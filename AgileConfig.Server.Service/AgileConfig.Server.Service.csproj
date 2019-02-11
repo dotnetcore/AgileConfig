@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AgileConfig.Server.Data.Repository\AgileConfig.Server.Data.Repository.csproj" />
+    <ProjectReference Include="..\AgileConfig.Server.IService\AgileConfig.Server.IService.csproj" />
+  </ItemGroup>
+
+</Project>

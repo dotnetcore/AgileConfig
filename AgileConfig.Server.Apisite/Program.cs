@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using AgileConfig.Server.Common;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -14,11 +15,24 @@ namespace AgileConfig.Server.Apisite
     {
         public static void Main(string[] args)
         {
+            var builder = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory());
+#if DEBUG
+            Configuration.Config = builder.AddJsonFile("appsettings.Development.json").Build();
+#else
+            Configuration.Config = builder.AddJsonFile("appsettings.json").Build();
+#endif
+
+
             CreateWebHostBuilder(args).Build().Run();
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .UseKestrel(ks =>
+                {
+                    ks.ListenAnyIP(5000);
+                })
                 .UseStartup<Startup>();
     }
 }

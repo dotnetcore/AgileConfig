@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AgileConfig.Server.Data.Repository;
+using AgileConfig.Server.Service;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +27,9 @@ namespace AgileConfig.Server.Apisite
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            services.AddAgileConfigDb();
+            services.AddBusinessServices();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
