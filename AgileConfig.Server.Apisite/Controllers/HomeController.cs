@@ -6,16 +6,15 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class HomeController : ControllerBase
+    public class HomeController : Controller
     {
-        // GET api/home
-        [HttpGet]
-        public string Get()
+        public IActionResult Index()
         {
-            return $"WELCOME TO AGILE CONFIG , {DateTime.Now} .";
+            return View();
         }
-       
+        public IActionResult GetView(string viewName)
+        {
+            return View(viewName);
+        }
     }
 }
