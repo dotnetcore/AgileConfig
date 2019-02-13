@@ -2,3 +2,24 @@
     <li><a ui-sref="apps.list">Apps</a></li>
     <li><a ui-sref="apps.add">Add</a></li>
 </ol>
+
+<form>
+    <div class="form-group">
+        <label for="appId">App Id </label>
+        <input type="text" class="form-control" id="inputAppId" placeholder="App Id （必填）">
+    </div>
+    <div class="form-group">
+        <label for="appName">App Name </label>
+        <input type="text" class="form-control" id="inputAppName" placeholder="App Name (必填)">
+    </div>
+    <div class="form-group">
+        <label for="appName">Secret</label>
+        <input type="text" class="form-control" id="inputSecret" placeholder="Secret">
+    </div>
+    <div class="checkbox">
+        <label>
+            <input type="checkbox">&nbsp; 启用
+        </label>
+    </div>
+    <button type="submit" class="btn btn-primary btn-lg">确定</button>
+</form>

@@ -12,17 +12,17 @@ app.config(function ($stateProvider, $urlRouterProvider) {
     
     let appsState = {
         url: '/apps',
-        templateUrl: '/home/getview?viewName=Apps',
+        templateUrl: '/home/getview?viewName=apps',
         controller: 'appsCtrl'
     };
     let listAppState = {
         url: '/list',
-        templateUrl: '/home/getview?viewName=App_List',
+        templateUrl: '/home/getview?viewName=app_list',
         controller: 'listAppCtrl'
     };
     let addAppState = {
         url: '/add',
-        templateUrl: '/home/getview?viewName=App_Add',
+        templateUrl: '/home/getview?viewName=app_add',
         controller: 'addAppCtrl'
     };
 
@@ -30,6 +30,16 @@ app.config(function ($stateProvider, $urlRouterProvider) {
         url: '/config',
         templateUrl: '/home/getview?viewName=config',
         controller: 'configCtrl'
+    };
+    let listConfigState = {
+        url: '/list',
+        templateUrl: '/home/getview?viewName=config_list',
+        controller: 'listConfigCtrl'
+    };
+    let addConfigState = {
+        url: '/add',
+        templateUrl: '/home/getview?viewName=config_add',
+        controller: 'addConfigCtrl'
     };
 
     $stateProvider.state('dash', homeState);
@@ -39,6 +49,8 @@ app.config(function ($stateProvider, $urlRouterProvider) {
     $stateProvider.state('apps.add', addAppState);
 
     $stateProvider.state('config',configState);
+    $stateProvider.state('config.list', listConfigState);
+    $stateProvider.state('config.add', addConfigState);
 
     $urlRouterProvider.otherwise("/dash");
     }

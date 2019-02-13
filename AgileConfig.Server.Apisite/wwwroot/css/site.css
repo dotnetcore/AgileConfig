@@ -130,3 +130,13 @@ body {
 .add-bar {
     margin-bottom:20px;
 }
+
+.checkbox input[type=checkbox] {
+    height:20px;
+    width:20px;
+}
+
+.form-group input.form-control {
+    height:50px;
+    font-size:22px;
+}
