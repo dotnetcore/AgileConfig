@@ -7,11 +7,14 @@ namespace AgileConfig.Server.IService
 {
     public interface IAppService
     {
+        Task<App> GetAsync(string id);
         Task<bool> AddAsync(App app);
 
-        Task<bool> Delete(App app);
+        Task<bool> DeleteAsync(App app);
 
-        Task<bool> Delete(string appId);
+        Task<bool> DeleteAsync(string appId);
+
+        Task<bool> UpdateAsync(App app);
 
         Task<List<App>> GetAllAppsAsync();
     }

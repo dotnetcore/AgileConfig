@@ -24,5 +24,8 @@ namespace AgileConfig.Server.Data.Entity
 
         [Column("update_time")]
         public DateTime? UpdateTime { get; set; }
+
+        [Column("enabled")]
+        public bool Enabled { get; set; }
     }
 }

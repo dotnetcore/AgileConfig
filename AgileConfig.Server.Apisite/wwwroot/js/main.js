@@ -25,6 +25,11 @@ app.config(function ($stateProvider, $urlRouterProvider) {
         templateUrl: '/home/getview?viewName=app_add',
         controller: 'addAppCtrl'
     };
+    let editAppState = {
+        url: '/edit:app_id',
+        templateUrl: '/home/getview?viewName=app_edit',
+        controller: 'editAppCtrl'
+    };
 
     let configState = {
         url: '/config',
@@ -47,6 +52,7 @@ app.config(function ($stateProvider, $urlRouterProvider) {
     $stateProvider.state('apps', appsState);
     $stateProvider.state('apps.list', listAppState);
     $stateProvider.state('apps.add', addAppState);
+    $stateProvider.state('apps.edit', editAppState);
 
     $stateProvider.state('config',configState);
     $stateProvider.state('config.list', listConfigState);

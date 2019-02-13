@@ -22,10 +22,10 @@ namespace AgileConfig.Server.Service
         {
             await _dbContext.Apps.AddAsync(app);
             int x = await _dbContext.SaveChangesAsync();
-            return x>0;
+            return x > 0;
         }
 
-        public async Task<bool> Delete(App app)
+        public async Task<bool> DeleteAsync(App app)
         {
             app = _dbContext.Apps.Find(app.Id);
             if (app != null)
@@ -36,7 +36,7 @@ namespace AgileConfig.Server.Service
             return x > 0;
         }
 
-        public async Task<bool> Delete(string appId)
+        public async Task<bool> DeleteAsync(string appId)
         {
             var app = _dbContext.Apps.Find(appId);
             if (app != null)
@@ -47,9 +47,22 @@ namespace AgileConfig.Server.Service
             return x > 0;
         }
 
+        public Task<App> GetAsync(string id)
+        {
+            return _dbContext.Apps.FindAsync(id);
+        }
+
         public Task<List<App>> GetAllAppsAsync()
         {
             return _dbContext.Apps.ToListAsync();
+        }
+
+        public async Task<bool> UpdateAsync(App app)
+        {
+            _dbContext.Update(app);
+            var x = await _dbContext.SaveChangesAsync();
+
+            return x > 0;
         }
     }
 }
