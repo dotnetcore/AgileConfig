@@ -78,7 +78,10 @@ namespace AgileConfig.Server.Service
 
         public Task<List<Config>> GetByAppId(string appId)
         {
-            return _dbContext.Configs.Where(c => c.AppId == appId).ToListAsync();
+            return _dbContext.Configs.Where(c =>
+                c.AppId == appId &&
+                c.Status == ConfigStatus.Enabled
+            ).ToListAsync();
         }
     }
 }

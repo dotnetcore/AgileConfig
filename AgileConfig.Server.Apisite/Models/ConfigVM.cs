@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.Apisite.Models
 {
-    public class EditConfigVM
+    public class ConfigVM
     {
         public string Id { get; set; }
 

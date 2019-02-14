@@ -19,7 +19,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody]EditConfigVM model)
+        public async Task<IActionResult> Add([FromBody]ConfigVM model)
         {
             if (model == null)
             {
@@ -59,7 +59,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> Edit([FromBody]EditConfigVM model)
+        public async Task<IActionResult> Edit([FromBody]ConfigVM model)
         {
             if (model == null)
             {

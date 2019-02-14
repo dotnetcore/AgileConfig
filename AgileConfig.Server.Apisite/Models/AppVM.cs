@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.Apisite.Models
 {
-    public class EditAppVM
+    public class AppVM
     {
         [Required(ErrorMessage ="应用Id不能为空")]
         [MaxLength(8,ErrorMessage ="应用Id长度不能超过8位")]
