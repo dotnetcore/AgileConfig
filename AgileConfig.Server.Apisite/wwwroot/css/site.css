@@ -129,6 +129,8 @@ body {
 
 .add-bar {
     margin-bottom:20px;
+    display:flex;
+    justify-content:space-between;
 }
 
 .checkbox input[type=checkbox] {
@@ -139,4 +141,9 @@ body {
 .form-group input.form-control {
     height:50px;
     font-size:22px;
+}
+
+.form-group select.form-control {
+    height: 50px;
+    font-size: 22px;
 }

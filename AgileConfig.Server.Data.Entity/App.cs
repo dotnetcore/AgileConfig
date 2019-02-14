@@ -10,13 +10,13 @@ namespace AgileConfig.Server.Data.Entity
     public class App
     {
         [Key]
-        [Column("id")]
+        [Column("id" ,TypeName ="nvarchar(8)")]
         public string Id { get; set; }
 
-        [Column("name")]
+        [Column("name" , TypeName ="nvarchar(50)")]
         public string Name { get; set; }
 
-        [Column("secret")]
+        [Column("secret", TypeName = "nvarchar(36)")]
         public string Secret { get; set; }
 
         [Column("create_time")]
