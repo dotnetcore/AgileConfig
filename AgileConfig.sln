@@ -21,6 +21,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.Data.Ent
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.Common", "AgileConfig.Server.Common\AgileConfig.Server.Common.csproj", "{52BFD5C6-B473-433C-A698-A2D3B6823B12}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Server", "Server", "{1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client", "Client", "{38C7514D-7FE2-4326-B84C-BC32807C4C85}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,6 +58,14 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{55EE475A-6F4E-44AF-85C6-9CF6037BA6EE} = {1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}
+		{614D89BB-6E03-4B9A-9378-DA9CF34A4886} = {1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}
+		{5BE6420C-5798-4E06-8119-A0E9889B32BA} = {1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}
+		{10FE686F-AE1A-4FE6-9CC1-7AE2097FD165} = {1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}
+		{DAEA55BA-B79B-44CE-BCB4-6A69B83D55CB} = {1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}
+		{52BFD5C6-B473-433C-A698-A2D3B6823B12} = {1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7F10DB58-5B6F-4EAC-994F-14E8046B306F}
