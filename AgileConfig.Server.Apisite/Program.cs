@@ -8,6 +8,7 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using NLog.Web;
 
 namespace AgileConfig.Server.Apisite
 {
@@ -33,6 +34,7 @@ namespace AgileConfig.Server.Apisite
                 {
                     ks.ListenAnyIP(5000);
                 })
+                .UseNLog()
                 .UseStartup<Startup>();
     }
 }

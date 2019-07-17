@@ -2,26 +2,37 @@
     <li><a ui-sref="config.list">Configruations</a></li>
 </ol>
 <div class="add-bar">
+    <div>
+        所属应用：
+        <select ng-model="selectedAppId">
+            <option value=""></option>
+            <option ng-repeat="app in apps" value="{{app.id}}">
+                {{app.name}}
+            </option>
+        </select>
+    </div>
     <button class="btn btn-info btn-lg" ng-click="toAdd()">新建配置</button>
 </div>
 <table class="table table-bordered table-hover">
     <tr>
-        <th>配置组</th>
         <th>配置键</th>
         <th>值</th>
+        <th>配置组</th>
         <th>描述</th>
         <th>创建时间</th>
+        <th>修改时间</th>
         <th></th>
     </tr>
-    <tr>
-        <td>wxapi</td>
-        <td>wxapi</td>
-        <td>fjkalsdjkfl2e32fjlk;ad</td>
-        <td></td>
-        <td></td>
+    <tr ng-repeat="config in configs|filter:{status:1 }|filter:{appId: selectedAppId}">
+        <td ng-bind="config.key"></td>
+        <td ng-bind="config.value"></td>
+        <td ng-bind="config.group"></td>
+        <td ng-bind="config.description"></td>
+        <td ng-bind="config.createTime|date:'yyyy-MM-dd HH:mm'"></td>
+        <td ng-bind="config.updateTime|date:'yyyy-MM-dd HH:mm'"></td>
         <td>
-            <button class="btn btn-danger">停用</button>
-            <button class="btn btn-primary">修改</button>
+            <button class="btn btn-primary" ng-click="toEdit(config)">修改</button>
+            <button class="btn btn-danger" ng-click="deleteConfig(config)">删除</button>
         </td>
     </tr>
 </table>

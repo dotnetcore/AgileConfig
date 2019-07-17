@@ -1,0 +1,35 @@
+2019-02-14 15:52:51.7937 Info Message Template Auto Format enabled
+2019-02-14 15:52:52.0392 Info Adding target File Target[web]
+2019-02-14 15:52:52.0392 Info Adding target Null Target[blackhole]
+2019-02-14 15:52:52.1636 Info Configured from an XML element in X:\workspace\AgileConfig\AgileConfig.Server.Apisite\bin\Debug\netcoreapp2.2\NLog.config...
+2019-02-14 15:52:52.2515 Info Found 42 configuration items
+2019-02-14 15:52:52.3383 Info Configuration initialized.
+2019-02-14 15:52:52.4605 Info NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 4.5.11.8645. Product version: 4.5.11.
+2019-02-14 15:56:04.9345 Info Message Template Auto Format enabled
+2019-02-14 15:56:05.0763 Info Adding target File Target[web]
+2019-02-14 15:56:05.0763 Info Adding target Null Target[blackhole]
+2019-02-14 15:56:05.0921 Info Configured from an XML element in X:\workspace\AgileConfig\AgileConfig.Server.Apisite\bin\Debug\netcoreapp2.2\NLog.config...
+2019-02-14 15:56:05.1229 Info Found 42 configuration items
+2019-02-14 15:56:05.1579 Info Configuration initialized.
+2019-02-14 15:56:05.1769 Info NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 4.5.11.8645. Product version: 4.5.11.
+2019-02-14 16:00:23.9007 Info Message Template Auto Format enabled
+2019-02-14 16:00:24.0441 Info Adding target File Target[web]
+2019-02-14 16:00:24.0441 Info Adding target Null Target[blackhole]
+2019-02-14 16:00:24.0637 Info Configured from an XML element in X:\workspace\AgileConfig\AgileConfig.Server.Apisite\bin\Debug\netcoreapp2.2\NLog.config...
+2019-02-14 16:00:24.0862 Info Found 42 configuration items
+2019-02-14 16:00:24.1128 Info Configuration initialized.
+2019-02-14 16:00:24.1336 Info NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 4.5.11.8645. Product version: 4.5.11.
+2019-02-14 16:04:16.5127 Info Message Template Auto Format enabled
+2019-02-14 16:04:16.6707 Info Adding target File Target[web]
+2019-02-14 16:04:16.6776 Info Adding target Null Target[blackhole]
+2019-02-14 16:04:16.6935 Info Configured from an XML element in X:\workspace\AgileConfig\AgileConfig.Server.Apisite\bin\Debug\netcoreapp2.2\NLog.config...
+2019-02-14 16:04:16.7319 Info Found 42 configuration items
+2019-02-14 16:04:16.7592 Info Configuration initialized.
+2019-02-14 16:04:16.7798 Info NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 4.5.11.8645. Product version: 4.5.11.
+2019-02-14 16:07:58.5787 Info Message Template Auto Format enabled
+2019-02-14 16:07:58.7511 Info Adding target File Target[web]
+2019-02-14 16:07:58.7511 Info Adding target Null Target[blackhole]
+2019-02-14 16:07:58.7705 Info Configured from an XML element in X:\workspace\AgileConfig\AgileConfig.Server.Apisite\bin\Debug\netcoreapp2.2\NLog.config...
+2019-02-14 16:07:58.8166 Info Found 39 configuration items
+2019-02-14 16:07:58.8628 Info Configuration initialized.
+2019-02-14 16:07:58.8951 Info NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 4.5.11.8645. Product version: 4.5.11.

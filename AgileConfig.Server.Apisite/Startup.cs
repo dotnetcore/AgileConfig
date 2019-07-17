@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AgileConfig.Server.Data.Repository;
 using AgileConfig.Server.Service;
+using AgileTrace.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -38,6 +39,10 @@ namespace AgileConfig.Server.Apisite
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseMiddleware<ExceptionHandlerMiddleware>();
             }
             app.UseStaticFiles();
             app.UseMvc(routes =>

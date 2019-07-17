@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
@@ -9,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
+    [ModelVaildate]
     public class AppController : Controller
     {
         private readonly IAppService _appService;
@@ -18,7 +18,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody]EditAppVM model)
+        public async Task<IActionResult> Add([FromBody]AppVM model)
         {
             if (model == null)
             {
@@ -55,7 +55,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> Edit([FromBody]EditAppVM model)
+        public async Task<IActionResult> Edit([FromBody]AppVM model)
         {
             if (model == null)
             {

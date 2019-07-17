@@ -11,6 +11,7 @@ namespace AgileConfig.Server.Service
         public static void AddBusinessServices(this IServiceCollection sc)
         {
             sc.AddScoped<IAppService, AppService>();
+            sc.AddScoped<IConfigService, ConfigService>();
         }
     }
 }

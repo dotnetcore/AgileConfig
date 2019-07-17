@@ -3,22 +3,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.136
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.Apisite", "AgileConfig.Server.Apisite\AgileConfig.Server.Apisite.csproj", "{55EE475A-6F4E-44AF-85C6-9CF6037BA6EE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.Apisite", "AgileConfig.Server.Apisite\AgileConfig.Server.Apisite.csproj", "{55EE475A-6F4E-44AF-85C6-9CF6037BA6EE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4E3E3A07-0DAA-4054-ADBB-18AD50AFB0EF}"
 	ProjectSection(SolutionItems) = preProject
+		Dockerfile = Dockerfile
 		think.txt = think.txt
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.Data.Repository", "AgileConfig.Server.Data.Repository\AgileConfig.Server.Data.Repository.csproj", "{614D89BB-6E03-4B9A-9378-DA9CF34A4886}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.Data.Repository", "AgileConfig.Server.Data.Repository\AgileConfig.Server.Data.Repository.csproj", "{614D89BB-6E03-4B9A-9378-DA9CF34A4886}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.IService", "AgileConfig.Server.IService\AgileConfig.Server.IService.csproj", "{5BE6420C-5798-4E06-8119-A0E9889B32BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.IService", "AgileConfig.Server.IService\AgileConfig.Server.IService.csproj", "{5BE6420C-5798-4E06-8119-A0E9889B32BA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.Service", "AgileConfig.Server.Service\AgileConfig.Server.Service.csproj", "{10FE686F-AE1A-4FE6-9CC1-7AE2097FD165}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.Service", "AgileConfig.Server.Service\AgileConfig.Server.Service.csproj", "{10FE686F-AE1A-4FE6-9CC1-7AE2097FD165}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.Data.Entity", "AgileConfig.Server.Data.Entity\AgileConfig.Server.Data.Entity.csproj", "{DAEA55BA-B79B-44CE-BCB4-6A69B83D55CB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.Data.Entity", "AgileConfig.Server.Data.Entity\AgileConfig.Server.Data.Entity.csproj", "{DAEA55BA-B79B-44CE-BCB4-6A69B83D55CB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.Common", "AgileConfig.Server.Common\AgileConfig.Server.Common.csproj", "{52BFD5C6-B473-433C-A698-A2D3B6823B12}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.Common", "AgileConfig.Server.Common\AgileConfig.Server.Common.csproj", "{52BFD5C6-B473-433C-A698-A2D3B6823B12}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
