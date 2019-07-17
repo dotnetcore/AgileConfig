@@ -83,5 +83,24 @@ namespace AgileConfig.Server.Service
                 c.Status == ConfigStatus.Enabled
             ).ToListAsync();
         }
+
+        public Task<List<Config>> Search(string appId, string group, string key)
+        {
+            var q = _dbContext.Configs.Where(c => true);
+            if (!string.IsNullOrEmpty(appId))
+            {
+                q = q.Where(c => c.AppId == appId);
+            }
+            if (!string.IsNullOrEmpty(group))
+            {
+                q = q.Where(c => EF.Functions.Like(c.Group, $"%{group}%"));
+            }
+            if (!string.IsNullOrEmpty(key))
+            {
+                q = q.Where(c => EF.Functions.Like(c.Key, $"%{key}%"));
+            }
+
+            return q.ToListAsync();
+        }
     }
 }

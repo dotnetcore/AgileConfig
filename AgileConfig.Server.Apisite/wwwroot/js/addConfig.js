@@ -12,8 +12,8 @@
                 alert(r.data.message);
             }
         }, err => {
-            console.log(err)
-            alert(err.statusText)
+            console.log(err);
+            alert(err.statusText);
         });
 
     $scope.save = function () {
@@ -23,7 +23,7 @@
                     alert('新建配置成功。');
                     $state.go('config.list');
                 } else {
-                    alert(r.data.message);
+                    $scope.error_message = r.data.message;
                 }
             }, err => {
                 console.log(err);
