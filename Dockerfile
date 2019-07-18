@@ -1,9 +1,8 @@
-FROM microsoft/dotnet:latest
-
-COPY . /app
-
+FROM microsoft/dotnet:latest AS build
 WORKDIR /app
-
-EXPOSE 5000/tcp
-
-ENTRYPOINT ["dotnet", "AgileConfig.Server.Apisite.dll"]
+COPY /. /app
+RUN dotnet restore
+WORKDIR /app/AgileConfig.Server.Apisite
+RUN dotnet publish -o ./out -c Release
+EXPOSE 5000
+ENTRYPOINT ["dotnet", "out/AgileConfig.Server.Apisite.dll"]
