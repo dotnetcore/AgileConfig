@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:latest AS build
+FROM microsoft/dotnet:2.2-sdk AS build
 WORKDIR /app
 COPY /. /app
 RUN dotnet restore
