@@ -5,7 +5,6 @@
 /* Move down content because we have a fixed navbar that is 50px tall */
 body {
     padding-top: 50px;
-    font-size: 20px;
 }
 
 
@@ -126,24 +125,19 @@ body {
         border-radius: 50%;
     }
 
-
 .add-bar {
     margin-bottom:20px;
     display:flex;
     justify-content:space-between;
 }
 
-.checkbox input[type=checkbox] {
-    height:20px;
-    width:20px;
-}
+    .add-bar input {
+        height:30px;
+    }
+    .add-bar select {
+        height:30px;
+    }
 
-.form-group input.form-control {
-    height:50px;
-    font-size:22px;
-}
-
-.form-group select.form-control {
-    height: 50px;
-    font-size: 22px;
-}
+    .config .config_list .col {
+        width: 200px;
+    }

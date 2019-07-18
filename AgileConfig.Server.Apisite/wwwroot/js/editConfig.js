@@ -36,7 +36,7 @@
                     alert('修改配置成功。');
                     $state.go('config.list');
                 } else {
-                    alert(r.data.message);
+                    $scope.error_message = r.data.message;
                 }
             }, err => {
                 console.log(err);

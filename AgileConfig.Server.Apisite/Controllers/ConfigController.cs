@@ -121,6 +121,21 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> Search(string appId, string group, string key)
+        {
+            var configs = await _configService.Search(appId, group, key);
+            configs = configs.Where(c => c.Status == ConfigStatus.Enabled)
+                .OrderBy(c => c.AppId).ThenBy(c => c.Group).ThenBy(c => c.Key)
+                .ToList();
+
+            return Json(new
+            {
+                success = true,
+                data = configs
+            });
+        }
+
+        [HttpGet]
         public async Task<IActionResult> Get(string id)
         {
             if (string.IsNullOrEmpty(id))

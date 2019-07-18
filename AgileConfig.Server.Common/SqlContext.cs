@@ -35,7 +35,7 @@ namespace AgileConfig.Server.Common
                     optionsBuilder.UseSqlite(conn);
                     break;
                 default:
-                    optionsBuilder.UseSqlServer(conn);
+                    optionsBuilder.UseSqlite(conn);
                     break;
             }
 #if DEBUG

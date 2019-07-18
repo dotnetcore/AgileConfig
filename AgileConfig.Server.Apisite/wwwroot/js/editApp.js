@@ -22,7 +22,7 @@
                     alert('修改应用成功。');
                     $state.go('apps.list');
                 } else {
-                    alert(r.data.message);
+                    $scope.error_message = r.data.message;
                 }
             }, err => {
                 console.log(err);

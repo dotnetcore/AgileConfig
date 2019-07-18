@@ -13,7 +13,7 @@
 
     <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     @*    site css*@
-    <link href="~/css/site.css" rel="stylesheet">
+    <link href="~/css/site.css" rel="stylesheet" asp-append-version="true">
     <link href="~/lib/Angular/loading-bar.min.css" rel="stylesheet">
 
 </head>
@@ -38,18 +38,6 @@
             </div>
             <div id="navbar" class="navbar-collapse collapse">
                 <ul class="nav navbar-nav navbar-right"></ul>
-                @using (Html.BeginForm("Logoff", "Login", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
-                {
-                    @Html.AntiForgeryToken()
-
-                    <ul class="nav navbar-nav navbar-right login">
-                        <li>
-                            @*<a href="#">@("hi，" + User.Claims.First().Value)</a>*@
-                            xxx
-                        </li>
-                        <li><a href="javascript:document.getElementById('logoutForm').submit()">注销</a></li>
-                    </ul>
-                }
             </div>
         </div>
     </nav>

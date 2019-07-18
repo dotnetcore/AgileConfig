@@ -4,25 +4,29 @@
 </ol>
 
 <form ng-submit="save()">
+    <div class="text-danger">
+        {{error_message}}
+    </div>
     <div class="form-group">
-        <label for="appId">应用Id </label>
-        <input type="text" class="form-control" id="inputAppId" placeholder="应用Id（必填）" 
+        <label for="inputAppId">应用Id </label>
+        <input type="text" class="form-control" id="inputAppId" placeholder="应用Id（必填）"
                ng-model="app.Id">
     </div>
     <div class="form-group">
-        <label for="appName">应用名称 </label>
-        <input type="text" class="form-control" id="inputAppName" placeholder="应用名称 (必填)" 
+        <label for="inputAppName">应用名称 </label>
+        <input type="text" class="form-control" id="inputAppName" placeholder="应用名称 (必填)"
                ng-model="app.Name">
     </div>
     <div class="form-group">
-        <label for="appName">密钥</label>
-        <input type="text" class="form-control" id="inputSecret" placeholder="密钥" 
+        <label for="inputSecret">密钥</label>
+        <input type="text" class="form-control" id="inputSecret" placeholder="密钥"
                ng-model="app.Secret">
     </div>
-    <div class="checkbox">
+    <div class="form-group">
         <label>
-            <input type="checkbox" ng-model="app.Enabled">&nbsp; 启用
+            启用
+            <input type="checkbox" class="form-control" ng-model="app.Enabled">
         </label>
     </div>
-    <button type="submit" class="btn btn-primary btn-lg">确定</button>
+    <button type="submit" class="btn btn-primary">确定</button>
 </form>
