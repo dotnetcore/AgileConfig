@@ -89,10 +89,16 @@ body {
 
 .main {
     padding: 20px;
+    min-height:95vh;
 }
+    .main .powered{
+        position:absolute;
+        bottom:0;
+        right:10px;
+    }
 
-@media (min-width: 768px) {
-    .main {
+    @media (min-width: 768px) {
+        .main {
         padding-right: 40px;
         padding-left: 40px;
     }

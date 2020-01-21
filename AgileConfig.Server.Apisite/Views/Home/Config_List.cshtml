@@ -3,20 +3,19 @@
         <li><a ui-sref="config.list">Configruations</a></li>
     </ol>
     <div class="add-bar">
-        <div>
+        <div class="form-inline">
             所属应用：
-            <select ng-model="selectedAppId">
-                <option value=""></option>
+            <select ng-model="selectedAppId" class="form-control">
                 <option ng-repeat="app in apps" value="{{app.id}}">
                     {{app.name}}
                 </option>
             </select>
-            配置键：<input ng-model="filter_key" />
-            配置组：<input ng-model="filter_group" />
-            <button class="btn btn-success" ng-click="search()">查询</button>
+            配置组：<input ng-model="filter_group" class="form-control"/>
+            配置键：<input ng-model="filter_key" class="form-control"/>
+            <button class="btn btn-success btn-sm" ng-click="search()">查询</button>
         </div>
         <div>
-            <button class="btn btn-info" ng-click="toAdd()">新建配置</button>
+            <button class="btn btn-info btn-sm" ng-click="toAdd()">新建配置</button>
         </div>
     </div>
     <table class="table table-bordered table-hover config_list">
