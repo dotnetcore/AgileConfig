@@ -50,12 +50,13 @@ namespace AgileConfig.Server.Service
 
         public Task<Config> GetAsync(string id)
         {
-            return _dbContext.Configs.FindAsync(id);
+            var config = _dbContext.Configs.FindAsync(id).AsTask();
+            return config;
         }
 
         public Task<List<Config>> GetAllConfigsAsync()
         {
-            return _dbContext.Configs.ToListAsync();
+            return _dbContext.Configs.Where(c => c.Status == ConfigStatus.Enabled).ToListAsync();
         }
 
         public async Task<bool> UpdateAsync(Config config)
@@ -79,8 +80,7 @@ namespace AgileConfig.Server.Service
         public Task<List<Config>> GetByAppId(string appId)
         {
             return _dbContext.Configs.Where(c =>
-                c.AppId == appId &&
-                c.Status == ConfigStatus.Enabled
+                c.AppId == appId && c.Status == ConfigStatus.Enabled
             ).ToListAsync();
         }
 

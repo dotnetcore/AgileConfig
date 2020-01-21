@@ -111,7 +111,6 @@ namespace AgileConfig.Server.Apisite.Controllers
         public async Task<IActionResult> All()
         {
             var configs = await _configService.GetAllConfigsAsync();
-            configs = configs.Where(c => c.Status == ConfigStatus.Enabled).ToList();
 
             return Json(new
             {
