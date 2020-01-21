@@ -260,5 +260,5 @@ paket-files/
 __pycache__/
 *.pyc
 /AgileConfig.Server.Apisite/agile_config.db
-/AgileConfig.Server.Apisite/logs
+/AgileConfig.Server.Apisite/logs/*.txt
 /AgileConfig.Server.Apisite/Properties/PublishProfiles/FolderProfile.pubxml
