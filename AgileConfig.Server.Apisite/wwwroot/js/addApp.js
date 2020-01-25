@@ -20,4 +20,8 @@
                 alert(err.statusText);
             });
     };
+
+    $scope.cancel = function () {
+        $state.go('apps.list');
+    };
 });

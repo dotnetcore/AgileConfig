@@ -1,6 +1,6 @@
 ﻿<ol class="breadcrumb">
-    <li><a ui-sref="apps.list">Apps</a></li>
-    <li><a ui-sref="apps.add">Add</a></li>
+    <li><a ui-sref="apps.list">应用列表</a></li>
+    <li><a ui-sref="apps.add">新建</a></li>
 </ol>
 
 <form ng-submit="save()">
@@ -29,4 +29,5 @@
         </label>
     </div>
     <button type="submit" class="btn btn-primary">确定</button>
+    <button type="button" class="btn btn-default" ng-click="cancel()">取消</button>
 </form>

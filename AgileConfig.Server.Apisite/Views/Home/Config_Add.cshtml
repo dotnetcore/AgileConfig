@@ -1,6 +1,6 @@
 ﻿<ol class="breadcrumb">
-    <li><a ui-sref="config.list">Configruations</a></li>
-    <li><a ui-sref="config.add">Add</a></li>
+    <li><a ui-sref="config.list">配置列表</a></li>
+    <li><a ui-sref="config.add">新建</a></li>
 </ol>
 
 <form ng-submit="save()">
@@ -36,4 +36,5 @@
                ng-model="config.description">
     </div>
     <button type="submit" class="btn btn-primary">确定</button>
+    <button type="button" class="btn btn-default" ng-click="cancel()">取消</button>
 </form>
