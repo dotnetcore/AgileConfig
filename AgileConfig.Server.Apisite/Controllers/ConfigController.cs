@@ -6,6 +6,8 @@ using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
+using AgileConfig.Server.Apisite.Websocket;
+using Newtonsoft.Json;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -50,6 +52,22 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             var result = await _configService.AddAsync(config);
 
+            if (result)
+            {
+                //notice clients
+                var msg = new { 
+                    Action="add",
+                    Node = new
+                    {
+                        group = config.Group,
+                        key = config.Key,
+                        value = config.Value
+                    }
+                };
+                var json = JsonConvert.SerializeObject(msg);
+                WebsocketCollection.Instance.SendToAll(json);
+            }
+
             return Json(new
             {
                 success = result,
@@ -67,6 +85,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var config = await _configService.GetAsync(model.Id);
+            var oldConfig = await _configService.GetAsync(model.Id);
             if (config == null)
             {
                 return Json(new
@@ -78,10 +97,9 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (config.Group != model.Group || config.Key != model.Key)
             {
-                var oldConfig = await _configService.GetByAppIdKey(model.AppId, model.Group, model.Key);
-                if (oldConfig != null)
+                var anotherConfig = await _configService.GetByAppIdKey(model.AppId, model.Group, model.Key);
+                if (anotherConfig != null)
                 {
-
                     return Json(new
                     {
                         success = false,
@@ -99,6 +117,28 @@ namespace AgileConfig.Server.Apisite.Controllers
             config.UpdateTime = DateTime.Now;
 
             var result = await _configService.UpdateAsync(config);
+
+            if (result)
+            {
+                //notice clients
+                var msg = new
+                {
+                    Action = "update",
+                    OldNode = new {
+                        group = oldConfig.Group,
+                        key = oldConfig.Key,
+                        value = oldConfig.Value
+                    },
+                    Node = new
+                    {
+                        group = config.Group,
+                        key = config.Key,
+                        value = config.Value
+                    }
+                };
+                var json = JsonConvert.SerializeObject(msg);
+                WebsocketCollection.Instance.SendToAll(json);
+            }
 
             return Json(new
             {
@@ -173,6 +213,23 @@ namespace AgileConfig.Server.Apisite.Controllers
             config.Status = ConfigStatus.Deleted;
 
             var result = await _configService.UpdateAsync(config);
+
+            if (result)
+            {
+                //notice clients
+                var msg = new
+                {
+                    Action = "remove",
+                    Node = new
+                    {
+                        group = config.Group,
+                        key = config.Key,
+                        value = config.Value
+                    }
+                };
+                var json = JsonConvert.SerializeObject(msg);
+                WebsocketCollection.Instance.SendToAll(json);
+            }
 
             return Json(new
             {

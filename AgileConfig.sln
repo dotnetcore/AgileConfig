@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.136
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.Apisite", "AgileConfig.Server.Apisite\AgileConfig.Server.Apisite.csproj", "{55EE475A-6F4E-44AF-85C6-9CF6037BA6EE}"
 EndProject
@@ -24,6 +24,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Server", "Server", "{1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client", "Client", "{38C7514D-7FE2-4326-B84C-BC32807C4C85}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Client", "AgileConfig.Client\AgileConfig.Client.csproj", "{9C5756C3-DFD5-41FD-A4E8-883F937E0CE0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.ClientTest", "AgileConfig.ClientTest\AgileConfig.ClientTest.csproj", "{134A88E1-42D8-499F-8EC3-4872C14D5A17}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,6 +59,14 @@ Global
 		{52BFD5C6-B473-433C-A698-A2D3B6823B12}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{52BFD5C6-B473-433C-A698-A2D3B6823B12}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{52BFD5C6-B473-433C-A698-A2D3B6823B12}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C5756C3-DFD5-41FD-A4E8-883F937E0CE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C5756C3-DFD5-41FD-A4E8-883F937E0CE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C5756C3-DFD5-41FD-A4E8-883F937E0CE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C5756C3-DFD5-41FD-A4E8-883F937E0CE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{134A88E1-42D8-499F-8EC3-4872C14D5A17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{134A88E1-42D8-499F-8EC3-4872C14D5A17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{134A88E1-42D8-499F-8EC3-4872C14D5A17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{134A88E1-42D8-499F-8EC3-4872C14D5A17}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -66,6 +78,8 @@ Global
 		{10FE686F-AE1A-4FE6-9CC1-7AE2097FD165} = {1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}
 		{DAEA55BA-B79B-44CE-BCB4-6A69B83D55CB} = {1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}
 		{52BFD5C6-B473-433C-A698-A2D3B6823B12} = {1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}
+		{9C5756C3-DFD5-41FD-A4E8-883F937E0CE0} = {38C7514D-7FE2-4326-B84C-BC32807C4C85}
+		{134A88E1-42D8-499F-8EC3-4872C14D5A17} = {38C7514D-7FE2-4326-B84C-BC32807C4C85}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7F10DB58-5B6F-4EAC-994F-14E8046B306F}
