@@ -35,7 +35,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = "配置键已存在，请重新输入。"
+                    message = "配置存在，请更改输入的信息。"
                 });
             }
 
@@ -85,7 +85,11 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var config = await _configService.GetAsync(model.Id);
-            var oldConfig = await _configService.GetAsync(model.Id);
+            var oldConfig = new Config { 
+                Key = config.Key,
+                Group = config.Group,
+                Value = config.Value
+            };
             if (config == null)
             {
                 return Json(new

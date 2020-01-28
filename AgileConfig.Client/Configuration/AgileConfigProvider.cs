@@ -40,9 +40,9 @@ namespace AgileConfig.Client.Configuration
 
         protected string Secret { get; }
 
-        ClientWebSocket WebsocketClient { get; }
+        private ClientWebSocket WebsocketClient { get; set; }
 
-        protected string WSUrl { get; }
+        private string WSUrl { get; }
 
         public AgileConfigProvider(string host, string appId, string secret, ILoggerFactory loggerFactory)
         {
@@ -69,47 +69,92 @@ namespace AgileConfig.Client.Configuration
                 WSUrl = host.Replace("http:", "ws:").Replace("HTTP:", "ws:");
             }
             WSUrl += "/ws";
-            WebsocketClient = new ClientWebSocket();
         }
 
-        private async Task WebsocketConnect()
-        {
-            await WebsocketClient.ConnectAsync(new Uri(WSUrl), CancellationToken.None);
-            Logger?.LogTrace("AgileConfig Client Websocket Connected.");
-            HandleWebsocketMessageAsync();
-            WebsocketHeartbeatAsync();
-        }
-        private Task WebsocketHeartbeatAsync()
+        /// <summary>
+        /// 开启一个线程来初始化Websocket Client，并且5s一次进行检查是否连接打开状态，如果不是则尝试重连。
+        /// </summary>
+        /// <returns></returns>
+        private Task WebsocketConnect()
         {
             return Task.Run(async () =>
+            {
+                while (true)
+                {
+                    await Task.Delay(1000 * 5);
+                    if (WebsocketClient?.State == WebSocketState.Open)
+                    {
+                        continue;
+                    }
+                    try
+                    {
+                        WebsocketClient?.Abort();
+                        WebsocketClient?.Dispose();
+                        WebsocketClient = null;
+                        WebsocketClient = new ClientWebSocket();
+                        await WebsocketClient.ConnectAsync(new Uri(WSUrl), CancellationToken.None);
+                        Logger?.LogTrace("AgileConfig Client Websocket Connected.");
+                        HandleWebsocketMessageAsync();
+                        //连接成功重新加载配置
+                        LoadAll();
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger?.LogError(ex, "AgileConfig Client Websocket try to connected to server failed.");
+                    }
+                }
+            });
+        }
+        /// <summary>
+        /// 开启一个线程5s进行一次心跳
+        /// </summary>
+        /// <returns></returns>
+        private void WebsocketHeartbeatAsync()
+        {
+            Task.Run(async () =>
             {
                 var data = Encoding.UTF8.GetBytes("hi");
                 while (true)
                 {
                     await Task.Delay(1000 * 5);
-                    if (WebsocketClient.State == WebSocketState.Open)
+                    if (WebsocketClient?.State == WebSocketState.Open)
                     {
-                        await WebsocketClient.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
-                        CancellationToken.None);
-                        Logger?.LogTrace("AgileConfig Client Say 'hi' by Websocket .");
-                    }
-                    else
-                    {
-                        break;
+                        try
+                        {
+                            //这里由于多线程的问题，WebsocketClient有可能在上一个if判断成功后被置空或者断开，所以需要try一下避免线程退出
+                            await WebsocketClient.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
+                                    CancellationToken.None);
+                            Logger?.LogTrace("AgileConfig Client Say 'hi' by Websocket .");
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger?.LogError(ex, "AgileConfig Client Websocket try to send Heartbeat to server failed.");
+                        }
                     }
                 }
             });
         }
-
-        private Task HandleWebsocketMessageAsync()
+        /// <summary>
+        /// 开启一个线程对服务端推送的websocket message进行处理
+        /// </summary>
+        /// <returns></returns>
+        private void HandleWebsocketMessageAsync()
         {
-            return Task.Run(async () =>
+            Task.Run(async () =>
             {
-                while (WebsocketClient.State == WebSocketState.Open)
+                while (WebsocketClient?.State == WebSocketState.Open)
                 {
                     ArraySegment<Byte> buffer = new ArraySegment<byte>(new Byte[1024 * 2]);
                     WebSocketReceiveResult result = null;
-                    result = await WebsocketClient.ReceiveAsync(buffer, CancellationToken.None);
+                    try
+                    {
+                        result = await WebsocketClient.ReceiveAsync(buffer, CancellationToken.None);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger?.LogError(ex, "AgileConfig Client Websocket try to ReceiveAsync message occur exception .");
+                        throw;
+                    }
                     if (result.CloseStatus.HasValue)
                     {
                         Logger?.LogTrace("AgileConfig Client Websocket closed , {0} .", result.CloseStatusDescription);
@@ -136,24 +181,7 @@ namespace AgileConfig.Client.Configuration
                                         var action = JsonConvert.DeserializeObject<WebsocketAction>(msg);
                                         if (action != null)
                                         {
-                                            var dict = Data as ConcurrentDictionary<string, string>;
-                                            switch (action.Action)
-                                            {
-                                                case "update":
-                                                case "add":
-                                                    var key = GenerateKey(action.Node);
-                                                    if (action.OldNode != null)
-                                                    {
-                                                        dict.TryRemove(GenerateKey(action.OldNode), out string oldV);
-                                                    }
-                                                    dict.AddOrUpdate(key, action.Node.value, (k, v) => { return action.Node.value; });
-                                                    break;
-                                                case "remove":
-                                                    dict.TryRemove(GenerateKey(action.Node), out string oldV1);
-                                                    break;
-                                                default:
-                                                    break;
-                                            }
+                                            ProcessAction(action);
                                         }
                                     }
                                     catch (Exception ex)
@@ -168,6 +196,36 @@ namespace AgileConfig.Client.Configuration
             });
         }
 
+        /// <summary>
+        /// 最终处理服务端推送的动作
+        /// </summary>
+        /// <param name="action"></param>
+        private void ProcessAction(WebsocketAction action)
+        {
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+            var dict = Data as ConcurrentDictionary<string, string>;
+            switch (action.Action)
+            {
+                case "update":
+                case "add":
+                    var key = GenerateKey(action.Node);
+                    if (action.OldNode != null)
+                    {
+                        dict.TryRemove(GenerateKey(action.OldNode), out string oldV);
+                    }
+                    dict.AddOrUpdate(key, action.Node.value, (k, v) => { return action.Node.value; });
+                    break;
+                case "remove":
+                    dict.TryRemove(GenerateKey(action.Node), out string oldV1);
+                    break;
+                default:
+                    break;
+            }
+        }
+
         private string GenerateKey(AgileConfigNode node)
         {
             var key = new StringBuilder();
@@ -180,35 +238,68 @@ namespace AgileConfig.Client.Configuration
             return key.ToString();
         }
 
-        public async override void Load()
+        /// <summary>
+        /// load方法会通过http从服务端拉取所有的配置，需要注意的是load方法在加载所有配置后会启动一个websocket客户端跟服务端保持长连接，当websocket
+        /// 连接建立成功会调用一次load方法，所以系统刚启动的时候通常会出现两次http请求。
+        /// </summary>
+        public override void Load()
+        {
+            if (LoadAll())
+            {
+                WebsocketConnect();
+                WebsocketHeartbeatAsync();
+            }
+            else
+            {
+                throw new Exception("AgileConfig client can not load configs from server .");
+            }
+        }
+
+        /// <summary>
+        /// 通过http从server拉取所有配置到本地，尝试5次
+        /// </summary>
+        private bool LoadAll()
         {
             var apiUrl = $"{Host}/api/config/app/{AppId}";
-            using (var result = AgileHttp.HTTP.Send(apiUrl))
+            int tryCount = 0;
+            while (tryCount <= 4)
             {
-                if (result.StatusCode == System.Net.HttpStatusCode.OK)
-                {
-                    Data = new ConcurrentDictionary<string, string>();
-                    var configs = JsonConvert.DeserializeObject<List<AgileConfigNode>>(result.GetResponseContent());
-                    configs.ForEach(c =>
-                    {
-                        var key = GenerateKey(c);
-                        string value = c.value;
+                tryCount++;
 
-                        var dict = Data as ConcurrentDictionary<string, string>;
-                        dict.TryAdd(key.ToString(), value);
-                    });
-                    Logger?.LogTrace("AgileConfig Client Loaded all the configs success by http {0} .", apiUrl);
-                    await WebsocketConnect();
-                }
-                else
+                try
                 {
-                    //load remote configs err .
-                    var errMsg = "AgileConfig Client Load all the configs failed .";
-                    var ex = new Exception(errMsg, result.Exception);
-                    Logger?.LogError(ex, errMsg, apiUrl);
-                    throw ex;
+                    using (var result = AgileHttp.HTTP.Send(apiUrl))
+                    {
+                        if (result.StatusCode == System.Net.HttpStatusCode.OK)
+                        {
+                            Data = new ConcurrentDictionary<string, string>();
+                            var configs = JsonConvert.DeserializeObject<List<AgileConfigNode>>(result.GetResponseContent());
+                            configs.ForEach(c =>
+                            {
+                                var key = GenerateKey(c);
+                                string value = c.value;
+
+                                var dict = Data as ConcurrentDictionary<string, string>;
+                                dict.TryAdd(key.ToString(), value);
+                            });
+                            Logger?.LogTrace("AgileConfig Client Loaded all the configs success from {0} .", apiUrl);
+                            return true;
+                        }
+                        else
+                        {
+                            //load remote configs err .
+                            var ex = result.Exception ?? new Exception("AgileConfig Client Load all the configs failed .");
+                            throw ex;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger?.LogError(ex, "AgileConfig Client try to load all configs failed . TryCount: {0}", tryCount);
                 }
             }
+
+            return false;
         }
     }
 }
