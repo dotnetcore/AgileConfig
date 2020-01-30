@@ -9,30 +9,30 @@
     </div>
     <div class="form-group">
         <label for="selectAppId">所属应用</label>
-        <select ng-model="config.appId" id="selectAppId" class="form-control">
+        <select ng-model="config.appId" id="selectAppId" class="form-control" ng-disabled="1">
             <option ng-repeat="app in apps" value="{{app.id}}">
                 {{app.name}}
             </option>
         </select>
     </div>
     <div class="form-group">
+        <label for="inputGroup">配置组</label>
+        <input type="text" class="form-control" id="inputGroup" placeholder="配置组" maxlength="50"
+               ng-model="config.group">
+    </div>
+    <div class="form-group">
         <label for="inputKey">配置键</label>
-        <input type="text" class="form-control" id="inputKey" placeholder="配置键（必填）"
+        <input type="text" class="form-control" id="inputKey" placeholder="配置键（必填）" maxlength="50"
                ng-model="config.key">
     </div>
     <div class="form-group">
         <label for="inputValue">值 </label>
-        <input type="text" class="form-control" id="inputValue" placeholder="值 (必填)"
+        <input type="text" class="form-control" id="inputValue" placeholder="值 (必填)" maxlength="500"
                ng-model="config.value">
     </div>
     <div class="form-group">
-        <label for="inputGroup">配置组</label>
-        <input type="text" class="form-control" id="inputGroup" placeholder="配置组"
-               ng-model="config.group">
-    </div>
-    <div class="form-group">
         <label for="inputDescription">描述</label>
-        <input type="text" class="form-control" id="inputDescription" placeholder="配置描述"
+        <input type="text" class="form-control" id="inputDescription" placeholder="配置描述" maxlength="100"
                ng-model="config.description">
     </div>
     <button type="submit" class="btn btn-primary">确定</button>

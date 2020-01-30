@@ -9,17 +9,17 @@
     </div>
     <div class="form-group">
         <label for="inputAppId">应用Id </label>
-        <input type="text" class="form-control" id="inputAppId" placeholder="应用Id（必填）"
+        <input type="text" class="form-control" id="inputAppId" placeholder="应用Id（必填）" maxlength="8"
                ng-model="app.id" ng-disabled="true">
     </div>
     <div class="form-group">
         <label for="inputAppName">应用名称 </label>
-        <input type="text" class="form-control" id="inputAppName" placeholder="应用名称 (必填)"
+        <input type="text" class="form-control" id="inputAppName" placeholder="应用名称 (必填)" maxlength="50"
                ng-model="app.name">
     </div>
     <div class="form-group">
         <label for="inputSecret">密钥</label>
-        <input type="text" class="form-control" id="inputSecret" placeholder="密钥"
+        <input type="text" class="form-control" id="inputSecret" placeholder="密钥" maxlength="36"
                ng-model="app.secret">
     </div>
     <div class="form-group">

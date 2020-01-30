@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -13,6 +14,8 @@ namespace AgileConfig.Server.Apisite.Websocket
         public WebSocket Client { get; set; }
 
         public string Id { get; set; }
+
+        public string AppId { get; set; }
     }
 
     public interface IWebsocketCollection
@@ -21,7 +24,9 @@ namespace AgileConfig.Server.Apisite.Websocket
         Task SendToOne(WSClient client, string message);
         void AddClient(WSClient client);
 
-        Task CloseClient(WSClient client, WebSocketCloseStatus closeStatus, string closeDesc);
+        Task RemoveClient(WSClient client, WebSocketCloseStatus closeStatus, string closeDesc);
+
+        void RemoveAppClients(string appId, WebSocketCloseStatus closeStatus, string closeDesc);
     }
 
     public class WebsocketCollection : IWebsocketCollection
@@ -30,39 +35,117 @@ namespace AgileConfig.Server.Apisite.Websocket
         {
         }
 
-        private ConcurrentDictionary<string, WSClient> Clients = new ConcurrentDictionary<string, WSClient>();
+        private List<WSClient> Clients = new List<WSClient>();
+        private object _lockObj = new object();
 
         public void SendToAll(string message)
         {
-            var data = Encoding.UTF8.GetBytes(message);
-            foreach (var webSocket in Clients.Values)
+            lock (_lockObj)
             {
-                if (webSocket.Client.State == WebSocketState.Open)
+                if (Clients.Count == 0)
                 {
-                    webSocket.Client.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
-                 CancellationToken.None);
+                    return;
+                }
+                var data = Encoding.UTF8.GetBytes(message);
+                foreach (var webSocket in Clients)
+                {
+                    if (webSocket.Client.State == WebSocketState.Open)
+                    {
+                        webSocket.Client.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
+                     CancellationToken.None);
+                    }
+                }
+            }
+        }
+
+        public void SendToAppClients(string appId, string message)
+        {
+            lock (_lockObj)
+            {
+                if (Clients.Count == 0)
+                {
+                    return;
+                }
+                var appClients = Clients.Where(c => c.AppId == appId);
+                if (appClients.Count() == 0)
+                {
+                    return;
+                }
+                var data = Encoding.UTF8.GetBytes(message);
+                foreach (var webSocket in appClients)
+                {
+                    if (webSocket.AppId == appId && webSocket.Client.State == WebSocketState.Open)
+                    {
+                        webSocket.Client.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
+                     CancellationToken.None);
+                    }
                 }
             }
         }
 
         public async Task SendToOne(WSClient client, string message)
         {
-            var data = Encoding.UTF8.GetBytes(message);
             if (client.Client.State == WebSocketState.Open)
+            {
+                var data = Encoding.UTF8.GetBytes(message);
                 await client.Client.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
-                CancellationToken.None);
+               CancellationToken.None);
+            }
         }
 
         public void AddClient(WSClient client)
         {
-            Clients.TryAdd(client.Id, client);
+            lock (_lockObj)
+            {
+                Clients.Add(client);
+            }
         }
 
-        public async Task CloseClient(WSClient client, WebSocketCloseStatus closeStatus, string closeDesc)
+        public async Task RemoveClient(WSClient client, WebSocketCloseStatus closeStatus, string closeDesc)
         {
-            Clients.TryRemove(client.Id, out client);
-            await client.Client.CloseAsync(closeStatus, closeDesc, CancellationToken.None);
-            client.Client.Dispose();
+            lock (_lockObj)
+            {
+                Clients.Remove(client);
+            }
+            if (client.Client.State == WebSocketState.Open)
+            {
+                await client.Client.CloseAsync(closeStatus, closeDesc, CancellationToken.None);
+                client.Client.Dispose();
+            }
+        }
+
+        public void RemoveAppClients(string appId, WebSocketCloseStatus closeStatus, string closeDesc)
+        {
+            lock (_lockObj)
+            {
+                var removeClients = Clients.Where(c => c.AppId == appId).ToList();
+                if (removeClients.Count == 0)
+                {
+                    return;
+                }
+                foreach (var webSocket in removeClients)
+                {
+                    Clients.Remove(webSocket);
+                }
+                Task.Run(async () =>
+                {
+                    foreach (var webSocket in removeClients)
+                    {
+                        try
+                        {
+                            if (webSocket.Client.State == WebSocketState.Open)
+                            {
+                                await webSocket.Client.CloseAsync(closeStatus, closeDesc, CancellationToken.None);
+                                webSocket.Client.Dispose();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("Try to close websocket client {0} err {1}.", webSocket.Id, ex.Message);
+                        }
+                    }
+                });
+            }
         }
 
         private static WebsocketCollection _Instance;
@@ -74,4 +157,5 @@ namespace AgileConfig.Server.Apisite.Websocket
             }
         }
     }
+
 }

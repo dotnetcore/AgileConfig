@@ -68,7 +68,7 @@ namespace AgileConfig.Client.Configuration
             {
                 WSUrl = host.Replace("http:", "ws:").Replace("HTTP:", "ws:");
             }
-            WSUrl += "/ws";
+            WSUrl += "/ws?appid=" + appId;
         }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace AgileConfig.Client.Configuration
                         WebsocketClient = null;
                         WebsocketClient = new ClientWebSocket();
                         await WebsocketClient.ConnectAsync(new Uri(WSUrl), CancellationToken.None);
-                        Logger?.LogTrace("AgileConfig Client Websocket Connected.");
+                        Logger?.LogTrace("AgileConfig Client Websocket Connected , {0}", WSUrl);
                         HandleWebsocketMessageAsync();
                         //连接成功重新加载配置
                         LoadAll();

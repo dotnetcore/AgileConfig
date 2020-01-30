@@ -122,7 +122,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             var result = await _configService.UpdateAsync(config);
 
-            if (result)
+            if (result && !IsOnlyUpdateDescription(config,oldConfig))
             {
                 //notice clients
                 var msg = new
@@ -149,6 +149,11 @@ namespace AgileConfig.Server.Apisite.Controllers
                 success = result,
                 message = !result ? "修改配置失败，请查看错误日志。" : ""
             });
+        }
+
+        private bool IsOnlyUpdateDescription(Config newConfig,Config oldConfig)
+        {
+            return newConfig.Key == oldConfig.Key && newConfig.Group == oldConfig.Group && newConfig.Value == oldConfig.Value;
         }
 
         [HttpGet]

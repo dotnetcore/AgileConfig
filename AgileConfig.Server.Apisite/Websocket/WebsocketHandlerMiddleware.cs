@@ -32,14 +32,25 @@ namespace AgileConfig.Server.Apisite.Websocket
             {
                 if (context.WebSockets.IsWebSocketRequest)
                 {
+                    var appId = context.Request.Query["appid"];
                     WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
                     var client = new WSClient()
                     {
                         Client = webSocket,
-                        Id = Guid.NewGuid().ToString()
+                        Id = Guid.NewGuid().ToString(),
+                        AppId = appId
                     };
                     _websocketCollection.AddClient(client);
-                    await Echo(context, client);
+                    _logger.LogInformation("Websocket client {0} Added ", client.Id);
+                    try
+                    {
+                        await Echo(context, client);
+                    }
+                    catch (Exception ex)
+                    {
+                        await _websocketCollection.RemoveClient(client, WebSocketCloseStatus.Empty, ex.Message);
+                        throw;
+                    }
                 }
                 else
                 {
@@ -62,7 +73,7 @@ namespace AgileConfig.Server.Apisite.Websocket
                 result = await webSocket.Client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             }
             _logger.LogInformation($"Websocket close , closeStatus:{webSocket.Client.CloseStatus} closeDesc:{webSocket.Client.CloseStatusDescription}");
-            await _websocketCollection.CloseClient(webSocket, result.CloseStatus.Value, result.CloseStatusDescription);
+            await _websocketCollection.RemoveClient(webSocket, result.CloseStatus.Value, result.CloseStatusDescription);
         }
     }
 }

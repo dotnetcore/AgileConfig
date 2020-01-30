@@ -26,7 +26,7 @@ namespace AgileConfig.Server.Data.Entity
         [Column("k", TypeName = "nvarchar(50)")]
         public string Key { get; set; }
 
-        [Column("v", TypeName = "nvarchar(200)")]
+        [Column("v", TypeName = "nvarchar(500)")]
         public string Value { get; set; }
 
         [Column("description", TypeName = "nvarchar(100)")]
