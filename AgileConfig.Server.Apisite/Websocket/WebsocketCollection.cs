@@ -24,9 +24,9 @@ namespace AgileConfig.Server.Apisite.Websocket
         Task SendToOne(WSClient client, string message);
         void AddClient(WSClient client);
 
-        Task RemoveClient(WSClient client, WebSocketCloseStatus closeStatus, string closeDesc);
+        Task RemoveClient(WSClient client, WebSocketCloseStatus? closeStatus, string closeDesc);
 
-        void RemoveAppClients(string appId, WebSocketCloseStatus closeStatus, string closeDesc);
+        void RemoveAppClients(string appId, WebSocketCloseStatus? closeStatus, string closeDesc);
     }
 
     public class WebsocketCollection : IWebsocketCollection
@@ -101,7 +101,7 @@ namespace AgileConfig.Server.Apisite.Websocket
             }
         }
 
-        public async Task RemoveClient(WSClient client, WebSocketCloseStatus closeStatus, string closeDesc)
+        public async Task RemoveClient(WSClient client, WebSocketCloseStatus? closeStatus, string closeDesc)
         {
             lock (_lockObj)
             {
@@ -109,12 +109,12 @@ namespace AgileConfig.Server.Apisite.Websocket
             }
             if (client.Client.State == WebSocketState.Open)
             {
-                await client.Client.CloseAsync(closeStatus, closeDesc, CancellationToken.None);
+                await client.Client.CloseAsync(closeStatus.HasValue ? closeStatus.Value : WebSocketCloseStatus.Empty, closeDesc, CancellationToken.None);
                 client.Client.Dispose();
             }
         }
 
-        public void RemoveAppClients(string appId, WebSocketCloseStatus closeStatus, string closeDesc)
+        public void RemoveAppClients(string appId, WebSocketCloseStatus? closeStatus, string closeDesc)
         {
             lock (_lockObj)
             {
@@ -135,7 +135,7 @@ namespace AgileConfig.Server.Apisite.Websocket
                         {
                             if (webSocket.Client.State == WebSocketState.Open)
                             {
-                                await webSocket.Client.CloseAsync(closeStatus, closeDesc, CancellationToken.None);
+                                await webSocket.Client.CloseAsync(closeStatus.HasValue ? closeStatus.Value : WebSocketCloseStatus.Empty, closeDesc, CancellationToken.None);
                                 webSocket.Client.Dispose();
                             }
                         }

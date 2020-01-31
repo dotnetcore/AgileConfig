@@ -5,6 +5,8 @@ using System.Net;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
+using AgileConfig.Server.Apisite.Filters;
+using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
@@ -18,7 +20,8 @@ namespace AgileConfig.Server.Apisite.Websocket
 
         public WebsocketHandlerMiddleware(
             RequestDelegate next,
-            ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory
+            )
         {
             _next = next;
             _logger = loggerFactory.
@@ -26,13 +29,19 @@ namespace AgileConfig.Server.Apisite.Websocket
             _websocketCollection = WebsocketCollection.Instance;
         }
 
-        public async Task Invoke(HttpContext context)
+        public async Task Invoke(HttpContext context, IAppService appService)
         {
             if (context.Request.Path == "/ws")
             {
                 if (context.WebSockets.IsWebSocketRequest)
                 {
-                    var appId = context.Request.Query["appid"];
+                    var basicAuth = new BasicAuthenticationAttribute(appService);
+                    if (!await basicAuth.Valid(context.Request))
+                    {
+                        context.Response.StatusCode = 403;
+                        return;
+                    }
+                    var appId = context.Request.Headers["appid"];
                     WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
                     var client = new WSClient()
                     {
@@ -72,8 +81,8 @@ namespace AgileConfig.Server.Apisite.Websocket
                 await webSocket.Client.SendAsync(new ArraySegment<byte>(buffer, 0, result.Count), result.MessageType, result.EndOfMessage, CancellationToken.None);
                 result = await webSocket.Client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             }
-            _logger.LogInformation($"Websocket close , closeStatus:{webSocket.Client.CloseStatus} closeDesc:{webSocket.Client.CloseStatusDescription}");
-            await _websocketCollection.RemoveClient(webSocket, result.CloseStatus.Value, result.CloseStatusDescription);
+            _logger.LogInformation($"Websocket close , closeStatus:{result.CloseStatus} closeDesc:{result.CloseStatusDescription}");
+            await _websocketCollection.RemoveClient(webSocket, result.CloseStatus, result.CloseStatusDescription);
         }
     }
 }

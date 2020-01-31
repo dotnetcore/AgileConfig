@@ -1,10 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace AgileConfig.Client.Configuration
+namespace AgileConfig.Client
 {
     public static class AgileConfitBuilderExt
     {

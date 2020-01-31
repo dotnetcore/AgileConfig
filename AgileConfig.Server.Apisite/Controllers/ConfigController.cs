@@ -55,8 +55,9 @@ namespace AgileConfig.Server.Apisite.Controllers
             if (result)
             {
                 //notice clients
-                var msg = new { 
-                    Action="add",
+                var msg = new
+                {
+                    Action = "add",
                     Node = new
                     {
                         group = config.Group,
@@ -65,7 +66,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     }
                 };
                 var json = JsonConvert.SerializeObject(msg);
-                WebsocketCollection.Instance.SendToAll(json);
+                WebsocketCollection.Instance.SendToAppClients(config.AppId, json);
             }
 
             return Json(new
@@ -85,7 +86,8 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var config = await _configService.GetAsync(model.Id);
-            var oldConfig = new Config { 
+            var oldConfig = new Config
+            {
                 Key = config.Key,
                 Group = config.Group,
                 Value = config.Value
@@ -122,13 +124,14 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             var result = await _configService.UpdateAsync(config);
 
-            if (result && !IsOnlyUpdateDescription(config,oldConfig))
+            if (result && !IsOnlyUpdateDescription(config, oldConfig))
             {
                 //notice clients
                 var msg = new
                 {
                     Action = "update",
-                    OldNode = new {
+                    OldNode = new
+                    {
                         group = oldConfig.Group,
                         key = oldConfig.Key,
                         value = oldConfig.Value
@@ -141,7 +144,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     }
                 };
                 var json = JsonConvert.SerializeObject(msg);
-                WebsocketCollection.Instance.SendToAll(json);
+                WebsocketCollection.Instance.SendToAppClients(config.AppId, json);
             }
 
             return Json(new
@@ -151,7 +154,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
-        private bool IsOnlyUpdateDescription(Config newConfig,Config oldConfig)
+        private bool IsOnlyUpdateDescription(Config newConfig, Config oldConfig)
         {
             return newConfig.Key == oldConfig.Key && newConfig.Group == oldConfig.Group && newConfig.Value == oldConfig.Value;
         }
@@ -237,7 +240,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     }
                 };
                 var json = JsonConvert.SerializeObject(msg);
-                WebsocketCollection.Instance.SendToAll(json);
+                WebsocketCollection.Instance.SendToAppClients(config.AppId, json);
             }
 
             return Json(new
