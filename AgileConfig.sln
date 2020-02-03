@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4E3E3A07-0DAA-4054-ADBB-18AD50AFB0EF}"
 	ProjectSection(SolutionItems) = preProject
 		Dockerfile = Dockerfile
+		License.txt = License.txt
 		think.txt = think.txt
 	EndProjectSection
 EndProject
@@ -25,9 +26,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Server", "Server", "{1D2FD6
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client", "Client", "{38C7514D-7FE2-4326-B84C-BC32807C4C85}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Client", "AgileConfig.Client\AgileConfig.Client.csproj", "{9C5756C3-DFD5-41FD-A4E8-883F937E0CE0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Client", "AgileConfig.Client\AgileConfig.Client.csproj", "{9C5756C3-DFD5-41FD-A4E8-883F937E0CE0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.ClientTest", "AgileConfig.ClientTest\AgileConfig.ClientTest.csproj", "{134A88E1-42D8-499F-8EC3-4872C14D5A17}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.ClientTest", "AgileConfig.ClientTest\AgileConfig.ClientTest.csproj", "{134A88E1-42D8-499F-8EC3-4872C14D5A17}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
