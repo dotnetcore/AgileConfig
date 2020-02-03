@@ -1,9 +1,9 @@
 ﻿app.controller('addAppCtrl', function ($scope, $http ,$state) {
     $scope.app = {
-        Id: '',
-        Name: '',
-        Secret: '',
-        Enabled: true
+        id: '',
+        name: '',
+        secret: '',
+        enabled: true
     };
 
     $scope.save = function () {
