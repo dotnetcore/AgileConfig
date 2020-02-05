@@ -103,9 +103,5 @@ namespace AgileConfig.Server.Service
             return q.ToListAsync();
         }
 
-        public void Dispose()
-        {
-            _dbContext?.Dispose();
-        }
     }
 }

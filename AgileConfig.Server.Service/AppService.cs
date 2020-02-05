@@ -65,9 +65,5 @@ namespace AgileConfig.Server.Service
             return x > 0;
         }
 
-        public void Dispose()
-        {
-            _dbContext?.Dispose();
-        }
     }
 }

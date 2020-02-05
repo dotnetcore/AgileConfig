@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.IService
 {
-    public interface IConfigService : IDisposable
+    public interface IConfigService
     {
         Task<Config> GetAsync(string id);
 
