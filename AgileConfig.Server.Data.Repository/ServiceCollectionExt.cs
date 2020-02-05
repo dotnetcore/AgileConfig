@@ -10,7 +10,7 @@ namespace AgileConfig.Server.Data.Repository
     {
         public static void AddAgileConfigDb(this IServiceCollection sc)
         {
-            sc.AddScoped<ISqlContext, AgileConfigDbContext>();
+            sc.AddTransient<ISqlContext, AgileConfigDbContext>();
             using (var ctx = new AgileConfigDbContext())
             {
                 ctx.InitTables();
