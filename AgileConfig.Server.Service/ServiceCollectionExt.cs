@@ -10,8 +10,8 @@ namespace AgileConfig.Server.Service
     {
         public static void AddBusinessServices(this IServiceCollection sc)
         {
-            sc.AddTransient<IAppService, AppService>();
-            sc.AddTransient<IConfigService, ConfigService>();
+            sc.AddScoped<IAppService, AppService>();
+            sc.AddScoped<IConfigService, ConfigService>();
         }
     }
 }

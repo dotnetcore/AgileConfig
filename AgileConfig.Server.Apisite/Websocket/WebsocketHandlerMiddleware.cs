@@ -6,7 +6,9 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 using AgileConfig.Server.Apisite.Filters;
+using AgileConfig.Server.Data.Repository;
 using AgileConfig.Server.IService;
+using AgileConfig.Server.Service;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
@@ -29,16 +31,18 @@ namespace AgileConfig.Server.Apisite.Websocket
             _websocketCollection = WebsocketCollection.Instance;
         }
 
-        public async Task Invoke(HttpContext context, IAppService appService)
+        public async Task Invoke(HttpContext context)
         {
             if (context.Request.Path == "/ws")
             {
                 if (context.WebSockets.IsWebSocketRequest)
                 {
+                    var db = new AgileConfigDbContext();
+                    var appService = new AppService(db);
                     var basicAuth = new BasicAuthenticationAttribute(appService);
                     if (!await basicAuth.Valid(context.Request))
                     {
-                        context.Response.StatusCode = 403;
+                        await context.Response.WriteAsync("closed");
                         return;
                     }
                     var appId = context.Request.Headers["appid"];
@@ -57,8 +61,9 @@ namespace AgileConfig.Server.Apisite.Websocket
                     }
                     catch (Exception ex)
                     {
+                        _logger.LogError(ex, "Echo websocket client {0} err .", client.Id);
                         await _websocketCollection.RemoveClient(client, WebSocketCloseStatus.Empty, ex.Message);
-                        throw;
+                        await context.Response.WriteAsync("closed");
                     }
                 }
                 else
