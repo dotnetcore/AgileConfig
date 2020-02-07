@@ -65,5 +65,12 @@ namespace AgileConfig.Server.Service
             return x > 0;
         }
 
+        public Task<int> CountEnabledAppsAsync()
+        {
+            var q = _dbContext.Apps.CountAsync(a => a.Enabled == true);
+
+            return q;
+        }
+
     }
 }

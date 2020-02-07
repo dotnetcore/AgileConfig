@@ -1,3 +1,40 @@
-﻿<div class="text-info">
-    @($"Welcome to AgileConfig , {DateTime.Now} .")
+﻿<div class="dash">
+    <div class="top-bar">
+        <button class="btn btn-warning" type="button" ng-click="goto('config.list')">
+            <div>
+                <h1>配置项</h1>
+            </div>
+            <div>
+                <h2 ng-bind="report.configCount">
+                </h2>
+            </div>
+        </button>
+        <button class="btn btn-info" type="button" ng-click="goto('apps.list')">
+            <div>
+                <h1>应用</h1>
+            </div>
+            <div>
+                <h2 ng-bind="report.appCount">
+                </h2>
+            </div>
+        </button>
+        <button class="btn btn-success" type="button" ng-click="">
+            <div>
+                <h1>客户端</h1>
+            </div>
+            <div>
+                <h2 ng-bind="report.websocketCollectionReport.clientCount">
+                </h2>
+            </div>
+        </button>
+    </div>
+    <div>
+      
+    </div>
+    <div>
+       
+    </div>
+    <div>
+       
+    </div>
 </div>

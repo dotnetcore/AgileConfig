@@ -81,10 +81,12 @@ namespace AgileConfig.Server.Apisite.Websocket
         {
             var buffer = new byte[1024 * 2];
             WebSocketReceiveResult result = await webSocket.Client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            webSocket.LastHeartbeatTime = DateTime.Now;
             while (!result.CloseStatus.HasValue)
             {
                 await webSocket.Client.SendAsync(new ArraySegment<byte>(buffer, 0, result.Count), result.MessageType, result.EndOfMessage, CancellationToken.None);
                 result = await webSocket.Client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                webSocket.LastHeartbeatTime = DateTime.Now;
             }
             _logger.LogInformation($"Websocket close , closeStatus:{result.CloseStatus} closeDesc:{result.CloseStatusDescription}");
             await _websocketCollection.RemoveClient(webSocket, result.CloseStatus, result.CloseStatusDescription);

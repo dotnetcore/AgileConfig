@@ -89,16 +89,17 @@ body {
 
 .main {
     padding: 20px;
-    min-height:95vh;
+    min-height: 95vh;
 }
-    .main .powered{
-        position:absolute;
-        bottom:0;
-        right:10px;
+
+    .main .powered {
+        position: absolute;
+        bottom: 0;
+        right: 10px;
     }
 
-    @media (min-width: 768px) {
-        .main {
+@media (min-width: 768px) {
+    .main {
         padding-right: 40px;
         padding-left: 40px;
     }
@@ -132,18 +133,32 @@ body {
     }
 
 .add-bar {
-    margin-bottom:20px;
-    display:flex;
-    justify-content:space-between;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
 }
 
     .add-bar input {
-        height:30px;
-    }
-    .add-bar select {
-        height:30px;
+        height: 30px;
     }
 
-    .config .config_list .col {
-        width: 200px;
+    .add-bar select {
+        height: 30px;
     }
+
+.config .config_list .col {
+    width: 200px;
+}
+
+.dash .top-bar {
+    display: flex;
+    justify-content: space-between;
+}
+
+    .dash .top-bar button {
+        height: 160px;
+        width: 33%;
+    }
+        .dash .top-bar button h1 {
+            font-size: 44px;
+        }

@@ -16,10 +16,20 @@ namespace AgileConfig.Server.Apisite.Websocket
         public string Id { get; set; }
 
         public string AppId { get; set; }
+
+        public DateTime LastHeartbeatTime { get; set; }
+    }
+
+    public class WebsocketCollectionReport
+    {
+        public int ClientCount { get; set; }
     }
 
     public interface IWebsocketCollection
     {
+        WebsocketCollectionReport Report();
+
+        WSClient Get(string clientId);
         void SendToAll(string message);
         Task SendToOne(WSClient client, string message);
         void AddClient(WSClient client);
@@ -97,6 +107,7 @@ namespace AgileConfig.Server.Apisite.Websocket
         {
             lock (_lockObj)
             {
+                client.LastHeartbeatTime = DateTime.Now;
                 Clients.Add(client);
             }
         }
@@ -145,6 +156,24 @@ namespace AgileConfig.Server.Apisite.Websocket
                         }
                     }
                 });
+            }
+        }
+
+        public WSClient Get(string clientId)
+        {
+            lock (_lockObj)
+            {
+                return Clients.FirstOrDefault(c => c.Id == clientId) ;
+            }
+        }
+
+        public WebsocketCollectionReport Report()
+        {
+            lock (_lockObj)
+            {
+                return new WebsocketCollectionReport {
+                    ClientCount = Clients.Count
+                };
             }
         }
 

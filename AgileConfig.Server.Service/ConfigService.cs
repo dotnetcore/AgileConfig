@@ -103,5 +103,11 @@ namespace AgileConfig.Server.Service
             return q.ToListAsync();
         }
 
+        public Task<int> CountEnabledConfigsAsync()
+        {
+            var q = _dbContext.Configs.CountAsync(c => c.Status == ConfigStatus.Enabled);
+
+            return q;
+        }
     }
 }
