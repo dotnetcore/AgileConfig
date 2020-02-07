@@ -23,6 +23,8 @@ namespace AgileConfig.Server.Apisite.Websocket
     public class WebsocketCollectionReport
     {
         public int ClientCount { get; set; }
+
+        public List<WSClient> ClientsCopy { get; set; }
     }
 
     public interface IWebsocketCollection
@@ -112,7 +114,7 @@ namespace AgileConfig.Server.Apisite.Websocket
             }
         }
 
-        public async Task RemoveClient(WSClient client, WebSocketCloseStatus? closeStatus, string closeDesc)
+        public async Task RemoveClient(WSClient client, WebSocketCloseStatus? closeStatus, string closeDesc = null)
         {
             lock (_lockObj)
             {
@@ -163,7 +165,7 @@ namespace AgileConfig.Server.Apisite.Websocket
         {
             lock (_lockObj)
             {
-                return Clients.FirstOrDefault(c => c.Id == clientId) ;
+                return Clients.FirstOrDefault(c => c.Id == clientId);
             }
         }
 
@@ -171,8 +173,14 @@ namespace AgileConfig.Server.Apisite.Websocket
         {
             lock (_lockObj)
             {
-                return new WebsocketCollectionReport {
-                    ClientCount = Clients.Count
+                return new WebsocketCollectionReport
+                {
+                    ClientCount = Clients.Count,
+                    ClientsCopy = Clients
+                                    .Select(c => new WSClient { Id = c.Id, AppId = c.AppId, LastHeartbeatTime = c.LastHeartbeatTime })
+                                    .OrderBy(c => c.AppId)
+                                    .ThenByDescending(c => c.LastHeartbeatTime)
+                                    .ToList()
                 };
             }
         }

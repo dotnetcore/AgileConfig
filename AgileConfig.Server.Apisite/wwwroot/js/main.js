@@ -52,6 +52,12 @@ app.config(function ($stateProvider, $urlRouterProvider) {
         controller: 'editConfigCtrl'
     };
 
+    let clientsState = {
+        url: '/clients',
+        templateUrl: '/home/getview?viewName=clients',
+        controller: 'clientsCtrl'
+    };
+
     $stateProvider.state('dash', homeState);
 
     $stateProvider.state('apps', appsState);
@@ -63,6 +69,8 @@ app.config(function ($stateProvider, $urlRouterProvider) {
     $stateProvider.state('config.list', listConfigState);
     $stateProvider.state('config.add', addConfigState);
     $stateProvider.state('config.edit', editConfigState);
+
+    $stateProvider.state('clients', clientsState);
 
     $urlRouterProvider.otherwise("/dash");
     }

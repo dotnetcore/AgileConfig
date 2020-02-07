@@ -6,10 +6,9 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 using AgileConfig.Server.Apisite.Filters;
-using AgileConfig.Server.Data.Repository;
 using AgileConfig.Server.IService;
-using AgileConfig.Server.Service;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace AgileConfig.Server.Apisite.Websocket
@@ -31,14 +30,12 @@ namespace AgileConfig.Server.Apisite.Websocket
             _websocketCollection = WebsocketCollection.Instance;
         }
 
-        public async Task Invoke(HttpContext context)
+        public async Task Invoke(HttpContext context, IAppService appService)
         {
             if (context.Request.Path == "/ws")
             {
                 if (context.WebSockets.IsWebSocketRequest)
                 {
-                    var db = new AgileConfigDbContext();
-                    var appService = new AppService(db);
                     var basicAuth = new BasicAuthenticationAttribute(appService);
                     if (!await basicAuth.Valid(context.Request))
                     {
