@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-bionic AS build
 WORKDIR /app
 COPY /. /app
 RUN dotnet restore -s https://nuget.cdn.azure.cn/v3/index.json
