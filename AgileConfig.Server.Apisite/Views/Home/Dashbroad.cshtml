@@ -1,15 +1,15 @@
 ﻿<div class="dash">
     <div class="top-bar">
-        <button class="btn btn-warning" type="button" ng-click="goto('config.list')">
+        <button class="btn btn-primary" type="button" ng-click="goto('nodes.list')">
             <div>
-                <h1>配置项</h1>
+                <h1>节点</h1>
             </div>
             <div>
                 <h2 ng-bind="report.configCount">
                 </h2>
             </div>
         </button>
-        <button class="btn btn-info" type="button" ng-click="goto('apps.list')">
+        <button class="btn btn-warning" type="button" ng-click="goto('apps.list')">
             <div>
                 <h1>应用</h1>
             </div>
@@ -18,7 +18,17 @@
                 </h2>
             </div>
         </button>
-        <button class="btn btn-success" type="button" ng-click="">
+        <button class="btn btn-info" type="button" ng-click="goto('config.list')">
+            <div>
+                <h1>配置项</h1>
+            </div>
+            <div>
+                <h2 ng-bind="report.configCount">
+                </h2>
+            </div>
+        </button>
+
+        <button class="btn btn-success" type="button" ng-click="goto('clients')">
             <div>
                 <h1>客户端</h1>
             </div>
