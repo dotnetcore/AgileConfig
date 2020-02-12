@@ -19,12 +19,14 @@ namespace AgileConfig.Server.Apisite
             var builder = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory());
 #if DEBUG
-            Configuration.Config = builder.AddJsonFile("appsettings.Development.json").Build();
+            Configuration.Config = 
+                 builder
+                .AddJsonFile("appsettings.Development.json")
+                .AddEnvironmentVariables()
+                .Build();
 #else
-            Configuration.Config = builder.AddJsonFile("appsettings.json").Build();
+            Configuration.Config = builder.AddJsonFile("appsettings.json").AddEnvironmentVariables().Build();
 #endif
-
-
             CreateWebHostBuilder(args).Build().Run();
         }
 
