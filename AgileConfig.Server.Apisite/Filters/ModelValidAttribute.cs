@@ -30,6 +30,5 @@ namespace AgileConfig.Server.Apisite.Filters
                 });
             }
         }
-      
     }
 }

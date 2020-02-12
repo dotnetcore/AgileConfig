@@ -1,7 +1,7 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-bionic AS build
 WORKDIR /app
 COPY /. /app
-RUN dotnet restore
+RUN dotnet restore -s https://nuget.cdn.azure.cn/v3/index.json
 WORKDIR /app/AgileConfig.Server.Apisite
 RUN dotnet publish -o ./out -c Release
 EXPOSE 5000

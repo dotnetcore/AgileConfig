@@ -6,6 +6,8 @@ using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
+using AgileConfig.Server.Apisite.Websocket;
+using Newtonsoft.Json;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -33,7 +35,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = "配置键已存在，请重新输入。"
+                    message = "配置存在，请更改输入的信息。"
                 });
             }
 
@@ -49,6 +51,23 @@ namespace AgileConfig.Server.Apisite.Controllers
             config.UpdateTime = null;
 
             var result = await _configService.AddAsync(config);
+
+            if (result)
+            {
+                //notice clients
+                var msg = new
+                {
+                    Action = "add",
+                    Node = new
+                    {
+                        group = config.Group,
+                        key = config.Key,
+                        value = config.Value
+                    }
+                };
+                var json = JsonConvert.SerializeObject(msg);
+                WebsocketCollection.Instance.SendToAppClients(config.AppId, json);
+            }
 
             return Json(new
             {
@@ -67,6 +86,12 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var config = await _configService.GetAsync(model.Id);
+            var oldConfig = new Config
+            {
+                Key = config.Key,
+                Group = config.Group,
+                Value = config.Value
+            };
             if (config == null)
             {
                 return Json(new
@@ -78,10 +103,9 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (config.Group != model.Group || config.Key != model.Key)
             {
-                var oldConfig = await _configService.GetByAppIdKey(model.AppId, model.Group, model.Key);
-                if (oldConfig != null)
+                var anotherConfig = await _configService.GetByAppIdKey(model.AppId, model.Group, model.Key);
+                if (anotherConfig != null)
                 {
-
                     return Json(new
                     {
                         success = false,
@@ -100,11 +124,39 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             var result = await _configService.UpdateAsync(config);
 
+            if (result && !IsOnlyUpdateDescription(config, oldConfig))
+            {
+                //notice clients
+                var msg = new
+                {
+                    Action = "update",
+                    OldNode = new
+                    {
+                        group = oldConfig.Group,
+                        key = oldConfig.Key,
+                        value = oldConfig.Value
+                    },
+                    Node = new
+                    {
+                        group = config.Group,
+                        key = config.Key,
+                        value = config.Value
+                    }
+                };
+                var json = JsonConvert.SerializeObject(msg);
+                WebsocketCollection.Instance.SendToAppClients(config.AppId, json);
+            }
+
             return Json(new
             {
                 success = result,
                 message = !result ? "修改配置失败，请查看错误日志。" : ""
             });
+        }
+
+        private bool IsOnlyUpdateDescription(Config newConfig, Config oldConfig)
+        {
+            return newConfig.Key == oldConfig.Key && newConfig.Group == oldConfig.Group && newConfig.Value == oldConfig.Value;
         }
 
         [HttpGet]
@@ -173,6 +225,23 @@ namespace AgileConfig.Server.Apisite.Controllers
             config.Status = ConfigStatus.Deleted;
 
             var result = await _configService.UpdateAsync(config);
+
+            if (result)
+            {
+                //notice clients
+                var msg = new
+                {
+                    Action = "remove",
+                    Node = new
+                    {
+                        group = config.Group,
+                        key = config.Key,
+                        value = config.Value
+                    }
+                };
+                var json = JsonConvert.SerializeObject(msg);
+                WebsocketCollection.Instance.SendToAppClients(config.AppId, json);
+            }
 
             return Json(new
             {

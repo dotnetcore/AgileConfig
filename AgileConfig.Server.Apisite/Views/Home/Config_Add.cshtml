@@ -1,6 +1,6 @@
 ﻿<ol class="breadcrumb">
-    <li><a ui-sref="config.list">Configruations</a></li>
-    <li><a ui-sref="config.add">Add</a></li>
+    <li><a ui-sref="config.list">配置列表</a></li>
+    <li><a ui-sref="config.add">新建</a></li>
 </ol>
 
 <form ng-submit="save()">
@@ -17,23 +17,24 @@
     </div>
     <div class="form-group">
         <label for="inputGroup">配置组</label>
-        <input type="text" class="form-control" id="inputGroup" placeholder="配置组"
+        <input type="text" class="form-control" id="inputGroup" placeholder="配置组" maxlength="50"
                ng-model="config.group">
     </div>
     <div class="form-group">
         <label for="inputKey">配置键</label>
-        <input type="text" class="form-control" id="inputKey" placeholder="配置键（必填）"
+        <input type="text" class="form-control" id="inputKey" placeholder="配置键（必填）" maxlength="50"
                ng-model="config.key">
     </div>
     <div class="form-group">
         <label for="inputValue">值 </label>
-        <input type="text" class="form-control" id="inputValue" placeholder="值 (必填)"
+        <input type="text" class="form-control" id="inputValue" placeholder="值 (必填)" maxlength="500"
                ng-model="config.value">
     </div>
     <div class="form-group">
         <label for="inputDescription">描述</label>
-        <input type="text" class="form-control" id="inputDescription" placeholder="配置描述"
+        <input type="text" class="form-control" id="inputDescription" placeholder="配置描述" maxlength="100"
                ng-model="config.description">
     </div>
     <button type="submit" class="btn btn-primary">确定</button>
+    <button type="button" class="btn btn-default" ng-click="cancel()">取消</button>
 </form>

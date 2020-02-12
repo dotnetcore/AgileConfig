@@ -30,4 +30,8 @@
                 alert(err.statusText);
             });
     };
+
+    $scope.cancel = function () {
+        $state.go('config.list');
+    };
 });
