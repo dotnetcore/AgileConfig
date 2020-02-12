@@ -14,14 +14,17 @@ namespace AgileConfig.Server.Apisite.Controllers
     {
         IConfigService ConfigService;
         IAppService AppService;
-        public HomeController(IConfigService configService, IAppService appService)
+        IServerNodeService ServerNodeService;
+
+        public HomeController(IConfigService configService, IAppService appService, IServerNodeService serverNodeService)
         {
             AppService = appService;
             ConfigService = configService;
+            ServerNodeService = serverNodeService;
         }
         public IActionResult Index()
         {
-            if ("true".Equals(Configuration.Config["adminConsole"],StringComparison.CurrentCultureIgnoreCase))
+            if ("true".Equals(Configuration.Config["adminConsole"], StringComparison.CurrentCultureIgnoreCase))
             {
                 return View();
             }
@@ -44,6 +47,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             report.WebsocketCollectionReport = WebsocketCollection.Instance.Report();
             report.AppCount = await AppService.CountEnabledAppsAsync();
             report.ConfigCount = await ConfigService.CountEnabledConfigsAsync();
+            report.NodeCount = (await ServerNodeService.GetAllNodesAsync()).Count;
 
             return Json(new
             {

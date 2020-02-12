@@ -51,11 +51,25 @@ app.config(function ($stateProvider, $urlRouterProvider) {
         templateUrl: '/home/getview?viewName=config_edit',
         controller: 'editConfigCtrl'
     };
-
     let clientsState = {
         url: '/clients',
         templateUrl: '/home/getview?viewName=clients',
         controller: 'clientsCtrl'
+    };
+    let nodesState = {
+        url: '/nodes',
+        templateUrl: '/home/getview?viewName=node',
+        controller: 'nodesCtrl'
+    };
+    let listNodesState = {
+        url: '/list',
+        templateUrl: '/home/getview?viewName=node_list',
+        controller: 'ListnodeCtrl'
+    };
+    let addNodesState = {
+        url: '/add',
+        templateUrl: '/home/getview?viewName=node_add',
+        controller: 'addNodeCtrl'
     };
 
     $stateProvider.state('dash', homeState);
@@ -71,6 +85,10 @@ app.config(function ($stateProvider, $urlRouterProvider) {
     $stateProvider.state('config.edit', editConfigState);
 
     $stateProvider.state('clients', clientsState);
+
+    $stateProvider.state('nodes', nodesState);
+    $stateProvider.state('nodes.list', listNodesState);
+    $stateProvider.state('nodes.add', addNodesState);
 
     $urlRouterProvider.otherwise("/dash");
     }

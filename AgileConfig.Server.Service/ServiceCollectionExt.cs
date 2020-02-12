@@ -1,8 +1,5 @@
 ﻿using AgileConfig.Server.IService;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AgileConfig.Server.Service
 {
@@ -12,6 +9,7 @@ namespace AgileConfig.Server.Service
         {
             sc.AddScoped<IAppService, AppService>();
             sc.AddScoped<IConfigService, ConfigService>();
+            sc.AddScoped<IServerNodeService, ServerNodeService>();
         }
     }
 }

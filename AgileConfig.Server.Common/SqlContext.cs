@@ -17,6 +17,7 @@ namespace AgileConfig.Server.Common
         public void InitTables()
         {
             this.Database.EnsureCreated();
+            //this.Database.Migrate();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

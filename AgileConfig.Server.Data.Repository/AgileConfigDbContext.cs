@@ -12,5 +12,8 @@ namespace AgileConfig.Server.Data.Repository
         public DbSet<App> Apps { get; set; }
 
         public DbSet<Config> Configs { get; set; }
+
+        public DbSet<ServerNode> ServerNodes { get; set; }
+
     }
 }
