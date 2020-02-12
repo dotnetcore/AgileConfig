@@ -1,4 +1,4 @@
-﻿app.factory('nodeStatusReflushService', function ($interval) {
+﻿app.factory('nodeStatusReflushService', function ($http, $interval) {
     var service = {
         started: false,
         uiNodes: []
@@ -23,8 +23,6 @@
                 });
         }
     };
-
- 
 
     service.start = function (nodes) {
         service.uiNodes = nodes;
@@ -69,13 +67,12 @@ app.controller('ListnodeCtrl', function ($scope, $http, $state, nodeStatusReflus
             .then(r => {
                 if (r.data.success) {
                     $scope.nodes = r.data.data;
+                    nodeStatusReflushService.start($scope.nodes);
                 }
             }, err => {
                 console.log(err);
                 alert(err.statusText);
             });
     };
-
-    nodeStatusReflushService.start($scope.nodes);
     load();
 });
