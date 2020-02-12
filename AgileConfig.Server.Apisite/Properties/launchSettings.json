@@ -24,7 +24,9 @@
       "applicationUrl": "http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "adminConsole": "true"
+        "adminConsole": "true",
+        "db:provider": "sqlite",
+        "db:conn": "Data Source=agile_config.db"
       }
     }
   }
