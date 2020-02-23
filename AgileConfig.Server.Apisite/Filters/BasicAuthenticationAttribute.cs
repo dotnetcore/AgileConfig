@@ -35,6 +35,11 @@ namespace AgileConfig.Server.Apisite.Filters
                 return false;
             }
             var app = await _appService.GetAsync(appid);
+            if (app == null)
+            {
+                return false;
+            }
+
             if (string.IsNullOrEmpty(app.Secret))
             {
                 //如果没有设置secret则直接通过

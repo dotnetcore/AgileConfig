@@ -1,14 +1,17 @@
-﻿app.controller('clientsCtrl', function ($scope, $http) {
-    $http.get('/home/report')
-        .then(r => {
-            if (r.data.success) {
-                $scope.clients = r.data.data.websocketCollectionReport.clientsCopy;
-            }
-        }, err => {
-            console.log(err);
-            alert(err.statusText);
-        });
-
+﻿app.controller('clientsCtrl', function ($scope, $http, nodeStatusReflushService) {
+    $scope.getClients = function (address) {
+        $http.get('/report/ServerNodeClients?address=' + address + '&_' + new Date().getTime())
+            .then(resp => {
+                if (resp.data.data) {
+                    $scope.clients = resp.data.data.clientsCopy;
+                } else {
+                    $scope.clients = [];
+                }
+            }, err => {
+                console.log(err);
+                alert(err.statusText);
+            });
+    };
     $scope.offline = function (client, index) {
         let cr = confirm(`是否确定断开客户端【${client.id}】?`);
         if (!cr) {
@@ -25,4 +28,16 @@
                 alert(err.statusText);
             });
     };
+    $http.get('/servernode/all?_' + new Date().getTime())
+        .then(resp => {
+            $scope.nodes = resp.data.data;
+            if (resp.data.data.length) {
+                $scope.selectedNodeAddress = resp.data.data[0].address;
+                $scope.getClients($scope.selectedNodeAddress);
+            }
+        }, err => {
+            console.log(err);
+            alert(err.statusText);
+        });
+
 });

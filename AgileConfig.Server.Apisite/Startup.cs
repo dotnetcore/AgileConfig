@@ -34,9 +34,6 @@ namespace AgileConfig.Server.Apisite
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0).AddRazorRuntimeCompilation();
             services.AddAgileConfigDb();
             services.AddBusinessServices();
-
-            var serverNodeManager = new ServerNodeManager(services);
-            serverNodeManager.TestEchoAsync();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

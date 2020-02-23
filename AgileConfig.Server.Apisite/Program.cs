@@ -14,6 +14,8 @@ namespace AgileConfig.Server.Apisite
 {
     public class Program
     {
+        public static RemoteServerNodeManager RemoteServerNodeManager { get; private set; }
+
         public static void Main(string[] args)
         {
             var builder = new ConfigurationBuilder()
@@ -27,16 +29,26 @@ namespace AgileConfig.Server.Apisite
 #else
             Configuration.Config = builder.AddJsonFile("appsettings.json").AddEnvironmentVariables().Build();
 #endif
-            CreateWebHostBuilder(args).Build().Run();
+            var host = CreateWebHostBuilder(args)
+                .Build();
+
+            var sp = host.Services;
+            RemoteServerNodeManager = new RemoteServerNodeManager(sp);
+            RemoteServerNodeManager.TestEchoAsync();
+
+            host.Run();
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseKestrel(ks =>
-                {
-                    ks.ListenAnyIP(5000);
-                })
-                .UseNLog()
-                .UseStartup<Startup>();
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args) 
+        {
+            return WebHost.CreateDefaultBuilder(args)
+                  .UseKestrel(ks =>
+                  {
+                      ks.ListenAnyIP(5000);
+                  })
+                  .UseNLog()
+                  .UseStartup<Startup>();
+        }
+          
     }
 }

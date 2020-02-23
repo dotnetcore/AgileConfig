@@ -12,15 +12,15 @@ namespace AgileConfig.Server.Apisite.Controllers
 {
     public class HomeController : Controller
     {
-        IConfigService ConfigService;
-        IAppService AppService;
-        IServerNodeService ServerNodeService;
+        private readonly IConfigService _configService;
+        private readonly IAppService _appService;
+        private readonly IServerNodeService _serverNodeService;
 
         public HomeController(IConfigService configService, IAppService appService, IServerNodeService serverNodeService)
         {
-            AppService = appService;
-            ConfigService = configService;
-            ServerNodeService = serverNodeService;
+            _appService = appService;
+            _configService = configService;
+            _serverNodeService = serverNodeService;
         }
         public IActionResult Index()
         {
@@ -40,22 +40,6 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             return Content("");
         }
-
-        public async Task<IActionResult> Report()
-        {
-            var report = new ServerStatusReport();
-            report.WebsocketCollectionReport = WebsocketCollection.Instance.Report();
-            report.AppCount = await AppService.CountEnabledAppsAsync();
-            report.ConfigCount = await ConfigService.CountEnabledConfigsAsync();
-            report.NodeCount = (await ServerNodeService.GetAllNodesAsync()).Count;
-
-            return Json(new
-            {
-                success = true,
-                data = report
-            });
-        }
-
 
         [HttpPost]
         public async Task<IActionResult> Client_Offline(string id)

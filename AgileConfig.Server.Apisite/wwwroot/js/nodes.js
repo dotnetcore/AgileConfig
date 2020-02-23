@@ -1,21 +1,21 @@
 ﻿app.factory('nodeStatusReflushService', function ($http, $interval) {
     var service = {
         started: false,
+        serverNodes: [],
         uiNodes: []
     };
 
     var reflushNodeStatus = function () {
         if (service.started) {
-            $http.get('/servernode/all?_=' + (new Date).getTime())
+            $http.get('/report/RemoteNodesStatus?_=' + (new Date).getTime())
                 .then(r => {
                     if (r.data.success) {
                         for (var i = 0; i < r.data.data.length; i++) {
-                            var node = r.data.data[i];
-                            var uiNode = service.uiNodes.find(n => n.address === node.address);
-                            if (uiNode) {
-                                uiNode.lastEchoTime = node.lastEchoTime;
-                                uiNode.status = node.status;
+                            service.serverNodes = r.data.data;
+                            if (service.callback) {
+                                service.callback(service.serverNodes);
                             }
+                            
                         }
                     }
                 }, err => {
@@ -24,10 +24,10 @@
         }
     };
 
-    service.start = function (nodes) {
-        service.uiNodes = nodes;
-        service.started = true;
-        if (service.started) {
+    service.start = function (callback) {
+        service.callback = callback;
+        if (!service.started) {
+            service.started = true;
             $interval(reflushNodeStatus, 5000);
         }
     };
@@ -39,7 +39,7 @@ app.controller('nodesCtrl', function ($state) {
     $state.go('nodes.list');
 });
 
-app.controller('ListnodeCtrl', function ($scope, $http, $state, nodeStatusReflushService ) {
+app.controller('ListnodeCtrl', function ($scope, $http, $state, nodeStatusReflushService) {
     $scope.toAdd = function () {
         $state.go('nodes.add');
     };
@@ -67,7 +67,18 @@ app.controller('ListnodeCtrl', function ($scope, $http, $state, nodeStatusReflus
             .then(r => {
                 if (r.data.success) {
                     $scope.nodes = r.data.data;
-                    nodeStatusReflushService.start($scope.nodes);
+                    nodeStatusReflushService.start((serverNodes) => {
+                        for (var i = 0; i < serverNodes.length; i++) {
+                            var node = serverNodes[i].n;
+                            if ($scope.nodes) {
+                                var uiNode = $scope.nodes.find(n => n.address === node.address);
+                                if (uiNode) {
+                                    uiNode.lastEchoTime = node.lastEchoTime;
+                                    uiNode.status = node.status;
+                                }
+                            }
+                        }
+                    });
                 }
             }, err => {
                 console.log(err);
