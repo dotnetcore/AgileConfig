@@ -1,5 +1,6 @@
 ﻿using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Apisite.Websocket;
+using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using AgileHttp;
 using AgileHttp.serialize;
@@ -19,7 +20,7 @@ namespace AgileConfig.Server.Apisite
     {
         Task TestEchoAsync();
 
-        WebsocketCollectionReport GetClientsReport(string address);
+        WebsocketCollectionReport GetClientReports(string address);
     }
 
     public class RemoteServerNodeManager : IRemoteServerNodeManager
@@ -46,23 +47,23 @@ namespace AgileConfig.Server.Apisite
 
         private IServerNodeService _serverNodeService;
         private ILogger _logger;
-        private ConcurrentDictionary<string, WebsocketCollectionReport> _nodeStatus;
+        private ConcurrentDictionary<string, WebsocketCollectionReport> _serverNodeClientReports;
 
         public RemoteServerNodeManager(IServiceProvider sp)
         {
             _serverNodeService = sp.CreateScope().ServiceProvider.GetService<IServerNodeService>();
             var loggerFactory = sp.GetService<ILoggerFactory>();
             _logger = loggerFactory.CreateLogger<RemoteServerNodeManager>();
-            _nodeStatus = new ConcurrentDictionary<string, WebsocketCollectionReport>();
+            _serverNodeClientReports = new ConcurrentDictionary<string, WebsocketCollectionReport>();
         }
 
-        public WebsocketCollectionReport GetClientsReport(string address)
+        public WebsocketCollectionReport GetClientReports(string address)
         {
             if (string.IsNullOrEmpty(address))
             {
                 return null;
             }
-            _nodeStatus.TryGetValue(address, out WebsocketCollectionReport report);
+            _serverNodeClientReports.TryGetValue(address, out WebsocketCollectionReport report);
             return report;
         }
 
@@ -77,17 +78,16 @@ namespace AgileConfig.Server.Apisite
                     {
                         try
                         {
-                            using (var resp = (n.Address + "/report/clients").AsHttp().Config(new RequestOptions(new SerializeProvider())).Send())
+                            using (var resp = (n.Address + "/home/echo").AsHttp().Send())
                             {
-                                if (resp.StatusCode == System.Net.HttpStatusCode.OK)
+                                if (resp.StatusCode == System.Net.HttpStatusCode.OK && resp.GetResponseContent() == "ok")
                                 {
                                     n.LastEchoTime = DateTime.Now;
                                     n.Status = Data.Entity.NodeStatus.Online;
-                                    var content = resp.GetResponseContent();
-                                    var report = resp.Deserialize<ClientsReport>();
+                                    var report = GetClientReport(n);
                                     if (report != null)
                                     {
-                                        _nodeStatus.AddOrUpdate(n.Address, report.data, (k, r) => report.data);
+                                        _serverNodeClientReports.AddOrUpdate(n.Address, report, (k, r) => report);
                                     }
                                 }
                                 else
@@ -106,6 +106,26 @@ namespace AgileConfig.Server.Apisite
                     await Task.Delay(5000);
                 }
             });
+        }
+
+        private WebsocketCollectionReport GetClientReport(ServerNode node)
+        {
+            using (var resp = (node.Address + "/report/Clients").AsHttp().Config(new RequestOptions(new SerializeProvider())).Send())
+            {
+                if (resp.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    var content = resp.GetResponseContent();
+                    _logger.LogTrace($"ServerNode: {node.Address} report clients infomation , {content}");
+
+                    var report = resp.Deserialize<ClientsReport>()?.data;
+                    if (report != null)
+                    {
+                        return report;
+                    }
+                }
+
+                return null;
+            }
         }
     }
 }

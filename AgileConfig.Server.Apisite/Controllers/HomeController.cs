@@ -56,5 +56,10 @@ namespace AgileConfig.Server.Apisite.Controllers
                 success = true,
             });
         }
+
+        public IActionResult Echo()
+        {
+            return Content("ok");
+        }
     }
 }
