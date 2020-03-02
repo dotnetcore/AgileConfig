@@ -8,6 +8,7 @@ using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
 using AgileConfig.Server.Apisite.Websocket;
 using Newtonsoft.Json;
+using Agile.Config.Protocol;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -55,18 +56,8 @@ namespace AgileConfig.Server.Apisite.Controllers
             if (result)
             {
                 //notice clients
-                var msg = new
-                {
-                    Action = "add",
-                    Node = new
-                    {
-                        group = config.Group,
-                        key = config.Key,
-                        value = config.Value
-                    }
-                };
-                var json = JsonConvert.SerializeObject(msg);
-                WebsocketCollection.Instance.SendToAppClients(config.AppId, json);
+                var action = new WebsocketAction { Action = "add", Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value }};
+                WebsocketCollection.Instance.SendActionToAppClients(config.AppId, action);
             }
 
             return Json(new
@@ -127,24 +118,12 @@ namespace AgileConfig.Server.Apisite.Controllers
             if (result && !IsOnlyUpdateDescription(config, oldConfig))
             {
                 //notice clients
-                var msg = new
-                {
-                    Action = "update",
-                    OldNode = new
-                    {
-                        group = oldConfig.Group,
-                        key = oldConfig.Key,
-                        value = oldConfig.Value
-                    },
-                    Node = new
-                    {
-                        group = config.Group,
-                        key = config.Key,
-                        value = config.Value
-                    }
+                var action = new WebsocketAction { 
+                    Action = "update", 
+                    Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value }, 
+                    OldItem = new ConfigItem { group = oldConfig.Group, key = oldConfig.Key, value = oldConfig.Value }
                 };
-                var json = JsonConvert.SerializeObject(msg);
-                WebsocketCollection.Instance.SendToAppClients(config.AppId, json);
+                WebsocketCollection.Instance.SendActionToAppClients(config.AppId, action);
             }
 
             return Json(new
@@ -229,18 +208,8 @@ namespace AgileConfig.Server.Apisite.Controllers
             if (result)
             {
                 //notice clients
-                var msg = new
-                {
-                    Action = "remove",
-                    Node = new
-                    {
-                        group = config.Group,
-                        key = config.Key,
-                        value = config.Value
-                    }
-                };
-                var json = JsonConvert.SerializeObject(msg);
-                WebsocketCollection.Instance.SendToAppClients(config.AppId, json);
+                var action = new WebsocketAction { Action = "remove", Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value }};
+                WebsocketCollection.Instance.SendActionToAppClients(config.AppId, action);
             }
 
             return Json(new

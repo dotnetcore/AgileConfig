@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Agile.Config.Protocol;
+using AgileConfig.Server.Data.Entity;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,11 +37,19 @@ namespace AgileConfig.Server.Apisite.Websocket
         WSClient Get(string clientId);
         void SendToAll(string message);
         Task SendToOne(WSClient client, string message);
+
+        Task SendActionToOne(WSClient client, WebsocketAction action);
         void AddClient(WSClient client);
 
         Task RemoveClient(WSClient client, WebSocketCloseStatus? closeStatus, string closeDesc);
 
         void RemoveAppClients(string appId, WebSocketCloseStatus? closeStatus, string closeDesc);
+
+        void SendActionToAppClients(string appId, WebsocketAction action);
+
+        void SendActionToAll(WebsocketAction action);
+
+        void SendToAppClients(string appId, string message);
     }
 
     public class WebsocketCollection : IWebsocketCollection
@@ -95,6 +106,33 @@ namespace AgileConfig.Server.Apisite.Websocket
             }
         }
 
+        public void SendActionToAppClients(string appId, WebsocketAction action)
+        {
+            lock (_lockObj)
+            {
+                if (Clients.Count == 0)
+                {
+                    return;
+                }
+                var appClients = Clients.Where(c => c.AppId == appId);
+                if (appClients.Count() == 0)
+                {
+                    return;
+                }
+                var json = JsonConvert.SerializeObject(action);
+                var data = Encoding.UTF8.GetBytes(json);
+                foreach (var webSocket in appClients)
+                {
+                    if (webSocket.AppId == appId && webSocket.Client.State == WebSocketState.Open)
+                    {
+                        webSocket.Client.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
+                     CancellationToken.None);
+                    }
+                }
+            }
+        }
+
+
         public async Task SendToOne(WSClient client, string message)
         {
             if (client.Client.State == WebSocketState.Open)
@@ -104,6 +142,18 @@ namespace AgileConfig.Server.Apisite.Websocket
                CancellationToken.None);
             }
         }
+
+        public async Task SendActionToOne(WSClient client, WebsocketAction action)
+        {
+            if (client.Client.State == WebSocketState.Open)
+            {
+                var json = JsonConvert.SerializeObject(action);
+                var data = Encoding.UTF8.GetBytes(json);
+                await client.Client.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
+               CancellationToken.None);
+            }
+        }
+
 
         public void AddClient(WSClient client)
         {
@@ -185,8 +235,30 @@ namespace AgileConfig.Server.Apisite.Websocket
             }
         }
 
-        private static WebsocketCollection _Instance;
-        public static WebsocketCollection Instance
+        public void SendActionToAll(WebsocketAction action)
+        {
+            lock (_lockObj)
+            {
+                if (Clients.Count == 0)
+                {
+                    return;
+                }
+
+                var json = JsonConvert.SerializeObject(action);
+                var data = Encoding.UTF8.GetBytes(json);
+                foreach (var webSocket in Clients)
+                {
+                    if (webSocket.Client.State == WebSocketState.Open)
+                    {
+                        webSocket.Client.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
+                     CancellationToken.None);
+                    }
+                }
+            }
+        }
+
+        private static IWebsocketCollection _Instance;
+        public static IWebsocketCollection Instance
         {
             get
             {

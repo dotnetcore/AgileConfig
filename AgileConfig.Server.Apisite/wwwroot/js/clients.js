@@ -17,7 +17,7 @@
         if (!cr) {
             return;
         }
-        $http.post('/home/Client_Offline?id=' + client.id)
+        $http.post('/op/RemoteClient_Offline?clientId=' + client.id + '&address=' + $scope.selectedNodeAddress)
             .then(r => {
                 if (r.data.success) {
                     alert("客户端已断开。");

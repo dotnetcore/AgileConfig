@@ -20,7 +20,7 @@
         <td ng-bind="node.lastEchoTime|date:'yyyy-MM-dd HH:mm:ss'"></td>
         <td ng-bind="node.status?'在线':'离线'" ng-class="node.status?'text-success':'text-danger'"></td>
         <td>
-           <button class="btn btn-primary btn-xs"  ng-disabled="!node.status">刷新所有客户端配置</button>
+           <button class="btn btn-primary btn-xs"  ng-disabled="!node.status" ng-click="nodeClientsReflushConfigItems(node.address)">刷新所有客户端配置</button>
             <button class="btn btn-danger btn-xs" ng-click="deleteNode(node, $index)">删除</button>
         </td>
     </tr>

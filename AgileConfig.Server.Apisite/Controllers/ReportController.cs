@@ -75,22 +75,6 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Client_Offline(string id)
-        {
-            var client = WebsocketCollection.Instance.Get(id);
-            if (client == null)
-            {
-                throw new Exception($"Can not find websocket client by id: {id}");
-            }
-            await WebsocketCollection.Instance.RemoveClient(client, System.Net.WebSockets.WebSocketCloseStatus.Empty);
-
-            return Json(new
-            {
-                success = true,
-            });
-        }
-
         public async Task<IActionResult> RemoteNodesStatus()
         {
             var nodes = await _serverNodeService.GetAllNodesAsync();

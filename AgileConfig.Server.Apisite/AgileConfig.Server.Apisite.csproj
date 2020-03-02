@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Agile.Config.Protocol\Agile.Config.Protocol.csproj" />
     <ProjectReference Include="..\AgileConfig.Server.Data.Entity\AgileConfig.Server.Data.Entity.csproj" />
     <ProjectReference Include="..\AgileConfig.Server.Data.Repository\AgileConfig.Server.Data.Repository.csproj" />
     <ProjectReference Include="..\AgileConfig.Server.Service\AgileConfig.Server.Service.csproj" />

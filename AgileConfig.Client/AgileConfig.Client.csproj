@@ -18,4 +18,8 @@
     <PackageReference Include="System.Net.WebSockets.Client" Version="4.3.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Agile.Config.Protocol\Agile.Config.Protocol.csproj" />
+  </ItemGroup>
+
 </Project>

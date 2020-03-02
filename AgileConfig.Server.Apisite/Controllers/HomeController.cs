@@ -12,16 +12,6 @@ namespace AgileConfig.Server.Apisite.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly IConfigService _configService;
-        private readonly IAppService _appService;
-        private readonly IServerNodeService _serverNodeService;
-
-        public HomeController(IConfigService configService, IAppService appService, IServerNodeService serverNodeService)
-        {
-            _appService = appService;
-            _configService = configService;
-            _serverNodeService = serverNodeService;
-        }
         public IActionResult Index()
         {
             if ("true".Equals(Configuration.Config["adminConsole"], StringComparison.CurrentCultureIgnoreCase))
@@ -39,22 +29,6 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             return Content("");
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Client_Offline(string id)
-        {
-            var client = WebsocketCollection.Instance.Get(id);
-            if (client == null)
-            {
-                throw new Exception($"Can not find websocket client by id: {id}");
-            }
-            await WebsocketCollection.Instance.RemoveClient(client, System.Net.WebSockets.WebSocketCloseStatus.Empty);
-
-            return Json(new
-            {
-                success = true,
-            });
         }
 
         public IActionResult Echo()

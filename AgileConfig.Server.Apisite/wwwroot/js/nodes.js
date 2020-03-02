@@ -62,6 +62,20 @@ app.controller('ListnodeCtrl', function ($scope, $http, $state, nodeStatusReflus
             });
     };
 
+    $scope.nodeClientsReflushConfigItems = function (address) {
+        $http.post('/op/RemoteServerNode_AllClientReload?address=' + address)
+            .then(r => {
+                if (r.data.success) {
+                    alert("刷新成功。");
+                } else {
+                    alert(r.data.message);
+                }
+            }, err => {
+                console.log(err);
+                alert(err.statusText);
+            });
+    };
+
     var load = function () {
         $http.get('/servernode/all?_=' + (new Date).getTime())
             .then(r => {

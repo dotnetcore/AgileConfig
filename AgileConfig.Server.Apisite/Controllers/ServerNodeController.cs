@@ -5,7 +5,6 @@ using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace AgileConfig.Server.Apisite.Controllers
@@ -39,7 +38,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var node = new ServerNode();
-            node.Address = model.Address;
+            node.Address = model.Address.TrimEnd('/');
             node.Remark = model.Remark;
             node.Status = NodeStatus.Offline;
             node.CreateTime = DateTime.Now;
@@ -92,5 +91,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 data = nodes.OrderBy(n => n.CreateTime)
             });
         }
+
+    
     }
 }
