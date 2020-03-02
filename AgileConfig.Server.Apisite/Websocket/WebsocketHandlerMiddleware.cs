@@ -54,11 +54,11 @@ namespace AgileConfig.Server.Apisite.Websocket
                     _logger.LogInformation("Websocket client {0} Added ", client.Id);
                     try
                     {
-                        await Echo(context, client);
+                        await Handle(client);
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Echo websocket client {0} err .", client.Id);
+                        _logger.LogError(ex, "Handle websocket client {0} err .", client.Id);
                         await _websocketCollection.RemoveClient(client, WebSocketCloseStatus.Empty, ex.Message);
                         await context.Response.WriteAsync("closed");
                     }
@@ -74,17 +74,17 @@ namespace AgileConfig.Server.Apisite.Websocket
             }
         }
 
-        private async Task Echo(HttpContext context, WSClient webSocket)
+        private async Task Handle(WSClient webSocket)
         {
             var buffer = new byte[1024 * 2];
-            WebSocketReceiveResult result = await webSocket.Client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-            webSocket.LastHeartbeatTime = DateTime.Now;
-            while (!result.CloseStatus.HasValue)
+            WebSocketReceiveResult result = null;
+            do
             {
-                await webSocket.Client.SendAsync(new ArraySegment<byte>(buffer, 0, result.Count), result.MessageType, result.EndOfMessage, CancellationToken.None);
                 result = await webSocket.Client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
                 webSocket.LastHeartbeatTime = DateTime.Now;
+                await webSocket.Client.SendAsync(new ArraySegment<byte>(buffer, 0, result.Count), result.MessageType, result.EndOfMessage, CancellationToken.None);
             }
+            while (!result.CloseStatus.HasValue);
             _logger.LogInformation($"Websocket close , closeStatus:{result.CloseStatus} closeDesc:{result.CloseStatusDescription}");
             await _websocketCollection.RemoveClient(webSocket, result.CloseStatus, result.CloseStatusDescription);
         }
