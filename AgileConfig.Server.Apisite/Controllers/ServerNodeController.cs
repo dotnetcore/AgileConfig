@@ -25,7 +25,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 throw new ArgumentNullException("model");
             }
-
+            model.Address = model.Address.TrimEnd('/');
             var oldNode = await _serverNodeService.GetAsync(model.Address);
             if (oldNode != null)
             {
