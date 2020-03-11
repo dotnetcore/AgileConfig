@@ -47,14 +47,14 @@ namespace AgileConfig.Server.Service
             return x > 0;
         }
 
-        public Task<App> GetAsync(string id)
+        public async Task<App> GetAsync(string id)
         {
-            return _dbContext.Apps.FindAsync(id).AsTask();
+            return await _dbContext.Apps.FindAsync(id).AsTask();
         }
 
-        public Task<List<App>> GetAllAppsAsync()
+        public async Task<List<App>> GetAllAppsAsync()
         {
-            return _dbContext.Apps.ToListAsync();
+            return await _dbContext.Apps.ToListAsync();
         }
 
         public async Task<bool> UpdateAsync(App app)
@@ -65,9 +65,9 @@ namespace AgileConfig.Server.Service
             return x > 0;
         }
 
-        public Task<int> CountEnabledAppsAsync()
+        public async Task<int> CountEnabledAppsAsync()
         {
-            var q = _dbContext.Apps.CountAsync(a => a.Enabled == true);
+            var q = await _dbContext.Apps.CountAsync(a => a.Enabled == true);
 
             return q;
         }

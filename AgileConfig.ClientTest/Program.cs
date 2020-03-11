@@ -37,6 +37,10 @@ namespace AgileConfig.ClientTest
                         }
                     }
                 });
+                for (int i = 0; i < 30; i++)
+                {
+                    Task.Run(provider.Load);
+                }
             }
             catch (Exception ex)
             {

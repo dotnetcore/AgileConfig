@@ -48,15 +48,15 @@ namespace AgileConfig.Server.Service
             return x > 0;
         }
 
-        public Task<Config> GetAsync(string id)
+        public async Task<Config> GetAsync(string id)
         {
-            var config = _dbContext.Configs.FindAsync(id).AsTask();
+            var config = await _dbContext.Configs.FindAsync(id).AsTask();
             return config;
         }
 
-        public Task<List<Config>> GetAllConfigsAsync()
+        public async Task<List<Config>> GetAllConfigsAsync()
         {
-            return _dbContext.Configs.Where(c => c.Status == ConfigStatus.Enabled).ToListAsync();
+            return await _dbContext.Configs.Where(c => c.Status == ConfigStatus.Enabled).ToListAsync();
         }
 
         public async Task<bool> UpdateAsync(Config config)
@@ -67,9 +67,9 @@ namespace AgileConfig.Server.Service
             return x > 0;
         }
 
-        public Task<Config> GetByAppIdKey(string appId, string group, string key)
+        public async Task<Config> GetByAppIdKey(string appId, string group, string key)
         {
-            return _dbContext.Configs.FirstOrDefaultAsync(c =>
+            return await _dbContext.Configs.FirstOrDefaultAsync(c =>
                 c.AppId == appId &&
                 c.Key == key &&
                 c.Group == group &&
@@ -77,14 +77,14 @@ namespace AgileConfig.Server.Service
             );
         }
 
-        public Task<List<Config>> GetByAppId(string appId)
+        public async Task<List<Config>> GetByAppId(string appId)
         {
-            return _dbContext.Configs.Where(c =>
+            return await _dbContext.Configs.Where(c =>
                 c.AppId == appId && c.Status == ConfigStatus.Enabled
             ).ToListAsync();
         }
 
-        public Task<List<Config>> Search(string appId, string group, string key)
+        public async Task<List<Config>> Search(string appId, string group, string key)
         {
             var q = _dbContext.Configs.Where(c => true);
             if (!string.IsNullOrEmpty(appId))
@@ -100,14 +100,14 @@ namespace AgileConfig.Server.Service
                 q = q.Where(c => EF.Functions.Like(c.Key, $"%{key}%"));
             }
 
-            return q.ToListAsync();
+            return await q.ToListAsync();
         }
 
-        public Task<int> CountEnabledConfigsAsync()
+        public async Task<int> CountEnabledConfigsAsync()
         {
-            var q = _dbContext.Configs.CountAsync(c => c.Status == ConfigStatus.Enabled);
+            var q = await _dbContext.Configs.CountAsync(c => c.Status == ConfigStatus.Enabled);
 
-            return q;
+            return  q;
         }
     }
 }

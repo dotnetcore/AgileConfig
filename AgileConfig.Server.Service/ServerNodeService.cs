@@ -46,14 +46,14 @@ namespace AgileConfig.Server.Service
             return x > 0;
         }
 
-        public Task<List<ServerNode>> GetAllNodesAsync()
+        public async Task<List<ServerNode>> GetAllNodesAsync()
         {
-            return _dbContext.ServerNodes.ToListAsync();
+            return await _dbContext.ServerNodes.ToListAsync();
         }
 
-        public Task<ServerNode> GetAsync(string address)
+        public async Task<ServerNode> GetAsync(string address)
         {
-            return _dbContext.ServerNodes.FindAsync(address).AsTask();
+            return await _dbContext.ServerNodes.FindAsync(address).AsTask();
         }
 
         public async Task<bool> UpdateAsync(ServerNode node)
