@@ -18,13 +18,15 @@ namespace AgileConfig.Server.Apisite.Filters
         {
             _appService = appService;
         }
-        public async override void OnActionExecuting(ActionExecutingContext context)
+
+        public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             if (!await Valid(context.HttpContext.Request))
             {
                 context.HttpContext.Response.StatusCode = 403;
                 context.Result = new ContentResult();
             }
+            await base.OnActionExecutionAsync(context, next);
         }
 
         public async Task<bool> Valid(HttpRequest httpRequest)
