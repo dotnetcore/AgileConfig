@@ -50,7 +50,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<Config> GetAsync(string id)
         {
-            var config = await _dbContext.Configs.FindAsync(id).AsTask();
+            var config = await _dbContext.Configs.FindAsync(id);
             return config;
         }
 

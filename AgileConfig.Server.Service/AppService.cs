@@ -49,7 +49,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<App> GetAsync(string id)
         {
-            return await _dbContext.Apps.FindAsync(id).AsTask();
+            return await _dbContext.Apps.FindAsync(id);
         }
 
         public async Task<List<App>> GetAllAppsAsync()

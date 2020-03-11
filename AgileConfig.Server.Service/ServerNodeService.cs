@@ -53,7 +53,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<ServerNode> GetAsync(string address)
         {
-            return await _dbContext.ServerNodes.FindAsync(address).AsTask();
+            return await _dbContext.ServerNodes.FindAsync(address);
         }
 
         public async Task<bool> UpdateAsync(ServerNode node)
