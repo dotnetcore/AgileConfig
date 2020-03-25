@@ -20,22 +20,23 @@
     </div>
     <table class="table table-bordered table-hover config_list">
         <tr>
+            <th class="col">配置组</th>
             <th class="col">配置键</th>
             <th class="col">值</th>
-            <th class="col">配置组</th>
             <th class="table_col_desc">描述</th>
             <th class="col">创建时间</th>
             <th class="col">修改时间</th>
             <th class="col"></th>
         </tr>
         <tr ng-repeat="config in configs|filter:{status:1 }|filter:{appId: selectedAppId}">
+            <td ng-bind="config.group"></td>
             <td ng-bind="config.key"></td>
             <td ng-bind="config.value"></td>
-            <td ng-bind="config.group"></td>
             <td ng-bind="config.description"></td>
             <td ng-bind="config.createTime|date:'yyyy-MM-dd HH:mm'"></td>
             <td ng-bind="config.updateTime|date:'yyyy-MM-dd HH:mm'"></td>
             <td>
+                <button class="btn btn-warning btn-xs" ng-click="toModifylogs(config)">版本历史</button>
                 <button class="btn btn-primary btn-xs" ng-click="toEdit(config)">修改</button>
                 <button class="btn btn-danger btn-xs" ng-click="deleteConfig(config)">删除</button>
             </td>

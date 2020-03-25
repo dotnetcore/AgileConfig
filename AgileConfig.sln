@@ -9,7 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		Dockerfile = Dockerfile
 		License.txt = License.txt
-		think.txt = think.txt
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.Data.Repository", "AgileConfig.Server.Data.Repository\AgileConfig.Server.Data.Repository.csproj", "{614D89BB-6E03-4B9A-9378-DA9CF34A4886}"
@@ -32,7 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.ClientTest", "A
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "protocol", "protocol", "{1902AB89-1E27-44C0-8286-3147CC039FF6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agile.Config.Protocol", "Agile.Config.Protocol\Agile.Config.Protocol.csproj", "{1B01F2FF-0A07-45AD-BB8D-6DCAEF9381E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agile.Config.Protocol", "Agile.Config.Protocol\Agile.Config.Protocol.csproj", "{1B01F2FF-0A07-45AD-BB8D-6DCAEF9381E1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -16,9 +16,11 @@ namespace AgileConfig.Server.Apisite.Controllers
     public class ConfigController : Controller
     {
         private readonly IConfigService _configService;
-        public ConfigController(IConfigService configService)
+        private readonly IModifyLogService _modifyLogService;
+        public ConfigController(IConfigService configService, IModifyLogService modifyLogService)
         {
             _configService = configService;
+            _modifyLogService = modifyLogService;
         }
 
         [HttpPost]
@@ -55,8 +57,18 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
+                //add modify log 
+                await _modifyLogService.AddAsync(new ModifyLog
+                {
+                    Id = Guid.NewGuid().ToString("N"),
+                    ConfigId = config.Id,
+                    Key = config.Key,
+                    Group = config.Group,
+                    Value = config.Value,
+                    ModifyTime = config.CreateTime
+                });
                 //notice clients
-                var action = new WebsocketAction { Action = "add", Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value }};
+                var action = new WebsocketAction { Action = "add", Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value } };
                 WebsocketCollection.Instance.SendActionToAppClients(config.AppId, action);
             }
 
@@ -117,10 +129,21 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result && !IsOnlyUpdateDescription(config, oldConfig))
             {
+                //add modify log 
+                await _modifyLogService.AddAsync(new ModifyLog
+                {
+                    Id = Guid.NewGuid().ToString("N"),
+                    ConfigId = config.Id,
+                    Key = config.Key,
+                    Group = config.Group,
+                    Value = config.Value,
+                    ModifyTime = config.UpdateTime.Value
+                });
                 //notice clients
-                var action = new WebsocketAction { 
-                    Action = "update", 
-                    Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value }, 
+                var action = new WebsocketAction
+                {
+                    Action = "update",
+                    Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value },
                     OldItem = new ConfigItem { group = oldConfig.Group, key = oldConfig.Key, value = oldConfig.Value }
                 };
                 WebsocketCollection.Instance.SendActionToAppClients(config.AppId, action);
@@ -208,7 +231,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             if (result)
             {
                 //notice clients
-                var action = new WebsocketAction { Action = "remove", Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value }};
+                var action = new WebsocketAction { Action = "remove", Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value } };
                 WebsocketCollection.Instance.SendActionToAppClients(config.AppId, action);
             }
 
@@ -217,6 +240,23 @@ namespace AgileConfig.Server.Apisite.Controllers
                 success = result,
                 message = !result ? "修改配置失败，请查看错误日志" : ""
             });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ModifyLogs(string configId)
+        {
+            if (string.IsNullOrEmpty(configId))
+            {
+                throw new ArgumentNullException("configId");
+            }
+
+            var logs = await _modifyLogService.Search(configId);
+
+            return Json(new
+            {
+                success = true,
+                data = logs.OrderByDescending(l => l.ModifyTime).ToList()
+            }); ;
         }
     }
 }

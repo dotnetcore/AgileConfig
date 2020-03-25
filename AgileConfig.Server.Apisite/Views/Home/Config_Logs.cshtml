@@ -1,0 +1,13 @@
+﻿<ol class="breadcrumb">
+    <li><a ui-sref="config.list">配置列表</a></li>
+    <li><a>版本历史</a></li>
+</ol>
+
+<div class="panel panel-default" ng-repeat="log in logs">
+    <div class="panel-body">
+        <div>配置组：{{log.group}}</div>
+        <div>配置键：{{log.key}}</div>
+        <div>值：{{log.value}}</div>
+        <div>版本时间：{{log.modifyTime|date:'yyyy-MM-dd HH:mm'}}</div>
+    </div>
+</div>

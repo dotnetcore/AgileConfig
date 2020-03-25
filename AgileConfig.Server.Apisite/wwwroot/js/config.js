@@ -62,6 +62,12 @@ app.controller('listConfigCtrl', function ($scope, $http, $state) {
             );
     };
 
+    $scope.toModifylogs = function (config) {
+        $state.go('config.logs', {
+            config_id: config.id
+        });
+    };
+
     $http.get('/app/all?_=' + (new Date).getTime())
         .then(
             r => {
