@@ -17,5 +17,7 @@ namespace AgileConfig.Server.Data.Repository
 
         public DbSet<ModifyLog> ModifyLogs { get; set; }
 
+        public DbSet<Setting> Settings { get; set; }
+
     }
 }

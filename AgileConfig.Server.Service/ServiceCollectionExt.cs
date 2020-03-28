@@ -11,6 +11,7 @@ namespace AgileConfig.Server.Service
             sc.AddScoped<IConfigService, ConfigService>();
             sc.AddScoped<IServerNodeService, ServerNodeService>();
             sc.AddScoped<IModifyLogService, ModifyLogService>();
+            sc.AddScoped<ISettingService, SettingService>();
         }
     }
 }

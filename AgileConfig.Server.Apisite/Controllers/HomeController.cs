@@ -12,10 +12,20 @@ namespace AgileConfig.Server.Apisite.Controllers
 {
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        private readonly ISettingService _settingService;
+        public HomeController(ISettingService settingService)
         {
-            if ("true".Equals(Configuration.Config["adminConsole"], StringComparison.CurrentCultureIgnoreCase))
+            _settingService = settingService;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            if (IsAdminConsoleMode)
             {
+                if (!await _settingService.HasAdminPassword())
+                {
+                    return View("init_password");
+                }
                 return View();
             }
 
@@ -23,7 +33,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
         public IActionResult GetView(string viewName)
         {
-            if ("true".Equals(Configuration.Config["adminConsole"], StringComparison.CurrentCultureIgnoreCase))
+            if (IsAdminConsoleMode)
             {
                 return View(viewName);
             }
@@ -35,5 +45,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         {
             return Content("ok");
         }
+
+        private bool IsAdminConsoleMode => "true".Equals(Configuration.Config["adminConsole"], StringComparison.CurrentCultureIgnoreCase);
     }
 }
