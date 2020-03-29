@@ -6,9 +6,11 @@ using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
+    [Authorize]
     [ModelVaildate]
     public class ServerNodeController : Controller
     {

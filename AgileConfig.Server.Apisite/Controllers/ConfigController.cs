@@ -9,9 +9,11 @@ using Microsoft.AspNetCore.Mvc;
 using AgileConfig.Server.Apisite.Websocket;
 using Newtonsoft.Json;
 using Agile.Config.Protocol;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
+    [Authorize]
     [ModelVaildate]
     public class ConfigController : Controller
     {

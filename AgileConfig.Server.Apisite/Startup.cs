@@ -6,6 +6,7 @@ using AgileConfig.Server.Apisite.Websocket;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Repository;
 using AgileConfig.Server.Service;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -31,6 +32,9 @@ namespace AgileConfig.Server.Apisite
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options => {
+                options.LoginPath = "/admin/Login";
+            });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0).AddRazorRuntimeCompilation();
             services.AddAgileConfigDb();
             services.AddBusinessServices();
@@ -55,6 +59,8 @@ namespace AgileConfig.Server.Apisite
             app.UseMiddleware<WebsocketHandlerMiddleware>();
             app.UseStaticFiles();
             app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapDefaultControllerRoute();

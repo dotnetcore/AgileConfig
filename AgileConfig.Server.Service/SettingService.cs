@@ -97,7 +97,7 @@ namespace AgileConfig.Server.Service
             }
 
             var salt = await GetAsync(AdminPasswordHashSaltKey);
-            password = Encrypt.Md5((password + salt));
+            password = Encrypt.Md5((password + salt.Value));
 
             return password == dbPassword.Value;
         }

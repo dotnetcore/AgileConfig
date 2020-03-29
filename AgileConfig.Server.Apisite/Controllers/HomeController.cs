@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AgileConfig.Server.Apisite.Models;
-using AgileConfig.Server.Apisite.Websocket;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.IService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly ISettingService _settingService;
@@ -18,14 +15,10 @@ namespace AgileConfig.Server.Apisite.Controllers
             _settingService = settingService;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             if (IsAdminConsoleMode)
             {
-                if (!await _settingService.HasAdminPassword())
-                {
-                    return View("init_password");
-                }
                 return View();
             }
 
@@ -41,6 +34,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             return Content("");
         }
 
+        [AllowAnonymous]
         public IActionResult Echo()
         {
             return Content("ok");

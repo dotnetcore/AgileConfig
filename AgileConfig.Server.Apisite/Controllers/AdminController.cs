@@ -1,26 +1,157 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
-using AgileConfig.Server.Apisite.Models;
-using AgileConfig.Server.Apisite.Websocket;
-using AgileConfig.Server.Common;
 using AgileConfig.Server.IService;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
     public class AdminController : Controller
     {
-        public IActionResult Login(string password)
+        private readonly ISettingService _settingService;
+        public AdminController(ISettingService settingService)
         {
-            return null;
+            _settingService = settingService;
         }
 
-        public IActionResult InitPassword(string password)
+        public async Task<IActionResult> Login()
         {
-            return null;
+            if ((await HttpContext.AuthenticateAsync()).Succeeded)
+            {
+                return Redirect("/");
+            }
+
+            if (!await _settingService.HasAdminPassword())
+            {
+                return Redirect("InitPassword");
+            }
+
+            return View();
         }
-   
+
+        [HttpPost]
+        public async Task<IActionResult> Login([FromForm]string password)
+        {
+            if (string.IsNullOrEmpty(password))
+            {
+                ViewBag.ErrorMessage = "密码不能为空";
+                return View();
+            }
+
+            var result = await _settingService.ValidateAdminPassword(password);
+            if (result)
+            {
+                var claims = new List<Claim>
+                {
+                  new Claim("UserName","Administrator")
+                };
+
+                var claimsIdentity = new ClaimsIdentity(
+                    claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                var authProperties = new AuthenticationProperties
+                {
+                    //AllowRefresh = <bool>,
+                    // Refreshing the authentication session should be allowed.
+
+                    //ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(10),
+                    // The time at which the authentication ticket expires. A 
+                    // value set here overrides the ExpireTimeSpan option of 
+                    // CookieAuthenticationOptions set with AddCookie.
+
+                    //IsPersistent = true,
+                    // Whether the authentication session is persisted across 
+                    // multiple requests. Required when setting the 
+                    // ExpireTimeSpan option of CookieAuthenticationOptions 
+                    // set with AddCookie. Also required when setting 
+                    // ExpiresUtc.
+
+                    //IssuedUtc = <DateTimeOffset>,
+                    // The time at which the authentication ticket was issued.
+
+                    //RedirectUri = <string>
+                    // The full path or absolute URI to be used as an http 
+                    // redirect response value.
+                };
+
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity),
+                    authProperties);
+
+                return Redirect("/");
+            }
+
+            ViewBag.ErrorMessage = "登录失败：密码不正确";
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> InitPassword()
+        {
+            var has = await _settingService.HasAdminPassword();
+            if (has)
+            {
+                return Redirect("login");
+            }
+
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult InitPasswordSuccess()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> InitPassword([FromForm]string password, [FromForm]string confirmPassword)
+        {
+            if (string.IsNullOrEmpty(password) || string.IsNullOrEmpty(confirmPassword))
+            {
+                ViewBag.ErrorMessage = "密码不能为空";
+                return View();
+            }
+
+            if (password.Length > 50 || confirmPassword.Length > 50)
+            {
+                ViewBag.ErrorMessage = "密码最长不能超过50位";
+                return View();
+            }
+
+            if (password != confirmPassword)
+            {
+                ViewBag.ErrorMessage = "输入的两次密码不一致";
+                return View();
+            }
+
+            if (await _settingService.HasAdminPassword())
+            {
+                ViewBag.ErrorMessage = "密码已经设置过，不需要再次设置";
+                return View();
+            }
+
+            var result = await _settingService.SetAdminPassword(password);
+
+            if (result)
+            {
+                return Redirect("InitPasswordSuccess");
+            }
+            else
+            {
+                return View();
+            }
+        }
+
+        public async Task<IActionResult> Logoff()
+        {
+            await HttpContext.SignOutAsync();
+
+            return Redirect("Login");
+        }
     }
 }
