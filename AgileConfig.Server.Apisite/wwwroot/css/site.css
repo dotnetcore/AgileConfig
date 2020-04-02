@@ -162,3 +162,7 @@ body {
         .dash .top-bar button h1 {
             font-size: 44px;
         }
+.panel-body .config-log {
+    display: flex;
+    justify-content: space-between;
+}
