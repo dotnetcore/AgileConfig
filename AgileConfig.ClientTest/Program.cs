@@ -1,9 +1,10 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Agile.Config.Client;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 
-namespace AgileConfig.ClientTest
+namespace Agile.Config.ClientTest
 {
     class Program
     {
@@ -23,16 +24,22 @@ namespace AgileConfig.ClientTest
 
             try
             {
-                var provider = new AgileConfig.Client.AgileConfigProvider(host, appId, seret, lf);
+                AgileConfig.Logger = lf.CreateLogger<IConfigClient>();
+                AgileConfig.AppId = appId;
+                AgileConfig.Secret = seret;
+                AgileConfig.ServerNodes = host;
+
+                var client = AgileConfig.ClientInstance;
+                var provider = new AgileConfigProvider(client, lf);
                 provider.Load();
                 Task.Run(async () =>
                 {
                     while (true)
                     {
                         await Task.Delay(5000);
-                        foreach (string key in Client.ConfigClient.Instance.Data.Keys)
+                        foreach (string key in client.Data.Keys)
                         {
-                            var val = Client.ConfigClient.Instance[key];
+                            var val = client[key];
                             Console.WriteLine("{0} : {1}", key, val);
                         }
                     }

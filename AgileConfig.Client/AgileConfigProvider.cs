@@ -2,29 +2,18 @@
 using Microsoft.Extensions.Logging;
 using System;
 
-namespace AgileConfig.Client
+namespace Agile.Config.Client
 {
-
-
     public class AgileConfigProvider : ConfigurationProvider
     {
-        protected ILogger Logger { get; }
+        private ILogger Logger { get; }
 
-        public AgileConfigProvider(string host, string appId, string secret, ILoggerFactory loggerFactory)
+        private ConfigClient Client { get; }
+
+        public AgileConfigProvider(IConfigClient client, ILoggerFactory loggerFactory)
         {
-            if (string.IsNullOrEmpty(host))
-            {
-                throw new ArgumentNullException(nameof(host));
-            }
-            if (string.IsNullOrEmpty(appId))
-            {
-                throw new ArgumentNullException(nameof(appId));
-            }
             Logger = loggerFactory?.CreateLogger<AgileConfigProvider>();
-            ConfigClient.Instance.Logger = loggerFactory?.CreateLogger<ConfigClient>();
-            ConfigClient.Instance.ServerNodeHost = host;
-            ConfigClient.Instance.AppId = appId;
-            ConfigClient.Instance.Secret = secret;
+            Client = client as ConfigClient;
         }
 
         /// <summary>
@@ -33,11 +22,11 @@ namespace AgileConfig.Client
         /// </summary>
         public override void Load()
         {
-            if (ConfigClient.Instance.LoadAllConfigNodes())
+            if (Client.LoadAllConfigItems())
             {
-                Data = ConfigClient.Instance.Data;
-                ConfigClient.Instance.WebsocketConnect();
-                ConfigClient.Instance.WebsocketHeartbeatAsync();
+                Data = Client.Data;
+                Client.WebsocketConnect();
+                Client.WebsocketHeartbeatAsync();
             }
             else
             {
