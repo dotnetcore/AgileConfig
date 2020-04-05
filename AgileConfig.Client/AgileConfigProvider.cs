@@ -22,7 +22,7 @@ namespace Agile.Config.Client
         /// </summary>
         public override void Load()
         {
-            if (Client.LoadAllConfigItems())
+            if (Client.Load())
             {
                 Data = Client.Data;
                 Client.Connect();

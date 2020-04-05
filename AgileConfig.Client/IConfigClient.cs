@@ -10,5 +10,7 @@ namespace Agile.Config.Client
         ConcurrentDictionary<string, string> Data { get; }
 
         void Connect();
+
+        bool Load();
     }
 }

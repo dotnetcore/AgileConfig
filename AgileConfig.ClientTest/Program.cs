@@ -32,9 +32,9 @@ namespace Agile.Config.ClientTest
                     AgileConfig.ServerNodes = host;
 
                     var client = AgileConfig.ClientInstance;
-                    client.Connect();
-                    //var provider = new AgileConfigProvider(client, lf);
-                    //provider.Load();
+                    //client.Connect();
+                    var provider = new AgileConfigProvider(client, lf);
+                    provider.Load();
                     await Task.Run(async () =>
                     {
                         while (true)
@@ -42,7 +42,7 @@ namespace Agile.Config.ClientTest
                             await Task.Delay(5000);
                             foreach (string key in client.Data.Keys)
                             {
-                                var val = client[key];
+                                provider.TryGet(key, out string val);
                                 Console.WriteLine("{0} : {1}", key, val);
                             }
                         }

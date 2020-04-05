@@ -120,7 +120,7 @@ namespace Agile.Config.Client
                         HandleWebsocketMessageAsync();
                         WebsocketHeartbeatAsync();
                         //连接成功重新加载配置
-                        LoadAllConfigItems();
+                        Load();
                     }
                     catch (Exception ex)
                     {
@@ -247,7 +247,7 @@ namespace Agile.Config.Client
                                         AgileConfig.Logger?.LogTrace("Websocket client offline because admin console send a commond 'offline' ,");
                                         break;
                                     case WebsocketActionConst.Reload:
-                                        LoadAllConfigItems();
+                                        Load();
                                         break;
                                     default:
                                         break;
@@ -278,7 +278,7 @@ namespace Agile.Config.Client
         /// <summary>
         /// 通过http从server拉取所有配置到本地，尝试5次
         /// </summary>
-        public bool LoadAllConfigItems()
+        public bool Load()
         {
             int tryCount = 0;
             while (tryCount <= 4)
