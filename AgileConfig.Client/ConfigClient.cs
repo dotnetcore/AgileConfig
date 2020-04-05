@@ -32,6 +32,7 @@ namespace Agile.Config.Client
 
     internal class ConfigClient : IConfigClient
     {
+        private bool _isConnecting = false;
         private ClientWebSocket WebsocketClient { get; set; }
         private bool _adminSayOffline = false;
 
@@ -53,28 +54,40 @@ namespace Agile.Config.Client
             }
         }
 
+        private string PickOneServer()
+        {
+            if (string.IsNullOrEmpty(AgileConfig.ServerNodes))
+            {
+                throw new ArgumentNullException("ServerNodes");
+            }
+
+            var servers = AgileConfig.ServerNodes.Split(',');
+            if (servers.Length == 1)
+            {
+                return servers[0];
+            }
+
+            var index = new Random().Next(0, servers.Length - 1);
+
+            return servers[index];
+        }
+
         /// <summary>
         /// 开启一个线程来初始化Websocket Client，并且5s一次进行检查是否连接打开状态，如果不是则尝试重连。
         /// </summary>
         /// <returns></returns>
-        public Task WebsocketConnect()
+        public void Connect()
         {
-            var websocketUrl = "";
-            if (AgileConfig.ServerNodes.StartsWith("https:", StringComparison.CurrentCultureIgnoreCase))
+            if (_isConnecting)
             {
-                websocketUrl = AgileConfig.ServerNodes.Replace("https:", "wss:").Replace("HTTPS:", "wss:");
+                return;
             }
-            else
-            {
-                websocketUrl = AgileConfig.ServerNodes.Replace("http:", "ws:").Replace("HTTP:", "ws:");
-            }
-            websocketUrl += "/ws";
+            _isConnecting = true;
 
-            return Task.Run(async () =>
+            Task.Run(async () =>
             {
                 while (true)
                 {
-                    await Task.Delay(1000 * 5);
                     if (WebsocketClient?.State == WebSocketState.Open)
                     {
                         continue;
@@ -91,9 +104,21 @@ namespace Agile.Config.Client
                         WebsocketClient = new ClientWebSocket();
                         WebsocketClient.Options.SetRequestHeader("appid", AgileConfig.AppId);
                         WebsocketClient.Options.SetRequestHeader("Authorization", GenerateBasicAuthorization(AgileConfig.AppId, AgileConfig.Secret));
-                        await WebsocketClient.ConnectAsync(new Uri(websocketUrl), CancellationToken.None);
-                        AgileConfig.Logger?.LogTrace("AgileConfig Client Websocket Connected , {0}", websocketUrl);
+                        var server = PickOneServer();
+                        var websocketServerUrl = "";
+                        if (server.StartsWith("https:", StringComparison.CurrentCultureIgnoreCase))
+                        {
+                            websocketServerUrl = server.Replace("https:", "wss:").Replace("HTTPS:", "wss:");
+                        }
+                        else
+                        {
+                            websocketServerUrl = server.Replace("http:", "ws:").Replace("HTTP:", "ws:");
+                        }
+                        websocketServerUrl += "/ws";
+                        await WebsocketClient.ConnectAsync(new Uri(websocketServerUrl), CancellationToken.None);
+                        AgileConfig.Logger?.LogTrace("AgileConfig Client Websocket Connected , {0}", websocketServerUrl);
                         HandleWebsocketMessageAsync();
+                        WebsocketHeartbeatAsync();
                         //连接成功重新加载配置
                         LoadAllConfigItems();
                     }
@@ -101,6 +126,7 @@ namespace Agile.Config.Client
                     {
                         AgileConfig.Logger?.LogError(ex, "AgileConfig Client Websocket try to connected to server failed.");
                     }
+                    await Task.Delay(1000 * 5);
                 }
             });
         }
@@ -203,8 +229,8 @@ namespace Agile.Config.Client
                                 var dict = Data as ConcurrentDictionary<string, string>;
                                 switch (action.Action)
                                 {
-                                    case "update":
-                                    case "add":
+                                    case WebsocketActionConst.Add:
+                                    case WebsocketActionConst.Update:
                                         var key = GenerateKey(action.Item);
                                         if (action.OldItem != null)
                                         {
@@ -212,15 +238,15 @@ namespace Agile.Config.Client
                                         }
                                         dict.AddOrUpdate(key, action.Item.value, (k, v) => { return action.Item.value; });
                                         break;
-                                    case "remove":
+                                    case WebsocketActionConst.Remove:
                                         dict.TryRemove(GenerateKey(action.Item), out string oldV1);
                                         break;
-                                    case "offline":
+                                    case WebsocketActionConst.Offline:
                                         _adminSayOffline = true;
                                         await WebsocketClient.CloseAsync(WebSocketCloseStatus.Empty, "", CancellationToken.None);
                                         AgileConfig.Logger?.LogTrace("Websocket client offline because admin console send a commond 'offline' ,");
                                         break;
-                                    case "reload":
+                                    case WebsocketActionConst.Reload:
                                         LoadAllConfigItems();
                                         break;
                                     default:
@@ -254,7 +280,6 @@ namespace Agile.Config.Client
         /// </summary>
         public bool LoadAllConfigItems()
         {
-            var apiUrl = $"{AgileConfig.ServerNodes}/api/config/app/{AgileConfig.AppId}";
             int tryCount = 0;
             while (tryCount <= 4)
             {
@@ -270,6 +295,7 @@ namespace Agile.Config.Client
                             {"Authorization", GenerateBasicAuthorization(AgileConfig.AppId,AgileConfig.Secret) }
                         }
                     };
+                    var apiUrl = $"{PickOneServer()}/api/config/app/{AgileConfig.AppId}";
                     using (var result = AgileHttp.HTTP.Send(apiUrl, "GET", null, op))
                     {
                         if (result.StatusCode == System.Net.HttpStatusCode.OK)
@@ -283,7 +309,7 @@ namespace Agile.Config.Client
                                 string value = c.value;
                                 concurrentDict.TryAdd(key.ToString(), value);
                             });
-                            AgileConfig.Logger?.LogTrace("AgileConfig Client Loaded all the configs success from {0} .", apiUrl);
+                            AgileConfig.Logger?.LogTrace("AgileConfig Client Loaded all the configs success from {0} , Try count: {1}.", apiUrl, tryCount);
                             return true;
                         }
                         else

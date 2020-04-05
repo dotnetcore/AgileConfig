@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace Agile.Config.Client
 {
@@ -7,5 +8,7 @@ namespace Agile.Config.Client
         string this[string key] { get; }
 
         ConcurrentDictionary<string, string> Data { get; }
+
+        void Connect();
     }
 }

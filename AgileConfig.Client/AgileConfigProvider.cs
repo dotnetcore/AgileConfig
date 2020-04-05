@@ -25,8 +25,7 @@ namespace Agile.Config.Client
             if (Client.LoadAllConfigItems())
             {
                 Data = Client.Data;
-                Client.WebsocketConnect();
-                Client.WebsocketHeartbeatAsync();
+                Client.Connect();
             }
             else
             {

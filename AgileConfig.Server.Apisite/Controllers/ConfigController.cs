@@ -70,7 +70,11 @@ namespace AgileConfig.Server.Apisite.Controllers
                     ModifyTime = config.CreateTime
                 });
                 //notice clients
-                var action = new WebsocketAction { Action = "add", Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value } };
+                var action = new WebsocketAction 
+                { 
+                    Action = WebsocketActionConst.Add, 
+                    Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value } 
+                };
                 WebsocketCollection.Instance.SendActionToAppClients(config.AppId, action);
             }
 
@@ -144,7 +148,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 //notice clients
                 var action = new WebsocketAction
                 {
-                    Action = "update",
+                    Action = WebsocketActionConst.Update,
                     Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value },
                     OldItem = new ConfigItem { group = oldConfig.Group, key = oldConfig.Key, value = oldConfig.Value }
                 };
@@ -233,7 +237,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             if (result)
             {
                 //notice clients
-                var action = new WebsocketAction { Action = "remove", Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value } };
+                var action = new WebsocketAction { Action = WebsocketActionConst.Remove, Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value } };
                 WebsocketCollection.Instance.SendActionToAppClients(config.AppId, action);
             }
 

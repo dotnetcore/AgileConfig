@@ -11,6 +11,15 @@ namespace Agile.Config.Protocol
         public string group { get; set; }
     }
 
+    public class WebsocketActionConst
+    {
+        public const string Add = "add";
+        public const string Update = "update";
+        public const string Remove = "remove";
+        public const string Offline = "offline";
+        public const string Reload = "reload";
+    }
+
     public class WebsocketAction
     {
         public string Action { get; set; }

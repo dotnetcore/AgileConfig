@@ -12,48 +12,49 @@ namespace Agile.Config.ClientTest
         {
             Console.WriteLine("Hello World!");
 
-            var serviceCollection = new ServiceCollection();
-            ConfigureServices(serviceCollection);
-            var serviceProvider = serviceCollection.BuildServiceProvider();
-
-            var lf = serviceProvider.GetService<ILoggerFactory>();
-
-            var appId = "xxx";
-            var seret = "app1";
-            var host = "http://localhost:5000";
-
-            try
+            Task.Run(async () =>
             {
-                AgileConfig.Logger = lf.CreateLogger<IConfigClient>();
-                AgileConfig.AppId = appId;
-                AgileConfig.Secret = seret;
-                AgileConfig.ServerNodes = host;
+                var serviceCollection = new ServiceCollection();
+                ConfigureServices(serviceCollection);
+                var serviceProvider = serviceCollection.BuildServiceProvider();
 
-                var client = AgileConfig.ClientInstance;
-                var provider = new AgileConfigProvider(client, lf);
-                provider.Load();
-                Task.Run(async () =>
+                var lf = serviceProvider.GetService<ILoggerFactory>();
+
+                var appId = "xxx";
+                var seret = "app1";
+                var host = "http://localhost:5000";
+
+                try
                 {
-                    while (true)
+                    AgileConfig.Logger = lf.CreateLogger<IConfigClient>();
+                    AgileConfig.AppId = appId;
+                    AgileConfig.Secret = seret;
+                    AgileConfig.ServerNodes = host;
+
+                    var client = AgileConfig.ClientInstance;
+                    client.Connect();
+                    //var provider = new AgileConfigProvider(client, lf);
+                    //provider.Load();
+                    await Task.Run(async () =>
                     {
-                        await Task.Delay(5000);
-                        foreach (string key in client.Data.Keys)
+                        while (true)
                         {
-                            var val = client[key];
-                            Console.WriteLine("{0} : {1}", key, val);
+                            await Task.Delay(5000);
+                            foreach (string key in client.Data.Keys)
+                            {
+                                var val = client[key];
+                                Console.WriteLine("{0} : {1}", key, val);
+                            }
                         }
-                    }
-                });
-                for (int i = 0; i < 30; i++)
-                {
-                    Task.Run(provider.Load);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+                    });
 
+                    Console.WriteLine("Test started .");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            });
 
 
             Console.ReadLine();
