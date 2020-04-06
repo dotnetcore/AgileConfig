@@ -63,7 +63,7 @@ app.controller('ListnodeCtrl', function ($scope, $http, $state, nodeStatusReflus
     };
 
     $scope.nodeClientsReflushConfigItems = function (address) {
-        $http.post('/op/RemoteServerNode_AllClientReload?address=' + address)
+        $http.post('/RemoteServerProxy/AllClients_Reload?address=' + address)
             .then(r => {
                 if (r.data.success) {
                     alert("刷新成功。");

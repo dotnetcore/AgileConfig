@@ -6,8 +6,6 @@ using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
-using AgileConfig.Server.Apisite.Websocket;
-using Newtonsoft.Json;
 using Agile.Config.Protocol;
 using Microsoft.AspNetCore.Authorization;
 
@@ -19,10 +17,18 @@ namespace AgileConfig.Server.Apisite.Controllers
     {
         private readonly IConfigService _configService;
         private readonly IModifyLogService _modifyLogService;
-        public ConfigController(IConfigService configService, IModifyLogService modifyLogService)
+        private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
+        private readonly IServerNodeService _serverNodeService;
+        public ConfigController(
+                                IConfigService configService, 
+                                IModifyLogService modifyLogService, 
+                                IRemoteServerNodeProxy remoteServerNodeProxy,
+                                IServerNodeService serverNodeService)
         {
             _configService = configService;
             _modifyLogService = modifyLogService;
+            _remoteServerNodeProxy = remoteServerNodeProxy;
+            _serverNodeService = serverNodeService;
         }
 
         [HttpPost]
@@ -72,10 +78,14 @@ namespace AgileConfig.Server.Apisite.Controllers
                 //notice clients
                 var action = new WebsocketAction 
                 { 
-                    Action = WebsocketActionConst.Add, 
+                    Action = ActionConst.Add, 
                     Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value } 
                 };
-                WebsocketCollection.Instance.SendActionToAppClients(config.AppId, action);
+                var nodes = await _serverNodeService.GetAllNodesAsync();
+                foreach (var node in nodes)
+                {
+                    await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, config.AppId, action);
+                }
             }
 
             return Json(new
@@ -148,11 +158,15 @@ namespace AgileConfig.Server.Apisite.Controllers
                 //notice clients
                 var action = new WebsocketAction
                 {
-                    Action = WebsocketActionConst.Update,
+                    Action = ActionConst.Update,
                     Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value },
                     OldItem = new ConfigItem { group = oldConfig.Group, key = oldConfig.Key, value = oldConfig.Value }
                 };
-                WebsocketCollection.Instance.SendActionToAppClients(config.AppId, action);
+                var nodes = await _serverNodeService.GetAllNodesAsync();
+                foreach (var node in nodes)
+                {
+                    await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, config.AppId, action);
+                }
             }
 
             return Json(new
@@ -237,8 +251,12 @@ namespace AgileConfig.Server.Apisite.Controllers
             if (result)
             {
                 //notice clients
-                var action = new WebsocketAction { Action = WebsocketActionConst.Remove, Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value } };
-                WebsocketCollection.Instance.SendActionToAppClients(config.AppId, action);
+                var action = new WebsocketAction { Action = ActionConst.Remove, Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value } };
+                var nodes = await _serverNodeService.GetAllNodesAsync();
+                foreach (var node in nodes)
+                {
+                    await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, config.AppId, action);
+                }
             }
 
             return Json(new

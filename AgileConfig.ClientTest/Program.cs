@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 
-namespace Agile.Config.ClientTest
+namespace AgileConfigClientTest
 {
     class Program
     {

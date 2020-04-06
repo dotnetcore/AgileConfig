@@ -17,11 +17,26 @@
         if (!cr) {
             return;
         }
-        $http.post('/op/RemoteClient_Offline?clientId=' + client.id + '&address=' + $scope.selectedNodeAddress)
+        $http.post('/RemoteServerProxy/Client_Offline?clientId=' + client.id + '&address=' + $scope.selectedNodeAddress)
             .then(r => {
                 if (r.data.success) {
                     alert("客户端已断开。");
                     $scope.clients.splice(index, 1);
+                } else {
+                    alert(r.data.message);
+                }
+            }, err => {
+                console.log(err);
+                alert(err.statusText);
+            });
+    };
+    $scope.clientsReflushConfigItems = function (client) {
+        $http.post('/RemoteServerProxy/Client_Reload?address=' + $scope.selectedNodeAddress + '&clientId=' + client.id)
+            .then(r => {
+                if (r.data.success) {
+                    alert("刷新成功。");
+                } else {
+                    alert(r.data.message);
                 }
             }, err => {
                 console.log(err);

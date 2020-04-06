@@ -229,8 +229,8 @@ namespace Agile.Config.Client
                                 var dict = Data as ConcurrentDictionary<string, string>;
                                 switch (action.Action)
                                 {
-                                    case WebsocketActionConst.Add:
-                                    case WebsocketActionConst.Update:
+                                    case ActionConst.Add:
+                                    case ActionConst.Update:
                                         var key = GenerateKey(action.Item);
                                         if (action.OldItem != null)
                                         {
@@ -238,15 +238,15 @@ namespace Agile.Config.Client
                                         }
                                         dict.AddOrUpdate(key, action.Item.value, (k, v) => { return action.Item.value; });
                                         break;
-                                    case WebsocketActionConst.Remove:
+                                    case ActionConst.Remove:
                                         dict.TryRemove(GenerateKey(action.Item), out string oldV1);
                                         break;
-                                    case WebsocketActionConst.Offline:
+                                    case ActionConst.Offline:
                                         _adminSayOffline = true;
                                         await WebsocketClient.CloseAsync(WebSocketCloseStatus.Empty, "", CancellationToken.None);
                                         AgileConfig.Logger?.LogTrace("Websocket client offline because admin console send a commond 'offline' ,");
                                         break;
-                                    case WebsocketActionConst.Reload:
+                                    case ActionConst.Reload:
                                         Load();
                                         break;
                                     default:
