@@ -67,7 +67,7 @@ namespace Agile.Config.Client
                 return servers[0];
             }
 
-            var index = new Random().Next(0, servers.Length - 1);
+            var index = new Random().Next(0, servers.Length);
 
             return servers[index];
         }
