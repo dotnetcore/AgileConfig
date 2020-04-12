@@ -90,6 +90,8 @@ namespace Agile.Config.Client
                 {
                     if (WebsocketClient?.State == WebSocketState.Open)
                     {
+                        await Task.Delay(1000 * 5);
+
                         continue;
                     }
                     try
