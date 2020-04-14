@@ -307,8 +307,9 @@ namespace Agile.Config.Client
         /// </summary>
         public bool Load()
         {
+            const int maxTry = 5;
             int tryCount = 0;
-            while (tryCount <= 4)
+            while (tryCount < maxTry)
             {
                 tryCount++;
 
@@ -327,15 +328,10 @@ namespace Agile.Config.Client
                     {
                         if (result.StatusCode == System.Net.HttpStatusCode.OK)
                         {
-                            Data.Clear();
-                            var concurrentDict = Data as ConcurrentDictionary<string, string>;
-                            var configs = JsonConvert.DeserializeObject<List<ConfigItem>>(result.GetResponseContent());
-                            configs.ForEach(c =>
-                            {
-                                var key = GenerateKey(c);
-                                string value = c.value;
-                                concurrentDict.TryAdd(key.ToString(), value);
-                            });
+                            var respContent = result.GetResponseContent();
+                            ReloadDataDict(respContent);
+                            WriteConfigsToLocal(respContent);
+
                             AgileConfig.Logger?.LogTrace("AgileConfig Client Loaded all the configs success from {0} , Try count: {1}.", apiUrl, tryCount);
                             return true;
                         }
@@ -349,11 +345,65 @@ namespace Agile.Config.Client
                 }
                 catch (Exception ex)
                 {
+                    if (tryCount == maxTry)
+                    {
+                        //load configs from local file
+                        var fileContent = ReadConfigsFromLocal();
+                        if (!string.IsNullOrEmpty(fileContent))
+                        {
+                            ReloadDataDict(fileContent);
+
+                            AgileConfig.Logger?.LogTrace("AgileConfig Client load all configs from local file .");
+                            return true;
+                        }
+                    }
+
                     AgileConfig.Logger?.LogError(ex, "AgileConfig Client try to load all configs failed . TryCount: {0}", tryCount);
                 }
             }
 
             return false;
+        }
+
+        private void ReloadDataDict(string content)
+        {
+            Data.Clear();
+            var concurrentDict = Data as ConcurrentDictionary<string, string>;
+            var configs = JsonConvert.DeserializeObject<List<ConfigItem>>(content);
+            configs.ForEach(c =>
+            {
+                var key = GenerateKey(c);
+                string value = c.value;
+                concurrentDict.TryAdd(key.ToString(), value);
+            });
+        }
+
+        private const string LocalCacheFileName = "agileconfig.client.configs.cache";
+        private void WriteConfigsToLocal(string configContent)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(configContent))
+                {
+                    return;
+                }
+
+                File.WriteAllText(LocalCacheFileName, configContent);
+            }
+            catch (Exception ex)
+            {
+                AgileConfig.Logger?.LogError(ex, "AgileConfig Client try to cache all configs to local but fail .");
+            }
+        }
+
+        private string ReadConfigsFromLocal()
+        {
+            if (!File.Exists(LocalCacheFileName))
+            {
+                return "";
+            }
+
+            return File.ReadAllText(LocalCacheFileName);
         }
 
     }
