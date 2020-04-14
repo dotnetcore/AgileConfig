@@ -1,8 +1,23 @@
-﻿using System.Collections.Concurrent;
+﻿using Agile.Config.Protocol;
+using System;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
 namespace Agile.Config.Client
 {
+    public class ConfigChangedArg
+    {
+        public ConfigChangedArg(string action, string key)
+        {
+            Action = action;
+            Key = key;
+        }
+
+        public string Key { get; }
+
+        public string Action { get; }
+    }
+
     public interface IConfigClient
     {
         string this[string key] { get; }
@@ -12,5 +27,7 @@ namespace Agile.Config.Client
         void Connect();
 
         bool Load();
+
+        event Action<ConfigChangedArg> ConfigChanged;
     }
 }

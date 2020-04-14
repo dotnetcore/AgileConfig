@@ -37,6 +37,9 @@ namespace Agile.Config.Client
         private bool _adminSayOffline = false;
 
         private ConcurrentDictionary<string, string> _data;
+
+        public event Action<ConfigChangedArg> ConfigChanged;
+
         public ConcurrentDictionary<string, string> Data => _data;
 
 
@@ -151,6 +154,10 @@ namespace Agile.Config.Client
                 while (true)
                 {
                     await Task.Delay(1000 * 5);
+                    if (_adminSayOffline)
+                    {
+                        break;
+                    }
                     if (WebsocketClient?.State == WebSocketState.Open)
                     {
                         try
@@ -202,7 +209,6 @@ namespace Agile.Config.Client
         /// <summary>
         /// 最终处理服务端推送的消息
         /// </summary>
-        /// <param name="action"></param>
         private async void ProcessMessage(WebSocketReceiveResult result, ArraySegment<Byte> buffer)
         {
             using (var ms = new MemoryStream())
@@ -232,6 +238,8 @@ namespace Agile.Config.Client
                                 switch (action.Action)
                                 {
                                     case ActionConst.Add:
+                                        NoticeChangedAsync(ActionConst.Add, GenerateKey(action.Item));
+                                        break;
                                     case ActionConst.Update:
                                         var key = GenerateKey(action.Item);
                                         if (action.OldItem != null)
@@ -239,17 +247,22 @@ namespace Agile.Config.Client
                                             dict.TryRemove(GenerateKey(action.OldItem), out string oldV);
                                         }
                                         dict.AddOrUpdate(key, action.Item.value, (k, v) => { return action.Item.value; });
+                                        NoticeChangedAsync(ActionConst.Update, key);
                                         break;
                                     case ActionConst.Remove:
-                                        dict.TryRemove(GenerateKey(action.Item), out string oldV1);
+                                        var key1 = GenerateKey(action.Item);
+                                        dict.TryRemove(key1, out string oldV1);
+                                        NoticeChangedAsync(ActionConst.Remove, key1);
                                         break;
                                     case ActionConst.Offline:
                                         _adminSayOffline = true;
                                         await WebsocketClient.CloseAsync(WebSocketCloseStatus.Empty, "", CancellationToken.None);
                                         AgileConfig.Logger?.LogTrace("Websocket client offline because admin console send a commond 'offline' ,");
+                                        NoticeChangedAsync(ActionConst.Offline);
                                         break;
                                     case ActionConst.Reload:
                                         Load();
+                                        NoticeChangedAsync(ActionConst.Reload);
                                         break;
                                     default:
                                         break;
@@ -263,6 +276,18 @@ namespace Agile.Config.Client
                     }
                 }
             }
+        }
+
+        private Task NoticeChangedAsync(string action, string key = "")
+        {
+            if (ConfigChanged == null)
+            {
+                return Task.CompletedTask;
+            }
+            return Task.Run(() =>
+            {
+                ConfigChanged(new ConfigChangedArg(action, key));
+            });
         }
 
         private string GenerateKey(ConfigItem item)

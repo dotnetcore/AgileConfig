@@ -32,6 +32,7 @@ namespace AgileConfigClientTest
                     AgileConfig.ServerNodes = host;
 
                     var client = AgileConfig.ClientInstance;
+                    client.ConfigChanged += Client_ConfigChanged;
                     //client.Connect();
                     var provider = new AgileConfigProvider(client, lf);
                     provider.Load();
@@ -58,6 +59,14 @@ namespace AgileConfigClientTest
 
 
             Console.ReadLine();
+        }
+
+        private static void Client_ConfigChanged(ConfigChangedArg obj)
+        {
+            if (obj != null)
+            {
+                Console.WriteLine("Client_ConfigChanged, action {0} key {1}", obj.Action, obj.Key);
+            }
         }
 
         private static void ConfigureServices(IServiceCollection services)
