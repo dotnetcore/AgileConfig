@@ -26,15 +26,10 @@ namespace AgileConfigClientTest
 
                 try
                 {
-                    AgileConfig.Logger = lf.CreateLogger<IConfigClient>();
-                    AgileConfig.AppId = appId;
-                    AgileConfig.Secret = seret;
-                    AgileConfig.ServerNodes = host;
-
-                    var client = AgileConfig.ClientInstance;
+                    var client = new ConfigClient(appId, seret, host, lf.CreateLogger<ConfigClient>());
                     client.ConfigChanged += Client_ConfigChanged;
                     //client.Connect();
-                    var provider = new AgileConfigProvider(client, lf);
+                    var provider = new AgileConfigProvider(client);
                     provider.Load();
                     await Task.Run(async () =>
                     {

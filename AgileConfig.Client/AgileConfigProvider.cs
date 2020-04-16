@@ -6,13 +6,10 @@ namespace Agile.Config.Client
 {
     public class AgileConfigProvider : ConfigurationProvider
     {
-        private ILogger Logger { get; }
-
         private ConfigClient Client { get; }
 
-        public AgileConfigProvider(IConfigClient client, ILoggerFactory loggerFactory)
+        public AgileConfigProvider(IConfigClient client)
         {
-            Logger = loggerFactory?.CreateLogger<AgileConfigProvider>();
             Client = client as ConfigClient;
         }
 
