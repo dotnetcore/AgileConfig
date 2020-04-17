@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.WebSockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using AgileConfig.Server.Apisite.Filters;
@@ -30,7 +32,7 @@ namespace AgileConfig.Server.Apisite.Websocket
             _websocketCollection = WebsocketCollection.Instance;
         }
 
-        public async Task Invoke(HttpContext context, IAppService appService)
+        public async Task Invoke(HttpContext context, IAppService appService, IConfigService configService)
         {
             if (context.Request.Path == "/ws")
             {
@@ -54,7 +56,7 @@ namespace AgileConfig.Server.Apisite.Websocket
                     _logger.LogInformation("Websocket client {0} Added ", client.Id);
                     try
                     {
-                        await Handle(client);
+                        await Handle(context, client, configService);
                     }
                     catch (Exception ex)
                     {
@@ -74,7 +76,7 @@ namespace AgileConfig.Server.Apisite.Websocket
             }
         }
 
-        private async Task Handle(WSClient webSocket)
+        private async Task Handle(HttpContext context, WSClient webSocket, IConfigService configService)
         {
             var buffer = new byte[1024 * 2];
             WebSocketReceiveResult result = null;
@@ -82,11 +84,44 @@ namespace AgileConfig.Server.Apisite.Websocket
             {
                 result = await webSocket.Client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
                 webSocket.LastHeartbeatTime = DateTime.Now;
-                await webSocket.Client.SendAsync(new ArraySegment<byte>(buffer, 0, result.Count), result.MessageType, result.EndOfMessage, CancellationToken.None);
+                var message = await ConvertWebsocketMessage(result, buffer);
+                if (message == "ping")
+                {
+                    //如果是ping，回复本地数据的md5版本
+                    var appId = context.Request.Headers["appid"];
+                    var md5 = await configService.AppConfigsMd5(appId);
+                    var md5Data = Encoding.UTF8.GetBytes($"V:{md5}");
+
+                    await webSocket.Client.SendAsync(new ArraySegment<byte>(md5Data, 0, md5Data.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+                }
+                else 
+                {
+                    //如果不是心跳消息，回复0
+                    var zeroData = Encoding.UTF8.GetBytes("0");
+                    await webSocket.Client.SendAsync(new ArraySegment<byte>(zeroData, 0, zeroData.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+                }
             }
             while (!result.CloseStatus.HasValue);
             _logger.LogInformation($"Websocket close , closeStatus:{result.CloseStatus} closeDesc:{result.CloseStatusDescription}");
             await _websocketCollection.RemoveClient(webSocket, result.CloseStatus, result.CloseStatusDescription);
+        }
+
+        private async Task<string> ConvertWebsocketMessage(WebSocketReceiveResult result, ArraySegment<Byte> buffer)
+        {
+            using (var ms = new MemoryStream())
+            {
+                ms.Write(buffer.Array, buffer.Offset, result.Count);
+                if (result.MessageType == WebSocketMessageType.Text)
+                {
+                    ms.Seek(0, SeekOrigin.Begin);
+                    using (var reader = new StreamReader(ms, Encoding.UTF8))
+                    {
+                        return await reader.ReadToEndAsync();
+                    }
+                }
+
+                return "";
+            }
         }
     }
 }

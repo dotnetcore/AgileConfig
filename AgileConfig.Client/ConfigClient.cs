@@ -6,14 +6,18 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.WebSockets;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace Agile.Config.Client
 {
     public class ConfigClient : IConfigClient
     {
+
+
         public ConfigClient(string appId, string secret, string serverNodes, ILogger logger = null)
         {
             this.Logger = logger;
@@ -31,6 +35,9 @@ namespace Agile.Config.Client
             _data = new ConcurrentDictionary<string, string>();
         }
 
+        private int WebsocketReconnectInterval = 5;
+        private int WebsocketHeartbeatInterval = 30;
+
         public event Action<ConfigChangedArg> ConfigChanged;
         public ConcurrentDictionary<string, string> Data => _data;
         public ILogger Logger { get; set; }
@@ -41,7 +48,6 @@ namespace Agile.Config.Client
         private ClientWebSocket WebsocketClient { get; set; }
         private bool _adminSayOffline = false;
         private ConcurrentDictionary<string, string> _data;
-        private string _currentDataVersion = "";
 
         public string this[string key]
         {
@@ -88,7 +94,7 @@ namespace Agile.Config.Client
                 {
                     if (WebsocketClient?.State == WebSocketState.Open)
                     {
-                        await Task.Delay(1000 * 5);
+                        await Task.Delay(1000 * WebsocketReconnectInterval);
 
                         continue;
                     }
@@ -138,17 +144,17 @@ namespace Agile.Config.Client
             return "Basic " + Convert.ToBase64String(data);
         }
         /// <summary>
-        /// 开启一个线程5s进行一次心跳
+        /// 开启一个线程30s进行一次心跳
         /// </summary>
         /// <returns></returns>
         public void WebsocketHeartbeatAsync()
         {
             Task.Run(async () =>
             {
-                var data = Encoding.UTF8.GetBytes("hi");
+                var data = Encoding.UTF8.GetBytes("ping");
                 while (true)
                 {
-                    await Task.Delay(1000 * 5);
+                    await Task.Delay(1000 * WebsocketHeartbeatInterval);
                     if (_adminSayOffline)
                     {
                         break;
@@ -216,14 +222,15 @@ namespace Agile.Config.Client
                     {
                         var msg = await reader.ReadToEndAsync();
                         Logger?.LogTrace("AgileConfig Client Receive message ' {0} ' by Websocket .", msg);
-                        if (string.IsNullOrEmpty(msg))
+                        if (string.IsNullOrEmpty(msg)|| msg == "0")
                         {
                             return;
                         }
                         if (msg.StartsWith("V:"))
                         {
                             var version = msg.Substring(2, msg.Length - 2);
-                            if (version != this._currentDataVersion)
+                            var localVersion = this.DataMd5Version();
+                            if (version != localVersion)
                             {
                                 //如果数据库版本跟本地版本不一致则直接全部更新
                                 Load();
@@ -407,6 +414,28 @@ namespace Agile.Config.Client
             }
 
             return File.ReadAllText(LocalCacheFileName);
+        }
+
+        private string DataMd5Version()
+        {
+            var keyStr = string.Join("&", Data.Keys.ToArray().OrderBy(k => k));
+            var valueStr = string.Join("&", Data.Values.ToArray().OrderBy(v => v));
+            var txt = $"{keyStr}&{valueStr}";
+
+            using (var md5 = MD5.Create())
+            {
+                var inputBytes = Encoding.ASCII.GetBytes(txt);
+                var hashBytes = md5.ComputeHash(inputBytes);
+
+                // Convert the byte array to hexadecimal string
+                var sb = new StringBuilder();
+                for (var i = 0; i < hashBytes.Length; i++)
+                {
+                    sb.Append(hashBytes[i].ToString("X2"));
+                }
+
+                return sb.ToString();
+            }
         }
 
     }

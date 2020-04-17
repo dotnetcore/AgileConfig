@@ -107,7 +107,30 @@ namespace AgileConfig.Server.Service
         {
             var q = await _dbContext.Configs.CountAsync(c => c.Status == ConfigStatus.Enabled);
 
-            return  q;
+            return q;
+        }
+
+        public async Task<string> AppConfigsMd5(string appId)
+        {
+            var configs = await _dbContext.Configs.AsNoTracking().Where(c =>
+                c.AppId == appId && c.Status == ConfigStatus.Enabled
+            ).ToListAsync();
+
+            string generateKey(Config config)
+            {
+                if (string.IsNullOrEmpty(config.Group))
+                {
+                    return config.Key;
+                }
+
+                return $"{config.Group}:{config.Key}";
+            }
+
+            var keyStr = string.Join('&', configs.Select(c => generateKey(c)).ToArray().OrderBy(k=>k));
+            var valStr = string.Join('&', configs.Select(c => c.Value).ToArray().OrderBy(v => v));
+            var txt = $"{keyStr}&{valStr}";
+
+            return Encrypt.Md5(txt);
         }
     }
 }
