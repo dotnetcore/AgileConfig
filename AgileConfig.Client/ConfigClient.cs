@@ -16,8 +16,6 @@ namespace Agile.Config.Client
 {
     public class ConfigClient : IConfigClient
     {
-
-
         public ConfigClient(string appId, string secret, string serverNodes, ILogger logger = null)
         {
             this.Logger = logger;
@@ -243,24 +241,28 @@ namespace Agile.Config.Client
                             if (action != null)
                             {
                                 var dict = Data as ConcurrentDictionary<string, string>;
+                                var itemKey = "";
+                                if (action.Item != null)
+                                {
+                                    itemKey = GenerateKey(action.Item);
+                                }
                                 switch (action.Action)
                                 {
                                     case ActionConst.Add:
-                                        NoticeChangedAsync(ActionConst.Add, GenerateKey(action.Item));
+                                        dict.AddOrUpdate(itemKey, action.Item.value, (k, v) => { return action.Item.value; });
+                                        NoticeChangedAsync(ActionConst.Add, itemKey);
                                         break;
                                     case ActionConst.Update:
-                                        var key = GenerateKey(action.Item);
                                         if (action.OldItem != null)
                                         {
                                             dict.TryRemove(GenerateKey(action.OldItem), out string oldV);
                                         }
-                                        dict.AddOrUpdate(key, action.Item.value, (k, v) => { return action.Item.value; });
-                                        NoticeChangedAsync(ActionConst.Update, key);
+                                        dict.AddOrUpdate(itemKey, action.Item.value, (k, v) => { return action.Item.value; });
+                                        NoticeChangedAsync(ActionConst.Update, itemKey);
                                         break;
                                     case ActionConst.Remove:
-                                        var key1 = GenerateKey(action.Item);
-                                        dict.TryRemove(key1, out string oldV1);
-                                        NoticeChangedAsync(ActionConst.Remove, key1);
+                                        dict.TryRemove(itemKey, out string oldV1);
+                                        NoticeChangedAsync(ActionConst.Remove, itemKey);
                                         break;
                                     case ActionConst.Offline:
                                         _adminSayOffline = true;

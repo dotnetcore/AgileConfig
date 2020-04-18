@@ -15,7 +15,7 @@
                             if (service.callback) {
                                 service.callback(service.serverNodes);
                             }
-                            
+
                         }
                     }
                 }, err => {
@@ -28,7 +28,8 @@
         service.callback = callback;
         if (!service.started) {
             service.started = true;
-            $interval(reflushNodeStatus, 5000);
+            reflushNodeStatus();
+            $interval(reflushNodeStatus, 5 * 1000);
         }
     };
 

@@ -32,5 +32,7 @@ namespace AgileConfig.Server.IService
         Task<int> CountEnabledConfigsAsync();
 
         Task<string> AppConfigsMd5(string appId);
+
+        Task<string> AppConfigsMd5Cache(string appId);
     }
 }

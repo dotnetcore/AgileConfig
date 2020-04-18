@@ -99,11 +99,11 @@ namespace AgileConfig.Server.Apisite
                         }
                         catch (Exception e)
                         {
-                            _logger.LogInformation(e, "Try test node {0} echo occur", n.Address);
+                            _logger.LogInformation(e, "Try test node {0} echo , but fail .", n.Address);
                         }
                     });
 
-                    await Task.Delay(5000);
+                    await Task.Delay(5000 * 1);
                 }
             });
         }

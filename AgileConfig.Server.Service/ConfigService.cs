@@ -7,23 +7,46 @@ using System.Threading.Tasks;
 using AgileConfig.Server.Common;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace AgileConfig.Server.Service
 {
     public class ConfigService : IConfigService
     {
-        private AgileConfigDbContext _dbContext;
+        private readonly AgileConfigDbContext _dbContext;
+        private readonly IMemoryCache _memoryCache;
 
-        public ConfigService(ISqlContext context)
+        public ConfigService(ISqlContext context, IMemoryCache memoryCache)
         {
             _dbContext = context as AgileConfigDbContext;
+            _memoryCache = memoryCache;
         }
 
         public async Task<bool> AddAsync(Config config)
         {
             await _dbContext.Configs.AddAsync(config);
             int x = await _dbContext.SaveChangesAsync();
-            return x > 0;
+
+            var result = x > 0;
+            if (result)
+            {
+                ClearAppConfigsMd5Cache(config.AppId);
+            }
+
+            return result;
+        }
+        public async Task<bool> UpdateAsync(Config config)
+        {
+            _dbContext.Update(config);
+            var x = await _dbContext.SaveChangesAsync();
+
+            var result = x > 0;
+            if (result)
+            {
+                ClearAppConfigsMd5Cache(config.AppId);
+            }
+
+            return result;
         }
 
         public async Task<bool> DeleteAsync(Config config)
@@ -34,7 +57,14 @@ namespace AgileConfig.Server.Service
                 _dbContext.Configs.Remove(config);
             }
             int x = await _dbContext.SaveChangesAsync();
-            return x > 0;
+
+            var result = x > 0;
+            if (result)
+            {
+                ClearAppConfigsMd5Cache(config.AppId);
+            }
+
+            return result;
         }
 
         public async Task<bool> DeleteAsync(string configId)
@@ -45,7 +75,14 @@ namespace AgileConfig.Server.Service
                 _dbContext.Configs.Remove(config);
             }
             int x = await _dbContext.SaveChangesAsync();
-            return x > 0;
+
+            var result = x > 0;
+            if (result)
+            {
+                ClearAppConfigsMd5Cache(config.AppId);
+            }
+
+            return result;
         }
 
         public async Task<Config> GetAsync(string id)
@@ -57,14 +94,6 @@ namespace AgileConfig.Server.Service
         public async Task<List<Config>> GetAllConfigsAsync()
         {
             return await _dbContext.Configs.Where(c => c.Status == ConfigStatus.Enabled).ToListAsync();
-        }
-
-        public async Task<bool> UpdateAsync(Config config)
-        {
-            _dbContext.Update(config);
-            var x = await _dbContext.SaveChangesAsync();
-
-            return x > 0;
         }
 
         public async Task<Config> GetByAppIdKey(string appId, string group, string key)
@@ -110,6 +139,11 @@ namespace AgileConfig.Server.Service
             return q;
         }
 
+        /// <summary>
+        /// 获取当前app的配置集合的md5版本
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <returns></returns>
         public async Task<string> AppConfigsMd5(string appId)
         {
             var configs = await _dbContext.Configs.AsNoTracking().Where(c =>
@@ -126,11 +160,44 @@ namespace AgileConfig.Server.Service
                 return $"{config.Group}:{config.Key}";
             }
 
-            var keyStr = string.Join('&', configs.Select(c => generateKey(c)).ToArray().OrderBy(k=>k));
+            var keyStr = string.Join('&', configs.Select(c => generateKey(c)).ToArray().OrderBy(k => k));
             var valStr = string.Join('&', configs.Select(c => c.Value).ToArray().OrderBy(v => v));
             var txt = $"{keyStr}&{valStr}";
 
             return Encrypt.Md5(txt);
+        }
+
+        /// <summary>
+        /// 获取当前app的配置集合的md5版本，1分钟缓存
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <returns></returns>
+        public async Task<string> AppConfigsMd5Cache(string appId)
+        {
+            var cacheKey = AppConfigsMd5CacheKey(appId);
+            if (_memoryCache.TryGetValue(cacheKey, out string md5))
+            {
+                return md5;
+            }
+
+            md5 = await AppConfigsMd5(appId);
+
+            var cacheOp = new MemoryCacheEntryOptions()
+            .SetAbsoluteExpiration(TimeSpan.FromSeconds(60));
+            _memoryCache.Set(cacheKey, md5, cacheOp);
+
+            return md5;
+        }
+
+        private string AppConfigsMd5CacheKey(string appId)
+        {
+            return $"ConfigService_AppConfigsMd5Cache_{appId}";
+        }
+
+        private void ClearAppConfigsMd5Cache(string appId)
+        {
+            var cacheKey = AppConfigsMd5CacheKey(appId);
+            _memoryCache.Remove(cacheKey);
         }
     }
 }
