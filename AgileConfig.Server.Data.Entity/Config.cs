@@ -10,6 +10,16 @@ namespace AgileConfig.Server.Data.Entity
         Enabled = 1,
     }
 
+    public enum OnlineStatus
+    {
+        AddWaitPublish = 10,
+        UpdateWaitPublish = 11,
+
+        Published = 1,
+
+        Offline = 0,
+    }
+
     [Table("config")]
     public class Config
     {
@@ -40,5 +50,8 @@ namespace AgileConfig.Server.Data.Entity
 
         [Column("status")]
         public ConfigStatus Status { get; set; }
+
+        [Column("online_status")]
+        public OnlineStatus OnlineStatus { get; set; }
     }
 }

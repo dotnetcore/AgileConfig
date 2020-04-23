@@ -60,6 +60,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             config.Status = ConfigStatus.Enabled;
             config.CreateTime = DateTime.Now;
             config.UpdateTime = null;
+            config.OnlineStatus = OnlineStatus.AddWaitPublish;
 
             var result = await _configService.AddAsync(config);
 
@@ -140,6 +141,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             config.Group = model.Group;
             config.Status = model.Status;
             config.UpdateTime = DateTime.Now;
+            config.OnlineStatus = OnlineStatus.UpdateWaitPublish;
 
             var result = await _configService.UpdateAsync(config);
 
