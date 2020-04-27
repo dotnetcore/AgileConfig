@@ -30,7 +30,7 @@ namespace AgileConfig.Server.Service
             var result = x > 0;
             if (result)
             {
-                ClearAppConfigsMd5Cache(config.AppId);
+                ClearAppPublishedConfigsMd5Cache(config.AppId);
             }
 
             return result;
@@ -43,7 +43,7 @@ namespace AgileConfig.Server.Service
             var result = x > 0;
             if (result)
             {
-                ClearAppConfigsMd5Cache(config.AppId);
+                ClearAppPublishedConfigsMd5Cache(config.AppId);
             }
 
             return result;
@@ -61,7 +61,7 @@ namespace AgileConfig.Server.Service
             var result = x > 0;
             if (result)
             {
-                ClearAppConfigsMd5Cache(config.AppId);
+                ClearAppPublishedConfigsMd5Cache(config.AppId);
             }
 
             return result;
@@ -79,7 +79,7 @@ namespace AgileConfig.Server.Service
             var result = x > 0;
             if (result)
             {
-                ClearAppConfigsMd5Cache(config.AppId);
+                ClearAppPublishedConfigsMd5Cache(config.AppId);
             }
 
             return result;
@@ -144,10 +144,10 @@ namespace AgileConfig.Server.Service
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        public async Task<string> AppConfigsMd5(string appId)
+        public async Task<string> AppPublishedConfigsMd5(string appId)
         {
             var configs = await _dbContext.Configs.AsNoTracking().Where(c =>
-                c.AppId == appId && c.Status == ConfigStatus.Enabled
+                c.AppId == appId && c.Status == ConfigStatus.Enabled && c.OnlineStatus == OnlineStatus.Online
             ).ToListAsync();
 
             string generateKey(Config config)
@@ -172,15 +172,15 @@ namespace AgileConfig.Server.Service
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        public async Task<string> AppConfigsMd5Cache(string appId)
+        public async Task<string> AppPublishedConfigsMd5Cache(string appId)
         {
-            var cacheKey = AppConfigsMd5CacheKey(appId);
+            var cacheKey = AppPublishedConfigsMd5CacheKey(appId);
             if (_memoryCache.TryGetValue(cacheKey, out string md5))
             {
                 return md5;
             }
 
-            md5 = await AppConfigsMd5(appId);
+            md5 = await AppPublishedConfigsMd5(appId);
 
             var cacheOp = new MemoryCacheEntryOptions()
             .SetAbsoluteExpiration(TimeSpan.FromSeconds(60));
@@ -189,15 +189,22 @@ namespace AgileConfig.Server.Service
             return md5;
         }
 
-        private string AppConfigsMd5CacheKey(string appId)
+        private string AppPublishedConfigsMd5CacheKey(string appId)
         {
-            return $"ConfigService_AppConfigsMd5Cache_{appId}";
+            return $"ConfigService_AppPublishedConfigsMd5Cache_{appId}";
         }
 
-        private void ClearAppConfigsMd5Cache(string appId)
+        private void ClearAppPublishedConfigsMd5Cache(string appId)
         {
-            var cacheKey = AppConfigsMd5CacheKey(appId);
+            var cacheKey = AppPublishedConfigsMd5CacheKey(appId);
             _memoryCache.Remove(cacheKey);
+        }
+
+        public async Task<List<Config>> GetPublishedConfigsByAppId(string appId)
+        {
+            return await _dbContext.Configs.Where(c =>
+                 c.AppId == appId && c.Status == ConfigStatus.Enabled && c.OnlineStatus == OnlineStatus.Online
+             ).ToListAsync();
         }
     }
 }

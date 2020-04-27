@@ -44,4 +44,8 @@
             alert(configResult.data.message);
         }
     };
+
+    $scope.goback = function () {
+        $state.go('config.list');
+    };
 });

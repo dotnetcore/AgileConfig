@@ -26,7 +26,7 @@
             <th class="table_col_desc">描述</th>
             <th class="col">创建时间</th>
             <th class="col">修改时间</th>
-            <th class="col">状态</th>
+            <th class="col">上线状态</th>
             <th class="col"></th>
         </tr>
         <tr ng-repeat="config in configs|filter:{status:1 }|filter:{appId: selectedAppId}">
@@ -36,11 +36,13 @@
             <td ng-bind="config.description"></td>
             <td ng-bind="config.createTime|date:'yyyy-MM-dd HH:mm'"></td>
             <td ng-bind="config.updateTime|date:'yyyy-MM-dd HH:mm'"></td>
-            <td ng-bind="config.onlineStatus"></td>
+            <td ng-bind="onlineStatusDesc[config.onlineStatus]"></td>
             <td>
-                <button class="btn btn-info btn-xs" ng-click="toModifylogs(config)">版本历史</button>
+                <button class="btn btn-success btn-xs" ng-click="publish(config)" ng-if="config.onlineStatus == 0">上线</button>
+                <button class="btn btn-warning btn-xs" ng-click="offline(config)" ng-if="config.onlineStatus == 1">下线</button>
                 <button class="btn btn-primary btn-xs" ng-click="toEdit(config)">修改</button>
                 <button class="btn btn-danger btn-xs" ng-click="deleteConfig(config)">删除</button>
+                <button class="btn btn-info btn-xs" ng-click="toModifylogs(config)">版本历史</button>
             </td>
         </tr>
     </table>

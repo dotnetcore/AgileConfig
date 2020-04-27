@@ -60,7 +60,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             config.Status = ConfigStatus.Enabled;
             config.CreateTime = DateTime.Now;
             config.UpdateTime = null;
-            config.OnlineStatus = OnlineStatus.AddWaitPublish;
+            config.OnlineStatus = OnlineStatus.WaitPublish;
 
             var result = await _configService.AddAsync(config);
 
@@ -76,17 +76,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     Value = config.Value,
                     ModifyTime = config.CreateTime
                 });
-                //notice clients
-                var action = new WebsocketAction 
-                { 
-                    Action = ActionConst.Add, 
-                    Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value } 
-                };
-                var nodes = await _serverNodeService.GetAllNodesAsync();
-                foreach (var node in nodes)
-                {
-                    await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, config.AppId, action);
-                }
+               
             }
 
             return Json(new
@@ -141,7 +131,6 @@ namespace AgileConfig.Server.Apisite.Controllers
             config.Group = model.Group;
             config.Status = model.Status;
             config.UpdateTime = DateTime.Now;
-            config.OnlineStatus = OnlineStatus.UpdateWaitPublish;
 
             var result = await _configService.UpdateAsync(config);
 
@@ -283,6 +272,83 @@ namespace AgileConfig.Server.Apisite.Controllers
                 success = true,
                 data = logs.OrderByDescending(l => l.ModifyTime).ToList()
             }); ;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Offline(string configId)
+        {
+            if (string.IsNullOrEmpty(configId))
+            {
+                throw new ArgumentNullException("configId");
+            }
+
+            var config = await _configService.GetAsync(configId);
+            if (config == null)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "未找到对应的配置项。"
+                });
+            }
+            config.OnlineStatus = OnlineStatus.WaitPublish;
+            var result = await _configService.UpdateAsync(config);
+            if (result)
+            {
+                //notice clients the config item is offline
+                var action = new WebsocketAction { Action = ActionConst.Remove, Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value } };
+                var nodes = await _serverNodeService.GetAllNodesAsync();
+                foreach (var node in nodes)
+                {
+                    await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, config.AppId, action);
+                }
+            }
+
+            return Json(new
+            {
+                success = result,
+                message = !result ? "下线配置失败，请查看错误日志" : ""
+            });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Publish(string configId)
+        {
+            if (string.IsNullOrEmpty(configId))
+            {
+                throw new ArgumentNullException("configId");
+            }
+
+            var config = await _configService.GetAsync(configId);
+            if (config == null)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "未找到对应的配置项。"
+                });
+            }
+            config.OnlineStatus = OnlineStatus.Online;
+            var result = await _configService.UpdateAsync(config);
+            if (result)
+            {
+                //notice clients config item is published
+                var action = new WebsocketAction
+                {
+                    Action = ActionConst.Add,
+                    Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value }
+                };
+                var nodes = await _serverNodeService.GetAllNodesAsync();
+                foreach (var node in nodes)
+                {
+                    await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, config.AppId, action);
+                }
+            }
+            return Json(new
+            {
+                success = result,
+                message = !result ? "上线配置失败，请查看错误日志" : ""
+            });
         }
     }
 }

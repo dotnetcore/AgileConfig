@@ -18,7 +18,7 @@ namespace AgileConfig.Server.IService
         /// <returns></returns>
         Task<List<Config>> Search(string appId, string group, string key);
         Task<List<Config>> GetByAppId(string appId);
-
+        Task<List<Config>> GetPublishedConfigsByAppId(string appId);
         Task<bool> AddAsync(Config app);
 
         Task<bool> DeleteAsync(Config app);
@@ -31,8 +31,8 @@ namespace AgileConfig.Server.IService
 
         Task<int> CountEnabledConfigsAsync();
 
-        Task<string> AppConfigsMd5(string appId);
+        Task<string> AppPublishedConfigsMd5(string appId);
 
-        Task<string> AppConfigsMd5Cache(string appId);
+        Task<string> AppPublishedConfigsMd5Cache(string appId);
     }
 }

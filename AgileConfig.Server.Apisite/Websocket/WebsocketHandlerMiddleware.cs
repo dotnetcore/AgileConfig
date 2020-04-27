@@ -89,7 +89,7 @@ namespace AgileConfig.Server.Apisite.Websocket
                 {
                     //如果是ping，回复本地数据的md5版本
                     var appId = context.Request.Headers["appid"];
-                    var md5 = await configService.AppConfigsMd5Cache(appId);
+                    var md5 = await configService.AppPublishedConfigsMd5Cache(appId);
                     var md5Data = Encoding.UTF8.GetBytes($"V:{md5}");
 
                     await webSocket.Client.SendAsync(new ArraySegment<byte>(md5Data, 0, md5Data.Length), WebSocketMessageType.Text, true, CancellationToken.None);

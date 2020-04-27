@@ -12,12 +12,8 @@ namespace AgileConfig.Server.Data.Entity
 
     public enum OnlineStatus
     {
-        AddWaitPublish = 10,
-        UpdateWaitPublish = 11,
-
-        Published = 1,
-
-        Offline = 0,
+        WaitPublish = 0,
+        Online = 1,
     }
 
     [Table("config")]

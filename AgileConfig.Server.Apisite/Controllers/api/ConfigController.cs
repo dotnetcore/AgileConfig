@@ -28,7 +28,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [HttpGet("app/{appId}")]
         public async Task<List<ConfigVM>> Get(string appId)
         {
-            var configs = await _configService.GetByAppId(appId);
+            var configs = await _configService.GetPublishedConfigsByAppId(appId);
 
             var vms = configs.Select(c => {
                 return new ConfigVM() {
