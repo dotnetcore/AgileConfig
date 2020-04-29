@@ -14,7 +14,7 @@ namespace AgileConfig.Server.IService
         public DateTime LastHeartbeatTime { get; set; }
     }
 
-    public class WebsocketCollectionReport
+    public class ClientsReport
     {
         public int ClientCount { get; set; }
 
@@ -25,7 +25,7 @@ namespace AgileConfig.Server.IService
     {
         Task TestEchoAsync();
 
-        WebsocketCollectionReport GetClientReports(string address);
+        ClientsReport GetClientsReport(string address);
 
         IRemoteServerNodeActionProxy NodeProxy { get; }
     }

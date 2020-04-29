@@ -36,7 +36,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
         public IActionResult ServerNodeClients(string address)
         {
-            var report = Program.RemoteServerNodeManager.GetClientReports(address);
+            var report = Program.RemoteServerNodeManager.GetClientsReport(address);
 
             return Json(new
             {
@@ -83,7 +83,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             nodes.ForEach(n => {
                 result.Add(new { 
                     n,
-                    server_status = Program.RemoteServerNodeManager.GetClientReports(n.Address)
+                    server_status = Program.RemoteServerNodeManager.GetClientsReport(n.Address)
                 });
             });
 

@@ -15,7 +15,7 @@ namespace AgileConfig.Server.Service
     {
         internal class ClientsReport
         {
-            public WebsocketCollectionReport data { get; set; }
+            public IService.ClientsReport data { get; set; }
         }
         internal class SerializeProvider : ISerializeProvider
         {
@@ -35,7 +35,7 @@ namespace AgileConfig.Server.Service
 
         private IServerNodeService _serverNodeService;
         private ILogger _logger;
-        private ConcurrentDictionary<string, WebsocketCollectionReport> _serverNodeClientReports;
+        private ConcurrentDictionary<string, IService.ClientsReport> _serverNodeClientReports;
 
         public IRemoteServerNodeActionProxy NodeProxy { get; }
 
@@ -44,16 +44,16 @@ namespace AgileConfig.Server.Service
             _serverNodeService = serverNodeService;
             NodeProxy = new RemoteServerNodeProxy();
             _logger = loggerFactory.CreateLogger<RemoteServerNodeManager>();
-            _serverNodeClientReports = new ConcurrentDictionary<string, WebsocketCollectionReport>();
+            _serverNodeClientReports = new ConcurrentDictionary<string, IService.ClientsReport>();
         }
 
-        public WebsocketCollectionReport GetClientReports(string address)
+        public IService.ClientsReport GetClientsReport(string address)
         {
             if (string.IsNullOrEmpty(address))
             {
                 return null;
             }
-            _serverNodeClientReports.TryGetValue(address, out WebsocketCollectionReport report);
+            _serverNodeClientReports.TryGetValue(address, out IService.ClientsReport report);
             return report;
         }
 
@@ -98,7 +98,7 @@ namespace AgileConfig.Server.Service
             });
         }
 
-        private WebsocketCollectionReport GetClientReport(ServerNode node)
+        private IService.ClientsReport GetClientReport(ServerNode node)
         {
             using (var resp = (node.Address + "/report/Clients").AsHttp().Config(new RequestOptions(new SerializeProvider())).Send())
             {
