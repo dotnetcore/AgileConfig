@@ -45,7 +45,7 @@ app.controller('ListnodeCtrl', function ($scope, $http, $state, nodeStatusReflus
         $state.go('nodes.add');
     };
     $scope.deleteNode = function (node, index) {
-        let cr = confirm(`是否确定删除节点【${node.address}】?`);
+        let cr = confirm(`是否确定删除节点【${node.address}】? \n删除节点并不会让其真正的下线，只是脱离控制台的管理。所有连接至此节点的客户端都会继续正常工作。`);
         if (!cr) {
             return;
         }

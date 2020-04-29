@@ -46,7 +46,7 @@ namespace AgileConfig.Server.Apisite.Websocket
                     }
                     var appId = context.Request.Headers["appid"];
                     WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
-                    var client = new WSClient()
+                    var client = new WebsocketClient()
                     {
                         Client = webSocket,
                         Id = Guid.NewGuid().ToString(),
@@ -76,7 +76,7 @@ namespace AgileConfig.Server.Apisite.Websocket
             }
         }
 
-        private async Task Handle(HttpContext context, WSClient webSocket, IConfigService configService)
+        private async Task Handle(HttpContext context, WebsocketClient webSocket, IConfigService configService)
         {
             var buffer = new byte[1024 * 2];
             WebSocketReceiveResult result = null;

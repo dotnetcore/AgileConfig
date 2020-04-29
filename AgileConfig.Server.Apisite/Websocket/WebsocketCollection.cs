@@ -1,5 +1,6 @@
 ﻿using Agile.Config.Protocol;
 using AgileConfig.Server.Data.Entity;
+using AgileConfig.Server.IService;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
@@ -12,36 +13,24 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.Apisite.Websocket
 {
-    public class WSClient
+
+    public class WebsocketClient : ClientInfo
     {
         public WebSocket Client { get; set; }
-
-        public string Id { get; set; }
-
-        public string AppId { get; set; }
-
-        public DateTime LastHeartbeatTime { get; set; }
-    }
-
-    public class WebsocketCollectionReport
-    {
-        public int ClientCount { get; set; }
-
-        public List<WSClient> ClientsCopy { get; set; }
     }
 
     public interface IWebsocketCollection
     {
         WebsocketCollectionReport Report();
 
-        WSClient Get(string clientId);
+        WebsocketClient Get(string clientId);
         void SendToAll(string message);
-        Task SendToOne(WSClient client, string message);
+        Task SendToOne(WebsocketClient client, string message);
 
-        Task SendActionToOne(WSClient client, WebsocketAction action);
-        void AddClient(WSClient client);
+        Task SendActionToOne(WebsocketClient client, WebsocketAction action);
+        void AddClient(WebsocketClient client);
 
-        Task RemoveClient(WSClient client, WebSocketCloseStatus? closeStatus, string closeDesc);
+        Task RemoveClient(WebsocketClient client, WebSocketCloseStatus? closeStatus, string closeDesc);
 
         void RemoveAppClients(string appId, WebSocketCloseStatus? closeStatus, string closeDesc);
 
@@ -58,7 +47,7 @@ namespace AgileConfig.Server.Apisite.Websocket
         {
         }
 
-        private List<WSClient> Clients = new List<WSClient>();
+        private List<WebsocketClient> Clients = new List<WebsocketClient>();
         private object _lockObj = new object();
 
         public void SendToAll(string message)
@@ -133,7 +122,7 @@ namespace AgileConfig.Server.Apisite.Websocket
         }
 
 
-        public async Task SendToOne(WSClient client, string message)
+        public async Task SendToOne(WebsocketClient client, string message)
         {
             if (client.Client.State == WebSocketState.Open)
             {
@@ -143,7 +132,7 @@ namespace AgileConfig.Server.Apisite.Websocket
             }
         }
 
-        public async Task SendActionToOne(WSClient client, WebsocketAction action)
+        public async Task SendActionToOne(WebsocketClient client, WebsocketAction action)
         {
             if (client.Client.State == WebSocketState.Open)
             {
@@ -155,7 +144,7 @@ namespace AgileConfig.Server.Apisite.Websocket
         }
 
 
-        public void AddClient(WSClient client)
+        public void AddClient(WebsocketClient client)
         {
             lock (_lockObj)
             {
@@ -164,7 +153,7 @@ namespace AgileConfig.Server.Apisite.Websocket
             }
         }
 
-        public async Task RemoveClient(WSClient client, WebSocketCloseStatus? closeStatus, string closeDesc = null)
+        public async Task RemoveClient(WebsocketClient client, WebSocketCloseStatus? closeStatus, string closeDesc = null)
         {
             lock (_lockObj)
             {
@@ -211,7 +200,7 @@ namespace AgileConfig.Server.Apisite.Websocket
             }
         }
 
-        public WSClient Get(string clientId)
+        public WebsocketClient Get(string clientId)
         {
             lock (_lockObj)
             {
@@ -226,8 +215,8 @@ namespace AgileConfig.Server.Apisite.Websocket
                 return new WebsocketCollectionReport
                 {
                     ClientCount = Clients.Count,
-                    ClientsCopy = Clients
-                                    .Select(c => new WSClient { Id = c.Id, AppId = c.AppId, LastHeartbeatTime = c.LastHeartbeatTime })
+                    ClientInfos = Clients
+                                    .Select(c => new ClientInfo { Id = c.Id, AppId = c.AppId, LastHeartbeatTime = c.LastHeartbeatTime })
                                     .OrderBy(c => c.AppId)
                                     .ThenByDescending(c => c.LastHeartbeatTime)
                                     .ToList()

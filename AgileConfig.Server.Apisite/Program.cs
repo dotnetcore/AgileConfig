@@ -1,20 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using AgileConfig.Server.Common;
+using AgileConfig.Server.IService;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 using NLog.Web;
 
 namespace AgileConfig.Server.Apisite
 {
     public class Program
     {
-        public static RemoteServerNodeManager RemoteServerNodeManager { get; private set; }
+        public static IRemoteServerNodeManager RemoteServerNodeManager { get; private set; }
 
         public static void Main(string[] args)
         {
@@ -33,7 +31,7 @@ namespace AgileConfig.Server.Apisite
                 .Build();
 
             var sp = host.Services;
-            RemoteServerNodeManager = new RemoteServerNodeManager(sp);
+            RemoteServerNodeManager = sp.CreateScope().ServiceProvider.GetService<IRemoteServerNodeManager>(); ;
             RemoteServerNodeManager.TestEchoAsync();
 
             host.Run();

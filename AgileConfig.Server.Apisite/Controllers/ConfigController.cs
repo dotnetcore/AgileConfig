@@ -17,12 +17,12 @@ namespace AgileConfig.Server.Apisite.Controllers
     {
         private readonly IConfigService _configService;
         private readonly IModifyLogService _modifyLogService;
-        private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
+        private readonly IRemoteServerNodeActionProxy _remoteServerNodeProxy;
         private readonly IServerNodeService _serverNodeService;
         public ConfigController(
                                 IConfigService configService, 
                                 IModifyLogService modifyLogService, 
-                                IRemoteServerNodeProxy remoteServerNodeProxy,
+                                IRemoteServerNodeActionProxy remoteServerNodeProxy,
                                 IServerNodeService serverNodeService)
         {
             _configService = configService;

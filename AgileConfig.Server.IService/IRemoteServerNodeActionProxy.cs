@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.IService
 {
-    public interface IRemoteServerNodeProxy
+    public interface IRemoteServerNodeActionProxy
     {
         Task<bool> AllClientsDoActionAsync(string address, WebsocketAction action);
 

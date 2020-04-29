@@ -1,10 +1,7 @@
-﻿using AgileConfig.Server.Apisite.Models;
-using AgileConfig.Server.Apisite.Websocket;
-using AgileConfig.Server.Data.Entity;
+﻿using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using AgileHttp;
 using AgileHttp.serialize;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -12,15 +9,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
-namespace AgileConfig.Server.Apisite
+namespace AgileConfig.Server.Service
 {
-    public interface IRemoteServerNodeManager
-    {
-        Task TestEchoAsync();
-
-        WebsocketCollectionReport GetClientReports(string address);
-    }
-
     public class RemoteServerNodeManager : IRemoteServerNodeManager
     {
         internal class ClientsReport
@@ -47,10 +37,12 @@ namespace AgileConfig.Server.Apisite
         private ILogger _logger;
         private ConcurrentDictionary<string, WebsocketCollectionReport> _serverNodeClientReports;
 
-        public RemoteServerNodeManager(IServiceProvider sp)
+        public IRemoteServerNodeActionProxy NodeProxy { get; }
+
+        public RemoteServerNodeManager(IServerNodeService serverNodeService, ILoggerFactory loggerFactory)
         {
-            _serverNodeService = sp.CreateScope().ServiceProvider.GetService<IServerNodeService>();
-            var loggerFactory = sp.GetService<ILoggerFactory>();
+            _serverNodeService = serverNodeService;
+            NodeProxy = new RemoteServerNodeProxy();
             _logger = loggerFactory.CreateLogger<RemoteServerNodeManager>();
             _serverNodeClientReports = new ConcurrentDictionary<string, WebsocketCollectionReport>();
         }
