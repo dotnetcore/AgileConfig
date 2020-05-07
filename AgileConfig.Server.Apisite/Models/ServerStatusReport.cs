@@ -9,7 +9,7 @@ namespace AgileConfig.Server.Apisite.Models
 {
     public class ServerStatusReport
     {
-        public ClientsReport WebsocketCollectionReport { get; set; }
+        public ClientInfos WebsocketCollectionReport { get; set; }
 
         public int AppCount { get; set; }
 

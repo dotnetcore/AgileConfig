@@ -14,18 +14,18 @@ namespace AgileConfig.Server.IService
         public DateTime LastHeartbeatTime { get; set; }
     }
 
-    public class ClientsReport
+    public class ClientInfos
     {
         public int ClientCount { get; set; }
 
-        public List<ClientInfo> ClientInfos { get; set; }
+        public List<ClientInfo> Infos { get; set; }
     }
 
     public interface IRemoteServerNodeManager
     {
         Task TestEchoAsync();
 
-        ClientsReport GetClientsReport(string address);
+        ClientInfos GetClientsReport(string address);
 
         IRemoteServerNodeActionProxy NodeProxy { get; }
     }

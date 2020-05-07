@@ -27,52 +27,32 @@ namespace AgileConfig.Server.Apisite.Controllers
         {
             var report = WebsocketCollection.Instance.Report();
 
-            return Json(new
-            {
-                success = true,
-                data = report
-            });
+            return Json(report);
         }
 
         public IActionResult ServerNodeClients(string address)
         {
             var report = Program.RemoteServerNodeManager.GetClientsReport(address);
 
-            return Json(new
-            {
-                success = true,
-                data = report
-            });
+            return Json(report);
         }
 
         public async Task<IActionResult> AppCount()
         {
             var appCount = await _appService.CountEnabledAppsAsync();
-            return Json(new
-            {
-                success = true,
-                data = appCount
-            });
+            return Json(appCount);
         }
 
         public async Task<IActionResult> ConfigCount()
         {
             var configCount = await _configService.CountEnabledConfigsAsync();
-            return Json(new
-            {
-                success = true,
-                data = configCount
-            });
+            return Json(configCount);
         }
 
         public async Task<IActionResult> NodeCount()
         {
             var nodeCount = (await _serverNodeService.GetAllNodesAsync()).Count;
-            return Json(new
-            {
-                success = true,
-                data = nodeCount
-            });
+            return Json(nodeCount);
         }
 
         public async Task<IActionResult> RemoteNodesStatus()
@@ -87,11 +67,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 });
             });
 
-            return Json(new
-            {
-                success = true,
-                data = result
-            });
+            return Json(result);
         }
     }
 }

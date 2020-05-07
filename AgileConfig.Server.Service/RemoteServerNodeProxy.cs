@@ -1,4 +1,5 @@
 ﻿using Agile.Config.Protocol;
+using AgileConfig.Server.Common;
 using AgileConfig.Server.IService;
 using AgileHttp;
 using System;
@@ -12,65 +13,75 @@ namespace AgileConfig.Server.Service
     {
         public async Task<bool> AllClientsDoActionAsync(string address, WebsocketAction action)
         {
-            using (var resp = await (address + "/RemoteOP/AllClientsDoAction")
-                                    .AsHttp("POST", action)
-                                    .Config(new RequestOptions { ContentType = "application/json" })
-                                    .SendAsync())
+            return await FunctionUtil.TRY(async () =>
             {
-                if (resp.StatusCode == System.Net.HttpStatusCode.OK)
+                using (var resp = await (address + "/RemoteOP/AllClientsDoAction")
+                        .AsHttp("POST", action)
+                        .Config(new RequestOptions { ContentType = "application/json" })
+                        .SendAsync())
                 {
-                    var result = resp.Deserialize<dynamic>();
-
-                    if ((bool)result.success)
+                    if (resp.StatusCode == System.Net.HttpStatusCode.OK)
                     {
-                        return true;
-                    }
-                }
+                        var result = resp.Deserialize<dynamic>();
 
-                return false;
-            }
+                        if ((bool)result.success)
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+            }, 5);
         }
 
         public async Task<bool> AppClientsDoActionAsync(string address, string appId, WebsocketAction action)
         {
-            using (var resp = await (address + "/RemoteOP/AppClientsDoAction".AppendQueryString("appId", appId))
-                                    .AsHttp("POST", action)
-                                    .Config(new RequestOptions { ContentType = "application/json" })
-                                    .SendAsync())
+            return await FunctionUtil.TRY(async () =>
             {
-                if (resp.StatusCode == System.Net.HttpStatusCode.OK)
+                using (var resp = await (address + "/RemoteOP/AppClientsDoAction".AppendQueryString("appId", appId))
+                                       .AsHttp("POST", action)
+                                       .Config(new RequestOptions { ContentType = "application/json" })
+                                       .SendAsync())
                 {
-                    var result = resp.Deserialize<dynamic>();
-
-                    if ((bool)result.success)
+                    if (resp.StatusCode == System.Net.HttpStatusCode.OK)
                     {
-                        return true;
-                    }
-                }
+                        var result = resp.Deserialize<dynamic>();
 
-                return false;
-            }
+                        if ((bool)result.success)
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+            }, 5);
         }
 
         public async Task<bool> OneClientDoActionAsync(string address, string clientId, WebsocketAction action)
         {
-            using (var resp = await (address + "/RemoteOP/OneClientDoAction?clientId=" + clientId)
-                                    .AsHttp("POST", action)
-                                    .Config(new RequestOptions { ContentType = "application/json" })
-                                    .SendAsync())
+            return await FunctionUtil.TRY(async () =>
             {
-                if (resp.StatusCode == System.Net.HttpStatusCode.OK)
+                using (var resp = await (address + "/RemoteOP/OneClientDoAction?clientId=" + clientId)
+                            .AsHttp("POST", action)
+                            .Config(new RequestOptions { ContentType = "application/json" })
+                            .SendAsync())
                 {
-                    var result = resp.Deserialize<dynamic>();
-
-                    if ((bool)result.success)
+                    if (resp.StatusCode == System.Net.HttpStatusCode.OK)
                     {
-                        return true;
-                    }
-                }
+                        var result = resp.Deserialize<dynamic>();
 
-                return false;
-            }
+                        if ((bool)result.success)
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+            }, 5);
+
         }
     }
 }

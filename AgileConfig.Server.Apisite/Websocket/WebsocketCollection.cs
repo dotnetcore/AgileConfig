@@ -21,7 +21,7 @@ namespace AgileConfig.Server.Apisite.Websocket
 
     public interface IWebsocketCollection
     {
-        ClientsReport Report();
+        ClientInfos Report();
 
         WebsocketClient Get(string clientId);
         void SendToAll(string message);
@@ -208,14 +208,14 @@ namespace AgileConfig.Server.Apisite.Websocket
             }
         }
 
-        public ClientsReport Report()
+        public ClientInfos Report()
         {
             lock (_lockObj)
             {
-                return new ClientsReport
+                return new ClientInfos
                 {
                     ClientCount = Clients.Count,
-                    ClientInfos = Clients
+                    Infos = Clients
                                     .Select(c => new ClientInfo { Id = c.Id, AppId = c.AppId, LastHeartbeatTime = c.LastHeartbeatTime })
                                     .OrderBy(c => c.AppId)
                                     .ThenByDescending(c => c.LastHeartbeatTime)

@@ -1,4 +1,5 @@
-﻿using AgileConfig.Server.Data.Entity;
+﻿using AgileConfig.Server.Common;
+using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using AgileHttp;
 using AgileHttp.serialize;
@@ -13,10 +14,6 @@ namespace AgileConfig.Server.Service
 {
     public class RemoteServerNodeManager : IRemoteServerNodeManager
     {
-        internal class ClientsReport
-        {
-            public IService.ClientsReport data { get; set; }
-        }
         internal class SerializeProvider : ISerializeProvider
         {
             public T Deserialize<T>(string content)
@@ -35,7 +32,7 @@ namespace AgileConfig.Server.Service
 
         private IServerNodeService _serverNodeService;
         private ILogger _logger;
-        private ConcurrentDictionary<string, IService.ClientsReport> _serverNodeClientReports;
+        private ConcurrentDictionary<string, ClientInfos> _serverNodeClientReports;
 
         public IRemoteServerNodeActionProxy NodeProxy { get; }
 
@@ -44,16 +41,16 @@ namespace AgileConfig.Server.Service
             _serverNodeService = serverNodeService;
             NodeProxy = new RemoteServerNodeProxy();
             _logger = loggerFactory.CreateLogger<RemoteServerNodeManager>();
-            _serverNodeClientReports = new ConcurrentDictionary<string, IService.ClientsReport>();
+            _serverNodeClientReports = new ConcurrentDictionary<string, IService.ClientInfos>();
         }
 
-        public IService.ClientsReport GetClientsReport(string address)
+        public IService.ClientInfos GetClientsReport(string address)
         {
             if (string.IsNullOrEmpty(address))
             {
                 return null;
             }
-            _serverNodeClientReports.TryGetValue(address, out IService.ClientsReport report);
+            _serverNodeClientReports.TryGetValue(address, out IService.ClientInfos report);
             return report;
         }
 
@@ -68,24 +65,27 @@ namespace AgileConfig.Server.Service
                     {
                         try
                         {
-                            using (var resp = (n.Address + "/home/echo").AsHttp().Send())
+                            FunctionUtil.TRY(() =>
                             {
-                                if (resp.StatusCode == System.Net.HttpStatusCode.OK && resp.GetResponseContent() == "ok")
+                                using (var resp = (n.Address + "/home/echo").AsHttp().Send())
                                 {
-                                    n.LastEchoTime = DateTime.Now;
-                                    n.Status = Data.Entity.NodeStatus.Online;
-                                    var report = GetClientReport(n);
-                                    if (report != null)
+                                    if (resp.StatusCode == System.Net.HttpStatusCode.OK && resp.GetResponseContent() == "ok")
                                     {
-                                        _serverNodeClientReports.AddOrUpdate(n.Address, report, (k, r) => report);
+                                        n.LastEchoTime = DateTime.Now;
+                                        n.Status = Data.Entity.NodeStatus.Online;
+                                        var report = GetClientReport(n);
+                                        if (report != null)
+                                        {
+                                            _serverNodeClientReports.AddOrUpdate(n.Address, report, (k, r) => report);
+                                        }
                                     }
+                                    else
+                                    {
+                                        n.Status = Data.Entity.NodeStatus.Offline;
+                                    }
+                                    _serverNodeService.UpdateAsync(n);
                                 }
-                                else
-                                {
-                                    n.Status = Data.Entity.NodeStatus.Offline;
-                                }
-                                _serverNodeService.UpdateAsync(n);
-                            }
+                            }, 5);
                         }
                         catch (Exception e)
                         {
@@ -98,24 +98,27 @@ namespace AgileConfig.Server.Service
             });
         }
 
-        private IService.ClientsReport GetClientReport(ServerNode node)
+        private ClientInfos GetClientReport(ServerNode node)
         {
-            using (var resp = (node.Address + "/report/Clients").AsHttp().Config(new RequestOptions(new SerializeProvider())).Send())
+            return FunctionUtil.TRY(() =>
             {
-                if (resp.StatusCode == System.Net.HttpStatusCode.OK)
+                using (var resp = (node.Address + "/report/Clients").AsHttp().Config(new RequestOptions(new SerializeProvider())).Send())
                 {
-                    var content = resp.GetResponseContent();
-                    _logger.LogTrace($"ServerNode: {node.Address} report clients infomation , {content}");
-
-                    var report = resp.Deserialize<ClientsReport>()?.data;
-                    if (report != null)
+                    if (resp.StatusCode == System.Net.HttpStatusCode.OK)
                     {
-                        return report;
-                    }
-                }
+                        var content = resp.GetResponseContent();
+                        _logger.LogTrace($"ServerNode: {node.Address} report clients infomation , {content}");
 
-                return null;
-            }
+                        var report = resp.Deserialize<ClientInfos>();
+                        if (report != null)
+                        {
+                            return report;
+                        }
+                    }
+
+                    return null;
+                }
+            }, 5);
         }
     }
 }
