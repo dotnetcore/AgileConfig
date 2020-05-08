@@ -9,13 +9,10 @@
         if (service.started) {
             $http.get('/report/RemoteNodesStatus?_=' + (new Date).getTime())
                 .then(r => {
-                    if (r.data.success) {
-                        for (var i = 0; i < r.data.data.length; i++) {
-                            service.serverNodes = r.data.data;
-                            if (service.callback) {
-                                service.callback(service.serverNodes);
-                            }
-
+                    for (var i = 0; i < r.data.length; i++) {
+                        service.serverNodes = r.data;
+                        if (service.callback) {
+                            service.callback(service.serverNodes);
                         }
                     }
                 }, err => {

@@ -17,27 +17,21 @@
     });
     $http.get('/report/appcount')
         .then(r => {
-            if (r.data.success) {
-                $scope.appCount = r.data.data;
-            }
+            $scope.appCount = r.data;
         }, err => {
             console.log(err);
             alert(err.statusText);
         });
     $http.get('/report/nodecount')
         .then(r => {
-            if (r.data.success) {
-                $scope.nodeCount = r.data.data;
-            }
+            $scope.nodeCount = r.data;
         }, err => {
             console.log(err);
             alert(err.statusText);
         });
     $http.get('/report/configcount')
         .then(r => {
-            if (r.data.success) {
-                $scope.configCount = r.data.data;
-            }
+            $scope.configCount = r.data;
         }, err => {
             console.log(err);
             alert(err.statusText);

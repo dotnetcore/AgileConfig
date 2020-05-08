@@ -2,8 +2,8 @@
     $scope.getClients = function (address) {
         $http.get('/report/ServerNodeClients?address=' + address + '&_' + new Date().getTime())
             .then(resp => {
-                if (resp.data.data) {
-                    $scope.clients = resp.data.data.clientsCopy;
+                if (resp.data) {
+                    $scope.clients = resp.data.infos;
                 } else {
                     $scope.clients = [];
                 }
