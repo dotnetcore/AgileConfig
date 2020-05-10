@@ -14,6 +14,7 @@ namespace AgileConfig.Server.Service
             sc.AddScoped<ISettingService, SettingService>();
             sc.AddScoped<IRemoteServerNodeActionProxy, RemoteServerNodeProxy>();
             sc.AddScoped<IRemoteServerNodeManager, RemoteServerNodeManager>();
+            sc.AddScoped<ISysLogService, SysLogService>();
         }
     }
 }

@@ -19,5 +19,6 @@ namespace AgileConfig.Server.Data.Repository
 
         public DbSet<Setting> Settings { get; set; }
 
+        public DbSet<SysLog> SysLogs { get; set; }
     }
 }

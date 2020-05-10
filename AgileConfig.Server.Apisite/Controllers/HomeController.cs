@@ -1,8 +1,10 @@
 ﻿using System;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.IService;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -15,14 +17,24 @@ namespace AgileConfig.Server.Apisite.Controllers
             _settingService = settingService;
         }
 
-        public IActionResult Index()
+        [AllowAnonymous]
+        public async Task<IActionResult> Index()
         {
-            if (IsAdminConsoleMode)
+            if (!IsAdminConsoleMode)
+            {
+                return Content($"AgileConfig Node is running now , {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} .");
+            }
+
+            var auth = (await HttpContext.AuthenticateAsync()).Succeeded;
+            if (auth)
             {
                 return View();
             }
+            else
+            {
+                return Redirect("/Admin/Login");
+            }
 
-            return Content($"AgileConfig Node is running now , {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} .");
         }
         public IActionResult GetView(string viewName)
         {

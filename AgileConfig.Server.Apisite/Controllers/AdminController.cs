@@ -13,9 +13,11 @@ namespace AgileConfig.Server.Apisite.Controllers
     public class AdminController : Controller
     {
         private readonly ISettingService _settingService;
-        public AdminController(ISettingService settingService)
+        private readonly ISysLogService _sysLogService;
+        public AdminController(ISettingService settingService, ISysLogService sysLogService)
         {
             _settingService = settingService;
+            _sysLogService = sysLogService;
         }
 
         public async Task<IActionResult> Login()
@@ -83,6 +85,14 @@ namespace AgileConfig.Server.Apisite.Controllers
                     new ClaimsPrincipal(claimsIdentity),
                     authProperties);
 
+                //addlog
+                await _sysLogService.AddSysLogSync(new Data.Entity.SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = Data.Entity.SysLogType.Normal,
+                    LogText = $"管理员登录成功"
+                });
+
                 return Redirect("/");
             }
 
@@ -139,6 +149,13 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
+                await _sysLogService.AddSysLogSync(new Data.Entity.SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = Data.Entity.SysLogType.Normal,
+                    LogText = $"管理员密码初始化成功"
+                });
+
                 return Redirect("InitPasswordSuccess");
             }
             else
