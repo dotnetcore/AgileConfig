@@ -14,9 +14,12 @@ namespace AgileConfig.Server.Apisite.Controllers
     public class AppController : Controller
     {
         private readonly IAppService _appService;
-        public AppController(IAppService appService)
+        private readonly ISysLogService _sysLogService;
+
+        public AppController(IAppService appService, ISysLogService sysLogService)
         {
             _appService = appService;
+            _sysLogService = sysLogService;
         }
 
         [HttpPost]
@@ -139,6 +142,16 @@ namespace AgileConfig.Server.Apisite.Controllers
             app.Enabled = !app.Enabled;
 
             var result = await _appService.UpdateAsync(app);
+
+            if (result)
+            {
+                await _sysLogService.AddSysLogSync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    LogText = $"{(app.Enabled?"启用":"禁用")}应用【AppId】:{app.Id}"
+                });
+            }
 
             return Json(new
             {

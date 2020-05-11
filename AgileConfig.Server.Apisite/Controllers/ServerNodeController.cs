@@ -15,9 +15,12 @@ namespace AgileConfig.Server.Apisite.Controllers
     public class ServerNodeController : Controller
     {
         private readonly IServerNodeService _serverNodeService;
-        public ServerNodeController(IServerNodeService serverNodeService)
+        private readonly ISysLogService _sysLogService;
+
+        public ServerNodeController(IServerNodeService serverNodeService, ISysLogService sysLogService)
         {
             _serverNodeService = serverNodeService;
+            _sysLogService = sysLogService;
         }
 
         [HttpPost]
@@ -31,7 +34,6 @@ namespace AgileConfig.Server.Apisite.Controllers
             var oldNode = await _serverNodeService.GetAsync(model.Address);
             if (oldNode != null)
             {
-
                 return Json(new
                 {
                     success = false,
@@ -93,7 +95,5 @@ namespace AgileConfig.Server.Apisite.Controllers
                 data = nodes.OrderBy(n => n.CreateTime)
             });
         }
-
-    
     }
 }

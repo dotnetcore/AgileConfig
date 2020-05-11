@@ -19,16 +19,19 @@ namespace AgileConfig.Server.Apisite.Controllers
         private readonly IModifyLogService _modifyLogService;
         private readonly IRemoteServerNodeActionProxy _remoteServerNodeProxy;
         private readonly IServerNodeService _serverNodeService;
+        private readonly ISysLogService _sysLogService;
         public ConfigController(
                                 IConfigService configService, 
                                 IModifyLogService modifyLogService, 
                                 IRemoteServerNodeActionProxy remoteServerNodeProxy,
-                                IServerNodeService serverNodeService)
+                                IServerNodeService serverNodeService,
+                                ISysLogService sysLogService)
         {
             _configService = configService;
             _modifyLogService = modifyLogService;
             _remoteServerNodeProxy = remoteServerNodeProxy;
             _serverNodeService = serverNodeService;
+            _sysLogService = sysLogService;
         }
 
         [HttpPost]
@@ -46,7 +49,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = "配置存在，请更改输入的信息。"
+                    message = "配置已存在，请更改输入的信息。"
                 });
             }
 
@@ -76,7 +79,6 @@ namespace AgileConfig.Server.Apisite.Controllers
                     Value = config.Value,
                     ModifyTime = config.CreateTime
                 });
-               
             }
 
             return Json(new
@@ -146,6 +148,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     Value = config.Value,
                     ModifyTime = config.UpdateTime.Value
                 });
+                
                 //notice clients
                 var action = new WebsocketAction
                 {
@@ -295,6 +298,13 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _configService.UpdateAsync(config);
             if (result)
             {
+                await _sysLogService.AddSysLogSync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    AppId = config.AppId,
+                    LogText = $"下线配置【Key】:{config.Key} 【Group】：{config.Group} 【AppId】：{config.AppId}"
+                }) ;
                 //notice clients the config item is offline
                 var action = new WebsocketAction { Action = ActionConst.Remove, Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value } };
                 var nodes = await _serverNodeService.GetAllNodesAsync();
@@ -332,6 +342,13 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _configService.UpdateAsync(config);
             if (result)
             {
+                await _sysLogService.AddSysLogSync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    AppId = config.AppId,
+                    LogText = $"上线配置【Key】:{config.Key} 【Group】：{config.Group} 【AppId】：{config.AppId}"
+                });
                 //notice clients config item is published
                 var action = new WebsocketAction
                 {

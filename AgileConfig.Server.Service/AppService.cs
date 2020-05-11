@@ -12,17 +12,31 @@ namespace AgileConfig.Server.Service
     public class AppService : IAppService
     {
         private AgileConfigDbContext _dbContext;
+        private ISysLogService _sysLogService;
 
-        public AppService(ISqlContext context)
+        public AppService(ISqlContext context, ISysLogService sysLogService)
         {
             _dbContext = context as AgileConfigDbContext;
+            _sysLogService = sysLogService;
         }
 
         public async Task<bool> AddAsync(App app)
         {
             await _dbContext.Apps.AddAsync(app);
             int x = await _dbContext.SaveChangesAsync();
-            return x > 0;
+            var result =  x > 0;
+
+            if (result)
+            {
+                await _sysLogService.AddSysLogSync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    LogText = $"新增应用【AppId】:{app.Id}"
+                });
+            }
+
+            return result;
         }
 
         public async Task<bool> DeleteAsync(App app)
@@ -33,7 +47,19 @@ namespace AgileConfig.Server.Service
                 _dbContext.Apps.Remove(app);
             }
             int x = await _dbContext.SaveChangesAsync();
-            return x > 0;
+            var result = x > 0;
+
+            if (result)
+            {
+                await _sysLogService.AddSysLogSync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    LogText = $"删除应用【AppId】:{app.Id}"
+                });
+            }
+
+            return result;
         }
 
         public async Task<bool> DeleteAsync(string appId)
@@ -44,7 +70,19 @@ namespace AgileConfig.Server.Service
                 _dbContext.Apps.Remove(app);
             }
             int x = await _dbContext.SaveChangesAsync();
-            return x > 0;
+            var result = x > 0;
+
+            if (result)
+            {
+                await _sysLogService.AddSysLogSync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    LogText = $"删除应用【AppId】:{app.Id}"
+                });
+            }
+
+            return result;
         }
 
         public async Task<App> GetAsync(string id)
@@ -62,7 +100,19 @@ namespace AgileConfig.Server.Service
             _dbContext.Update(app);
             var x = await _dbContext.SaveChangesAsync();
 
-            return x > 0;
+            var result = x > 0;
+
+            if (result)
+            {
+                await _sysLogService.AddSysLogSync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    LogText = $"编辑应用【AppId】:{app.Id}"
+                });
+            }
+
+            return result;
         }
 
         public async Task<int> CountEnabledAppsAsync()

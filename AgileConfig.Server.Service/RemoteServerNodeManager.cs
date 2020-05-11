@@ -36,10 +36,10 @@ namespace AgileConfig.Server.Service
 
         public IRemoteServerNodeActionProxy NodeProxy { get; }
 
-        public RemoteServerNodeManager(IServerNodeService serverNodeService, ILoggerFactory loggerFactory)
+        public RemoteServerNodeManager(IServerNodeService serverNodeService,ISysLogService sysLogService, ILoggerFactory loggerFactory)
         {
             _serverNodeService = serverNodeService;
-            NodeProxy = new RemoteServerNodeProxy();
+            NodeProxy = new RemoteServerNodeProxy(sysLogService);
             _logger = loggerFactory.CreateLogger<RemoteServerNodeManager>();
             _serverNodeClientReports = new ConcurrentDictionary<string, IService.ClientInfos>();
         }

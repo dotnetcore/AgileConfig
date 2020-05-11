@@ -5,23 +5,38 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AgileConfig.Server.Common;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace AgileConfig.Server.Service
 {
     public class ServerNodeService : IServerNodeService
     {
         private AgileConfigDbContext _dbContext;
+        private ISysLogService _sysLogService;
 
-        public ServerNodeService(ISqlContext context)
+        public ServerNodeService(ISqlContext context, ISysLogService sysLogService)
         {
             _dbContext = context as AgileConfigDbContext;
+            _sysLogService = sysLogService;
         }
 
         public async Task<bool> AddAsync(ServerNode node)
         {
             await _dbContext.ServerNodes.AddAsync(node);
             int x = await _dbContext.SaveChangesAsync();
-            return x > 0;
+            var result = x > 0;
+
+            if (result)
+            {
+                await _sysLogService.AddSysLogSync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    LogText = $"新增节点：{node.Address}"
+                });
+            }
+
+            return result;
         }
 
         public async Task<bool> DeleteAsync(ServerNode node)
@@ -32,7 +47,19 @@ namespace AgileConfig.Server.Service
                 _dbContext.ServerNodes.Remove(node);
             }
             int x = await _dbContext.SaveChangesAsync();
-            return x > 0;
+            var result = x > 0;
+
+            if (result)
+            {
+                await _sysLogService.AddSysLogSync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    LogText = $"删除节点：{node.Address}"
+                });
+            }
+
+            return result;
         }
 
         public async Task<bool> DeleteAsync(string address)
@@ -43,7 +70,19 @@ namespace AgileConfig.Server.Service
                 _dbContext.ServerNodes.Remove(node);
             }
             int x = await _dbContext.SaveChangesAsync();
-            return x > 0;
+            var result = x > 0;
+
+            if (result)
+            {
+                await _sysLogService.AddSysLogSync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    LogText = $"删除节点：{address}"
+                });
+            }
+
+            return result;
         }
 
         public async Task<List<ServerNode>> GetAllNodesAsync()
@@ -60,8 +99,19 @@ namespace AgileConfig.Server.Service
         {
             _dbContext.Update(node);
             var x = await _dbContext.SaveChangesAsync();
+            var result = x > 0;
 
-            return x > 0;
+            if (result)
+            {
+                await _sysLogService.AddSysLogSync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    LogText = $"编辑节点：{node.Address}"
+                });
+            }
+
+            return result;
         }
     }
 }

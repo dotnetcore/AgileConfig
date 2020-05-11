@@ -15,10 +15,12 @@ namespace AgileConfig.Server.Service
     {
         private readonly AgileConfigDbContext _dbContext;
         private readonly IMemoryCache _memoryCache;
+        private readonly ISysLogService _sysLogService;
 
-        public ConfigService(ISqlContext context, IMemoryCache memoryCache)
+        public ConfigService(ISqlContext context, IMemoryCache memoryCache, ISysLogService sysLogService)
         {
             _dbContext = context as AgileConfigDbContext;
+            _sysLogService = sysLogService;
             _memoryCache = memoryCache;
         }
 
@@ -31,6 +33,14 @@ namespace AgileConfig.Server.Service
             if (result)
             {
                 ClearAppPublishedConfigsMd5Cache(config.AppId);
+
+                await _sysLogService.AddSysLogSync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    AppId = config.AppId,
+                    LogText = $"新增配置【Key】:{config.Key} 【Group】：{config.Group} 【AppId】：{config.AppId}"
+                }); 
             }
 
             return result;
@@ -44,6 +54,14 @@ namespace AgileConfig.Server.Service
             if (result)
             {
                 ClearAppPublishedConfigsMd5Cache(config.AppId);
+
+                await _sysLogService.AddSysLogSync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    AppId = config.AppId,
+                    LogText = $"编辑配置【Key】:{config.Key} 【Group】：{config.Group} 【AppId】：{config.AppId}"
+                });
             }
 
             return result;
@@ -62,6 +80,14 @@ namespace AgileConfig.Server.Service
             if (result)
             {
                 ClearAppPublishedConfigsMd5Cache(config.AppId);
+
+                await _sysLogService.AddSysLogSync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    AppId = config.AppId,
+                    LogText = $"删除配置【Key】:{config.Key} 【Group】：{config.Group} 【AppId】：{config.AppId}"
+                });
             }
 
             return result;
@@ -80,6 +106,14 @@ namespace AgileConfig.Server.Service
             if (result)
             {
                 ClearAppPublishedConfigsMd5Cache(config.AppId);
+
+                await _sysLogService.AddSysLogSync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    AppId = config.AppId,
+                    LogText = $"删除配置【Key】:{config.Key} 【Group】：{config.Group} 【AppId】：{config.AppId}"
+                });
             }
 
             return result;
