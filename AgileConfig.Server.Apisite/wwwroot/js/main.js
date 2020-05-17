@@ -76,6 +76,11 @@ app.config(function ($stateProvider, $urlRouterProvider) {
         templateUrl: '/home/getview?viewName=node_add',
         controller: 'addNodeCtrl'
     };
+    let syslogsState = {
+        url: '/syslogs',
+        templateUrl: '/home/getview?viewName=syslogs',
+        controller: 'syslogsCtrl'
+    };
 
     $stateProvider.state('dash', homeState);
 
@@ -95,6 +100,8 @@ app.config(function ($stateProvider, $urlRouterProvider) {
     $stateProvider.state('nodes', nodesState);
     $stateProvider.state('nodes.list', listNodesState);
     $stateProvider.state('nodes.add', addNodesState);
+
+    $stateProvider.state('syslogs', syslogsState);
 
     $urlRouterProvider.otherwise("/dash");
     }
