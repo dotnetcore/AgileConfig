@@ -20,7 +20,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         [HttpGet]
         public async Task<IActionResult> Search(string appId, DateTime startTime, DateTime endTime, int pageSize, int pageIndex)
         {
-            var pageList = await _sysLogService.SearchPage(appId, startTime, endTime, pageSize, pageIndex);
+            var pageList = await _sysLogService.SearchPage(appId, startTime, endTime.Date.AddDays(1), pageSize, pageIndex);
 
             return Json(new
             {

@@ -1,4 +1,33 @@
 ﻿<ol class="breadcrumb">
     <li><a ui-sref="syslogs">系统日志</a></li>
 </ol>
+<div class="add-bar">
+    <div class="form-inline">
+        所属应用：
+        <select ng-model="selectedAppId" class="form-control">
+            <option ng-repeat="app in apps" value="{{app.id}}">
+                {{app.name}}
+            </option>
+        </select>
+        开始时间：<input ng-model="startTime" class="form-control" datetimepicker view-mode="month">
+        ~
+        结束时间：<input ng-model="endTime" class="form-control" datetimepicker view-mode="month">
+        <button class="btn btn-success btn-sm" ng-click="search()">查询</button>
+    </div>
 
+</div>
+<table class="table table-bordered table-hover">
+    <tr>
+        <th>应用</th>
+        <th>类型</th>
+        <th>时间</th>
+        <th>内容</th>
+    </tr>
+    <tr ng-repeat="log in logs" ng-class="log.logType?'text-warning':''">
+        <td ng-bind="findApp(log.appId).name"></td>
+        <td ng-bind="typeName(log.logType)" ></td>
+        <td ng-bind="log.logTime|date:'yyyy-MM-dd HH:mm:ss'"></td>
+        <td ng-bind="log.logText" ></td>
+    </tr>
+</table>
+<pagebar page-info='pageInfo' on-change='changePage'></pagebar>

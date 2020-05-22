@@ -10,7 +10,7 @@ namespace AgileConfig.Server.Data.Entity
     public class App
     {
         [Key]
-        [Column("id" ,TypeName ="nvarchar(8)")]
+        [Column("id" ,TypeName = "nvarchar(36)")]
         public string Id { get; set; }
 
         [Column("name" , TypeName ="nvarchar(50)")]

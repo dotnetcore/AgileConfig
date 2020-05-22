@@ -9,7 +9,7 @@ namespace AgileConfig.Server.Apisite.Models
     public class AppVM
     {
         [Required(ErrorMessage ="应用Id不能为空")]
-        [MaxLength(8,ErrorMessage ="应用Id长度不能超过8位")]
+        [MaxLength(36, ErrorMessage = "应用Id长度不能超过36位")]
         public string Id { get; set; }
         [Required(ErrorMessage = "应用名称不能为空")]
         [MaxLength(50, ErrorMessage = "应用名称长度不能超过50位")]

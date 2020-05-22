@@ -1,2 +1,78 @@
-﻿app.controller('syslogsCtrl', function ($scope, $http, nodeStatusReflushService) {
+﻿app.controller('syslogsCtrl', function ($scope, $http) {
+    $scope.selectedAppId = '';
+    $scope.startTime = moment().add(-1, 'months').format('YYYY-MM-DD')
+    $scope.endTime = moment().format('YYYY-MM-DD')
+    $scope.logs = [];
+    $scope.pageInfo = {
+        pageIndex: 1,
+        showPages: 5,
+        totalPages: 10
+    };
+    $scope.typeName = function (type) {
+        if (type === 0) {
+            return '普通';
+        }
+        if (type === 1) {
+            return '警告';
+        }
+
+        return ''
+    }
+    $scope.findApp = function (appId) {
+        return $scope.apps.find(a => a.id === appId);
+    }
+    $scope.changePage = function (index) {
+
+    }
+
+    let searchUrl = function () {
+        let url = '/SysLog/search?';
+        url += 'startTime=' + $scope.startTime;
+        url += '&endTime=' + $scope.endTime;
+        url += '&appId=' + $scope.selectedAppId;
+        url += '&pageIndex=' + $scope.pageInfo.pageIndex;
+        url += '&pageSize=20';
+        url += ('&_=' + new Date().getTime());
+        return url;
+    }
+
+    $scope.search = function () {
+        $http.get(searchUrl())
+            .then(
+                r => {
+                    if (r.data.success) {
+                        $scope.logs = r.data.data;
+                    } else {
+                        $scope.logs = [];
+                        alert(r.data.message);
+                    }
+                },
+                err => {
+                    console.log(err);
+                    alert(err.statusText);
+                });
+    }
+
+    $http.get('/app/all?_=' + (new Date).getTime())
+        .then(
+            r => {
+                if (r.data.success) {
+                    $scope.apps = r.data.data;
+                    $scope.apps.unshift({
+                        id: '',
+                        name: ''
+                    });
+                    
+                } else {
+                    $scope.apps = [];
+                    alert(r.data.message);
+                }
+            },
+            err => {
+                console.log(err);
+                alert(err.statusText);
+            }
+    );
+
+    $scope.search();
 });
