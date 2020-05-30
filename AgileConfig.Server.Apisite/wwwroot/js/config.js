@@ -58,7 +58,7 @@ app.controller('listConfigCtrl', function ($scope, $http, $state) {
             $scope.pageInfo.pageIndex += 1;
         }
 
-        let url = `/config/search?_=appId=${$scope.selectedAppId}&group=${$scope.filter_group}&key=${$scope.filter_key}&pageSize=20&pageIndex=${$scope.pageInfo.pageIndex}`;
+        let url = `/config/search?appId=${$scope.selectedAppId}&group=${$scope.filter_group}&key=${$scope.filter_key}&pageSize=20&pageIndex=${$scope.pageInfo.pageIndex}`;
         url = url + '&_=' + (new Date).getTime();
 
         return url;
