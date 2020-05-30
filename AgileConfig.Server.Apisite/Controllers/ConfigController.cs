@@ -200,9 +200,8 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var configs = await _configService.Search(appId, group, key);
-            configs = configs.Where(c => c.Status == ConfigStatus.Enabled)
-                .OrderBy(c => c.AppId).ThenBy(c => c.Group).ThenBy(c => c.Key)
-                .ToList();
+            configs = configs.Where(c => c.Status == ConfigStatus.Enabled).ToList();
+            configs = configs.OrderBy(c => c.AppId).ThenBy(c => c.Group).ThenBy(c => c.Key).ToList();
 
             var page = configs.Skip((pageIndex - 1) * pageSize).Take(pageSize);
             var total = configs.Count();
