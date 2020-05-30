@@ -215,7 +215,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             return Json(new
             {
                 success = true,
-                data = configs,
+                data = page,
                 totalPages
             });
         }
