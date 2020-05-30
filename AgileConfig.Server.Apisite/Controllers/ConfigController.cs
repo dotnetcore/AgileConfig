@@ -188,17 +188,35 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Search(string appId, string group, string key)
+        public async Task<IActionResult> Search(string appId, string group, string key, int pageSize, int pageIndex)
         {
+            if (pageSize == 0)
+            {
+                throw new ArgumentException("pageSize can not be 0 .");
+            }
+            if (pageIndex == 0)
+            {
+                throw new ArgumentException("pageIndex can not be 0 .");
+            }
+
             var configs = await _configService.Search(appId, group, key);
             configs = configs.Where(c => c.Status == ConfigStatus.Enabled)
                 .OrderBy(c => c.AppId).ThenBy(c => c.Group).ThenBy(c => c.Key)
                 .ToList();
 
+            var page = configs.Skip((pageIndex - 1) * pageSize).Take(pageSize);
+            var total = configs.Count();
+            var totalPages = total / pageSize;
+            if ((total % pageSize) > 0)
+            {
+                totalPages++;
+            }
+
             return Json(new
             {
                 success = true,
-                data = configs
+                data = configs,
+                totalPages
             });
         }
 

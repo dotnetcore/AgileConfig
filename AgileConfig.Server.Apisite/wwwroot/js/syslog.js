@@ -6,7 +6,7 @@
     $scope.pageInfo = {
         pageIndex: 1,
         showPages: 5,
-        totalPages: 10
+        totalPages: 0
     };
     $scope.typeName = function (type) {
         if (type === 0) {
@@ -22,10 +22,15 @@
         return $scope.apps.find(a => a.id === appId);
     }
     $scope.changePage = function (index) {
-
+        $scope.pageInfo.pageIndex = index;
+        $scope.search();
     }
 
     let searchUrl = function () {
+        if ($scope.pageInfo.pageIndex === 0) {
+            $scope.pageInfo.pageIndex += 1;
+        }
+
         let url = '/SysLog/search?';
         url += 'startTime=' + $scope.startTime;
         url += '&endTime=' + $scope.endTime;
@@ -42,6 +47,7 @@
                 r => {
                     if (r.data.success) {
                         $scope.logs = r.data.data;
+                        $scope.pageInfo.totalPages = r.data.totalPages;
                     } else {
                         $scope.logs = [];
                         alert(r.data.message);

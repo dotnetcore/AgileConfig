@@ -26,17 +26,24 @@ namespace AgileConfig.Server.Service
             return x > 0;
         }
 
+        public async Task<long> Count(string appId, DateTime startTime, DateTime endTime)
+        {
+            var query = _dbContext.SysLogs.AsNoTracking();
+            if (!string.IsNullOrEmpty(appId))
+            {
+                query = query.Where(x => x.AppId == appId);
+            }
+            query = query.Where(x => x.LogTime >= startTime);
+            query = query.Where(x => x.LogTime < endTime);
+
+
+            var count = await query.LongCountAsync();
+
+            return count;
+        }
+
         public Task<List<SysLog>> SearchPage(string appId, DateTime startTime, DateTime endTime, int pageSize, int pageIndex)
         {
-            if (pageSize == 0)
-            {
-                throw new ArgumentException("pageSize can not be 0 .");
-            }
-            if (pageIndex == 0)
-            {
-                throw new ArgumentException("pageIndex can not be 0 .");
-            }
-
             var query = _dbContext.SysLogs.AsNoTracking();
             if (!string.IsNullOrEmpty(appId))
             {

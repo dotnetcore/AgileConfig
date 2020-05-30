@@ -10,5 +10,8 @@ namespace AgileConfig.Server.IService
         Task<bool> AddSysLogSync(SysLog log);
 
         Task<List<SysLog>> SearchPage(string appId, DateTime startTime, DateTime endTime, int pageSize, int pageIndex);
+
+        Task<long> Count(string appId, DateTime startTime, DateTime endTime);
+
     }
 }

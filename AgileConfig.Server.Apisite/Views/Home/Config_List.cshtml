@@ -10,8 +10,8 @@
                     {{app.name}}
                 </option>
             </select>
-            配置组：<input ng-model="filter_group" class="form-control"/>
-            配置键：<input ng-model="filter_key" class="form-control"/>
+            配置组：<input ng-model="filter_group" class="form-control" />
+            配置键：<input ng-model="filter_key" class="form-control" />
             <button class="btn btn-success btn-sm" ng-click="search()">查询</button>
         </div>
         <div>
@@ -46,5 +46,6 @@
             </td>
         </tr>
     </table>
+    <pagebar page-info='pageInfo' on-change='changePage'></pagebar>
 
 </div>

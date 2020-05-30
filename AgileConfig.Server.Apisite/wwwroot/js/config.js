@@ -8,6 +8,11 @@ app.controller('listConfigCtrl', function ($scope, $http, $state) {
     $scope.selectedAppId = '';
     $scope.filter_group = '';
     $scope.filter_key = '';
+    $scope.pageInfo = {
+        pageIndex: 1,
+        showPages: 5,
+        totalPages: 0
+    };
 
     $scope.onlineStatusDesc = {
         '0': "待上线",
@@ -43,8 +48,17 @@ app.controller('listConfigCtrl', function ($scope, $http, $state) {
             });
     };
 
+    $scope.changePage = function (index) {
+        $scope.pageInfo.pageIndex = index;
+        $scope.search();
+    }
+
     let newSearchUrl = function () {
-        let url = `/config/search?_=appId=${$scope.selectedAppId}&group=${$scope.filter_group}&key=${$scope.filter_key}`;
+        if ($scope.pageInfo.pageIndex === 0) {
+            $scope.pageInfo.pageIndex += 1;
+        }
+
+        let url = `/config/search?_=appId=${$scope.selectedAppId}&group=${$scope.filter_group}&key=${$scope.filter_key}&pageSize=20&pageIndex=${$scope.pageInfo.pageIndex}`;
         url = url + '&_=' + (new Date).getTime();
 
         return url;
@@ -55,6 +69,7 @@ app.controller('listConfigCtrl', function ($scope, $http, $state) {
                 r => {
                     if (r.data.success) {
                         $scope.configs = r.data.data;
+                        $scope.pageInfo.totalPages = r.data.totalPages;
                     } else {
                         $scope.configs = [];
                         alert(r.data.message);

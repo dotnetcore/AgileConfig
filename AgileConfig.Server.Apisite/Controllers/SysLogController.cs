@@ -20,12 +20,28 @@ namespace AgileConfig.Server.Apisite.Controllers
         [HttpGet]
         public async Task<IActionResult> Search(string appId, DateTime startTime, DateTime endTime, int pageSize, int pageIndex)
         {
+            if (pageSize == 0)
+            {
+                throw new ArgumentException("pageSize can not be 0 .");
+            }
+            if (pageIndex == 0)
+            {
+                throw new ArgumentException("pageIndex can not be 0 .");
+            }
+
             var pageList = await _sysLogService.SearchPage(appId, startTime, endTime.Date.AddDays(1), pageSize, pageIndex);
+            var total = await _sysLogService.Count(appId, startTime, endTime.Date.AddDays(1));
+            var totalPages = total / pageSize;
+            if ((total % pageSize) > 0)
+            {
+                totalPages++;
+            }
 
             return Json(new
             {
                 success = true,
-                data = pageList
+                data = pageList,
+                totalPages = totalPages
             });
         }
     }
