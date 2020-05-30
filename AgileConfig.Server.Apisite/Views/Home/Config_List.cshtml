@@ -27,9 +27,9 @@
             <th class="col">创建时间</th>
             <th class="col">修改时间</th>
             <th class="col">上线状态</th>
-            <th class="col"></th>
+            <th class="col" style="width:250px"></th>
         </tr>
-        <tr ng-repeat="config in configs|filter:{status:1 }|filter:{appId: selectedAppId}">
+        <tr ng-repeat="config in configs|filter:{status:1 }">
             <td ng-bind="config.group"></td>
             <td ng-bind="config.key"></td>
             <td ng-bind="config.value"></td>

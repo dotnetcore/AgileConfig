@@ -101,16 +101,6 @@ namespace AgileConfig.Server.Service
             var x = await _dbContext.SaveChangesAsync();
             var result = x > 0;
 
-            if (result)
-            {
-                await _sysLogService.AddSysLogSync(new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    LogText = $"编辑节点：{node.Address}"
-                });
-            }
-
             return result;
         }
     }
