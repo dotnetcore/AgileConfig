@@ -135,6 +135,12 @@ app.controller('listConfigCtrl', function ($scope, $http, $state) {
         }
     };
 
+    $scope.$watch('selectedAppId', function (newval, oldval) {
+        if (newval != oldval) {
+            $scope.search();
+        }
+    });  
+
     $http.get('/app/all?_=' + (new Date).getTime())
         .then(
             r => {
@@ -142,7 +148,6 @@ app.controller('listConfigCtrl', function ($scope, $http, $state) {
                     $scope.apps = r.data.data;
                     if ($scope.apps.length > 0) {
                         $scope.selectedAppId = $scope.apps[0].id;
-                        $scope.search();
                     }
                 } else {
                     $scope.apps = [];

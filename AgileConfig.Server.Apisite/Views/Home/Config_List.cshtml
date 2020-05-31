@@ -5,7 +5,7 @@
     <div class="add-bar">
         <div class="form-inline">
             所属应用：
-            <select ng-model="selectedAppId" class="form-control">
+            <select ng-model="selectedAppId" class="form-control" >
                 <option ng-repeat="app in apps" value="{{app.id}}">
                     {{app.name}}
                 </option>
@@ -36,7 +36,7 @@
             <td ng-bind="config.description"></td>
             <td ng-bind="config.createTime|date:'yyyy-MM-dd HH:mm'"></td>
             <td ng-bind="config.updateTime|date:'yyyy-MM-dd HH:mm'"></td>
-            <td ng-bind="onlineStatusDesc[config.onlineStatus]"></td>
+            <td ng-bind="onlineStatusDesc[config.onlineStatus]" ng-class="config.onlineStatus?'text-success':'text-warning'"></td>
             <td>
                 <button class="btn btn-success btn-xs" ng-click="publish(config)" ng-if="config.onlineStatus == 0">上线</button>
                 <button class="btn btn-warning btn-xs" ng-click="offline(config)" ng-if="config.onlineStatus == 1">下线</button>

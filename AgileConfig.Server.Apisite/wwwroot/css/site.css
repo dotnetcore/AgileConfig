@@ -60,6 +60,10 @@ body {
     }
 }
 
+table.table {
+    margin-bottom:0;
+}
+
 /* Sidebar navigation */
 .nav-sidebar {
     margin-right: -21px; /* 20px padding + 1px border */
