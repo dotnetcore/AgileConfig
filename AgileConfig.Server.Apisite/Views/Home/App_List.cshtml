@@ -8,9 +8,9 @@
 </div>
 <table class="table table-bordered table-hover">
     <tr>
+        <th>应用名称</th>
         <th>应用Id</th>
         <th>密钥</th>
-        <th>应用名称</th>
         <th>创建时间</th>
         <th>修改时间</th>
         <th>是否启用</th>
@@ -18,9 +18,9 @@
         <th></th>
     </tr>
     <tr ng-repeat="app in apps">
+        <td ng-bind="app.name"></td>
         <td ng-bind="app.id"></td>
         <td ng-bind="app.secret"></td>
-        <td ng-bind="app.name"></td>
         <td ng-bind="app.createTime|date:'yyyy-MM-dd HH:mm'"></td>
         <td ng-bind="app.updateTime|date:'yyyy-MM-dd HH:mm'"></td>
         <td ng-bind="app.enabled?'是':'否'"></td>

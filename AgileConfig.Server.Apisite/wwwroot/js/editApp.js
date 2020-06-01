@@ -1,4 +1,4 @@
-﻿app.controller('editAppCtrl', function ($scope, $http, $state, $stateParams) {
+﻿app.controller('editAppCtrl', function ($scope, $http, $state, $stateParams, $window) {
     let id = $stateParams.app_id;
     $scope.app = {
     };
@@ -31,6 +31,6 @@
     };
 
     $scope.cancel = function () {
-        $state.go('apps.list');
+        $window.history.back();
     };
 });

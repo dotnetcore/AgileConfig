@@ -10,7 +10,7 @@
                     {{app.name}}
                 </option>
             </select>
-            配置组：<input ng-model="filter_group" class="form-control" />
+            组：<input ng-model="filter_group" class="form-control" />
             配置键：<input ng-model="filter_key" class="form-control" />
             <button class="btn btn-success btn-sm" ng-click="search()">查询</button>
         </div>
@@ -20,24 +20,24 @@
     </div>
     <table class="table table-bordered table-hover config_list">
         <tr>
-            <th class="col">配置组</th>
             <th class="col">配置键</th>
             <th class="col">值</th>
+            <th class="col">组</th>
             <th class="table_col_desc">描述</th>
-            <th class="col">创建时间</th>
-            <th class="col">修改时间</th>
-            <th class="col">上线状态</th>
-            <th class="col" style="width:250px"></th>
+            <th class="">创建时间</th>
+            <th class="">修改时间</th>
+            <th class="">上线状态</th>
+            <th class=""></th>
         </tr>
         <tr ng-repeat="config in configs|filter:{status:1 }">
-            <td ng-bind="config.group"></td>
             <td ng-bind="config.key"></td>
             <td ng-bind="config.value"></td>
+            <td ng-bind="config.group"></td>
             <td ng-bind="config.description"></td>
-            <td ng-bind="config.createTime|date:'yyyy-MM-dd HH:mm'"></td>
-            <td ng-bind="config.updateTime|date:'yyyy-MM-dd HH:mm'"></td>
-            <td ng-bind="onlineStatusDesc[config.onlineStatus]" ng-class="config.onlineStatus?'text-success':'text-warning'"></td>
-            <td>
+            <td ng-bind="config.createTime|date:'yyyy-MM-dd HH:mm'" style="width:140px"></td>
+            <td ng-bind="config.updateTime|date:'yyyy-MM-dd HH:mm'" style="width:140px"></td>
+            <td ng-bind="onlineStatusDesc[config.onlineStatus]" ng-class="config.onlineStatus?'text-success':'text-warning'" style="width:80px"></td>
+            <td style="width:220px">
                 <button class="btn btn-success btn-xs" ng-click="publish(config)" ng-if="config.onlineStatus == 0">上线</button>
                 <button class="btn btn-warning btn-xs" ng-click="offline(config)" ng-if="config.onlineStatus == 1">下线</button>
                 <button class="btn btn-primary btn-xs" ng-click="toEdit(config)">修改</button>

@@ -1,4 +1,4 @@
-﻿app.controller('addAppCtrl', function ($scope, $http ,$state) {
+﻿app.controller('addAppCtrl', function ($scope, $http, $state, $window) {
     $scope.app = {
         id: '',
         name: '',
@@ -22,6 +22,6 @@
     };
 
     $scope.cancel = function () {
-        $state.go('apps.list');
+        $window.history.back();
     };
 });

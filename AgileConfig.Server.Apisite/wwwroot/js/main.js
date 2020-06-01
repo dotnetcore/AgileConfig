@@ -37,7 +37,7 @@ app.config(function ($stateProvider, $urlRouterProvider) {
         controller: 'configCtrl'
     };
     let listConfigState = {
-        url: '/list',
+        url: '/list/:app_id',
         templateUrl: '/home/getview?viewName=config_list',
         controller: 'listConfigCtrl'
     };

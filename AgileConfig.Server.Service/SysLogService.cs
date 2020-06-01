@@ -52,7 +52,7 @@ namespace AgileConfig.Server.Service
             query = query.Where(x => x.LogTime >= startTime);
             query = query.Where(x => x.LogTime < endTime);
 
-            query = query.Skip((pageIndex - 1) * pageSize).Take(pageSize);
+            query = query.OrderByDescending(x => x.Id).Skip((pageIndex - 1) * pageSize).Take(pageSize);
 
             return query.ToListAsync();
         }

@@ -1,4 +1,4 @@
-﻿app.controller('addNodeCtrl', function ($scope, $http, $state) {
+﻿app.controller('addNodeCtrl', function ($scope, $http, $state, $window) {
     $scope.node = {
         address: '',
         remark: ''
@@ -19,6 +19,6 @@
     };
 
     $scope.cancel = function () {
-        $state.go('nodes.list');
+        $window.history.back();
     };
 });

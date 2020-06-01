@@ -1,4 +1,4 @@
-﻿app.controller('addConfigCtrl', function ($scope, $http, $state) {
+﻿app.controller('addConfigCtrl', function ($scope, $http, $state, $window) {
     $scope.config = {
         group: ''
     };
@@ -21,7 +21,10 @@
             .then(r => {
                 if (r.data.success) {
                     alert('新建配置成功。');
-                    $state.go('config.list');
+                    $state.go('config.list', {
+                        app_id: $scope.config.appId
+                    });
+                    //$window.history.back();
                 } else {
                     $scope.error_message = r.data.message;
                 }
@@ -32,6 +35,6 @@
     };
 
     $scope.cancel = function () {
-        $state.go('config.list');
+        $window.history.back();
     };
 });

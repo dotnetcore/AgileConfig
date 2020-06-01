@@ -1,4 +1,4 @@
-﻿app.controller('editConfigCtrl', function ($scope, $http, $state, $stateParams) {
+﻿app.controller('editConfigCtrl', function ($scope, $http, $state, $stateParams, $window) {
     let id = $stateParams.config_id;
     $scope.config = {
     };
@@ -34,7 +34,9 @@
             .then(r => {
                 if (r.data.success) {
                     alert('修改配置成功。');
-                    $state.go('config.list');
+                    $state.go('config.list', {
+                        app_id: $scope.config.appId
+                    });
                 } else {
                     $scope.error_message = r.data.message;
                 }
@@ -45,6 +47,6 @@
     };
 
     $scope.cancel = function () {
-        $state.go('config.list');
+        $window.history.back();
     };
 });

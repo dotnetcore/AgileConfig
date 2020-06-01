@@ -33,6 +33,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "protocol", "protocol", "{19
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agile.Config.Protocol", "Agile.Config.Protocol\Agile.Config.Protocol.csproj", "{1B01F2FF-0A07-45AD-BB8D-6DCAEF9381E1}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_test", "_test", "{F277EC27-8C0E-4490-9645-F5F3244F9246}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiSiteTests", "ApiSiteTests\ApiSiteTests.csproj", "{EA462A1A-03CB-4FF0-AA1E-0988021E8711}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,6 +79,10 @@ Global
 		{1B01F2FF-0A07-45AD-BB8D-6DCAEF9381E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1B01F2FF-0A07-45AD-BB8D-6DCAEF9381E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1B01F2FF-0A07-45AD-BB8D-6DCAEF9381E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA462A1A-03CB-4FF0-AA1E-0988021E8711}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA462A1A-03CB-4FF0-AA1E-0988021E8711}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA462A1A-03CB-4FF0-AA1E-0988021E8711}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA462A1A-03CB-4FF0-AA1E-0988021E8711}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -89,6 +97,7 @@ Global
 		{9C5756C3-DFD5-41FD-A4E8-883F937E0CE0} = {38C7514D-7FE2-4326-B84C-BC32807C4C85}
 		{134A88E1-42D8-499F-8EC3-4872C14D5A17} = {38C7514D-7FE2-4326-B84C-BC32807C4C85}
 		{1B01F2FF-0A07-45AD-BB8D-6DCAEF9381E1} = {1902AB89-1E27-44C0-8286-3147CC039FF6}
+		{EA462A1A-03CB-4FF0-AA1E-0988021E8711} = {F277EC27-8C0E-4490-9645-F5F3244F9246}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7F10DB58-5B6F-4EAC-994F-14E8046B306F}

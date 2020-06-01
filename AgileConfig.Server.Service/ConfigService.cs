@@ -39,7 +39,7 @@ namespace AgileConfig.Server.Service
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
                     AppId = config.AppId,
-                    LogText = $"新增配置【Key】:{config.Key} 【Group】：{config.Group} 【AppId】：{config.AppId}"
+                    LogText = $"新增配置【Key】:{config.Key} 【Value】：{config.Value} 【Group】：{config.Group} 【AppId】：{config.AppId}"
                 }); 
             }
 
@@ -60,7 +60,7 @@ namespace AgileConfig.Server.Service
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
                     AppId = config.AppId,
-                    LogText = $"编辑配置【Key】:{config.Key} 【Group】：{config.Group} 【AppId】：{config.AppId}"
+                    LogText = $"编辑配置【Key】:{config.Key} 【Value】：{config.Value}  【Group】：{config.Group} 【AppId】：{config.AppId}"
                 });
             }
 
@@ -86,7 +86,7 @@ namespace AgileConfig.Server.Service
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
                     AppId = config.AppId,
-                    LogText = $"删除配置【Key】:{config.Key} 【Group】：{config.Group} 【AppId】：{config.AppId}"
+                    LogText = $"删除配置【Key】:{config.Key} 【Value】：{config.Value}  【Group】：{config.Group} 【AppId】：{config.AppId}"
                 });
             }
 
@@ -112,7 +112,7 @@ namespace AgileConfig.Server.Service
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
                     AppId = config.AppId,
-                    LogText = $"删除配置【Key】:{config.Key} 【Group】：{config.Group} 【AppId】：{config.AppId}"
+                    LogText = $"删除配置【Key】:{config.Key} 【Value】：{config.Value} 【Group】：{config.Group} 【AppId】：{config.AppId}"
                 });
             }
 

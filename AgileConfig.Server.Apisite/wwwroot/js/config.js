@@ -1,8 +1,13 @@
 ﻿app.controller('configCtrl', function ($scope, $state) {
-    $state.go('config.list');
+    $state.go('config.list', {
+        app_id: ''
+    });
 });
 
-app.controller('listConfigCtrl', function ($scope, $http, $state) {
+app.controller('listConfigCtrl', function ($scope, $http, $state, $stateParams) {
+
+    let _appId = $stateParams.app_id;
+
     $scope.configs = [];
     $scope.apps = [];
     $scope.selectedAppId = '';
@@ -147,7 +152,11 @@ app.controller('listConfigCtrl', function ($scope, $http, $state) {
                 if (r.data.success) {
                     $scope.apps = r.data.data;
                     if ($scope.apps.length > 0) {
-                        $scope.selectedAppId = $scope.apps[0].id;
+                        if (_appId) {
+                            $scope.selectedAppId = _appId; 
+                        } else {
+                            $scope.selectedAppId = $scope.apps[0].id;
+                        }
                     }
                 } else {
                     $scope.apps = [];
