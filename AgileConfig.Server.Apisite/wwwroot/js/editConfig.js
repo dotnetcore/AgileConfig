@@ -1,4 +1,4 @@
-﻿app.controller('editConfigCtrl', function ($scope, $http, $state, $stateParams, $window) {
+﻿app.controller('editConfigCtrl', function ($scope, $http, $state, $stateParams) {
     let id = $stateParams.config_id;
     $scope.config = {
     };
@@ -47,6 +47,8 @@
     };
 
     $scope.cancel = function () {
-        $window.history.back();
+        $state.go('config.list', {
+            app_id: $scope.config.appId
+        });
     };
 });
