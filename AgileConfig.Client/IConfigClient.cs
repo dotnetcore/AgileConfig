@@ -24,7 +24,7 @@ namespace Agile.Config.Client
 
         ConcurrentDictionary<string, string> Data { get; }
 
-        void Connect();
+        Task ConnectAsync();
 
         bool Load();
 

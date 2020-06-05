@@ -74,11 +74,43 @@ namespace Agile.Config.Client
             return servers[index];
         }
 
+        public async Task ConnectAsync()
+        {
+            if (WebsocketClient?.State == WebSocketState.Open)
+            {
+                return;
+            }
+
+            WebsocketClient = null;
+            WebsocketClient = new ClientWebSocket();
+            WebsocketClient.Options.SetRequestHeader("appid", AppId);
+            WebsocketClient.Options.SetRequestHeader("Authorization", GenerateBasicAuthorization(AppId, Secret));
+            var server = PickOneServer();
+            var websocketServerUrl = "";
+            if (server.StartsWith("https:", StringComparison.CurrentCultureIgnoreCase))
+            {
+                websocketServerUrl = server.Replace("https:", "wss:").Replace("HTTPS:", "wss:");
+            }
+            else
+            {
+                websocketServerUrl = server.Replace("http:", "ws:").Replace("HTTP:", "ws:");
+            }
+            websocketServerUrl += "/ws";
+            await WebsocketClient.ConnectAsync(new Uri(websocketServerUrl), CancellationToken.None);
+            Logger?.LogTrace("AgileConfig Client Websocket Connected , {0}", websocketServerUrl);
+            HandleWebsocketMessageAsync();
+            WebsocketHeartbeatAsync();
+            //连接成功重新加载配置
+            Load();
+            //设置自动重连
+            AutoReConnect();
+        }
+
         /// <summary>
         /// 开启一个线程来初始化Websocket Client，并且5s一次进行检查是否连接打开状态，如果不是则尝试重连。
         /// </summary>
         /// <returns></returns>
-        public void Connect()
+        private void AutoReConnect()
         {
             if (_isConnecting)
             {
@@ -100,31 +132,13 @@ namespace Agile.Config.Client
                     {
                         WebsocketClient?.Abort();
                         WebsocketClient?.Dispose();
+                        await ConnectAsync();
+
                         if (_adminSayOffline)
                         {
                             break;
                         }
-                        WebsocketClient = null;
-                        WebsocketClient = new ClientWebSocket();
-                        WebsocketClient.Options.SetRequestHeader("appid", AppId);
-                        WebsocketClient.Options.SetRequestHeader("Authorization", GenerateBasicAuthorization(AppId, Secret));
-                        var server = PickOneServer();
-                        var websocketServerUrl = "";
-                        if (server.StartsWith("https:", StringComparison.CurrentCultureIgnoreCase))
-                        {
-                            websocketServerUrl = server.Replace("https:", "wss:").Replace("HTTPS:", "wss:");
-                        }
-                        else
-                        {
-                            websocketServerUrl = server.Replace("http:", "ws:").Replace("HTTP:", "ws:");
-                        }
-                        websocketServerUrl += "/ws";
-                        await WebsocketClient.ConnectAsync(new Uri(websocketServerUrl), CancellationToken.None);
-                        Logger?.LogTrace("AgileConfig Client Websocket Connected , {0}", websocketServerUrl);
-                        HandleWebsocketMessageAsync();
-                        WebsocketHeartbeatAsync();
-                        //连接成功重新加载配置
-                        Load();
+
                     }
                     catch (Exception ex)
                     {
@@ -220,7 +234,7 @@ namespace Agile.Config.Client
                     {
                         var msg = await reader.ReadToEndAsync();
                         Logger?.LogTrace("AgileConfig Client Receive message ' {0} ' by Websocket .", msg);
-                        if (string.IsNullOrEmpty(msg)|| msg == "0")
+                        if (string.IsNullOrEmpty(msg) || msg == "0")
                         {
                             return;
                         }
