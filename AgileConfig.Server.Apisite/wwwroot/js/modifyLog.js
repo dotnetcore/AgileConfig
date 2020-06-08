@@ -32,7 +32,9 @@
                 .then(r => {
                     if (r.data.success) {
                         alert('回滚成功。');
-                        $state.go('config.list');
+                        $state.go('config.list', {
+                            app_id: config.appId
+                        });
                     } else {
                         alert(r.data.message);
                     }
@@ -45,7 +47,10 @@
         }
     };
 
-    $scope.goback = function () {
-        $state.go('config.list');
+    $scope.goback = async function () {
+        let configResult = await $http.get('/config/get?id=' + id + '&_=' + new Date().getTime());
+        $state.go('config.list', {
+            app_id: configResult.data.data.appId
+        });
     };
 });

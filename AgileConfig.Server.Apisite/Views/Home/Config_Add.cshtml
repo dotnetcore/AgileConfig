@@ -11,7 +11,7 @@
         <label for="selectAppId">所属应用</label>
         <select ng-model="config.appId" id="selectAppId" class="form-control">
             <option ng-repeat="app in apps" value="{{app.id}}">
-                {{app.name}}
+                {{app.name}}({{app.id}})
             </option>
         </select>
     </div>

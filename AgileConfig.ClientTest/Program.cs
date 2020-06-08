@@ -20,8 +20,8 @@ namespace AgileConfigClientTest
 
                 var lf = serviceProvider.GetService<ILoggerFactory>();
 
-                var appId = "xxx";
-                var seret = "app1";
+                var appId = "app";
+                var seret = "xxx";
                 var host = "http://localhost:5000";
 
                 try
@@ -56,6 +56,10 @@ namespace AgileConfigClientTest
             Console.ReadLine();
         }
 
+        /// <summary>
+        /// 此事件会在配置项目发生新增、修改、删除的时候触发
+        /// </summary>
+        /// <param name="obj"></param>
         private static void Client_ConfigChanged(ConfigChangedArg obj)
         {
             if (obj != null)

@@ -37,7 +37,7 @@
             alert(err.statusText);
         });
 
-    $scope.goto = function (path) {
-        $state.go(path);
+    $scope.goto = function (path, op) {
+        $state.go(path, op);
     };
 });

@@ -23,7 +23,7 @@
         <td ng-bind="app.secret"></td>
         <td ng-bind="app.createTime|date:'yyyy-MM-dd HH:mm'"></td>
         <td ng-bind="app.updateTime|date:'yyyy-MM-dd HH:mm'"></td>
-        <td ng-bind="app.enabled?'是':'否'"></td>
+        <td ng-bind="app.enabled?'是':'否'" ng-class="app.enabled?'text-success':'text-warning'"></td>
         <td>
             <button class="btn btn-primary btn-xs" ng-click="toEdit(app)">修改</button>
             <button class="btn btn-danger btn-xs"

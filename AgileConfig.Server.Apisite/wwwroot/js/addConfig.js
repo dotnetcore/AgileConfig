@@ -21,9 +21,16 @@
             .then(r => {
                 if (r.data.success) {
                     alert('新建配置成功。');
-                    $state.go('config.list', {
-                        app_id: $scope.config.appId
-                    });
+                    let cr = confirm('是否继续新建配置？');
+                    if (!cr) {
+                        $state.go('config.list', {
+                            app_id: $scope.config.appId
+                        });
+                    } else {
+                        $scope.config = {
+                            group: ''
+                        };
+                    }
                     //$window.history.back();
                 } else {
                     $scope.error_message = r.data.message;

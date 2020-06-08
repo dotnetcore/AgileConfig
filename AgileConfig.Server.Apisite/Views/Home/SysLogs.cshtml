@@ -6,7 +6,7 @@
         所属应用：
         <select ng-model="selectedAppId" class="form-control">
             <option ng-repeat="app in apps" value="{{app.id}}">
-                {{app.name}}
+                {{app.name + (app.id?('('+app.id+')' ): app.id) }}
             </option>
         </select>
         开始时间：<input ng-model="startTime" class="form-control" datetimepicker view-mode="month">
