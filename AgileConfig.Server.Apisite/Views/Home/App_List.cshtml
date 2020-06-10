@@ -26,7 +26,8 @@
         <td ng-bind="app.enabled?'是':'否'" ng-class="app.enabled?'text-success':'text-warning'"></td>
         <td>
             <button class="btn btn-primary btn-xs" ng-click="toEdit(app)">修改</button>
-            <button class="btn btn-danger btn-xs"
+            <button class="btn btn-xs"
+                    ng-class="app.enabled?'btn-danger':'btn-success'"
                     ng-bind="app.enabled?'停用':'启用'"
                     ng-click="disableOrEnable(app)"></button>
         </td>

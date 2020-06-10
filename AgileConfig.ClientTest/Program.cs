@@ -20,8 +20,8 @@ namespace AgileConfigClientTest
 
                 var lf = serviceProvider.GetService<ILoggerFactory>();
 
-                var appId = "app";
-                var seret = "xxx";
+                var appId = "app01";
+                var seret = "11";
                 var host = "http://localhost:5000";
 
                 try
