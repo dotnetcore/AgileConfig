@@ -170,3 +170,21 @@ table.table {
     display: flex;
     justify-content: space-between;
 }
+
+select.form-control {
+    padding-top:0;
+    padding-bottom:0;
+}
+table {
+    width: 100%;
+}
+
+    table tr td, th {
+        width: 50px;
+        text-align: center;
+        border: solid 1px #ccc;
+        padding: 5px;
+    }
+
+    table tr.row-selected {
+    }

@@ -20,7 +20,7 @@ namespace AgileConfig.Server.Data.Entity
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        [Column("app_id")]
+        [Column("app_id",TypeName = "nvarchar(36)")]
         public string AppId { get; set; }
 
         [Column("log_type")]

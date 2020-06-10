@@ -15,30 +15,34 @@
             <button class="btn btn-success btn-sm" ng-click="search()">查询</button>
         </div>
         <div>
-            <button class="btn btn-success btn-sm" ng-click="toAdd()">上线选中配置</button>
+            <button class="btn btn-success btn-sm" ng-click="publishSelected()">上线选中的配置</button>
             <button class="btn btn-info btn-sm" ng-click="toAdd()">新建配置</button>
         </div>
     </div>
-    <table class="table table-bordered table-hover config_list">
+    <table class="table-hover config_list">
         <tr>
+            <th>选择</th>
             <th class="col">配置键</th>
             <th class="col">值</th>
             <th class="col">组</th>
             <th class="table_col_desc">描述</th>
-            <th class="">创建时间</th>
-            <th class="">修改时间</th>
+            <th class="" style="min-width:140px">创建时间</th>
+            <th class="" style="min-width:140px">修改时间</th>
             <th class="">上线状态</th>
-            <th class=""></th>
+            <th class=""  style="width:220px"></th>
         </tr>
-        <tr ng-repeat="config in configs|filter:{status:1 }">
+        <tr ng-repeat="config in configs|filter:{status:1 }" ng-click="config.selected=!config.selected" ng-class="config.selected?'row-selected':''">
+            <td>
+                <span ng-show="config.selected" class="glyphicon glyphicon-ok" ></span>
+            </td>
             <td ng-bind="config.key"></td>
             <td ng-bind="config.value"></td>
             <td ng-bind="config.group"></td>
             <td ng-bind="config.description"></td>
-            <td ng-bind="config.createTime|date:'yyyy-MM-dd HH:mm'" style="width:140px"></td>
-            <td ng-bind="config.updateTime|date:'yyyy-MM-dd HH:mm'" style="width:140px"></td>
+            <td ng-bind="config.createTime|date:'yyyy-MM-dd HH:mm'" ></td>
+            <td ng-bind="config.updateTime|date:'yyyy-MM-dd HH:mm'" ></td>
             <td ng-bind="onlineStatusDesc[config.onlineStatus]" ng-class="config.onlineStatus?'text-success':'text-warning'" style="width:80px"></td>
-            <td style="width:220px">
+            <td>
                 <button class="btn btn-success btn-xs" ng-click="publish(config)" ng-if="config.onlineStatus == 0">上线</button>
                 <button class="btn btn-warning btn-xs" ng-click="offline(config)" ng-if="config.onlineStatus == 1">下线</button>
                 <button class="btn btn-primary btn-xs" ng-click="toEdit(config)">修改</button>
@@ -50,3 +54,4 @@
     <pagebar page-info='pageInfo' on-change='changePage'></pagebar>
 
 </div>
+

@@ -33,14 +33,6 @@ namespace AgileConfig.Server.Service
             if (result)
             {
                 ClearAppPublishedConfigsMd5Cache(config.AppId);
-
-                await _sysLogService.AddSysLogSync(new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    AppId = config.AppId,
-                    LogText = $"新增配置【Key】:{config.Key} 【Value】：{config.Value} 【Group】：{config.Group} 【AppId】：{config.AppId}"
-                }); 
             }
 
             return result;
@@ -54,14 +46,6 @@ namespace AgileConfig.Server.Service
             if (result)
             {
                 ClearAppPublishedConfigsMd5Cache(config.AppId);
-
-                await _sysLogService.AddSysLogSync(new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    AppId = config.AppId,
-                    LogText = $"编辑配置【Key】:{config.Key} 【Value】：{config.Value}  【Group】：{config.Group} 【AppId】：{config.AppId}"
-                });
             }
 
             return result;
@@ -80,14 +64,6 @@ namespace AgileConfig.Server.Service
             if (result)
             {
                 ClearAppPublishedConfigsMd5Cache(config.AppId);
-
-                await _sysLogService.AddSysLogSync(new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    AppId = config.AppId,
-                    LogText = $"删除配置【Key】:{config.Key} 【Value】：{config.Value}  【Group】：{config.Group} 【AppId】：{config.AppId}"
-                });
             }
 
             return result;
@@ -106,14 +82,6 @@ namespace AgileConfig.Server.Service
             if (result)
             {
                 ClearAppPublishedConfigsMd5Cache(config.AppId);
-
-                await _sysLogService.AddSysLogSync(new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    AppId = config.AppId,
-                    LogText = $"删除配置【Key】:{config.Key} 【Value】：{config.Value} 【Group】：{config.Group} 【AppId】：{config.AppId}"
-                });
             }
 
             return result;

@@ -26,16 +26,6 @@ namespace AgileConfig.Server.Service
             int x = await _dbContext.SaveChangesAsync();
             var result =  x > 0;
 
-            if (result)
-            {
-                await _sysLogService.AddSysLogSync(new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    LogText = $"新增应用【AppId】:{app.Id}"
-                });
-            }
-
             return result;
         }
 
@@ -49,16 +39,6 @@ namespace AgileConfig.Server.Service
             int x = await _dbContext.SaveChangesAsync();
             var result = x > 0;
 
-            if (result)
-            {
-                await _sysLogService.AddSysLogSync(new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    LogText = $"删除应用【AppId】:{app.Id}"
-                });
-            }
-
             return result;
         }
 
@@ -71,16 +51,6 @@ namespace AgileConfig.Server.Service
             }
             int x = await _dbContext.SaveChangesAsync();
             var result = x > 0;
-
-            if (result)
-            {
-                await _sysLogService.AddSysLogSync(new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    LogText = $"删除应用【AppId】:{app.Id}"
-                });
-            }
 
             return result;
         }
@@ -101,16 +71,6 @@ namespace AgileConfig.Server.Service
             var x = await _dbContext.SaveChangesAsync();
 
             var result = x > 0;
-
-            if (result)
-            {
-                await _sysLogService.AddSysLogSync(new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    LogText = $"编辑应用【AppId】:{app.Id}"
-                });
-            }
 
             return result;
         }

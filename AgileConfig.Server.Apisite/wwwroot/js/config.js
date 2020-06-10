@@ -116,6 +116,34 @@ app.controller('listConfigCtrl', function ($scope, $http, $state, $stateParams) 
                 );
         }
     };
+    $scope.publishSelected = function () {
+        var selectedConfgs = $scope.configs.filter(c => c.selected && c.onlineStatus === 0);
+        if (!selectedConfgs.length) {
+            alert('请至少选择一行待上线的配置。');
+            return;
+        }
+        let cr = confirm('是否确定上线选中的配置?');
+        if (!cr) {
+            return;
+        }
+        $http.post('/config/PublishSome', selectedConfgs.map(c=>c.id))
+            .then(
+                r => {
+                    if (r.data.success) {
+                        selectedConfgs.forEach(item => {
+                            item.onlineStatus = 1;
+                        })
+                        alert('上线成功。');
+                    } else {
+                        alert(r.data.message);
+                    }
+                },
+                err => {
+                    console.log(err);
+                    alert(err.statusText);
+                }
+            );
+    }
     $scope.offline = function (config) {
         let cr = confirm('是否确定下线' + `配置【${config.key}】?`);
         if (!cr) {

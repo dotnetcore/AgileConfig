@@ -27,8 +27,10 @@
                             app_id: $scope.config.appId
                         });
                     } else {
+                        let lastAppId = $scope.config.appId;
                         $scope.config = {
-                            group: ''
+                            group: '',
+                            appId: lastAppId
                         };
                     }
                     //$window.history.back();

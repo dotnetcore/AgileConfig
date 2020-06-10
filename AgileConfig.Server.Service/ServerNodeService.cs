@@ -26,16 +26,6 @@ namespace AgileConfig.Server.Service
             int x = await _dbContext.SaveChangesAsync();
             var result = x > 0;
 
-            if (result)
-            {
-                await _sysLogService.AddSysLogSync(new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    LogText = $"新增节点：{node.Address}"
-                });
-            }
-
             return result;
         }
 
@@ -49,16 +39,6 @@ namespace AgileConfig.Server.Service
             int x = await _dbContext.SaveChangesAsync();
             var result = x > 0;
 
-            if (result)
-            {
-                await _sysLogService.AddSysLogSync(new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    LogText = $"删除节点：{node.Address}"
-                });
-            }
-
             return result;
         }
 
@@ -71,16 +51,6 @@ namespace AgileConfig.Server.Service
             }
             int x = await _dbContext.SaveChangesAsync();
             var result = x > 0;
-
-            if (result)
-            {
-                await _sysLogService.AddSysLogSync(new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    LogText = $"删除节点：{address}"
-                });
-            }
 
             return result;
         }

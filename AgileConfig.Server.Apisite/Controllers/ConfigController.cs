@@ -8,6 +8,7 @@ using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
 using Agile.Config.Protocol;
 using Microsoft.AspNetCore.Authorization;
+using System.Collections.Generic;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -69,6 +70,14 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
+                //add syslog
+                await _sysLogService.AddSysLogSync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    AppId = config.AppId,
+                    LogText = $"新增配置【Key:{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
+                });
                 //add modify log 
                 await _modifyLogService.AddAsync(new ModifyLog
                 {
@@ -148,7 +157,14 @@ namespace AgileConfig.Server.Apisite.Controllers
                     Value = config.Value,
                     ModifyTime = config.UpdateTime.Value
                 });
-                
+                //syslog
+                await _sysLogService.AddSysLogSync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    AppId = config.AppId,
+                    LogText = $"删除配置【Key:{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
+                });
                 //notice clients
                 var action = new WebsocketAction
                 {
@@ -261,6 +277,14 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
+                //add syslog
+                await _sysLogService.AddSysLogSync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    AppId = config.AppId,
+                    LogText = $"删除配置【Key:{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
+                });
                 //notice clients
                 var action = new WebsocketAction { Action = ActionConst.Remove, Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value } };
                 var nodes = await _serverNodeService.GetAllNodesAsync();
@@ -268,6 +292,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 {
                     await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, config.AppId, action);
                 }
+
             }
 
             return Json(new
@@ -320,7 +345,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
                     AppId = config.AppId,
-                    LogText = $"下线配置【Key】:{config.Key} 【Group】：{config.Group} 【AppId】：{config.AppId}"
+                    LogText = $"下线配置【Key:{config.Key}】 【Group：{config.Group}】 【AppId：{config.AppId}】"
                 }) ;
                 //notice clients the config item is offline
                 var action = new WebsocketAction { Action = ActionConst.Remove, Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value } };
@@ -338,7 +363,60 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
-        [HttpPost]
+        public async Task<IActionResult> PublishSome([FromBody]List<string> configIds)
+        {
+            if (configIds == null)
+            {
+                throw new ArgumentNullException("configIds");
+            }
+
+            var nodes = await _serverNodeService.GetAllNodesAsync();
+            foreach (var configId in configIds)
+            {
+                var config = await _configService.GetAsync(configId);
+                if (config == null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "未找到对应的配置项。"
+                    });
+                }
+                if (config.OnlineStatus == OnlineStatus.Online)
+                {
+                    continue;
+                }
+                config.OnlineStatus = OnlineStatus.Online;
+                var result = await _configService.UpdateAsync(config);
+                if (result)
+                {
+                    await _sysLogService.AddSysLogSync(new SysLog
+                    {
+                        LogTime = DateTime.Now,
+                        LogType = SysLogType.Normal,
+                        AppId = config.AppId,
+                        LogText = $"上线配置【Key:{config.Key}】 【Group：{config.Group}】 【AppId：{config.AppId}】"
+                    });
+                    //notice clients config item is published
+                    var action = new WebsocketAction
+                    {
+                        Action = ActionConst.Add,
+                        Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value }
+                    };
+                    foreach (var node in nodes)
+                    {
+                        await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, config.AppId, action);
+                    }
+                }
+            }
+            return Json(new
+            {
+                success = true,
+                message = "上线配置成功"
+            });
+        }
+
+       [HttpPost]
         public async Task<IActionResult> Publish(string configId)
         {
             if (string.IsNullOrEmpty(configId))
@@ -355,6 +433,16 @@ namespace AgileConfig.Server.Apisite.Controllers
                     message = "未找到对应的配置项。"
                 });
             }
+
+            if (config.OnlineStatus == OnlineStatus.Online)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "该配置已上线"
+                });
+            }
+
             config.OnlineStatus = OnlineStatus.Online;
             var result = await _configService.UpdateAsync(config);
             if (result)
@@ -364,7 +452,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
                     AppId = config.AppId,
-                    LogText = $"上线配置【Key】:{config.Key} 【Group】：{config.Group} 【AppId】：{config.AppId}"
+                    LogText = $"上线配置【Key:{config.Key}】 【Group：{config.Group}】 【AppId：{config.AppId}】"
                 });
                 //notice clients config item is published
                 var action = new WebsocketAction

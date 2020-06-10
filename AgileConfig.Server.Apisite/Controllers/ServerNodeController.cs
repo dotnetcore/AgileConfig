@@ -48,7 +48,16 @@ namespace AgileConfig.Server.Apisite.Controllers
             node.CreateTime = DateTime.Now;
 
             var result = await _serverNodeService.AddAsync(node);
-
+            if (result)
+            {
+                await _sysLogService.AddSysLogSync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    LogText = $"新增节点：{node.Address}"
+                });
+            }
+           
             return Json(new
             {
                 success = result,
@@ -76,7 +85,15 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var result = await _serverNodeService.DeleteAsync(node);
-
+            if (result)
+            {
+                await _sysLogService.AddSysLogSync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    LogText = $"删除节点：{node.Address}"
+                });
+            }
             return Json(new
             {
                 success = result,

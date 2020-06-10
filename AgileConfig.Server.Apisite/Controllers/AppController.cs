@@ -50,6 +50,15 @@ namespace AgileConfig.Server.Apisite.Controllers
             app.UpdateTime = null;
 
             var result = await _appService.AddAsync(app);
+            if (result)
+            {
+                await _sysLogService.AddSysLogSync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    LogText = $"新增应用【AppId：{app.Id}】【AppName：{app.Name}】"
+                });
+            }
 
             return Json(new
             {
@@ -83,7 +92,15 @@ namespace AgileConfig.Server.Apisite.Controllers
             app.UpdateTime = DateTime.Now;
 
             var result = await _appService.UpdateAsync(app);
-
+            if (result)
+            {
+                await _sysLogService.AddSysLogSync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    LogText = $"修改应用【AppId：{app.Id}】【AppName：{app.Name}】"
+                });
+            }
             return Json(new
             {
                 success = result,

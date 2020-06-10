@@ -17,19 +17,27 @@ namespace AgileConfig.Server.Apisite.Controllers.api
     public class ConfigController : Controller
     {
         private readonly IConfigService _configService;
-        private readonly ILogger _logger;
+        private readonly IAppService _appService;
 
-        public ConfigController(IConfigService configService, ILoggerFactory loggerFactory)
+        public ConfigController(
+            IConfigService configService,
+            ILoggerFactory loggerFactory,
+            IAppService appService)
         {
             _configService = configService;
-            _logger = loggerFactory.CreateLogger<ConfigController>();
+            _appService = appService;
         }
         // GET: api/<controller>
         [HttpGet("app/{appId}")]
-        public async Task<List<ConfigVM>> Get(string appId)
+        public async Task<ActionResult<List<ConfigVM>>> Get(string appId)
         {
-            var configs = await _configService.GetPublishedConfigsByAppId(appId);
+            var app =await _appService.GetAsync(appId);
+            if (!app.Enabled)
+            {
+                return NotFound();
+            }
 
+            var configs = await _configService.GetPublishedConfigsByAppId(appId);
             var vms = configs.Select(c => {
                 return new ConfigVM() {
                     Id = c.Id,
@@ -40,8 +48,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                     Status = c.Status
                 };
             });
-
-            _logger.LogTrace($"get app {appId} configs .");
 
             return vms.ToList();
         }
