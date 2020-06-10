@@ -25,6 +25,11 @@ namespace AgileConfig.Server.Service
             return x > 0;
         }
 
+        public async Task<ModifyLog> GetAsync(string logId)
+        {
+            return await _dbContext.ModifyLogs.FindAsync(logId);
+        }
+
         public async Task<List<ModifyLog>> Search(string configId)
         {
             var logs = await _dbContext.ModifyLogs.Where(m => m.ConfigId == configId).ToListAsync();

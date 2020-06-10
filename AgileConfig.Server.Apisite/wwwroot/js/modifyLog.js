@@ -23,28 +23,20 @@
             return;
         }
         let configResult = await $http.get('/config/get?id=' + log.configId + '&_=' + new Date().getTime());
-        if (configResult.data.success) {
-            let config = configResult.data.data;
-            config.key = log.key;
-            config.group = log.group;
-            config.value = log.value;
-            $http.post('/config/edit', config)
-                .then(r => {
-                    if (r.data.success) {
-                        alert('回滚成功。');
-                        $state.go('config.list', {
-                            app_id: config.appId
-                        });
-                    } else {
-                        alert(r.data.message);
-                    }
-                }, err => {
-                    console.log(err);
-                    alert(err.statusText);
-                });
-        } else {
-            alert(configResult.data.message);
-        }
+        $http.post('/config/rollback?configId=' + log.configId + '&logId=' + log.id)
+            .then(r => {
+                if (r.data.success) {
+                    alert('回滚成功。');
+                    $state.go('config.list', {
+                        app_id: configResult.data.data.appId
+                    });
+                } else {
+                    alert(r.data.message);
+                }
+            }, err => {
+                console.log(err);
+                alert(err.statusText);
+            });
     };
 
     $scope.goback = async function () {

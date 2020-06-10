@@ -163,7 +163,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
                     AppId = config.AppId,
-                    LogText = $"删除配置【Key:{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
+                    LogText = $"编辑配置【Key:{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
                 });
                 //notice clients
                 var action = new WebsocketAction
@@ -299,6 +299,90 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 success = result,
                 message = !result ? "修改配置失败，请查看错误日志" : ""
+            });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Rollback(string configId,string logId)
+        {
+            if (string.IsNullOrEmpty(configId))
+            {
+                throw new ArgumentNullException("configId");
+            }
+            if (string.IsNullOrEmpty(logId))
+            {
+                throw new ArgumentNullException("logId");
+            }
+
+            var config = await _configService.GetAsync(configId);
+            if (config == null)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "未找到对应的配置项。"
+                });
+            }
+            var oldConfig = new Config
+            {
+                Key = config.Key,
+                Group = config.Group,
+                Value = config.Value
+            };
+
+            var log = await _modifyLogService.GetAsync(logId);
+            if (config == null)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "未找到对应的配置项的历史记录项。"
+                });
+            }
+            config.Key = log.Key;
+            config.Group = log.Group;
+            config.Value = log.Value;
+            config.UpdateTime = DateTime.Now;
+
+            var result = await _configService.UpdateAsync(config);
+            if (result)
+            {
+                //add modify log 
+                await _modifyLogService.AddAsync(new ModifyLog
+                {
+                    Id = Guid.NewGuid().ToString("N"),
+                    ConfigId = config.Id,
+                    Key = config.Key,
+                    Group = config.Group,
+                    Value = config.Value,
+                    ModifyTime = config.UpdateTime.Value
+                });
+                //add syslog
+                await _sysLogService.AddSysLogSync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    AppId = config.AppId,
+                    LogText = $"回滚配置【Key:{config.Key}】 【Group：{config.Group}】 【AppId：{config.AppId}】至历史记录：{logId}"
+                });
+                //notice clients
+                var action = new WebsocketAction
+                {
+                    Action = ActionConst.Update,
+                    Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value },
+                    OldItem = new ConfigItem { group = oldConfig.Group, key = oldConfig.Key, value = oldConfig.Value }
+                };
+                var nodes = await _serverNodeService.GetAllNodesAsync();
+                foreach (var node in nodes)
+                {
+                    await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, config.AppId, action);
+                }
+            }
+
+            return Json(new
+            {
+                success = result,
+                message = !result ? "回滚失败，请查看错误日志。" : ""
             });
         }
 
