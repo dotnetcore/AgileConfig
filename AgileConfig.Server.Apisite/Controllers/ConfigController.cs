@@ -107,12 +107,6 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var config = await _configService.GetAsync(model.Id);
-            var oldConfig = new Config
-            {
-                Key = config.Key,
-                Group = config.Group,
-                Value = config.Value
-            };
             if (config == null)
             {
                 return Json(new
@@ -121,7 +115,12 @@ namespace AgileConfig.Server.Apisite.Controllers
                     message = "未找到对应的配置项。"
                 });
             }
-
+            var oldConfig = new Config
+            {
+                Key = config.Key,
+                Group = config.Group,
+                Value = config.Value
+            };
             if (config.Group != model.Group || config.Key != model.Key)
             {
                 var anotherConfig = await _configService.GetByAppIdKey(model.AppId, model.Group, model.Key);

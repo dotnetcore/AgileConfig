@@ -21,7 +21,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
         public ConfigController(
             IConfigService configService,
-            ILoggerFactory loggerFactory,
             IAppService appService)
         {
             _configService = configService;
