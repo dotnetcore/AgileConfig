@@ -174,6 +174,10 @@ namespace AgileConfig.Server.Apisite.Controllers
                 var nodes = await _serverNodeService.GetAllNodesAsync();
                 foreach (var node in nodes)
                 {
+                    if (node.Status == NodeStatus.Offline)
+                    {
+                        continue;
+                    }
                     await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, config.AppId, action);
                 }
             }
@@ -289,6 +293,10 @@ namespace AgileConfig.Server.Apisite.Controllers
                 var nodes = await _serverNodeService.GetAllNodesAsync();
                 foreach (var node in nodes)
                 {
+                    if (node.Status == NodeStatus.Offline)
+                    {
+                        continue;
+                    }
                     await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, config.AppId, action);
                 }
 
@@ -374,6 +382,10 @@ namespace AgileConfig.Server.Apisite.Controllers
                 var nodes = await _serverNodeService.GetAllNodesAsync();
                 foreach (var node in nodes)
                 {
+                    if (node.Status == NodeStatus.Offline)
+                    {
+                        continue;
+                    }
                     await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, config.AppId, action);
                 }
             }
@@ -435,6 +447,10 @@ namespace AgileConfig.Server.Apisite.Controllers
                 var nodes = await _serverNodeService.GetAllNodesAsync();
                 foreach (var node in nodes)
                 {
+                    if (node.Status == NodeStatus.Offline)
+                    {
+                        continue;
+                    }
                     await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, config.AppId, action);
                 }
             }
@@ -488,6 +504,10 @@ namespace AgileConfig.Server.Apisite.Controllers
                     };
                     foreach (var node in nodes)
                     {
+                        if (node.Status == NodeStatus.Offline)
+                        {
+                            continue;
+                        }
                         await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, config.AppId, action);
                     }
                 }
@@ -546,6 +566,10 @@ namespace AgileConfig.Server.Apisite.Controllers
                 var nodes = await _serverNodeService.GetAllNodesAsync();
                 foreach (var node in nodes)
                 {
+                    if (node.Status == NodeStatus.Offline)
+                    {
+                        continue;
+                    }
                     await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, config.AppId, action);
                 }
             }

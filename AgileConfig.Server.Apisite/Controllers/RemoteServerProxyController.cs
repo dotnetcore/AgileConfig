@@ -46,7 +46,6 @@ namespace AgileConfig.Server.Apisite.Controllers
         public async Task<IActionResult> AllClients_Reload(string address)
         {
             var action = new WebsocketAction { Action = "reload" };
-            var nodes = await _serverNodeService.GetAllNodesAsync();
             var result = await _remoteServerNodeProxy.AllClientsDoActionAsync(address, action);
 
             _logger.LogInformation("Request remote node {0} 's action AllClientsDoAction {1} .", address, result ? "success" : "fail");

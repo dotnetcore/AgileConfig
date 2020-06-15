@@ -22,15 +22,15 @@ namespace AgileConfigClientTest
 
                 var appId = "app01";
                 var seret = "11";
-                var host = "http://localhost:5000";
+                var host = "http://139.155.39.49:8800";
 
                 try
                 {
                     var client = new ConfigClient(appId, seret, host, lf.CreateLogger<ConfigClient>());
                     client.ConfigChanged += Client_ConfigChanged;
-                    //client.Connect();
-                    var provider = new AgileConfigProvider(client);
-                    provider.Load();
+                    await client.ConnectAsync();
+                    //var provider = new AgileConfigProvider(client);
+                    //provider.Load();
                     await Task.Run(async () =>
                     {
                         while (true)
@@ -38,7 +38,8 @@ namespace AgileConfigClientTest
                             await Task.Delay(5000);
                             foreach (string key in client.Data.Keys)
                             {
-                                provider.TryGet(key, out string val);
+                                var val = client[key];
+                                //provider.TryGet(key, out string val);
                                 Console.WriteLine("{0} : {1}", key, val);
                             }
                         }

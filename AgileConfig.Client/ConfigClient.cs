@@ -42,7 +42,7 @@ namespace Agile.Config.Client
         private string ServerNodes { get; set; }
         private string AppId { get; set; }
         private string Secret { get; set; }
-        private bool _isConnecting = false;
+        private bool _isAutoReConnecting = false;
         private ClientWebSocket WebsocketClient { get; set; }
         private bool _adminSayOffline = false;
         private ConcurrentDictionary<string, string> _data;
@@ -74,15 +74,33 @@ namespace Agile.Config.Client
             return servers[index];
         }
 
-        public async Task ConnectAsync()
+        public async Task<bool> ConnectAsync()
         {
             if (WebsocketClient?.State == WebSocketState.Open)
             {
-                return;
+                return true;
             }
 
-            WebsocketClient = null;
-            WebsocketClient = new ClientWebSocket();
+            if (WebsocketClient == null)
+            {
+                WebsocketClient = new ClientWebSocket();
+            }
+            var connected = await TryConnectWebsocketAsync();
+            if (connected)
+            {
+                //连接成功立马加载配置
+                Load();
+                HandleWebsocketMessageAsync();
+                WebsocketHeartbeatAsync();
+                //设置自动重连
+                AutoReConnect();
+            }
+
+            return connected;
+        }
+
+        private async Task<bool> TryConnectWebsocketAsync()
+        {
             WebsocketClient.Options.SetRequestHeader("appid", AppId);
             WebsocketClient.Options.SetRequestHeader("Authorization", GenerateBasicAuthorization(AppId, Secret));
             var server = PickOneServer();
@@ -98,12 +116,8 @@ namespace Agile.Config.Client
             websocketServerUrl += "/ws";
             await WebsocketClient.ConnectAsync(new Uri(websocketServerUrl), CancellationToken.None);
             Logger?.LogTrace("AgileConfig Client Websocket Connected , {0}", websocketServerUrl);
-            HandleWebsocketMessageAsync();
-            WebsocketHeartbeatAsync();
-            //连接成功重新加载配置
-            Load();
-            //设置自动重连
-            AutoReConnect();
+
+            return true;
         }
 
         /// <summary>
@@ -112,39 +126,45 @@ namespace Agile.Config.Client
         /// <returns></returns>
         private void AutoReConnect()
         {
-            if (_isConnecting)
+            if (_isAutoReConnecting)
             {
                 return;
             }
-            _isConnecting = true;
+            _isAutoReConnecting = true;
 
             Task.Run(async () =>
             {
                 while (true)
                 {
+                    await Task.Delay(1000 * WebsocketReconnectInterval);
+
                     if (WebsocketClient?.State == WebSocketState.Open)
                     {
-                        await Task.Delay(1000 * WebsocketReconnectInterval);
-
                         continue;
                     }
                     try
                     {
                         WebsocketClient?.Abort();
                         WebsocketClient?.Dispose();
-                        await ConnectAsync();
 
                         if (_adminSayOffline)
                         {
                             break;
                         }
 
+                        WebsocketClient = new ClientWebSocket();
+                        var connected = await TryConnectWebsocketAsync();
+                        if (connected)
+                        {
+                            Load();
+                            HandleWebsocketMessageAsync();
+                            WebsocketHeartbeatAsync();
+                        }
                     }
                     catch (Exception ex)
                     {
                         Logger?.LogError(ex, "AgileConfig Client Websocket try to connected to server failed.");
                     }
-                    await Task.Delay(1000 * 5);
                 }
             });
         }
