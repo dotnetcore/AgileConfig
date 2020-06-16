@@ -229,7 +229,7 @@ namespace Agile.Config.Client
                         Logger?.LogError(ex, "AgileConfig Client Websocket try to ReceiveAsync message occur exception .");
                         throw;
                     }
-                    if (result.CloseStatus.HasValue)
+                    if (result != null && result.CloseStatus.HasValue)
                     {
                         Logger?.LogTrace("AgileConfig Client Websocket closed , {0} .", result.CloseStatusDescription);
                         break;

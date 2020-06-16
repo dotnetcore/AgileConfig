@@ -160,6 +160,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
             else
             {
+                ViewBag.ErrorMessage = "初始化密码失败";
                 return View();
             }
         }
