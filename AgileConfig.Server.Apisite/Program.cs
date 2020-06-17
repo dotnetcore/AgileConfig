@@ -12,7 +12,7 @@ namespace AgileConfig.Server.Apisite
 {
     public class Program
     {
-        public static IRemoteServerNodeManager RemoteServerNodeManager { get; private set; }
+        public static IRemoteServerNodeProxy RemoteServerNodeProxy { get; private set; }
 
         public static void Main(string[] args)
         {
@@ -31,8 +31,8 @@ namespace AgileConfig.Server.Apisite
                 .Build();
 
             var sp = host.Services;
-            RemoteServerNodeManager = sp.CreateScope().ServiceProvider.GetService<IRemoteServerNodeManager>(); ;
-            RemoteServerNodeManager.TestEchoAsync();
+            RemoteServerNodeProxy = sp.CreateScope().ServiceProvider.GetService<IRemoteServerNodeProxy>(); ;
+            RemoteServerNodeProxy.TestEchoAsync();
 
             host.Run();
         }
