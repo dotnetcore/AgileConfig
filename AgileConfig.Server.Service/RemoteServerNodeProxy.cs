@@ -40,6 +40,7 @@ namespace AgileConfig.Server.Service
         public RemoteServerNodeProxy (ISysLogService sysLogService,IServerNodeService serverNodeService, ILoggerFactory loggerFactory)
         {
             _sysLogService = sysLogService;
+            _serverNodeService = serverNodeService;
             _logger = loggerFactory.CreateLogger<RemoteServerNodeProxy>();
             _serverNodeClientReports = new ConcurrentDictionary<string, ClientInfos>();
         }

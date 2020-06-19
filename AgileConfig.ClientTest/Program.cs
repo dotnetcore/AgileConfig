@@ -22,7 +22,7 @@ namespace AgileConfigClientTest
 
                 var appId = "app01";
                 var seret = "11";
-                var host = "http://139.155.39.49:8800";
+                var host = "http://localhost:5000";
 
                 try
                 {

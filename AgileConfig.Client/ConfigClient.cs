@@ -85,7 +85,7 @@ namespace Agile.Config.Client
             {
                 WebsocketClient = new ClientWebSocket();
             }
-            var connected = await TryConnectWebsocketAsync();
+            var connected = await TryConnectWebsocketAsync().ConfigureAwait(false);
             if (connected)
             {
                 //连接成功立马加载配置
@@ -114,7 +114,7 @@ namespace Agile.Config.Client
                 websocketServerUrl = server.Replace("http:", "ws:").Replace("HTTP:", "ws:");
             }
             websocketServerUrl += "/ws";
-            await WebsocketClient.ConnectAsync(new Uri(websocketServerUrl), CancellationToken.None);
+            await WebsocketClient.ConnectAsync(new Uri(websocketServerUrl), CancellationToken.None).ConfigureAwait(false);
             Logger?.LogTrace("AgileConfig Client Websocket Connected , {0}", websocketServerUrl);
 
             return true;
@@ -136,7 +136,7 @@ namespace Agile.Config.Client
             {
                 while (true)
                 {
-                    await Task.Delay(1000 * WebsocketReconnectInterval);
+                    await Task.Delay(1000 * WebsocketReconnectInterval).ConfigureAwait(false);
 
                     if (WebsocketClient?.State == WebSocketState.Open)
                     {
@@ -153,7 +153,7 @@ namespace Agile.Config.Client
                         }
 
                         WebsocketClient = new ClientWebSocket();
-                        var connected = await TryConnectWebsocketAsync();
+                        var connected = await TryConnectWebsocketAsync().ConfigureAwait(false);
                         if (connected)
                         {
                             Load();
@@ -186,7 +186,7 @@ namespace Agile.Config.Client
                 var data = Encoding.UTF8.GetBytes("ping");
                 while (true)
                 {
-                    await Task.Delay(1000 * WebsocketHeartbeatInterval);
+                    await Task.Delay(1000 * WebsocketHeartbeatInterval).ConfigureAwait(false); ;
                     if (_adminSayOffline)
                     {
                         break;
@@ -197,7 +197,7 @@ namespace Agile.Config.Client
                         {
                             //这里由于多线程的问题，WebsocketClient有可能在上一个if判断成功后被置空或者断开，所以需要try一下避免线程退出
                             await WebsocketClient.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
-                                    CancellationToken.None);
+                                    CancellationToken.None).ConfigureAwait(false);
                             Logger?.LogTrace("AgileConfig Client Say 'hi' by Websocket .");
                         }
                         catch (Exception ex)
@@ -222,7 +222,7 @@ namespace Agile.Config.Client
                     WebSocketReceiveResult result = null;
                     try
                     {
-                        result = await WebsocketClient.ReceiveAsync(buffer, CancellationToken.None);
+                        result = await WebsocketClient.ReceiveAsync(buffer, CancellationToken.None).ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {
@@ -252,7 +252,7 @@ namespace Agile.Config.Client
                     ms.Seek(0, SeekOrigin.Begin);
                     using (var reader = new StreamReader(ms, Encoding.UTF8))
                     {
-                        var msg = await reader.ReadToEndAsync();
+                        var msg = await reader.ReadToEndAsync().ConfigureAwait(false);
                         Logger?.LogTrace("AgileConfig Client Receive message ' {0} ' by Websocket .", msg);
                         if (string.IsNullOrEmpty(msg) || msg == "0")
                         {
@@ -300,7 +300,7 @@ namespace Agile.Config.Client
                                         break;
                                     case ActionConst.Offline:
                                         _adminSayOffline = true;
-                                        await WebsocketClient.CloseAsync(WebSocketCloseStatus.Empty, "", CancellationToken.None);
+                                        await WebsocketClient.CloseAsync(WebSocketCloseStatus.Empty, "", CancellationToken.None).ConfigureAwait(false);
                                         Logger?.LogTrace("Websocket client offline because admin console send a commond 'offline' ,");
                                         NoticeChangedAsync(ActionConst.Offline);
                                         break;
