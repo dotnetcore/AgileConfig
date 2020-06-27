@@ -31,8 +31,18 @@ namespace AgileConfig.Server.IService
 
         Task<int> CountEnabledConfigsAsync();
 
+        /// <summary>
+        /// 计算已发布配置项的MD5
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <returns></returns>
         Task<string> AppPublishedConfigsMd5(string appId);
 
+        /// <summary>
+        /// 计算已发布配置项的MD5进行缓存
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <returns></returns>
         Task<string> AppPublishedConfigsMd5Cache(string appId);
     }
 }

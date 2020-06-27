@@ -26,7 +26,12 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             _configService = configService;
             _appService = appService;
         }
-        // GET: api/<controller>
+       
+        /// <summary>
+        /// 根据appid查所有发布的配置项
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <returns></returns>
         [HttpGet("app/{appId}")]
         public async Task<ActionResult<List<ConfigVM>>> Get(string appId)
         {

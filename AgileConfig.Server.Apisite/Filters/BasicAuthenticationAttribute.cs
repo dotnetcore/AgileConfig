@@ -11,6 +11,9 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace AgileConfig.Server.Apisite.Filters
 {
+    /// <summary>
+    /// 对请求进行basic认证的filter
+    /// </summary>
     public class BasicAuthenticationAttribute : ActionFilterAttribute
     {
         private readonly IAppService _appService;

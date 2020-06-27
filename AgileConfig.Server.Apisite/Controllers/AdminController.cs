@@ -100,6 +100,10 @@ namespace AgileConfig.Server.Apisite.Controllers
             return View();
         }
 
+        /// <summary>
+        /// 初始化密码
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> InitPassword()
         {
@@ -118,6 +122,10 @@ namespace AgileConfig.Server.Apisite.Controllers
             return View();
         }
 
+        /// <summary>
+        /// 初始化密码
+        /// </summary>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> InitPassword([FromForm]string password, [FromForm]string confirmPassword)
         {

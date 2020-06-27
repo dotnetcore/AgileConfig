@@ -189,6 +189,12 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
+        /// <summary>
+        /// 是否只是修改了描述信息
+        /// </summary>
+        /// <param name="newConfig"></param>
+        /// <param name="oldConfig"></param>
+        /// <returns></returns>
         private bool IsOnlyUpdateDescription(Config newConfig, Config oldConfig)
         {
             return newConfig.Key == oldConfig.Key && newConfig.Group == oldConfig.Group && newConfig.Value == oldConfig.Value;
@@ -206,6 +212,15 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
+        /// <summary>
+        /// 按多条件进行搜索
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <param name="group"></param>
+        /// <param name="key"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="pageIndex"></param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> Search(string appId, string group, string key, int pageSize, int pageIndex)
         {
@@ -414,6 +429,11 @@ namespace AgileConfig.Server.Apisite.Controllers
             }); ;
         }
 
+        /// <summary>
+        /// 下线
+        /// </summary>
+        /// <param name="configId"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> Offline(string configId)
         {
@@ -462,6 +482,12 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
+
+        /// <summary>
+        /// 上线多个配置
+        /// </summary>
+        /// <param name="configIds"></param>
+        /// <returns></returns>
         public async Task<IActionResult> PublishSome([FromBody]List<string> configIds)
         {
             if (configIds == null)
@@ -519,6 +545,11 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
+        /// <summary>
+        /// 上线1个配置
+        /// </summary>
+        /// <param name="configId"></param>
+        /// <returns></returns>
        [HttpPost]
         public async Task<IActionResult> Publish(string configId)
         {

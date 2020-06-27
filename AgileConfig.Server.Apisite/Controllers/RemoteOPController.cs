@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
+    /// <summary>
+    /// 这个Controller用来接受控制台节点发送过来的命令
+    /// </summary>
     public class RemoteOPController : Controller
     {
         [HttpPost]

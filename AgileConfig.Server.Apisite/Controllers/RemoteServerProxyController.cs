@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
+    /// <summary>
+    /// 这个Controller是控制台网页跟后台的接口，不要跟RemoteOp那个Controller混淆
+    /// </summary>
     [Authorize]
     public class RemoteServerProxyController : Controller
     {
@@ -24,6 +27,12 @@ namespace AgileConfig.Server.Apisite.Controllers
             _logger = loggerFactory.CreateLogger<RemoteServerProxyController>();
         }
 
+        /// <summary>
+        /// 通知一个节点的某个客户端离线
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> Client_Offline(string address, string clientId)
         {
@@ -37,7 +46,11 @@ namespace AgileConfig.Server.Apisite.Controllers
                 success = true,
             });
         }
-
+        /// <summary>
+        /// 通知某个节点让所有的客户端刷新配置项
+        /// </summary>
+        /// <param name="address"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> AllClients_Reload(string address)
         {
@@ -52,6 +65,12 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
+        /// <summary>
+        /// 通知某个节点个某个客户端刷新配置项
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> Client_Reload(string address, string clientId)
         {

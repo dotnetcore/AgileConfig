@@ -138,6 +138,11 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
+        /// <summary>
+        /// 在启动跟禁用之间进行切换
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> DisableOrEanble(string id)
         {

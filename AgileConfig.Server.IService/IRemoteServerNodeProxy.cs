@@ -24,13 +24,41 @@ namespace AgileConfig.Server.IService
 
     public interface IRemoteServerNodeProxy
     {
+        /// <summary>
+        /// 通知某个节点所有的客户端执行某个动作
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="action"></param>
+        /// <returns></returns>
         Task<bool> AllClientsDoActionAsync(string address, WebsocketAction action);
 
+        /// <summary>
+        /// 通知某个节点某个客户端执行某个动作
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="action"></param>
+        /// <returns></returns>
         Task<bool> OneClientDoActionAsync(string address, string clientId, WebsocketAction action);
 
+        /// <summary>
+        /// 通知某个节点某个相关app的客户端执行某个动作
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="action"></param>
+        /// <returns></returns>
         Task<bool> AppClientsDoActionAsync(string address, string appId, WebsocketAction action);
 
+        /// <summary>
+        /// 获取某个节点的客户端连接信息
+        /// </summary>
+        /// <param name="address"></param>
+        /// <returns></returns>
         ClientInfos GetClientsReport(string address);
+
+        /// <summary>
+        /// 探测某个节点是否在线
+        /// </summary>
+        /// <returns></returns>
         Task TestEchoAsync();
 
     }
