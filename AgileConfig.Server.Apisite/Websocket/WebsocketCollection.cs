@@ -47,6 +47,11 @@ namespace AgileConfig.Server.Apisite.Websocket
         {
         }
 
+        static WebsocketCollection()
+        {
+            Instance = new WebsocketCollection();
+        }
+
         private List<WebsocketClient> Clients = new List<WebsocketClient>();
         private object _lockObj = new object();
 
@@ -246,14 +251,7 @@ namespace AgileConfig.Server.Apisite.Websocket
             }
         }
 
-        private static IWebsocketCollection _Instance;
-        public static IWebsocketCollection Instance
-        {
-            get
-            {
-                return _Instance ?? (_Instance = new WebsocketCollection());
-            }
-        }
+        public static IWebsocketCollection Instance { get; private set; }
     }
 
 }
