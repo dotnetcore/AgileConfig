@@ -12,7 +12,7 @@ namespace AgileConfig.Server.Apisite.Models
         public string Id { get; set; }
 
         [Required(ErrorMessage = "应用Id不能为空")]
-        [MaxLength(8, ErrorMessage = "应用Id长度不能超过8位")]
+        [MaxLength(36, ErrorMessage = "应用Id长度不能超过36位")]
         public string AppId { get; set; }
 
         [MaxLength(50, ErrorMessage = "配置组长度不能超过50位")]
