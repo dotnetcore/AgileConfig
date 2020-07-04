@@ -16,12 +16,26 @@ namespace AgileConfigMVCSample.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IConfiguration _IConfiguration;
         private readonly IOptions<DbConfigOptions> _dbOptions;
+        private readonly IOptionsSnapshot<DbConfigOptions> _dbOptionsSnapshot;
+        private readonly IOptionsMonitor<DbConfigOptions> _dbOptionsMonitor;
 
-        public HomeController(ILogger<HomeController> logger, IConfiguration configuration, IOptions<DbConfigOptions> dbOptions)
+        public HomeController(
+            ILogger<HomeController> logger, 
+            IConfiguration configuration, 
+            IOptions<DbConfigOptions> dbOptions, 
+            IOptionsSnapshot<DbConfigOptions> dbOptionsSnapshot,
+            IOptionsMonitor<DbConfigOptions> dbOptionsMonitor)
         {
             _logger = logger;
             _IConfiguration = configuration;
             _dbOptions = dbOptions;
+            _dbOptionsSnapshot = dbOptionsSnapshot;
+            _dbOptionsMonitor = dbOptionsMonitor;
+
+            _dbOptionsMonitor.OnChange((o, s) => {
+                Console.WriteLine(o.connection);
+                Console.WriteLine(s);
+            });
         }
 
         public IActionResult Index()
@@ -41,7 +55,7 @@ namespace AgileConfigMVCSample.Controllers
             ViewBag.userId = userId;
             ViewBag.dbConn = dbConn;
 
-            return View();
+            return View("Configuration");
         }
 
         /// <summary>
@@ -56,7 +70,7 @@ namespace AgileConfigMVCSample.Controllers
             ViewBag.userId = userId;
             ViewBag.dbConn = dbConn;
 
-            return View("ByIConfiguration");
+            return View("Configuration");
         }
 
         /// <summary>
@@ -68,7 +82,23 @@ namespace AgileConfigMVCSample.Controllers
             var dbConn = _dbOptions.Value.connection;
             ViewBag.dbConn = dbConn;
 
-            return View("ByIConfiguration");
+            return View("Configuration");
+        }
+
+        public IActionResult ByOptionsSnapshot()
+        {
+            var dbConn = _dbOptionsSnapshot.Value.connection;
+            ViewBag.dbConn = dbConn;
+
+            return View("Configuration");
+        }
+
+        public IActionResult ByOptionsMonitor()
+        {
+            var dbConn = _dbOptionsMonitor.CurrentValue.connection;
+            ViewBag.dbConn = dbConn;
+
+            return View("Configuration");
         }
 
         public IActionResult Privacy()

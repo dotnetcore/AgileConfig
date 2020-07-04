@@ -18,8 +18,13 @@ namespace Agile.Config.Client
         /// </summary>
         public override void Load()
         {
+            Client.ConfigChanged += (arg) =>
+            {
+                this.OnReload();
+            };
             Client.ConnectAsync().GetAwaiter().GetResult() ;
             Data = Client.Data;
         }
+
     }
 }
