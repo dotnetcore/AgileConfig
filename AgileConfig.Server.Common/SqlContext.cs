@@ -35,6 +35,9 @@ namespace AgileConfig.Server.Common
                 case "sqlite":
                     optionsBuilder.UseSqlite(conn);
                     break;
+                case "npgsql":
+                    optionsBuilder.UseNpgsql(conn);
+                    break;
                 default:
                     optionsBuilder.UseSqlite(conn);
                     break;

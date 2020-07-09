@@ -15,11 +15,16 @@ AgileConfig的架构比较简单，主要是分3块：
 ### 节点、管理程序
 节点是使用asp.net core开发的一个服务。为了部署简单，直接把管理程序跟节点服务合二为一了。任何一个节点都可以在启动的时候配置环境变量开启管理程序功能。
 ### 数据库
-使用数据库来存储数据，目前支持Sqlserver, Mysql, Sqlite 三种数据库。因为服务端使用EF Core框架访问数据，原则上只要EF Core支持的数据库，节点就可以很方便的支持它。
+使用数据库来存储数据，目前支持Sqlserver, Mysql, Sqlite, PostgreSql 四种数据库。因为服务端使用EF Core框架访问数据，原则上只要EF Core支持的数据库，节点就可以很方便的支持它。
 
 ## 部署服务端
 ## 初始化数据库
-用户只需要手工建一个空库，所有的表在第一次启动的时候都会自动生成。目前支持sqlserver，mysql，sqlite三种数据库。
+用户只需要手工建一个空库，所有的表在第一次启动的时候都会自动生成。目前支持sqlserver，mysql，sqlite, PostgreSql 四种数据库。
+provider对照：   
+sqlserver = SqlServer   
+mysql = MySql   
+sqlite = Sqlite   
+npgsql = PostgreSql   
 ## 使用服务端
 ### 运行服务端
 ```
