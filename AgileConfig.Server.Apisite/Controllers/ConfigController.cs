@@ -74,12 +74,12 @@ namespace AgileConfig.Server.Apisite.Controllers
             if (result)
             {
                 //add syslog
-                await _sysLogService.AddSysLogSync(new SysLog
+                await _sysLogService.AddSysLogAsync(new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
                     AppId = config.AppId,
-                    LogText = $"新增配置【Key:{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
+                    LogText = $"新增配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
                 });
                 //add modify log 
                 await _modifyLogService.AddAsync(new ModifyLog
@@ -99,7 +99,97 @@ namespace AgileConfig.Server.Apisite.Controllers
                 message = !result ? "新建配置失败，请查看错误日志" : ""
             });
         }
+        [HttpPost]
+        public async Task<IActionResult> AddRange([FromBody] List<ConfigVM> model)
+        {
+            if (model == null || model.Count == 0)
+            {
+                throw new ArgumentNullException("model");
+            }
 
+            var configs = await _configService.GetByAppId(model.First().AppId);
+
+            var oldDict = new Dictionary<string, string>();
+            configs.ForEach(item =>
+            {
+                var newkey = item.Key;
+                if (!string.IsNullOrEmpty(item.Group))
+                {
+                    newkey = $"{item.Group}:{item.Key}";
+                }
+                oldDict.Add(newkey, item.Value);
+            });
+
+            var addConfigs = new List<Config>();
+            //judge if json key already in configs
+            foreach (var item in model)
+            {
+                var newkey = item.Key;
+                if (!string.IsNullOrEmpty(item.Group))
+                {
+                    newkey = $"{item.Group}:{item.Key}";
+                }
+                if (oldDict.ContainsKey(newkey))
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "存在重复的配置：" + item.Key
+                    });
+                }
+
+                var config = new Config();
+                config.Id = Guid.NewGuid().ToString("N");
+                config.Key = item.Key;
+                config.AppId = item.AppId;
+                config.Description = item.Description;
+                config.Value = item.Value;
+                config.Group = item.Group;
+                config.Status = ConfigStatus.Enabled;
+                config.CreateTime = DateTime.Now;
+                config.UpdateTime = null;
+                config.OnlineStatus = OnlineStatus.WaitPublish;
+                addConfigs.Add(config);
+            }
+
+            var result = await _configService.AddRangeAsync(addConfigs);
+
+            if (result)
+            {
+                //add syslogs
+                var addSysLogs = new List<SysLog>();
+                addConfigs.ForEach(c=> {
+                    addSysLogs.Add(new SysLog
+                    {
+                        LogTime = DateTime.Now,
+                        LogType = SysLogType.Normal,
+                        AppId = c.AppId,
+                        LogText = $"新增配置【Key：{c.Key}】【Value：{c.Value}】【Group：{c.Group}】【AppId：{c.AppId}】"
+                    });
+                });
+                await _sysLogService.AddRangeAsync(addSysLogs);
+                //add modify log 
+                var addModifyLogs = new List<ModifyLog>();
+                addConfigs.ForEach(c=> {
+                    addModifyLogs.Add(new ModifyLog
+                    {
+                        Id = Guid.NewGuid().ToString("N"),
+                        ConfigId = c.Id,
+                        Key = c.Key,
+                        Group = c.Group,
+                        Value = c.Value,
+                        ModifyTime = c.CreateTime
+                    });
+                });
+                await _modifyLogService.AddRangAsync(addModifyLogs);
+            }
+
+            return Json(new
+            {
+                success = result,
+                message = !result ? "批量新增配置失败，请查看错误日志" : ""
+            });
+        }
 
         [HttpPost]
         public async Task<IActionResult> Edit([FromBody]ConfigVM model)
@@ -160,7 +250,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     ModifyTime = config.UpdateTime.Value
                 });
                 //syslog
-                await _sysLogService.AddSysLogSync(new SysLog
+                await _sysLogService.AddSysLogAsync(new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
@@ -299,7 +389,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             if (result)
             {
                 //add syslog
-                await _sysLogService.AddSysLogSync(new SysLog
+                await _sysLogService.AddSysLogAsync(new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
@@ -383,7 +473,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     ModifyTime = config.UpdateTime.Value
                 });
                 //add syslog
-                await _sysLogService.AddSysLogSync(new SysLog
+                await _sysLogService.AddSysLogAsync(new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
@@ -458,7 +548,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _configService.UpdateAsync(config);
             if (result)
             {
-                await _sysLogService.AddSysLogSync(new SysLog
+                await _sysLogService.AddSysLogAsync(new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
@@ -518,7 +608,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 var result = await _configService.UpdateAsync(config);
                 if (result)
                 {
-                    await _sysLogService.AddSysLogSync(new SysLog
+                    await _sysLogService.AddSysLogAsync(new SysLog
                     {
                         LogTime = DateTime.Now,
                         LogType = SysLogType.Normal,
@@ -584,7 +674,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _configService.UpdateAsync(config);
             if (result)
             {
-                await _sysLogService.AddSysLogSync(new SysLog
+                await _sysLogService.AddSysLogAsync(new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
@@ -614,12 +704,12 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
-        public async Task<IActionResult> ImportFromJson([FromQuery]string appId, List<IFormFile> files)
+        public IActionResult PreViewJsonFile(List<IFormFile> files)
         {
-            if (string.IsNullOrEmpty(appId))
-            {
-                throw new ArgumentNullException("appId");
-            }
+            //if (string.IsNullOrEmpty(appId))
+            //{
+            //    throw new ArgumentNullException("appId");
+            //}
 
             if (files == null || !files.Any())
             {
@@ -634,60 +724,43 @@ namespace AgileConfig.Server.Apisite.Controllers
             using (var stream = jsonFile.OpenReadStream())
             {
                 var dict = JsonConfigurationFileParser.Parse(stream);
-                var configs = await _configService.GetByAppId(appId);
+                //var configs = await _configService.GetByAppId(appId);
 
-                var oldDict = new Dictionary<string, string>();
-                configs.ForEach(item =>
-                {
-                    oldDict.Add(item.Group + ":" + item.Key, item.Value);
-                });
+                //var oldDict = new Dictionary<string, string>();
+                //configs.ForEach(item =>
+                //{
+                //    oldDict.Add(item.Group + ":" + item.Key, item.Value);
+                //});
 
                 var addConfigs = new List<Config>();
                 //judge if json key already in configs
                 foreach (var key in dict.Keys)
                 {
-                    if (oldDict.ContainsKey(key))
+                    var newKey = key;
+                    var group = "";
+                    var paths = key.Split(":");
+                    if (paths.Length > 1)
                     {
-                        return Json(new
-                        {
-                            success = false,
-                            message = $"已存在键：{key}"
-                        });
+                        //如果是复杂key，取最后一个为真正的key，其他作为group
+                        newKey = paths[paths.Length - 1];
+                        group = string.Join(":", paths.ToList().Take(paths.Length - 1));
                     }
-                    else
-                    {
-                        var newKey = key;
-                        var group = "";
-                        var paths = key.Split(":");
-                        if (paths.Length > 1)
-                        {
-                            //如果是复杂key，取最后一个为真正的key，其他作为group
-                            newKey = paths[paths.Length - 1];
-                            group = string.Join(":", paths.ToList().Take(paths.Length - 1));
-                        }
 
-                        var config = new Config();
-                        config.Id = Guid.NewGuid().ToString("N");
-                        config.Key = newKey;
-                        config.AppId = appId;
-                        config.Description = "";
-                        config.Value = dict[key];
-                        config.Group = group;
-                        config.Status = ConfigStatus.Enabled;
-                        config.CreateTime = DateTime.Now;
-                        config.UpdateTime = null;
-                        config.OnlineStatus = OnlineStatus.WaitPublish;
-                        addConfigs.Add(config);
-                    }
+                    var config = new Config();
+                    config.Key = newKey;
+                    config.Description = "";
+                    config.Value = dict[key];
+                    config.Group = group;
+                    addConfigs.Add(config);
                 }
 
-                var result = await _configService.AddRangeAsync(configs);
+                //var result = await _configService.AddRangeAsync(configs);
 
                 return Json(new
                 {
-                    success = result,
-                    message = result? "" : "导入配置失败。"
-                });
+                    success = true,
+                    data = addConfigs
+                }); 
             }
         }
     }

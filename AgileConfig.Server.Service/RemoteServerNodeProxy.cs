@@ -68,7 +68,7 @@ namespace AgileConfig.Server.Service
                 }
             }, 5);
 
-            await _sysLogService.AddSysLogSync(new SysLog
+            await _sysLogService.AddSysLogAsync(new SysLog
             {
                 LogTime = DateTime.Now,
                 LogType = result ? SysLogType.Normal : SysLogType.Warn,
@@ -101,7 +101,7 @@ namespace AgileConfig.Server.Service
                 }
             }, 5);
 
-            await _sysLogService.AddSysLogSync(new SysLog
+            await _sysLogService.AddSysLogAsync(new SysLog
             {
                 LogTime = DateTime.Now,
                 LogType = result ? SysLogType.Normal : SysLogType.Warn,
@@ -135,7 +135,7 @@ namespace AgileConfig.Server.Service
                 }
             }, 5);
 
-            await _sysLogService.AddSysLogSync(new SysLog
+            await _sysLogService.AddSysLogAsync(new SysLog
             {
                 LogTime = DateTime.Now,
                 LogType = result ? SysLogType.Normal : SysLogType.Warn,

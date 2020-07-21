@@ -25,6 +25,13 @@ namespace AgileConfig.Server.Service
             return x > 0;
         }
 
+        public async Task<bool> AddRangAsync(List<ModifyLog> Logs)
+        {
+            _dbContext.ModifyLogs.AddRange(Logs);
+            int x = await _dbContext.SaveChangesAsync();
+            return x > 0;
+        }
+
         public async Task<ModifyLog> GetAsync(string logId)
         {
             return await _dbContext.ModifyLogs.FindAsync(logId);

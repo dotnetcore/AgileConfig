@@ -52,7 +52,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _appService.AddAsync(app);
             if (result)
             {
-                await _sysLogService.AddSysLogSync(new SysLog
+                await _sysLogService.AddSysLogAsync(new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
@@ -94,7 +94,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _appService.UpdateAsync(app);
             if (result)
             {
-                await _sysLogService.AddSysLogSync(new SysLog
+                await _sysLogService.AddSysLogAsync(new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
@@ -167,7 +167,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                await _sysLogService.AddSysLogSync(new SysLog
+                await _sysLogService.AddSysLogAsync(new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,

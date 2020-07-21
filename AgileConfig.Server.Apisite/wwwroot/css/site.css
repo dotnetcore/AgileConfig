@@ -153,6 +153,10 @@ table.table {
 .config .config_list .col {
     width: 200px;
 }
+.config_json .preview-bar {
+    display:flex;
+    justify-content:space-between;
+}
 
 .dash .top-bar {
     display: flex;

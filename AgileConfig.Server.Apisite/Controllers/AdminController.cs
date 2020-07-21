@@ -86,7 +86,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     authProperties);
 
                 //addlog
-                await _sysLogService.AddSysLogSync(new Data.Entity.SysLog
+                await _sysLogService.AddSysLogAsync(new Data.Entity.SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = Data.Entity.SysLogType.Normal,
@@ -157,7 +157,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                await _sysLogService.AddSysLogSync(new Data.Entity.SysLog
+                await _sysLogService.AddSysLogAsync(new Data.Entity.SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = Data.Entity.SysLogType.Normal,

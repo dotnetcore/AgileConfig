@@ -33,7 +33,13 @@ app.controller('listConfigCtrl', function ($scope, $http, $state, $stateParams) 
             config_id: config.id
         });
     };
-
+    $scope.toJson = function () {
+        $state.go('config.json',
+            {
+                app_id: $scope.selectedAppId
+            }
+        );
+    };
     $scope.deleteConfig = function (config) {
         let cr = confirm('是否确定删除' + `配置【${config.key}】?`);
         if (!cr) {

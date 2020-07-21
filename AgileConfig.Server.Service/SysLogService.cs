@@ -19,7 +19,14 @@ namespace AgileConfig.Server.Service
             _dbContext = context as AgileConfigDbContext;
         }
 
-        public async Task<bool> AddSysLogSync(SysLog log)
+        public async Task<bool> AddRangeAsync(List<SysLog> logs)
+        {
+            await _dbContext.SysLogs.AddRangeAsync(logs);
+            int x = await _dbContext.SaveChangesAsync();
+            return x > 0;
+        }
+
+        public async Task<bool> AddSysLogAsync(SysLog log)
         {
             await _dbContext.SysLogs.AddAsync(log);
             int x = await _dbContext.SaveChangesAsync();

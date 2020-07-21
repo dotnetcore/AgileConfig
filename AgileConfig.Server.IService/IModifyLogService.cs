@@ -11,6 +11,7 @@ namespace AgileConfig.Server.IService
         Task<List<ModifyLog>> Search(string configId);
 
         Task<bool> AddAsync(ModifyLog Log);
+        Task<bool> AddRangAsync(List<ModifyLog> Logs);
 
         Task<ModifyLog> GetAsync(string logId);
     }

@@ -50,7 +50,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _serverNodeService.AddAsync(node);
             if (result)
             {
-                await _sysLogService.AddSysLogSync(new SysLog
+                await _sysLogService.AddSysLogAsync(new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
@@ -87,7 +87,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _serverNodeService.DeleteAsync(node);
             if (result)
             {
-                await _sysLogService.AddSysLogSync(new SysLog
+                await _sysLogService.AddSysLogAsync(new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,

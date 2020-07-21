@@ -46,6 +46,11 @@ app.config(function ($stateProvider, $urlRouterProvider) {
         templateUrl: '/home/getview?viewName=config_add',
         controller: 'addConfigCtrl'
     };
+    let jsonConfigState = {
+        url: '/json/:app_id',
+        templateUrl: '/home/getview?viewName=config_json',
+        controller: 'jsonConfigCtrl'
+    };
     let editConfigState = {
         url: '/edit/:config_id',
         templateUrl: '/home/getview?viewName=config_edit',
@@ -94,6 +99,7 @@ app.config(function ($stateProvider, $urlRouterProvider) {
     $stateProvider.state('config.add', addConfigState);
     $stateProvider.state('config.edit', editConfigState);
     $stateProvider.state('config.logs', modifyLogsState);
+    $stateProvider.state('config.json', jsonConfigState);
 
     $stateProvider.state('clients', clientsState);
 
