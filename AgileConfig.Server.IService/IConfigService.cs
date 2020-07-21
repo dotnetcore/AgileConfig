@@ -19,7 +19,9 @@ namespace AgileConfig.Server.IService
         Task<List<Config>> Search(string appId, string group, string key);
         Task<List<Config>> GetByAppId(string appId);
         Task<List<Config>> GetPublishedConfigsByAppId(string appId);
-        Task<bool> AddAsync(Config app);
+        Task<bool> AddAsync(Config config);
+
+        Task<bool> AddRangeAsync(List<Config> configs);
 
         Task<bool> DeleteAsync(Config app);
 

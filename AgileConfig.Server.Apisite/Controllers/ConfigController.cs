@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 using Agile.Config.Protocol;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
+using AgileConfig.Server.Common;
+using System.IO;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -22,7 +25,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         private readonly IServerNodeService _serverNodeService;
         private readonly ISysLogService _sysLogService;
         public ConfigController(
-                                IConfigService configService, 
+                                IConfigService configService,
                                 IModifyLogService modifyLogService,
                                 IRemoteServerNodeProxy remoteServerNodeProxy,
                                 IServerNodeService serverNodeService,
@@ -325,7 +328,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Rollback(string configId,string logId)
+        public async Task<IActionResult> Rollback(string configId, string logId)
         {
             if (string.IsNullOrEmpty(configId))
             {
@@ -461,7 +464,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     LogType = SysLogType.Normal,
                     AppId = config.AppId,
                     LogText = $"下线配置【Key:{config.Key}】 【Group：{config.Group}】 【AppId：{config.AppId}】"
-                }) ;
+                });
                 //notice clients the config item is offline
                 var action = new WebsocketAction { Action = ActionConst.Remove, Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value } };
                 var nodes = await _serverNodeService.GetAllNodesAsync();
@@ -550,7 +553,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         /// </summary>
         /// <param name="configId"></param>
         /// <returns></returns>
-       [HttpPost]
+        [HttpPost]
         public async Task<IActionResult> Publish(string configId)
         {
             if (string.IsNullOrEmpty(configId))
@@ -609,6 +612,83 @@ namespace AgileConfig.Server.Apisite.Controllers
                 success = result,
                 message = !result ? "上线配置失败，请查看错误日志" : ""
             });
+        }
+
+        public async Task<IActionResult> ImportFromJson([FromQuery]string appId, List<IFormFile> files)
+        {
+            if (string.IsNullOrEmpty(appId))
+            {
+                throw new ArgumentNullException("appId");
+            }
+
+            if (files == null || !files.Any())
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "请上传Json文件"
+                });
+            }
+
+            var jsonFile = files.First();
+            using (var stream = jsonFile.OpenReadStream())
+            {
+                var dict = JsonConfigurationFileParser.Parse(stream);
+                var configs = await _configService.GetByAppId(appId);
+
+                var oldDict = new Dictionary<string, string>();
+                configs.ForEach(item =>
+                {
+                    oldDict.Add(item.Group + ":" + item.Key, item.Value);
+                });
+
+                var addConfigs = new List<Config>();
+                //judge if json key already in configs
+                foreach (var key in dict.Keys)
+                {
+                    if (oldDict.ContainsKey(key))
+                    {
+                        return Json(new
+                        {
+                            success = false,
+                            message = $"已存在键：{key}"
+                        });
+                    }
+                    else
+                    {
+                        var newKey = key;
+                        var group = "";
+                        var paths = key.Split(":");
+                        if (paths.Length > 1)
+                        {
+                            //如果是复杂key，取最后一个为真正的key，其他作为group
+                            newKey = paths[paths.Length - 1];
+                            group = string.Join(":", paths.ToList().Take(paths.Length - 1));
+                        }
+
+                        var config = new Config();
+                        config.Id = Guid.NewGuid().ToString("N");
+                        config.Key = newKey;
+                        config.AppId = appId;
+                        config.Description = "";
+                        config.Value = dict[key];
+                        config.Group = group;
+                        config.Status = ConfigStatus.Enabled;
+                        config.CreateTime = DateTime.Now;
+                        config.UpdateTime = null;
+                        config.OnlineStatus = OnlineStatus.WaitPublish;
+                        addConfigs.Add(config);
+                    }
+                }
+
+                var result = await _configService.AddRangeAsync(configs);
+
+                return Json(new
+                {
+                    success = result,
+                    message = result? "" : "导入配置失败。"
+                });
+            }
         }
     }
 }

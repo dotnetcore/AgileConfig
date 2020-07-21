@@ -208,5 +208,19 @@ namespace AgileConfig.Server.Service
                  c.AppId == appId && c.Status == ConfigStatus.Enabled && c.OnlineStatus == OnlineStatus.Online
              ).ToListAsync();
         }
+
+        public async Task<bool> AddRangeAsync(List<Config> configs)
+        {
+            await _dbContext.Configs.AddRangeAsync(configs);
+            int x = await _dbContext.SaveChangesAsync();
+
+            var result = x > 0;
+            if (result)
+            {
+                ClearAppPublishedConfigsMd5Cache(configs.First().AppId);
+            }
+
+            return result;
+        }
     }
 }
