@@ -16,7 +16,7 @@ namespace AgileConfig.Server.Data.Entity
     public class ServerNode
     {
         [Key]
-        [Column("address", TypeName = "nvarchar(50)")]
+        [Column("address", TypeName = "nvarchar(100)")]
         public string Address { get; set; }
 
         [Column("remark", TypeName = "nvarchar(50)")]

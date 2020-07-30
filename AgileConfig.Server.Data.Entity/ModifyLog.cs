@@ -16,13 +16,13 @@ namespace AgileConfig.Server.Data.Entity
         [Column("config_id", TypeName = "varchar(36)")]
         public string ConfigId { get; set; }
 
-        [Column("g", TypeName = "nvarchar(50)")]
+        [Column("g", TypeName = "nvarchar(100)")]
         public string Group { get; set; }
 
-        [Column("k", TypeName = "nvarchar(50)")]
+        [Column("k", TypeName = "nvarchar(100)")]
         public string Key { get; set; }
 
-        [Column("v", TypeName = "nvarchar(500)")]
+        [Column("v", TypeName = "nvarchar(4000)")]
         public string Value { get; set; }
 
         [Column("modify_time")]

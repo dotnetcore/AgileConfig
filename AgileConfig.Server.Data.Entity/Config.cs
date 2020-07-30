@@ -23,19 +23,19 @@ namespace AgileConfig.Server.Data.Entity
         [Column("id", TypeName = "varchar(36)")]
         public string Id { get; set; }
 
-        [Column("app_id", TypeName = "nvarchar(8)")]
+        [Column("app_id", TypeName = "nvarchar(36)")]
         public string AppId { get; set; }
 
-        [Column("g", TypeName = "nvarchar(50)")]
+        [Column("g", TypeName = "nvarchar(100)")]
         public string Group { get; set; }
 
-        [Column("k", TypeName = "nvarchar(50)")]
+        [Column("k", TypeName = "nvarchar(100)")]
         public string Key { get; set; }
 
-        [Column("v", TypeName = "nvarchar(500)")]
+        [Column("v", TypeName = "nvarchar(4000)")]
         public string Value { get; set; }
 
-        [Column("description", TypeName = "nvarchar(100)")]
+        [Column("description", TypeName = "nvarchar(200)")]
         public string Description { get; set; }
 
         [Column("create_time")]

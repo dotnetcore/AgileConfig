@@ -706,11 +706,6 @@ namespace AgileConfig.Server.Apisite.Controllers
 
         public IActionResult PreViewJsonFile(List<IFormFile> files)
         {
-            //if (string.IsNullOrEmpty(appId))
-            //{
-            //    throw new ArgumentNullException("appId");
-            //}
-
             if (files == null || !files.Any())
             {
                 return Json(new
@@ -724,13 +719,6 @@ namespace AgileConfig.Server.Apisite.Controllers
             using (var stream = jsonFile.OpenReadStream())
             {
                 var dict = JsonConfigurationFileParser.Parse(stream);
-                //var configs = await _configService.GetByAppId(appId);
-
-                //var oldDict = new Dictionary<string, string>();
-                //configs.ForEach(item =>
-                //{
-                //    oldDict.Add(item.Group + ":" + item.Key, item.Value);
-                //});
 
                 var addConfigs = new List<Config>();
                 //judge if json key already in configs

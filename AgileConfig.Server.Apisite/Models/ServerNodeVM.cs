@@ -10,7 +10,7 @@ namespace AgileConfig.Server.Apisite.Models
     public class ServerNodeVM
     {
         [Required(ErrorMessage = "节点地址不能为空")]
-        [MaxLength(50, ErrorMessage = "节点地址长度不能超过50位")]
+        [MaxLength(100, ErrorMessage = "节点地址长度不能超过100位")]
         public string Address { get; set; }
 
         [MaxLength(50, ErrorMessage = "备注长度不能超过50位")]
