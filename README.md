@@ -62,7 +62,8 @@ AgileConfig支持多应用程序接入。需要为每个应用程序配置名称
 ![](https://s1.ax1x.com/2020/06/09/t4rYy6.png)
 
 ## 使用客户端
-### 安装客户端
+客户端[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)是使用.net core standard2.0编写的一个类库，已发布到nuget，方便用户集成。
+### 使用nuget安装客户端类库
 ```
 Install-Package AgileConfig.Client
 ```
