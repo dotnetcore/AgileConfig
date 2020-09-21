@@ -12,7 +12,6 @@ namespace AgileConfig.Server.Data.Freesql
         {
             _freesql = new FreeSql.FreeSqlBuilder()
                           .UseConnectionString(ProviderToFreesqlDbType(DbProvider), DbConnection)
-                          .UseAutoSyncStructure(true)
                           .Build(); //请务必定义成 Singleton 单例模式
             EnsureTables.Ensure();
         }

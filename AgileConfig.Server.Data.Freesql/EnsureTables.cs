@@ -9,7 +9,7 @@ namespace AgileConfig.Server.Data.Freesql
     {
         private const string Sqlite_ExistTableSql = "SELECT count(1) FROM sqlite_master WHERE type='table' AND name = 'app'";
         private const string Mysql_ExistTableSql = "SELECT count(1) FROM sqlite_master WHERE type='table' AND name = 'app'";
-        private const string SqlServer_ExistTableSql = "SELECT count(1) FROM sqlite_master WHERE type='table' AND name = 'app'";
+        private const string SqlServer_ExistTableSql = "SELECT COUNT(1) FROM dbo.SYSOBJECTS WHERE ID = object_id(N'[dbo].[app]') and OBJECTPROPERTY(id, N'IsUserTable') = 1";
         private const string Oracle_ExistTableSql = "SELECT count(1) FROM sqlite_master WHERE type='table' AND name = 'app'";
         private const string PostgreSql_ExistTableSql = "SELECT count(1) FROM sqlite_master WHERE type='table' AND name = 'app'";
 
@@ -39,7 +39,7 @@ namespace AgileConfig.Server.Data.Freesql
                     break;
             }
 
-            var count = (long)FreeSQL.Instance.Ado.ExecuteScalar(sql);
+            dynamic count = FreeSQL.Instance.Ado.ExecuteScalar(sql);
 
             return count > 0;
         }
