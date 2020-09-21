@@ -2,7 +2,6 @@
 using AgileConfig.Server.Apisite.Websocket;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Freesql;
-using AgileConfig.Server.Data.Repository;
 using AgileConfig.Server.Service;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;

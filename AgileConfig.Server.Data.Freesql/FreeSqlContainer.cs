@@ -4,18 +4,20 @@ using System;
 
 namespace AgileConfig.Server.Data.Freesql
 {
-    public static class FreeSqlContainer
+    public static class FreeSQL
     {
         private static IFreeSql _freesql;
 
-        static FreeSqlContainer()
+        static FreeSQL()
         {
             _freesql = new FreeSql.FreeSqlBuilder()
                           .UseConnectionString(ProviderToFreesqlDbType(DbProvider), DbConnection)
+                          .UseAutoSyncStructure(true)
                           .Build(); //请务必定义成 Singleton 单例模式
+            EnsureTables.Ensure();
         }
 
-        public static IFreeSql FreeSqlInstance => _freesql;
+        public static IFreeSql Instance => _freesql;
 
         private static string DbProvider => Configuration.Config["db:provider"];
         private static string DbConnection => Configuration.Config["db:conn"];

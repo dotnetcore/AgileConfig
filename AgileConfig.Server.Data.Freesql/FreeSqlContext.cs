@@ -20,10 +20,5 @@ namespace AgileConfig.Server.Data.Freesql
 
         public DbSet<SysLog> SysLogs { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder builder)
-        {
-            //builder.UseFreeSql(FreeSqlContainer.FreeSqlInstance);
-            //这里直接指定一个静态的 IFreeSql 对象即可，切勿重新 Build()
-        }
     }
 }
