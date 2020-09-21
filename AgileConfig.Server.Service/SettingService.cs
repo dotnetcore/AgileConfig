@@ -1,24 +1,24 @@
 ﻿using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
-using AgileConfig.Server.Data.Repository;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AgileConfig.Server.Common;
 using Microsoft.EntityFrameworkCore;
+using AgileConfig.Server.Data.Freesql;
 
 namespace AgileConfig.Server.Service
 {
     public class SettingService : ISettingService
     {
-        private AgileConfigDbContext _dbContext;
+        private FreeSqlContext _dbContext;
 
         public string AdminPasswordSettingKey => "AdminPassword";
         string AdminPasswordHashSaltKey => "AdminPasswordHashSalt";
 
-        public SettingService(ISqlContext context)
+        public SettingService(FreeSqlContext context)
         {
-            _dbContext = context as AgileConfigDbContext;
+            _dbContext = context;
         }
 
         public async Task<bool> AddAsync(Setting setting)
@@ -30,7 +30,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> DeleteAsync(Setting setting)
         {
-            setting = _dbContext.Settings.Find(setting.Id);
+            setting = await _dbContext.Settings.Where(s => s.Id == setting.Id).ToOneAsync();
             if (setting != null)
             {
                 _dbContext.Settings.Remove(setting);
@@ -41,7 +41,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> DeleteAsync(string settingId)
         {
-            var setting = _dbContext.Settings.Find(settingId);
+             var setting = await _dbContext.Settings.Where(s => s.Id == settingId).ToOneAsync();
             if (setting != null)
             {
                 _dbContext.Settings.Remove(setting);
@@ -52,12 +52,12 @@ namespace AgileConfig.Server.Service
 
         public async Task<Setting> GetAsync(string id)
         {
-            return await _dbContext.Settings.FindAsync(id);
+            return await _dbContext.Settings.Where(s => s.Id == id).ToOneAsync();
         }
 
         public async Task<List<Setting>> GetAllSettingsAsync()
         {
-            return await _dbContext.Settings.ToListAsync();
+            return await _dbContext.Settings.Where(s => 1 == 1).ToListAsync();
         }
 
         public async Task<bool> UpdateAsync(Setting setting)

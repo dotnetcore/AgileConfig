@@ -1,22 +1,22 @@
 ﻿using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
-using AgileConfig.Server.Data.Repository;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AgileConfig.Server.Common;
 using Microsoft.EntityFrameworkCore;
 using System;
+using AgileConfig.Server.Data.Freesql;
 
 namespace AgileConfig.Server.Service
 {
     public class ServerNodeService : IServerNodeService
     {
-        private AgileConfigDbContext _dbContext;
+        private FreeSqlContext _dbContext;
         private ISysLogService _sysLogService;
 
-        public ServerNodeService(ISqlContext context, ISysLogService sysLogService)
+        public ServerNodeService(FreeSqlContext context, ISysLogService sysLogService)
         {
-            _dbContext = context as AgileConfigDbContext;
+            _dbContext = context;
             _sysLogService = sysLogService;
         }
 
@@ -31,7 +31,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> DeleteAsync(ServerNode node)
         {
-            node = _dbContext.ServerNodes.Find(node.Address);
+            node = await _dbContext.ServerNodes.Where(n => n.Address == node.Address).ToOneAsync();
             if (node != null)
             {
                 _dbContext.ServerNodes.Remove(node);
@@ -44,7 +44,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> DeleteAsync(string address)
         {
-            var node = _dbContext.ServerNodes.Find(address);
+            var node = await _dbContext.ServerNodes.Where(n => n.Address == address).ToOneAsync();
             if (node != null)
             {
                 _dbContext.ServerNodes.Remove(node);
@@ -57,12 +57,12 @@ namespace AgileConfig.Server.Service
 
         public async Task<List<ServerNode>> GetAllNodesAsync()
         {
-            return await _dbContext.ServerNodes.ToListAsync();
+            return await _dbContext.ServerNodes.Where(n => 1 == 1).ToListAsync();
         }
 
         public async Task<ServerNode> GetAsync(string address)
         {
-            return await _dbContext.ServerNodes.FindAsync(address);
+           return await _dbContext.ServerNodes.Where(n => n.Address == address).ToOneAsync();
         }
 
         public async Task<bool> UpdateAsync(ServerNode node)

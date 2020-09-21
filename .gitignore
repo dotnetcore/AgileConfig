@@ -262,3 +262,5 @@ __pycache__/
 /AgileConfig.Server.Apisite/agile_config.db
 /AgileConfig.Server.Apisite/logs/internal-nlog.txt
 /AgileConfig.Server.Apisite/Properties/PublishProfiles/FolderProfile.pubxml
+/AgileConfig.Server.Apisite/agile_config.db-wal
+/AgileConfig.Server.Apisite/agile_config.db-shm

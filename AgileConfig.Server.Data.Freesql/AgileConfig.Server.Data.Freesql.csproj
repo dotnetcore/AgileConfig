@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FreeSql" Version="1.8.1" />
+    <PackageReference Include="FreeSql.DbContext" Version="1.8.1" />
+    <PackageReference Include="FreeSql.Provider.MySql" Version="1.8.1" />
+    <PackageReference Include="FreeSql.Provider.Oracle" Version="1.8.1" />
+    <PackageReference Include="FreeSql.Provider.PostgreSQL" Version="1.8.1" />
+    <PackageReference Include="FreeSql.Provider.Sqlite" Version="1.8.1" />
+    <PackageReference Include="FreeSql.Provider.SqlServer" Version="1.8.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AgileConfig.Server.Common\AgileConfig.Server.Common.csproj" />
+    <ProjectReference Include="..\AgileConfig.Server.Data.Entity\AgileConfig.Server.Data.Entity.csproj" />
+  </ItemGroup>
+
+</Project>

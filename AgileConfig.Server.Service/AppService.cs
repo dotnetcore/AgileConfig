@@ -1,23 +1,20 @@
 ﻿using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
-using AgileConfig.Server.Data.Repository;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AgileConfig.Server.Common;
 using Microsoft.EntityFrameworkCore;
+using AgileConfig.Server.Data.Freesql;
 
 namespace AgileConfig.Server.Service
 {
     public class AppService : IAppService
     {
-        private AgileConfigDbContext _dbContext;
-        private ISysLogService _sysLogService;
+        private FreeSqlContext _dbContext;
 
-        public AppService(ISqlContext context, ISysLogService sysLogService)
+        public AppService(FreeSqlContext context, ISysLogService sysLogService)
         {
-            _dbContext = context as AgileConfigDbContext;
-            _sysLogService = sysLogService;
+            _dbContext = context;
         }
 
         public async Task<bool> AddAsync(App app)
@@ -31,7 +28,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> DeleteAsync(App app)
         {
-            app = _dbContext.Apps.Find(app.Id);
+            app = await _dbContext.Apps.Where(a => a.Id == app.Id).ToOneAsync();
             if (app != null)
             {
                 _dbContext.Apps.Remove(app);
@@ -44,7 +41,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> DeleteAsync(string appId)
         {
-            var app = _dbContext.Apps.Find(appId);
+            var app = await _dbContext.Apps.Where(a => a.Id == appId).ToOneAsync();
             if (app != null)
             {
                 _dbContext.Apps.Remove(app);
@@ -57,12 +54,12 @@ namespace AgileConfig.Server.Service
 
         public async Task<App> GetAsync(string id)
         {
-            return await _dbContext.Apps.FindAsync(id);
+            return await _dbContext.Apps.Where(a => a.Id == id).ToOneAsync();
         }
 
         public async Task<List<App>> GetAllAppsAsync()
         {
-            return await _dbContext.Apps.ToListAsync();
+            return await  _dbContext.Apps.Where(a => 1 == 1).ToListAsync();
         }
 
         public async Task<bool> UpdateAsync(App app)
@@ -77,9 +74,9 @@ namespace AgileConfig.Server.Service
 
         public async Task<int> CountEnabledAppsAsync()
         {
-            var q = await _dbContext.Apps.CountAsync(a => a.Enabled == true);
+            var q = await _dbContext.Apps.Where(a => a.Enabled == true).CountAsync();
 
-            return q;
+            return (int)q;
         }
 
     }

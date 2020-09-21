@@ -1,25 +1,25 @@
 ﻿using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
-using AgileConfig.Server.Data.Repository;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AgileConfig.Server.Common;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using Microsoft.Extensions.Caching.Memory;
+using AgileConfig.Server.Data.Freesql;
+using AgileConfig.Server.Common;
 
 namespace AgileConfig.Server.Service
 {
     public class ConfigService : IConfigService
     {
-        private readonly AgileConfigDbContext _dbContext;
+        private readonly FreeSqlContext _dbContext;
         private readonly IMemoryCache _memoryCache;
         private readonly ISysLogService _sysLogService;
 
-        public ConfigService(ISqlContext context, IMemoryCache memoryCache, ISysLogService sysLogService)
+        public ConfigService(FreeSqlContext context, IMemoryCache memoryCache, ISysLogService sysLogService)
         {
-            _dbContext = context as AgileConfigDbContext;
+            _dbContext = context;
             _sysLogService = sysLogService;
             _memoryCache = memoryCache;
         }
@@ -53,7 +53,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> DeleteAsync(Config config)
         {
-            config = _dbContext.Configs.Find(config.Id);
+            config = await _dbContext.Configs.Where(c => c.Id == config.Id).ToOneAsync();
             if (config != null)
             {
                 _dbContext.Configs.Remove(config);
@@ -71,7 +71,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> DeleteAsync(string configId)
         {
-            var config = _dbContext.Configs.Find(configId);
+            var config = await _dbContext.Configs.Where(c => c.Id == configId).ToOneAsync();
             if (config != null)
             {
                 _dbContext.Configs.Remove(config);
@@ -89,7 +89,8 @@ namespace AgileConfig.Server.Service
 
         public async Task<Config> GetAsync(string id)
         {
-            var config = await _dbContext.Configs.FindAsync(id);
+            var config = await _dbContext.Configs.Where(c => c.Id == id).ToOneAsync();
+
             return config;
         }
 
@@ -100,12 +101,12 @@ namespace AgileConfig.Server.Service
 
         public async Task<Config> GetByAppIdKey(string appId, string group, string key)
         {
-            return await _dbContext.Configs.FirstOrDefaultAsync(c =>
+            return await _dbContext.Configs.Where(c =>
                 c.AppId == appId &&
                 c.Key == key &&
                 c.Group == group &&
                 c.Status == ConfigStatus.Enabled
-            );
+            ).FirstAsync();
         }
 
         public async Task<List<Config>> GetByAppId(string appId)
@@ -136,9 +137,9 @@ namespace AgileConfig.Server.Service
 
         public async Task<int> CountEnabledConfigsAsync()
         {
-            var q = await _dbContext.Configs.CountAsync(c => c.Status == ConfigStatus.Enabled);
+            var q = await _dbContext.Configs.Where(c => c.Status == ConfigStatus.Enabled).CountAsync();
 
-            return q;
+            return (int)q;
         }
 
         /// <summary>
@@ -148,7 +149,7 @@ namespace AgileConfig.Server.Service
         /// <returns></returns>
         public async Task<string> AppPublishedConfigsMd5(string appId)
         {
-            var configs = await _dbContext.Configs.AsNoTracking().Where(c =>
+            var configs = await _dbContext.Configs.Where(c =>
                 c.AppId == appId && c.Status == ConfigStatus.Enabled && c.OnlineStatus == OnlineStatus.Online
             ).ToListAsync();
 

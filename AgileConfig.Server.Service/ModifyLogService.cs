@@ -1,21 +1,21 @@
 ﻿using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
-using AgileConfig.Server.Data.Repository;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AgileConfig.Server.Common;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using AgileConfig.Server.Data.Freesql;
 
 namespace AgileConfig.Server.Service
 {
     public class ModifyLogService : IModifyLogService
     {
-        private AgileConfigDbContext _dbContext;
-        public ModifyLogService(ISqlContext context)
+        private FreeSqlContext _dbContext;
+        public ModifyLogService(FreeSqlContext context)
         {
-            _dbContext = context as AgileConfigDbContext;
+            _dbContext = context;
         }
 
         public async Task<bool> AddAsync(ModifyLog log)
@@ -34,7 +34,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<ModifyLog> GetAsync(string logId)
         {
-            return await _dbContext.ModifyLogs.FindAsync(logId);
+            return await _dbContext.ModifyLogs.Where(m => m.Id == logId).ToOneAsync();
         }
 
         public async Task<List<ModifyLog>> Search(string configId)

@@ -1,22 +1,20 @@
-﻿using System;
+﻿using FreeSql.DataAnnotations;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace AgileConfig.Server.Data.Entity
 {
-    [Table("setting")]
+    [Table(Name = "setting")]
     public class Setting
     {
-        [Key]
-        [Column("id", TypeName = "varchar(36)")]
+        [Column(Name = "id", DbType = "varchar(36)")]
         public string Id { get; set; }
 
-        [Column("value", TypeName = "nvarchar(50)")]
+        [Column(Name = "value", DbType = "nvarchar(50)")]
         public string Value { get; set; }
 
-        [Column("create_time")]
+        [Column(Name = "create_time")]
         public DateTime CreateTime { get; set; }
     }
 }

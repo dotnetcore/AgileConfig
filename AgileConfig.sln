@@ -31,6 +31,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_test", "_test", "{F277EC27
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiSiteTests", "ApiSiteTests\ApiSiteTests.csproj", "{EA462A1A-03CB-4FF0-AA1E-0988021E8711}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.Data.Freesql", "AgileConfig.Server.Data.Freesql\AgileConfig.Server.Data.Freesql.csproj", "{1EBE3129-A926-497A-801E-FDC29F998272}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,10 @@ Global
 		{EA462A1A-03CB-4FF0-AA1E-0988021E8711}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA462A1A-03CB-4FF0-AA1E-0988021E8711}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA462A1A-03CB-4FF0-AA1E-0988021E8711}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1EBE3129-A926-497A-801E-FDC29F998272}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EBE3129-A926-497A-801E-FDC29F998272}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EBE3129-A926-497A-801E-FDC29F998272}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EBE3129-A926-497A-801E-FDC29F998272}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -82,6 +88,7 @@ Global
 		{52BFD5C6-B473-433C-A698-A2D3B6823B12} = {1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}
 		{1B01F2FF-0A07-45AD-BB8D-6DCAEF9381E1} = {1902AB89-1E27-44C0-8286-3147CC039FF6}
 		{EA462A1A-03CB-4FF0-AA1E-0988021E8711} = {F277EC27-8C0E-4490-9645-F5F3244F9246}
+		{1EBE3129-A926-497A-801E-FDC29F998272} = {1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7F10DB58-5B6F-4EAC-994F-14E8046B306F}

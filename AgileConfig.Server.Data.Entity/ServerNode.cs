@@ -1,7 +1,6 @@
-﻿using System;
+﻿using FreeSql.DataAnnotations;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace AgileConfig.Server.Data.Entity
@@ -12,23 +11,22 @@ namespace AgileConfig.Server.Data.Entity
         Offline = 0,
     }
 
-    [Table("server_node")]
+    [Table(Name = "server_node")]
     public class ServerNode
     {
-        [Key]
-        [Column("address", TypeName = "nvarchar(100)")]
+        [Column(Name = "address", DbType = "nvarchar(100)", IsPrimary = true)]
         public string Address { get; set; }
 
-        [Column("remark", TypeName = "nvarchar(50)")]
+        [Column(Name = "remark", DbType = "nvarchar(50)")]
         public string Remark { get; set; }
 
-        [Column("status")]
+        [Column(Name = "status")]
         public NodeStatus Status { get; set; }
 
-        [Column("last_echo_time")]
+        [Column(Name = "last_echo_time")]
         public DateTime? LastEchoTime { get; set; }
 
-        [Column("create_time")]
+        [Column(Name = "create_time")]
         public DateTime CreateTime { get; set; }
     }
 }

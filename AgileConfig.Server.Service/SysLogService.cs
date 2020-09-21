@@ -1,22 +1,22 @@
 ﻿using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
-using AgileConfig.Server.Data.Repository;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AgileConfig.Server.Common;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using AgileConfig.Server.Data.Freesql;
 
 namespace AgileConfig.Server.Service
 {
     public class SysLogService : ISysLogService
     {
-        private AgileConfigDbContext _dbContext;
+        private FreeSqlContext _dbContext;
 
-        public SysLogService(ISqlContext context)
+        public SysLogService(FreeSqlContext context)
         {
-            _dbContext = context as AgileConfigDbContext;
+            _dbContext = context;
         }
 
         public async Task<bool> AddRangeAsync(List<SysLog> logs)
@@ -35,7 +35,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<long> Count(string appId, DateTime startTime, DateTime endTime)
         {
-            var query = _dbContext.SysLogs.AsNoTracking();
+            var query = _dbContext.SysLogs.Where(s => 1 == 1);
             if (!string.IsNullOrEmpty(appId))
             {
                 query = query.Where(x => x.AppId == appId);
@@ -44,14 +44,14 @@ namespace AgileConfig.Server.Service
             query = query.Where(x => x.LogTime < endTime);
 
 
-            var count = await query.LongCountAsync();
+            var count = await query.CountAsync();
 
             return count;
         }
 
         public Task<List<SysLog>> SearchPage(string appId, DateTime startTime, DateTime endTime, int pageSize, int pageIndex)
         {
-            var query = _dbContext.SysLogs.AsNoTracking();
+            var query = _dbContext.SysLogs.Where(s => 1 == 1);
             if (!string.IsNullOrEmpty(appId))
             {
                 query = query.Where(x => x.AppId == appId);
