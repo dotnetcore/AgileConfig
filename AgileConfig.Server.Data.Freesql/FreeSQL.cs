@@ -10,10 +10,11 @@ namespace AgileConfig.Server.Data.Freesql
 
         static FreeSQL()
         {
+            
             _freesql = new FreeSql.FreeSqlBuilder()
                           .UseConnectionString(ProviderToFreesqlDbType(DbProvider), DbConnection)
-                          .Build(); //请务必定义成 Singleton 单例模式
-            EnsureTables.Ensure();
+                          .Build();
+            EnsureTables.Ensure(_freesql);
         }
 
         public static IFreeSql Instance => _freesql;

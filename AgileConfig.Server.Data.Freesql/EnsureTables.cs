@@ -8,16 +8,16 @@ namespace AgileConfig.Server.Data.Freesql
     public class EnsureTables
     {
         private const string Sqlite_ExistTableSql = "SELECT count(1) FROM sqlite_master WHERE type='table' AND name = 'app'";
-        private const string Mysql_ExistTableSql = "SELECT count(1) FROM sqlite_master WHERE type='table' AND name = 'app'";
+        private const string Mysql_ExistTableSql = " SELECT count(1) FROM information_schema.TABLES WHERE table_name ='app';";
         private const string SqlServer_ExistTableSql = "SELECT COUNT(1) FROM dbo.SYSOBJECTS WHERE ID = object_id(N'[dbo].[app]') and OBJECTPROPERTY(id, N'IsUserTable') = 1";
-        private const string Oracle_ExistTableSql = "SELECT count(1) FROM sqlite_master WHERE type='table' AND name = 'app'";
+        private const string Oracle_ExistTableSql = "select count(1) from user_tables where table_name =upper('app')";
         private const string PostgreSql_ExistTableSql = "SELECT count(1) FROM sqlite_master WHERE type='table' AND name = 'app'";
 
-        public static bool ExistTable()
+        public static bool ExistTable(IFreeSql instance)
         {
             //sqlite exist table?
             string sql = "";
-            switch (FreeSQL.Instance.Ado.DataType)
+            switch (instance.Ado.DataType)
             {
                 case FreeSql.DataType.Sqlite:
                     sql = Sqlite_ExistTableSql;
@@ -39,21 +39,26 @@ namespace AgileConfig.Server.Data.Freesql
                     break;
             }
 
-            dynamic count = FreeSQL.Instance.Ado.ExecuteScalar(sql);
+            dynamic count = instance.Ado.ExecuteScalar(sql);
 
             return count > 0;
         }
 
-        public static void Ensure()
+        public static void Ensure(IFreeSql instance)
         {
-            if (!ExistTable())
+            if (!ExistTable(instance))
             {
-                FreeSQL.Instance.CodeFirst.SyncStructure<App>();
-                FreeSQL.Instance.CodeFirst.SyncStructure<Config>();
-                FreeSQL.Instance.CodeFirst.SyncStructure<ModifyLog>();
-                FreeSQL.Instance.CodeFirst.SyncStructure<ServerNode>();
-                FreeSQL.Instance.CodeFirst.SyncStructure<Setting>();
-                FreeSQL.Instance.CodeFirst.SyncStructure<SysLog>();
+                if (instance.Ado.DataType == FreeSql.DataType.Oracle)
+                {
+                    instance.CodeFirst.IsSyncStructureToUpper = true;
+                }
+                var sql = instance.CodeFirst.GetComparisonDDLStatements<App>();
+                instance.CodeFirst.SyncStructure<App>();
+                instance.CodeFirst.SyncStructure<Config>();
+                instance.CodeFirst.SyncStructure<ModifyLog>();
+                instance.CodeFirst.SyncStructure<ServerNode>();
+                instance.CodeFirst.SyncStructure<Setting>();
+                instance.CodeFirst.SyncStructure<SysLog>();
             }
         }
     }
