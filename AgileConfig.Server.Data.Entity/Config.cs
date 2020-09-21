@@ -30,7 +30,6 @@ namespace AgileConfig.Server.Data.Entity
         [Column(Name = "k", StringLength = 100)]
         public string Key { get; set; }
 
-        [Column(Name = "v", StringLength = 4000)]
         public string Value { get; set; }
 
         [Column(Name = "description", StringLength = 200)]

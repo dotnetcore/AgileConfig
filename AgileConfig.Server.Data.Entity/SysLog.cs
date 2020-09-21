@@ -26,7 +26,7 @@ namespace AgileConfig.Server.Data.Entity
         [Column(Name = "log_time")]
         public DateTime? LogTime { get; set; }
 
-        [Column(Name = "log_text")]
+        [Column(Name = "log_text", StringLength = 2000)]
         public string LogText { get; set; }
     }
 }

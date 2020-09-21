@@ -10,10 +10,10 @@ namespace AgileConfig.Server.Data.Freesql
 
         static FreeSQL()
         {
-            
             _freesql = new FreeSql.FreeSqlBuilder()
                           .UseConnectionString(ProviderToFreesqlDbType(DbProvider), DbConnection)
                           .Build();
+            FluentApi.Config(_freesql);
             EnsureTables.Ensure(_freesql);
         }
 
