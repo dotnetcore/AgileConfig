@@ -8,10 +8,10 @@ namespace AgileConfig.Server.Data.Entity
     [Table(Name = "setting")]
     public class Setting
     {
-        [Column(Name = "id", DbType = "varchar(36)")]
+        [Column(Name = "id", StringLength = 36)]
         public string Id { get; set; }
 
-        [Column(Name = "value", DbType = "nvarchar(50)")]
+        [Column(Name = "value", StringLength = 50)]
         public string Value { get; set; }
 
         [Column(Name = "create_time")]

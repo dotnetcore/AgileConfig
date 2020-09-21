@@ -17,7 +17,7 @@ namespace AgileConfig.Server.Data.Entity
         [Column(Name = "id", IsIdentity = true)]
         public int Id { get; set; }
 
-        [Column(Name = "app_id", DbType = "varchar(36)")]
+        [Column(Name = "app_id", StringLength = 36)]
         public string AppId { get; set; }
 
         [Column(Name = "log_type")]

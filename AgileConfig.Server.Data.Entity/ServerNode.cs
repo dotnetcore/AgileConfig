@@ -14,10 +14,10 @@ namespace AgileConfig.Server.Data.Entity
     [Table(Name = "server_node")]
     public class ServerNode
     {
-        [Column(Name = "address", DbType = "nvarchar(100)", IsPrimary = true)]
+        [Column(Name = "address", StringLength = 100, IsPrimary = true)]
         public string Address { get; set; }
 
-        [Column(Name = "remark", DbType = "nvarchar(50)")]
+        [Column(Name = "remark", StringLength = 50)]
         public string Remark { get; set; }
 
         [Column(Name = "status")]

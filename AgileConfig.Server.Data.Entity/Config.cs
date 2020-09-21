@@ -18,22 +18,22 @@ namespace AgileConfig.Server.Data.Entity
     [Table(Name = "config")]
     public class Config
     {
-        [Column(Name = "id", DbType = "varchar(36)")]
+        [Column(Name = "id", StringLength = 36)]
         public string Id { get; set; }
 
-        [Column(Name = "app_id", DbType = "nvarchar(36)")]
+        [Column(Name = "app_id", StringLength = 36)]
         public string AppId { get; set; }
 
-        [Column(Name = "g", DbType = "nvarchar(100)")]
+        [Column(Name = "g", StringLength = 100)]
         public string Group { get; set; }
 
-        [Column(Name = "k", DbType = "nvarchar(100)")]
+        [Column(Name = "k", StringLength = 100)]
         public string Key { get; set; }
 
-        [Column(Name = "v", DbType = "nvarchar(4000)")]
+        [Column(Name = "v", StringLength = 4000)]
         public string Value { get; set; }
 
-        [Column(Name = "description", DbType = "nvarchar(200)")]
+        [Column(Name = "description", StringLength = 200)]
         public string Description { get; set; }
 
         [Column(Name = "create_time")]

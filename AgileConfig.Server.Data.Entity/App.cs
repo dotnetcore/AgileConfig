@@ -8,13 +8,13 @@ namespace AgileConfig.Server.Data.Entity
     [Table(Name = "app")]
     public class App
     {
-        [Column(Name= "id" , DbType = "nvarchar(36)")]
+        [Column(Name= "id" , StringLength = 36)]
         public string Id { get; set; }
 
-        [Column(Name = "name" , DbType = "nvarchar(50)")]
+        [Column(Name = "name" , StringLength = 50)]
         public string Name { get; set; }
 
-        [Column(Name = "secret", DbType = "nvarchar(36)")]
+        [Column(Name = "secret", StringLength = 36)]
         public string Secret { get; set; }
 
         [Column(Name = "create_time")]
