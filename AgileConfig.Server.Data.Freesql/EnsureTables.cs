@@ -46,9 +46,13 @@ namespace AgileConfig.Server.Data.Freesql
             return count > 0;
         }
 
+        /// <summary>
+        /// 先判断是否建过表了，如果没有则新建表
+        /// </summary>
+        /// <param name="instance"></param>
         public static void Ensure(IFreeSql instance)
         {
-            if (ExistTable(instance))
+            if (!ExistTable(instance))
             {
                 if (instance.Ado.DataType == FreeSql.DataType.Oracle)
                 {
