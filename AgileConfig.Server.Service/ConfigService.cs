@@ -3,7 +3,6 @@ using AgileConfig.Server.IService;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using Microsoft.Extensions.Caching.Memory;
 using AgileConfig.Server.Data.Freesql;
@@ -15,12 +14,10 @@ namespace AgileConfig.Server.Service
     {
         private readonly FreeSqlContext _dbContext;
         private readonly IMemoryCache _memoryCache;
-        private readonly ISysLogService _sysLogService;
 
-        public ConfigService(FreeSqlContext context, IMemoryCache memoryCache, ISysLogService sysLogService)
+        public ConfigService(FreeSqlContext context, IMemoryCache memoryCache)
         {
             _dbContext = context;
-            _sysLogService = sysLogService;
             _memoryCache = memoryCache;
         }
 
@@ -118,18 +115,18 @@ namespace AgileConfig.Server.Service
 
         public async Task<List<Config>> Search(string appId, string group, string key)
         {
-            var q = _dbContext.Configs.Where(c => true);
+            var q = _dbContext.Configs.Where(c => c.Status == ConfigStatus.Enabled);
             if (!string.IsNullOrEmpty(appId))
             {
                 q = q.Where(c => c.AppId == appId);
             }
             if (!string.IsNullOrEmpty(group))
             {
-                q = q.Where(c => EF.Functions.Like(c.Group, $"%{group}%"));
+                q = q.Where(c => c.Group.Contains(group));
             }
             if (!string.IsNullOrEmpty(key))
             {
-                q = q.Where(c => EF.Functions.Like(c.Key, $"%{key}%"));
+                q = q.Where(c => c.Key.Contains(key));
             }
 
             return await q.ToListAsync();

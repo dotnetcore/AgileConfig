@@ -8,6 +8,14 @@ namespace AgileConfig.Server.Data.Freesql
 {
     public class FreeSqlContext : DbContext
     {
+        public FreeSqlContext()
+        {
+        }
+
+        public FreeSqlContext(IFreeSql freeSql) : base(freeSql, null)
+        {
+        }
+
         public DbSet<App> Apps { get; set; }
 
         public DbSet<Config> Configs { get; set; }

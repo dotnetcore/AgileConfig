@@ -12,7 +12,7 @@ namespace AgileConfig.Server.Service
     {
         private FreeSqlContext _dbContext;
 
-        public AppService(FreeSqlContext context, ISysLogService sysLogService)
+        public AppService(FreeSqlContext context)
         {
             _dbContext = context;
         }
