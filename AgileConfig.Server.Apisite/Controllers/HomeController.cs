@@ -52,6 +52,6 @@ namespace AgileConfig.Server.Apisite.Controllers
             return Content("ok");
         }
 
-        private bool IsAdminConsoleMode => "true".Equals(Configuration.Config["adminConsole"], StringComparison.CurrentCultureIgnoreCase);
+        private bool IsAdminConsoleMode => "true".Equals(Global.Config["adminConsole"], StringComparison.CurrentCultureIgnoreCase);
     }
 }

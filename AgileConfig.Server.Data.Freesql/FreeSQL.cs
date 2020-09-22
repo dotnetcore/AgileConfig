@@ -19,8 +19,8 @@ namespace AgileConfig.Server.Data.Freesql
 
         public static IFreeSql Instance => _freesql;
 
-        private static string DbProvider => Configuration.Config["db:provider"];
-        private static string DbConnection => Configuration.Config["db:conn"];
+        private static string DbProvider => Global.Config["db:provider"];
+        private static string DbConnection => Global.Config["db:conn"];
         
         private static FreeSql.DataType ProviderToFreesqlDbType(string provider)
         {
