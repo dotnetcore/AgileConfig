@@ -52,7 +52,6 @@ namespace AgileConfig.Server.Data.Freesql
                 {
                     instance.CodeFirst.IsSyncStructureToUpper = true;
                 }
-                var sql = instance.CodeFirst.GetComparisonDDLStatements<App>();
                 instance.CodeFirst.SyncStructure<App>();
                 instance.CodeFirst.SyncStructure<Config>();
                 instance.CodeFirst.SyncStructure<ModifyLog>();
