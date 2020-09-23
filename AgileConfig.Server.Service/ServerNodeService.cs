@@ -12,12 +12,10 @@ namespace AgileConfig.Server.Service
     public class ServerNodeService : IServerNodeService
     {
         private FreeSqlContext _dbContext;
-        private ISysLogService _sysLogService;
 
-        public ServerNodeService(FreeSqlContext context, ISysLogService sysLogService)
+        public ServerNodeService(FreeSqlContext context)
         {
             _dbContext = context;
-            _sysLogService = sysLogService;
         }
 
         public async Task<bool> AddAsync(ServerNode node)

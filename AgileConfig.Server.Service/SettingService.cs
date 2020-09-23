@@ -14,7 +14,7 @@ namespace AgileConfig.Server.Service
         private FreeSqlContext _dbContext;
 
         public string AdminPasswordSettingKey => "AdminPassword";
-        string AdminPasswordHashSaltKey => "AdminPasswordHashSalt";
+        public string AdminPasswordHashSaltKey => "AdminPasswordHashSalt";
 
         public SettingService(FreeSqlContext context)
         {
