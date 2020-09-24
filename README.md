@@ -7,6 +7,9 @@
 5. 支持IConfiguration，IOptions模式读取配置，原程序几乎可以不用改造
 6. 配置修改支持版本记录，随时回滚配置
 7. 如果所有节点都故障，客户端支持从本地缓存读取配置
+    
+客户端项目[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
+示例项目[AgileConfigMVCSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigMVCSample)   
 ## 架构
 ![](https://s1.ax1x.com/2020/06/29/NRz1gO.png)
 AgileConfig的架构比较简单，主要是分3块：
@@ -15,16 +18,18 @@ AgileConfig的架构比较简单，主要是分3块：
 ### 节点、管理程序
 节点是使用asp.net core开发的一个服务。为了部署简单，直接把管理程序跟节点服务合二为一了。任何一个节点都可以在启动的时候配置环境变量开启管理程序功能。
 ### 数据库
-使用数据库来存储数据，目前支持Sqlserver, Mysql, Sqlite, PostgreSql 四种数据库。因为服务端使用EF Core框架访问数据，原则上只要EF Core支持的数据库，节点就可以很方便的支持它。
+使用数据库来存储数据，目前支持Sqlserver, Mysql, Sqlite, PostgreSql,Oracle 五种数据库。最新版本已经切换为Freesql为数据访问组件。Freesql对多数据库的支持更加强劲，特别是对国产数据库的支持。但是因为没有国产数据库的测试环境，本项目并未支持，如果有需要我可是开分支尝试支持，但是测试工作就要靠用户啦。
+> 注意：如果使用<=1.0.4之前版本的用户请不要更新，因为EFCore跟Freesql自动建的库可能存在稍许差异，保险起见不要更新吧。
 
 ## 部署服务端
 ## 初始化数据库
-用户只需要手工建一个空库，所有的表在第一次启动的时候都会自动生成。目前支持sqlserver，mysql，sqlite, PostgreSql 四种数据库。
+用户只需要手工建一个空库，所有的表在第一次启动的时候都会自动生成。目前支持sqlserver，mysql，sqlite, PostgreSql，Oracle 五种数据库。
 provider对照：   
 sqlserver = SqlServer   
 mysql = MySql   
 sqlite = Sqlite   
 npgsql = PostgreSql   
+oracle = Oracle   
 ## 使用服务端
 ### 运行服务端
 ```
@@ -32,12 +37,12 @@ sudo docker run --name agile_config -e adminConsole=true -e db:provider=sqlite -
 ```
 通过docker建立一个agile_config实例，其中有3个环境变量需要配置:    
 1. adminConsole 配置程序是否为管理控制台。如果为true则启用控制台功能，访问该实例会出现管理界面。
-2. db:provider 配置程序的数据库类型。目前程序支持：sqlite，mysql，sqlserver 三种数据库。
+2. db:provider 配置程序的数据库类型。目前程序支持：sqlite，mysql，sqlserver，npgsql, oracle 五种数据库。
 3. db:conn 配置数据库连接串    
     
 ![](https://s1.ax1x.com/2020/06/09/t4rDfA.png)
 ### 初始化管理员密码
-第一次远行程序需要初始化管理员密码    
+第一次运行程序需要初始化管理员密码    
 ![](https://s1.ax1x.com/2020/06/09/t4DgIJ.png)
 ### 节点
 AgileConfig支持多节点部署，所有的节点都是平行的。为了简化部署，AgileConfig并没有单独的控制台程序，请直接使用任意一个节点作为控制台。当环境变量adminConsole=true时，该节点同时兼备数据节点跟控制台功能。为了控制台能够管理节点，所以需要在控制台配置节点的信息。
