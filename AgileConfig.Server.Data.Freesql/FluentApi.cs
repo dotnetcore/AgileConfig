@@ -5,7 +5,7 @@ using System.Text;
 
 namespace AgileConfig.Server.Data.Freesql
 {
-    class FluentApi
+    public class FluentApi
     {
         public static void Config(IFreeSql freeSql)
         {
