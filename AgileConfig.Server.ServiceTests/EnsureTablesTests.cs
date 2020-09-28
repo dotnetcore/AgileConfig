@@ -61,5 +61,22 @@ namespace AgileConfig.Server.Data.Freesql.Tests
             ex = EnsureTables.ExistTable(mysql_fsq);
             Assert.IsTrue(ex);
         }
+
+        [TestMethod()]
+        public void ExistTableOracleTest()
+        {
+            //SqlServer
+            string conn = "user id=CLINIC;password=CLINIC;data source=192.168.0.91/orcl";
+            var oracle_fsq = new FreeSqlBuilder()
+                          .UseConnectionString(FreeSql.DataType.Oracle, conn)
+                          .Build();
+            FluentApi.Config(oracle_fsq);
+            oracle_fsq.Ado.ExecuteNonQuery("drop table \"app\" ");
+            var ex = EnsureTables.ExistTable(oracle_fsq);
+            Assert.IsFalse(ex);
+            oracle_fsq.CodeFirst.SyncStructure<App>();
+            ex = EnsureTables.ExistTable(oracle_fsq);
+            Assert.IsTrue(ex);
+        }
     }
 }

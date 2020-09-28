@@ -12,7 +12,7 @@ namespace AgileConfig.Server.Data.Freesql
         private const string Sqlite_ExistTableSql = "SELECT count(1) FROM sqlite_master WHERE type='table' AND name = 'app'";
         private const string Mysql_ExistTableSql = " SELECT count(1) FROM information_schema.TABLES WHERE table_name ='app'";
         private const string SqlServer_ExistTableSql = "SELECT COUNT(1) FROM dbo.SYSOBJECTS WHERE ID = object_id(N'[dbo].[app]') and OBJECTPROPERTY(id, N'IsUserTable') = 1";
-        private const string Oracle_ExistTableSql = "select count(1) from user_tables where table_name =upper('app')";
+        private const string Oracle_ExistTableSql = "select count(1) from user_tables where table_name = 'app'";
         private const string PostgreSql_ExistTableSql = "select count(1) from pg_class where relname = 'app'";
 
         public static bool ExistTable(IFreeSql instance)
