@@ -78,5 +78,22 @@ namespace AgileConfig.Server.Data.Freesql.Tests
             ex = EnsureTables.ExistTable(oracle_fsq);
             Assert.IsTrue(ex);
         }
+
+        [TestMethod()]
+        public void ExistTablePostgreSqlTest()
+        {
+            //SqlServer
+            string conn = "Host=127.0.0.1;Database=agile_config;Username=postgres;Password=dev@123";
+            var postgresql_fsq = new FreeSqlBuilder()
+                          .UseConnectionString(FreeSql.DataType.PostgreSQL, conn)
+                          .Build();
+            FluentApi.Config(postgresql_fsq);
+            postgresql_fsq.Ado.ExecuteNonQuery("drop table \"app\" ");
+            var ex = EnsureTables.ExistTable(postgresql_fsq);
+            Assert.IsFalse(ex);
+            postgresql_fsq.CodeFirst.SyncStructure<App>();
+            ex = EnsureTables.ExistTable(postgresql_fsq);
+            Assert.IsTrue(ex);
+        }
     }
 }
