@@ -6,6 +6,7 @@ using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -23,7 +24,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody]AppVM model)
+        public async Task<IActionResult> Add([FromBody] AppVM model)
         {
             if (model == null)
             {
@@ -48,6 +49,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             app.Enabled = model.Enabled;
             app.CreateTime = DateTime.Now;
             app.UpdateTime = null;
+            app.Type = model.Inheritanced ? AppType.Inheritance : AppType.PRIVATE;
 
             var result = await _appService.AddAsync(app);
             if (result)
@@ -69,7 +71,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> Edit([FromBody]AppVM model)
+        public async Task<IActionResult> Edit([FromBody] AppVM model)
         {
             if (model == null)
             {
@@ -90,6 +92,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             app.Secret = model.Secret;
             app.Enabled = model.Enabled;
             app.UpdateTime = DateTime.Now;
+            app.Type = model.Inheritanced ? AppType.Inheritance : AppType.PRIVATE;
 
             var result = await _appService.UpdateAsync(app);
             if (result)
@@ -112,11 +115,23 @@ namespace AgileConfig.Server.Apisite.Controllers
         public async Task<IActionResult> All()
         {
             var apps = await _appService.GetAllAppsAsync();
+            var vms = apps.Select(x => {
+                return new AppListVM
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Secret = x.Secret,
+                    Inheritanced = x.Type == AppType.Inheritance,
+                    Enabled = x.Enabled,
+                    UpdateTime = x.UpdateTime,
+                    CreateTime = x.CreateTime
+                };
+            });
 
             return Json(new
             {
                 success = true,
-                data = apps
+                data = vms
             });
         }
 
@@ -129,11 +144,17 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var app = await _appService.GetAsync(id);
+            var vm = new AppVM();
+            vm.Id = app.Id;
+            vm.Name = app.Name;
+            vm.Secret = app.Secret;
+            vm.Inheritanced = app.Type == AppType.Inheritance;
+            vm.Enabled = app.Enabled;
 
             return Json(new
             {
                 success = app != null,
-                data = app,
+                data = vm,
                 message = app == null ? "未找到对应的应用程序。" : ""
             });
         }
@@ -171,7 +192,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
-                    LogText = $"{(app.Enabled?"启用":"禁用")}应用【AppId】:{app.Id}"
+                    LogText = $"{(app.Enabled ? "启用" : "禁用")}应用【AppId】:{app.Id}"
                 });
             }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AgileConfig.Server.Data.Entity;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -17,5 +18,13 @@ namespace AgileConfig.Server.Apisite.Models
         [MaxLength(36, ErrorMessage = "密钥长度不能超过36位")]
         public string Secret { get; set; }
         public bool Enabled { get; set; }
+        public bool Inheritanced { get; set; }
+    }
+
+    public class AppListVM : AppVM
+    {
+        public DateTime CreateTime { get; set; }
+
+        public DateTime? UpdateTime { get; set; }
     }
 }
