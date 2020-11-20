@@ -192,3 +192,8 @@ table {
 
     table tr.row-selected {
     }
+
+form.app .form-group input[type=checkbox].form-control {
+    width: 34px;
+    height: 34px;
+}

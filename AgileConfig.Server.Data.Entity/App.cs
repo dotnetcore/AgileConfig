@@ -5,6 +5,12 @@ using System.Text;
 
 namespace AgileConfig.Server.Data.Entity
 {
+    public enum AppType
+    {
+        PRIVATE,
+        Inheritance,
+    }
+
     [Table(Name = "app")]
     public class App
     {
@@ -25,5 +31,8 @@ namespace AgileConfig.Server.Data.Entity
 
         [Column(Name = "enabled")]
         public bool Enabled { get; set; }
+
+        [Column(Name = "type")]
+        public AppType Type { get; set; }
     }
 }
