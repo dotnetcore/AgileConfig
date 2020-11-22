@@ -79,5 +79,9 @@ namespace AgileConfig.Server.Service
             return (int)q;
         }
 
+        public async Task<List<App>> GetAllInheritancedAppsAsync()
+        {
+            return await _dbContext.Apps.Where(a => a.Type == AppType.Inheritance).ToListAsync();
+        }
     }
 }

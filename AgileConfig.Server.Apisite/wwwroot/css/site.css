@@ -197,3 +197,30 @@ form.app .form-group input[type=checkbox].form-control {
     width: 34px;
     height: 34px;
 }
+.ref-apps {
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+}
+    .ref-apps .ref-app {
+        border: 1px solid #999;
+        border-radius: 5px;
+        padding: 5px 15px;
+        margin-right: 10px;
+        display: flex;
+        align-items: center;
+        font-size: 18px;
+        cursor: pointer;
+    }
+        .ref-apps .ref-app.selected {
+            border: 1px solid rgb(0,117,255);
+            color: white;
+            background-color: rgb(0,117,255);
+        }
+        .ref-apps .ref-app span {
+            margin-left: 15px;
+        }
+    .ref-apps span.glyphicon.glyphicon-plus{
+        font-size:24px;
+        cursor:pointer;
+    }

@@ -202,5 +202,35 @@ namespace AgileConfig.Server.Apisite.Controllers
                 message = !result ? "修改应用失败，请查看错误日志" : ""
             });
         }
+
+        /// <summary>
+        /// 获取所有可以继承的app
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> InheritancedApps(string currentAppId)
+        {
+            var apps = await _appService.GetAllInheritancedAppsAsync();
+            apps = apps.Where(a=>a.Enabled).ToList();
+            var self = apps.FirstOrDefault(a=>a.Id == currentAppId);
+            if (self != null)
+            {
+                //过滤本身
+                apps.Remove(self);
+            }
+            var vms = apps.Select(x => {
+                return new
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                };
+            });
+
+            return Json(new
+            {
+                success = true,
+                data = vms
+            });
+        }
     }
 }
