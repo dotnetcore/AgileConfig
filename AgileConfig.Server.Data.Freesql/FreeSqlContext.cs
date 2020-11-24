@@ -28,5 +28,7 @@ namespace AgileConfig.Server.Data.Freesql
 
         public DbSet<SysLog> SysLogs { get; set; }
 
+        public DbSet<AppInheritanced> AppInheritanceds { get; set; }
+
     }
 }

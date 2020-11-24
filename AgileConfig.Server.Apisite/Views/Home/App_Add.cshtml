@@ -24,7 +24,7 @@
     </div>
     <div class="form-group">
         <label>
-            可继承
+            可被继承
         </label>
         <input type="checkbox" class="form-control" ng-model="app.inheritanced">
     </div>
@@ -34,7 +34,7 @@
         </label>
         <input type="checkbox" class="form-control" ng-model="app.enabled">
     </div>
-    <div class="form-group">
+    <div class="form-group" ng-show="!app.inheritanced">
         <label>
             继承应用
         </label>

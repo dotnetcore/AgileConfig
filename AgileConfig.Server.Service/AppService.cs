@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using AgileConfig.Server.Data.Freesql;
+using System.Linq;
 
 namespace AgileConfig.Server.Service
 {
@@ -25,7 +26,18 @@ namespace AgileConfig.Server.Service
 
             return result;
         }
+        public async Task<bool> AddAsync(App app, List<AppInheritanced> appInheritanceds)
+        {
+            await _dbContext.Apps.AddAsync(app);
+            if (appInheritanceds != null)
+            {
+                await _dbContext.AppInheritanceds.AddRangeAsync(appInheritanceds);
+            }
+            int x = await _dbContext.SaveChangesAsync();
+            var result = x > 0;
 
+            return result;
+        }
         public async Task<bool> DeleteAsync(App app)
         {
             app = await _dbContext.Apps.Where(a => a.Id == app.Id).ToOneAsync();
@@ -82,6 +94,42 @@ namespace AgileConfig.Server.Service
         public async Task<List<App>> GetAllInheritancedAppsAsync()
         {
             return await _dbContext.Apps.Where(a => a.Type == AppType.Inheritance).ToListAsync();
+        }
+
+        /// <summary>
+        /// 根据appId查询所有继承的app
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <returns></returns>
+        public async Task<List<App>> GetInheritancedAppsAsync(string appId)
+        {
+            var appInheritanceds = await _dbContext.AppInheritanceds.Where(a => a.AppId == appId).ToListAsync();
+            appInheritanceds = appInheritanceds.OrderBy(a => a.Sort).ToList();
+
+            var apps = new List<App>();
+
+            appInheritanceds.ForEach(async a => {
+                var app = await GetAsync(a.InheritancedAppId);
+                apps.Add(app);
+            });
+
+            return apps;
+        }
+
+        public async Task<bool> UpdateAsync(App app, List<AppInheritanced> appInheritanceds)
+        {
+            _dbContext.Update(app);
+            var oldInheritancedApps = await _dbContext.AppInheritanceds.Where(a => a.AppId == app.Id).ToListAsync();
+            _dbContext.RemoveRange(oldInheritancedApps);
+            if (appInheritanceds != null)
+            {
+                await _dbContext.AddRangeAsync(appInheritanceds);
+            }
+            var x = await _dbContext.SaveChangesAsync();
+
+            var result = x > 0;
+
+            return result;
         }
     }
 }

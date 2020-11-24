@@ -19,6 +19,8 @@ namespace AgileConfig.Server.Apisite.Models
         public string Secret { get; set; }
         public bool Enabled { get; set; }
         public bool Inheritanced { get; set; }
+
+        public List<App> inheritancedApps { get; set; }
     }
 
     public class AppListVM : AppVM

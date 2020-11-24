@@ -7,6 +7,7 @@ using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -51,7 +52,22 @@ namespace AgileConfig.Server.Apisite.Controllers
             app.UpdateTime = null;
             app.Type = model.Inheritanced ? AppType.Inheritance : AppType.PRIVATE;
 
-            var result = await _appService.AddAsync(app);
+            var inheritanceApps = new List<AppInheritanced>();
+            if (!model.Inheritanced && model.inheritancedApps != null)
+            {
+                var sort = 0;
+                model.inheritancedApps.ForEach(a=> {
+                    inheritanceApps.Add(new AppInheritanced
+                    {
+                        Id = Guid.NewGuid().ToString("N"),
+                        AppId = app.Id,
+                        InheritancedAppId = a.Id,
+                        Sort = sort++
+                    }) ;
+                });
+            }
+
+            var result = await _appService.AddAsync(app, inheritanceApps);
             if (result)
             {
                 await _sysLogService.AddSysLogAsync(new SysLog
@@ -93,8 +109,22 @@ namespace AgileConfig.Server.Apisite.Controllers
             app.Enabled = model.Enabled;
             app.UpdateTime = DateTime.Now;
             app.Type = model.Inheritanced ? AppType.Inheritance : AppType.PRIVATE;
+            var inheritanceApps = new List<AppInheritanced>();
+            if (!model.Inheritanced && model.inheritancedApps != null)
+            {
+                var sort = 0;
+                model.inheritancedApps.ForEach(a => {
+                    inheritanceApps.Add(new AppInheritanced
+                    {
+                        Id = Guid.NewGuid().ToString("N"),
+                        AppId = app.Id,
+                        InheritancedAppId = a.Id,
+                        Sort = sort++
+                    });
+                });
+            }
 
-            var result = await _appService.UpdateAsync(app);
+            var result = await _appService.UpdateAsync(app, inheritanceApps);
             if (result)
             {
                 await _sysLogService.AddSysLogAsync(new SysLog
@@ -150,6 +180,8 @@ namespace AgileConfig.Server.Apisite.Controllers
             vm.Secret = app.Secret;
             vm.Inheritanced = app.Type == AppType.Inheritance;
             vm.Enabled = app.Enabled;
+
+            vm.inheritancedApps = await _appService.GetInheritancedAppsAsync(id);
 
             return Json(new
             {

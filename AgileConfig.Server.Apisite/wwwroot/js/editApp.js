@@ -18,7 +18,6 @@
             r => {
                 if (r.data.success) {
                     $scope.app = r.data.data;
-                    $scope.app.inheritancedApps = [];
                     getAllInheritancedApps();
                 } else {
                     alert(r.data.message);

@@ -34,7 +34,7 @@
         </label>
         <input type="checkbox" class="form-control" ng-model="app.enabled">
     </div>
-    <div class="form-group">
+    <div class="form-group" ng-show="!app.inheritanced">
         <label>
             继承应用
         </label>
@@ -67,6 +67,8 @@
             </div>
         </div>
     </div>
+
     <button type="submit" class="btn btn-primary">确定</button>
     <button type="button" class="btn btn-default" ng-click="cancel()">取消</button>
+
 </form>
