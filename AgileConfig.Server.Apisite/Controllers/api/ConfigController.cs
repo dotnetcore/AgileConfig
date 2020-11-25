@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Apisite.Models;
+using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -41,7 +42,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 return NotFound();
             }
 
-            var configs = await _configService.GetPublishedConfigsByAppId(appId);
+            var configs = await _configService.GetPublishedConfigsByAppIdWithInheritanced(appId);
+           
             var vms = configs.Select(c => {
                 return new ConfigVM() {
                     Id = c.Id,

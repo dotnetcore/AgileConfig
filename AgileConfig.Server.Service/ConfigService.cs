@@ -14,11 +14,13 @@ namespace AgileConfig.Server.Service
     {
         private readonly FreeSqlContext _dbContext;
         private readonly IMemoryCache _memoryCache;
+        private readonly IAppService _appService;
 
-        public ConfigService(FreeSqlContext context, IMemoryCache memoryCache)
+        public ConfigService(FreeSqlContext context, IMemoryCache memoryCache, IAppService appService)
         {
             _dbContext = context;
             _memoryCache = memoryCache;
+            _appService = appService;
         }
 
         public async Task<bool> AddAsync(Config config)
@@ -30,6 +32,7 @@ namespace AgileConfig.Server.Service
             if (result)
             {
                 ClearAppPublishedConfigsMd5Cache(config.AppId);
+                ClearAppPublishedConfigsMd5CacheWithInheritanced(config.AppId);
             }
 
             return result;
@@ -43,6 +46,7 @@ namespace AgileConfig.Server.Service
             if (result)
             {
                 ClearAppPublishedConfigsMd5Cache(config.AppId);
+                ClearAppPublishedConfigsMd5CacheWithInheritanced(config.AppId);
             }
 
             return result;
@@ -61,6 +65,7 @@ namespace AgileConfig.Server.Service
             if (result)
             {
                 ClearAppPublishedConfigsMd5Cache(config.AppId);
+                ClearAppPublishedConfigsMd5CacheWithInheritanced(config.AppId);
             }
 
             return result;
@@ -79,6 +84,7 @@ namespace AgileConfig.Server.Service
             if (result)
             {
                 ClearAppPublishedConfigsMd5Cache(config.AppId);
+                ClearAppPublishedConfigsMd5CacheWithInheritanced(config.AppId);
             }
 
             return result;
@@ -139,6 +145,16 @@ namespace AgileConfig.Server.Service
             return (int)q;
         }
 
+        public string GenerateKey(Config config)
+        {
+            if (string.IsNullOrEmpty(config.Group))
+            {
+                return config.Key;
+            }
+
+            return $"{config.Group}:{config.Key}";
+        }
+
         /// <summary>
         /// 获取当前app的配置集合的md5版本
         /// </summary>
@@ -150,17 +166,7 @@ namespace AgileConfig.Server.Service
                 c.AppId == appId && c.Status == ConfigStatus.Enabled && c.OnlineStatus == OnlineStatus.Online
             ).ToListAsync();
 
-            string generateKey(Config config)
-            {
-                if (string.IsNullOrEmpty(config.Group))
-                {
-                    return config.Key;
-                }
-
-                return $"{config.Group}:{config.Key}";
-            }
-
-            var keyStr = string.Join('&', configs.Select(c => generateKey(c)).ToArray().OrderBy(k => k));
+            var keyStr = string.Join('&', configs.Select(c => GenerateKey(c)).ToArray().OrderBy(k => k));
             var valStr = string.Join('&', configs.Select(c => c.Value).ToArray().OrderBy(v => v));
             var txt = $"{keyStr}&{valStr}";
 
@@ -194,9 +200,19 @@ namespace AgileConfig.Server.Service
             return $"ConfigService_AppPublishedConfigsMd5Cache_{appId}";
         }
 
+        private string AppPublishedConfigsMd5CacheKeyWithInheritanced(string appId)
+        {
+            return $"ConfigService_AppPublishedConfigsMd5CacheWithInheritanced_{appId}";
+        }
+
         private void ClearAppPublishedConfigsMd5Cache(string appId)
         {
             var cacheKey = AppPublishedConfigsMd5CacheKey(appId);
+            _memoryCache.Remove(cacheKey);
+        }
+        private void ClearAppPublishedConfigsMd5CacheWithInheritanced(string appId)
+        {
+            var cacheKey = AppPublishedConfigsMd5CacheKeyWithInheritanced(appId);
             _memoryCache.Remove(cacheKey);
         }
 
@@ -216,9 +232,78 @@ namespace AgileConfig.Server.Service
             if (result)
             {
                 ClearAppPublishedConfigsMd5Cache(configs.First().AppId);
+                ClearAppPublishedConfigsMd5CacheWithInheritanced(configs.First().AppId);
             }
 
             return result;
+        }
+
+        public async Task<List<Config>> GetPublishedConfigsByAppIdWithInheritanced(string appId)
+        {
+            var apps = new List<string>();
+            var inheritanceApps = await _appService.GetInheritancedAppsAsync(appId);
+            for (int i = 0; i < inheritanceApps.Count; i++)
+            {
+                apps.Add(inheritanceApps[i].Id);//后继承的排在后面
+            }
+            apps.Add(appId);//本应用放在最后
+
+            var configs = new Dictionary<string, Config>();
+            //读取所有继承的配置跟本app的配置
+            for (int i = 0; i < apps.Count; i++)
+            {
+                var id = apps[i];
+                var publishConfigs = await GetPublishedConfigsByAppId(id);
+                for (int j = 0; j < publishConfigs.Count; j++)
+                {
+                    var config = publishConfigs[j];
+                    var key = GenerateKey(config);
+                    if (configs.ContainsKey(key))
+                    {
+                        //后面的覆盖前面的
+                        configs[key] = config;
+                    }
+                    else
+                    {
+                        configs.Add(key, config);
+                    }
+                }
+            }
+
+            return configs.Values.ToList();
+        }
+
+        public async Task<string> AppPublishedConfigsMd5WithInheritanced(string appId)
+        {
+            var configs = await GetPublishedConfigsByAppIdWithInheritanced(appId);
+
+            var keyStr = string.Join('&', configs.Select(c => GenerateKey(c)).ToArray().OrderBy(k => k));
+            var valStr = string.Join('&', configs.Select(c => c.Value).ToArray().OrderBy(v => v));
+            var txt = $"{keyStr}&{valStr}";
+
+            return Encrypt.Md5(txt);
+        }
+
+        /// <summary>
+        /// 获取当前app的配置集合的md5版本，1分钟缓存 集合了继承app的配置
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <returns></returns>
+        public async Task<string> AppPublishedConfigsMd5CacheWithInheritanced(string appId)
+        {
+            var cacheKey = AppPublishedConfigsMd5CacheKeyWithInheritanced(appId);
+            if (_memoryCache.TryGetValue(cacheKey, out string md5))
+            {
+                return md5;
+            }
+
+            md5 = await AppPublishedConfigsMd5WithInheritanced(appId);
+
+            var cacheOp = new MemoryCacheEntryOptions()
+            .SetAbsoluteExpiration(TimeSpan.FromSeconds(60));
+            _memoryCache.Set(cacheKey, md5, cacheOp);
+
+            return md5;
         }
     }
 }

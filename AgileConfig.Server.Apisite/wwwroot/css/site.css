@@ -224,3 +224,6 @@ form.app .form-group input[type=checkbox].form-control {
         font-size:24px;
         cursor:pointer;
     }
+form .foot-bar {
+    margin-top:20px;
+}
