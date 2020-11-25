@@ -34,7 +34,7 @@ namespace AgileConfig.Server.Service.Tests.mysql
             var cache = new Mock<IMemoryCache>();
             var config = new Config();
 
-            service = new ConfigService(freeSqlContext, cache.Object);
+            service = new ConfigService(freeSqlContext, cache.Object, new AppService(freeSqlContext));
             fsq.Delete<Config>().Where("1=1");
 
             Console.WriteLine("TestInitialize");
