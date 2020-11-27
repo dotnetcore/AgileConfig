@@ -39,7 +39,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody]ConfigVM model)
+        public async Task<IActionResult> Add([FromBody] ConfigVM model)
         {
             if (model == null)
             {
@@ -158,7 +158,8 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 //add syslogs
                 var addSysLogs = new List<SysLog>();
-                addConfigs.ForEach(c=> {
+                addConfigs.ForEach(c =>
+                {
                     addSysLogs.Add(new SysLog
                     {
                         LogTime = DateTime.Now,
@@ -170,7 +171,8 @@ namespace AgileConfig.Server.Apisite.Controllers
                 await _sysLogService.AddRangeAsync(addSysLogs);
                 //add modify log 
                 var addModifyLogs = new List<ModifyLog>();
-                addConfigs.ForEach(c=> {
+                addConfigs.ForEach(c =>
+                {
                     addModifyLogs.Add(new ModifyLog
                     {
                         Id = Guid.NewGuid().ToString("N"),
@@ -192,7 +194,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit([FromBody]ConfigVM model)
+        public async Task<IActionResult> Edit([FromBody] ConfigVM model)
         {
             if (model == null)
             {
@@ -397,7 +399,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     LogText = $"删除配置【Key:{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
                 });
                 //notice clients
-                var action = new WebsocketAction { Action = ActionConst.Remove, Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value } };
+                var action = await CreateRemoveWebsocketAction(config, config.AppId);
                 var nodes = await _serverNodeService.GetAllNodesAsync();
                 foreach (var node in nodes)
                 {
@@ -415,6 +417,33 @@ namespace AgileConfig.Server.Apisite.Controllers
                 success = result,
                 message = !result ? "修改配置失败，请查看错误日志" : ""
             });
+        }
+
+        private async Task<WebsocketAction> CreateRemoveWebsocketAction(Config oldConfig, string appId)
+        {
+            //获取app此时的配置列表合并继承的app配置 字典
+            var configs = await _configService.GetPublishedConfigsByAppIdWithInheritanced_Dictionary(appId);
+            var oldKey = _configService.GenerateKey(oldConfig);
+            //如果oldkey已经不存在，返回remove的action
+            if (!configs.ContainsKey(oldKey))
+            {
+                var action = new WebsocketAction { Action = ActionConst.Remove, Item = new ConfigItem { group = oldConfig.Group, key = oldConfig.Key, value = oldConfig.Value } };
+                return action;
+            }
+            else
+            {
+                //如果还在，那么说明有继承的app的配置项目的key跟oldkey一样，那么使用继承的配置的值
+                //返回update的action
+                var config = configs[oldKey];
+                var action = new WebsocketAction
+                {
+                    Action = ActionConst.Update,
+                    Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value },
+                    OldItem = new ConfigItem { group = oldConfig.Group, key = oldConfig.Key, value = oldConfig.Value }
+                };
+
+                return action;
+            }
         }
 
         [HttpPost]
@@ -581,7 +610,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         /// </summary>
         /// <param name="configIds"></param>
         /// <returns></returns>
-        public async Task<IActionResult> PublishSome([FromBody]List<string> configIds)
+        public async Task<IActionResult> PublishSome([FromBody] List<string> configIds)
         {
             if (configIds == null)
             {
@@ -748,7 +777,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 {
                     success = true,
                     data = addConfigs
-                }); 
+                });
             }
         }
     }

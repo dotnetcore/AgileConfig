@@ -238,7 +238,24 @@ namespace AgileConfig.Server.Service
             return result;
         }
 
+        /// <summary>
+        /// 获取app的配置项继承的app配置合并进来
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <returns></returns>
         public async Task<List<Config>> GetPublishedConfigsByAppIdWithInheritanced(string appId)
+        {
+            var configs = await GetPublishedConfigsByAppIdWithInheritanced_Dictionary(appId);
+
+            return configs.Values.ToList();
+        }
+
+        /// <summary>
+        /// 获取app的配置项继承的app配置合并进来转换为字典
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <returns></returns>
+        public async Task<Dictionary<string, Config>> GetPublishedConfigsByAppIdWithInheritanced_Dictionary(string appId)
         {
             var apps = new List<string>();
             var inheritanceApps = await _appService.GetInheritancedAppsAsync(appId);
@@ -270,7 +287,7 @@ namespace AgileConfig.Server.Service
                 }
             }
 
-            return configs.Values.ToList();
+            return configs;
         }
 
         public async Task<string> AppPublishedConfigsMd5WithInheritanced(string appId)
