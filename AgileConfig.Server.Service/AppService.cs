@@ -108,10 +108,11 @@ namespace AgileConfig.Server.Service
 
             var apps = new List<App>();
 
-            appInheritanceds.ForEach(async a => {
-                var app = await GetAsync(a.InheritancedAppId);
+            foreach (var item in appInheritanceds)
+            {
+                var app = await GetAsync(item.InheritancedAppId);
                 apps.Add(app);
-            });
+            }
 
             return apps;
         }

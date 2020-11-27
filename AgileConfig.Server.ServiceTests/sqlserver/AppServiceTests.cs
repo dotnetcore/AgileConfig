@@ -22,7 +22,7 @@ namespace AgileConfig.Server.Service.Tests.sqlserver
         [TestInitialize]
         public void TestInitialize()
         {
-            string conn = "Persist Security Info = False; User ID =dev; Password =dev@123,; Initial Catalog =agile_config_test; Server =xxxxx";
+            string conn = "Persist Security Info = False; User ID =dev; Password =dev@123,; Initial Catalog =agile_config_test; Server =www.ranzhotel.com";
             fsq = new FreeSqlBuilder()
                           .UseConnectionString(FreeSql.DataType.SqlServer, conn)
                           .UseAutoSyncStructure(true)
@@ -252,6 +252,123 @@ namespace AgileConfig.Server.Service.Tests.sqlserver
             Assert.AreEqual(1, count);
         }
 
+        [TestMethod()]
+        public async Task GetAllInheritancedAppsAsyncTest()
+        {
+            fsq.Delete<App>().Where("1=1").ExecuteAffrows();
+            var id = Guid.NewGuid().ToString();
+            var source = new Data.Entity.App
+            {
+                Id = id,
+                Name = "xx",
+                Secret = "sec",
+                CreateTime = DateTime.Now,
+                UpdateTime = DateTime.Now,
+                Enabled = true,
+                Type = AppType.PRIVATE
+            };
+            var source1 = new Data.Entity.App
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = "xxx",
+                Secret = "sec",
+                CreateTime = DateTime.Now,
+                UpdateTime = DateTime.Now,
+                Enabled = true,
+                Type = AppType.PRIVATE
+            };
+            var source2 = new Data.Entity.App
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = "xxxx",
+                Secret = "sec",
+                CreateTime = DateTime.Now,
+                UpdateTime = DateTime.Now,
+                Enabled = true,
+                Type = AppType.Inheritance
+            };
+            var source3 = new Data.Entity.App
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = "xxxx",
+                Secret = "sec",
+                CreateTime = DateTime.Now,
+                UpdateTime = DateTime.Now,
+                Enabled = false,
+                Type = AppType.Inheritance
+            };
+            var result = await service.AddAsync(source);
+            await service.AddAsync(source1);
+            await service.AddAsync(source2);
+            await service.AddAsync(source3);
+
+            Assert.IsTrue(result);
+
+            var apps = await service.GetAllInheritancedAppsAsync();
+
+            Assert.AreEqual(2, apps.Count);
+        }
+        [TestMethod()]
+        public async Task GetInheritancedAppsAsyncTest()
+        {
+            fsq.Delete<App>().Where("1=1").ExecuteAffrows();
+            fsq.Delete<AppInheritanced>().Where("1=1").ExecuteAffrows();
+
+            var id = Guid.NewGuid().ToString();
+            var source = new Data.Entity.App
+            {
+                Id = id,
+                Name = "xx",
+                Secret = "sec",
+                CreateTime = DateTime.Now,
+                UpdateTime = DateTime.Now,
+                Enabled = true,
+                Type = AppType.PRIVATE
+            };
+            var source1 = new Data.Entity.App
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = "xx1",
+                Secret = "sec",
+                CreateTime = DateTime.Now,
+                UpdateTime = DateTime.Now,
+                Enabled = true,
+                Type = AppType.Inheritance
+            };
+            var source2 = new Data.Entity.App
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = "xx2",
+                Secret = "sec",
+                CreateTime = DateTime.Now,
+                UpdateTime = DateTime.Now,
+                Enabled = true,
+                Type = AppType.Inheritance
+            };
+            //
+            var appInher = new AppInheritanced();
+            appInher.Id = Guid.NewGuid().ToString();
+            appInher.AppId = source.Id;
+            appInher.InheritancedAppId = source1.Id;
+            appInher.Sort = 1;
+            var appInher1 = new AppInheritanced();
+            appInher1.Id = Guid.NewGuid().ToString();
+            appInher1.AppId = source.Id;
+            appInher1.InheritancedAppId = source2.Id;
+            appInher1.Sort = 2;
+
+            var result = await service.AddAsync(source);
+            await service.AddAsync(source1);
+            await service.AddAsync(source2);
+            fsq.Insert<AppInheritanced>(appInher).ExecuteAffrows();
+            fsq.Insert<AppInheritanced>(appInher1).ExecuteAffrows();
+
+            Assert.IsTrue(result);
+
+            var apps = await service.GetInheritancedAppsAsync(source.Id);
+
+            Assert.AreEqual(2, apps.Count);
+        }
         [TestCleanup]
         public void Clean()
         {
