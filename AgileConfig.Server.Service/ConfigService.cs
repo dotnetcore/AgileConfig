@@ -261,7 +261,10 @@ namespace AgileConfig.Server.Service
             var inheritanceApps = await _appService.GetInheritancedAppsAsync(appId);
             for (int i = 0; i < inheritanceApps.Count; i++)
             {
-                apps.Add(inheritanceApps[i].Id);//后继承的排在后面
+                if (inheritanceApps[i].Enabled)
+                {
+                    apps.Add(inheritanceApps[i].Id);//后继承的排在后面
+                }
             }
             apps.Add(appId);//本应用放在最后
 
