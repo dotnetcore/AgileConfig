@@ -64,6 +64,10 @@ app.controller('listConfigCtrl', function ($scope, $http, $state, $stateParams) 
         $scope.search();
     }
 
+    $scope.showWholeValue = function (item) {
+        console.log(item.value);
+    }
+
     let newSearchUrl = function () {
         if ($scope.pageInfo.pageIndex === 0) {
             $scope.pageInfo.pageIndex += 1;

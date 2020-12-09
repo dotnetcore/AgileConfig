@@ -227,3 +227,17 @@ form.app .form-group input[type=checkbox].form-control {
 form .foot-bar {
     margin-top:20px;
 }
+div.config_value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 300px;
+}
+.config_list div.value {
+    display: flex;
+    justify-content:space-between;
+}
+
+.config_list div.config_value.not_maxwidth + button {
+    display: none;
+}

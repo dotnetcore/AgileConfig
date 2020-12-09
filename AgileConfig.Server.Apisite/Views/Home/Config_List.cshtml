@@ -38,7 +38,17 @@
                 <span ng-show="config.selected" class="glyphicon glyphicon-ok" ></span>
             </td>
             <td ng-bind="config.key"></td>
-            <td ng-bind="config.value"></td>
+            <td>
+                <div class="value">
+                    <div class="config_value" overflow-class>
+                        {{config.value}}
+                    </div>
+                    <button type="button" class="btn btn-default btn-xs" ng-click="showWholeValue(config);$event.stopPropagation()">
+                        查看
+                    </button>
+                </div>
+              
+            </td>
             <td ng-bind="config.group"></td>
             <td ng-bind="config.description"></td>
             <td ng-bind="config.createTime|date:'yyyy-MM-dd HH:mm'" ></td>
