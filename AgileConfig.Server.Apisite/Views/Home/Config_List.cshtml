@@ -5,7 +5,7 @@
     <div class="add-bar">
         <div class="form-inline">
             所属应用：
-            <select ng-model="selectedAppId" class="form-control" >
+            <select ng-model="selectedAppId" class="form-control">
                 <option ng-repeat="app in apps" value="{{app.id}}">
                     {{app.name}}({{app.id}})
                 </option>
@@ -31,11 +31,11 @@
             <th class="" style="min-width:140px">创建时间</th>
             <th class="" style="min-width:140px">修改时间</th>
             <th class="">上线状态</th>
-            <th class=""  style="width:220px"></th>
+            <th class="" style="width:220px"></th>
         </tr>
         <tr ng-repeat="config in configs|filter:{status:1 }" ng-click="config.selected=!config.selected" ng-class="config.selected?'row-selected':''">
             <td>
-                <span ng-show="config.selected" class="glyphicon glyphicon-ok" ></span>
+                <span ng-show="config.selected" class="glyphicon glyphicon-ok"></span>
             </td>
             <td ng-bind="config.key"></td>
             <td>
@@ -47,12 +47,12 @@
                         查看
                     </button>
                 </div>
-              
+
             </td>
             <td ng-bind="config.group"></td>
             <td ng-bind="config.description"></td>
-            <td ng-bind="config.createTime|date:'yyyy-MM-dd HH:mm'" ></td>
-            <td ng-bind="config.updateTime|date:'yyyy-MM-dd HH:mm'" ></td>
+            <td ng-bind="config.createTime|date:'yyyy-MM-dd HH:mm'"></td>
+            <td ng-bind="config.updateTime|date:'yyyy-MM-dd HH:mm'"></td>
             <td ng-bind="onlineStatusDesc[config.onlineStatus]" ng-class="config.onlineStatus?'text-success':'text-warning'" style="width:80px"></td>
             <td>
                 <button class="btn btn-success btn-xs" ng-click="publish(config);$event.stopPropagation();" ng-if="config.onlineStatus == 0">上线</button>
@@ -64,6 +64,21 @@
         </tr>
     </table>
     <pagebar page-info='pageInfo' on-change='changePage'></pagebar>
-
+    <!-- Modal -->
+    <div class="modal fade" id="modal_show_value_detail" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    {{selectedValueDetail}}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 

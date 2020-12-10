@@ -66,6 +66,8 @@ app.controller('listConfigCtrl', function ($scope, $http, $state, $stateParams) 
 
     $scope.showWholeValue = function (item) {
         console.log(item.value);
+        $scope.selectedValueDetail = item.value;
+        $('#modal_show_value_detail').modal('show');
     }
 
     let newSearchUrl = function () {
