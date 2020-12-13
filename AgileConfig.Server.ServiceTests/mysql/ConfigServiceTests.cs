@@ -693,5 +693,176 @@ namespace AgileConfig.Server.Service.Tests.mysql
             }).ToOne();
             Assert.IsNotNull(config1);
         }
+
+        [TestMethod()]
+        public async Task GetPublishedConfigsByAppIdWithInheritanced_DictionaryTest()
+        {
+            fsq.Delete<App>().Where("1=1").ExecuteAffrows();
+            fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
+            fsq.Delete<AppInheritanced>().Where("1=1").ExecuteAffrows();
+
+            var app = new App();
+            app.Id = "001";
+            app.Name = "x";
+            app.Enabled = true;
+            app.CreateTime = DateTime.Now;
+            app.UpdateTime = DateTime.Now;
+            app.Type = AppType.PRIVATE;
+            var app1 = new App();
+            app1.Id = "002";
+            app1.Name = "x";
+            app1.Enabled = true;
+            app1.CreateTime = DateTime.Now;
+            app1.UpdateTime = DateTime.Now;
+            app.Type = AppType.Inheritance;
+            var id = Guid.NewGuid().ToString();
+            var source = new Config
+            {
+                AppId = "001",
+                Id = id,
+                Key = "k",
+                Value = "v",
+                Description = "d",
+                CreateTime = DateTime.Now,
+                UpdateTime = DateTime.Now,
+                Status = ConfigStatus.Enabled,
+                OnlineStatus = OnlineStatus.Online
+            };
+            var id1 = Guid.NewGuid().ToString();
+            var source1 = new Config
+            {
+                AppId = "001",
+                Id = id1,
+                Key = "k1",
+                Value = "v1",
+                Description = "d",
+                CreateTime = DateTime.Now,
+                UpdateTime = DateTime.Now,
+                Status = ConfigStatus.Enabled,
+                OnlineStatus = OnlineStatus.Online
+            };
+            var source2 = new Config
+            {
+                AppId = "002",
+                Id = Guid.NewGuid().ToString(),
+                Key = "k2",
+                Value = "v",
+                Description = "d",
+                CreateTime = DateTime.Now,
+                UpdateTime = DateTime.Now,
+                Status = ConfigStatus.Enabled,
+                OnlineStatus = OnlineStatus.Online
+            };
+            var source3 = new Config
+            {
+                AppId = "002",
+                Id = Guid.NewGuid().ToString(),
+                Key = "k21",
+                Value = "v2",
+                Description = "d",
+                CreateTime = DateTime.Now,
+                UpdateTime = DateTime.Now,
+                Status = ConfigStatus.Enabled,
+                OnlineStatus = OnlineStatus.Online
+            };
+            var appref = new AppInheritanced();
+            appref.AppId = app.Id;
+            appref.InheritancedAppId = app1.Id;
+            appref.Sort = 1;
+            appref.Id = Guid.NewGuid().ToString();
+
+            fsq.Insert(app).ExecuteAffrows();
+            fsq.Insert(app1).ExecuteAffrows();
+            fsq.Insert(source).ExecuteAffrows();
+            fsq.Insert(source1).ExecuteAffrows();
+            fsq.Insert(source2).ExecuteAffrows();
+            fsq.Insert(source3).ExecuteAffrows();
+            fsq.Insert(appref).ExecuteAffrows();
+
+            var dict = await service.GetPublishedConfigsByAppIdWithInheritanced_Dictionary(app.Id);
+            Assert.IsNotNull(dict);
+            Assert.AreEqual(4, dict.Keys.Count);
+
+            Assert.IsTrue(dict.ContainsKey(source.Key));
+            Assert.IsTrue(dict.ContainsKey(source1.Key));
+            Assert.IsTrue(dict.ContainsKey(source2.Key));
+            Assert.IsTrue(dict.ContainsKey(source3.Key));
+
+            Assert.IsTrue(dict[source.Key].Value == "v");
+            Assert.IsTrue(dict[source1.Key].Value == "v1");
+            Assert.IsTrue(dict[source2.Key].Value == "v");
+            Assert.IsTrue(dict[source3.Key].Value == "v2");
+
+            var source4 = new Config
+            {
+                AppId = "001",
+                Id = Guid.NewGuid().ToString(),
+                Key = "k4",
+                Value = "v3",
+                Description = "d",
+                CreateTime = DateTime.Now,
+                UpdateTime = DateTime.Now,
+                Status = ConfigStatus.Enabled,
+                OnlineStatus = OnlineStatus.Online
+            };
+            var source5 = new Config
+            {
+                AppId = "002",
+                Id = Guid.NewGuid().ToString(),
+                Key = "k4",
+                Value = "v2",
+                Description = "d",
+                CreateTime = DateTime.Now,
+                UpdateTime = DateTime.Now,
+                Status = ConfigStatus.Enabled,
+                OnlineStatus = OnlineStatus.Online
+            };
+            fsq.Insert(source4).ExecuteAffrows();
+            fsq.Insert(source5).ExecuteAffrows();
+
+            dict = await service.GetPublishedConfigsByAppIdWithInheritanced_Dictionary(app.Id);
+            Assert.IsNotNull(dict);
+            Assert.AreEqual(5, dict.Keys.Count);
+
+            var config1 = dict["k4"];
+            Assert.AreEqual(source4.Value, config1.Value);
+
+            var app2 = new App();
+            app2.Id = "003";
+            app2.Name = "x";
+            app2.Enabled = true;
+            app2.CreateTime = DateTime.Now;
+            app2.UpdateTime = DateTime.Now;
+            app2.Type = AppType.Inheritance;
+            fsq.Insert(app2).ExecuteAffrows();
+            var source6 = new Config
+            {
+                AppId = "003",
+                Id = Guid.NewGuid().ToString(),
+                Key = "k2",
+                Value = "k4444",
+                Description = "d",
+                CreateTime = DateTime.Now,
+                UpdateTime = DateTime.Now,
+                Status = ConfigStatus.Enabled,
+                OnlineStatus = OnlineStatus.Online
+            };
+            fsq.Delete<AppInheritanced>().Where("1=1").ExecuteAffrows();
+            fsq.Insert(source6).ExecuteAffrows();
+
+            fsq.Insert(appref).ExecuteAffrows();
+            var appref1 = new AppInheritanced();
+            appref1.AppId = app.Id;
+            appref1.InheritancedAppId = app2.Id;
+            appref1.Sort = 2;
+            appref1.Id = Guid.NewGuid().ToString();
+            fsq.Insert(appref1).ExecuteAffrows();
+            dict = await service.GetPublishedConfigsByAppIdWithInheritanced_Dictionary(app.Id);
+            Assert.IsNotNull(dict);
+            Assert.AreEqual(5, dict.Keys.Count);
+
+            config1 = dict["k2"];
+            Assert.AreEqual(source6.Value, config1.Value);
+        }
     }
 }
