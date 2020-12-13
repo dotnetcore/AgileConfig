@@ -50,6 +50,8 @@ namespace ApiSiteTests
             var configService = new Mock<IConfigService>();
             configService.Setup(s => s.GetPublishedConfigsByAppId("001"))
                 .ReturnsAsync(newConfigs);
+            configService.Setup(s => s.GetPublishedConfigsByAppIdWithInheritanced("001"))
+                .ReturnsAsync(newConfigs);
 
             var ctrl = new ConfigController(configService.Object, appService.Object);
             var act = await ctrl.Get("001");

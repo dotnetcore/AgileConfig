@@ -52,6 +52,8 @@ namespace ApiSiteTests
             Assert.IsTrue(jr.Value.ToString().Contains("新建应用失败，请查看错误日志"));
 
             appService.Setup(s => s.AddAsync(It.IsAny<App>())).ReturnsAsync(true);
+            appService.Setup(s => s.AddAsync(It.IsAny<App>(), It.IsAny<List<AppInheritanced>>())).ReturnsAsync(true);
+
             result = await ctl.Add(new AppVM
             {
                 Id = "02"
