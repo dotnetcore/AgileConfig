@@ -76,37 +76,40 @@ namespace AgileConfig.Server.Apisite.Websocket
             }
         }
 
-        private async Task Handle(HttpContext context, WebsocketClient webSocket, IConfigService configService)
+        private async Task Handle(HttpContext context, WebsocketClient socketClient, IConfigService configService)
         {
             var buffer = new byte[1024 * 2];
             WebSocketReceiveResult result = null;
             do
             {
-                result = await webSocket.Client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-                webSocket.LastHeartbeatTime = DateTime.Now;
-                var message = await ConvertWebsocketMessage(result, buffer);
+                result = await socketClient.Client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                socketClient.LastHeartbeatTime = DateTime.Now;
+                var message = await ReadWebsocketMessage(result, buffer);
                 if (message == "ping")
                 {
                     //如果是ping，回复本地数据的md5版本
                     var appId = context.Request.Headers["appid"];
                     var md5 = await configService.AppPublishedConfigsMd5CacheWithInheritanced(appId);
-                    var md5Data = Encoding.UTF8.GetBytes($"V:{md5}");
-
-                    await webSocket.Client.SendAsync(new ArraySegment<byte>(md5Data, 0, md5Data.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+                    await SendMessage(socketClient.Client, $"V:{md5}");
                 }
-                else 
+                else
                 {
                     //如果不是心跳消息，回复0
-                    var zeroData = Encoding.UTF8.GetBytes("0");
-                    await webSocket.Client.SendAsync(new ArraySegment<byte>(zeroData, 0, zeroData.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+                    await SendMessage(socketClient.Client, "0");
                 }
             }
             while (!result.CloseStatus.HasValue);
             _logger.LogInformation($"Websocket close , closeStatus:{result.CloseStatus} closeDesc:{result.CloseStatusDescription}");
-            await _websocketCollection.RemoveClient(webSocket, result.CloseStatus, result.CloseStatusDescription);
+            await _websocketCollection.RemoveClient(socketClient, result.CloseStatus, result.CloseStatusDescription);
         }
 
-        private async Task<string> ConvertWebsocketMessage(WebSocketReceiveResult result, ArraySegment<Byte> buffer)
+        private async Task SendMessage(WebSocket webSocket, string message)
+        {
+            var data = Encoding.UTF8.GetBytes(message);
+            await webSocket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+        }
+
+        private async Task<string> ReadWebsocketMessage(WebSocketReceiveResult result, ArraySegment<Byte> buffer)
         {
             using (var ms = new MemoryStream())
             {
