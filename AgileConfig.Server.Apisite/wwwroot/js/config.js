@@ -4,7 +4,7 @@
     });
 });
 
-app.controller('listConfigCtrl', function ($scope, $http, $state, $stateParams) {
+app.controller('listConfigCtrl', function ($scope, $http, $state, $stateParams, msg) {
 
     let _appId = $stateParams.app_id;
 
@@ -41,22 +41,22 @@ app.controller('listConfigCtrl', function ($scope, $http, $state, $stateParams) 
         );
     };
     $scope.deleteConfig = function (config) {
-        let cr = confirm('是否确定删除' + `配置【${config.key}】?`);
-        if (!cr) {
-            return;
-        }
-
-        $http.post('/config/delete?id=' + config.id)
-            .then(r => {
-                if (r.data.success) {
-                    config.status = 0;
-                } else {
-                    alert(r.data.message);
-                }
-            }, err => {
-                console.log(err);
-                alert(err.statusText);
-            });
+        let message = '是否确定删除' + `配置【${config.key}】?`;
+        let index = msg.confirm(message, ['确定', '取消'], () => {
+            $http.post('/config/delete?id=' + config.id)
+                .then(r => {
+                    msg.clear(index);
+                    if (r.data.success) {
+                        config.status = 0;
+                    } else {
+                        msg.fail(r.data.message);
+                    }
+                }, err => {
+                    msg.clear(index);
+                    console.log(err);
+                    msg.fail(err.statusText);
+                });
+        });
     };
 
     $scope.changePage = function (index) {
@@ -106,85 +106,88 @@ app.controller('listConfigCtrl', function ($scope, $http, $state, $stateParams) 
     };
 
     $scope.publish = function (config) {
-        let cr = confirm('是否确定上线' + `配置【${config.key}】?`);
-        if (!cr) {
-            return;
-        }
-        if (config.onlineStatus === 0) {
-            $http.post('/config/publish?configId=' + config.id)
-                .then(
-                    r => {
-                        if (r.data.success) {
-                            config.onlineStatus = 1;
-                            alert('上线成功。');
-                        } else {
-                            alert(r.data.message);
+        let message = '是否确定上线' + `配置【${config.key}】?`;
+        let index = msg.confirm(message, ['确定', '取消'], () => {
+            if (config.onlineStatus === 0) {
+                $http.post('/config/publish?configId=' + config.id)
+                    .then(
+                        r => {
+                            msg.clear(index);
+                            if (r.data.success) {
+                                config.onlineStatus = 1;
+                                msg.success('上线成功。');
+                            } else {
+                                msg.fail(r.data.message);
+                            }
+                        },
+                        err => {
+                            msg.clear(index);
+                            console.log(err);
+                            msg.fail(err.statusText);
                         }
-                    },
-                    err => {
-                        console.log(err);
-                        alert(err.statusText);
-                    }
-                );
-        }
+                    );
+            }
+        });
     };
     $scope.publishSelected = function () {
         var selectedConfgs = $scope.configs.filter(c => c.selected && c.onlineStatus === 0);
         if (!selectedConfgs.length) {
-            alert('请至少选择一行待上线的配置。');
+            msg.alert('请至少选择一行待上线的配置。');
             return;
         }
-        let cr = confirm('是否确定上线选中的配置?');
-        if (!cr) {
-            return;
-        }
-        $http.post('/config/PublishSome', selectedConfgs.map(c=>c.id))
-            .then(
-                r => {
-                    if (r.data.success) {
-                        selectedConfgs.forEach(item => {
-                            item.onlineStatus = 1;
-                        })
-                        alert('上线成功。');
-                    } else {
-                        alert(r.data.message);
-                    }
-                },
-                err => {
-                    console.log(err);
-                    alert(err.statusText);
-                }
-            );
-    }
-    $scope.offline = function (config) {
-        let cr = confirm('是否确定下线' + `配置【${config.key}】?`);
-        if (!cr) {
-            return;
-        }
-        if (config.onlineStatus === 1) {
-            $http.post('/config/offline?configId=' + config.id)
+        var message = '是否确定上线选中的配置?';
+        let index = msg.confirm(message, ['确定', '取消'], () => {
+            $http.post('/config/PublishSome', selectedConfgs.map(c => c.id))
                 .then(
                     r => {
+                        msg.clear(index);
                         if (r.data.success) {
-                            config.onlineStatus = 0;
-                            alert('下线成功。');
+                            selectedConfgs.forEach(item => {
+                                item.onlineStatus = 1;
+                            })
+                            msg.success('上线成功。');
                         } else {
-                            alert(r.data.message);
+                            msg.fail(r.data.message);
                         }
                     },
                     err => {
+                        msg.clear(index);
                         console.log(err);
-                        alert(err.statusText);
+                        msg.fail(err.statusText);
                     }
                 );
-        }
+        });
+    }
+    $scope.offline = function (config) {
+        var message = '是否确定下线' + `配置【${config.key}】?`;
+        let index = msg.confirm(message, ['确定', '取消'], () => {
+            if (config.onlineStatus === 1) {
+                $http.post('/config/offline?configId=' + config.id)
+                    .then(
+                        r => {
+                            msg.clear(index);
+                            if (r.data.success) {
+                                config.onlineStatus = 0;
+                                msg.success('下线成功。');
+                            } else {
+                                msg.fail(r.data.message);
+                            }
+                        },
+                        err => {
+                            msg.clear(index);
+                            console.log(err);
+                            msg.fail(err.statusText);
+                        }
+                    );
+            }
+        });
     };
 
     $scope.$watch('selectedAppId', function (newval, oldval) {
         if (newval != oldval) {
             $scope.search();
         }
-    });  
+    });
 
     $http.get('/app/all?_=' + (new Date).getTime())
         .then(
@@ -193,19 +196,19 @@ app.controller('listConfigCtrl', function ($scope, $http, $state, $stateParams) 
                     $scope.apps = r.data.data;
                     if ($scope.apps.length > 0) {
                         if (_appId) {
-                            $scope.selectedAppId = _appId; 
+                            $scope.selectedAppId = _appId;
                         } else {
                             $scope.selectedAppId = $scope.apps[0].id;
                         }
                     }
                 } else {
                     $scope.apps = [];
-                    alert(r.data.message);
+                    msg.fail(r.data.message);
                 }
             },
             err => {
                 console.log(err);
-                alert(err.statusText);
+                msg.fail(err.statusText);
             }
         );
 

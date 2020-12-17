@@ -1,4 +1,4 @@
-﻿app.controller('addAppCtrl', function ($scope, $http, $state, $window) {
+﻿app.controller('addAppCtrl', function ($scope, $http, $state, $window, msg) {
     $scope.app = {
         id: '',
         name: '',
@@ -13,14 +13,14 @@
         $http.post('/app/add', $scope.app)
             .then(r => {
                 if (r.data.success) {
-                    alert('新建应用成功。');
+                    msg.success('新建应用成功。');
                     $state.go('apps.list');
                 } else {
                     $scope.error_message = r.data.message;
                 }
             }, err => {
                 console.log(err);
-                alert(err.statusText);
+                msg.fail(err.statusText);
             });
     };
 
@@ -32,7 +32,7 @@
                 }
             }, err => {
                 console.log(err);
-                alert(err.statusText);
+                msg.fail(err.statusText);
             });
     }
     getAllInheritancedApps();

@@ -1,4 +1,4 @@
-﻿app.controller('addNodeCtrl', function ($scope, $http, $state, $window) {
+﻿app.controller('addNodeCtrl', function ($scope, $http, $state, $window, msg) {
     $scope.node = {
         address: '',
         remark: ''
@@ -7,14 +7,14 @@
         $http.post('/servernode/add', $scope.node)
             .then(r => {
                 if (r.data.success) {
-                    alert('新增节点成功。');
+                    msg.success('新增节点成功。');
                     $state.go('nodes.list');
                 } else {
                     $scope.error_message = r.data.message;
                 }
             }, err => {
                 console.log(err);
-                alert(err.statusText);
+                msg.fail(err.statusText);
             });
     };
 
