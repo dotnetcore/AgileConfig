@@ -1,4 +1,4 @@
-﻿app.controller('jsonConfigCtrl', function ($scope, $http, $state, $stateParams) {
+﻿app.controller('jsonConfigCtrl', function ($scope, $http, $state, $stateParams,msg) {
     let _appId = $stateParams.app_id;
 
     $scope.apps = [];
@@ -17,18 +17,18 @@
                     }
                 }
             } else {
-                alert(r.data.message);
+                msg.fail(r.data.message);
             }
         }, err => {
             console.log(err)
-            alert(err.statusText)
+             msg.fail(err.statusText)
         });
 
     $scope.save = function () {
         $http.post('/config/edit', $scope.config)
             .then(r => {
                 if (r.data.success) {
-                    alert('修改配置成功。');
+                    msg.success('修改配置成功。');
                     $state.go('config.list', {
                         app_id: $scope.config.appId
                     });
@@ -37,7 +37,7 @@
                 }
             }, err => {
                 console.log(err);
-                alert(err.statusText);
+                msg.fail(err.statusText);
             });
     };
 
@@ -64,10 +64,10 @@
                     item.selected = true; 
                 });
             } else {
-                alert(rep.data.message);
+                msg.fail(rep.data.message);
             }
         }, err => {
-                alert('解析json文件失败');
+                msg.fail('解析json文件失败');
         });
     }
 
@@ -100,18 +100,18 @@
             .then(
                 r => {
                     if (r.data.success) {
-                        alert('导入成功。');
+                        msg.success('导入成功。');
                         $state.go('config.list', {
                             app_id: $scope.selectedAppId
                         });
                     } else {
-                        alert(r.data.message);
+                        msg.fail(r.data.message);
                     }
                     $scope.adding = false;
                 },
                 err => {
                     console.log(err);
-                    alert(err.statusText);
+                    msg.fail(err.statusText);
                     $scope.adding = false;
                 }
             );

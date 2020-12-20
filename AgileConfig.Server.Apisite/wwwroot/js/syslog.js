@@ -1,4 +1,4 @@
-﻿app.controller('syslogsCtrl', function ($scope, $http) {
+﻿app.controller('syslogsCtrl', function ($scope, $http, msg) {
     $scope.selectedAppId = '';
     $scope.startTime = moment().add(-1, 'months').format('YYYY-MM-DD')
     $scope.endTime = moment().format('YYYY-MM-DD')
@@ -50,12 +50,12 @@
                         $scope.pageInfo.totalPages = r.data.totalPages;
                     } else {
                         $scope.logs = [];
-                        alert(r.data.message);
+                        msg.fail(r.data.message);
                     }
                 },
                 err => {
                     console.log(err);
-                    alert(err.statusText);
+                    msg.fail(err.statusText);
                 });
     }
 
@@ -71,12 +71,12 @@
                     
                 } else {
                     $scope.apps = [];
-                    alert(r.data.message);
+                    msg.fail(r.data.message);
                 }
             },
             err => {
                 console.log(err);
-                alert(err.statusText);
+                msg.fail(err.statusText);
             }
     );
 

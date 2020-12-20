@@ -1,4 +1,4 @@
-﻿app.factory('nodeStatusReflushService', function ($http, $interval) {
+﻿app.factory('nodeStatusReflushService', function ($http, $interval,msg) {
     var service = {
         started: false,
         serverNodes: [],
@@ -37,40 +37,42 @@ app.controller('nodesCtrl', function ($state) {
     $state.go('nodes.list');
 });
 
-app.controller('ListnodeCtrl', function ($scope, $http, $state, nodeStatusReflushService) {
+app.controller('ListnodeCtrl', function ($scope, $http, $state, nodeStatusReflushService, msg) {
     $scope.toAdd = function () {
         $state.go('nodes.add');
     };
     $scope.deleteNode = function (node, index) {
-        let cr = confirm(`是否确定删除节点【${node.address}】? \n删除节点并不会让其真正的下线，只是脱离控制台的管理。所有连接至此节点的客户端都会继续正常工作。`);
-        if (!cr) {
-            return;
-        }
-
-        $http.post('/servernode/delete', node)
-            .then(r => {
-                if (r.data.success) {
-                    $scope.nodes.splice(index, 1);
-                } else {
-                    alert(r.data.message);
-                }
-            }, err => {
-                console.log(err);
-                alert(err.statusText);
-            });
+        let layerIndex = msg.confirm(`是否确定删除节点【${node.address}】? <br>删除节点并不会让其真正的下线，只是脱离控制台的管理。所有连接至此节点的客户端都会继续正常工作。`,
+            ['确定', '取消'],
+            function () {
+                $http.post('/servernode/delete', node)
+                    .then(r => {
+                        msg.clear(layerIndex);
+                        if (r.data.success) {
+                            $scope.nodes.splice(index, 1);
+                        } else {
+                            msg.fail(r.data.message);
+                        }
+                    }, err => {
+                        msg.clear(layerIndex);
+                        console.log(err);
+                        msg.fail(err.statusText);
+                    });
+            }
+        );
     };
 
     $scope.nodeClientsReflushConfigItems = function (address) {
         $http.post('/RemoteServerProxy/AllClients_Reload?address=' + address)
             .then(r => {
                 if (r.data.success) {
-                    alert("刷新成功。");
+                    msg.success("刷新成功。");
                 } else {
-                    alert(r.data.message);
+                    msg.fail(r.data.message);
                 }
             }, err => {
                 console.log(err);
-                alert(err.statusText);
+                msg.fail(err.statusText);
             });
     };
 
@@ -94,7 +96,7 @@ app.controller('ListnodeCtrl', function ($scope, $http, $state, nodeStatusReflus
                 }
             }, err => {
                 console.log(err);
-                alert(err.statusText);
+                msg.fail(err.statusText);
             });
     };
     load();
