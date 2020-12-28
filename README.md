@@ -2,12 +2,12 @@
 这是一个基于.net core开发的轻量级配置中心。
 1. 部署简单，最少只需要一个数据节点，支持docker部署
 2. 支持多节点分布式部署来保证高可用
-3. 应用支持继承，可以把公共配置提取到一个应用然后其它应用继承它
 3. 配置支持按应用隔离，应用内配置支持分组隔离
-4. 使用长连接技术，配置信息实时推送至客户端
-5. 支持IConfiguration，IOptions模式读取配置，原程序几乎可以不用改造
-6. 配置修改支持版本记录，随时回滚配置
-7. 如果所有节点都故障，客户端支持从本地缓存读取配置
+4. 应用支持继承，可以把公共配置提取到一个应用然后其它应用继承它
+5. 使用长连接技术，配置信息实时推送至客户端
+6. 支持IConfiguration，IOptions模式读取配置，原程序几乎可以不用改造
+7. 配置修改支持版本记录，随时回滚配置
+8. 如果所有节点都故障，客户端支持从本地缓存读取配置
     
 客户端项目[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
 示例项目[AgileConfigMVCSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigMVCSample)   
@@ -172,7 +172,7 @@ public class HomeController : Controller
             ViewBag.userId = userId;
             ViewBag.dbConn = dbConn;
 
-            return View("ByIConfiguration");
+            return View("ByInstance");
         }
 
         /// <summary>
@@ -184,7 +184,7 @@ public class HomeController : Controller
             var dbConn = _dbOptions.Value.connection;
             ViewBag.dbConn = dbConn;
 
-            return View("ByIConfiguration");
+            return View("ByOptions");
         }
     }
 ```
