@@ -50,7 +50,8 @@ namespace AgileConfig.Server.Apisite.Websocket
                     {
                         Client = webSocket,
                         Id = Guid.NewGuid().ToString(),
-                        AppId = appId
+                        AppId = appId,
+                        LastHeartbeatTime = DateTime.Now
                     };
                     _websocketCollection.AddClient(client);
                     _logger.LogInformation("Websocket client {0} Added ", client.Id);
