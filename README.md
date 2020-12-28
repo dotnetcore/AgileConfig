@@ -3,7 +3,7 @@
 ![GitHub stars](https://img.shields.io/github/stars/kklldog/AgileConfig)
 ![Commit Date](https://img.shields.io/github/last-commit/kklldog/AgileConfig/master.svg?logo=github&logoColor=green&label=commit)
 ![Nuget](https://img.shields.io/nuget/v/agileconfig.client?label=Client)
-![Nuget](https://img.shields.io/nuget/dt/agileconfig.client?label=ClientDownlaod)
+![Nuget](https://img.shields.io/nuget/dt/agileconfig.client?label=ClientDownload)
 ![GitHub license](https://img.shields.io/github/license/kklldog/AgileConfig)
 
     
