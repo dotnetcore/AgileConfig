@@ -25,7 +25,7 @@ namespace AgileConfig.Server.Apisite.Websocket
 
         private ConcurrentDictionary<string, WebsocketClient> _Clients = new ConcurrentDictionary<string, WebsocketClient>();
 
-        public void SendToAll(string message)
+        public void SendMessageToAll(string message)
         {
             if (_Clients.Count == 0)
             {
@@ -196,6 +196,8 @@ namespace AgileConfig.Server.Apisite.Websocket
         }
 
         public static IWebsocketCollection Instance { get; private set; }
+
+        public int Count => _Clients.Count;
     }
 
 }

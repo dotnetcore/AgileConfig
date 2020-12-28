@@ -14,8 +14,9 @@ namespace AgileConfig.Server.Apisite.Websocket
     {
         ClientInfos Report();
 
+        int Count { get; }
         WebsocketClient Get(string clientId);
-        void SendToAll(string message);
+        void SendMessageToAll(string message);
         Task SendMessageToOne(WebsocketClient client, string message);
 
         Task SendActionToOne(WebsocketClient client, WebsocketAction action);
