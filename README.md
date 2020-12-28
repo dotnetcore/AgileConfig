@@ -1,4 +1,12 @@
 # AgileConfig
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/kklldog/agileconfig/.NET%20Core)
+![GitHub stars](https://img.shields.io/github/stars/kklldog/AgileConfig)
+![Commit Date](https://img.shields.io/github/last-commit/kklldog/AgileConfig/master.svg?logo=github&logoColor=green&label=commit)
+![Nuget](https://img.shields.io/nuget/v/agileconfig.client?label=Client)
+![Nuget](https://img.shields.io/nuget/dt/agileconfig.client?label=ClientDownlaod)
+![GitHub license](https://img.shields.io/github/license/kklldog/AgileConfig)
+
+    
 这是一个基于.net core开发的轻量级配置中心。
 1. 部署简单，最少只需要一个数据节点，支持docker部署
 2. 支持多节点分布式部署来保证高可用
