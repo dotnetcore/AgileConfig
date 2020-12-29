@@ -17,7 +17,7 @@
 7. 配置修改支持版本记录，随时回滚配置
 8. 如果所有节点都故障，客户端支持从本地缓存读取配置
     
-演示地址：[AgileConfig Server Demo](http://agileconfig.xbaby.xyz:5000)   
+演示地址：[AgileConfig Server Demo](http://agileconfig.xbaby.xyz:5000)   密码123456   
 客户端项目[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
 示例项目[AgileConfigMVCSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigMVCSample)   
 ## 架构
@@ -30,7 +30,14 @@ AgileConfig的架构比较简单，主要是分3块：
 ### 数据库
 使用数据库来存储数据，目前支持Sqlserver, Mysql, Sqlite, PostgreSql,Oracle 五种数据库。最新版本已经切换为Freesql为数据访问组件。Freesql对多数据库的支持更加强劲，特别是对国产数据库的支持。但是因为没有国产数据库的测试环境，本项目并未支持，如果有需要我可是开分支尝试支持，但是测试工作就要靠用户啦。
 > 注意：如果使用<=1.0.4之前版本的用户请不要更新，因为EFCore跟Freesql自动建的库可能存在稍许差异，保险起见不要更新吧。
-
+### 关于高可用
+AgileConfig的节点都是无状态的，所以可以横向部署多个节点来防止单点故障。在客户端配置多个节点地址后，客户端会随机连接至某个节点。
+| 问题 | 影响 | 说明 |   
+| ---- | ---- | ---- |   
+| 控制台下线 | 无法维护配置，客户端无影响 | 因为控制台跟节点是共存的，所以某个控制台下线一般来说同样意味着一个节点的下线 |   
+| 某个节点下线 | 客户端重连至其他节点 | 无任何影响 |    
+| 所有节点下线 | 客户端从内存读取配置 | 启动的客户端会从内存读取配置，未启动的配置会再尝试连接到节点失败后尝试从本地文件缓存读取配置 |    
+有同学说你这样没什么卵用，数据库还是单点的，一旦数据库崩了，同样GG。但是数据库有数据库的高可用技术，比如mysql的binlog等等。至于数据库的高可用还是让数据库自己搞定吧。从架构上看携程的apollo数据库也是单点的。
 ## 部署服务端
 ## 初始化数据库
 用户只需要手工建一个空库，所有的表在第一次启动的时候都会自动生成。目前支持sqlserver，mysql，sqlite, PostgreSql，Oracle 五种数据库。
