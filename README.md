@@ -17,6 +17,7 @@
 7. 配置修改支持版本记录，随时回滚配置
 8. 如果所有节点都故障，客户端支持从本地缓存读取配置
     
+演示地址：[AgileConfig Server Demo](http://agileconfig.xbaby.xyz:5000)   
 客户端项目[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
 示例项目[AgileConfigMVCSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigMVCSample)   
 ## 架构

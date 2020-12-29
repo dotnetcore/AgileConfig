@@ -1,6 +1,0 @@
-1.第一次启动需要设置超管账号，密码
-2.所有配置跟着application走，每个接入的app都需要超管分配appid，secretkey，
-secretkey可以不填；可以使用appid进行登录后，对对应的application配置进行管理。
-3.使用websocket进行双向互通
-4.客户端支持简单的主从切换，客户端从服务端断线后需要尝试重连。
-5.配置支持分组，类似namespace
