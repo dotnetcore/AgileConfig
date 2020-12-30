@@ -2,8 +2,8 @@
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/kklldog/agileconfig/.NET%20Core)
 ![GitHub stars](https://img.shields.io/github/stars/kklldog/AgileConfig)
 ![Commit Date](https://img.shields.io/github/last-commit/kklldog/AgileConfig/master.svg?logo=github&logoColor=green&label=commit)
-![Nuget](https://img.shields.io/nuget/v/agileconfig.client?label=Client)
-![Nuget](https://img.shields.io/nuget/dt/agileconfig.client?label=ClientDownload)
+![Nuget](https://img.shields.io/nuget/v/agileconfig.client?label=agileconfig.client)
+![Nuget](https://img.shields.io/nuget/dt/agileconfig.client?label=client%20download)
 ![GitHub license](https://img.shields.io/github/license/kklldog/AgileConfig)
 
     
@@ -17,9 +17,9 @@
 7. 配置修改支持版本记录，随时回滚配置
 8. 如果所有节点都故障，客户端支持从本地缓存读取配置
     
-演示地址：[AgileConfig Server Demo](http://agileconfig.xbaby.xyz:5000)   密码123456   
-客户端项目[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
-示例项目[AgileConfigMVCSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigMVCSample)   
+演示地址：[AgileConfig Server Demo](http://agileconfig.xbaby.xyz:5000)   密码：123456   
+客户端项目：[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
+示例项目：[AgileConfigMVCSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigMVCSample)   
 ## 架构
 ![](https://s1.ax1x.com/2020/06/29/NRz1gO.png)
 AgileConfig的架构比较简单，主要是分3块：
