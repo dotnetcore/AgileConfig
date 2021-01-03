@@ -20,6 +20,7 @@
 演示地址：[AgileConfig Server Demo](http://agileconfig.xbaby.xyz:5000)   密码：123456   
 客户端项目：[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
 示例项目：[AgileConfigMVCSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigMVCSample)   
+[教程 - 如何使用AgileConfig.Client读取配置](https://www.cnblogs.com/kklldog/p/how-to-use-agileconfigclient.html)
 ## 架构
 ![](https://s1.ax1x.com/2020/06/29/NRz1gO.png)
 AgileConfig的架构比较简单，主要是分3块：
@@ -119,14 +120,6 @@ Install-Package AgileConfig.Client
             Host.CreateDefaultBuilder(args)
             .ConfigureAppConfiguration((context, config) =>
             {
-                //读取本地配置
-                var localconfig = new ConfigurationBuilder()
-                                 .SetBasePath(Directory.GetCurrentDirectory())
-                                 .AddJsonFile("appsettings.json").Build();
-                //从本地配置里读取AgileConfig的相关信息
-                var appId = localconfig["AgileConfig:appId"];
-                var secret = localconfig["AgileConfig:secret"];
-                var nodes = localconfig["AgileConfig:nodes"];
                 //new一个client实例
                 var configClient = new ConfigClient(appId, secret, nodes);
                 //使用AddAgileConfig配置一个新的IConfigurationSource
