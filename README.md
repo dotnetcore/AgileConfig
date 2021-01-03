@@ -19,7 +19,10 @@
     
 演示地址：[AgileConfig Server Demo](http://agileconfig.xbaby.xyz:5000)   密码：123456   
 客户端项目：[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
-示例项目：[AgileConfigMVCSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigMVCSample)   
+示例项目：    
+[AgileConfigMVCSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigMVCSample)
+[AgileConfig WPFSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigWPFSample)    
+[AgileConfig ConsoleSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigConsoleSample)    
 [教程 - 如何使用AgileConfig.Client读取配置](https://www.cnblogs.com/kklldog/p/how-to-use-agileconfigclient.html)
 ## 架构
 ![](https://s1.ax1x.com/2020/06/29/NRz1gO.png)
@@ -120,8 +123,8 @@ Install-Package AgileConfig.Client
             Host.CreateDefaultBuilder(args)
             .ConfigureAppConfiguration((context, config) =>
             {
-                //new一个client实例
-                var configClient = new ConfigClient(appId, secret, nodes);
+                //new一个client实例，无参构造会从本地appsettings.json文件读取配置
+                var configClient = new ConfigClient();
                 //使用AddAgileConfig配置一个新的IConfigurationSource
                 config.AddAgileConfig(configClient);
                 //找一个变量挂载client实例，以便其他地方可以直接使用实例访问配置
