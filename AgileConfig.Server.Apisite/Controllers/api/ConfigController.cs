@@ -57,6 +57,24 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
             return vms.ToList();
         }
-       
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ConfigVM>> GetConfig(string id)
+        {
+            var config = await _configService.GetAsync(id);
+            if (config.Status == ConfigStatus.Deleted)
+            {
+                return NotFound();
+            }
+
+            return new ConfigVM()
+            {
+                Id = config.Id,
+                AppId = config.AppId,
+                Group = config.Group,
+                Key = config.Key,
+                Value = config.Value,
+                Status = config.Status
+            };
+        }
     }
 }
