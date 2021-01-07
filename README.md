@@ -2,12 +2,12 @@
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/kklldog/agileconfig/.NET%20Core)
 ![GitHub stars](https://img.shields.io/github/stars/kklldog/AgileConfig)
 ![Commit Date](https://img.shields.io/github/last-commit/kklldog/AgileConfig/master.svg?logo=github&logoColor=green&label=commit)
-![Nuget](https://img.shields.io/nuget/v/agileconfig.client?label=Client)
-![Nuget](https://img.shields.io/nuget/dt/agileconfig.client?label=ClientDownload)
+![Nuget](https://img.shields.io/nuget/v/agileconfig.client?label=agileconfig.client)
+![Nuget](https://img.shields.io/nuget/dt/agileconfig.client?label=client%20download)
 ![GitHub license](https://img.shields.io/github/license/kklldog/AgileConfig)
 
     
-这是一个基于.net core开发的轻量级配置中心。
+这是一个基于.net core开发的轻量级配置中心。说起配置中心很容易让人跟微服务联系起来，如果你选择微服务架构，那么几乎逃不了需要一个配置中心。事实上我这里并不是要蹭微服务的热度。这个世界上有很多分布式程序但它并不是微服务。比如有很多传统的SOA的应用他们分布式部署，但并不是完整的微服务架构。这些程序由于分散在多个服务器上所以更改配置很困难。又或者某些程序即使不是分布式部署的，但是他们采用了容器化部署，他们修改配置同样很费劲。所以我开发AgileConfig并不是为了什么微服务，我更多的是为了那些分布式、容器化部署的应用能够更加简单的读取、修改配置。AgileConfig秉承轻量化的特点，部署简单、配置简单、使用简单、学习简单，它只提取了必要的一些功能，并没有像Apollo那样复杂且庞大。但是它的功能也已经足够你替换webconfig，appsettings.json这些文件了。如果你不想用微服务全家桶，不想为了部署一个配置中心而需要看N篇教程跟几台服务器那么你可以试试AgileConfig  ：）   
 1. 部署简单，最少只需要一个数据节点，支持docker部署
 2. 支持多节点分布式部署来保证高可用
 3. 配置支持按应用隔离，应用内配置支持分组隔离
@@ -17,9 +17,13 @@
 7. 配置修改支持版本记录，随时回滚配置
 8. 如果所有节点都故障，客户端支持从本地缓存读取配置
     
-演示地址：[AgileConfig Server Demo](http://agileconfig.xbaby.xyz:5000)   密码123456   
-客户端项目[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
-示例项目[AgileConfigMVCSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigMVCSample)   
+演示地址：[AgileConfig Server Demo](http://agileconfig.xbaby.xyz:5000)   密码：123456   
+客户端项目：[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
+示例项目：    
+[AgileConfigMVCSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigMVCSample)
+[AgileConfig WPFSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigWPFSample)    
+[AgileConfig ConsoleSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigConsoleSample)    
+[教程 - 如何使用AgileConfig.Client读取配置](https://www.cnblogs.com/kklldog/p/how-to-use-agileconfigclient.html)
 ## 架构
 ![](https://s1.ax1x.com/2020/06/29/NRz1gO.png)
 AgileConfig的架构比较简单，主要是分3块：
@@ -119,16 +123,8 @@ Install-Package AgileConfig.Client
             Host.CreateDefaultBuilder(args)
             .ConfigureAppConfiguration((context, config) =>
             {
-                //读取本地配置
-                var localconfig = new ConfigurationBuilder()
-                                 .SetBasePath(Directory.GetCurrentDirectory())
-                                 .AddJsonFile("appsettings.json").Build();
-                //从本地配置里读取AgileConfig的相关信息
-                var appId = localconfig["AgileConfig:appId"];
-                var secret = localconfig["AgileConfig:secret"];
-                var nodes = localconfig["AgileConfig:nodes"];
-                //new一个client实例
-                var configClient = new ConfigClient(appId, secret, nodes);
+                //new一个client实例，无参构造会从本地appsettings.json文件读取配置
+                var configClient = new ConfigClient();
                 //使用AddAgileConfig配置一个新的IConfigurationSource
                 config.AddAgileConfig(configClient);
                 //找一个变量挂载client实例，以便其他地方可以直接使用实例访问配置
