@@ -11,7 +11,7 @@ namespace AgileConfig.Server.Data.Entity
         Warn = 1
     }
 
-    [Table(Name = "sys_log")]
+    [Table(Name = "agc_sys_log")]
     public class SysLog
     {
         [Column(Name = "id", IsIdentity = true)]

@@ -22,7 +22,7 @@ namespace AgileConfig.Server.Service.Tests.sqlserver
         [TestInitialize]
         public void TestInitialize()
         {
-            string conn = "Persist Security Info = False; User ID =dev; Password =dev@123,; Initial Catalog =agile_config_test; Server =xxx";
+            string conn = "Persist Security Info = False; User ID =dev; Password =dev@123,; Initial Catalog =agile_config_test; Server =www..com";
             fsq = new FreeSqlBuilder()
                           .UseConnectionString(FreeSql.DataType.SqlServer, conn)
                           .UseAutoSyncStructure(true)

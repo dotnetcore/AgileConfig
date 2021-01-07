@@ -11,7 +11,7 @@ namespace AgileConfig.Server.Data.Entity
         Inheritance,
     }
 
-    [Table(Name = "app")]
+    [Table(Name = "agc_app")]
     public class App
     {
         [Column(Name= "id" , StringLength = 36)]

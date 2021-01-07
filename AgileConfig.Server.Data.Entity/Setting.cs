@@ -5,7 +5,7 @@ using System.Text;
 
 namespace AgileConfig.Server.Data.Entity
 {
-    [Table(Name = "setting")]
+    [Table(Name = "agc_setting")]
     public class Setting
     {
         [Column(Name = "id", StringLength = 36)]

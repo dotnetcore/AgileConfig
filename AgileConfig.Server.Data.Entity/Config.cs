@@ -15,7 +15,7 @@ namespace AgileConfig.Server.Data.Entity
         Online = 1,
     }
 
-    [Table(Name = "config")]
+    [Table(Name = "agc_config")]
     public class Config
     {
         [Column(Name = "id", StringLength = 36)]

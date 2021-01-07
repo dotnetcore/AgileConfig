@@ -20,7 +20,7 @@ namespace AgileConfig.Server.Data.Freesql.Tests
                           .UseConnectionString(FreeSql.DataType.Sqlite, conn)
                           .Build();
             FluentApi.Config(sqllite_fsq);
-            sqllite_fsq.Ado.ExecuteNonQuery("drop table app");
+            sqllite_fsq.Ado.ExecuteNonQuery("drop table agc_app");
             var ex = EnsureTables.ExistTable(sqllite_fsq);
             Assert.IsFalse(ex);
             sqllite_fsq.CodeFirst.SyncStructure<App>();
@@ -32,12 +32,12 @@ namespace AgileConfig.Server.Data.Freesql.Tests
         public void ExistTableSqlServerTest()
         {
             //SqlServer
-            string conn = "Persist Security Info = False; User ID =dev; Password =,; Initial Catalog =agile_config_test; Server =xxxx";
+            string conn = "Persist Security Info = False; User ID =dev; Password =dev@123,; Initial Catalog =agile_config_test; Server =www..com";
             var sqlserver_fsq = new FreeSqlBuilder()
                           .UseConnectionString(FreeSql.DataType.SqlServer, conn)
                           .Build();
             FluentApi.Config(sqlserver_fsq);
-            sqlserver_fsq.Ado.ExecuteNonQuery("drop table app");
+            sqlserver_fsq.Ado.ExecuteNonQuery("drop table agc_app");
             var ex = EnsureTables.ExistTable(sqlserver_fsq);
             Assert.IsFalse(ex);
             sqlserver_fsq.CodeFirst.SyncStructure<App>();
@@ -54,7 +54,7 @@ namespace AgileConfig.Server.Data.Freesql.Tests
                           .UseConnectionString(FreeSql.DataType.MySql, conn)
                           .Build();
             FluentApi.Config(mysql_fsq);
-            mysql_fsq.Ado.ExecuteNonQuery("drop table app");
+            mysql_fsq.Ado.ExecuteNonQuery("drop table agc_app");
             var ex = EnsureTables.ExistTable(mysql_fsq);
             Assert.IsFalse(ex);
             mysql_fsq.CodeFirst.SyncStructure<App>();
@@ -71,7 +71,7 @@ namespace AgileConfig.Server.Data.Freesql.Tests
                           .UseConnectionString(FreeSql.DataType.Oracle, conn)
                           .Build();
             FluentApi.Config(oracle_fsq);
-            oracle_fsq.Ado.ExecuteNonQuery("drop table \"app\" ");
+            oracle_fsq.Ado.ExecuteNonQuery("drop table \"agc_app\" ");
             var ex = EnsureTables.ExistTable(oracle_fsq);
             Assert.IsFalse(ex);
             oracle_fsq.CodeFirst.SyncStructure<App>();
@@ -88,7 +88,7 @@ namespace AgileConfig.Server.Data.Freesql.Tests
                           .UseConnectionString(FreeSql.DataType.PostgreSQL, conn)
                           .Build();
             FluentApi.Config(postgresql_fsq);
-            postgresql_fsq.Ado.ExecuteNonQuery("drop table \"app\" ");
+            postgresql_fsq.Ado.ExecuteNonQuery("drop table \"agc_app\" ");
             var ex = EnsureTables.ExistTable(postgresql_fsq);
             Assert.IsFalse(ex);
             postgresql_fsq.CodeFirst.SyncStructure<App>();

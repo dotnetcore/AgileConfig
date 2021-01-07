@@ -9,11 +9,11 @@ namespace AgileConfig.Server.Data.Freesql
 {
     public class EnsureTables
     {
-        private const string Sqlite_ExistTableSql = "SELECT count(1) FROM sqlite_master WHERE type='table' AND name = 'app'";
-        private const string Mysql_ExistTableSql = " SELECT count(1) FROM information_schema.TABLES WHERE table_name ='app'";
-        private const string SqlServer_ExistTableSql = "SELECT COUNT(1) FROM dbo.SYSOBJECTS WHERE ID = object_id(N'[dbo].[app]') and OBJECTPROPERTY(id, N'IsUserTable') = 1";
-        private const string Oracle_ExistTableSql = "select count(1) from user_tables where table_name = 'app'";
-        private const string PostgreSql_ExistTableSql = "select count(1) from pg_class where relname = 'app'";
+        private const string Sqlite_ExistTableSql = "SELECT count(1) FROM sqlite_master WHERE type='table' AND name = 'agc_app'";
+        private const string Mysql_ExistTableSql = " SELECT count(1) FROM information_schema.TABLES WHERE table_name ='agc_app'";
+        private const string SqlServer_ExistTableSql = "SELECT COUNT(1) FROM dbo.SYSOBJECTS WHERE ID = object_id(N'[dbo].[agc_app]') and OBJECTPROPERTY(id, N'IsUserTable') = 1";
+        private const string Oracle_ExistTableSql = "select count(1) from user_tables where table_name = 'agc_app'";
+        private const string PostgreSql_ExistTableSql = "select count(1) from pg_class where relname = 'agc_app'";
 
         public static bool ExistTable(IFreeSql instance)
         {

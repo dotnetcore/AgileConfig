@@ -11,7 +11,7 @@ namespace AgileConfig.Server.Data.Entity
         Offline = 0,
     }
 
-    [Table(Name = "server_node")]
+    [Table(Name = "agc_server_node")]
     public class ServerNode
     {
         [Column(Name = "address", StringLength = 100, IsPrimary = true)]
