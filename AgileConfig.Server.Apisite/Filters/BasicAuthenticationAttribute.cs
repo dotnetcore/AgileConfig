@@ -34,39 +34,61 @@ namespace AgileConfig.Server.Apisite.Filters
 
         public async Task<bool> Valid(HttpRequest httpRequest)
         {
-            var appid = httpRequest.Headers["appid"];
-            if (string.IsNullOrEmpty(appid))
-            {
-                return false;
-            }
-            var app = await _appService.GetAsync(appid);
-            if (app == null)
-            {
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(app.Secret))
-            {
-                //如果没有设置secret则直接通过
-                return true;
-            }
             var authorization = httpRequest.Headers["Authorization"];
             if (string.IsNullOrEmpty(authorization))
             {
                 return false;
             }
+            var authStr = authorization.First();
+            //去掉basic_
+            if (!authStr.StartsWith("Basic "))
+            {
+                return false;
+            }
+            authStr = authStr.Substring(6, authStr.Length - 6);
+            byte[] base64Decode = null;
+            try
+            {
+                base64Decode = Convert.FromBase64String(authStr);
+            }
+            catch  
+            {
+                return false;
+            }
+            var base64Str = Encoding.UTF8.GetString(base64Decode);
 
+            if (string.IsNullOrEmpty(base64Str))
+            {
+                return false;
+            }
+
+            var appId = "";
+            var sec = "";
+
+           
+            var baseAuthArr = base64Str.Split(':');
+
+            if (baseAuthArr.Length>0)
+            {
+                appId = baseAuthArr[0];
+            }
+            var app = await _appService.GetAsync(appId);
+            if (app == null)
+            {
+                return false;
+            }
             if (!app.Enabled)
             {
                 return false;
             }
-            var sec = app.Secret;
+            if (baseAuthArr.Length > 1)
+            {
+                sec = baseAuthArr[1];
+            }
 
-            var txt = $"{appid}:{sec}";
-            var data = Encoding.UTF8.GetBytes(txt);
-            var auth = "Basic " + Convert.ToBase64String(data);
+            var txt = $"{app.Id}:{app.Secret}";
 
-            return auth == authorization;
+            return txt == $"{appId}:{sec}";
         }
     }
 }
