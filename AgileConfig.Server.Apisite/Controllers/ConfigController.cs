@@ -46,6 +46,16 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException("model");
             }
 
+            var app = await _configService.GetByAppId(model.AppId);
+            if (!app.Any())
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = $"应用（{model.AppId}）不存在。"
+                });
+            }
+
             var oldConfig = await _configService.GetByAppIdKey(model.AppId, model.Group, model.Key);
             if (oldConfig != null)
             {
@@ -58,7 +68,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var config = new Config();
-            config.Id = Guid.NewGuid().ToString("N");
+            config.Id = string.IsNullOrEmpty(config.Id) ? Guid.NewGuid().ToString("N") : config.Id;
             config.Key = model.Key;
             config.AppId = model.AppId;
             config.Description = model.Description;
@@ -96,8 +106,9 @@ namespace AgileConfig.Server.Apisite.Controllers
             return Json(new
             {
                 success = result,
-                message = !result ? "新建配置失败，请查看错误日志" : ""
-            });
+                message = !result ? "新建配置失败，请查看错误日志" : "",
+                data = config
+            }) ;
         }
         [HttpPost]
         public async Task<IActionResult> AddRange([FromBody] List<ConfigVM> model)
@@ -210,6 +221,17 @@ namespace AgileConfig.Server.Apisite.Controllers
                     message = "未找到对应的配置项。"
                 });
             }
+
+            var app = await _configService.GetByAppId(model.AppId);
+            if (!app.Any())
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = $"应用（{model.AppId}）不存在。"
+                });
+            }
+
             var oldConfig = new Config
             {
                 Key = config.Key,

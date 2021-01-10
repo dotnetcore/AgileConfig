@@ -19,15 +19,27 @@ namespace AgileConfig.Server.Apisite.Controllers.api
     {
         private readonly IConfigService _configService;
         private readonly IAppService _appService;
+        private readonly IModifyLogService _modifyLogService;
+        private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
+        private readonly IServerNodeService _serverNodeService;
+        private readonly ISysLogService _sysLogService;
 
         public ConfigController(
             IConfigService configService,
-            IAppService appService)
+            IAppService appService,
+            IModifyLogService modifyLogService,
+              IRemoteServerNodeProxy remoteServerNodeProxy,
+                                IServerNodeService serverNodeService,
+                                ISysLogService sysLogService)
         {
             _configService = configService;
             _appService = appService;
+            _modifyLogService = modifyLogService;
+            _remoteServerNodeProxy = remoteServerNodeProxy;
+            _serverNodeService = serverNodeService;
+            _sysLogService = sysLogService;
         }
-       
+
         /// <summary>
         /// 根据appid查所有发布的配置项
         /// </summary>
@@ -36,14 +48,14 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [HttpGet("app/{appId}")]
         public async Task<ActionResult<List<ConfigVM>>> Get(string appId)
         {
-            var app =await _appService.GetAsync(appId);
+            var app = await _appService.GetAsync(appId);
             if (!app.Enabled)
             {
                 return NotFound();
             }
 
             var configs = await _configService.GetPublishedConfigsByAppIdWithInheritanced(appId);
-           
+
             var vms = configs.Select(c => {
                 return new ConfigVM() {
                     Id = c.Id,
@@ -75,6 +87,99 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 Value = config.Value,
                 Status = config.Status
             };
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Add([FromBody] ConfigVM model)
+        {
+            var requiredResult = CheckRequired(model);
+
+            if (!requiredResult.Item1)
+            {
+                Response.StatusCode = 400;
+                return Json(new
+                {
+                    message = requiredResult.Item2
+                });
+            }
+
+            var ctrl = new Controllers.ConfigController(
+                _configService,
+                _modifyLogService,
+                _remoteServerNodeProxy,
+                _serverNodeService,
+                _sysLogService
+                );
+
+            var result = (await ctrl.Add(model)) as JsonResult;
+
+            dynamic obj = result.Value;
+
+            if (obj.success == true)
+            {
+                return Created("/api/config/" + obj.data.Id, "");
+            }
+
+            Response.StatusCode = 400;
+            return Json(new {
+                obj.message
+            });
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Edit(string id, [FromBody] ConfigVM model)
+        {
+            var requiredResult = CheckRequired(model);
+
+            if (!requiredResult.Item1)
+            {
+                Response.StatusCode = 400;
+                return Json(new
+                {
+                    message = requiredResult.Item2
+                }); 
+            }
+
+            var ctrl = new Controllers.ConfigController(
+                _configService,
+                _modifyLogService,
+                _remoteServerNodeProxy,
+                _serverNodeService,
+                _sysLogService
+                );
+
+            model.Id = id;
+            var result = (await ctrl.Edit(model)) as JsonResult;
+
+            dynamic obj = result.Value;
+            if (obj.success == true)
+            {
+                return Ok();
+            }
+
+            Response.StatusCode = 400;
+            return Json(new
+            {
+                obj.message
+            });
+        }
+
+        private (bool, string) CheckRequired(ConfigVM model)
+        {
+            if (string.IsNullOrEmpty(model.Key))
+            {
+                return (false, "Key不能为空");
+            }
+            if (string.IsNullOrEmpty(model.Value))
+            {
+                return (false, "Value不能为空");
+            }
+            if (string.IsNullOrEmpty(model.AppId))
+            {
+                return (false, "AppId不能为空");
+            }
+
+            return (true, "");
         }
     }
 }
