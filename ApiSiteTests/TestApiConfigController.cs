@@ -53,7 +53,18 @@ namespace ApiSiteTests
             configService.Setup(s => s.GetPublishedConfigsByAppIdWithInheritanced("001"))
                 .ReturnsAsync(newConfigs);
 
-            var ctrl = new ConfigController(configService.Object, appService.Object);
+            var modifyLogService = new Mock<IModifyLogService>();
+            var remoteNodeProxy = new Mock<IRemoteServerNodeProxy>();
+            var serverNodeService = new Mock<IServerNodeService>();
+            var sysLogService = new Mock<ISysLogService>();
+
+            var ctrl = new ConfigController(
+                configService.Object,
+                appService.Object,
+                modifyLogService.Object, 
+                remoteNodeProxy.Object,
+                serverNodeService.Object,
+                sysLogService.Object);
             var act = await ctrl.Get("001");
 
             Assert.IsNotNull(act);
@@ -71,7 +82,13 @@ namespace ApiSiteTests
             appService = new Mock<IAppService>();
             appService.Setup(s => s.GetAsync("001")).ReturnsAsync(newApp1);
 
-            ctrl = new ConfigController(configService.Object, appService.Object);
+            ctrl = new ConfigController(
+                configService.Object,
+                appService.Object,
+                modifyLogService.Object,
+                remoteNodeProxy.Object,
+                serverNodeService.Object,
+                sysLogService.Object);
             act = await ctrl.Get("001");
 
             Assert.IsNotNull(act);
