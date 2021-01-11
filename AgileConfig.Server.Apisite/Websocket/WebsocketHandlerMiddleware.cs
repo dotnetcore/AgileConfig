@@ -38,10 +38,9 @@ namespace AgileConfig.Server.Apisite.Websocket
             {
                 if (context.WebSockets.IsWebSocketRequest)
                 {
-                    var basicAuth = new AppBasicAuthenticationAttribute(appBasicAuth);
-                    if (!await basicAuth.Valid(context.Request))
+                    if (!await appBasicAuth.ValidAsync(context.Request))
                     {
-                        await context.Response.WriteAsync("closed");
+                        await context.Response.WriteAsync("basic auth failed .");
                         return;
                     }
                     var appId = context.Request.Headers["appid"];
