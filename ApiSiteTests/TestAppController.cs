@@ -22,7 +22,7 @@ namespace ApiSiteTests
             var appService = new Mock<IAppService>();
             var logService = new Mock<ISysLogService>();
 
-            var ctl = new AppController(appService.Object, logService.Object);
+            var ctl = new AgileConfig.Server.Apisite.Controllers.AppController(appService.Object, logService.Object);
             Assert.ThrowsException<ArgumentNullException>( () => {
                 ctl.Add(null).GetAwaiter().GetResult();
             });
