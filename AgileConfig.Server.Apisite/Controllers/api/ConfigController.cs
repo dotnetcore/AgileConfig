@@ -7,13 +7,12 @@ using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace AgileConfig.Server.Apisite.Controllers.api
 {
-    [TypeFilter(typeof(BasicAuthenticationAttribute))]
+    [TypeFilter(typeof(AppBasicAuthenticationAttribute))]
     [Route("api/[controller]")]
     public class ConfigController : Controller
     {
@@ -23,6 +22,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
         private readonly IServerNodeService _serverNodeService;
         private readonly ISysLogService _sysLogService;
+        private readonly IAppBasicAuthService _appBasicAuthService;
 
         public ConfigController(
             IConfigService configService,
@@ -30,7 +30,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             IModifyLogService modifyLogService,
               IRemoteServerNodeProxy remoteServerNodeProxy,
                                 IServerNodeService serverNodeService,
-                                ISysLogService sysLogService)
+                                ISysLogService sysLogService,
+                                IAppBasicAuthService appBasicAuthService)
         {
             _configService = configService;
             _appService = appService;
@@ -38,6 +39,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             _remoteServerNodeProxy = remoteServerNodeProxy;
             _serverNodeService = serverNodeService;
             _sysLogService = sysLogService;
+            _appBasicAuthService = appBasicAuthService;
         }
 
         /// <summary>
@@ -46,7 +48,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <param name="appId"></param>
         /// <returns></returns>
         [HttpGet("app/{appId}")]
-        public async Task<ActionResult<List<ConfigVM>>> Get(string appId)
+        public async Task<ActionResult<List<ConfigVM>>> GetAppConfig(string appId)
         {
             var app = await _appService.GetAsync(appId);
             if (!app.Enabled)
@@ -56,8 +58,10 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
             var configs = await _configService.GetPublishedConfigsByAppIdWithInheritanced(appId);
 
-            var vms = configs.Select(c => {
-                return new ConfigVM() {
+            var vms = configs.Select(c =>
+            {
+                return new ConfigVM()
+                {
                     Id = c.Id,
                     AppId = c.AppId,
                     Group = c.Group,
@@ -69,11 +73,32 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
             return vms.ToList();
         }
+
+        [HttpGet()]
+        public async Task<ActionResult<List<ConfigVM>>> GetConfigs()
+        {
+            var appId = _appBasicAuthService.GetAppIdSecret(Request).Item1;
+
+            var configs = await _configService.GetByAppId(appId);
+
+            return configs.Select(config => new ConfigVM()
+            {
+                Id = config.Id,
+                AppId = config.AppId,
+                Group = config.Group,
+                Key = config.Key,
+                Value = config.Value,
+                Status = config.Status,
+                Description = config.Description,
+                OnlineStatus = config.OnlineStatus
+            }).ToList();
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<ConfigVM>> GetConfig(string id)
         {
             var config = await _configService.GetAsync(id);
-            if (config.Status == ConfigStatus.Deleted)
+            if (config == null || config.Status == ConfigStatus.Deleted)
             {
                 return NotFound();
             }
@@ -85,7 +110,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 Group = config.Group,
                 Key = config.Key,
                 Value = config.Value,
-                Status = config.Status
+                Status = config.Status,
+                Description = config.Description,
+                OnlineStatus = config.OnlineStatus
             };
         }
 
@@ -108,7 +135,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 _modifyLogService,
                 _remoteServerNodeProxy,
                 _serverNodeService,
-                _sysLogService
+                _sysLogService,
+                _appService
                 );
 
             var result = (await ctrl.Add(model)) as JsonResult;
@@ -121,7 +149,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             }
 
             Response.StatusCode = 400;
-            return Json(new {
+            return Json(new
+            {
                 obj.message
             });
         }
@@ -137,7 +166,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 return Json(new
                 {
                     message = requiredResult.Item2
-                }); 
+                });
             }
 
             var ctrl = new Controllers.ConfigController(
@@ -145,7 +174,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 _modifyLogService,
                 _remoteServerNodeProxy,
                 _serverNodeService,
-                _sysLogService
+                _sysLogService,
+                _appService
                 );
 
             model.Id = id;
@@ -155,6 +185,33 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             if (obj.success == true)
             {
                 return Ok();
+            }
+
+            Response.StatusCode = 400;
+            return Json(new
+            {
+                obj.message
+            });
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(string id)
+        {
+            var ctrl = new Controllers.ConfigController(
+                _configService,
+                _modifyLogService,
+                _remoteServerNodeProxy,
+                _serverNodeService,
+                _sysLogService,
+                _appService
+                );
+
+            var result = (await ctrl.Delete(id)) as JsonResult;
+
+            dynamic obj = result.Value;
+            if (obj.success == true)
+            {
+                return NoContent();
             }
 
             Response.StatusCode = 400;
@@ -181,5 +238,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
             return (true, "");
         }
+
     }
 }

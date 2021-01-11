@@ -32,13 +32,13 @@ namespace AgileConfig.Server.Apisite.Websocket
             _websocketCollection = WebsocketCollection.Instance;
         }
 
-        public async Task Invoke(HttpContext context, IAppService appService, IConfigService configService)
+        public async Task Invoke(HttpContext context, IAppBasicAuthService appBasicAuth, IConfigService configService)
         {
             if (context.Request.Path == "/ws")
             {
                 if (context.WebSockets.IsWebSocketRequest)
                 {
-                    var basicAuth = new BasicAuthenticationAttribute(appService);
+                    var basicAuth = new AppBasicAuthenticationAttribute(appBasicAuth);
                     if (!await basicAuth.Valid(context.Request))
                     {
                         await context.Response.WriteAsync("closed");

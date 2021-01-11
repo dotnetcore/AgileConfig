@@ -29,6 +29,7 @@ namespace AgileConfig.Server.Apisite.Models
         [MaxLength(200, ErrorMessage = "描述长度不能超过200位")]
         public string Description { get; set; }
 
+        public OnlineStatus OnlineStatus { get; set; }
         public ConfigStatus Status { get; set; }
     }
 }

@@ -9,6 +9,7 @@ using AgileConfig.Server.IService;
 using AgileConfig.Server.Data.Entity;
 using System.Threading.Tasks;
 using System.Net;
+using AgileConfig.Server.Service;
 
 namespace AgileConfig.Server.Apisite.Filters.Tests
 {
@@ -45,7 +46,7 @@ namespace AgileConfig.Server.Apisite.Filters.Tests
                 Enabled = true
             });
             var http = new DefaultHttpContext();
-            var filter = new BasicAuthenticationAttribute(service.Object);
+            var filter = new AppBasicAuthenticationAttribute(new AppBasicAuthService(service.Object));
             var result = await filter.Valid(http.Request);
             Assert.IsFalse(result);
             result = await filter.Valid(http.Request);

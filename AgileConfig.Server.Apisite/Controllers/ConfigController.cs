@@ -24,18 +24,22 @@ namespace AgileConfig.Server.Apisite.Controllers
         private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
         private readonly IServerNodeService _serverNodeService;
         private readonly ISysLogService _sysLogService;
+        private readonly IAppService _appService;
+
         public ConfigController(
                                 IConfigService configService,
                                 IModifyLogService modifyLogService,
                                 IRemoteServerNodeProxy remoteServerNodeProxy,
                                 IServerNodeService serverNodeService,
-                                ISysLogService sysLogService)
+                                ISysLogService sysLogService,
+                                 IAppService appService)
         {
             _configService = configService;
             _modifyLogService = modifyLogService;
             _remoteServerNodeProxy = remoteServerNodeProxy;
             _serverNodeService = serverNodeService;
             _sysLogService = sysLogService;
+            _appService = appService;
         }
 
         [HttpPost]
@@ -46,8 +50,8 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException("model");
             }
 
-            var app = await _configService.GetByAppId(model.AppId);
-            if (!app.Any())
+            var app = await _appService.GetAsync(model.AppId);
+            if (app == null)
             {
                 return Json(new
                 {

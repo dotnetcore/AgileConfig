@@ -57,6 +57,7 @@ namespace ApiSiteTests
             var remoteNodeProxy = new Mock<IRemoteServerNodeProxy>();
             var serverNodeService = new Mock<IServerNodeService>();
             var sysLogService = new Mock<ISysLogService>();
+            var appBasicAuthService = new Mock<IAppBasicAuthService>();
 
             var ctrl = new ConfigController(
                 configService.Object,
@@ -64,8 +65,9 @@ namespace ApiSiteTests
                 modifyLogService.Object, 
                 remoteNodeProxy.Object,
                 serverNodeService.Object,
-                sysLogService.Object);
-            var act = await ctrl.Get("001");
+                sysLogService.Object,
+                appBasicAuthService.Object);
+            var act = await ctrl.GetAppConfig("001");
 
             Assert.IsNotNull(act);
             Assert.IsNotNull(act.Value);
@@ -88,8 +90,9 @@ namespace ApiSiteTests
                 modifyLogService.Object,
                 remoteNodeProxy.Object,
                 serverNodeService.Object,
-                sysLogService.Object);
-            act = await ctrl.Get("001");
+                sysLogService.Object,
+                appBasicAuthService.Object);
+            act = await ctrl.GetAppConfig("001");
 
             Assert.IsNotNull(act);
             Assert.IsNull(act.Value);
