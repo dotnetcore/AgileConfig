@@ -80,6 +80,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             return Json(new
             {
+                data = app,
                 success = result,
                 message = !result ? "新建应用失败，请查看错误日志" : ""
             });

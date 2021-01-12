@@ -1,5 +1,6 @@
 ﻿using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Apisite.Models;
+using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.Apisite.Controllers.api
 {
-    [TypeFilter(typeof(AppBasicAuthenticationAttribute))]
+    [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
     [Route("api/[controller]")]
     public class AppController : Controller
     {
@@ -20,6 +21,57 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         {
             _appService = appService;
             _sysLogService = sysLogService;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var apps = await _appService.GetAllAppsAsync();
+            var vms = apps.Select(x => {
+                return new AppVM
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Secret = x.Secret,
+                    Inheritanced = x.Type == AppType.Inheritance,
+                    Enabled = x.Enabled,
+                };
+            });
+
+            return Json(vms);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(string id)
+        {
+            var ctrl = new Controllers.AppController(
+             _appService,
+             _sysLogService
+             );
+            var result = (await ctrl.Get(id)) as JsonResult;
+            dynamic obj = result.Value;
+
+            if (obj.success)
+            {
+                AppVM appVM = obj.data;
+                return Json(new
+                {
+                    appVM.Id,
+                    appVM.Name,
+                    appVM.Secret,
+                    appVM.Inheritanced,
+                    appVM.Enabled,
+                    inheritancedApps = appVM.inheritancedApps.Select(x =>new { 
+                        x.Id
+                    })
+                }) ;
+            }
+
+            Response.StatusCode = 400;
+            return Json(new
+            {
+                obj.message
+            });
         }
 
         [HttpPost]

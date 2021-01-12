@@ -44,6 +44,11 @@ namespace AgileConfig.Server.Apisite.Websocket
                         return;
                     }
                     var appId = context.Request.Headers["appid"];
+                    if (string.IsNullOrEmpty(appId))
+                    {
+                        var appIdSecret = appBasicAuth.GetAppIdSecret(context.Request);
+                        appId = appIdSecret.Item1;
+                    }
                     WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
                     var client = new WebsocketClient()
                     {

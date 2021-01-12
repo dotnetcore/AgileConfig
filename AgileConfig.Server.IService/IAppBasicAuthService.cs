@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
 
 namespace AgileConfig.Server.IService
 {
-    public interface IAppBasicAuthService
+    /// <summary>
+    /// 基于应用的认证
+    /// </summary>
+    public interface IAppBasicAuthService: IBasicAuthService
     {
         (string, string) GetAppIdSecret(HttpRequest httpRequest);
-        Task<bool> ValidAsync(HttpRequest httpRequest);
     }
 }
