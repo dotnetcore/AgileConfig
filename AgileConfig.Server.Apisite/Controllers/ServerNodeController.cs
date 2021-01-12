@@ -60,6 +60,7 @@ namespace AgileConfig.Server.Apisite.Controllers
            
             return Json(new
             {
+                data = node,
                 success = result,
                 message = !result ? "添加节点失败，请查看错误日志" : ""
             });
