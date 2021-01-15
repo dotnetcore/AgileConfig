@@ -221,6 +221,60 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             });
         }
 
+        [HttpPost("publish/{id}")]
+        public async Task<IActionResult> Publish(string id)
+        {
+            var ctrl = new Controllers.ConfigController(
+                _configService,
+                _modifyLogService,
+                _remoteServerNodeProxy,
+                _serverNodeService,
+                _sysLogService,
+                _appService
+                );
+
+            var result = (await ctrl.Publish(id)) as JsonResult;
+
+            dynamic obj = result.Value;
+            if (obj.success == true)
+            {
+                return NoContent();
+            }
+
+            Response.StatusCode = 400;
+            return Json(new
+            {
+                obj.message
+            });
+        }
+
+        [HttpPost("offline/{id}")]
+        public async Task<IActionResult> Offline(string id)
+        {
+            var ctrl = new Controllers.ConfigController(
+                _configService,
+                _modifyLogService,
+                _remoteServerNodeProxy,
+                _serverNodeService,
+                _sysLogService,
+                _appService
+                );
+
+            var result = (await ctrl.Offline(id)) as JsonResult;
+
+            dynamic obj = result.Value;
+            if (obj.success == true)
+            {
+                return NoContent();
+            }
+
+            Response.StatusCode = 400;
+            return Json(new
+            {
+                obj.message
+            });
+        }
+
         private (bool, string) CheckRequired(ConfigVM model)
         {
             if (string.IsNullOrEmpty(model.Key))
