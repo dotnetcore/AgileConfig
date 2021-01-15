@@ -23,10 +23,11 @@ AgileConfig秉承轻量化的特点，部署简单、配置简单、使用简单
 演示地址：[AgileConfig Server Demo](http://agileconfig.xbaby.xyz:5000)   密码：123456   
 客户端项目：[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
 示例项目：    
-[AgileConfigMVCSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigMVCSample)
+[AgileConfigMVCSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigMVCSample)   
 [AgileConfig WPFSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigWPFSample)    
 [AgileConfig ConsoleSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigConsoleSample)    
-[教程 - 如何使用AgileConfig.Client读取配置](https://www.cnblogs.com/kklldog/p/how-to-use-agileconfigclient.html)
+[教程 - 如何使用AgileConfig.Client读取配置](https://www.cnblogs.com/kklldog/p/how-to-use-agileconfigclient.html)    
+[restful api](https://github.com/kklldog/AgileConfig/wiki/Restful-API)
 ## 架构
 ![](https://s1.ax1x.com/2020/06/29/NRz1gO.png)
 AgileConfig的架构比较简单，主要是分3块：
@@ -58,7 +59,7 @@ oracle = Oracle
 ## 使用服务端
 ### 运行服务端
 ```
-sudo docker run --name agile_config -e adminConsole=true -e db:provider=sqlite -e db:conn="Data Source=agile_config.db" -p 5000:5000 kklldog/agile_config:latest
+sudo docker run --name agile_config -e adminConsole=true -e db:provider=sqlite -e db:conn="Data Source=agile_config.db" -p 5000:5000 -v /etc/localtime:/etc/localtime  kklldog/agile_config:latest
 ```
 通过docker建立一个agile_config实例，其中有3个环境变量需要配置:    
 1. adminConsole 配置程序是否为管理控制台。如果为true则启用控制台功能，访问该实例会出现管理界面。
