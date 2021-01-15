@@ -238,7 +238,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             dynamic obj = result.Value;
             if (obj.success == true)
             {
-                return NoContent();
+                return Ok();
             }
 
             Response.StatusCode = 400;
@@ -265,7 +265,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             dynamic obj = result.Value;
             if (obj.success == true)
             {
-                return NoContent();
+                return Ok();
             }
 
             Response.StatusCode = 400;
