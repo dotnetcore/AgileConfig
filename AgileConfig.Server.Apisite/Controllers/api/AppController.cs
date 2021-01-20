@@ -144,6 +144,29 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             });
         }
 
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(string id)
+        {
+            var ctrl = new Controllers.AppController(
+                    _appService,
+                    _sysLogService
+                    );
+
+            var result = (await ctrl.Delete(id)) as JsonResult;
+
+            dynamic obj = result.Value;
+            if (obj.success == true)
+            {
+                return NoContent();
+            }
+
+            Response.StatusCode = 400;
+            return Json(new
+            {
+                obj.message
+            });
+        }
+
         private (bool, string) CheckRequired(AppVM model)
         {
             if (string.IsNullOrEmpty(model.Id))
