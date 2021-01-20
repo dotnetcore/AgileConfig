@@ -28,9 +28,14 @@
         <td>
             <button class="btn btn-primary btn-xs" ng-click="toEdit(app)">修改</button>
             <button class="btn btn-xs"
-                    ng-class="app.enabled?'btn-danger':'btn-success'"
+                    ng-class="app.enabled?'btn-warning':'btn-success'"
                     ng-bind="app.enabled?'停用':'启用'"
                     ng-click="disableOrEnable(app)"></button>
+            <button 
+                    class="btn btn-danger btn-xs"
+                    ng-click="delete(app)">
+                删除
+            </button>
         </td>
     </tr>
 </table>

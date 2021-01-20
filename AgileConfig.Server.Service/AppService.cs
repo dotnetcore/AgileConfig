@@ -71,7 +71,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<List<App>> GetAllAppsAsync()
         {
-            return await  _dbContext.Apps.Where(a => 1 == 1).ToListAsync();
+            return await  _dbContext.Apps.Where(a=> 1==1).ToListAsync();
         }
 
         public async Task<bool> UpdateAsync(App app)
@@ -111,7 +111,10 @@ namespace AgileConfig.Server.Service
             foreach (var item in appInheritanceds)
             {
                 var app = await GetAsync(item.InheritancedAppId);
-                apps.Add(app);
+                if (app!=null && app.Enabled)
+                {
+                    apps.Add(app);
+                }
             }
 
             return apps;
