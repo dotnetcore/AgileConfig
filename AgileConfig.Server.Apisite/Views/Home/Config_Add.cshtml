@@ -23,7 +23,10 @@
     <div class="form-group">
         <label for="inputValue">值 </label>
         <textarea type="text" class="form-control" id="inputValue" placeholder="值 (必填)" maxlength="4000"
-               ng-model="config.value"> </textarea>
+                  ng-model="config.value"> </textarea>
+        <div class="text-right">
+            <span class="small text-muted">格式化：</span> <a href="javascript:;" ng-click="formatJson(config)">json</a>
+        </div>
     </div>
     <div class="form-group">
         <label for="inputGroup">组</label>

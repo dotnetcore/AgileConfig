@@ -46,6 +46,15 @@
             });
     };
 
+    $scope.formatJson = function (config) {
+        if (config.value) {
+            var obj = JSON.parse(config.value);
+            var json = JSON.stringify(obj, null, 4);
+
+            config.value = json;
+        }
+    }
+
     $scope.cancel = function () {
         $state.go('config.list', {
             app_id: $scope.config.appId
