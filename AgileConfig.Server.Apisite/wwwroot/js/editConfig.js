@@ -46,12 +46,51 @@
             });
     };
 
+    $scope.formatMode = 'text';
+    $scope.cm_el = null;
+    $scope.cm = null;
     $scope.formatJson = function (config) {
         if (config.value) {
-            var obj = JSON.parse(config.value);
-            var json = JSON.stringify(obj, null, 4);
-
-            config.value = json;
+            $scope.formatMode = 'json';
+            var jsonStr = '';
+            try {
+                var obj = JSON.parse(config.value);
+                jsonStr = JSON.stringify(obj, null, 4);
+            } catch (e) {
+                console.log(e);
+            }
+            if (jsonStr) {
+                config.value = jsonStr;
+            }
+            var cmArea = document.getElementById('cm_area');
+            $scope.cm = CodeMirror(function (elt) {
+                if ($scope.cm_el) {
+                    cmArea.removeChild($scope.cm_el);
+                }
+                $scope.cm_el = elt;
+                cmArea.appendChild(elt);
+            }, {
+                value: config.value,
+                mode: {
+                    name: 'javascript',
+                    json: true
+                }
+            });
+            $scope.cm.on('change', function () {
+                console.log('cm content change');
+                var content = $scope.cm.getDoc().getValue();
+                $scope.$apply(function () {
+                    config.value = content;
+                });
+            });
+        }
+    }
+    $scope.formatText = function (config) {
+        $scope.formatMode = 'text';
+        var cmArea = document.getElementById('cm_area');
+        if ($scope.cm_el) {
+            cmArea.removeChild($scope.cm_el);
+            $scope.cm_el = null;
         }
     }
 

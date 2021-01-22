@@ -40,6 +40,11 @@
     <None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.min.js" />
     <None Include="wwwroot\lib\bootstrap\dist\js\npm.js" />
     <None Include="wwwroot\lib\bootstrap\LICENSE" />
+    <None Include="wwwroot\lib\code_mirror\lib\codemirror.js" />
+    <None Include="wwwroot\lib\code_mirror\mode\javascript\javascript.js" />
+    <None Include="wwwroot\lib\code_mirror\mode\javascript\test.js" />
+    <None Include="wwwroot\lib\code_mirror\mode\meta.js" />
+    <None Include="wwwroot\lib\code_mirror\mode\yaml\yaml.js" />
     <None Include="wwwroot\lib\jquery\dist\jquery.js" />
     <None Include="wwwroot\lib\jquery\dist\jquery.min.js" />
     <None Include="wwwroot\lib\jquery\dist\jquery.min.map" />

@@ -241,3 +241,11 @@ div.config_value {
 .config_list div.config_value.not_maxwidth + button {
     display: none;
 }
+
+.form-group textarea {
+    height:120px;
+}
+.CodeMirror.cm-s-default {
+    border:1px solid #ccc;
+    border-radius: 4px;
+}
