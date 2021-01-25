@@ -51,7 +51,7 @@
     $scope.cm = null;
     $scope.formatJson = function (config) {
         if (config.value) {
-            $scope.formatMode = 'json';
+            $scope.formatMode = 'rich';
             var jsonStr = '';
             try {
                 var obj = JSON.parse(config.value);
@@ -75,6 +75,30 @@
                     name: 'javascript',
                     json: true
                 }
+            });
+            $scope.cm.on('change', function () {
+                console.log('cm content change');
+                var content = $scope.cm.getDoc().getValue();
+                $scope.$apply(function () {
+                    config.value = content;
+                });
+            });
+        }
+    }
+    $scope.formatYml = function (config) {
+        if (config.value) {
+            $scope.formatMode = 'rich';
+            var cmArea = document.getElementById('cm_area');
+            $scope.cm = CodeMirror(function (elt) {
+                if ($scope.cm_el) {
+                    cmArea.removeChild($scope.cm_el);
+                }
+                $scope.cm_el = elt;
+                cmArea.appendChild(elt);
+            }, {
+                value: config.value,
+                mode: 'yaml',
+                tabSize: 2,
             });
             $scope.cm.on('change', function () {
                 console.log('cm content change');
