@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <AssemblyVersion>1.1.7.3</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

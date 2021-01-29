@@ -1,4 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Http
+@{
+    string app_ver = System.Reflection.Assembly.GetAssembly(typeof(AgileConfig.Server.Apisite.Program)).GetName().Version.ToString();
+}
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -9,7 +12,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Agile Config Console</title>
+    <title>Agile Config Console - @app_ver</title>
 
     <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="~/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
@@ -36,7 +39,7 @@
                 <a class="navbar-brand" href="#">
                 </a>
                 <a class="navbar-brand" href="#" style="color: #fff">
-                    Agile Config Console
+                    Agile Config Console - @app_ver
                 </a>
             </div>
             <div id="navbar" class="navbar-collapse collapse">
