@@ -37,6 +37,7 @@ namespace AgileConfig.Server.Apisite
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0).AddRazorRuntimeCompilation();
             services.AddFreeSqlDbContext();
             services.AddBusinessServices();
+            services.AddAntiforgery(o => o.SuppressXFrameOptionsHeader = true);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
