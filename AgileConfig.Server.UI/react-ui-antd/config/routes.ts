@@ -56,6 +56,36 @@
                 component: './TableList',
               },
               {
+                name: 'list.node-list',
+                icon: 'table',
+                path: '/node',
+                component: './Nodes',
+              },
+              {
+                name: 'list.app-list',
+                icon: 'table',
+                path: '/app',
+                component: './Apps',
+              },
+              {
+                name: 'list.config-list',
+                icon: 'table',
+                path: '/config',
+                component: './Configs',
+              },
+              {
+                name: 'list.client-list',
+                icon: 'table',
+                path: '/client',
+                component: './Clients',
+              },
+              {
+                name: 'list.logs-list',
+                icon: 'table',
+                path: '/logs',
+                component: './Logs',
+              },
+              {
                 component: './404',
               },
             ],
