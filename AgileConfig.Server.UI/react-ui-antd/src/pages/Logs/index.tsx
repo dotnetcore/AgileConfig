@@ -10,34 +10,63 @@ const logs:React.FC = () => {
     {
       title: '应用',
       dataIndex: 'appId',
+      valueType: 'select',
+      valueEnum: {
+        '': { text: '全部', status: '' },
+        test_app: {
+          text: '测试应用',
+        }
+      },
     },
     {
       title: '类型',
       dataIndex: 'logType',
+      valueType: 'select',
+      valueEnum: {
+        '': { text: '全部', status: '' },
+        0: {
+          text: '普通',
+        },
+        1: {
+          text: '警告',
+        }
+      },
     },
     {
       title: '时间',
       dataIndex: 'logTime',
-      valueType: 'dateRange'
+      valueType: 'dateTime',
+      hideInSearch: true,
+    },
+    {
+      title: '时间',
+      dataIndex: 'logTime',
+      valueType: 'dateRange',
+      hideInTable: true,
+      search: {
+        transform: (value) => {
+          return {
+            startTime: value[0],
+            endTime: value[1],
+          };
+        },
+      }
     },
     {
       title: '内容',
       dataIndex: 'logTxt',
+      hideInSearch: true
     },
   ];
   return (
     <PageContainer>
-      <ProTable<TableListItem>
+      <ProTable<TableListItem>                                                                                    
         rowKey="id"
         columns = {columns}
         search={{
           labelWidth: 120,
         }}
         request = { (params, sorter, filter) => queryLogs({ ...params}) }
-        rowSelection={{
-          onChange: (_, selectedRows) => {
-          },
-        }}
       />
     </PageContainer>
   );
