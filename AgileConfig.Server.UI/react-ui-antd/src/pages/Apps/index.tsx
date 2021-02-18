@@ -18,22 +18,41 @@ const appList:React.FC = () => {
     {
       title: '密钥',
       dataIndex: 'secret',
+      valueType: 'password'
     },
     {
       title: '创建时间',
       dataIndex: 'createTime',
+      valueType: 'dateTime'
     },
     {
         title: '修改时间',
         dataIndex: 'updateTime',
+        valueType: 'dateTime'
       },
       {
         title: '可被继承',
         dataIndex: 'inheritanced',
+        valueEnum: {
+          true:{
+            text: '是'
+          },
+          false: {
+            text: '否'
+          }
+        }
       },
       {
         title: '启用',
         dataIndex: 'enabled',
+        valueEnum: {
+          true:{
+            text: '是'
+          },
+          false: {
+            text: '否'
+          }
+        }
       },
     {
       title: '操作',

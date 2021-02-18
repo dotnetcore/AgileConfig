@@ -9,42 +9,44 @@ const configs:React.FC = () => {
   const columns: ProColumns<TableListItem>[] = [
     {
       title: '组',
-      dataIndex: 'appId',
+      dataIndex: 'group',
     },
     {
       title: '键',
-      dataIndex: 'logType',
+      dataIndex: 'key',
     },
     {
       title: '值',
-      dataIndex: 'logTime',
-      valueType: 'dateTime',
-      hideInSearch: true,
+      dataIndex: 'value',
     },
     {
       title: '描述',
-      dataIndex: 'logTime',
+      dataIndex: 'description',
       hideInSearch: true,
     },
     {
       title: '创建时间',
-      dataIndex: 'logTxt',
-      hideInSearch: true
+      dataIndex: 'createTime',
+      hideInSearch: true,
+      valueType: 'dateTime'
     },
     {
       title: '修改时间',
-      dataIndex: 'logTxt',
-      hideInSearch: true
+      dataIndex: 'updateTime',
+      hideInSearch: true,
+      valueType: 'dateTime'
     },
     {
       title: '状态',
-      dataIndex: 'logTxt',
-      hideInSearch: true
+      dataIndex: 'status',
+      hideInSearch: true,
+      valueEnum: {
+        0: '未上线',
+        1: '已上线'
+      }
     },
     {
       title: '操作',
-      dataIndex: 'logTxt',
-      hideInSearch: true
     },
   ];
   return (
