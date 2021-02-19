@@ -5,7 +5,7 @@ import ProTable, { ActionType, ProColumns, TableDropdown } from '@ant-design/pro
 import { Button, FormInstance, message,Modal } from 'antd';
 import React, { useState, useRef } from 'react';
 import { NodeItem } from './data';
-import { queryNodes, addNode } from './service';
+import { queryNodes, addNode, delNode } from './service';
 
 const { confirm } = Modal;
 const handleAdd = async (fields: NodeItem) => {
@@ -17,12 +17,30 @@ const handleAdd = async (fields: NodeItem) => {
     if (success) {
       message.success('添加成功');
     } else {
-      message.error('添加失败请重试！');
+      message.error(result.message);
     }
     return success;
   } catch (error) {
     hide();
     message.error('添加失败请重试！');
+    return false;
+  }
+};
+const handleDel = async (fields: NodeItem) => {
+  const hide = message.loading('正在删除');
+  try {
+    const result = await delNode({ ...fields });
+    hide();
+    const success = result.success;
+    if (success) {
+      message.success('删除成功');
+    } else {
+      message.error('删除失败请重试！');
+    }
+    return success;
+  } catch (error) {
+    hide();
+    message.error('删除失败请重试！');
     return false;
   }
 };
@@ -77,8 +95,12 @@ const nodeList:React.FC = () => {
                           <br></br>
                           <div>删除节点并不会让其真正的下线，只是脱离控制台的管理。所有连接至此节点的客户端都会继续正常工作。</div>
                         </div>,
-              onOk() {
+              async onOk() {
                 console.log('delete node ' + record.address);
+                const success = await handleDel(record);
+                if (success) {
+                  actionRef.current?.reload();
+                }
               },
               onCancel() {
                 console.log('Cancel');

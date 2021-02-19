@@ -14,4 +14,13 @@ export async function addNode(params:NodeItem) {
     }
   });
 }
+
+export async function delNode(params:NodeItem) {
+  return request('/servernode/delete', {
+    method: 'POST',
+    data: {
+      ...params
+    }
+  });
+}
  

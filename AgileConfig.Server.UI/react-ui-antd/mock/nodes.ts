@@ -34,8 +34,18 @@ const addNode = (req: Request, resp: Response) => {
         success: true
     });
 }
-
+const delNode = (req: Request, resp: Response) => {
+    const body = req.body;
+    console.log(body);
+    const index = list.findIndex(x=> x.address === body.address);
+    list.splice(index, 1);
+    resp.json({
+        message: "",
+        success: true
+    });
+}
 export default {
     'GET /servernode/all': getNodes,
-    'POST /servernode/add': addNode
+    'POST /servernode/add': addNode,
+    'POST /servernode/delete': delNode
   };
