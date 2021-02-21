@@ -1,12 +1,14 @@
+import { PlusOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ProColumns } from '@ant-design/pro-table';
+import { Button } from 'antd';
 import React, { useState, useRef } from 'react';
 import { FormattedMessage } from 'umi';
 import { TableListItem } from '../TableList/data';
 import { queryConfigs } from './service';
 
 const configs:React.FC = () => {
-  const columns: ProColumns<TableListItem>[] = [
+  const columns: ProColumns<any>[] = [
     {
       title: '组',
       dataIndex: 'group',
@@ -38,26 +40,62 @@ const configs:React.FC = () => {
     },
     {
       title: '状态',
-      dataIndex: 'status',
+      dataIndex: 'onlineStatus',
       hideInSearch: true,
       valueEnum: {
-        0: '未上线',
-        1: '已上线'
+        0: {
+          text:'待上线',
+          status: 'Default'
+        },
+        1: {
+          text:'已上线',
+          status: 'Success'
+        }
       }
     },
     {
       title: '操作',
+      valueType: 'option',
+      render: (text, record, _, action) => [
+        <a>下线</a>,
+        <a
+          key="editable"
+          onClick={() => {
+            action.startEditable?.(record.id);
+          }}
+        >
+          编辑
+        </a>,
+        <a>版本历史</a>,
+        <Button type="link" danger>
+          删除
+        </Button>
+      ]
     },
   ];
   return (
     <PageContainer>
-      <ProTable<TableListItem>                                                                                    
+      <ProTable<any>     
         rowKey="id"
+        options={
+          false
+        }
         columns = {columns}
         search={{
           labelWidth: 120,
         }}
         request = { (params, sorter, filter) => queryConfigs() }
+        toolBarRender={() => [
+          <Button key="button" icon={<PlusOutlined />} type="primary">
+            新建
+          </Button>,
+          <Button key="button" type="primary">
+          上线选中的配置
+        </Button>,
+          <Button key="button" type="primary">
+            从json文件导入
+          </Button>
+        ]}
       />
     </PageContainer>
   );

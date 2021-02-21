@@ -70,7 +70,7 @@ const nodeList:React.FC = () => {
       valueEnum: {
         1:{
           text: '在线',
-          status: 'Success'
+          status: 'Processing'
         },
         0: {
           text: '离线',
@@ -116,6 +116,9 @@ const nodeList:React.FC = () => {
   return (
     <PageContainer>
       <ProTable     
+      options={
+        false
+      }
         rowKey="address"
         actionRef={actionRef}
         columns = {columns}

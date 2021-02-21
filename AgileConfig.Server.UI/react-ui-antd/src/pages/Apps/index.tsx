@@ -1,7 +1,7 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ProColumns, TableDropdown } from '@ant-design/pro-table';
-import { Button } from 'antd';
+import { Button, Switch } from 'antd';
 import React, { useState, useRef } from 'react';
 import { queryApps } from './service';
 
@@ -33,27 +33,15 @@ const appList:React.FC = () => {
       {
         title: '可被继承',
         dataIndex: 'inheritanced',
-        valueEnum: {
-          true:{
-            text: '是'
-          },
-          false: {
-            text: '否'
-          }
+        render: (dom, entry) =>{
+          return  <Switch checked={entry.inheritanced} />
         }
       },
       {
         title: '启用',
         dataIndex: 'enabled',
-        valueEnum: {
-          true:{
-            text: '是',
-            status: 'Success'
-          },
-          false: {
-            text: '否',
-            status: 'Default'
-          }
+        render: (dom, entry) =>{
+          return  <Switch checked={entry.enabled} />
         }
       },
     {
@@ -68,18 +56,18 @@ const appList:React.FC = () => {
         >
           编辑
         </a>,
-        <a href={record.url} target="_blank" rel="noopener noreferrer" key="view">
-          停用
-        </a>,
-        <a href={record.url} target="_blank" rel="noopener noreferrer" key="view">
+        <Button type="link" danger>
           删除
-        </a>
+        </Button>
       ]
     }
   ];
   return (
     <PageContainer>
-      <ProTable                                                                                    
+      <ProTable      
+      options={
+        false
+      }                                                                              
         rowKey="id"
         columns = {columns}
         search={false}

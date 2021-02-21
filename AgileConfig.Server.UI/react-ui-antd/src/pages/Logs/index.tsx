@@ -60,7 +60,10 @@ const logs:React.FC = () => {
   ];
   return (
     <PageContainer>
-      <ProTable<TableListItem>                                                                                    
+      <ProTable<TableListItem>       
+      options={
+        false
+      }                                                                             
         rowKey="id"
         columns = {columns}
         search={{

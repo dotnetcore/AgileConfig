@@ -27,15 +27,18 @@ const clients:React.FC = () => {
         >
           刷新配置
         </a>,
-        <a href={record.url} target="_blank" rel="noopener noreferrer" key="view">
+        <Button type="link" danger>
           断开
-        </a>
+        </Button>
       ]
     }
   ];
   return (
     <PageContainer>
-      <ProTable                                                                                    
+      <ProTable      
+      options={
+        false
+      }                                                                              
         rowKey="id"
         columns = {columns}
         search={false}
