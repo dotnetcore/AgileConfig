@@ -5,6 +5,7 @@ import ProTable, { ActionType, ProColumns, TableDropdown } from '@ant-design/pro
 import { Button, FormInstance, message, Modal, Switch } from 'antd';
 import React, { useState, useRef } from 'react';
 import UpdateForm from './comps/updateForm';
+import { AppListItem } from './data';
 import { addApp, delNode, queryApps } from './service';
 
 const { confirm } = Modal;
@@ -51,8 +52,9 @@ const appList:React.FC = () => {
 
   const [createModalVisible, handleModalVisible] = useState<boolean>(false);
   const [updateModalVisible, handleUpdateModalVisible] = useState<boolean>(false);
+  const [currentRow, setCurrentRow] = useState<AppListItem>();
 
-  const columns: ProColumns[] = [
+  const columns: ProColumns<AppListItem>[] = [
     {
       title: '名称',
       dataIndex: 'name',
@@ -82,16 +84,16 @@ const appList:React.FC = () => {
       {
         title: '公共',
         dataIndex: 'inheritanced',
-        render: (dom, entry) =>{
-          return  <Switch checked={entry.inheritanced} size="small"/>
+        render: (dom, entity) =>{
+          return  <Switch checked={entity.inheritanced} size="small"/>
         },
         hideInSearch: true
       },
       {
         title: '启用',
         dataIndex: 'enabled',
-        render: (dom, entry) =>{
-          return  <Switch checked={entry.enabled} size="small"/>
+        render: (dom, entity) =>{
+          return  <Switch checked={entity.enabled} size="small"/>
         },
         hideInSearch: true
       },
@@ -102,7 +104,10 @@ const appList:React.FC = () => {
         <a
           key="editable"
           onClick={() => {
-            handleUpdateModalVisible(true)
+            handleUpdateModalVisible(true);
+            setCurrentRow(record);
+            console.log('select app ', record);
+            console.log('current app ', currentRow);
           }}
         >
           编辑
@@ -114,7 +119,7 @@ const appList:React.FC = () => {
             icon: <ExclamationCircleOutlined />,
             content:  msg,
             async onOk() {
-              console.log('delete app ' + record.address);
+              console.log('delete app ' + record.name);
               const success = await handleDel(record);
               if (success) {
                 actionRef.current?.reload();
@@ -189,7 +194,7 @@ const appList:React.FC = () => {
             },
           ]}
           label="密钥"
-          name="password"
+          name="secret"
         />
         <ProFormSwitch label="公共应用" name="inheritanced"></ProFormSwitch>
         <ProFormSelect label="关联应用" name="inheritancedApps"
@@ -201,13 +206,22 @@ const appList:React.FC = () => {
           { label: 'app4', value: '4' },
         ]}
         ></ProFormSelect>
-        <ProFormSwitch label="启用" name="enabled"></ProFormSwitch>
+        <ProFormSwitch label="启用" name="enabled" initialValue="true">
+        </ProFormSwitch>
       </ModalForm>
       <UpdateForm
-      handleModalVisible = {handleUpdateModalVisible}
+      values={currentRow || {}}
       updateModalVisible = {updateModalVisible}
+      onCancel={
+        ()=>{
+          setCurrentRow(undefined);
+          handleUpdateModalVisible(false);
+          console.log('set currentrow undefined');
+        }
+      }
       onSubmit={
         async (value) => {
+          setCurrentRow(undefined);
           const success = await handleAdd(value);
           if (success) {
             handleUpdateModalVisible(false);
