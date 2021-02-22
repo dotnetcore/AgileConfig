@@ -5,3 +5,21 @@ export async function queryApps() {
   });
 }
  
+
+export async function addApp(params:any) {
+  return request('/app/add', {
+    method: 'POST',
+    data: {
+      ...params
+    }
+  });
+}
+
+export async function delNode(params:any) {
+  return request('/app/delete', {
+    method: 'POST',
+    data: {
+      ...params
+    }
+  });
+}

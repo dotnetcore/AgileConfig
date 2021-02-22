@@ -1,28 +1,28 @@
 import { Request, Response } from 'express';
+const list = [
+    {
+        createTime: "2021-02-03T16:55:48.0515423",
+        enabled: true,
+        id: "test_app",
+        inheritanced: false,
+        inheritancedApps: null,
+        name: "测试程序",
+        secret: null,
+        updateTime: "2021-02-03T16:55:48.0515423"
+    },
+    {
+        createTime: "2021-02-03T16:55:48.0515423",
+        enabled: false,
+        id: "test_app",
+        inheritanced: true,
+        inheritancedApps: null,
+        name: "测试程序",
+        secret: null,
+        updateTime: "2021-02-03T16:55:48.0515423"
+    }
+];
 
 const getApps = (req: Request, resp: Response) => {
-    const list = [
-        {
-            createTime: "2021-02-03T16:55:48.0515423",
-            enabled: true,
-            id: "test_app",
-            inheritanced: false,
-            inheritancedApps: null,
-            name: "测试程序",
-            secret: null,
-            updateTime: "2021-02-03T16:55:48.0515423"
-        },
-        {
-            createTime: "2021-02-03T16:55:48.0515423",
-            enabled: false,
-            id: "test_app",
-            inheritanced: true,
-            inheritancedApps: null,
-            name: "测试程序",
-            secret: null,
-            updateTime: "2021-02-03T16:55:48.0515423"
-        }
-    ];
 
     resp.json({
         current: 1,
@@ -32,7 +32,27 @@ const getApps = (req: Request, resp: Response) => {
         data: list
     });
 }
-
+const addApp = (req: Request, resp: Response) => {
+    const body = req.body;
+    console.log(body);
+    list.push(body);
+    resp.json({
+        message: "",
+        success: true
+    });
+}
+const delApp = (req: Request, resp: Response) => {
+    const body = req.body;
+    console.log(body);
+    const index = list.findIndex(x=> x.id === body.id);
+    list.splice(index, 1);
+    resp.json({
+        message: "",
+        success: true
+    });
+}
 export default {
     'GET /app/all': getApps,
+    'POST /app/add': addApp,
+    'POST /app/delete': delApp,
   };

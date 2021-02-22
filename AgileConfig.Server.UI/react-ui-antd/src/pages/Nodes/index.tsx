@@ -128,7 +128,7 @@ const nodeList:React.FC = () => {
           <Button key="button" icon={<PlusOutlined />} type="primary"
           onClick={ ()=>{ handleModalVisible(true) } }
           >
-            添加节点
+            添加
           </Button>
         ]}
       />
