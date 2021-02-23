@@ -14,8 +14,15 @@ export async function addApp(params:any) {
     }
   });
 }
-
-export async function delNode(params:any) {
+export async function editApp(params:any) {
+  return request('/app/edit', {
+    method: 'POST',
+    data: {
+      ...params
+    }
+  });
+}
+export async function delApp(params:any) {
   return request('/app/delete', {
     method: 'POST',
     data: {

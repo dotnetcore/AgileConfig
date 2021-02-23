@@ -3,9 +3,9 @@ const list = [
     {
         createTime: "2021-02-03T16:55:48.0515423",
         enabled: true,
-        id: "test_app",
+        id: "cc",
         inheritanced: false,
-        inheritancedApps: null,
+        inheritancedApps: [],
         name: "测试程序",
         secret: null,
         updateTime: "2021-02-03T16:55:48.0515423"
@@ -13,9 +13,9 @@ const list = [
     {
         createTime: "2021-02-03T16:55:48.0515423",
         enabled: false,
-        id: "test_app",
+        id: "aa",
         inheritanced: true,
-        inheritancedApps: null,
+        inheritancedApps: ['2'],
         name: "测试程序",
         secret: null,
         updateTime: "2021-02-03T16:55:48.0515423"
@@ -51,8 +51,26 @@ const delApp = (req: Request, resp: Response) => {
         success: true
     });
 }
+const editApp = (req: Request, resp: Response) => {
+    const body = req.body;
+    console.log(body);
+    const app = list.find(x=> x.id === body.id);
+    if (app) {
+      app.name = body.name;
+      app.id = body.id;
+      app.secret = body.secret;
+      app.inheritanced = body.inheritanced;
+      app.inheritancedApps = body.inheritancedApps;
+      app.enabled = body.enabled;
+    }
+    resp.json({
+        message: "",
+        success: true
+    });
+}
 export default {
     'GET /app/all': getApps,
     'POST /app/add': addApp,
     'POST /app/delete': delApp,
+    'POST /app/edit': editApp,
   };

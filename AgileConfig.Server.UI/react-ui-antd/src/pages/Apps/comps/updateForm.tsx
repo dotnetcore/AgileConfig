@@ -1,34 +1,32 @@
-import { FormInstance, ModalForm, ProFormSelect, ProFormSwitch, ProFormText } from "@ant-design/pro-form";
-import React, { useRef } from 'react';
+import {  ModalForm, ProFormDependency, ProFormSelect, ProFormSwitch, ProFormText } from "@ant-design/pro-form";
+import React from 'react';
 import { AppListItem } from "../data";
 export type UpdateFormProps = {
     onSubmit: (values: AppListItem) => Promise<void>;
     onCancel: () => void;
     updateModalVisible: boolean;
-    values: Partial<AppListItem>;
+    value: AppListItem ;
+    setValue: React.Dispatch<React.SetStateAction<AppListItem | undefined>>
   };
 const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
-  const fromRef = useRef<FormInstance>();
+
     return (
     <ModalForm 
-    formRef={fromRef}
-    title="编辑应用" 
+    title="编辑应用"
+    initialValues={props.value}
     visible={props.updateModalVisible}
-    onFinish={
-      async (value) => {
-        props.onSubmit(value as AppListItem);
-      }
-    }
     modalProps={
       {
         onCancel: ()=>{
-          console.log('modal close ', props.values);
-          fromRef.current?.resetFields();
           props.onCancel();
         }
       }
     }
+     onFinish={
+       props.onSubmit
+    }
     >
+   
     <ProFormText
       rules={[
         {
@@ -37,49 +35,49 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
       ]}
       label="名称"
       name="name"
-      fieldProps={
-        {
-          value: props.values?.name
-        }
-      }
     />
     <ProFormText
-      rules={[
-        {
-          required: true,
-        },
-      ]}
+     rules={[
+      {
+        required: true,
+      },
+    ]}
+    readonly={true}
       label="ID"
       name="id"
-      fieldProps={
-        {
-          value: props.values?.id
-        }
-      }
     />
     <ProFormText.Password
-      rules={[
-        {
-        },
-      ]}
       label="密钥"
-      name="password"
-      fieldProps={
-        {
-          value: props.values?.secret
+      name="secret"
+    />
+    <ProFormSwitch 
+      tooltip="公共应用可以被其他应用关联"
+      label="公共应用" 
+      name="inheritanced"
+      >
+    </ProFormSwitch>
+    <ProFormDependency name={
+      ["inheritanced"]
+    }>
+      {
+        (e) => {
+          return !e.inheritanced? 
+                <ProFormSelect 
+                label="关联应用" 
+                tooltip="关联后可以读取公共应用的配置项"
+                name="inheritancedApps"
+                    mode="multiple" 
+                    request={async () => [
+                      { label: 'app1', value: '1' },
+                      { label: 'app2', value: '2' },
+                      { label: 'app3', value: '3' },
+                      { label: 'app4', value: '4' },
+                    ]}
+                ></ProFormSelect> : null
         }
       }
-    />
-    <ProFormSwitch label="公共应用" name="inheritanced"></ProFormSwitch>
-    <ProFormSelect label="关联应用" name="inheritancedApps"
-    mode="multiple" 
-    request={async () => [
-      { label: 'app1', value: '1' },
-      { label: 'app2', value: '2' },
-      { label: 'app3', value: '3' },
-      { label: 'app4', value: '4' },
-    ]}
-    ></ProFormSelect>
+    </ProFormDependency>
+   
     <ProFormSwitch label="启用" name="enabled" 
     ></ProFormSwitch>
     </ModalForm>
