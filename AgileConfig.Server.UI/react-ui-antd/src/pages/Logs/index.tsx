@@ -1,33 +1,51 @@
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ProColumns } from '@ant-design/pro-table';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FormattedMessage } from 'umi';
 import { TableListItem } from '../TableList/data';
 import { queryLogs } from './service';
 import {queryApps} from '../Apps/service'
 
 const logs:React.FC = () =>  {
-  const getAppEnum = async () =>
+  const [appEnums, setAppEnums] = useState<any>();
+  const getAppEnums = async () =>
   {
     const result = await queryApps({})
-    const en = {};
-    result.data.forEach((x:{id:string, name:string})=>{
-      en[x.id] = {
+    const obj = {};
+    result.data.forEach((x)=>{
+      obj[x.id] = {
         text: x.name
       }
     });
 
-    return en;
+    return obj;
   }
-  const appEnums = getAppEnum();
+  const getAppsForSelect = async () =>
+  {
+    const result = await queryApps({})
+    const arr:any[] = [];
+    result.data.forEach((x)=>{
+       arr.push({
+         value: x.id,
+         label: x.name
+       });
+    });
+
+    return arr;
+  }
+  useEffect(()=>{
+    getAppEnums().then(x=> {
+      console.log('app enums ', x);
+      setAppEnums({...x});
+    });
+  }, []);
+ 
   const columns: ProColumns<TableListItem>[] = [
     {
       title: '应用',
       dataIndex: 'appId',
       valueType: 'select',
-      request: async ()=>{
-        return [{value:'test_app',id:'dfsdfs'}]
-      },
+      valueEnum: appEnums,
     },
     {
       title: '类型',
@@ -74,7 +92,10 @@ const logs:React.FC = () =>  {
       <ProTable<TableListItem>       
       options={
         false
-      }                                                                             
+      }    
+      search={{
+        labelWidth: 'auto',
+      }}                                                                         
         rowKey="id"
         columns = {columns}
         request = { (params, sorter, filter) => queryLogs({ ...params}) }

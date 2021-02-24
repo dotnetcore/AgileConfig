@@ -2,12 +2,30 @@ import { PlusOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ProColumns } from '@ant-design/pro-table';
 import { Button } from 'antd';
-import React, { useState, useRef } from 'react';
-import { FormattedMessage } from 'umi';
-import { TableListItem } from '../TableList/data';
+import React, { useState, useRef, useEffect } from 'react';
+import { queryApps } from '../Apps/service';
 import { queryConfigs } from './service';
 
 const configs:React.FC = () => {
+  const [appEnums, setAppEnums] = useState<any>();
+  const getAppEnums = async () =>
+  {
+    const result = await queryApps({})
+    const obj = {};
+    result.data.forEach((x)=>{
+      obj[x.id] = {
+        text: x.name
+      }
+    });
+
+    return obj;
+  }
+  useEffect(()=>{
+    getAppEnums().then(x=> {
+      console.log('app enums ', x);
+      setAppEnums({...x});
+    });
+  }, []);
   const columns: ProColumns<any>[] = [
     {
       title: '组',
@@ -82,7 +100,7 @@ const configs:React.FC = () => {
         }
         columns = {columns}
         search={{
-          labelWidth: 120,
+          labelWidth: 'auto',
         }}
         request = { (params, sorter, filter) => queryConfigs() }
         toolBarRender={() => [

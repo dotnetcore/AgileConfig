@@ -4,7 +4,7 @@ const getLogs = (req: Request, resp: Response) => {
     const list = [];
     for (let index = 0; index < 20; index++) {
         list.push({
-            appId:'test_app',
+            appId:'cc',
             id: index++,
             logTime:'2021-02-07T00:55:51.3888328',
             logTxt: '删除配置【Key:type】【Value：sqlite】【Group：store】【AppId：test_app】',

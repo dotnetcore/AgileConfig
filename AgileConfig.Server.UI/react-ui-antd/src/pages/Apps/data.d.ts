@@ -1,8 +1,8 @@
 export type AppListItem = {
-    id?: string,
+    id: string,
     name?: string,
     enabled?: boolean,
-    inheritanced?: boolean,
+    inheritanced: boolean,
     inheritancedApps?: string[],
     secret?: string,
     createTime?: Date,
@@ -15,4 +15,11 @@ export type AppListParams = {
   pageSize?: number;
   current?: number;
 };
-  
+
+export type AppListResult = {
+    current: number
+    data: AppListItem[]
+    pageSize: number
+    success: boolean
+    total: number
+}

@@ -9,7 +9,7 @@ import { queryNodes, addNode, delNode,allClientReload } from './service';
 
 const { confirm } = Modal;
 const handleAdd = async (fields: NodeItem) => {
-  const hide = message.loading('正在添加');
+  const hide = message.loading('正在保存');
   try {
     const result = await addNode({ ...fields });
     hide();

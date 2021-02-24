@@ -6,7 +6,7 @@ export type UpdateFormProps = {
     onSubmit: (values: AppListItem) => Promise<void>;
     onCancel: () => void;
     updateModalVisible: boolean;
-    value: AppListItem ;
+    value: AppListItem | undefined ;
     setValue: React.Dispatch<React.SetStateAction<AppListItem | undefined>>
   };
 const UpdateForm : React.FC<UpdateFormProps> = (props)=>{

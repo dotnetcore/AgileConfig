@@ -5,10 +5,11 @@ import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
 import { Button, FormInstance, message, Modal, Switch } from 'antd';
 import React, { useState, useRef } from 'react';
 import UpdateForm from './comps/updateForm';
-import { AppListItem } from './data';
+import { AppListItem, AppListParams, AppListResult } from './data';
 import { addApp, editApp, delApp, queryApps, inheritancedApps } from './service';
 
 const { confirm } = Modal;
+
 const handleAdd = async (fields: AppListItem) => {
   const hide = message.loading('正在保存');
   try {
@@ -67,11 +68,16 @@ const handleDel = async (fields: AppListItem) => {
 const appList: React.FC = () => {
   const actionRef = useRef<ActionType>();
   const addFormRef = useRef<FormInstance>();
-
+ 
   const [createModalVisible, handleModalVisible] = useState<boolean>(false);
   const [updateModalVisible, handleUpdateModalVisible] = useState<boolean>(false);
   const [currentRow, setCurrentRow] = useState<AppListItem>();
-
+  const [dataSource, setDataSource] = useState<AppListResult>();
+  const handleQuery = async (params: AppListParams) => {
+    const result = await queryApps(params);
+    setDataSource(result);
+    return result;
+  }
   const columns: ProColumns<AppListItem>[] = [
     {
       title: '名称',
@@ -103,7 +109,17 @@ const appList: React.FC = () => {
       title: '公共',
       dataIndex: 'inheritanced',
       render: (dom, entity) => {
-        return <Switch checked={entity.inheritanced} size="small" />
+        return <Switch checked={entity.inheritanced} size="small" onChange={
+          (checked)=>{ 
+            console.log('inheritanced switch changed .', checked); 
+            if (dataSource) {
+              const app = dataSource?.data?.find(x=>x.id === entity.id);
+              if (app) {
+                app.inheritanced = checked;
+              }
+              setDataSource({...dataSource});
+            }
+          }}/>
       },
       hideInSearch: true
     },
@@ -111,7 +127,17 @@ const appList: React.FC = () => {
       title: '启用',
       dataIndex: 'enabled',
       render: (dom, entity) => {
-        return <Switch checked={entity.enabled} size="small" />
+        return <Switch checked={entity.enabled} size="small" onChange={
+          (checked)=>{ 
+            console.log('enabled switch changed .', checked); 
+            if (dataSource) {
+              const app = dataSource?.data?.find(x=>x.id === entity.id);
+              if (app) {
+                app.enabled = checked;
+              }
+              setDataSource({...dataSource});
+            }
+          }}/>
       },
       hideInSearch: true
     },
@@ -161,14 +187,18 @@ const appList: React.FC = () => {
         options={
           false
         }
+        search={{
+          labelWidth: 'auto',
+        }}
         rowKey="id"
         columns={columns}
-        request={(params, sorter, filter) => queryApps(params)}
+        request={(params, sorter, filter) => handleQuery(params)}
         toolBarRender={() => [
           <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { handleModalVisible(true) }}>
             新建
           </Button>
         ]}
+        //dataSource={dataSource}
       />
       <ModalForm
         formRef={addFormRef}
@@ -177,7 +207,7 @@ const appList: React.FC = () => {
         onVisibleChange={handleModalVisible}
         onFinish={
           async (value) => {
-            const success = await handleAdd(value);
+            const success = await handleAdd(value as AppListItem);
             if (success) {
               handleModalVisible(false);
               if (actionRef.current) {
@@ -242,7 +272,7 @@ const appList: React.FC = () => {
       {
         updateModalVisible &&
         <UpdateForm
-          value={{ ...currentRow }}
+          value={currentRow}
           setValue={setCurrentRow}
           updateModalVisible={updateModalVisible}
           onCancel={

@@ -1,8 +1,8 @@
 import request from '@/utils/request';
-import { AppListParams } from './data';
+import { AppListParams, AppListResult } from './data';
 
 export async function queryApps(params:AppListParams) {
-  return request('/app/search', {
+  return request<AppListResult>('/app/search', {
     params
   });
 }
