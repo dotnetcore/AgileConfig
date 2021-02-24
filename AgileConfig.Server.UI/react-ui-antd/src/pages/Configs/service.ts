@@ -4,4 +4,5 @@ export async function queryConfigs() {
   return request('/config/search', {
   });
 }
- 
+
+
