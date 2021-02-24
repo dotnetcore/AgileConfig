@@ -6,19 +6,19 @@ type DefaultSettings = Partial<ProSettings> & {
 
 const proSettings: DefaultSettings ={
   "navTheme": "light",
-  "primaryColor": "#13C2C2",
+  "primaryColor": "#1890ff",
   "layout": "mix",
   "contentWidth": "Fluid",
   "fixedHeader": false,
   "fixSiderbar": true,
-  "title": "Ant Design Pro",
+  "title": "AgileConfig",
   "pwa": false,
   "iconfontUrl": "",
   "menu": {
     "locale": true
   },
   "headerHeight": 48
-};
+}
 
 export type { DefaultSettings };
 
