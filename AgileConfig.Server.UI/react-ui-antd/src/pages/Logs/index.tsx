@@ -4,18 +4,29 @@ import React, { useState, useRef } from 'react';
 import { FormattedMessage } from 'umi';
 import { TableListItem } from '../TableList/data';
 import { queryLogs } from './service';
+import {queryApps} from '../Apps/service'
 
-const logs:React.FC = () => {
+const logs:React.FC = () =>  {
+  const getAppEnum = async () =>
+  {
+    const result = await queryApps({})
+    const en = {};
+    result.data.forEach((x:{id:string, name:string})=>{
+      en[x.id] = {
+        text: x.name
+      }
+    });
+
+    return en;
+  }
+  const appEnums = getAppEnum();
   const columns: ProColumns<TableListItem>[] = [
     {
       title: '应用',
       dataIndex: 'appId',
       valueType: 'select',
-      valueEnum: {
-        '': { text: '全部', status: '' },
-        test_app: {
-          text: '测试应用',
-        }
+      request: async ()=>{
+        return [{value:'test_app',id:'dfsdfs'}]
       },
     },
     {
@@ -66,9 +77,6 @@ const logs:React.FC = () => {
       }                                                                             
         rowKey="id"
         columns = {columns}
-        search={{
-          labelWidth: 120,
-        }}
         request = { (params, sorter, filter) => queryLogs({ ...params}) }
       />
     </PageContainer>

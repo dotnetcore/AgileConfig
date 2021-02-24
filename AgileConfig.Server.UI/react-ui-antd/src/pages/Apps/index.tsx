@@ -6,7 +6,7 @@ import { Button, FormInstance, message, Modal, Switch } from 'antd';
 import React, { useState, useRef } from 'react';
 import UpdateForm from './comps/updateForm';
 import { AppListItem } from './data';
-import { addApp, editApp, delApp, queryApps } from './service';
+import { addApp, editApp, delApp, queryApps, inheritancedApps } from './service';
 
 const { confirm } = Modal;
 const handleAdd = async (fields: AppListItem) => {
@@ -163,7 +163,7 @@ const appList: React.FC = () => {
         }
         rowKey="id"
         columns={columns}
-        request={(params, sorter, filter) => queryApps()}
+        request={(params, sorter, filter) => queryApps(params)}
         toolBarRender={() => [
           <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { handleModalVisible(true) }}>
             新建
@@ -226,12 +226,12 @@ const appList: React.FC = () => {
                   label="关联应用"
                   name="inheritancedApps"
                   mode="multiple"
-                  request={async () => [
-                    { label: 'app1', value: '1' },
-                    { label: 'app2', value: '2' },
-                    { label: 'app3', value: '3' },
-                    { label: 'app4', value: '4' },
-                  ]}
+                  request={async () => {
+                    const result = await inheritancedApps();
+                    return result.data.map( (x: { name: string, id: string })=> {
+                      return { lable:x.name, value:x.id};
+                    });
+                  }}
                 ></ProFormSelect> : null
             }
           }

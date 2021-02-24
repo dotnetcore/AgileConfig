@@ -24,3 +24,9 @@ export async function delNode(params:NodeItem) {
   });
 }
  
+export async function allClientReload(params:NodeItem) {
+  return request('/RemoteServerProxy/AllClients_Reload?address=' + params.address, {
+    method: 'POST',
+  });
+}
+ 

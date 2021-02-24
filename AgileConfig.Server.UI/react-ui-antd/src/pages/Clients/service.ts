@@ -5,3 +5,21 @@ export async function queryClients() {
   });
 }
  
+export async function reloadClientConfigs(address: string, clientId: string) {
+  return request('/RemoteServerProxy/Client_Reload', {
+    method: 'POST',
+    params:{
+      address,
+      clientId
+    }
+  });
+}
+export async function clientOffline(address: string, clientId: string) {
+  return request('/RemoteServerProxy/Client_Offline', {
+    method: 'POST',
+    params:{
+      address,
+      clientId
+    }
+  });
+}

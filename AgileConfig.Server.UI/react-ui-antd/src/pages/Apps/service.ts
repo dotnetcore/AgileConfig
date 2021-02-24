@@ -1,7 +1,9 @@
 import request from '@/utils/request';
+import { AppListParams } from './data';
 
-export async function queryApps() {
-  return request('/app/all', {
+export async function queryApps(params:AppListParams) {
+  return request('/app/search', {
+    params
   });
 }
  
@@ -28,5 +30,9 @@ export async function delApp(params:any) {
     data: {
       ...params
     }
+  });
+}
+export async function inheritancedApps() {
+  return request('/app/inheritanced', {
   });
 }

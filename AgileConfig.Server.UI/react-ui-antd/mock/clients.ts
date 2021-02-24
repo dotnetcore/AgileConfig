@@ -18,6 +18,20 @@ const getClients = (req: Request, resp: Response) => {
     });
 }
 
+const reloadClientConfig =  (req: Request, resp: Response) => {
+    resp.json({
+        success: true,
+    });
+}
+
+const clientOffline = (req: Request, resp: Response) => {
+    resp.json({
+        success: true,
+    });
+}
+
 export default {
     'GET /report/ServerNodeClients': getClients,
+    'POST /RemoteServerProxy/Client_Reload': reloadClientConfig,
+    'POST /RemoteServerProxy/Client_Offline': clientOffline
   };

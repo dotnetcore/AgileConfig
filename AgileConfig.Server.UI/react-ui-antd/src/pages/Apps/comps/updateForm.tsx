@@ -1,6 +1,7 @@
 import {  ModalForm, ProFormDependency, ProFormSelect, ProFormSwitch, ProFormText } from "@ant-design/pro-form";
 import React from 'react';
 import { AppListItem } from "../data";
+import { inheritancedApps } from "../service";
 export type UpdateFormProps = {
     onSubmit: (values: AppListItem) => Promise<void>;
     onCancel: () => void;
@@ -67,12 +68,12 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
                 tooltip="关联后可以读取公共应用的配置项"
                 name="inheritancedApps"
                     mode="multiple" 
-                    request={async () => [
-                      { label: 'app1', value: '1' },
-                      { label: 'app2', value: '2' },
-                      { label: 'app3', value: '3' },
-                      { label: 'app4', value: '4' },
-                    ]}
+                    request={async () => {
+                      const result = await inheritancedApps();
+                      return result.data.map( (x: { name: string, id: string })=> {
+                        return { lable:x.name, value:x.id};
+                      });
+                    }}
                 ></ProFormSelect> : null
         }
       }

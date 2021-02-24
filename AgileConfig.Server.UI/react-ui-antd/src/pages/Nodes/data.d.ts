@@ -1,5 +1,8 @@
 export type NodeItem = {
-    name: string,
-    remark: string
+    address: string,
+    remark?: string,
+    lastEchoTime?: Date,
+    status: number,
+    createTime?: Date
   };
   

@@ -1,11 +1,11 @@
 import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
 import { PageContainer } from '@ant-design/pro-layout';
-import ProTable, { ActionType, ProColumns, TableDropdown } from '@ant-design/pro-table';
+import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
 import { Button, FormInstance, message,Modal } from 'antd';
 import React, { useState, useRef } from 'react';
 import { NodeItem } from './data';
-import { queryNodes, addNode, delNode } from './service';
+import { queryNodes, addNode, delNode,allClientReload } from './service';
 
 const { confirm } = Modal;
 const handleAdd = async (fields: NodeItem) => {
@@ -23,6 +23,24 @@ const handleAdd = async (fields: NodeItem) => {
   } catch (error) {
     hide();
     message.error('添加失败请重试！');
+    return false;
+  }
+};
+const handleAllReload = async (fields: NodeItem) => {
+  const hide = message.loading('正在刷新');
+  try {
+    const result = await allClientReload({ ...fields });
+    hide();
+    const success = result.success;
+    if (success) {
+      message.success('刷新成功');
+    } else {
+      message.error(result.message);
+    }
+    return success;
+  } catch (error) {
+    hide();
+    message.error('刷新失败请重试！');
     return false;
   }
 };
@@ -50,7 +68,7 @@ const nodeList:React.FC = () => {
   const addFormRef = useRef<FormInstance>();
 
   const [createModalVisible, handleModalVisible] = useState<boolean>(false);
-  const columns: ProColumns[] = [
+  const columns: ProColumns<NodeItem>[] = [
     {
       title: '节点地址',
       dataIndex: 'address',
@@ -82,7 +100,11 @@ const nodeList:React.FC = () => {
       title: '操作',
       valueType: 'option',
       render: (text, record, _, action) => [
-        <a>
+        <a onClick={
+          ()=>{
+            handleAllReload(record)
+          }
+        }>
           刷新所有客户端的配置
         </a>,
         <Button  type="link" danger

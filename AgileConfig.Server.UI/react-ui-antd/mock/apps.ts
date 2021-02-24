@@ -16,14 +16,23 @@ const list = [
         id: "aa",
         inheritanced: true,
         inheritancedApps: ['2'],
-        name: "测试程序",
+        name: "公共程序1",
         secret: null,
         updateTime: "2021-02-03T16:55:48.0515423"
     }
 ];
 
-const getApps = (req: Request, resp: Response) => {
+const inheritancedApps = (req: Request, resp: Response) => {
+    resp.json({
+        current: 1,
+        pageSize: 20,
+        success: true,
+        total:30,
+        data: list.filter(x=>x.inheritanced)
+    });
+}
 
+const getApps = (req: Request, resp: Response) => {
     resp.json({
         current: 1,
         pageSize: 20,
@@ -69,8 +78,9 @@ const editApp = (req: Request, resp: Response) => {
     });
 }
 export default {
-    'GET /app/all': getApps,
+    'GET /app/search': getApps,
     'POST /app/add': addApp,
     'POST /app/delete': delApp,
     'POST /app/edit': editApp,
+    'GET /app/inheritanced': inheritancedApps
   };
