@@ -138,13 +138,20 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
         }
         return <Link to={menuItemProps.path}>{defaultDom}</Link>;
       }}
-      breadcrumbRender={(routers = []) => [
-        {
-          path: '/',
-          breadcrumbName: formatMessage({ id: 'menu.home' }),
-        },
-        ...routers,
-      ]}
+      breadcrumbRender={(routers = []) => {
+        const configRouter = routers.find(x=>x.path.indexOf('/app/config') >= 0);
+        if (configRouter) {
+          const name = configRouter.path.split('/')[4];
+          configRouter.breadcrumbName = name ;
+        }
+        return [
+          {
+            path: '/',
+            breadcrumbName: formatMessage({ id: 'menu.home' }),
+          },
+          ...routers,
+        ]
+      }}
       itemRender={(route, params, routes, paths) => {
         const first = routes.indexOf(route) === 0;
         return first ? (

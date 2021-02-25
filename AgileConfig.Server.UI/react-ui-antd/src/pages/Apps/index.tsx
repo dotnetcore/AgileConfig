@@ -4,6 +4,7 @@ import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
 import { Button, FormInstance, message, Modal, Switch } from 'antd';
 import React, { useState, useRef } from 'react';
+import {Link} from 'umi';
 import UpdateForm from './comps/updateForm';
 import { AppListItem, AppListParams, AppListResult } from './data';
 import { addApp, editApp, delApp, queryApps, inheritancedApps } from './service';
@@ -78,6 +79,18 @@ const appList: React.FC = () => {
     setDataSource(result);
     return result;
   }
+  const handleEnabledChange = (checked:boolean, entity:AppListItem) => {
+    console.log('enabled switch changed .', checked); 
+    const msg = (checked?'启用':'禁用') + '成功';
+    message.success(msg);
+    if (dataSource) {
+      const app = dataSource?.data?.find(x=>x.id === entity.id);
+      if (app) {
+        app.enabled = checked;
+      }
+      setDataSource({...dataSource});
+    }
+  }
   const columns: ProColumns<AppListItem>[] = [
     {
       title: '名称',
@@ -108,36 +121,27 @@ const appList: React.FC = () => {
     {
       title: '公共',
       dataIndex: 'inheritanced',
-      render: (dom, entity) => {
-        return <Switch checked={entity.inheritanced} size="small" onChange={
-          (checked)=>{ 
-            console.log('inheritanced switch changed .', checked); 
-            if (dataSource) {
-              const app = dataSource?.data?.find(x=>x.id === entity.id);
-              if (app) {
-                app.inheritanced = checked;
-              }
-              setDataSource({...dataSource});
-            }
-          }}/>
-      },
-      hideInSearch: true
+      hideInSearch: true,
+      valueEnum: {
+        false: {
+          text: '私有',
+          status: 'default'
+        },
+        true: {
+          text: '公共',
+          status: 'success'
+        }
+      }
     },
     {
       title: '启用',
       dataIndex: 'enabled',
       render: (dom, entity) => {
         return <Switch checked={entity.enabled} size="small" onChange={
-          (checked)=>{ 
-            console.log('enabled switch changed .', checked); 
-            if (dataSource) {
-              const app = dataSource?.data?.find(x=>x.id === entity.id);
-              if (app) {
-                app.enabled = checked;
-              }
-              setDataSource({...dataSource});
-            }
-          }}/>
+          (e)=>{
+            handleEnabledChange(e, entity);
+          }
+           }/>
       },
       hideInSearch: true
     },
@@ -156,6 +160,13 @@ const appList: React.FC = () => {
         >
           编辑
         </a>,
+        <Link 
+          to={
+            {
+              pathname:'/app/config/' + record.id + '/' + record.name,
+            }
+          }
+        >配置项</Link>,
         <Button type="link" danger
           onClick={() => {
             const msg = `是否确定删除应用【${record.name}】?`;
