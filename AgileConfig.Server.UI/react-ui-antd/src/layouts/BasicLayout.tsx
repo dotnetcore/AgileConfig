@@ -56,26 +56,20 @@ const menuDataRender = (menuList: MenuDataItem[]): MenuDataItem[] =>
 
 const defaultFooterDom = (
   <DefaultFooter
-    copyright={`${new Date().getFullYear()} 蚂蚁集团体验技术部出品`}
+    copyright={`${new Date().getFullYear()} Powered .netcore3.1 & ant design pro 4`}
     links={[
       {
-        key: 'Ant Design Pro',
-        title: 'Ant Design Pro',
-        href: 'https://pro.ant.design',
-        blankTarget: true,
-      },
-      {
-        key: 'github',
+        key: 'AgileConfig',
         title: <GithubOutlined />,
-        href: 'https://github.com/ant-design/ant-design-pro',
+        href: 'https://github.com/kklldog/AgileConfig',
         blankTarget: true,
       },
       {
-        key: 'Ant Design',
-        title: 'Ant Design',
-        href: 'https://ant.design',
+        key: 'AgileConfig',
+        title: 'AgileConfig',
+        href: 'https://github.com/kklldog/AgileConfig',
         blankTarget: true,
-      },
+      }
     ]}
   />
 );
@@ -160,7 +154,19 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
           <span>{route.breadcrumbName}</span>
         );
       }}
-      footerRender={() => defaultFooterDom}
+      footerRender={() => {
+        return (
+          <div style={{
+            display:'flex',
+            justifyContent: 'center',
+            marginBottom: '10px',
+            color: '#bfbfbf'
+          }}>
+            <a href="https://github.com/kklldog/AgileConfig" style={{color:'#bfbfbf'}}><GithubOutlined/> </a>
+            &nbsp; Powered by .netcore3.1 ant-design-pro4
+          </div>
+        )
+      }}
       menuDataRender={menuDataRender}
       rightContentRender={() => <RightContent />}
       postMenuData={(menuData) => {

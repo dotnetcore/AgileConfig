@@ -70,8 +70,8 @@ const appList: React.FC = () => {
   const actionRef = useRef<ActionType>();
   const addFormRef = useRef<FormInstance>();
  
-  const [createModalVisible, handleModalVisible] = useState<boolean>(false);
-  const [updateModalVisible, handleUpdateModalVisible] = useState<boolean>(false);
+  const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
+  const [updateModalVisible, setUpdateModalVisible] = useState<boolean>(false);
   const [currentRow, setCurrentRow] = useState<AppListItem>();
   const [dataSource, setDataSource] = useState<AppListResult>();
   const handleQuery = async (params: AppListParams) => {
@@ -150,9 +150,8 @@ const appList: React.FC = () => {
       valueType: 'option',
       render: (text, record, _, action) => [
         <a
-          key="editable"
           onClick={() => {
-            handleUpdateModalVisible(true);
+            setUpdateModalVisible(true);
             setCurrentRow(record);
             console.log('select app ', record);
             console.log('current app ', currentRow);
@@ -205,7 +204,7 @@ const appList: React.FC = () => {
         columns={columns}
         request={(params, sorter, filter) => handleQuery(params)}
         toolBarRender={() => [
-          <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { handleModalVisible(true) }}>
+          <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { setCreateModalVisible(true) }}>
             新建
           </Button>
         ]}
@@ -215,12 +214,12 @@ const appList: React.FC = () => {
         formRef={addFormRef}
         title="新建应用"
         visible={createModalVisible}
-        onVisibleChange={handleModalVisible}
+        onVisibleChange={setCreateModalVisible}
         onFinish={
           async (value) => {
             const success = await handleAdd(value as AppListItem);
             if (success) {
-              handleModalVisible(false);
+              setCreateModalVisible(false);
               if (actionRef.current) {
                 actionRef.current.reload();
               }
@@ -289,7 +288,7 @@ const appList: React.FC = () => {
           onCancel={
             () => {
               setCurrentRow(undefined);
-              handleUpdateModalVisible(false);
+              setUpdateModalVisible(false);
               console.log('set currentrow undefined');
             }
           }
@@ -298,14 +297,14 @@ const appList: React.FC = () => {
               setCurrentRow(undefined);
               const success = await handleEdit(value);
               if (success) {
-                handleUpdateModalVisible(false);
+                setUpdateModalVisible(false);
                 if (actionRef.current) {
                   actionRef.current.reload();
                 }
               }
               addFormRef.current?.resetFields();
             }
-          }></UpdateForm>
+          }/>
       }
     </PageContainer>
   );

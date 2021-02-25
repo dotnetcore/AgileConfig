@@ -1,5 +1,5 @@
 import request from '@/utils/request';
-import { AppListParams, AppListResult } from './data';
+import { AppListItem, AppListParams, AppListResult } from './data';
 
 export async function queryApps(params:AppListParams) {
   return request<AppListResult>('/app/search', {
@@ -8,7 +8,7 @@ export async function queryApps(params:AppListParams) {
 }
  
 
-export async function addApp(params:any) {
+export async function addApp(params:AppListItem) {
   return request('/app/add', {
     method: 'POST',
     data: {
@@ -16,7 +16,7 @@ export async function addApp(params:any) {
     }
   });
 }
-export async function editApp(params:any) {
+export async function editApp(params:AppListItem) {
   return request('/app/edit', {
     method: 'POST',
     data: {
@@ -24,7 +24,7 @@ export async function editApp(params:any) {
     }
   });
 }
-export async function delApp(params:any) {
+export async function delApp(params:AppListItem) {
   return request('/app/delete', {
     method: 'POST',
     data: {

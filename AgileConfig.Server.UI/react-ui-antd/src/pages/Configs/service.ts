@@ -23,3 +23,30 @@ export async function offlineConfig(config: ConfigListItem) {
     }
   });
 }
+
+export async function delConfig(config: ConfigListItem) {
+  return request('/config/delete', {
+    method: 'POST',
+    params: {
+      id: config.id
+    }
+  });
+}
+
+export async function addConfig(config: ConfigListItem) {
+  return request('/config/add', {
+    method: 'POST',
+    data: {
+      ...config
+    }
+  });
+}
+
+export async function editConfig(config: ConfigListItem) {
+  return request('/config/edit', {
+    method: 'POST',
+    data: {
+      ...config
+    }
+  });
+}

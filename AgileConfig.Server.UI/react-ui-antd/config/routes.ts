@@ -50,12 +50,6 @@
                 ],
               },
               {
-                name: 'list.table-list',
-                icon: 'AppstoreOutlined',
-                path: '/list',
-                component: './TableList',
-              },
-              {
                 name: 'list.node-list',
                 icon: 'Database',
                 path: '/node',

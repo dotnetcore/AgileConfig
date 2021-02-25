@@ -57,8 +57,45 @@ const online = (req: Request, resp: Response) => {
     });
 }
 
+const delConfig = (req: Request, resp: Response) => {
+    const id = req.query['id'];
+    const idx = list.findIndex(x=>x.id == id)
+    list.splice(idx,1);
+    resp.json({
+        success: true,
+    });
+}
+
+const addConfig = (req: Request, resp: Response) => {
+    const body = req.body;
+    body.id = 'sdfsdfsdf';
+    list.push(body);
+    resp.json({
+        success: true,
+    });
+}
+
+const editConfig = (req: Request, resp: Response) => {
+    const body = req.body;
+    console.log(body);
+    const config = list.find(x=> x.id === body.id);
+    if (config) {
+      config.group = body.group;
+      config.key = body.key;
+      config.value = body.value;
+      config.description = body.description;
+    }
+    resp.json({
+        message: "",
+        success: true
+    });
+}
+
 export default {
     'GET /config/search': getConfigs,
     'POST /config/offline': offline,
     'POST /config/publish': online,
+    'POST /config/delete': delConfig,
+    'POST /config/add': addConfig,
+    'POST /config/edit': editConfig
   };
