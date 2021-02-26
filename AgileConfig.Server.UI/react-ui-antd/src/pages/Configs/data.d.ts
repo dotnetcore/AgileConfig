@@ -10,3 +10,12 @@ export type ConfigListItem = {
     updateTime: Date
     value: string
 }
+
+export type ConfigModifyLog =  {
+  configId: string,
+  group: string,
+  id: string,
+  key: string,
+  modifyTime: Date,
+  value: string,
+}

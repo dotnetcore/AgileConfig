@@ -2,12 +2,14 @@ import { PlusOutlined } from '@ant-design/icons';
 import { ModalForm, ProFormSwitch, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
-import { Button, FormInstance, message, Modal } from 'antd';
+import { Button, Drawer, FormInstance, List, message, Modal, Tag } from 'antd';
 import React, { useState, useRef, useEffect } from 'react';
 import { queryApps } from '../Apps/service';
 import UpdateForm from './comps/updateForm';
-import { ConfigListItem } from './data';
-import { queryConfigs, onlineConfig, offlineConfig, delConfig, addConfig,editConfig } from './service';
+import { ConfigListItem, ConfigModifyLog } from './data';
+import { queryConfigs, onlineConfig, offlineConfig, delConfig, addConfig, editConfig, queryModifyLogs } from './service';
+import Text from 'antd/lib/typography/Text';
+import moment from 'moment';
 const { confirm } = Modal;
 
 const handleOnline = async (fields: ConfigListItem) => {
@@ -102,22 +104,22 @@ const handleEdit = async (config: ConfigListItem) => {
     return false;
   }
 };
-const configs:React.FC = (props:any) => {
+const configs: React.FC = (props: any) => {
   const appId = props.match.params.app_id;
   const appName = props.match.params.app_name;
   const [appEnums, setAppEnums] = useState<any>();
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [updateModalVisible, setUpdateModalVisible] = useState<boolean>(false);
+  const [modifyLogsModalVisible, setmodifyLogsModalVisible] = useState<boolean>(false);
   const [currentRow, setCurrentRow] = useState<ConfigListItem>();
   const [selectedRowsState, setSelectedRows] = useState<ConfigListItem[]>([]);
-
+  const [modifyLogs, setModifyLogs] = useState<ConfigModifyLog[]>([]);
   const actionRef = useRef<ActionType>();
   const addFormRef = useRef<FormInstance>();
-  const getAppEnums = async () =>
-  {
+  const getAppEnums = async () => {
     const result = await queryApps({})
     const obj = {};
-    result.data.forEach((x)=>{
+    result.data.forEach((x) => {
       obj[x.id] = {
         text: x.name
       }
@@ -125,16 +127,16 @@ const configs:React.FC = (props:any) => {
 
     return obj;
   }
-  useEffect(()=>{
-    getAppEnums().then(x=> {
+  useEffect(() => {
+    getAppEnums().then(x => {
       console.log('app enums ', x);
-      setAppEnums({...x});
+      setAppEnums({ ...x });
     });
   }, []);
   const online = (config: ConfigListItem) => {
     confirm({
-      content:`确定上线配置【${config.key}】？`,
-      onOk: ()=>{
+      content: `确定上线配置【${config.key}】？`,
+      onOk: () => {
         const result = handleOnline(config);
         if (result) {
           actionRef.current?.reload();
@@ -144,8 +146,8 @@ const configs:React.FC = (props:any) => {
   }
   const offline = (config: ConfigListItem) => {
     confirm({
-      content:`确定下线配置【${config.key}】？`,
-      onOk: ()=>{
+      content: `确定下线配置【${config.key}】？`,
+      onOk: () => {
         const result = handleOffline(config);
         if (result) {
           actionRef.current?.reload();
@@ -155,8 +157,8 @@ const configs:React.FC = (props:any) => {
   }
   const delConfig = (config: ConfigListItem) => {
     confirm({
-      content:`确定删除配置【${config.key}】？`,
-      onOk: ()=>{
+      content: `确定删除配置【${config.key}】？`,
+      onOk: () => {
         const result = handleDel(config);
         if (result) {
           actionRef.current?.reload();
@@ -201,11 +203,11 @@ const configs:React.FC = (props:any) => {
       hideInSearch: true,
       valueEnum: {
         0: {
-          text:'待上线',
+          text: '待上线',
           status: 'warning'
         },
         1: {
-          text:'已上线',
+          text: '已上线',
           status: 'Success'
         }
       }
@@ -214,18 +216,28 @@ const configs:React.FC = (props:any) => {
       title: '操作',
       valueType: 'option',
       render: (text, record, _, action) => [
-        record.onlineStatus? <a onClick={ ()=>{ offline(record)} }>下线</a>:<a onClick={ ()=>{ online(record)} }>上线</a>,
+        record.onlineStatus ? <a onClick={() => { offline(record) }}>下线</a> : <a onClick={() => { online(record) }}>上线</a>,
         <a
-        onClick={ ()=>{
-          setCurrentRow(record);
-          setUpdateModalVisible(true)
-        } }
+          onClick={() => {
+            setCurrentRow(record);
+            setUpdateModalVisible(true)
+          }}
         >
           编辑
         </a>,
-        <a>版本历史</a>,
+        <a
+          onClick={
+            async () => {
+              setmodifyLogsModalVisible(true)
+              const result = await queryModifyLogs(record)
+              if (result.success) {
+                setModifyLogs(result.data);
+              }
+            }
+          }
+        >版本历史</a>,
         <Button type="link" danger onClick={
-          ()=>{
+          () => {
             delConfig(record);
           }
         }>
@@ -236,27 +248,27 @@ const configs:React.FC = (props:any) => {
   ];
   return (
     <PageContainer>
-      <ProTable   
+      <ProTable
         headerTitle={appName}
-        actionRef={actionRef}  
+        actionRef={actionRef}
         rowKey="id"
         options={
           false
         }
-        columns = {columns}
+        columns={columns}
         search={{
           labelWidth: 'auto',
         }}
-        request = { (params, sorter, filter) => queryConfigs() }
+        request={(params, sorter, filter) => queryConfigs()}
         toolBarRender={() => [
-          <Button key="button" icon={<PlusOutlined />} type="primary" onClick={()=>{ setCreateModalVisible(true); }}>
+          <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { setCreateModalVisible(true); }}>
             新建
           </Button>,
           <Button key="button" type="primary" hidden={selectedRowsState.length == 0}>
-          上线
+            上线
         </Button>,
-         <Button key="button" type="primary" danger hidden={selectedRowsState.length == 0}>
-         下线
+          <Button key="button" type="primary" danger hidden={selectedRowsState.length == 0}>
+            下线
        </Button>,
           <Button key="button" type="primary">
             从json文件导入
@@ -334,7 +346,7 @@ const configs:React.FC = (props:any) => {
           name="value"
           fieldProps={
             {
-              autoSize:{
+              autoSize: {
                 minRows: 3, maxRows: 8
               }
             }
@@ -376,8 +388,39 @@ const configs:React.FC = (props:any) => {
               }
               addFormRef.current?.resetFields();
             }
-          }/>
+          } />
       }
+
+      <Drawer title="版本历史" visible={modifyLogsModalVisible} width="400" onClose={() => { setmodifyLogsModalVisible(false); setModifyLogs([]); }} >
+        <List
+          header={false}
+          itemLayout="horizontal"
+          dataSource={modifyLogs}
+          renderItem={(item, index) => (
+            <List.Item actions={index ? [<a>回滚</a>] : []} >
+              <List.Item.Meta
+                title={
+
+                  <div>
+                    <Text>{moment(item.modifyTime).format('YYYY-MM-DD HH:mm:ss')}</Text>
+                  &nbsp;
+                  {
+                      index ? null : <Tag color="blue">当前版本</Tag>
+                    }
+                  </div>
+                }
+                description={
+                  <div>
+                    <div>组：{item.group}</div>
+                    <div>键：{item.key}</div>
+                    <div>值：{item.value}</div>
+                  </div>
+                }
+              />
+            </List.Item>
+          )}
+        />
+      </Drawer>
     </PageContainer>
   );
 }

@@ -50,3 +50,12 @@ export async function editConfig(config: ConfigListItem) {
     }
   });
 }
+
+export async function queryModifyLogs(config: ConfigListItem) {
+  return request('/config/modifyLogs', {
+    method: 'GET',
+    params:{
+      configId: config.id
+    }
+  });
+}

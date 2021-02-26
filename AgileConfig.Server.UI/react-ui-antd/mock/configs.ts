@@ -91,11 +91,40 @@ const editConfig = (req: Request, resp: Response) => {
     });
 }
 
+const modifyLogs = (req: Request, resp: Response) => {
+  const list = [
+    {
+      configId: "0583520cd95f42c58a4ba3e3fb7dcb52",
+      group: "",
+      id: "8d1c8b76edf84dc6b147978a3065b27d",
+      key: "key",
+      modifyTime: "2021-02-22T17:16:52.9883836",
+      value: "155653",
+    },
+    {
+      configId: "0583520cd95f42c58a4ba3e3fb7dcb52",
+      group: "",
+      id: "8d1c8b76edf84dc6b147978a3065b27d",
+      key: "key",
+      modifyTime: "2021-02-22T17:16:52.9883836",
+      value: "155653",
+    }
+  ];
+  resp.json({
+    current: 1,
+    pageSize: 20,
+    success: true,
+    total:30,
+    data: list
+  });
+}
+
 export default {
     'GET /config/search': getConfigs,
     'POST /config/offline': offline,
     'POST /config/publish': online,
     'POST /config/delete': delConfig,
     'POST /config/add': addConfig,
-    'POST /config/edit': editConfig
+    'POST /config/edit': editConfig,
+    'GET /config/modifylogs': modifyLogs
   };

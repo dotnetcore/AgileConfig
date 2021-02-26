@@ -44,7 +44,6 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
           name="appName"
         />
         <ProFormText
-          initialValue={props.appId}
           rules={[
             {
             },
