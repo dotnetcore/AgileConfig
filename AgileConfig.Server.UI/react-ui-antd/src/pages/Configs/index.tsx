@@ -10,6 +10,8 @@ import { ConfigListItem, ConfigModifyLog } from './data';
 import { queryConfigs, onlineConfig, offlineConfig, delConfig, addConfig, editConfig, queryModifyLogs } from './service';
 import Text from 'antd/lib/typography/Text';
 import moment from 'moment';
+import styles from './index.less';
+
 const { confirm } = Modal;
 
 const handleOnline = async (fields: ConfigListItem) => {
@@ -247,9 +249,8 @@ const configs: React.FC = (props: any) => {
     },
   ];
   return (
-    <PageContainer>
+    <PageContainer header={{ title: appName }}>
       <ProTable
-        headerTitle={appName}
         actionRef={actionRef}
         rowKey="id"
         options={
@@ -393,16 +394,17 @@ const configs: React.FC = (props: any) => {
 
       <Drawer title="版本历史" visible={modifyLogsModalVisible} width="400" onClose={() => { setmodifyLogsModalVisible(false); setModifyLogs([]); }} >
         <List
+          className={styles.history}
           header={false}
           itemLayout="horizontal"
           dataSource={modifyLogs}
           renderItem={(item, index) => (
-            <List.Item actions={index ? [<a>回滚</a>] : []} >
+            <List.Item className={styles.listitem} actions={index ? [<a className={styles.rollback}>回滚</a>] : []} >
               <List.Item.Meta
                 title={
 
                   <div>
-                    <Text>{moment(item.modifyTime).format('YYYY-MM-DD HH:mm:ss')}</Text>
+                    <Text style={{marginRight:'20px'}}>{moment(item.modifyTime).format('YYYY-MM-DD HH:mm:ss')}</Text>
                   &nbsp;
                   {
                       index ? null : <Tag color="blue">当前版本</Tag>

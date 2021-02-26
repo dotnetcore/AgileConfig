@@ -3,7 +3,7 @@ import { PageContainer } from '@ant-design/pro-layout';
 
 const logs:React.FC = () =>  {
   return (
-    <PageContainer>
+    <PageContainer pageHeaderRender={false}>
       <div>home index</div>
     </PageContainer>
   );

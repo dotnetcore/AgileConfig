@@ -3,10 +3,11 @@
  *
  * @see You can view component api by: https://github.com/ant-design/ant-design-pro-layout
  */
-import type {
+import {
   MenuDataItem,
   BasicLayoutProps as ProLayoutProps,
   Settings,
+  PageContainer,
 } from '@ant-design/pro-layout';
 import ProLayout, { DefaultFooter } from '@ant-design/pro-layout';
 import React, { useEffect, useMemo, useRef } from 'react';
@@ -53,26 +54,6 @@ const menuDataRender = (menuList: MenuDataItem[]): MenuDataItem[] =>
     };
     return Authorized.check(item.authority, localItem, null) as MenuDataItem;
   });
-
-const defaultFooterDom = (
-  <DefaultFooter
-    copyright={`${new Date().getFullYear()} Powered .netcore3.1 & ant design pro 4`}
-    links={[
-      {
-        key: 'AgileConfig',
-        title: <GithubOutlined />,
-        href: 'https://github.com/kklldog/AgileConfig',
-        blankTarget: true,
-      },
-      {
-        key: 'AgileConfig',
-        title: 'AgileConfig',
-        href: 'https://github.com/kklldog/AgileConfig',
-        blankTarget: true,
-      }
-    ]}
-  />
-);
 
 const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
   const {
@@ -135,8 +116,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
       breadcrumbRender={(routers = []) => {
         const configRouter = routers.find(x=>x.path.indexOf('/app/config') >= 0);
         if (configRouter) {
-          const name = configRouter.path.split('/')[4];
-          configRouter.breadcrumbName = name ;
+          configRouter.breadcrumbName = '配置项' ;
           return [
             ...routers,
           ]
@@ -146,10 +126,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
         }
       }}
       itemRender={(route, params, routes, paths) => {
-        const first = routes.indexOf(route) === 0;
-        return first ? (
-          <Link to={paths.join('/')}>{route.breadcrumbName}</Link>
-        ) : (
+        return  (
           <span>{route.breadcrumbName}</span>
         );
       }}
