@@ -25,29 +25,13 @@
             routes: [
               {
                 path: '/',
-                redirect: '/welcome',
+                redirect: '/home'
               },
               {
-                path: '/welcome',
-                name: 'welcome',
-                icon: 'DashboardOutlined',
-                component: './Welcome',
-              },
-              {
-                path: '/admin',
-                name: 'admin',
-                icon: 'crown',
-                component: './Admin',
-                authority: ['admin'],
-                routes: [
-                  {
-                    path: '/admin/sub-page',
-                    name: 'sub-page',
-                    icon: 'smile',
-                    component: './Welcome',
-                    authority: ['admin'],
-                  },
-                ],
+                name: 'home',
+                icon: 'Dashboard',
+                path: '/home',
+                component: './home',
               },
               {
                 name: 'list.node-list',

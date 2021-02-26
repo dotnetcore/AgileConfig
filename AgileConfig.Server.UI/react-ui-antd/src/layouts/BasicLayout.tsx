@@ -137,14 +137,13 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
         if (configRouter) {
           const name = configRouter.path.split('/')[4];
           configRouter.breadcrumbName = name ;
+          return [
+            ...routers,
+          ]
         }
-        return [
-          {
-            path: '/',
-            breadcrumbName: formatMessage({ id: 'menu.home' }),
-          },
-          ...routers,
-        ]
+        else {
+          return [];
+        }
       }}
       itemRender={(route, params, routes, paths) => {
         const first = routes.indexOf(route) === 0;
