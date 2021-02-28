@@ -1,5 +1,5 @@
 import request from '@/utils/request';
-import { ConfigListItem } from './data';
+import { ConfigListItem, ConfigModifyLog } from './data';
 
 export async function queryConfigs() {
   return request('/config/search', {
@@ -56,6 +56,15 @@ export async function queryModifyLogs(config: ConfigListItem) {
     method: 'GET',
     params:{
       configId: config.id
+    }
+  });
+}
+export async function rollback(config: ConfigModifyLog) {
+  return request('/config/rollback', {
+    method: 'POST',
+    params:{
+      configId: config.configId,
+      logId: config.id
     }
   });
 }

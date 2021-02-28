@@ -119,6 +119,16 @@ const modifyLogs = (req: Request, resp: Response) => {
   });
 }
 
+const rollback = (req: Request, resp: Response) => {
+  const body = req.body;
+  console.log(body);
+  resp.json({
+      message: "",
+      success: true
+  });
+}
+
+
 export default {
     'GET /config/search': getConfigs,
     'POST /config/offline': offline,
@@ -126,5 +136,6 @@ export default {
     'POST /config/delete': delConfig,
     'POST /config/add': addConfig,
     'POST /config/edit': editConfig,
-    'GET /config/modifylogs': modifyLogs
+    'GET /config/modifylogs': modifyLogs,
+    'POST /config/rollback': rollback
   };

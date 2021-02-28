@@ -7,7 +7,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { queryApps } from '../Apps/service';
 import UpdateForm from './comps/updateForm';
 import { ConfigListItem, ConfigModifyLog } from './data';
-import { queryConfigs, onlineConfig, offlineConfig, delConfig, addConfig, editConfig, queryModifyLogs } from './service';
+import { queryConfigs, onlineConfig, offlineConfig, delConfig, addConfig, editConfig, queryModifyLogs,rollback } from './service';
 import Text from 'antd/lib/typography/Text';
 import moment from 'moment';
 import styles from './index.less';
@@ -106,6 +106,24 @@ const handleEdit = async (config: ConfigListItem) => {
     return false;
   }
 };
+const handleRollback = async (config: ConfigModifyLog) => {
+  const hide = message.loading('正在回滚');
+  try {
+    const result = await rollback({ ...config });
+    hide();
+    const success = result.success;
+    if (success) {
+      message.success('回滚成功');
+    } else {
+      message.error(result.message);
+    }
+    return success;
+  } catch (error) {
+    hide();
+    message.error('回滚失败请重试！');
+    return false;
+  }
+};
 const configs: React.FC = (props: any) => {
   const appId = props.match.params.app_id;
   const appName = props.match.params.app_name;
@@ -163,6 +181,18 @@ const configs: React.FC = (props: any) => {
       onOk: () => {
         const result = handleDel(config);
         if (result) {
+          actionRef.current?.reload();
+        }
+      }
+    });
+  }
+  const rollback = (config: ConfigModifyLog) => {
+    confirm({
+      content: `确定回滚至版本【${moment(config.modifyTime).format('YYYY-MM-DD HH:mm:ss')}】？`,
+      onOk: () => {
+        const result = handleRollback(config);
+        if (result) {
+          setmodifyLogsModalVisible(false);
           actionRef.current?.reload();
         }
       }
@@ -399,7 +429,7 @@ const configs: React.FC = (props: any) => {
           itemLayout="horizontal"
           dataSource={modifyLogs}
           renderItem={(item, index) => (
-            <List.Item className={styles.listitem} actions={index ? [<a className={styles.rollback}>回滚</a>] : []} >
+            <List.Item className={styles.listitem} actions={index ? [<a className={styles.rollback} onClick={ ()=>{rollback(item)} }>回滚</a>] : []} >
               <List.Item.Meta
                 title={
 
