@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -98,6 +99,48 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             ViewBag.ErrorMessage = "登录失败：密码不正确";
             return View();
+        }
+
+        [HttpPost("admin/jwt/login")]
+        public async Task<IActionResult> Login4AntdPro([FromBody] LoginVM model)
+        {
+            string password = model.password;
+            if (string.IsNullOrEmpty(password))
+            {
+                return Json(new
+                {
+                    status = "error",
+                    message = "密码不能为空"
+                });
+            }
+
+            var result = await _settingService.ValidateAdminPassword(password);
+            if (result)
+            {
+
+                var jwt = JWT.GetToken();
+
+                //addlog
+                await _sysLogService.AddSysLogAsync(new Data.Entity.SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = Data.Entity.SysLogType.Normal,
+                    LogText = $"管理员登录成功"
+                });
+
+                return Json(new { 
+                    status="ok",
+                    token=jwt,
+                    type= "Bearer",
+                    currentAuthority = "admin"
+                });
+            }
+
+            return Json(new
+            {
+                status = "error",
+                message = "密码错误"
+            });
         }
 
         /// <summary>
