@@ -59,18 +59,18 @@ const Model: LoginModelType = {
           }
         }
         history.replace(redirect || '/');
+      } else {
+        message.error('用户名或密码错误 😢😢😢 ');
       }
     },
 
     logout() {
+      setToken('');
       const { redirect } = getPageQuery();
       // Note: There may be security issues, please note
       if (window.location.pathname !== '/user/login' && !redirect) {
         history.replace({
           pathname: '/user/login',
-          search: stringify({
-            redirect: window.location.href,
-          }),
         });
       }
     },
@@ -79,7 +79,7 @@ const Model: LoginModelType = {
   reducers: {
     changeLoginStatus(state, { payload }) {
       setAuthority(payload.currentAuthority);
-      setToken(payload.token)
+      setToken(payload.token);
       return {
         ...state,
         status: payload.status,

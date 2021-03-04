@@ -36,7 +36,7 @@ export function setToken(token:string): void {
 }
 
 export function getToken(): string {
-  var tk = localStorage.getItem('token');
+  const tk = localStorage.getItem('token');
   if (tk) {
     return tk as string;
   }

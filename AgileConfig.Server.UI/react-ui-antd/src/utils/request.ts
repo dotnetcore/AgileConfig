@@ -1,7 +1,9 @@
 /** Request 网络请求工具 更详细的 api 文档: https://github.com/umijs/umi-request */
-import { extend } from 'umi-request';
+import { extend, RequestOptionsInit } from 'umi-request';
 import { notification } from 'antd';
 import { getToken } from './authority';
+import { history } from 'umi';
+import { stringify } from 'querystring';
 
 const codeMessage = {
   200: '服务器成功返回请求的数据。',
@@ -28,10 +30,21 @@ const errorHandler = (error: { response: Response }): Response => {
     const errorText = codeMessage[response.status] || response.statusText;
     const { status, url } = response;
 
-    notification.error({
-      message: `请求错误 ${status}: ${url}`,
-      description: errorText,
-    });
+    if (status === 401 || status === 403) {
+      if (window.location.pathname !== '/user/login') {
+        history.replace({
+          pathname: '/user/login',
+          search: stringify({
+            redirect: window.location.href,
+          }),
+        });
+      }
+    }else {
+      notification.error({
+        message: `请求错误 ${status}: ${url}`,
+        description: errorText,
+      });
+    }
   } else if (!response) {
     notification.error({
       description: '您的网络发生异常，无法连接服务器',
@@ -41,14 +54,21 @@ const errorHandler = (error: { response: Response }): Response => {
   return response;
 };
 
+const authHeaderInterceptor = (url: string, options: RequestOptionsInit) => {
+  const authHeader = { Authorization: 'Bearer ' + getToken() };
+  return {
+    url: `${url}`,
+    options: { ...options, interceptors: true, headers: authHeader },
+  };
+};
+
 /** 配置request请求时的默认参数 */
 const request = extend({
   prefix: 'http://localhost:5000',
   errorHandler, // 默认错误处理
   credentials: 'same-origin', // 默认请求是否带上cookie,
-  headers: {
-    Authorization: 'Bearer '+getToken(),
-  },
 });
+
+request.interceptors.request.use(authHeaderInterceptor);
 
 export default request;
