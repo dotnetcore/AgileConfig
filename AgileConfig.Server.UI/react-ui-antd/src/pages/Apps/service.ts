@@ -27,12 +27,15 @@ export async function editApp(params:AppListItem) {
 export async function delApp(params:AppListItem) {
   return request('/app/delete', {
     method: 'POST',
-    data: {
-      ...params
+    params: {
+      id: params.id
     }
   });
 }
-export async function inheritancedApps() {
-  return request('/app/inheritanced', {
+export async function inheritancedApps(currentAppId: string) {
+  return request('/app/InheritancedApps', {
+    params: {
+      currentAppId: currentAppId
+    }
   });
 }

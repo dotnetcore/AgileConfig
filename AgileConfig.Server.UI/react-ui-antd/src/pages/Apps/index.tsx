@@ -254,7 +254,7 @@ const appList: React.FC = () => {
           label="密钥"
           name="secret"
         />
-        <ProFormSwitch tooltip="公共应用可以被其他应用关联" label="公共应用" name="inheritanced"></ProFormSwitch>
+        <ProFormSwitch tooltip="公共应用可以被其他应用关联" label="公共应用" name="inheritanced" checkedChildren={true} unCheckedChildren={false}></ProFormSwitch>
         <ProFormDependency name={
           ["inheritanced"]
         }>
@@ -265,18 +265,19 @@ const appList: React.FC = () => {
                   tooltip="关联后可以读取公共应用的配置项"
                   label="关联应用"
                   name="inheritancedApps"
-                  mode="multiple"
+                  mode="multiple" 
                   request={async () => {
-                    const result = await inheritancedApps();
+                    const result = await inheritancedApps('');
                     return result.data.map( (x: { name: string, id: string })=> {
-                      return { lable:x.name, value:x.id};
+                      console.log(x);
+                      return { lable:(x.name + x.id), value:x.id};
                     });
                   }}
                 ></ProFormSelect> : null
             }
           }
         </ProFormDependency>
-        <ProFormSwitch label="启用" name="enabled" initialValue="true">
+        <ProFormSwitch label="启用" name="enabled" initialValue={true} checkedChildren={true} unCheckedChildren={false}>
         </ProFormSwitch>
       </ModalForm>
       {

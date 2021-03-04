@@ -61,9 +61,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                     appVM.Secret,
                     appVM.Inheritanced,
                     appVM.Enabled,
-                    inheritancedApps = appVM.inheritancedApps.Select(x =>new { 
-                        x.Id
-                    })
+                    appVM.inheritancedApps
                 }) ;
             }
 

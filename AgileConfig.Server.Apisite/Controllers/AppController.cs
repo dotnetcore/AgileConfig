@@ -24,6 +24,57 @@ namespace AgileConfig.Server.Apisite.Controllers
             _sysLogService = sysLogService;
         }
 
+        public async Task<IActionResult> Search(string name, string id, int current = 1, int pageSize = 20)
+        {
+            if (current < 1)
+            {
+                throw new ArgumentException("current cant less then 1 .");
+            }
+            if (pageSize < 1)
+            {
+                throw new ArgumentException("pageSize cant less then 1 .");
+            }
+
+            var all = await _appService.GetAllAppsAsync();
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                all = all.Where(x => x.Name.Contains(name)).ToList();
+            }
+            if (!string.IsNullOrWhiteSpace(id))
+            {
+                all = all.Where(x => x.Id.Contains(id)).ToList();
+            }
+
+            var count = all.Count;
+            var pageList = all.OrderBy(x => x.CreateTime).ToList().Skip((current - 1) * pageSize).Take(pageSize);
+            var vms = new List<AppListVM>();
+            foreach (var item in pageList)
+            {
+                vms.Add(new AppListVM
+                {
+                    Id = item.Id,
+                    Name = item.Name,
+                    Secret = item.Secret,
+                    Inheritanced = item.Type == AppType.Inheritance,
+                    Enabled = item.Enabled,
+                    UpdateTime = item.UpdateTime,
+                    CreateTime = item.CreateTime,
+                    inheritancedApps = item.Type == AppType.Inheritance ? 
+                                                                            new List<string>() : 
+                                                                            (await _appService.GetInheritancedAppsAsync(item.Id)).Select(ia => ia.Id).ToList()
+                });
+            }
+
+            return Json(new
+            {
+                current,
+                pageSize,
+                success = true,
+                total = count,
+                data = vms
+            });
+        }
+
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] AppVM model)
         {
@@ -56,14 +107,15 @@ namespace AgileConfig.Server.Apisite.Controllers
             if (!model.Inheritanced && model.inheritancedApps != null)
             {
                 var sort = 0;
-                model.inheritancedApps.ForEach(a=> {
+                model.inheritancedApps.ForEach(appId =>
+                {
                     inheritanceApps.Add(new AppInheritanced
                     {
                         Id = Guid.NewGuid().ToString("N"),
                         AppId = app.Id,
-                        InheritancedAppId = a.Id,
+                        InheritancedAppId = appId,
                         Sort = sort++
-                    }) ;
+                    });
                 });
             }
 
@@ -114,12 +166,13 @@ namespace AgileConfig.Server.Apisite.Controllers
             if (!model.Inheritanced && model.inheritancedApps != null)
             {
                 var sort = 0;
-                model.inheritancedApps.ForEach(a => {
+                model.inheritancedApps.ForEach(appId =>
+                {
                     inheritanceApps.Add(new AppInheritanced
                     {
                         Id = Guid.NewGuid().ToString("N"),
                         AppId = app.Id,
-                        InheritancedAppId = a.Id,
+                        InheritancedAppId = appId,
                         Sort = sort++
                     });
                 });
@@ -146,18 +199,23 @@ namespace AgileConfig.Server.Apisite.Controllers
         public async Task<IActionResult> All()
         {
             var apps = await _appService.GetAllAppsAsync();
-            var vms = apps.Select(x => {
-                return new AppListVM
+            var vms = new List<AppListVM>();
+            foreach (var item in apps)
+            {
+                vms.Add(new AppListVM
                 {
-                    Id = x.Id,
-                    Name = x.Name,
-                    Secret = x.Secret,
-                    Inheritanced = x.Type == AppType.Inheritance,
-                    Enabled = x.Enabled,
-                    UpdateTime = x.UpdateTime,
-                    CreateTime = x.CreateTime
-                };
-            });
+                    Id = item.Id,
+                    Name = item.Name,
+                    Secret = item.Secret,
+                    Inheritanced = item.Type == AppType.Inheritance,
+                    Enabled = item.Enabled,
+                    UpdateTime = item.UpdateTime,
+                    CreateTime = item.CreateTime,
+                    inheritancedApps = item.Type == AppType.Inheritance ?
+                                                                            new List<string>() :
+                                                                            (await _appService.GetInheritancedAppsAsync(item.Id)).Select(ia => ia.Id).ToList()
+                });
+            }
 
             return Json(new
             {
@@ -182,7 +240,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             vm.Inheritanced = app.Type == AppType.Inheritance;
             vm.Enabled = app.Enabled;
 
-            vm.inheritancedApps = await _appService.GetInheritancedAppsAsync(id);
+            vm.inheritancedApps = (await _appService.GetInheritancedAppsAsync(id)).Select(x => x.Id).ToList();
 
             return Json(new
             {
@@ -281,14 +339,15 @@ namespace AgileConfig.Server.Apisite.Controllers
         public async Task<IActionResult> InheritancedApps(string currentAppId)
         {
             var apps = await _appService.GetAllInheritancedAppsAsync();
-            apps = apps.Where(a=>a.Enabled).ToList();
-            var self = apps.FirstOrDefault(a=>a.Id == currentAppId);
+            apps = apps.Where(a => a.Enabled).ToList();
+            var self = apps.FirstOrDefault(a => a.Id == currentAppId);
             if (self != null)
             {
                 //过滤本身
                 apps.Remove(self);
             }
-            var vms = apps.Select(x => {
+            var vms = apps.Select(x =>
+            {
                 return new
                 {
                     Id = x.Id,

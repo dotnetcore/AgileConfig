@@ -7,6 +7,7 @@ import React from 'react';
 import type { ConnectState } from '@/models/connect';
 import logo from '../assets/logo.svg';
 import styles from './UserLayout.less';
+import LayoutFooter from './compos/layoutFooter';
 
 export type UserLayoutProps = {
   breadcrumbNameMap: Record<string, MenuDataItem>;
@@ -60,7 +61,7 @@ const UserLayout: React.FC<UserLayoutProps> = (props) => {
           </div>
           {children}
         </div>
-        <DefaultFooter />
+        <LayoutFooter />
       </div>
     </HelmetProvider>
   );

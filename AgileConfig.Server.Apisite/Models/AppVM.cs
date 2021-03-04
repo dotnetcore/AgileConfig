@@ -20,7 +20,7 @@ namespace AgileConfig.Server.Apisite.Models
         public bool Enabled { get; set; }
         public bool Inheritanced { get; set; }
 
-        public List<App> inheritancedApps { get; set; }
+        public List<string> inheritancedApps { get; set; }
     }
 
     public class AppListVM : AppVM

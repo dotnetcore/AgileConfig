@@ -55,6 +55,7 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
       tooltip="公共应用可以被其他应用关联"
       label="公共应用" 
       name="inheritanced"
+      checkedChildren={true} unCheckedChildren={false}
       >
     </ProFormSwitch>
     <ProFormDependency name={
@@ -69,7 +70,7 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
                 name="inheritancedApps"
                     mode="multiple" 
                     request={async () => {
-                      const result = await inheritancedApps();
+                      const result = await inheritancedApps(props.value? props.value.id: '');
                       return result.data.map( (x: { name: string, id: string })=> {
                         return { lable:x.name, value:x.id};
                       });
@@ -79,8 +80,7 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
       }
     </ProFormDependency>
    
-    <ProFormSwitch label="启用" name="enabled" 
-    ></ProFormSwitch>
+    <ProFormSwitch label="启用" name="enabled" checkedChildren={true} unCheckedChildren={false}></ProFormSwitch>
     </ModalForm>
     );
 }

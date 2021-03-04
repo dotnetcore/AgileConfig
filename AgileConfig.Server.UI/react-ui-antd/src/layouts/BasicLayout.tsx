@@ -20,6 +20,7 @@ import RightContent from '@/components/GlobalHeader/RightContent';
 import type { ConnectState } from '@/models/connect';
 import { getMatchMenu } from '@umijs/route-utils';
 import logo from '../assets/logo.svg';
+import LayoutFooter from './compos/layoutFooter';
 
 const noMatch = (
   <Result
@@ -132,15 +133,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
       }}
       footerRender={() => {
         return (
-          <div style={{
-            display:'flex',
-            justifyContent: 'center',
-            marginBottom: '10px',
-            color: '#bfbfbf'
-          }}>
-            <a href="https://github.com/kklldog/AgileConfig" style={{color:'#bfbfbf'}}><GithubOutlined/> </a>
-            &nbsp; Powered by .netcore3.1 ant-design-pro4
-          </div>
+           <LayoutFooter></LayoutFooter>
         )
       }}
       menuDataRender={menuDataRender}
