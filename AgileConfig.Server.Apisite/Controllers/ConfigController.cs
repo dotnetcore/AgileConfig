@@ -343,22 +343,26 @@ namespace AgileConfig.Server.Apisite.Controllers
         /// <param name="pageIndex"></param>
         /// <returns></returns>
         [HttpGet]
-        public async Task<IActionResult> Search(string appId, string group, string key, int pageSize, int pageIndex)
+        public async Task<IActionResult> Search(string appId, string group, string key, OnlineStatus? onlineStatus, int pageSize = 20, int current = 1)
         {
-            if (pageSize == 0)
+            if (pageSize <= 0)
             {
-                throw new ArgumentException("pageSize can not be 0 .");
+                throw new ArgumentException("pageSize can not less then 1 .");
             }
-            if (pageIndex == 0)
+            if (current <= 0)
             {
-                throw new ArgumentException("pageIndex can not be 0 .");
+                throw new ArgumentException("pageIndex can not less then 1 .");
             }
 
             var configs = await _configService.Search(appId, group, key);
             configs = configs.Where(c => c.Status == ConfigStatus.Enabled).ToList();
+            if (onlineStatus.HasValue)
+            {
+                configs = configs.Where(c => c.OnlineStatus == onlineStatus).ToList();
+            }
             configs = configs.OrderBy(c => c.AppId).ThenBy(c => c.Group).ThenBy(c => c.Key).ToList();
 
-            var page = configs.Skip((pageIndex - 1) * pageSize).Take(pageSize);
+            var page = configs.Skip((current - 1) * pageSize).Take(pageSize);
             var total = configs.Count();
             var totalPages = total / pageSize;
             if ((total % pageSize) > 0)
@@ -368,9 +372,11 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             return Json(new
             {
+                current,
+                pageSize,
                 success = true,
-                data = page,
-                totalPages
+                total = total,
+                data = page
             });
         }
 

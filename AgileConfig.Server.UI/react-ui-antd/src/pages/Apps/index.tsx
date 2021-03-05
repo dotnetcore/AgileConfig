@@ -7,7 +7,7 @@ import React, { useState, useRef } from 'react';
 import {Link} from 'umi';
 import UpdateForm from './comps/updateForm';
 import { AppListItem, AppListParams, AppListResult } from './data';
-import { addApp, editApp, delApp, queryApps, inheritancedApps } from './service';
+import { addApp, editApp, delApp, queryApps, inheritancedApps,enableOrdisableApp } from './service';
 
 const { confirm } = Modal;
 
@@ -79,16 +79,21 @@ const appList: React.FC = () => {
     setDataSource(result);
     return result;
   }
-  const handleEnabledChange = (checked:boolean, entity:AppListItem) => {
-    console.log('enabled switch changed .', checked); 
-    const msg = (checked?'启用':'禁用') + '成功';
-    message.success(msg);
-    if (dataSource) {
-      const app = dataSource?.data?.find(x=>x.id === entity.id);
-      if (app) {
-        app.enabled = checked;
+  const handleEnabledChange =async (checked:boolean, entity:AppListItem) => {
+    const result = await enableOrdisableApp(entity.id);
+    if (result.success) {
+      const msg = (checked?'启用':'禁用') + '成功';
+      message.success(msg);
+      if (dataSource) {
+        const app = dataSource?.data?.find(x=>x.id === entity.id);
+        if (app) {
+          app.enabled = checked;
+        }
+        setDataSource({...dataSource});
       }
-      setDataSource({...dataSource});
+    }
+    else{
+      message.error((checked?'启用':'禁用') + '失败')
     }
   }
   const columns: ProColumns<AppListItem>[] = [

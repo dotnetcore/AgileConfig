@@ -39,3 +39,12 @@ export async function inheritancedApps(currentAppId: string) {
     }
   });
 }
+
+export async function enableOrdisableApp(appId:string) {
+  return request('/app/DisableOrEanble', {
+    method: 'POST',
+    params: {
+      id: appId
+    }
+  });
+}

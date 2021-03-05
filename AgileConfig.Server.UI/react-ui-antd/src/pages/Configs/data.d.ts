@@ -19,3 +19,10 @@ export type ConfigModifyLog =  {
   modifyTime: Date,
   value: string,
 }
+
+export type ConfigListParams = {
+  group?: string;
+  key?: string;
+  pageSize?: number;
+  current?: number;
+};

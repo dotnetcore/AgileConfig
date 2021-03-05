@@ -1,8 +1,13 @@
 import request from '@/utils/request';
-import { ConfigListItem, ConfigModifyLog } from './data';
+import { ConfigListItem, ConfigListParams, ConfigModifyLog } from './data';
 
-export async function queryConfigs() {
+export async function queryConfigs(appId:string, params: ConfigListParams) {
   return request('/config/search', {
+    params:
+      {
+        appId,
+        ...params
+      }
   });
 }
 

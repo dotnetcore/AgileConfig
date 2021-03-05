@@ -211,6 +211,7 @@ const configs: React.FC = (props: any) => {
     {
       title: '值',
       dataIndex: 'value',
+      hideInSearch: true,
     },
     {
       title: '描述',
@@ -232,7 +233,6 @@ const configs: React.FC = (props: any) => {
     {
       title: '状态',
       dataIndex: 'onlineStatus',
-      hideInSearch: true,
       valueEnum: {
         0: {
           text: '待上线',
@@ -290,7 +290,7 @@ const configs: React.FC = (props: any) => {
         search={{
           labelWidth: 'auto',
         }}
-        request={(params, sorter, filter) => queryConfigs()}
+        request={(params, sorter, filter) => queryConfigs(appId,params)}
         toolBarRender={() => [
           <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { setCreateModalVisible(true); }}>
             新建
