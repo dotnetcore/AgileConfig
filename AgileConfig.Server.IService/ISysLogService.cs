@@ -12,9 +12,9 @@ namespace AgileConfig.Server.IService
         Task<bool> AddRangeAsync(List<SysLog> logs);
 
 
-        Task<List<SysLog>> SearchPage(string appId, DateTime startTime, DateTime endTime, int pageSize, int pageIndex);
+        Task<List<SysLog>> SearchPage(string appId, SysLogType? logType,DateTime? startTime, DateTime? endTime, int pageSize, int pageIndex);
 
-        Task<long> Count(string appId, DateTime startTime, DateTime endTime);
+        Task<long> Count(string appId, SysLogType? logType, DateTime? startTime, DateTime? endTime);
 
     }
 }

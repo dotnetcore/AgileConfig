@@ -33,31 +33,50 @@ namespace AgileConfig.Server.Service
             return x > 0;
         }
 
-        public async Task<long> Count(string appId, DateTime startTime, DateTime endTime)
+        public async Task<long> Count(string appId, SysLogType? logType, DateTime? startTime, DateTime? endTime)
         {
             var query = _dbContext.SysLogs.Where(s => 1 == 1);
             if (!string.IsNullOrEmpty(appId))
             {
                 query = query.Where(x => x.AppId == appId);
             }
-            query = query.Where(x => x.LogTime >= startTime);
-            query = query.Where(x => x.LogTime < endTime);
-
+            if (startTime.HasValue)
+            {
+                query = query.Where(x => x.LogTime >= startTime);
+            }
+            if (endTime.HasValue)
+            {
+                query = query.Where(x => x.LogTime < endTime);
+            }
+            if (logType.HasValue)
+            {
+                query = query.Where(x => x.LogType == logType);
+            }
 
             var count = await query.CountAsync();
 
             return count;
         }
 
-        public Task<List<SysLog>> SearchPage(string appId, DateTime startTime, DateTime endTime, int pageSize, int pageIndex)
+        public Task<List<SysLog>> SearchPage(string appId, SysLogType? logType, DateTime? startTime, DateTime? endTime, int pageSize, int pageIndex)
         {
             var query = _dbContext.SysLogs.Where(s => 1 == 1);
             if (!string.IsNullOrEmpty(appId))
             {
                 query = query.Where(x => x.AppId == appId);
             }
-            query = query.Where(x => x.LogTime >= startTime);
-            query = query.Where(x => x.LogTime < endTime);
+            if (startTime.HasValue)
+            {
+                query = query.Where(x => x.LogTime >= startTime);
+            }
+            if (endTime.HasValue)
+            {
+                query = query.Where(x => x.LogTime < endTime);
+            }
+            if (logType.HasValue)
+            {
+                query = query.Where(x => x.LogType == logType);
+            }
 
             query = query.OrderByDescending(x => x.Id).Skip((pageIndex - 1) * pageSize).Take(pageSize);
 

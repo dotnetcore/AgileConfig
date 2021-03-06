@@ -20,19 +20,6 @@ const logs:React.FC = () =>  {
 
     return obj;
   }
-  const getAppsForSelect = async () =>
-  {
-    const result = await queryApps({})
-    const arr:any[] = [];
-    result.data.forEach((x)=>{
-       arr.push({
-         value: x.id,
-         label: x.name
-       });
-    });
-
-    return arr;
-  }
   useEffect(()=>{
     getAppEnums().then(x=> {
       console.log('app enums ', x);
@@ -40,7 +27,7 @@ const logs:React.FC = () =>  {
     });
   }, []);
  
-  const columns: ProColumns<TableListItem>[] = [
+  const columns: ProColumns[] = [
     {
       title: '应用',
       dataIndex: 'appId',
@@ -52,7 +39,6 @@ const logs:React.FC = () =>  {
       dataIndex: 'logType',
       valueType: 'select',
       valueEnum: {
-        '': { text: '全部', status: '' },
         0: {
           text: '普通',
         },
@@ -83,7 +69,7 @@ const logs:React.FC = () =>  {
     },
     {
       title: '内容',
-      dataIndex: 'logTxt',
+      dataIndex: 'logText',
       hideInSearch: true
     },
   ];

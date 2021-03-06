@@ -104,12 +104,21 @@ namespace AgileConfig.Server.Service
 
         public async Task<Config> GetByAppIdKey(string appId, string group, string key)
         {
-            return await _dbContext.Configs.Where(c =>
-                c.AppId == appId &&
-                c.Key == key &&
-                c.Group == group &&
-                c.Status == ConfigStatus.Enabled
-            ).FirstAsync();
+            var q = _dbContext.Configs.Where(c =>
+                 c.AppId == appId &&
+                 c.Key == key &&
+                 c.Status == ConfigStatus.Enabled
+            );
+            if (string.IsNullOrEmpty(group))
+            {
+                q = q.Where(c => c.Group == "" || c.Group == null);
+            }
+            else
+            {
+                q = q.Where(c => c.Group == group);
+
+            }
+            return await q.FirstAsync();
         }
 
         public async Task<List<Config>> GetByAppId(string appId)

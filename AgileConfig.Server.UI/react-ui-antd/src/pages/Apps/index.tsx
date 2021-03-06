@@ -154,6 +154,13 @@ const appList: React.FC = () => {
       title: '操作',
       valueType: 'option',
       render: (text, record, _, action) => [
+        <Link 
+        to={
+          {
+            pathname:'/app/config/' + record.id + '/' + record.name,
+          }
+        }
+      >配置项</Link>,
         <a
           onClick={() => {
             setUpdateModalVisible(true);
@@ -164,13 +171,6 @@ const appList: React.FC = () => {
         >
           编辑
         </a>,
-        <Link 
-          to={
-            {
-              pathname:'/app/config/' + record.id + '/' + record.name,
-            }
-          }
-        >配置项</Link>,
         <Button type="link" danger
           onClick={() => {
             const msg = `是否确定删除应用【${record.name}】?`;

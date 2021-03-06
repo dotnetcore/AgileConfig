@@ -156,8 +156,8 @@ const configs: React.FC = (props: any) => {
   const online = (config: ConfigListItem) => {
     confirm({
       content: `确定上线配置【${config.key}】？`,
-      onOk: () => {
-        const result = handleOnline(config);
+      onOk: async () => {
+        const result = await handleOnline(config);
         if (result) {
           actionRef.current?.reload();
         }
@@ -167,8 +167,8 @@ const configs: React.FC = (props: any) => {
   const offline = (config: ConfigListItem) => {
     confirm({
       content: `确定下线配置【${config.key}】？`,
-      onOk: () => {
-        const result = handleOffline(config);
+      onOk: async () => {
+        const result = await handleOffline(config);
         if (result) {
           actionRef.current?.reload();
         }
@@ -178,8 +178,8 @@ const configs: React.FC = (props: any) => {
   const delConfig = (config: ConfigListItem) => {
     confirm({
       content: `确定删除配置【${config.key}】？`,
-      onOk: () => {
-        const result = handleDel(config);
+      onOk: async () => {
+        const result = await handleDel(config);
         if (result) {
           actionRef.current?.reload();
         }
@@ -189,8 +189,8 @@ const configs: React.FC = (props: any) => {
   const rollback = (config: ConfigModifyLog) => {
     confirm({
       content: `确定回滚至版本【${moment(config.modifyTime).format('YYYY-MM-DD HH:mm:ss')}】？`,
-      onOk: () => {
-        const result = handleRollback(config);
+      onOk: async () => {
+        const result = await handleRollback(config);
         if (result) {
           setmodifyLogsModalVisible(false);
           actionRef.current?.reload();
@@ -240,7 +240,7 @@ const configs: React.FC = (props: any) => {
         },
         1: {
           text: '已上线',
-          status: 'Success'
+          status: 'Processing'
         }
       }
     },

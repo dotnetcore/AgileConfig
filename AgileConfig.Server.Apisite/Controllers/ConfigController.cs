@@ -260,7 +260,6 @@ namespace AgileConfig.Server.Apisite.Controllers
             config.Key = model.Key;
             config.Value = model.Value;
             config.Group = model.Group;
-            config.Status = model.Status;
             config.UpdateTime = DateTime.Now;
 
             var result = await _configService.UpdateAsync(config);
@@ -362,7 +361,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
             configs = configs.OrderBy(c => c.AppId).ThenBy(c => c.Group).ThenBy(c => c.Key).ToList();
 
-            var page = configs.Skip((current - 1) * pageSize).Take(pageSize);
+            var page = configs.Skip((current - 1) * pageSize).Take(pageSize).ToList();
             var total = configs.Count();
             var totalPages = total / pageSize;
             if ((total % pageSize) > 0)

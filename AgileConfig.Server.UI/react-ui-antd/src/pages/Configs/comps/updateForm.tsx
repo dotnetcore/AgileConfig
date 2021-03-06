@@ -60,6 +60,7 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
           ]}
           label="组"
           name="group"
+          readonly={true}
         />
         <ProFormText
           rules={[
@@ -69,6 +70,7 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
           ]}
           label="键"
           name="key"
+          readonly={true}
         />
         <ProFormTextArea
           rules={[
