@@ -72,7 +72,7 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
                     request={async () => {
                       const result = await inheritancedApps(props.value? props.value.id: '');
                       return result.data.map( (x: { name: string, id: string })=> {
-                        return { lable:x.name, value:x.id};
+                        return { label:x.name, value:x.id};
                       });
                     }}
                 ></ProFormSelect> : null
