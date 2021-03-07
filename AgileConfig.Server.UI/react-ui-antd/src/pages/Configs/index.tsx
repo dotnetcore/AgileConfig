@@ -7,7 +7,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { queryApps } from '../Apps/service';
 import UpdateForm from './comps/updateForm';
 import { ConfigListItem, ConfigModifyLog } from './data';
-import { queryConfigs, onlineConfig, offlineConfig, delConfig, addConfig, editConfig, queryModifyLogs,rollback } from './service';
+import { queryConfigs, onlineConfig, offlineConfig, delConfig, addConfig, editConfig, queryModifyLogs,rollback,onlineSomeConfigs,offlineSomeConfigs } from './service';
 import Text from 'antd/lib/typography/Text';
 import moment from 'moment';
 import styles from './index.less';
@@ -29,6 +29,44 @@ const handleOnline = async (fields: ConfigListItem) => {
   } catch (error) {
     hide();
     message.error('上线失败请重试！');
+    return false;
+  }
+};
+
+const handleOnlineSome = async (configs: ConfigListItem[]) => {
+  const hide = message.loading('正在上线');
+  try {
+    const result = await onlineSomeConfigs(configs);
+    hide();
+    const success = result.success;
+    if (success) {
+      message.success('上线成功');
+    } else {
+      message.error('上线失败请重试！');
+    }
+    return success;
+  } catch (error) {
+    hide();
+    message.error('上线失败请重试！');
+    return false;
+  }
+};
+
+const handleOfflineSome = async (configs: ConfigListItem[]) => {
+  const hide = message.loading('正在下线');
+  try {
+    const result = await offlineSomeConfigs(configs);
+    hide();
+    const success = result.success;
+    if (success) {
+      message.success('下线成功');
+    } else {
+      message.error('下线失败请重试！');
+    }
+    return success;
+  } catch (error) {
+    hide();
+    message.error('下线失败请重试！');
     return false;
   }
 };
@@ -158,6 +196,38 @@ const configs: React.FC = (props: any) => {
       content: `确定上线配置【${config.key}】？`,
       onOk: async () => {
         const result = await handleOnline(config);
+        if (result) {
+          actionRef.current?.reload();
+        }
+      }
+    });
+  }
+  const onlineSome = (configs: ConfigListItem[]) => {
+    const waitPublishConfigs = configs.filter(x=>x.onlineStatus === 0);
+    if (!waitPublishConfigs.length) {
+      message.warning('请至少选中一个待上线配置项');
+      return;
+    }
+    confirm({
+      content: `确定上线选中的配置？`,
+      onOk: async () => {
+        const result = await handleOnlineSome(configs);
+        if (result) {
+          actionRef.current?.reload();
+        }
+      }
+    });
+  }
+  const offlineSome = (configs: ConfigListItem[]) => {
+    const waitPublishConfigs = configs.filter(x=>x.onlineStatus === 1);
+    if (!waitPublishConfigs.length) {
+      message.warning('请至少选中一个已上线配置项');
+      return;
+    }
+    confirm({
+      content: `确定下线选中的配置？`,
+      onOk: async () => {
+        const result = await handleOfflineSome(configs);
         if (result) {
           actionRef.current?.reload();
         }
@@ -295,10 +365,10 @@ const configs: React.FC = (props: any) => {
           <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { setCreateModalVisible(true); }}>
             新建
           </Button>,
-          <Button key="button" type="primary" hidden={selectedRowsState.length == 0}>
+          <Button key="button" type="primary" hidden={selectedRowsState.length == 0} onClick={()=>{onlineSome(selectedRowsState)}}>
             上线
         </Button>,
-          <Button key="button" type="primary" danger hidden={selectedRowsState.length == 0}>
+          <Button key="button" type="primary" danger hidden={selectedRowsState.length == 0} onClick={()=>{offlineSome(selectedRowsState)}}>
             下线
        </Button>,
           <Button key="button" type="primary">

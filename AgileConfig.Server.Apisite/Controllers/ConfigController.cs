@@ -583,6 +583,64 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         /// <summary>
+        /// 上线多个配置
+        /// </summary>
+        /// <param name="configIds"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> OfflineSome([FromBody] List<string> configIds)
+        {
+            if (configIds == null)
+            {
+                throw new ArgumentNullException("configIds");
+            }
+
+            var nodes = await _serverNodeService.GetAllNodesAsync();
+            foreach (var configId in configIds)
+            {
+                var config = await _configService.GetAsync(configId);
+                if (config == null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "未找到对应的配置项。"
+                    });
+                }
+                if (config.OnlineStatus == OnlineStatus.WaitPublish)
+                {
+                    continue;
+                }
+                config.OnlineStatus = OnlineStatus.WaitPublish;
+                var result = await _configService.UpdateAsync(config);
+                if (result)
+                {
+                    await _sysLogService.AddSysLogAsync(new SysLog
+                    {
+                        LogTime = DateTime.Now,
+                        LogType = SysLogType.Normal,
+                        AppId = config.AppId,
+                        LogText = $"下线配置【Key:{config.Key}】 【Group：{config.Group}】 【AppId：{config.AppId}】"
+                    });
+                    //notice clients the config item is offline
+                    var action = new WebsocketAction { Action = ActionConst.Remove, Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value } };
+                    foreach (var node in nodes)
+                    {
+                        if (node.Status == NodeStatus.Offline)
+                        {
+                            continue;
+                        }
+                        await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, config.AppId, action);
+                    }
+                }
+            }
+            return Json(new
+            {
+                success = true,
+                message = "下线配置成功"
+            });
+        }
+
+        /// <summary>
         /// 下线
         /// </summary>
         /// <param name="configId"></param>

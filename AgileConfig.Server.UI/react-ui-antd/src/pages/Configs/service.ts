@@ -20,6 +20,18 @@ export async function onlineConfig(config: ConfigListItem) {
   });
 }
 
+export async function onlineSomeConfigs(configs: ConfigListItem[]) {
+  return request('/config/PublishSome', {
+    method: 'POST',
+    data: configs.map(c=>c.id)
+  });
+}
+export async function offlineSomeConfigs(configs: ConfigListItem[]) {
+  return request('/config/OfflineSome', {
+    method: 'POST',
+    data: configs.map(c=>c.id)
+  });
+}
 export async function offlineConfig(config: ConfigListItem) {
   return request('/config/offline', {
     method: 'POST',
