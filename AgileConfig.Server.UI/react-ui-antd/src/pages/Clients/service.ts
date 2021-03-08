@@ -1,7 +1,7 @@
 import request from '@/utils/request';
 
 export async function queryClients(params: any) {
-  return request('/report/ServerNodeClients', {
+  return request('/report/SearchServerNodeClients', {
     params
   });
 }

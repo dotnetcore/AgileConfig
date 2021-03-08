@@ -49,6 +49,52 @@ namespace AgileConfig.Server.Apisite.Controllers
             return Json(report);
         }
 
+        public IActionResult SearchServerNodeClients(string address,int current, int pageSize)
+        {
+            if (current <= 0)
+            {
+                throw new ArgumentException("current can not less than 1 .");
+            }
+            if (pageSize <= 0)
+            {
+                throw new ArgumentException("pageSize can not less than 1 .");
+            }
+            if (string.IsNullOrEmpty(address))
+            {
+                return Json(new
+                {
+                    current,
+                    pageSize,
+                    success = true,
+                    total = 0,
+                    data = new List<object>()
+                }) ;
+            }
+
+            var report = Program.RemoteServerNodeProxy.GetClientsReport(address);
+            if (report == null || report.Infos == null)
+            {
+                return  Json(new
+                {
+                    current,
+                    pageSize,
+                    success = true,
+                    total = 0,
+                    data = new List<object>()
+                });
+            }
+            var page = report.Infos.OrderBy(i=>i.Id).Skip((current-1)*pageSize).Take(pageSize);
+
+            return Json(new
+            {
+                current,
+                pageSize,
+                success = true,
+                total = report.Infos.Count,
+                data = page
+            });
+        }
+
         /// <summary>
         /// 获取App数量
         /// </summary>
