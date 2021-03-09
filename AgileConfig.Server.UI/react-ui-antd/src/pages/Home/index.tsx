@@ -2,7 +2,7 @@ import { AppstoreOutlined, DatabaseOutlined, HomeFilled, ShrinkOutlined, TableOu
 import { PageContainer } from '@ant-design/pro-layout';
 import React, { useEffect, useState } from 'react';
 import styles from './index.less';
-import { queryAppcount, queryConfigcount, queryNodecount } from './service';
+import { queryAppcount, queryConfigcount, queryNodecount, queryServerNodeStatus } from './service';
 
 export type itemInfoProps = {
   type:string,
@@ -46,7 +46,7 @@ const ItemInfo: React.FC<itemInfoProps> = (props) => {
   return (
     <div  className={styles.item} style={{backgroundColor:itemColor()}}>
       <div>
-        <div>{props.count}</div>
+        <div className={styles.count}>{props.count}</div>
         <div className={styles.name}>
           {
            itemName()
@@ -63,25 +63,35 @@ const ItemInfo: React.FC<itemInfoProps> = (props) => {
   );
 }
 const Summary: React.FC = () => {
-  const [appcount,setAppcount] = useState<number>(0);
-  const [configcount,setConfigcount] = useState<number>(0);
-  const [nodecount,setNodecount] = useState<number>(0);
+  const [appCount,setAppCount] = useState<number>(0);
+  const [configCount,setConfigCount] = useState<number>(0);
+  const [nodeCount,setNodecount] = useState<number>(0);
+  const [clientCount,setClientCount] = useState<number>(0);
 
   useEffect(()=>{
     queryNodecount().then(x=> setNodecount(x) );
   },[]);
   useEffect(()=>{
-    queryConfigcount().then(x=> setConfigcount(x) );
+    queryConfigcount().then(x=> setConfigCount(x) );
   },[]);
   useEffect(()=>{
-    queryAppcount().then(x=> setAppcount(x) );
+    queryAppcount().then(x=> setAppCount(x) );
+  },[]);
+  useEffect(()=>{
+    queryServerNodeStatus().then((x:{server_status:{clientCount:number}}[])=> {
+      let count:number = 0;
+      x.forEach(item => {
+        count = count + item.server_status.clientCount;
+      });
+      setClientCount(count);
+    }  );
   },[]);
   return (
     <div className={styles.summary}>
-       <ItemInfo count={nodecount} type="node" icon={<DatabaseOutlined ></DatabaseOutlined>}></ItemInfo>
-       <ItemInfo count={appcount} type="app" icon={<AppstoreOutlined ></AppstoreOutlined>}></ItemInfo>
-       <ItemInfo count={configcount} type="config" icon={<TableOutlined ></TableOutlined>}></ItemInfo>
-       <ItemInfo count={40} type="client" icon={<ShrinkOutlined ></ShrinkOutlined>}></ItemInfo>
+       <ItemInfo count={nodeCount} type="node" icon={<DatabaseOutlined ></DatabaseOutlined>}></ItemInfo>
+       <ItemInfo count={appCount} type="app" icon={<AppstoreOutlined ></AppstoreOutlined>}></ItemInfo>
+       <ItemInfo count={configCount} type="config" icon={<TableOutlined ></TableOutlined>}></ItemInfo>
+       <ItemInfo count={clientCount} type="client" icon={<ShrinkOutlined ></ShrinkOutlined>}></ItemInfo>
        
     </div>
   );

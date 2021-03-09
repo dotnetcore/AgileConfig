@@ -9,3 +9,6 @@ export async function queryConfigcount() {
 export async function queryNodecount() {
     return request('/report/nodecount');
 }
+export async function queryServerNodeStatus() {
+    return request('/report/RemoteNodesStatus');
+}
