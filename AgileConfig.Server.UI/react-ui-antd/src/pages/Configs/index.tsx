@@ -1,7 +1,7 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { ModalForm, ProFormSwitch, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
 import { PageContainer } from '@ant-design/pro-layout';
-import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
+import ProTable, { ActionType, ProColumns, TableDropdown } from '@ant-design/pro-table';
 import { Button, Drawer, FormInstance, List, message, Modal, Tag } from 'antd';
 import React, { useState, useRef, useEffect } from 'react';
 import { queryApps } from '../Apps/service';
@@ -212,7 +212,10 @@ const configs: React.FC = (props: any) => {
       content: `确定上线选中的配置？`,
       onOk: async () => {
         const result = await handleOnlineSome(configs);
-        if (result) {
+        if (result && actionRef.current) {
+          if (actionRef.current?.clearSelected){
+            actionRef.current?.clearSelected();
+          }
           actionRef.current?.reload();
         }
       }
@@ -228,7 +231,10 @@ const configs: React.FC = (props: any) => {
       content: `确定下线选中的配置？`,
       onOk: async () => {
         const result = await handleOfflineSome(configs);
-        if (result) {
+        if (result && actionRef.current) {
+          if (actionRef.current?.clearSelected){
+            actionRef.current?.clearSelected();
+          }
           actionRef.current?.reload();
         }
       }
@@ -277,28 +283,35 @@ const configs: React.FC = (props: any) => {
     {
       title: '键',
       dataIndex: 'key',
+      copyable: true
     },
     {
       title: '值',
       dataIndex: 'value',
       hideInSearch: true,
+      ellipsis: true,
+      copyable: true,
+      tip: '过长会自动收缩',
     },
     {
       title: '描述',
       dataIndex: 'description',
       hideInSearch: true,
+      ellipsis: true,
     },
     {
       title: '创建时间',
       dataIndex: 'createTime',
       hideInSearch: true,
-      valueType: 'dateTime'
+      valueType: 'dateTime',
+      width: 150
     },
     {
       title: '修改时间',
       dataIndex: 'updateTime',
       hideInSearch: true,
-      valueType: 'dateTime'
+      valueType: 'dateTime',
+      width: 150
     },
     {
       title: '状态',
@@ -312,10 +325,12 @@ const configs: React.FC = (props: any) => {
           text: '已上线',
           status: 'Processing'
         }
-      }
+      },
+      width: 100
     },
     {
       title: '操作',
+      width: 150,
       valueType: 'option',
       render: (text, record, _, action) => [
         record.onlineStatus ? <a onClick={() => { offline(record) }}>下线</a> : <a onClick={() => { online(record) }}>上线</a>,
@@ -327,24 +342,28 @@ const configs: React.FC = (props: any) => {
         >
           编辑
         </a>,
-        <a
-          onClick={
-            async () => {
+        <TableDropdown
+        key="actionGroup"
+        onSelect={async (item) => 
+          {
+            if (item == 'history') {
               setmodifyLogsModalVisible(true)
               const result = await queryModifyLogs(record)
               if (result.success) {
                 setModifyLogs(result.data);
               }
             }
+
+            if (item == 'delete') {
+              delConfig(record);
+            }
           }
-        >版本历史</a>,
-        <Button type="link" danger onClick={
-          () => {
-            delConfig(record);
-          }
-        }>
-          删除
-        </Button>
+        }
+        menus={[
+          { key: 'history', name: '历史' },
+          { key: 'delete', name: '删除' },
+        ]}
+      />
       ]
     },
   ];

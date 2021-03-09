@@ -49,7 +49,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             return Json(report);
         }
 
-        public IActionResult SearchServerNodeClients(string address,int current, int pageSize)
+        public async Task<IActionResult> SearchServerNodeClients(string address, int current, int pageSize)
         {
             if (current <= 0)
             {
@@ -59,38 +59,35 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 throw new ArgumentException("pageSize can not less than 1 .");
             }
+            var addressess = new List<string>();
             if (string.IsNullOrEmpty(address))
             {
-                return Json(new
-                {
-                    current,
-                    pageSize,
-                    success = true,
-                    total = 0,
-                    data = new List<object>()
-                }) ;
+                var nodes = await _serverNodeService.GetAllNodesAsync();
+                addressess.AddRange(nodes.Select(n => n.Address));
+            }
+            else
+            {
+                addressess.Add(address);
             }
 
-            var report = Program.RemoteServerNodeProxy.GetClientsReport(address);
-            if (report == null || report.Infos == null)
+            var clients = new List<ClientInfo>();
+            addressess.ForEach(addr =>
             {
-                return  Json(new
+                var report = Program.RemoteServerNodeProxy.GetClientsReport(addr);
+                if (report != null && report.Infos != null)
                 {
-                    current,
-                    pageSize,
-                    success = true,
-                    total = 0,
-                    data = new List<object>()
-                });
-            }
-            var page = report.Infos.OrderBy(i=>i.Id).Skip((current-1)*pageSize).Take(pageSize);
+                    clients.AddRange(report.Infos);
+                }
+            });
+
+            var page = clients.OrderBy(i => i.Address).ThenBy(i => i.Id).Skip((current - 1) * pageSize).Take(pageSize);
 
             return Json(new
             {
                 current,
                 pageSize,
                 success = true,
-                total = report.Infos.Count,
+                total = clients.Count,
                 data = page
             });
         }
@@ -134,8 +131,10 @@ namespace AgileConfig.Server.Apisite.Controllers
             var nodes = await _serverNodeService.GetAllNodesAsync();
             var result = new List<object>();
 
-            nodes.ForEach(n => {
-                result.Add(new { 
+            nodes.ForEach(n =>
+            {
+                result.Add(new
+                {
                     n,
                     server_status = Program.RemoteServerNodeProxy.GetClientsReport(n.Address)
                 });

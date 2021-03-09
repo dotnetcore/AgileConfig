@@ -7,6 +7,8 @@ using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
+using AgileConfig.Server.Common;
+using Microsoft.Extensions.Logging;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -16,11 +18,14 @@ namespace AgileConfig.Server.Apisite.Controllers
     {
         private readonly IServerNodeService _serverNodeService;
         private readonly ISysLogService _sysLogService;
+        private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
 
-        public ServerNodeController(IServerNodeService serverNodeService, ISysLogService sysLogService)
+        public ServerNodeController(IServerNodeService serverNodeService,
+            ISysLogService sysLogService)
         {
             _serverNodeService = serverNodeService;
             _sysLogService = sysLogService;
+            _remoteServerNodeProxy = Program.RemoteServerNodeProxy;
         }
 
         [HttpPost]
@@ -56,6 +61,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     LogType = SysLogType.Normal,
                     LogText = $"新增节点：{node.Address}"
                 });
+                await _remoteServerNodeProxy.TestEchoAsync(node.Address);
             }
            
             return Json(new

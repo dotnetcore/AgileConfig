@@ -104,12 +104,14 @@ const appList: React.FC = () => {
     {
       title: '应用ID',
       dataIndex: 'id',
+      copyable: true,
     },
     {
       title: '密钥',
       dataIndex: 'secret',
       valueType: 'password',
-      hideInSearch: true
+      hideInSearch: true,
+      copyable: true,
     },
     {
       title: '创建时间',

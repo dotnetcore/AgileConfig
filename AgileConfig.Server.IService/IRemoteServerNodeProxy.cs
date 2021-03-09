@@ -12,6 +12,10 @@ namespace AgileConfig.Server.IService
 
         public string AppId { get; set; }
 
+        public string Address { get; set; }
+
+        public string Tag { get;set; }
+
         public DateTime LastHeartbeatTime { get; set; }
     }
 
@@ -56,10 +60,16 @@ namespace AgileConfig.Server.IService
         ClientInfos GetClientsReport(string address);
 
         /// <summary>
-        /// 探测某个节点是否在线
+        /// 探测所有个节点是否在线
         /// </summary>
         /// <returns></returns>
         Task TestEchoAsync();
 
+        /// <summary>
+        /// 探测某个节点是否在校
+        /// </summary>
+        /// <param name="address"></param>
+        /// <returns></returns>
+        Task TestEchoAsync(string address);
     }
 }

@@ -1,7 +1,8 @@
 import { AppstoreOutlined, DatabaseOutlined, HomeFilled, ShrinkOutlined, TableOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-layout';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './index.less';
+import { queryAppcount, queryConfigcount, queryNodecount } from './service';
 
 export type itemInfoProps = {
   type:string,
@@ -62,11 +63,24 @@ const ItemInfo: React.FC<itemInfoProps> = (props) => {
   );
 }
 const Summary: React.FC = () => {
+  const [appcount,setAppcount] = useState<number>(0);
+  const [configcount,setConfigcount] = useState<number>(0);
+  const [nodecount,setNodecount] = useState<number>(0);
+
+  useEffect(()=>{
+    queryNodecount().then(x=> setNodecount(x) );
+  },[]);
+  useEffect(()=>{
+    queryConfigcount().then(x=> setConfigcount(x) );
+  },[]);
+  useEffect(()=>{
+    queryAppcount().then(x=> setAppcount(x) );
+  },[]);
   return (
     <div className={styles.summary}>
-       <ItemInfo count={10} type="node" icon={<DatabaseOutlined ></DatabaseOutlined>}></ItemInfo>
-       <ItemInfo count={20} type="app" icon={<AppstoreOutlined ></AppstoreOutlined>}></ItemInfo>
-       <ItemInfo count={30} type="config" icon={<TableOutlined ></TableOutlined>}></ItemInfo>
+       <ItemInfo count={nodecount} type="node" icon={<DatabaseOutlined ></DatabaseOutlined>}></ItemInfo>
+       <ItemInfo count={appcount} type="app" icon={<AppstoreOutlined ></AppstoreOutlined>}></ItemInfo>
+       <ItemInfo count={configcount} type="config" icon={<TableOutlined ></TableOutlined>}></ItemInfo>
        <ItemInfo count={40} type="client" icon={<ShrinkOutlined ></ShrinkOutlined>}></ItemInfo>
        
     </div>

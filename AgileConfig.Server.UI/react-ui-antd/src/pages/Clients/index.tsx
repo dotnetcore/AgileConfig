@@ -4,15 +4,14 @@ import ProTable, { ActionType, ProColumns, TableDropdown } from '@ant-design/pro
 import { Button, message, Modal } from 'antd';
 import React, { useState, useRef, useEffect } from 'react';
 import { queryApps } from '../Apps/service';
-import { NodeItem } from '../Nodes/data';
 import { queryNodes } from '../Nodes/service';
 import { queryClients, reloadClientConfigs, clientOffline } from './service';
 const { confirm } = Modal;
 
-const handleClientReload = async (node:NodeItem, client:any)=>{
+const handleClientReload = async (client:any)=>{
   const hide = message.loading('正在刷新');
   try {
-    const result = await reloadClientConfigs(node.address, client.id);
+    const result = await reloadClientConfigs(client.address, client.id);
     hide();
     const success = result.success;
     if (success) {
@@ -29,10 +28,10 @@ const handleClientReload = async (node:NodeItem, client:any)=>{
 }
 
 
-const handleClientOffline = async (node:NodeItem, client:any)=>{
+const handleClientOffline = async (client:any)=>{
   const hide = message.loading('正在断开');
   try {
-    const result = await clientOffline(node.address, client.id);
+    const result = await clientOffline(client.address, client.id);
     hide();
     const success = result.success;
     if (success) {
@@ -90,6 +89,12 @@ const clients:React.FC = () => {
       hideInSearch: true,
     },
     {
+      title: '节点',
+      dataIndex: 'address',
+      valueType: 'select',
+      request: getNodesForSelect
+    },
+    {
       title: '应用ID',
       dataIndex: 'appId',
       hideInSearch: true,
@@ -101,20 +106,14 @@ const clients:React.FC = () => {
       valueEnum: appEnums,
       hideInSearch: true,
     },
-    {
-      title: '节点',
-      dataIndex: 'address',
-      valueType: 'select',
-      hideInTable: true,
-      request: getNodesForSelect
-    },
+    
     {
       title: '操作',
       valueType: 'option',
       render: (text, record) => [
         <a
           onClick={() => {
-            handleClientReload({address: 'xxx', status:1},record);
+            handleClientReload(record);
           }}
         >
           刷新配置
@@ -127,7 +126,7 @@ const clients:React.FC = () => {
             content: msg,
             async onOk() {
               console.log('disconnect client ' + record.id);
-              const success = await handleClientOffline({address: 'xxx', status:1},record);
+              const success = await handleClientOffline(record);
               if (success) {
                 actionRef.current?.reload();
               }
@@ -142,7 +141,7 @@ const clients:React.FC = () => {
     }
   ];
   return (
-    <PageContainer>
+    <PageContainer header={{ title:'连接的客户端' }}>
       <ProTable     
       search={{
         labelWidth: 'auto',
