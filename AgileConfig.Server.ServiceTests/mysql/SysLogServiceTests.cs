@@ -140,10 +140,10 @@ namespace AgileConfig.Server.Service.Tests.mysql
             });
             Assert.IsTrue(result);
 
-           var count = await service.Count("001", DateTime.Now.AddDays(-1), DateTime.Now.AddDays(1));
+           var count = await service.Count("001", SysLogType.Normal, DateTime.Now.AddDays(-1), DateTime.Now.AddDays(1));
             Assert.AreEqual(1, count);
 
-            var count1 = await service.Count("002", DateTime.Now.AddDays(-1), DateTime.Now.AddDays(-1));
+            var count1 = await service.Count("002", SysLogType.Warn, DateTime.Now.AddDays(-1), DateTime.Now.AddDays(-1));
             Assert.AreEqual(0, count1);
         }
 
@@ -171,10 +171,10 @@ namespace AgileConfig.Server.Service.Tests.mysql
             });
             Assert.IsTrue(result);
 
-            var page = await service.SearchPage("001", DateTime.Now.AddDays(-1), DateTime.Now.AddDays(1),1,0);
+            var page = await service.SearchPage("001", SysLogType.Normal, DateTime.Now.AddDays(-1), DateTime.Now.AddDays(1),1,0);
             Assert.AreEqual(1, page.Count);
 
-            var page1 = await service.SearchPage("002", DateTime.Now.AddDays(-1), DateTime.Now.AddDays(-1), 1, 0);
+            var page1 = await service.SearchPage("002", SysLogType.Warn, DateTime.Now.AddDays(-1), DateTime.Now.AddDays(-1), 1, 0);
             Assert.AreEqual(0, page1.Count);
         }
     }

@@ -77,14 +77,25 @@ const Summary: React.FC = () => {
   useEffect(() => {
     queryAppcount().then(x => setAppCount(x));
   }, []);
-  useEffect(() => {
+  const getServerNodeClientInfos = ()=>{
     queryServerNodeStatus().then((x: { server_status: { clientCount: number } }[]) => {
       let count: number = 0;
-      x.forEach(item => {
-        count = count + item.server_status.clientCount;
+      x?.forEach(item => {
+        if (item.server_status) {
+          count = count + item.server_status.clientCount;
+        }
       });
       setClientCount(count);
     });
+  }
+  useEffect(() => {
+    getServerNodeClientInfos();
+  }, []);
+  useEffect(() => {
+    const id = setInterval(()=>{
+      getServerNodeClientInfos();
+    }, 5000);
+    return ()=> clearInterval(id);
   }, []);
   return (
     <div className={styles.summary}>

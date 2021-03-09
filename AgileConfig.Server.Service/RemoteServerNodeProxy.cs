@@ -1,6 +1,7 @@
 ﻿using Agile.Config.Protocol;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Entity;
+using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.IService;
 using AgileHttp;
 using AgileHttp.serialize;
@@ -35,14 +36,13 @@ namespace AgileConfig.Server.Service
         private IServerNodeService _serverNodeService;
         private ILogger _logger;
         private ISysLogService _sysLogService;
-        private static ConcurrentDictionary<string, ClientInfos> _serverNodeClientReports;
+        private static ConcurrentDictionary<string, ClientInfos> _serverNodeClientReports = new ConcurrentDictionary<string, ClientInfos>();
 
-        public RemoteServerNodeProxy (ISysLogService sysLogService,IServerNodeService serverNodeService, ILoggerFactory loggerFactory)
+        public RemoteServerNodeProxy (ILoggerFactory loggerFactory)
         {
-            _sysLogService = sysLogService;
-            _serverNodeService = serverNodeService;
+            _sysLogService = new SysLogService(new FreeSqlContext(FreeSQL.Instance));
+            _serverNodeService = new ServerNodeService(new FreeSqlContext(FreeSQL.Instance));
             _logger = loggerFactory.CreateLogger<RemoteServerNodeProxy>();
-            _serverNodeClientReports = new ConcurrentDictionary<string, ClientInfos>();
         }
 
         public async Task<bool> AllClientsDoActionAsync(string address, WebsocketAction action)
@@ -172,6 +172,10 @@ namespace AgileConfig.Server.Service
                     i.Address = address;
                 });
             }
+            if (report == null && address == "http://localhost:5000")
+            {
+               Console.WriteLine("report null");
+            }
             return report;
         }
 
@@ -191,7 +195,15 @@ namespace AgileConfig.Server.Service
                             var report = GetClientReport(node);
                             if (report != null)
                             {
-                                _serverNodeClientReports.AddOrUpdate(node.Address, report, (k, r) => report);
+                                if (_serverNodeClientReports.ContainsKey(node.Address))
+                                {
+                                    _serverNodeClientReports[node.Address] = report;
+                                }
+                                else
+                                {
+                                    _serverNodeClientReports.AddOrUpdate(node.Address, report, (k, r) => report);
+                                }
+                                
                             }
                         }
                         else
@@ -228,7 +240,11 @@ namespace AgileConfig.Server.Service
                                         n.LastEchoTime = DateTime.Now;
                                         n.Status = Data.Entity.NodeStatus.Online;
                                         var report = GetClientReport(n);
-                                        if (report != null)
+                                        if (_serverNodeClientReports.ContainsKey(n.Address))
+                                        {
+                                            _serverNodeClientReports[n.Address] = report;
+                                        }
+                                        else
                                         {
                                             _serverNodeClientReports.AddOrUpdate(n.Address, report, (k, r) => report);
                                         }

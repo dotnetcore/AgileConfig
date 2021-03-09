@@ -15,10 +15,12 @@ namespace AgileConfig.Server.Apisite.Controllers.api
     {
         private readonly IServerNodeService _serverNodeService;
         private readonly ISysLogService _sysLogService;
-        public NodeController(IServerNodeService serverNodeService, ISysLogService sysLogService)
+        private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
+        public NodeController(IServerNodeService serverNodeService, ISysLogService sysLogService, IRemoteServerNodeProxy remoteServerNodeProxy)
         {
             _serverNodeService = serverNodeService;
             _sysLogService = sysLogService;
+            _remoteServerNodeProxy = remoteServerNodeProxy;
         }
 
         [HttpGet]
@@ -50,7 +52,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 });
             }
 
-            var ctrl = new ServerNodeController(_serverNodeService, _sysLogService);
+            var ctrl = new ServerNodeController(_serverNodeService, _sysLogService, _remoteServerNodeProxy);
             var result = (await ctrl.Add(model)) as JsonResult;
 
             dynamic obj = result.Value;
@@ -69,7 +71,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [HttpDelete()]
         public async Task<IActionResult> Delete([FromQuery] string address)
         {
-            var ctrl = new ServerNodeController(_serverNodeService, _sysLogService);
+            var ctrl = new ServerNodeController(_serverNodeService, _sysLogService, _remoteServerNodeProxy);
             var result = (await ctrl.Delete(new ServerNodeVM { Address = address })) as JsonResult;
 
             dynamic obj = result.Value;

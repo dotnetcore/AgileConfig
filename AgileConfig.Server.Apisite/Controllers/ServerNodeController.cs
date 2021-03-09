@@ -21,11 +21,12 @@ namespace AgileConfig.Server.Apisite.Controllers
         private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
 
         public ServerNodeController(IServerNodeService serverNodeService,
-            ISysLogService sysLogService)
+            ISysLogService sysLogService,
+            IRemoteServerNodeProxy remoteServerNodeProxy)
         {
             _serverNodeService = serverNodeService;
             _sysLogService = sysLogService;
-            _remoteServerNodeProxy = Program.RemoteServerNodeProxy;
+            _remoteServerNodeProxy = remoteServerNodeProxy;
         }
 
         [HttpPost]
