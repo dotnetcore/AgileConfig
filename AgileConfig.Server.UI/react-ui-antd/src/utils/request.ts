@@ -64,7 +64,7 @@ const authHeaderInterceptor = (url: string, options: RequestOptionsInit) => {
 
 /** 配置request请求时的默认参数 */
 const request = extend({
-  prefix: 'http://localhost:5000',
+  prefix: '',
   errorHandler, // 默认错误处理
   credentials: 'same-origin', // 默认请求是否带上cookie,
 });

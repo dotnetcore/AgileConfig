@@ -18,23 +18,15 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         [AllowAnonymous]
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             if (!IsAdminConsoleMode)
             {
                 return Content($"AgileConfig Node is running now , {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} .");
             }
 
-            var auth = (await HttpContext.AuthenticateAsync()).Succeeded;
-            if (auth)
-            {
-                return View();
-            }
-            else
-            {
-                return Redirect("/Admin/Login");
-            }
 
+            return Redirect("/index.html");
         }
         public IActionResult GetView(string viewName)
         {

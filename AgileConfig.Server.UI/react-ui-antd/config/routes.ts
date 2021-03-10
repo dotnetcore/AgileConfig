@@ -28,6 +28,10 @@
                 redirect: '/home'
               },
               {
+                path: '/index.html',
+                redirect: '/home'
+              },
+              {
                 name: 'home',
                 icon: 'Dashboard',
                 path: '/home',
