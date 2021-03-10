@@ -62,9 +62,14 @@ const authHeaderInterceptor = (url: string, options: RequestOptionsInit) => {
   };
 };
 
+let requestPrefix = '';
+const { NODE_ENV } = process.env;
+if (NODE_ENV === 'development') {
+  requestPrefix = 'http://localhost:5000';
+}
 /** 配置request请求时的默认参数 */
 const request = extend({
-  prefix: '',
+  prefix: requestPrefix,
   errorHandler, // 默认错误处理
   credentials: 'same-origin', // 默认请求是否带上cookie,
 });
