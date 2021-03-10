@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using AgileConfig.Server.Apisite.UIExtension;
 using AgileConfig.Server.Apisite.Websocket;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Freesql;
@@ -63,6 +64,8 @@ namespace AgileConfig.Server.Apisite
             {
                 app.UseMiddleware<ExceptionHandlerMiddleware>();
             }
+            app.UseMiddleware<ReactUIMiddleware>();
+
             app.UseCors(op=> {
                 op.AllowAnyOrigin();
                 op.AllowAnyMethod();
