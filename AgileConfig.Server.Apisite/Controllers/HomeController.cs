@@ -30,7 +30,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Redirect("/admin/InitPassword");
             }
 
-            return Redirect("/index.html");
+            return Redirect("/ui");
         }
         public IActionResult GetView(string viewName)
         {
