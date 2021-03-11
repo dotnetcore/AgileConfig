@@ -141,6 +141,8 @@ Install-Package AgileConfig.Client
                     webBuilder.UseStartup<Startup>();
                 });
 ```
+> 注意：如果节点使用nginx反代的话，需要对nginx进行配置，使其支持websocket协议，不然客户端跟节点的长连接没法建立。
+
 ## 读取配置
 AgileConfig支持asp.net core 标准的IConfiguration，跟IOptions模式读取配置。还支持直接通过AgileConfigClient实例直接读取：
 ```
