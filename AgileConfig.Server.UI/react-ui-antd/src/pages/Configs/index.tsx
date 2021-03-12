@@ -11,6 +11,7 @@ import { queryConfigs, onlineConfig, offlineConfig, delConfig, addConfig, editCo
 import Text from 'antd/lib/typography/Text';
 import moment from 'moment';
 import styles from './index.less';
+import JsonImport from './comps/JsonImport';
 
 const { confirm } = Modal;
 
@@ -169,6 +170,7 @@ const configs: React.FC = (props: any) => {
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [updateModalVisible, setUpdateModalVisible] = useState<boolean>(false);
   const [modifyLogsModalVisible, setmodifyLogsModalVisible] = useState<boolean>(false);
+  const [jsonImportFormModalVisible, setjsonImportFormModalVisible] = useState<boolean>(false);
   const [currentRow, setCurrentRow] = useState<ConfigListItem>();
   const [selectedRowsState, setSelectedRows] = useState<ConfigListItem[]>([]);
   const [modifyLogs, setModifyLogs] = useState<ConfigModifyLog[]>([]);
@@ -307,13 +309,6 @@ const configs: React.FC = (props: any) => {
       width: 150
     },
     {
-      title: '修改时间',
-      dataIndex: 'updateTime',
-      hideInSearch: true,
-      valueType: 'dateTime',
-      width: 150
-    },
-    {
       title: '状态',
       dataIndex: 'onlineStatus',
       valueEnum: {
@@ -390,7 +385,7 @@ const configs: React.FC = (props: any) => {
           <Button key="button" type="primary" danger hidden={selectedRowsState.length == 0} onClick={()=>{offlineSome(selectedRowsState)}}>
             下线
        </Button>,
-          <Button key="button" type="primary">
+          <Button key="button" type="primary" onClick={()=>{ setjsonImportFormModalVisible(true) }}>
             从json文件导入
           </Button>
         ]}
@@ -400,6 +395,17 @@ const configs: React.FC = (props: any) => {
           },
         }}
       />
+      <JsonImport
+      onCancel={
+        ()=>{
+          setjsonImportFormModalVisible(false);
+        }
+      }
+        appId={appId}
+        appName={appName}
+        jsonImportModalVisible={jsonImportFormModalVisible}> 
+        
+      </JsonImport>
       <ModalForm
         formRef={addFormRef}
         title="新建配置"
@@ -467,7 +473,7 @@ const configs: React.FC = (props: any) => {
           fieldProps={
             {
               autoSize: {
-                minRows: 3, maxRows: 8
+                minRows: 3, maxRows: 12
               }
             }
           }

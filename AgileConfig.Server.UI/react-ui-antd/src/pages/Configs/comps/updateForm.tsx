@@ -83,7 +83,7 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
           fieldProps={
             {
               autoSize:{
-                minRows: 3, maxRows: 8
+                minRows: 3, maxRows: 12
               }
             }
           }
