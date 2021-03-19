@@ -531,8 +531,8 @@ const configs: React.FC = (props: any) => {
                   <div>
                     <Text style={{marginRight:'20px'}}>{moment(item.modifyTime).format('YYYY-MM-DD HH:mm:ss')}</Text>
                   &nbsp;
-                  {
-                      index ? null : <Tag color="blue">当前版本</Tag>
+                    {
+                       index ? null : <Tag color="blue">当前版本</Tag>
                     }
                   </div>
                 }

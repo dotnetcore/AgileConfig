@@ -70,7 +70,14 @@ const JsonImport : React.FC<JsonImportFormProps> = (props)=>{
                 <Button type="primary" icon={<UploadOutlined />}>选择文件</Button>
               </Upload>
             </div>
-            <Table dataSource={datasource} columns={columns}>
+            <Table 
+              pagination={false}
+              dataSource={datasource} 
+              columns={columns}
+              scroll ={{
+                y: 500
+              }}>
+              
             </Table>
         </Modal>
     );
