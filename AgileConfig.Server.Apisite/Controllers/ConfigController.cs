@@ -858,6 +858,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     config.Description = "";
                     config.Value = dict[key];
                     config.Group = group;
+                    config.Id = Guid.NewGuid().ToString();
                     addConfigs.Add(config);
                 }
 

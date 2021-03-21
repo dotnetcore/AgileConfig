@@ -1,34 +1,70 @@
 import { getToken } from "@/utils/authority";
-import { UploadOutlined } from "@ant-design/icons";
-import { Button, message, Modal, Table, Upload } from "antd";
-import { List } from "lodash";
+import { DeleteOutlined, UploadOutlined } from "@ant-design/icons";
+import { Button, message, Modal, Space, Table, Upload } from "antd";
 import React, { useState } from 'react';
+import { JsonImportItem } from "../data";
+import { addRangeConfig } from "../service";
 import styles from './jsonImport.less';
 export type JsonImportFormProps = {
     appId: string,
     appName: string,
     jsonImportModalVisible: boolean;
     onCancel: () => void;
+    onSaveSuccess: ()=> void;
   };
-
+  const handleSave = async ( items: JsonImportItem[]) => {
+    const hide = message.loading('正在导入');
+    try {
+      const result = await addRangeConfig(items);
+      hide();
+      const success = result.success;
+      if (success) {
+        message.success('导入成功');
+      } else {
+        message.error(result.message);
+      }
+      return success;
+    } catch (error) {
+      hide();
+      message.error('导入失败请重试！');
+      return false;
+    }
+  };
 const JsonImport : React.FC<JsonImportFormProps> = (props)=>{
-    const [datasource, setDatasource] = useState<{group:string,key:string, value:string}[]>([]);
+    const [datasource, setDatasource] = useState<JsonImportItem[]>([]);
+    const deleteItem = (item:JsonImportItem) => {
+      const index = datasource.findIndex(x=>x.id === item.id);
+      console.log(index, item.id);
+      if (index >= 0) {
+        datasource.splice(index, 1);
+        const cloned  = Object.assign([], datasource)
+        setDatasource(cloned);
+      }
+    }
     const columns = [
         {
           title: '组',
           dataIndex: 'group',
-          key: 'group',
         },
         {
           title: '键',
           dataIndex: 'key',
-          key: 'key',
         },
         {
           title: '值',
           dataIndex: 'value',
-          key: 'value',
         },
+        {
+          title: '操作',
+          key: 'action',
+          render: (text:string, record:any) => (
+            <Space size="middle">
+              <a title="删除" onClick={ ()=>{ deleteItem(record) } }>
+                <DeleteOutlined />
+              </a>
+            </Space>
+          ),
+        }
       ];
       const fileUploadProps = {
         name: 'file',
@@ -46,6 +82,9 @@ const JsonImport : React.FC<JsonImportFormProps> = (props)=>{
               const response = info.file.response;
               if (response.success) {
                 const itemList = response.data;
+                itemList.forEach((x:any)=>{
+                  x.appId = props.appId;
+                });
                 setDatasource(itemList);
               }
             }
@@ -64,6 +103,14 @@ const JsonImport : React.FC<JsonImportFormProps> = (props)=>{
               props.onCancel();
             }
           }
+          onOk={
+            async ()=> {
+              const result = await handleSave(datasource);
+              if (result) {
+                props.onSaveSuccess();
+              }
+            }
+          }
           >
             <div className={styles.action_bar}>
               <Upload accept=".json" {...fileUploadProps}>
@@ -71,6 +118,7 @@ const JsonImport : React.FC<JsonImportFormProps> = (props)=>{
               </Upload>
             </div>
             <Table 
+              rowKey="id"
               pagination={false}
               dataSource={datasource} 
               columns={columns}

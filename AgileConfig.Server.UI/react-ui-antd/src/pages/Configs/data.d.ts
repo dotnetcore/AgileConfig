@@ -26,3 +26,11 @@ export type ConfigListParams = {
   pageSize?: number;
   current?: number;
 };
+
+export type JsonImportItem =  {
+  group: string,
+  key: string,
+  value: string,
+  id: string,
+  appId: string
+}

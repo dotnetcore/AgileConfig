@@ -386,7 +386,7 @@ const configs: React.FC = (props: any) => {
             下线
        </Button>,
           <Button key="button" type="primary" onClick={()=>{ setjsonImportFormModalVisible(true) }}>
-            从json文件导入
+            从json文件导入 {jsonImportFormModalVisible}
           </Button>
         ]}
         rowSelection={{
@@ -395,17 +395,27 @@ const configs: React.FC = (props: any) => {
           },
         }}
       />
-      <JsonImport
-      onCancel={
-        ()=>{
-          setjsonImportFormModalVisible(false);
+      {
+        jsonImportFormModalVisible&&
+        <JsonImport
+          onSaveSuccess={
+            ()=>{
+              setjsonImportFormModalVisible(false);
+              actionRef.current?.reload();
+            }
+          }
+        onCancel={
+          ()=>{
+            setjsonImportFormModalVisible(false);
+          }
         }
+          appId={appId}
+          appName={appName}
+          jsonImportModalVisible={jsonImportFormModalVisible}> 
+          
+        </JsonImport>
       }
-        appId={appId}
-        appName={appName}
-        jsonImportModalVisible={jsonImportFormModalVisible}> 
-        
-      </JsonImport>
+     
       <ModalForm
         formRef={addFormRef}
         title="新建配置"
