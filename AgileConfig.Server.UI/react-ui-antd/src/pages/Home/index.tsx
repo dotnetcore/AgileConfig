@@ -3,11 +3,13 @@ import { PageContainer } from '@ant-design/pro-layout';
 import React, { useEffect, useState } from 'react';
 import styles from './index.less';
 import { queryAppcount, queryConfigcount, queryNodecount, queryServerNodeStatus } from './service';
+import { history } from 'umi';
 
 export type itemInfoProps = {
   type: string,
   icon: JSX.Element,
-  count: number
+  count: number,
+  link: string
 }
 
 const ItemInfo: React.FC<itemInfoProps> = (props) => {
@@ -44,7 +46,12 @@ const ItemInfo: React.FC<itemInfoProps> = (props) => {
     return '';
   }
   return (
-    <div className={styles.item} style={{ backgroundColor: itemColor() }}>
+    <div className={styles.item} style={{ backgroundColor: itemColor() }} onClick={()=>{
+      const link = props.link;
+      if (link) {
+        history.push(link);
+      }
+    }}>
       <div>
         <div className={styles.count}>{props.count}</div>
         <div className={styles.name}>
@@ -99,11 +106,10 @@ const Summary: React.FC = () => {
   }, []);
   return (
     <div className={styles.summary}>
-      <ItemInfo count={nodeCount} type="node" icon={<DatabaseOutlined ></DatabaseOutlined>}></ItemInfo>
-      <ItemInfo count={appCount} type="app" icon={<AppstoreOutlined ></AppstoreOutlined>}></ItemInfo>
-      <ItemInfo count={configCount} type="config" icon={<TableOutlined ></TableOutlined>}></ItemInfo>
-      <ItemInfo count={clientCount} type="client" icon={<ShrinkOutlined ></ShrinkOutlined>}></ItemInfo>
-
+      <ItemInfo count={nodeCount} type="node" link="/node" icon={<DatabaseOutlined ></DatabaseOutlined>}></ItemInfo>
+      <ItemInfo count={appCount} type="app" link="/app" icon={<AppstoreOutlined ></AppstoreOutlined>}></ItemInfo>
+      <ItemInfo count={configCount} type="config" link="/app" icon={<TableOutlined ></TableOutlined>}></ItemInfo>
+      <ItemInfo count={clientCount} type="client" link="/client" icon={<ShrinkOutlined ></ShrinkOutlined>}></ItemInfo>
     </div>
   );
 }
