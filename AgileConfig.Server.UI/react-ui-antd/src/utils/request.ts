@@ -34,9 +34,6 @@ const errorHandler = (error: { response: Response }): Response => {
       if (window.location.pathname !== '/user/login') {
         history.replace({
           pathname: '/user/login',
-          search: stringify({
-            redirect: window.location.href,
-          }),
         });
       }
     }else {
