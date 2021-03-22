@@ -27,7 +27,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (!await _settingService.HasAdminPassword())
             {
-                return Redirect("/admin/InitPassword");
+                return Redirect("/ui#/user/initpassword");
             }
 
             return Redirect("/ui");

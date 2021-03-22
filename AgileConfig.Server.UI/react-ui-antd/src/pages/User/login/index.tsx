@@ -2,14 +2,15 @@ import {
   LockTwoTone,
 } from '@ant-design/icons';
 import { Alert, Tabs } from 'antd';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ProForm, { ProFormText } from '@ant-design/pro-form';
 import { useIntl, connect, FormattedMessage } from 'umi';
 import type { Dispatch } from 'umi';
+import { history } from 'umi';
 import type { StateType } from '@/models/login';
 import type { LoginParamsType } from '@/services/login';
 import type { ConnectState } from '@/models/connect';
-
+import { PasswordInited } from './service'
 import styles from './index.less';
 
 export type LoginProps = {
@@ -36,6 +37,14 @@ const Login: React.FC<LoginProps> = (props) => {
   const { status, type: loginType } = userLogin;
   const [type, setType] = useState<string>('account');
   const intl = useIntl();
+
+  useEffect(()=>{
+    PasswordInited().then(resp=> {
+      if (!resp.data) {
+        history.replace('/user/initpassword');
+      }
+    })
+  },[])
 
   const handleSubmit = (values: LoginParamsType) => {
     const { dispatch } = props;

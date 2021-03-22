@@ -37,7 +37,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login([FromForm]string password)
+        public async Task<IActionResult> Login([FromForm] string password)
         {
             if (string.IsNullOrEmpty(password))
             {
@@ -128,10 +128,11 @@ namespace AgileConfig.Server.Apisite.Controllers
                     LogText = $"管理员登录成功"
                 });
 
-                return Json(new { 
-                    status="ok",
-                    token=jwt,
-                    type= "Bearer",
+                return Json(new
+                {
+                    status = "ok",
+                    token = jwt,
+                    type = "Bearer",
                     currentAuthority = "admin"
                 });
             }
@@ -140,6 +141,21 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 status = "error",
                 message = "密码错误"
+            });
+        }
+
+        /// <summary>
+        /// is password inited ?
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> PasswordInited()
+        {
+            var has = await _settingService.HasAdminPassword();
+            return Json(new
+            {
+                success = true,
+                data = has
             });
         }
 
@@ -170,30 +186,45 @@ namespace AgileConfig.Server.Apisite.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> InitPassword([FromForm]string password, [FromForm]string confirmPassword)
+        public async Task<IActionResult> InitPassword([FromBody] InitPasswordVM model)
         {
+            var password = model.password;
+            var confirmPassword = model.confirmPassword;
+
             if (string.IsNullOrEmpty(password) || string.IsNullOrEmpty(confirmPassword))
             {
-                ViewBag.ErrorMessage = "密码不能为空";
-                return View();
+                return Json(new
+                {
+                    message = "密码不能为空",
+                    success = false
+                });
             }
 
             if (password.Length > 50 || confirmPassword.Length > 50)
             {
-                ViewBag.ErrorMessage = "密码最长不能超过50位";
-                return View();
+                return Json(new
+                {
+                    message = "密码最长不能超过50位",
+                    success = false
+                });
             }
 
             if (password != confirmPassword)
             {
-                ViewBag.ErrorMessage = "输入的两次密码不一致";
-                return View();
+                return Json(new
+                {
+                    message = "输入的两次密码不一致",
+                    success = false
+                });
             }
 
             if (await _settingService.HasAdminPassword())
             {
-                ViewBag.ErrorMessage = "密码已经设置过，不需要再次设置";
-                return View();
+                return Json(new
+                {
+                    message = "密码已经设置过，不需要再次设置",
+                    success = false
+                });
             }
 
             var result = await _settingService.SetAdminPassword(password);
@@ -207,12 +238,18 @@ namespace AgileConfig.Server.Apisite.Controllers
                     LogText = $"管理员密码初始化成功"
                 });
 
-                return Redirect("InitPasswordSuccess");
+                return Json(new
+                {
+                    success = true
+                });
             }
             else
             {
-                ViewBag.ErrorMessage = "初始化密码失败";
-                return View();
+                return Json(new
+                {
+                    message = "初始化密码失败",
+                    success = false
+                });
             }
         }
 
