@@ -1,4 +1,5 @@
 ﻿using Agile.Config.Protocol;
+using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Authorization;
@@ -17,6 +18,11 @@ namespace AgileConfig.Server.Apisite.Controllers
     {
         private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
         private readonly ILogger _logger;
+
+        /// <summary>
+        /// 是否演示模式
+        /// </summary>
+        private bool IsPreviewMode => "true".Equals(Global.Config["preview_mode"], StringComparison.CurrentCultureIgnoreCase);
 
         public RemoteServerProxyController(
             IServerNodeService serverNodeService,
@@ -37,6 +43,15 @@ namespace AgileConfig.Server.Apisite.Controllers
         [HttpPost]
         public async Task<IActionResult> Client_Offline(string address, string clientId)
         {
+            if (IsPreviewMode)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "演示模式请勿断开客户端"
+                });
+            }
+
             var action = new WebsocketAction { Action = "offline" };
             var result = await _remoteServerNodeProxy.OneClientDoActionAsync(address, clientId, action);
 
