@@ -124,34 +124,55 @@ namespace ApiSiteTests
             var syslogService = new Mock<ISysLogService>();
 
             var ctrl = new AdminController(settingService.Object, syslogService.Object);
-            var act = await ctrl.InitPassword("", "");
+            var model = new InitPasswordVM
+            {
+                password = "",
+                confirmPassword = ""
+            };
+            var act = await ctrl.InitPassword(model);
             Assert.IsNotNull(act);
             var vr = act as ViewResult;
             Assert.IsNotNull(vr);
             var msg = vr.ViewData["ErrorMessage"];
             Assert.AreEqual("密码不能为空", msg);
-            act = await ctrl.InitPassword("1", "");
+            act = await ctrl.InitPassword(new InitPasswordVM
+            {
+                password = "1",
+                confirmPassword = ""
+            });
             Assert.IsNotNull(act);
             vr = act as ViewResult;
             Assert.IsNotNull(vr);
             msg = vr.ViewData["ErrorMessage"];
             Assert.AreEqual("密码不能为空", msg);
-            act = await ctrl.InitPassword("", "1");
+            act = await ctrl.InitPassword(new InitPasswordVM
+            {
+                password = "",
+                confirmPassword = "1"
+            });
             Assert.IsNotNull(act);
             vr = act as ViewResult;
             Assert.IsNotNull(vr);
             msg = vr.ViewData["ErrorMessage"];
             Assert.AreEqual("密码不能为空", msg);
 
-            act = await ctrl.InitPassword("a122222222222222222222222222222221222222222222222222222222222222" +
-                "22a12222222222222222222222222222222122222222222222222222222222222222", "1");
+            model = new InitPasswordVM
+            {
+                password = "a12222222222222222222222222222222122222222222222222222222222222222a12222222222222222222222222222222122222222222222222222222222222222",
+                confirmPassword = "1"
+            };
+            act = await ctrl.InitPassword(model);
             Assert.IsNotNull(act);
             vr = act as ViewResult;
             Assert.IsNotNull(vr);
             msg = vr.ViewData["ErrorMessage"];
             Assert.AreEqual("密码最长不能超过50位", msg);
 
-            act = await ctrl.InitPassword("1", "2");
+            act = await ctrl.InitPassword(new InitPasswordVM
+            {
+                password = "1",
+                confirmPassword = "2"
+            });
             Assert.IsNotNull(act);
             vr = act as ViewResult;
             Assert.IsNotNull(vr);
@@ -159,7 +180,11 @@ namespace ApiSiteTests
             Assert.AreEqual("输入的两次密码不一致", msg);
 
             settingService.Setup(s => s.HasAdminPassword()).ReturnsAsync(true);
-            act = await ctrl.InitPassword("1", "1");
+            act = await ctrl.InitPassword(new InitPasswordVM
+            {
+                password = "1",
+                confirmPassword = "1"
+            });
             Assert.IsNotNull(act);
             vr = act as ViewResult;
             Assert.IsNotNull(vr);
@@ -168,7 +193,11 @@ namespace ApiSiteTests
 
             settingService.Setup(s => s.HasAdminPassword()).ReturnsAsync(false);
             settingService.Setup(s => s.SetAdminPassword(It.IsAny<string>())).ReturnsAsync(false);
-            act = await ctrl.InitPassword("1", "1");
+            act = await ctrl.InitPassword(new InitPasswordVM
+            {
+                password = "1",
+                confirmPassword = "1"
+            });
             Assert.IsNotNull(act);
             vr = act as ViewResult;
             Assert.IsNotNull(vr);
@@ -176,7 +205,11 @@ namespace ApiSiteTests
             Assert.AreEqual("初始化密码失败", msg);
 
             settingService.Setup(s => s.SetAdminPassword(It.IsAny<string>())).ReturnsAsync(true);
-            act = await ctrl.InitPassword("1", "1");
+            act = await ctrl.InitPassword(new InitPasswordVM
+            {
+                password = "1",
+                confirmPassword = "1"
+            });
             Assert.IsNotNull(act);
             var rr = act as RedirectResult;
             Assert.IsNotNull(rr);
