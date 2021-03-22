@@ -12,6 +12,11 @@
             path: '/user/login',
             component: './User/login',
           },
+          {
+            name: 'initPassword',
+            path: '/user/initPassword',
+            component: './User/initPassword',
+          },
         ],
       },
       {

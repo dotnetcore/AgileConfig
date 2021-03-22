@@ -27,7 +27,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (!await _settingService.HasAdminPassword())
             {
-                return Redirect("/admin/InitPassword");
+                return Redirect("/ui#/user/initpassword");
             }
 
             return Redirect("/ui");
@@ -40,6 +40,17 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             return Content("");
+        }
+
+        public async Task<IActionResult> SystemInfo()
+        {
+            string appVer = System.Reflection.Assembly.GetAssembly(typeof(AgileConfig.Server.Apisite.Program)).GetName().Version.ToString();
+
+            return Json(new { 
+                appVer,
+                userName="admin",
+                passwordInited=await _settingService.HasAdminPassword()
+            });
         }
 
         [AllowAnonymous]

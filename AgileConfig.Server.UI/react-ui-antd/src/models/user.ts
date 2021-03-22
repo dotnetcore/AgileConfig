@@ -1,6 +1,6 @@
 import type { Effect, Reducer } from 'umi';
 
-import { queryCurrent, query as queryUsers } from '@/services/user';
+import { systemInfo, query as queryUsers } from '@/services/user';
 
 export type CurrentUser = {
   avatar?: string;
@@ -49,9 +49,11 @@ const UserModel: UserModelType = {
       });
     },
     *fetchCurrent(_, { call, put }) {
+      const sysInfo = yield call(systemInfo);
       const response = {
         name: '管理员',
-        userid: 'admin'
+        userid: sysInfo.userName,
+        passwordInited: sysInfo.passwordInited
       };
       yield put({
         type: 'saveCurrentUser',

@@ -1,0 +1,1 @@
+export  type InitPasswordModel = {password:string, confirmPassword:string}

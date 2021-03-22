@@ -822,9 +822,10 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
-        public IActionResult PreViewJsonFile(List<IFormFile> files)
+        public IActionResult PreViewJsonFile()
         {
-            if (files == null || !files.Any())
+            List<IFormFile> files = Request.Form.Files.ToList();
+            if (!files.Any())
             {
                 return Json(new
                 {
@@ -857,6 +858,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     config.Description = "";
                     config.Value = dict[key];
                     config.Group = group;
+                    config.Id = Guid.NewGuid().ToString();
                     addConfigs.Add(config);
                 }
 

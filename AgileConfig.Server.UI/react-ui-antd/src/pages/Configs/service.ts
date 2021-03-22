@@ -1,5 +1,5 @@
 import request from '@/utils/request';
-import { ConfigListItem, ConfigListParams, ConfigModifyLog } from './data';
+import { ConfigListItem, ConfigListParams, ConfigModifyLog, JsonImportItem } from './data';
 
 export async function queryConfigs(appId:string, params: ConfigListParams) {
   return request('/config/search', {
@@ -56,6 +56,13 @@ export async function addConfig(config: ConfigListItem) {
     data: {
       ...config
     }
+  });
+}
+
+export async function addRangeConfig(list: JsonImportItem[]) {
+  return request('/config/AddRange', {
+    method: 'POST',
+    data: list
   });
 }
 
