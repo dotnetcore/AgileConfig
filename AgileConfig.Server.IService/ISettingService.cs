@@ -40,7 +40,7 @@ namespace AgileConfig.Server.IService
         Task<bool> SetAdminPassword(string password);
 
         /// <summary>
-        /// 教育管理员密码
+        /// 校验管理员密码
         /// </summary>
         /// <param name="password"></param>
         /// <returns></returns>

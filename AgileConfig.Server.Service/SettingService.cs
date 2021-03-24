@@ -77,8 +77,14 @@ namespace AgileConfig.Server.Service
 
             var newSalt = Guid.NewGuid().ToString("N");
             password = Encrypt.Md5((password + newSalt));
+
+            await DeleteAsync(AdminPasswordHashSaltKey);
+            await DeleteAsync(AdminPasswordSettingKey);
+
             await AddAsync(new Setting { Id = AdminPasswordHashSaltKey, Value = newSalt, CreateTime = DateTime.Now });
-            return await AddAsync(new Setting { Id = AdminPasswordSettingKey, Value = password, CreateTime = DateTime.Now });
+            await AddAsync(new Setting { Id = AdminPasswordSettingKey, Value = password, CreateTime = DateTime.Now });
+
+            return true;
         }
 
         public async Task<bool> HasAdminPassword()
