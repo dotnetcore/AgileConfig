@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -153,9 +149,19 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
         }
 
+        [HttpPost]
         [Authorize]
         public async Task<IActionResult> ChangePassword([FromBody]ChangePasswordVM model)
         {
+            if (Appsettings.IsPreviewMode)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "演示模式请勿修改管理密码"
+                });
+            }
+
             var password = model.password;
             var confirmPassword = model.confirmPassword;
             var oldPassword = model.oldPassword;

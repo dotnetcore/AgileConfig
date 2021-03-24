@@ -19,11 +19,6 @@ namespace AgileConfig.Server.Apisite.Controllers
         private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
         private readonly ILogger _logger;
 
-        /// <summary>
-        /// 是否演示模式
-        /// </summary>
-        private bool IsPreviewMode => "true".Equals(Global.Config["preview_mode"], StringComparison.CurrentCultureIgnoreCase);
-
         public RemoteServerProxyController(
             IServerNodeService serverNodeService,
             IRemoteServerNodeProxy remoteServerNodeProxy,
@@ -43,7 +38,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         [HttpPost]
         public async Task<IActionResult> Client_Offline(string address, string clientId)
         {
-            if (IsPreviewMode)
+            if (Appsettings.IsPreviewMode)
             {
                 return Json(new
                 {

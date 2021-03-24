@@ -1,7 +1,5 @@
 ﻿using System;
-using AgileConfig.Server.Common;
 using AgileConfig.Server.IService;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -20,7 +18,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> IndexAsync()
         {
-            if (!IsAdminConsoleMode)
+            if (!Appsettings.IsAdminConsoleMode)
             {
                 return Content($"AgileConfig Node is running now , {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} .");
             }
@@ -31,15 +29,6 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             return Redirect("/ui");
-        }
-        public IActionResult GetView(string viewName)
-        {
-            if (IsAdminConsoleMode)
-            {
-                return View(viewName);
-            }
-
-            return Content("");
         }
 
         public async Task<IActionResult> SystemInfo()
@@ -59,6 +48,5 @@ namespace AgileConfig.Server.Apisite.Controllers
             return Content("ok");
         }
 
-        private bool IsAdminConsoleMode => "true".Equals(Global.Config["adminConsole"], StringComparison.CurrentCultureIgnoreCase);
     }
 }

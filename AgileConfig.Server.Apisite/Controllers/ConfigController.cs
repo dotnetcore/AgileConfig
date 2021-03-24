@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using AgileConfig.Server.Common;
-using System.IO;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {

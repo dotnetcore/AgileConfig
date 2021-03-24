@@ -69,26 +69,30 @@ class AvatarDropdown extends React.Component<GlobalHeaderRightProps,{changePassw
 
       currentUser && currentUser.name ? (
         <div>
-          <Changepassword
-            onSuccess={
-              ()=>{
-                const { dispatch } = this.props;
-                if (dispatch) {
-                  dispatch({
-                    type: 'login/logout',
+          {
+            this.state.changePasswordModalVisible &&
+            <Changepassword
+              onSuccess={
+                ()=>{
+                  const { dispatch } = this.props;
+                  if (dispatch) {
+                    dispatch({
+                      type: 'login/logout',
+                    });
+                  }
+                }
+              }
+              onCancel={
+                ()=>{
+                  this.setState({
+                    changePasswordModalVisible: false
                   });
                 }
               }
-            }
-            onCancel={
-              ()=>{
-                this.setState({
-                  changePasswordModalVisible: false
-                });
-              }
-            }
-            changePasswordModalVisible={this.state.changePasswordModalVisible}>
-          </Changepassword>
+              changePasswordModalVisible={this.state.changePasswordModalVisible}>
+            </Changepassword>
+          }
+          
         <HeaderDropdown overlay={menuHeaderDropdown}>
           <span className={`${styles.action} ${styles.account}`}>
             <span className={`${styles.name} anticon`}>{currentUser.name}</span>

@@ -27,33 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\lib\Angular\angular-animate.min.js" />
-    <None Include="wwwroot\lib\Angular\angular-ui-router.js" />
-    <None Include="wwwroot\lib\Angular\angular.cookie.min.js" />
-    <None Include="wwwroot\lib\Angular\angular.min.js" />
-    <None Include="wwwroot\lib\Angular\loading-bar.min.js" />
-    <None Include="wwwroot\lib\bootstrap\dist\css\bootstrap-theme.css.map" />
-    <None Include="wwwroot\lib\bootstrap\dist\css\bootstrap-theme.min.css.map" />
-    <None Include="wwwroot\lib\bootstrap\dist\css\bootstrap.css.map" />
-    <None Include="wwwroot\lib\bootstrap\dist\css\bootstrap.min.css.map" />
-    <None Include="wwwroot\lib\bootstrap\dist\fonts\glyphicons-halflings-regular.svg" />
-    <None Include="wwwroot\lib\bootstrap\dist\fonts\glyphicons-halflings-regular.woff2" />
-    <None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.js" />
-    <None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.min.js" />
-    <None Include="wwwroot\lib\bootstrap\dist\js\npm.js" />
-    <None Include="wwwroot\lib\bootstrap\LICENSE" />
-    <None Include="wwwroot\lib\code_mirror\lib\codemirror.js" />
-    <None Include="wwwroot\lib\code_mirror\mode\javascript\javascript.js" />
-    <None Include="wwwroot\lib\code_mirror\mode\javascript\test.js" />
-    <None Include="wwwroot\lib\code_mirror\mode\meta.js" />
-    <None Include="wwwroot\lib\code_mirror\mode\yaml\yaml.js" />
-    <None Include="wwwroot\lib\jquery\dist\jquery.js" />
-    <None Include="wwwroot\lib\jquery\dist\jquery.min.js" />
-    <None Include="wwwroot\lib\jquery\dist\jquery.min.map" />
-    <None Include="wwwroot\lib\layer\mobile\layer.js" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Update="nlog.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

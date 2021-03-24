@@ -7,8 +7,6 @@ using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
-using AgileConfig.Server.Common;
-using Microsoft.Extensions.Logging;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {

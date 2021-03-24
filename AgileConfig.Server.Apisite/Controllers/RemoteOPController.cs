@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Agile.Config.Protocol;
 using AgileConfig.Server.Apisite.Websocket;
-using AgileHttp;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AgileConfig.Server.Apisite.Controllers
