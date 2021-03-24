@@ -31,7 +31,9 @@ import { initPassword } from './service';
   }
 
   const InitPassword: React.FC = (props) => {
-
+    useEffect(()=>{
+        message.info("首次登录请初始化管理员密码。");
+    },[])
     return (
       <div className={styles.main}>
         <ProForm
