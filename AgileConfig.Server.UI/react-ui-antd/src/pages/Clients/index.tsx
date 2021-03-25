@@ -66,7 +66,7 @@ const clients:React.FC = () => {
   {
     const result = await queryApps({})
     const obj = {};
-    result.data.forEach(x=>{
+    result.data?.forEach(x=>{
       if(x) {
         obj[x.id] = {
           text: x.name
