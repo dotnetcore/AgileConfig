@@ -2,7 +2,7 @@ import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { ModalForm,  ProFormDependency, ProFormSelect, ProFormSwitch, ProFormText } from '@ant-design/pro-form';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
-import { Button, FormInstance, message, Modal, Switch } from 'antd';
+import { Button, FormInstance, message, Modal, Space, Switch, Tag } from 'antd';
 import React, { useState, useRef } from 'react';
 import {Link} from 'umi';
 import UpdateForm from './comps/updateForm';
@@ -139,6 +139,31 @@ const appList: React.FC = () => {
           status: 'success'
         }
       }
+    },
+    {
+      title: '关联',
+      dataIndex: 'inheritancedApps',
+      search: false,
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+            message: '此项为必填项',
+          },
+        ],
+      },
+      renderFormItem: (_, { defaultRender }) => {
+        return defaultRender(_);
+      },
+      render: (_, record) => (
+        <Space>
+          {record.inheritancedAppNames?.map((name:string) => (
+            <Tag color="blue" key={name}>
+              {name}
+            </Tag>
+          ))}
+        </Space>
+      ),
     },
     {
       title: '启用',

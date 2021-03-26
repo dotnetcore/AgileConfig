@@ -4,6 +4,7 @@ export type AppListItem = {
     enabled?: boolean,
     inheritanced: boolean,
     inheritancedApps?: string[],
+    inheritancedAppNames?: string[],
     secret?: string,
     createTime?: Date,
     updateTime?: Date

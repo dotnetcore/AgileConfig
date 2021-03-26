@@ -386,7 +386,7 @@ const configs: React.FC = (props: any) => {
             下线
        </Button>,
           <Button key="button" type="primary" onClick={()=>{ setjsonImportFormModalVisible(true) }}>
-            从json文件导入 {jsonImportFormModalVisible}
+            从json文件导入
           </Button>
         ]}
         rowSelection={{

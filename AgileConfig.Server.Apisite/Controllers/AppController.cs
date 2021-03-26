@@ -50,6 +50,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var vms = new List<AppListVM>();
             foreach (var item in pageList)
             {
+                var inheritancedApps = await _appService.GetInheritancedAppsAsync(item.Id);
                 vms.Add(new AppListVM
                 {
                     Id = item.Id,
@@ -61,7 +62,10 @@ namespace AgileConfig.Server.Apisite.Controllers
                     CreateTime = item.CreateTime,
                     inheritancedApps = item.Type == AppType.Inheritance ? 
                                                                             new List<string>() : 
-                                                                            (await _appService.GetInheritancedAppsAsync(item.Id)).Select(ia => ia.Id).ToList()
+                                                                            (inheritancedApps).Select(ia => ia.Id).ToList(),
+                    inheritancedAppNames = item.Type == AppType.Inheritance ?
+                                                                            new List<string>() :
+                                                                            (inheritancedApps).Select(ia => ia.Name).ToList()
                 });
             }
 
