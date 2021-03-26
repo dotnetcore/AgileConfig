@@ -1,6 +1,6 @@
 import { stringify } from 'querystring';
 import type { Reducer, Effect } from 'umi';
-import { history } from 'umi';
+import { getIntl, history, getLocale  } from 'umi';
 
 import { accountLogin } from '@/services/login';
 import { setAuthority, setToken } from '@/utils/authority';
@@ -34,6 +34,8 @@ const Model: LoginModelType = {
 
   effects: {
     *login({ payload }, { call, put }) {
+      const intl = getIntl(getLocale());
+
       const response = yield call(accountLogin, payload);
       yield put({
         type: 'changeLoginStatus',
@@ -43,7 +45,10 @@ const Model: LoginModelType = {
       if (response.status === 'ok') {
         const urlParams = new URL(window.location.href);
         const params = getPageQuery();
-        message.success('🎉 🎉 🎉  登录成功！');
+        const msg = intl.formatMessage({
+          id: 'pages.login.loginsuccess'
+        })
+        message.success(msg);
         let { redirect } = params as { redirect: string };
         if (redirect) {
           console.log('redirect url ' , redirect);
@@ -60,7 +65,10 @@ const Model: LoginModelType = {
         }
         history.replace(redirect || '/');
       } else {
-        message.error('用户名或密码错误 😢😢😢 ');
+        const msg = intl.formatMessage({
+          id: 'pages.login.loginfail'
+        })
+        message.error(msg);
       }
     },
 

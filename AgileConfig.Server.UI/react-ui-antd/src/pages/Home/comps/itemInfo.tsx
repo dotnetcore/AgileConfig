@@ -1,5 +1,5 @@
 import styles from '../index.less';
-import { history } from 'umi';
+import { useIntl,history } from 'umi';
 
 export type itemInfoProps = {
     type: string,
@@ -9,6 +9,8 @@ export type itemInfoProps = {
   }
 
 const ItemInfo: React.FC<itemInfoProps> = (props) => {
+    const intl = useIntl();
+
     const itemColor = () => {
       if (props.type == 'node') {
         return '#1890ff';
@@ -26,20 +28,12 @@ const ItemInfo: React.FC<itemInfoProps> = (props) => {
       return '';
     }
     const itemName = () => {
-      if (props.type == 'node') {
-        return '节点';
-      }
-      if (props.type == 'app') {
-        return '应用';
-      }
-      if (props.type == 'config') {
-        return '配置';
-      }
-      if (props.type == 'client') {
-        return '客户端';
-      }
-  
-      return '';
+      const key = 'pages.home.summary.' + props.type;
+      const name = intl.formatMessage({
+        id: key,
+      })
+
+      return name;
     }
     return (
       <div className={styles.item} style={{ backgroundColor: itemColor() }} onClick={()=>{

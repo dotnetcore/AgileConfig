@@ -19,22 +19,8 @@ export type LoginProps = {
   submitting?: boolean;
 };
 
-const LoginMessage: React.FC<{
-  content: string;
-}> = ({ content }) => (
-  <Alert
-    style={{
-      marginBottom: 24,
-    }}
-    message={content}
-    type="error"
-    showIcon
-  />
-);
-
 const Login: React.FC<LoginProps> = (props) => {
   const { userLogin = {}, submitting } = props;
-  const { status, type: loginType } = userLogin;
   const [type, setType] = useState<string>('account');
   const intl = useIntl();
 
@@ -88,14 +74,6 @@ const Login: React.FC<LoginProps> = (props) => {
           />
         </Tabs>
 
-        {status === 'error' && loginType === 'account' && !submitting && (
-          <LoginMessage
-            content={intl.formatMessage({
-              id: 'pages.login.accountLogin.errorMessage',
-              defaultMessage: '账户或密码错误（admin/ant.design)',
-            })}
-          />
-        )}
         {type === 'account' && (
           <>
             <ProFormText.Password

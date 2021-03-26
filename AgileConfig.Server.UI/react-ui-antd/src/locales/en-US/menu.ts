@@ -49,4 +49,9 @@ export default {
   'menu.editor.flow': 'Flow Editor',
   'menu.editor.mind': 'Mind Editor',
   'menu.editor.koni': 'Koni Editor',
+
+  'menu.list.node-list': 'Node',
+  'menu.list.app-list': 'App',
+  'menu.list.client-list': 'Client',
+  'menu.list.logs-list': 'Log',
 };

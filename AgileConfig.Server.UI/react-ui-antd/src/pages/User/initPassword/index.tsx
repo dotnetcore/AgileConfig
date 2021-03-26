@@ -4,20 +4,25 @@ import {
   import { Alert, message, Tabs } from 'antd';
   import React, { useEffect, useState } from 'react';
   import ProForm, { ProFormText } from '@ant-design/pro-form';
-  import { useIntl, connect, FormattedMessage,history } from 'umi';
+  import { useIntl, connect, FormattedMessage,history, getIntl, getLocale } from 'umi';
 
   import styles from './index.less';
 import { InitPasswordModel } from './data';
 import { initPassword } from './service';
   
   const handleSave = async function name(params:InitPasswordModel) {
-    const hide = message.loading('正在初始化');
+    const intl = getIntl(getLocale());
+    const hide = message.loading(intl.formatMessage({
+      id: 'saving'
+    }));
     try {
       const result = await initPassword(params);
       hide();
       const success = result.success;
       if (success) {
-        message.success('初始化成功，请使用管理员密码重新登录。');
+        message.success(intl.formatMessage({
+          id: 'pages.initpassword.init_success'
+        }));
         history.replace('/user/login');
       } else {
         message.error(result.message);
@@ -25,14 +30,20 @@ import { initPassword } from './service';
       return success;
     } catch (error) {
       hide();
-      message.error('初始化失败请重试！');
+      message.error(intl.formatMessage({
+        id: 'save_fail'
+      }));
       return false;
     }
   }
 
   const InitPassword: React.FC = (props) => {
+    const intl = useIntl();
     useEffect(()=>{
-        message.info("首次登录请初始化管理员密码。");
+        const msg = intl.formatMessage({
+          id: 'pages.initpassword.init_tip',
+        })
+        message.info(msg);
     },[])
     return (
       <div className={styles.main}>
@@ -49,8 +60,9 @@ import { initPassword } from './service';
               },
             },
             searchConfig: {
-              submitText: '确定'
-            }
+              submitText: intl.formatMessage({
+                id: 'pages.initpassword.submit',
+              })}
           }}
           onFinish={async (values) => {
              const result = handleSave(values as InitPasswordModel)
@@ -59,7 +71,9 @@ import { initPassword } from './service';
           <Tabs activeKey="account">
             <Tabs.TabPane
               key="account"
-              tab="初始化管理员密码"
+              tab={intl.formatMessage({
+                id: 'pages.initpassword.tab',
+              })}
             />
           </Tabs>
           <ProFormText.Password
@@ -68,13 +82,15 @@ import { initPassword } from './service';
                  size: 'large',
                  prefix: <LockTwoTone className={styles.prefixIcon} />,
                }}
-               placeholder="请输入密码"
+               placeholder={intl.formatMessage({
+                id: 'pages.login.password.placeholder',
+              })}
                rules={[
                  {
                    required: true,
                    message: (
                      <FormattedMessage
-                       id="pages.login.initpassword.required"
+                       id="pages.login.password.required"
                        defaultMessage="请输入密码！"
                      />
                    ),
@@ -87,13 +103,15 @@ import { initPassword } from './service';
                  size: 'large',
                  prefix: <LockTwoTone className={styles.prefixIcon} />,
                }}
-               placeholder="请再次输入密码"
+               placeholder={intl.formatMessage({
+                id: 'pages.initpassword.ag_password.placeholder',
+              })}
                rules={[
                  {
                    required: true,
                    message: (
                      <FormattedMessage
-                       id="pages.login.initpassword.required"
+                       id="pages.login.password.required"
                        defaultMessage="请再次输入密码！"
                      />
                    ),
