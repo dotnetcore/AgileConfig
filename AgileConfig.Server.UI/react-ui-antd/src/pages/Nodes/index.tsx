@@ -6,59 +6,87 @@ import { Button, FormInstance, message,Modal } from 'antd';
 import React, { useState, useRef } from 'react';
 import { NodeItem } from './data';
 import { queryNodes, addNode, delNode,allClientReload } from './service';
+import { useIntl, getIntl, getLocale } from 'umi';
 
 const { confirm } = Modal;
 const handleAdd = async (fields: NodeItem) => {
-  const hide = message.loading('正在保存');
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({
+    id: 'saving'
+  }));
   try {
     const result = await addNode({ ...fields });
     hide();
     const success = result.success;
     if (success) {
-      message.success('添加成功');
+      message.success(intl.formatMessage({
+        id: 'save_success'
+      }));
     } else {
-      message.error(result.message);
+      message.error(intl.formatMessage({
+        id: 'save_fail'
+      }));
     }
     return success;
   } catch (error) {
     hide();
-    message.error('添加失败请重试！');
+    message.error(intl.formatMessage({
+      id: 'save_fail'
+    }));
     return false;
   }
 };
 const handleAllReload = async (fields: NodeItem) => {
-  const hide = message.loading('正在刷新');
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({
+    id: 'refreshing'
+  }));
   try {
     const result = await allClientReload({ ...fields });
     hide();
     const success = result.success;
     if (success) {
-      message.success('刷新成功');
+      message.success(intl.formatMessage({
+        id: 'refresh_success'
+      }));
     } else {
-      message.error(result.message);
+      message.error(intl.formatMessage({
+        id: 'refresh_fail'
+      }));
     }
     return success;
   } catch (error) {
     hide();
-    message.error('刷新失败请重试！');
+    message.error(intl.formatMessage({
+      id: 'refresh_fail'
+    }));
     return false;
   }
 };
 const handleDel = async (fields: NodeItem) => {
-  const hide = message.loading('正在删除');
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({
+    id: 'deleting'
+  }));
   try {
     const result = await delNode({ ...fields });
     hide();
     const success = result.success;
     if (success) {
-      message.success('删除成功');
+      message.success(intl.formatMessage({
+        id: 'delete_success'
+      }));
     } else {
-      message.error('删除失败请重试！');
+      message.error(intl.formatMessage({
+        id: 'delete_fail'
+      }));
     }
     return success;
   } catch (error) {
     hide();
-    message.error('删除失败请重试！');
+    message.error(intl.formatMessage({
+      id: 'delete_fail'
+    }));
     return false;
   }
 };
@@ -66,38 +94,53 @@ const handleDel = async (fields: NodeItem) => {
 const nodeList:React.FC = () => {
   const actionRef = useRef<ActionType>();
   const addFormRef = useRef<FormInstance>();
+  const intl = useIntl();
 
   const [createModalVisible, handleModalVisible] = useState<boolean>(false);
   const columns: ProColumns<NodeItem>[] = [
     {
-      title: '节点地址',
+      title: intl.formatMessage({
+        id: 'pages.node.table.cols.address'
+      }),
       dataIndex: 'address',
     },
     {
-      title: '备注',
+      title: intl.formatMessage({
+        id: 'pages.node.table.cols.remark'
+      }),
       dataIndex: 'remark',
     },
     {
-      title: '最后响应时间',
+      title: intl.formatMessage({
+        id: 'pages.node.table.cols.lastEcho'
+      }),
       dataIndex: 'lastEchoTime',
       valueType: 'dateTime'
     },
     {
-      title: '状态',
+      title: intl.formatMessage({
+        id: 'pages.node.table.cols.status'
+      }),
       dataIndex: 'status',
       valueEnum: {
         1:{
-          text: '在线',
+          text:  intl.formatMessage({
+            id: 'pages.node.table.cols.status.1'
+          }),
           status: 'Processing'
         },
         0: {
-          text: '离线',
+          text:  intl.formatMessage({
+            id: 'pages.node.table.cols.status.0'
+          }),
           status: 'Default'
         }
       }
     },
     {
-      title: '操作',
+      title: intl.formatMessage({
+        id: 'pages.node.table.cols.action'
+      }),
       valueType: 'option',
       render: (text, record, _, action) => [
         <a onClick={
@@ -105,17 +148,27 @@ const nodeList:React.FC = () => {
             handleAllReload(record)
           }
         }>
-          刷新所有客户端的配置
+          {
+            intl.formatMessage({
+              id: 'pages.node.action.refresh'
+            })
+          }
         </a>,
         <Button  type="link" danger
           onClick={ ()=> {
-            const msg = `是否确定删除节点【${record.address}】?`;
+            const msg = intl.formatMessage({id: 'pages.node.delete_msg'}) + `【${record.address}】?`;
             confirm({
               icon: <ExclamationCircleOutlined />,
               content: <div>
                           <div>{msg}</div>
                           <br></br>
-                          <div>删除节点并不会让其真正的下线，只是脱离控制台的管理。所有连接至此节点的客户端都会继续正常工作。</div>
+                          <div>
+                            {
+                              intl.formatMessage({
+                                id: 'pages.node.action.delete.tips'
+                              })
+                            }
+                          </div>
                         </div>,
               async onOk() {
                 console.log('delete node ' + record.address);
@@ -130,7 +183,11 @@ const nodeList:React.FC = () => {
             });
           }}
         >
-          删除
+          {
+              intl.formatMessage({
+                id: 'pages.node.action.delete'
+              })
+          }
         </Button >
       ]
     }
@@ -150,13 +207,21 @@ const nodeList:React.FC = () => {
           <Button key="button" icon={<PlusOutlined />} type="primary"
           onClick={ ()=>{ handleModalVisible(true) } }
           >
-            添加
+            {
+              intl.formatMessage({
+                id: 'pages.node.action.add'
+              })
+            }
           </Button>
         ]}
       />
       <ModalForm 
         formRef={addFormRef}
-        title="添加节点" 
+        title={
+          intl.formatMessage({
+            id: 'pages.node.action.add'
+          })
+        } 
         width="400px"
         visible={createModalVisible}
         onVisibleChange={handleModalVisible}
@@ -179,13 +244,25 @@ const nodeList:React.FC = () => {
               required: true,
             },
           ]}
-          label="节点地址"
+          label={
+            intl.formatMessage({
+              id: 'pages.node.table.cols.address'
+            })
+          }
           width="md"
-          name="address"
-          tooltip="请输入节点的IP跟PORT，如 http://192.168.0.120:5000"
+          name="address" 
+          tooltip={
+            intl.formatMessage({
+              id: 'pages.node.from.tips'
+            })
+          }
         />
         <ProFormTextArea
-          label="备注"
+          label={
+            intl.formatMessage({
+              id: 'pages.node.table.cols.remark'
+            })
+          }
           width="md"
           name="remark"
         />

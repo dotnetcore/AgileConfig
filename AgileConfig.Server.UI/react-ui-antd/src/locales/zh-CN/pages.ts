@@ -4,6 +4,12 @@ export default {
   'loading': '正在加载',
   'save_success': '保存成功 !',
   'save_fail': '保存失败 !',
+  'deleting': '正在删除',
+  'delete_success': '删除成功！',
+  'delete_fail': '删除失败！',
+  'refreshing': '正在刷新',
+  'refresh_success': '刷新成功！',
+  'refresh_fail': '删除失败！',
 
   'pages.layouts.userLayout.title': 'AgielConfig - 轻量级配置中心',
   'pages.login.accountLogin.tab': '使用管理员密码登录',
@@ -45,4 +51,21 @@ export default {
   'pages.home.summary.app': '应用',
   'pages.home.summary.config': '配置',
   'pages.home.summary.client': '客户端',
+
+  'pages.node.action.add': '添加',
+  'pages.node.action.delete': '删除',
+  'pages.node.action.refresh': '刷新所有客户端的配置 ',
+
+  'pages.node.table.cols.address': '节点地址',
+  'pages.node.table.cols.remark': '备注',
+  'pages.node.table.cols.lastEcho': '最后响应时间',
+  'pages.node.table.cols.status': '状态',
+  'pages.node.table.cols.status.1': '在线',
+  'pages.node.table.cols.status.0': '离线',
+  'pages.node.table.cols.action': '	操作',
+
+  'pages.node.from.tips': '请输入节点的IP跟PORT，如 http://192.168.0.120:5000',
+  'pages.node.action.delete.tips': '删除节点并不会让其真正的下线，只是脱离控制台的管理。所有连接至此节点的客户端都会继续正常工作。',
+  'pages.node.delete_msg': '是否确定删除节点 '
+
 };

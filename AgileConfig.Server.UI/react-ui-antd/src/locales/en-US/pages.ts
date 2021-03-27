@@ -4,6 +4,12 @@ export default {
   'loading': 'Loading',
   'save_success': 'Save successful !',
   'save_fail': 'Save failed !',
+  'deleting': 'Deleting',
+  'delete_success': 'Delete successful',
+  'delete_fail': 'Delete failed !',
+  'refreshing': 'Refreshing',
+  'refresh_success': 'Refresh successful',
+  'refresh_fail': 'Refresh failed !',
 
   'pages.layouts.userLayout.title':
     'AgileConfig - a light configuration server',
@@ -45,7 +51,23 @@ export default {
 
   'pages.home.summary.node': 'Node',
   'pages.home.summary.app': 'App',
-  'pages.home.summary.config': 'configuration',
+  'pages.home.summary.config': 'Configuration',
   'pages.home.summary.client': 'Client',
 
+  'pages.node.action.add': 'Add',
+  'pages.node.action.delete': 'Delete',
+  'pages.node.action.refresh': 'Refresh all clients',
+
+  'pages.node.table.cols.address': 'Address',
+  'pages.node.table.cols.remark': 'Remark',
+  'pages.node.table.cols.lastEcho': 'LastEcho',
+  'pages.node.table.cols.status.1': 'Online',
+  'pages.node.table.cols.status.0': 'Offline',
+  'pages.node.table.cols.status': 'Status',
+
+  'pages.node.table.cols.action': 'Action',
+
+  'pages.node.from.tips': "Input node's IP and port , example http://192.168.0.120:5000",
+  'pages.node.action.delete.tips': 'Delete the node will not shutdown the server , it just out control the admin console .',
+  'pages.node.delete_msg': 'Are you sure to delete the node '
 };
