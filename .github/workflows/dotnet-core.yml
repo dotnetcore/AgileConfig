@@ -23,7 +23,6 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --configuration Release --no-restore
-    - uses: actions/checkout@v2
     - name: Use Node.js 12.x
       working-directory: AgileConfig.Server.UI\react-ui-antd
     - uses: actions/setup-node@v1
