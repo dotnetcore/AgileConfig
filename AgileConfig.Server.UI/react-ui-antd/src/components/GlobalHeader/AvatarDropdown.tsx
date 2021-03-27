@@ -2,7 +2,7 @@ import { LogoutOutlined, SettingOutlined, } from '@ant-design/icons';
 import { Menu, Spin } from 'antd';
 import React from 'react';
 import type { ConnectProps } from 'umi';
-import {  connect } from 'umi';
+import {  connect,getIntl, getLocale } from 'umi';
 import type { ConnectState } from '@/models/connect';
 import type { CurrentUser } from '@/models/user';
 import HeaderDropdown from '../HeaderDropdown';
@@ -46,6 +46,7 @@ class AvatarDropdown extends React.Component<GlobalHeaderRightProps,{changePassw
   };
 
   render(): React.ReactNode {
+    const intl = getIntl(getLocale());
     const {
       currentUser = {
         avatar: '',
@@ -57,11 +58,19 @@ class AvatarDropdown extends React.Component<GlobalHeaderRightProps,{changePassw
       <Menu className={styles.menu} selectedKeys={[]} onClick={this.onMenuClick}>
         <Menu.Item key="resetPassword">
           <SettingOutlined />
-            修改密码
+            {
+             intl.formatMessage({
+              id: 'menu.account.resetPassword'
+             })
+            }
         </Menu.Item>
         <Menu.Item key="logout">
           <LogoutOutlined />
-          退出登录
+           {
+             intl.formatMessage({
+              id: 'menu.account.logout'
+             })
+           }
         </Menu.Item>
       </Menu>
     );
