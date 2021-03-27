@@ -24,14 +24,19 @@ jobs:
       run: dotnet build --configuration Release --no-restore
   job2:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./AgileConfig.Server.UI/react-ui-antd
+    strategy:
+      matrix:
+        node-version: [10.x, 12.x, 14.x, 15.x]
 
     steps:
     - uses: actions/checkout@v2
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
       with:
-        dotnet-version: 3.1.301
-    - name: Install dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
+        node-version: ${{ matrix.node-version }}
+        
+    - run: npm install
+    - run: npm run build
