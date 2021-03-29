@@ -9,20 +9,7 @@ on:
     branches: [ master ]
 
 jobs:
-  job1:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 3.1.301
-    - name: Install dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
-  job2:
+  build-reactapp:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -40,6 +27,23 @@ jobs:
         
     - run: npm install
     - run: npm run build
-    - run: cd ..
-    - run: cd ..
-    - run: ls
+  build-dotnet:
+    needs: build-reactapp
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.301
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    -
+      name: Set up QEMU
+      uses: docker/setup-qemu-action@v1
+    -
+      name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
