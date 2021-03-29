@@ -42,6 +42,7 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Check out the repo
+      uses: actions/checkout@v2
     - name: Push to Docker Hub
       uses: docker/build-push-action@v1
       with:
