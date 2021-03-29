@@ -38,5 +38,8 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         
-    - run: npm install --save
+    - run: npm install
     - run: npm run build
+    - run: cd ..
+    - run: cd ..
+    - run: ls
