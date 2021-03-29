@@ -40,7 +40,7 @@
                 name: 'home',
                 icon: 'Dashboard',
                 path: '/home',
-                component: './home',
+                component: './Home',
               },
               {
                 name: 'list.node-list',
