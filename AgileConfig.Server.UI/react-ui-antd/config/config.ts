@@ -41,4 +41,5 @@ export default defineConfig({
     basePath: '/a/',
   },
   esbuild: {},
+  outputPath: '../../AgileConfig.Server.Apisite/wwwroot/ui'
 });
