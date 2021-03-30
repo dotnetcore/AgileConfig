@@ -9,26 +9,26 @@ on:
     branches: [ master ]
 
 jobs:
-  build-dotnet:
+  build-reactapp:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: AgileConfig.Server.UI/react-ui-antd
+    strategy:
+      matrix:
+        node-version: [12.x]
 
     steps:
     - uses: actions/checkout@v2
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
       with:
-        dotnet-version: 3.1.301
-    - name: Install dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
-    - name: Check out the repo
-      uses: actions/checkout@v2
-    - name: Push to Docker Hub
-      uses: docker/build-push-action@v1
+        node-version: ${{ matrix.node-version }}
+        
+    - run: npm install
+    - run: npm run build
+    - uses: actions/upload-artifact@v2
       with:
-        username: ${{ secrets.DOCKER_HUB_NAME }}
-        password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-        repository: kklldog/agile_config
-        tags: test
+        name: agileconfig-ui
+        path: dist/
 
