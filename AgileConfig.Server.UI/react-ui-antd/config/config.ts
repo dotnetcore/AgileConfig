@@ -40,6 +40,5 @@ export default defineConfig({
   manifest: {
     basePath: '/a/',
   },
-  esbuild: {},
-  outputPath: '../../AgileConfig.Server.Apisite/wwwroot/ui'
+  esbuild: {}
 });
