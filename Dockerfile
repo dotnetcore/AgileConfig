@@ -2,12 +2,11 @@ FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS base
 WORKDIR /app
 EXPOSE 5000
 
-FROM node:12.18.1 AS antd
+FROM node:12.16.1 AS antd
 ENV NODE_ENV=production
 WORKDIR /antd
 COPY /AgileConfig.Server.UI/react-ui-antd /antd
-RUN npm install
-RUN npm build
+RUN npm install && ls && npm run build
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
