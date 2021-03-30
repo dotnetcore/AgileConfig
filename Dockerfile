@@ -7,7 +7,7 @@ ENV NODE_ENV=production
 WORKDIR /antd
 COPY /AgileConfig.Server.UI/react-ui-antd /antd
 RUN npm install
-RUN npm build
+RUN npm run build
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
