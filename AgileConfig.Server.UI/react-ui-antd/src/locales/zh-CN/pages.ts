@@ -10,6 +10,10 @@ export default {
   'refreshing': '正在刷新',
   'refresh_success': '刷新成功！',
   'refresh_fail': '删除失败！',
+  'enabled.0': '禁用',
+  'enabled.1': '启用',
+  'success': '成功',
+  'failed': '失败',
 
   'pages.layouts.userLayout.title': 'AgielConfig - 轻量级配置中心',
   'pages.login.accountLogin.tab': '使用管理员密码登录',
@@ -66,6 +70,35 @@ export default {
 
   'pages.node.from.tips': '请输入节点的IP跟PORT，如 http://192.168.0.120:5000',
   'pages.node.action.delete.tips': '删除节点并不会让其真正的下线，只是脱离控制台的管理。所有连接至此节点的客户端都会继续正常工作。',
-  'pages.node.delete_msg': '是否确定删除节点 '
+  'pages.node.delete_msg': '是否确定删除节点 ',
+
+  'pages.app.table.cols.appname': '名称',
+  'pages.app.table.cols.appid': '应用ID',
+  'pages.app.table.cols.secret': '密钥',
+  'pages.app.table.cols.create_time': '创建时间',
+  'pages.app.table.cols.update_time': '修改时间',
+  'pages.app.table.cols.public': '公共',
+  'pages.app.table.cols.link': '关联',
+  'pages.app.table.cols.enabled': '启用',
+  'pages.app.table.cols.action': '操作',
+  'pages.app.table.cols.action.configs': '配置项',
+  'pages.app.table.cols.action.edit': '编辑',
+  'pages.app.table.cols.action.delete': '删除',
+  'pages.app.table.cols.action.add': '新建',
+
+  'pages.app.form.title.add': '新建应用',
+  'pages.app.form.title.edit': '编辑应用',
+  'pages.app.form.name': '名称',
+  'pages.app.form.id': '应用ID',
+  'pages.app.form.secret': '密钥',
+  'pages.app.form.public': '公共应用',
+  'pages.app.form.public.tooltip': '公共应用可以被其他应用关联',
+  'pages.app.form.connected': '关联公共应用',
+  'pages.app.form.connected.tooltip': '关联后可以读取公共应用的配置项',
+  'pages.app.form.enabled': '启用',
+  'pages.app.delete_msg': '是否确定删除应用 ',
+
+  'pages.app.inheritanced.true': '公共',
+  'pages.app.inheritanced.false': '私有',
 
 };

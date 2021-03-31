@@ -1,3 +1,4 @@
+import { useIntl } from "@/.umi/plugin-locale/localeExports";
 import {  ModalForm, ProFormDependency, ProFormSelect, ProFormSwitch, ProFormText } from "@ant-design/pro-form";
 import React from 'react';
 import { AppListItem } from "../data";
@@ -10,10 +11,15 @@ export type UpdateFormProps = {
     setValue: React.Dispatch<React.SetStateAction<AppListItem | undefined>>
   };
 const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
+    const intl = useIntl();
 
     return (
     <ModalForm 
-    title="编辑应用"
+    title={
+      intl.formatMessage({
+        id: 'pages.app.form.title.edit'
+      })
+    }
     initialValues={props.value}
     visible={props.updateModalVisible}
     modalProps={
@@ -34,7 +40,11 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
           required: true,
         },
       ]}
-      label="名称"
+      label={
+        intl.formatMessage({
+          id: 'pages.app.form.name'
+        })
+      }
       name="name"
     />
     <ProFormText
@@ -44,16 +54,28 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
       },
     ]}
     readonly={true}
-      label="ID"
+      label={
+        intl.formatMessage({
+          id: 'pages.app.form.id'
+        })
+      }
       name="id"
     />
     <ProFormText.Password
-      label="密钥"
+      label={
+        intl.formatMessage({
+          id: 'pages.app.form.secret'
+        })
+      }
       name="secret"
     />
     <ProFormSwitch 
       tooltip="公共应用可以被其他应用关联"
-      label="公共应用" 
+      label={
+        intl.formatMessage({
+          id: 'pages.app.form.public'
+        })
+      } 
       name="inheritanced"
       checkedChildren={true} unCheckedChildren={false}
       >
@@ -65,7 +87,9 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
         (e) => {
           return !e.inheritanced? 
                 <ProFormSelect 
-                label="关联应用" 
+                label={intl.formatMessage({
+                  id: 'pages.app.form.connected'
+                })} 
                 tooltip="关联后可以读取公共应用的配置项"
                 name="inheritancedApps"
                     mode="multiple" 
@@ -80,7 +104,11 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
       }
     </ProFormDependency>
    
-    <ProFormSwitch label="启用" name="enabled" checkedChildren={true} unCheckedChildren={false}></ProFormSwitch>
+    <ProFormSwitch label={
+      intl.formatMessage({
+        id: 'pages.app.form.enabled'
+      })
+    } name="enabled" checkedChildren={true} unCheckedChildren={false}></ProFormSwitch>
     </ModalForm>
     );
 }

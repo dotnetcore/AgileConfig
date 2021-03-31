@@ -4,7 +4,7 @@ import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
 import { Button, FormInstance, message, Modal, Space, Switch, Tag } from 'antd';
 import React, { useState, useRef } from 'react';
-import {Link} from 'umi';
+import {getIntl, getLocale, Link, useIntl} from 'umi';
 import UpdateForm from './comps/updateForm';
 import { AppListItem, AppListParams, AppListResult } from './data';
 import { addApp, editApp, delApp, queryApps, inheritancedApps,enableOrdisableApp } from './service';
@@ -12,56 +12,79 @@ import { addApp, editApp, delApp, queryApps, inheritancedApps,enableOrdisableApp
 const { confirm } = Modal;
 
 const handleAdd = async (fields: AppListItem) => {
-  const hide = message.loading('正在保存');
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({
+    id:'saving'
+  }));
   try {
     const result = await addApp({ ...fields });
     hide();
     const success = result.success;
     if (success) {
-      message.success('新建成功');
+      message.success(intl.formatMessage({
+        id:'save_success'
+      }));
     } else {
       message.error(result.message);
     }
     return success;
   } catch (error) {
     hide();
-    message.error('新建失败请重试！');
+    message.error(intl.formatMessage({
+      id:'save_fail'
+    }));
     return false;
   }
 };
 const handleEdit = async (app: AppListItem) => {
-  const hide = message.loading('正在保存');
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({
+    id:'saving'
+  }));
   try {
     const result = await editApp({ ...app });
     hide();
     const success = result.success;
     if (success) {
-      message.success('保存成功');
+      message.success(intl.formatMessage({
+        id:'save_success'
+      }));
     } else {
       message.error(result.message);
     }
     return success;
   } catch (error) {
     hide();
-    message.error('保存失败请重试！');
+    message.error(intl.formatMessage({
+      id:'save_fail'
+    }));
     return false;
   }
 };
 const handleDel = async (fields: AppListItem) => {
-  const hide = message.loading('正在删除');
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({
+    id:'deleting'
+  }));
   try {
     const result = await delApp({ ...fields });
     hide();
     const success = result.success;
     if (success) {
-      message.success('删除成功');
+      message.success(intl.formatMessage({
+        id:'delete_success'
+      }));
     } else {
-      message.error('删除失败请重试！');
+      message.error(intl.formatMessage({
+        id:'delete_fail'
+      }));
     }
     return success;
   } catch (error) {
     hide();
-    message.error('删除失败请重试！');
+    message.error(intl.formatMessage({
+      id:'delete_fail'
+    }));
     return false;
   }
 };
@@ -70,6 +93,8 @@ const appList: React.FC = () => {
   const actionRef = useRef<ActionType>();
   const addFormRef = useRef<FormInstance>();
  
+  const intl = useIntl();
+
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [updateModalVisible, setUpdateModalVisible] = useState<boolean>(false);
   const [currentRow, setCurrentRow] = useState<AppListItem>();
@@ -81,8 +106,20 @@ const appList: React.FC = () => {
   }
   const handleEnabledChange =async (checked:boolean, entity:AppListItem) => {
     const result = await enableOrdisableApp(entity.id);
+    const qiyong = intl.formatMessage({
+      id: 'enabled.1'
+    });
+    const jinyong = intl.formatMessage({
+      id: 'enabled.0'
+    });
+    const success = intl.formatMessage({
+      id: 'success'
+    });
+    const failed = intl.formatMessage({
+      id: 'failed'
+    });
     if (result.success) {
-      const msg = (checked?'启用':'禁用') + '成功';
+      const msg = (checked?qiyong:jinyong) + success;
       message.success(msg);
       if (dataSource) {
         const app = dataSource?.data?.find(x=>x.id === entity.id);
@@ -93,65 +130,75 @@ const appList: React.FC = () => {
       }
     }
     else{
-      message.error((checked?'启用':'禁用') + '失败')
+      message.error((checked?qiyong:jinyong) + failed)
     }
   }
   const columns: ProColumns<AppListItem>[] = [
     {
-      title: '名称',
+      title: intl.formatMessage({
+        id:'pages.app.table.cols.appname'
+      }),
       dataIndex: 'name',
     },
     {
-      title: '应用ID',
+      title: intl.formatMessage({
+        id:'pages.app.table.cols.appid'
+      }),
       dataIndex: 'id',
       copyable: true,
     },
     {
-      title: '密钥',
+      title: intl.formatMessage({
+        id:'pages.app.table.cols.secret'
+      }),
       dataIndex: 'secret',
       valueType: 'password',
       hideInSearch: true,
       copyable: true,
     },
     {
-      title: '创建时间',
+      title: intl.formatMessage({
+        id:'pages.app.table.cols.create_time'
+      }),
       dataIndex: 'createTime',
       valueType: 'dateTime',
       hideInSearch: true
     },
     {
-      title: '修改时间',
+      title: intl.formatMessage({
+        id:'pages.app.table.cols.update_time'
+      }),
       dataIndex: 'updateTime',
       valueType: 'dateTime',
       hideInSearch: true
     },
     {
-      title: '公共',
+      title: intl.formatMessage({
+        id:'pages.app.table.cols.public'
+      }),
       dataIndex: 'inheritanced',
       hideInSearch: true,
       valueEnum: {
         false: {
-          text: '私有',
+          text:  intl.formatMessage({
+            id:'pages.app.inheritanced.false'
+          }),
           status: 'default'
         },
         true: {
-          text: '公共',
+          text:  intl.formatMessage({
+            id:'pages.app.inheritanced.true'
+          }),
           status: 'success'
         }
       }
     },
     {
-      title: '关联',
+      title: intl.formatMessage({
+        id:'pages.app.table.cols.link'
+      }),
       dataIndex: 'inheritancedApps',
       search: false,
-      formItemProps: {
-        rules: [
-          {
-            required: true,
-            message: '此项为必填项',
-          },
-        ],
-      },
       renderFormItem: (_, { defaultRender }) => {
         return defaultRender(_);
       },
@@ -166,7 +213,9 @@ const appList: React.FC = () => {
       ),
     },
     {
-      title: '启用',
+      title: intl.formatMessage({
+        id:'pages.app.table.cols.enabled'
+      }),
       dataIndex: 'enabled',
       render: (dom, entity) => {
         return <Switch checked={entity.enabled} size="small" onChange={
@@ -178,7 +227,9 @@ const appList: React.FC = () => {
       hideInSearch: true
     },
     {
-      title: '操作',
+      title: intl.formatMessage({
+        id:'pages.app.table.cols.action'
+      }),
       valueType: 'option',
       render: (text, record, _, action) => [
         <Link 
@@ -187,7 +238,9 @@ const appList: React.FC = () => {
             pathname:'/app/config/' + record.id + '/' + record.name,
           }
         }
-      >配置项</Link>,
+      >{intl.formatMessage({
+        id:'pages.app.table.cols.action.configs'
+      })}</Link>,
         <a
           onClick={() => {
             setUpdateModalVisible(true);
@@ -196,11 +249,17 @@ const appList: React.FC = () => {
             console.log('current app ', currentRow);
           }}
         >
-          编辑
+          {
+            intl.formatMessage({
+              id:'pages.app.table.cols.action.edit'
+            })
+          }
         </a>,
         <Button type="link" danger
           onClick={() => {
-            const msg = `是否确定删除应用【${record.name}】?`;
+            const msg = intl.formatMessage({
+              id:'pages.app.delete_msg'
+            }) + `【${record.name}】?`;
             confirm({
               icon: <ExclamationCircleOutlined />,
               content: msg,
@@ -217,7 +276,11 @@ const appList: React.FC = () => {
             });
           }}
         >
-          删除
+          {
+            intl.formatMessage({
+              id:'pages.app.table.cols.action.delete'
+            })
+          }
         </Button>
       ]
     }
@@ -237,14 +300,22 @@ const appList: React.FC = () => {
         request={(params, sorter, filter) => handleQuery(params)}
         toolBarRender={() => [
           <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { setCreateModalVisible(true) }}>
-            新建
+            {
+              intl.formatMessage({
+                id:'pages.app.table.cols.action.add'
+              })
+            }
           </Button>
         ]}
         //dataSource={dataSource}
       />
       <ModalForm
         formRef={addFormRef}
-        title="新建应用"
+        title={
+          intl.formatMessage({
+            id: 'pages.app.form.title.add'
+          })
+        }
         visible={createModalVisible}
         onVisibleChange={setCreateModalVisible}
         onFinish={
@@ -266,7 +337,11 @@ const appList: React.FC = () => {
               required: true,
             },
           ]}
-          label="名称"
+          label={
+            intl.formatMessage({
+              id: 'pages.app.form.name'
+            })
+          }
           name="name"
         />
         <ProFormText
@@ -275,7 +350,11 @@ const appList: React.FC = () => {
               required: true,
             },
           ]}
-          label="ID"
+          label={
+            intl.formatMessage({
+              id: 'pages.app.form.id'
+            })
+          }
           name="id"
         />
         <ProFormText.Password
@@ -283,10 +362,22 @@ const appList: React.FC = () => {
             {
             },
           ]}
-          label="密钥"
+          label={
+            intl.formatMessage({
+              id: 'pages.app.form.secret'
+            })
+          }
           name="secret"
         />
-        <ProFormSwitch tooltip="公共应用可以被其他应用关联" label="公共应用" name="inheritanced" checkedChildren={true} unCheckedChildren={false}></ProFormSwitch>
+        <ProFormSwitch tooltip={
+          intl.formatMessage({
+            id: 'pages.app.form.public.tooltip'
+          })
+        } label={
+           intl.formatMessage({
+            id: 'pages.app.form.public'
+          })
+        } name="inheritanced" checkedChildren={true} unCheckedChildren={false}></ProFormSwitch>
         <ProFormDependency name={
           ["inheritanced"]
         }>
@@ -294,8 +385,16 @@ const appList: React.FC = () => {
             (e) => {
               return !e.inheritanced ?
                 <ProFormSelect
-                  tooltip="关联后可以读取公共应用的配置项"
-                  label="关联应用"
+                  tooltip={
+                    intl.formatMessage({
+                      id: 'pages.app.form.connected.tooltip'
+                    })
+                  }
+                  label={
+                    intl.formatMessage({
+                      id: 'pages.app.form.connected'
+                    })
+                  }
                   name="inheritancedApps"
                   mode="multiple" 
                   request={async () => {
@@ -309,7 +408,11 @@ const appList: React.FC = () => {
             }
           }
         </ProFormDependency>
-        <ProFormSwitch label="启用" name="enabled" initialValue={true} checkedChildren={true} unCheckedChildren={false}>
+        <ProFormSwitch label={
+          intl.formatMessage({
+            id: 'pages.app.form.enabled'
+          })
+        } name="enabled" initialValue={true} checkedChildren={true} unCheckedChildren={false}>
         </ProFormSwitch>
       </ModalForm>
       {
