@@ -1,4 +1,4 @@
-name: .NET
+name: preview ci workflow
 
 on:
   push:
