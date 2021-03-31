@@ -40,5 +40,5 @@ export default defineConfig({
   manifest: {
     basePath: '/a/',
   },
-  esbuild: {},
+  esbuild: {}
 });
