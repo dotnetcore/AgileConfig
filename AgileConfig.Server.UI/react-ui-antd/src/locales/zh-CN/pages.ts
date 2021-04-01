@@ -18,6 +18,13 @@ export default {
   'disconnect_success': '断开成功！',
   'disconnect_fail': '断开失败！',
 
+  'resetpassword.title': '修改密码',
+  'resetpassword.oldpassword': '原密码',
+  'resetpassword.newpassword': '新密码',
+  'resetpassword.newpassword_ag': '重复新密码',
+  'resetpassword.update_success': '修改密码成功,请使用新密码重新登录。',
+  'resetpassword.update_fail': '修改密码失败。',
+  
   'pages.layouts.userLayout.title': 'AgielConfig - 轻量级配置中心',
   'pages.login.accountLogin.tab': '使用管理员密码登录',
   'pages.login.accountLogin.errorMessage': '错误的密码，请重新再试',

@@ -5,6 +5,7 @@ import pwa from './zh-CN/pwa';
 import settingDrawer from './zh-CN/settingDrawer';
 import settings from './zh-CN/settings';
 import pages from './zh-CN/pages';
+import err_code from './zh-CN/err_code';
 
 export default {
   'navBar.lang': '语言',
@@ -21,4 +22,6 @@ export default {
   ...settings,
   ...pwa,
   ...component,
+  ...err_code
+
 };

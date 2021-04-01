@@ -18,6 +18,13 @@ export default {
   'disconnect_success': 'Disconnect successfully ！',
   'disconnect_fail': 'Disconnect failed !',
 
+  'resetpassword.title': 'Reset Password',
+  'resetpassword.oldpassword': 'Old password',
+  'resetpassword.newpassword': 'New password',
+  'resetpassword.newpassword_ag': 'Repeat new password',
+  'resetpassword.update_success': 'Reset password successfully !',
+  'resetpassword.update_fail': 'Reset password failed .',
+
   'pages.layouts.userLayout.title':
     'AgileConfig - a light configuration server',
   'pages.login.accountLogin.tab': 'Account Login',

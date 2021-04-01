@@ -1,7 +1,8 @@
 import request from "@/utils/request";
 import { ModalForm, ProFormText } from "@ant-design/pro-form";
-import {  message, Modal} from "antd";
-import React, { useState } from 'react';
+import {  message } from "antd";
+import React from 'react';
+import { useIntl } from "react-intl";
 
 export type ChangepasswordProps = {
     changePasswordModalVisible: boolean;
@@ -10,21 +11,22 @@ export type ChangepasswordProps = {
   };
 
 const Changepassword : React.FC<ChangepasswordProps> = (props)=>{
+    const intl = useIntl();
     const handleChangePassword = async (params:any) => {
         var data = await request('/admin/changepassword', {
             method: 'POST',
             data: params
           })
         if (data.success) {
-            message.success('修改密码成功,请使用新密码重新登录。');
+            message.success(intl.formatMessage({id: 'resetpassword.update_success'}));
             props.onSuccess();
         }else{
-            message.error(data.message);
+            message.error(intl.formatMessage({id: data.err_code}));
         }
     }
     return (
         <ModalForm 
-        title="修改密码"
+        title={ intl.formatMessage({id: 'resetpassword.title'}) }
         width={400}
         visible={props.changePasswordModalVisible}
         modalProps={
@@ -45,7 +47,7 @@ const Changepassword : React.FC<ChangepasswordProps> = (props)=>{
                   required: true,
                 },
               ]}
-              label="原密码"
+              label={intl.formatMessage({id: 'resetpassword.oldpassword'})}
               name="oldPassword"
             />
              <ProFormText.Password
@@ -54,7 +56,7 @@ const Changepassword : React.FC<ChangepasswordProps> = (props)=>{
                   required: true,
                 },
               ]}
-              label="新密码"
+              label={intl.formatMessage({id: 'resetpassword.newpassword'})}
               name="password"
             />
              <ProFormText.Password
@@ -63,7 +65,7 @@ const Changepassword : React.FC<ChangepasswordProps> = (props)=>{
                   required: true,
                 },
               ]}
-              label="再次输入新密码"
+              label={intl.formatMessage({id: 'resetpassword.newpassword_ag'})}
               name="confirmPassword"
             />
         
