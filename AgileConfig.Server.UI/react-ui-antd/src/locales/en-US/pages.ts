@@ -14,6 +14,9 @@ export default {
   'enabled.1': 'Enable ',
   'success': 'Successfully',
   'failed': 'Failed',
+  'disconnecting': 'Disconnecting',
+  'disconnect_success': 'Disconnect successfully ！',
+  'disconnect_fail': 'Disconnect failed !',
 
   'pages.layouts.userLayout.title':
     'AgileConfig - a light configuration server',
@@ -103,4 +106,22 @@ export default {
 
   'pages.app.inheritanced.true': 'public',
   'pages.app.inheritanced.false': 'private',
+
+  'pages.client.table.cols.id': 'ID',
+  'pages.client.table.cols.node': 'Node',
+  'pages.client.table.cols.appid': 'AppID',
+  'pages.client.table.cols.appname': 'AppName',
+  'pages.client.table.cols.action': 'Action',
+  'pages.client.table.cols.action.refresh': 'Refresh',
+  'pages.client.table.cols.action.disconnect': 'Disconnect',
+
+  'pages.client.header.title': 'Connected Clients',
+  'pages.client.disconnect_message': `Are you sure to disconnect the client ?`,
+
+  'pages.logs.table.appname': `AppName`,
+  'pages.logs.table.type': 'Type',
+  'pages.logs.table.type.0': 'Normal',
+  'pages.logs.table.type.1': 'Warn',
+  'pages.logs.table.time': `LogTime`,
+  'pages.logs.table.content': `Content`,
 };

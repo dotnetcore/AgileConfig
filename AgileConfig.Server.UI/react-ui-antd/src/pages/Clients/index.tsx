@@ -1,48 +1,52 @@
-import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { getIntl, getLocale } from '@/.umi/plugin-locale/localeExports';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-layout';
-import ProTable, { ActionType, ProColumns, TableDropdown } from '@ant-design/pro-table';
+import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
 import { Button, message, Modal } from 'antd';
 import React, { useState, useRef, useEffect } from 'react';
+import { useIntl } from 'react-intl';
 import { queryApps } from '../Apps/service';
 import { queryNodes } from '../Nodes/service';
 import { queryClients, reloadClientConfigs, clientOffline } from './service';
 const { confirm } = Modal;
 
 const handleClientReload = async (client:any)=>{
-  const hide = message.loading('正在刷新');
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({id: 'refreshing'}));
   try {
     const result = await reloadClientConfigs(client.address, client.id);
     hide();
     const success = result.success;
     if (success) {
-      message.success('刷新成功');
+      message.success(intl.formatMessage({id: 'refresh_success'}));
     } else {
       message.error(result.message);
     }
     return success;
   } catch (error) {
     hide();
-    message.error('刷新失败请重试！');
+    message.error(intl.formatMessage({id: 'refresh_fail'}));
     return false;
   }
 }
 
 
 const handleClientOffline = async (client:any)=>{
-  const hide = message.loading('正在断开');
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({id: 'disconnecting'}));
   try {
     const result = await clientOffline(client.address, client.id);
     hide();
     const success = result.success;
     if (success) {
-      message.success('断开成功');
+      message.success(intl.formatMessage({id: 'disconnect_success'}));
     } else {
       message.error(result.message);
     }
     return success;
   } catch (error) {
     hide();
-    message.error('断开失败请重试！');
+    message.error(intl.formatMessage({id: 'disconnect_fail'}));
     return false;
   }
 }
@@ -50,6 +54,8 @@ const handleClientOffline = async (client:any)=>{
 const clients:React.FC = () => {
   const actionRef = useRef<ActionType>();
   const [appEnums, setAppEnums] = useState<any>();
+  const intl = useIntl();
+
   const getNodesForSelect = async () =>
   {
     const result = await queryNodes()
@@ -84,23 +90,31 @@ const clients:React.FC = () => {
   }, []);
   const columns: ProColumns[] = [
     {
-      title: 'ID',
+      title: intl.formatMessage({
+        id: 'pages.client.table.cols.id'
+      }),
       dataIndex: 'id',
       hideInSearch: true,
     },
     {
-      title: '节点',
+      title: intl.formatMessage({
+        id: 'pages.client.table.cols.node'
+      }),
       dataIndex: 'address',
       valueType: 'select',
       request: getNodesForSelect
     },
     {
-      title: '应用ID',
+      title: intl.formatMessage({
+        id: 'pages.client.table.cols.appid'
+      }),
       dataIndex: 'appId',
       hideInSearch: true,
     },
     {
-      title: '应用名称',
+      title: intl.formatMessage({
+        id: 'pages.client.table.cols.appname'
+      }),
       dataIndex: 'appId',
       valueType: 'select',
       valueEnum: appEnums,
@@ -108,7 +122,9 @@ const clients:React.FC = () => {
     },
     
     {
-      title: '操作',
+      title: intl.formatMessage({
+        id: 'pages.client.table.cols.action'
+      }),
       valueType: 'option',
       render: (text, record) => [
         <a
@@ -116,11 +132,17 @@ const clients:React.FC = () => {
             handleClientReload(record);
           }}
         >
-          刷新配置
+          {
+            intl.formatMessage({
+              id: 'pages.client.table.cols.action.refresh'
+            })
+          }
         </a>,
         <Button type="link" danger onClick={
          ()=>{
-          const msg = `是否确定断开与客户端【${record.id}】的连接?`;
+          const msg = intl.formatMessage({
+                        id: 'pages.client.disconnect_message'
+                      }) + `【${record.id}】`;
           confirm({
             icon: <ExclamationCircleOutlined />,
             content: msg,
@@ -135,13 +157,17 @@ const clients:React.FC = () => {
             },
           });
           }}>
-          断开
+           {
+             intl.formatMessage({
+              id: 'pages.client.table.cols.action.disconnect'
+            })
+           }
         </Button>
       ]
     }
   ];
   return (
-    <PageContainer header={{ title:'连接的客户端' }}>
+    <PageContainer header={{ title:intl.formatMessage({id:'pages.client.header.title'}) }}>
       <ProTable     
       search={{
         labelWidth: 'auto',

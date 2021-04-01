@@ -1,12 +1,13 @@
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ProColumns } from '@ant-design/pro-table';
 import React, { useState, useRef, useEffect } from 'react';
-import { FormattedMessage } from 'umi';
+import { FormattedMessage, useIntl } from 'umi';
 import { TableListItem } from '../TableList/data';
 import { queryLogs } from './service';
 import {queryApps} from '../Apps/service'
 
 const logs:React.FC = () =>  {
+  const intl = useIntl();
   const [appEnums, setAppEnums] = useState<any>();
   const getAppEnums = async () =>
   {
@@ -29,32 +30,32 @@ const logs:React.FC = () =>  {
  
   const columns: ProColumns[] = [
     {
-      title: '应用',
+      title: intl.formatMessage({id: 'pages.logs.table.appname'}),
       dataIndex: 'appId',
       valueType: 'select',
       valueEnum: appEnums,
     },
     {
-      title: '类型',
+      title: intl.formatMessage({id: 'pages.logs.table.type'}),
       dataIndex: 'logType',
       valueType: 'select',
       valueEnum: {
         0: {
-          text: '普通',
+          text: intl.formatMessage({id: 'pages.logs.table.type.0'}),
         },
         1: {
-          text: '警告',
+          text:  intl.formatMessage({id: 'pages.logs.table.type.1'}),
         }
       },
     },
     {
-      title: '时间',
+      title: intl.formatMessage({id: 'pages.logs.table.time'}),
       dataIndex: 'logTime',
       valueType: 'dateTime',
       hideInSearch: true,
     },
     {
-      title: '时间',
+      title: intl.formatMessage({id: 'pages.logs.table.time'}),
       dataIndex: 'logTime',
       valueType: 'dateRange',
       hideInTable: true,
@@ -68,7 +69,7 @@ const logs:React.FC = () =>  {
       }
     },
     {
-      title: '内容',
+      title: intl.formatMessage({id: 'pages.logs.table.content'}),
       dataIndex: 'logText',
       hideInSearch: true
     },

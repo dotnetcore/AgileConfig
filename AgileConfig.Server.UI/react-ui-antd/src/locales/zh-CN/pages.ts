@@ -14,6 +14,9 @@ export default {
   'enabled.1': '启用',
   'success': '成功',
   'failed': '失败',
+  'disconnecting': '正在断开',
+  'disconnect_success': '断开成功！',
+  'disconnect_fail': '断开失败！',
 
   'pages.layouts.userLayout.title': 'AgielConfig - 轻量级配置中心',
   'pages.login.accountLogin.tab': '使用管理员密码登录',
@@ -100,5 +103,23 @@ export default {
 
   'pages.app.inheritanced.true': '公共',
   'pages.app.inheritanced.false': '私有',
+
+  'pages.client.table.cols.id': 'ID',
+  'pages.client.table.cols.node': '节点',
+  'pages.client.table.cols.appid': '应用ID',
+  'pages.client.table.cols.appname': '应用名称',
+  'pages.client.table.cols.action': '操作',
+  'pages.client.table.cols.action.refresh': '刷新配置',
+  'pages.client.table.cols.action.disconnect': '强制断开',
+
+  'pages.client.header.title': '连接的客户端',
+  'pages.client.disconnect_message': `是否确定断开与客户端的连接?`,
+
+  'pages.logs.table.appname': `应用`,
+  'pages.logs.table.type': '类型',
+  'pages.logs.table.type.0': '普通',
+  'pages.logs.table.type.1': '警告',
+  'pages.logs.table.time': `时间`,
+  'pages.logs.table.content': `内容`,
 
 };
