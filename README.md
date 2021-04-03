@@ -1,10 +1,11 @@
 <p align="center">
-    <img src="https://raw.githubusercontent.com/kklldog/AgileConfig/master/AgileConfig.Server.UI/react-ui-antd/public/pro_icon.svg" style="height:130px">
+    <img height="130" src="https://raw.githubusercontent.com/kklldog/AgileConfig/master/AgileConfig.Server.UI/react-ui-antd/public/pro_icon.svg" style="height: 130px">
 </p>
     
-<p>
-  <h1 style="text-align: center">AgileConfig</h1>
-</p>
+<h1 align="center">AgileConfig</h1>
+
+
+
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/kklldog/agileconfig/.NET%20Core)
 ![GitHub stars](https://img.shields.io/github/stars/kklldog/AgileConfig)
