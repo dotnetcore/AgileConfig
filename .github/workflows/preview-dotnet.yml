@@ -2,12 +2,11 @@ name: preview ci workflow
 
 on:
   push:
-    branches: [ preview_1.2.0 ]
     paths-ignore: 
       - '**/README.md'
       - '**/*.yml'
-  pull_request:
-    branches: [ preview_1.2.0 ]
+    tags:        
+      - 'release-*'
     
 jobs:
   build-reactapp:
@@ -56,4 +55,4 @@ jobs:
         username: ${{ secrets.DOCKER_HUB_NAME }}
         password: ${{ secrets.DOCKER_HUB_PASSWORD }}
         repository: kklldog/agile_config
-        tags: preview-1.2.0
+        tag_with_ref: true
