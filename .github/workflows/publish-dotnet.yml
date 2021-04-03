@@ -6,8 +6,6 @@ on:
     paths-ignore: 
       - '**/README.md'
       - '**/*.yml'
-    tags:        
-      - '*'
     
 jobs:
   build-reactapp:
@@ -57,10 +55,3 @@ jobs:
         password: ${{ secrets.DOCKER_HUB_PASSWORD }}
         repository: kklldog/agile_config
         tags: latest
-    - name: Push to Docker hub release
-      uses: docker/build-push-action@v1
-      with:
-        username: ${{ secrets.DOCKER_HUB_NAME }}
-        password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-        repository: kklldog/agile_config
-        tag_with_ref: true
