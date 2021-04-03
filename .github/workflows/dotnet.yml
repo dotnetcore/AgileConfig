@@ -6,7 +6,7 @@ on:
       - '**/README.md'
       - '**/*.yml'
     tags:        
-      - '*'
+      - 'release-*'
     
 jobs:
   build-reactapp:
