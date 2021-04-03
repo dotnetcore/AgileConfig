@@ -42,7 +42,7 @@ const home: React.FC = () => {
   return (
     <PageContainer pageHeaderRender={false}>
       <Summary clientCount={serverNodeStatus.clientCount}></Summary>
-      { serverNodeStatus.nodeStatiInfo?.chartCategorys.length>1&&<NodeStatiCharts  nodeStatiInfo= { serverNodeStatus.nodeStatiInfo }></NodeStatiCharts>}
+      {/* { serverNodeStatus.nodeStatiInfo?.chartCategorys.length>1&&<NodeStatiCharts  nodeStatiInfo= { serverNodeStatus.nodeStatiInfo }></NodeStatiCharts>} */}
     </PageContainer>
   );
 }
