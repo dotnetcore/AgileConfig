@@ -1,0 +1,58 @@
+name: release-xxx ci workflow
+
+on:
+  push:
+    paths-ignore: 
+      - '**/README.md'
+      - '**/*.yml'
+    tags:        
+      - '*'
+    
+jobs:
+  build-reactapp:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: AgileConfig.Server.UI/react-ui-antd
+    strategy:
+      matrix:
+        node-version: [12.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+        
+    - run: npm install
+    - run: npm run build
+    - uses: actions/upload-artifact@v2
+      with:
+        name: agileconfig-ui
+        path: AgileConfig.Server.UI/react-ui-antd/dist/
+  build-dotnet:
+    needs: build-reactapp
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.301
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    - uses: actions/download-artifact@v2
+      with:
+        name: agileconfig-ui
+        path: AgileConfig.Server.Apisite/wwwroot/ui
+    - name: Push to Docker hub release -xxx
+      uses: docker/build-push-action@v1
+      with:
+        username: ${{ secrets.DOCKER_HUB_NAME }}
+        password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+        repository: kklldog/agile_config
+        tag_with_ref: true
