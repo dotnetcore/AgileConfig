@@ -74,33 +74,33 @@ sudo docker run --name agile_config -e adminConsole=true -e db:provider=sqlite -
 2. db:provider 配置程序的数据库类型。目前程序支持：sqlite，mysql，sqlserver，npgsql, oracle 五种数据库。
 3. db:conn 配置数据库连接串    
     
-![](https://s1.ax1x.com/2020/06/09/t4rDfA.png)
+![](https://ftp.bmp.ovh/imgs/2021/04/88c43b8bbddb2c4e.png)
 ### 初始化管理员密码
 第一次运行程序需要初始化管理员密码    
-![](https://s1.ax1x.com/2020/06/09/t4DgIJ.png)
+![](https://ftp.bmp.ovh/imgs/2021/04/44242b327230c5e6.png)
 ### 节点
 AgileConfig支持多节点部署，所有的节点都是平行的。为了简化部署，AgileConfig并没有单独的控制台程序，请直接使用任意一个节点作为控制台。当环境变量adminConsole=true时，该节点同时兼备数据节点跟控制台功能。为了控制台能够管理节点，所以需要在控制台配置节点的信息。
 > 注意：即使是作为控制台的数据节点同样需要添加到管理程序，以便管理它。
     
-![](https://s1.ax1x.com/2020/06/09/t4DxQP.png)
+![](https://ftp.bmp.ovh/imgs/2021/04/7e93011590c55d12.png)
 ### 应用
 AgileConfig支持多应用程序接入。需要为每个应用程序配置名称、ID、秘钥等信息。    
 每个应用可以设置是否可以被继承，可以被继承的应用类似apollo的公共 namespace 的概念。公共的配置可以提取到可继承应用中，其它应用只要继承它就可以获得所有配置。   
 如果子应用跟被继承应用之间的配置键发生重复，子应用的配置会覆盖被继承的应用的配置。子应用可以继承多个应用，如果多个应用之间发生重复键，按照继承的顺序，后继承的应用的配置覆盖前面的应用。
     
-![](https://s1.ax1x.com/2020/06/09/t4rSL8.png)
+![](https://ftp.bmp.ovh/imgs/2021/04/a48014f02ced6804.png)
 ### 配置项
 配置完应用信息后可以为每个应用配置配置项。配置项支持分组。新添加的配置并不会被客户端感知到，需要手工点击“上线”才会推送给客户端。已上线的配置如果发生修改、删除、回滚操作，会实时推送给客户端。版本历史记录了配置的历史信息，可以回滚至任意版本。
     
-![](https://s1.ax1x.com/2020/06/09/t4rFij.png)
+![](https://ftp.bmp.ovh/imgs/2021/04/8ae7d8bfcef72518.png)
 ### 客户端
 控制台可以查看已连接的客户端。
     
-![](https://s1.ax1x.com/2020/06/09/t4rmLT.png)
+![](https://ftp.bmp.ovh/imgs/2021/04/74fbc7f1daab5deb.png)
 ### 系统日志
 系统日志记录了AgileConfig生产中的一些关键信息。
     
-![](https://s1.ax1x.com/2020/06/09/t4rYy6.png)
+![](https://ftp.bmp.ovh/imgs/2021/04/9f38d55804e858d5.png)
 
 ## 使用客户端
 客户端[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)是使用.net core standard2.0编写的一个类库，已发布到nuget，方便用户集成。
