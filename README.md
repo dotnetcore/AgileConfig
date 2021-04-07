@@ -74,7 +74,7 @@ sudo docker run --name agile_config -e adminConsole=true -e db:provider=sqlite -
 ```
 通过docker建立一个agile_config实例，其中有3个环境变量需要配置:    
 1. adminConsole 配置程序是否为管理控制台。如果为true则启用控制台功能，访问该实例会出现管理界面。
-2. db:provider 配置程序的数据库类型。目前程序支持：sqlite，mysql，sqlserver，npgsql, oracle 五种数据库。
+2. db:provider 配置程序的数据库类型。目前程序支持：sqlserver，mysql，sqlite, PostgreSql，Oracle 五种数据库。
 3. db:conn 配置数据库连接串    
     
 ![](https://ftp.bmp.ovh/imgs/2021/04/88c43b8bbddb2c4e.png)
@@ -219,5 +219,8 @@ public class HomeController : Controller
     }
 ```
 ## 联系我
-有什么问题可以mail我：minj.zhou@gmail.com
+有什么问题可以mail我：minj.zhou@gmail.com   
 也可以加qq群：1022985150
+## 如果觉得这个项目对你有帮助可以给作者早餐加个蛋🍳🍳🍳
+<img src = 'https://ftp.bmp.ovh/imgs/2021/04/c0146fa995e8074d.jpg'  width="300"/>
+<img src = 'https://ftp.bmp.ovh/imgs/2021/04/1c8748c5732b8fbe.jpg' width="300"/>
