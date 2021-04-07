@@ -3,7 +3,7 @@ name: release-xxx ci workflow
 on:
   push:
     paths-ignore: 
-      - '**/README.md'
+      - '**/*.md'
       - '**/*.yml'
     tags:        
       - 'release-*'
