@@ -35,7 +35,10 @@ AgileConfig秉承轻量化的特点，部署简单、配置简单、使用简单
 [AgileConfig WPFSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigWPFSample)    
 [AgileConfig ConsoleSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigConsoleSample)    
 [教程 - 如何使用AgileConfig.Client读取配置](https://www.cnblogs.com/kklldog/p/how-to-use-agileconfigclient.html)    
+API:   
 [restful api](https://github.com/kklldog/AgileConfig/wiki/Restful-API)
+## ChangeLog
+[Changelog](https://github.com/kklldog/AgileConfig/blob/master/CHANGELOG.md)
 ## 架构
 ![](https://s1.ax1x.com/2020/06/29/NRz1gO.png)
 AgileConfig的架构比较简单，主要是分3块：
