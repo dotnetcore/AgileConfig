@@ -161,6 +161,15 @@ namespace AgileConfig.Server.Apisite.Controllers
                 });
             }
 
+            if (Appsettings.IsPreviewMode && app.Name == "test_app")
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "演示模式请勿修改Test_App"
+                });
+            }
+
             app.Name = model.Name;
             app.Secret = model.Secret;
             app.Enabled = model.Enabled;
