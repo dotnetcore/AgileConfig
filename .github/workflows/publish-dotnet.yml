@@ -4,7 +4,7 @@ on:
   push:
     branches: [ publish ]
     paths-ignore: 
-      - '**/README.md'
+      - '**/*.md'
       - '**/*.yml'
     
 jobs:
