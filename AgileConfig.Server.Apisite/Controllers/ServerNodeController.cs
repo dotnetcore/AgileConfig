@@ -75,6 +75,14 @@ namespace AgileConfig.Server.Apisite.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete([FromBody]ServerNodeVM model)
         {
+            if (Appsettings.IsPreviewMode)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "演示模式请勿删除节点"
+                });
+            }
             if (model == null)
             {
                 throw new ArgumentNullException("model");
