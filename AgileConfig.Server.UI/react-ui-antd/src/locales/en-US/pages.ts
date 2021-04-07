@@ -131,4 +131,27 @@ export default {
   'pages.logs.table.type.1': 'Warn',
   'pages.logs.table.time': `LogTime`,
   'pages.logs.table.content': `Content`,
+
+  'pages.configs.breadcrumbName': 'Configurations',
+  'pages.configs.table.cols.g': 'Group',
+  'pages.configs.table.cols.k': 'Key',
+  'pages.configs.table.cols.v': 'Value',
+  'pages.configs.table.cols.desc': 'Description',
+  'pages.configs.table.cols.create_time': 'CreateTime',
+  'pages.configs.table.cols.status': 'Status',
+  'pages.configs.table.cols.status.0': 'WaitPublish',
+  'pages.configs.table.cols.status.1': 'Online',
+  'pages.configs.table.cols.action': 'Action',
+  'pages.configs.table.cols.action.add': 'Add',
+  'pages.configs.table.cols.action.importfromjosnfile': 'Import JSON File',
+  'pages.configs.table.cols.action.edit': 'Edit',
+  'pages.configs.table.cols.action.delete': 'Delete',
+  'pages.configs.table.cols.action.publish': 'Publish',
+  'pages.configs.table.cols.action.offline': 'Offline',
+  'pages.configs.table.cols.action.history': 'History',
+
+  'pages.configs.from.add.title': 'Create',
+  'pages.configs.from.add.app': 'App',
+  'pages.configs.from.importjson.selectfile': 'Select file'
+
 };

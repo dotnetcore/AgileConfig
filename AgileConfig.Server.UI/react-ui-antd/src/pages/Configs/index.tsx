@@ -12,6 +12,7 @@ import Text from 'antd/lib/typography/Text';
 import moment from 'moment';
 import styles from './index.less';
 import JsonImport from './comps/JsonImport';
+import { useIntl } from 'react-intl';
 
 const { confirm } = Modal;
 
@@ -176,6 +177,7 @@ const configs: React.FC = (props: any) => {
   const [modifyLogs, setModifyLogs] = useState<ConfigModifyLog[]>([]);
   const actionRef = useRef<ActionType>();
   const addFormRef = useRef<FormInstance>();
+  const intl = useIntl();
   const getAppEnums = async () => {
     const result = await queryApps({})
     const obj = {};
@@ -279,16 +281,16 @@ const configs: React.FC = (props: any) => {
 
   const columns: ProColumns<ConfigListItem>[] = [
     {
-      title: '组',
+      title: intl.formatMessage({id:'pages.configs.table.cols.g'}),
       dataIndex: 'group',
     },
     {
-      title: '键',
+      title: intl.formatMessage({id:'pages.configs.table.cols.k'}),
       dataIndex: 'key',
       copyable: true
     },
     {
-      title: '值',
+      title: intl.formatMessage({id:'pages.configs.table.cols.v'}),
       dataIndex: 'value',
       hideInSearch: true,
       ellipsis: true,
@@ -296,46 +298,62 @@ const configs: React.FC = (props: any) => {
       tip: '过长会自动收缩',
     },
     {
-      title: '描述',
+      title: intl.formatMessage({id:'pages.configs.table.cols.desc'}),
       dataIndex: 'description',
       hideInSearch: true,
       ellipsis: true,
     },
     {
-      title: '创建时间',
+      title: intl.formatMessage({id:'pages.configs.table.cols.create_time'}),
       dataIndex: 'createTime',
       hideInSearch: true,
       valueType: 'dateTime',
       width: 150
     },
     {
-      title: '状态',
+      title: intl.formatMessage({id:'pages.configs.table.cols.status'}),
       dataIndex: 'onlineStatus',
       valueEnum: {
         0: {
-          text: '待上线',
+          text: intl.formatMessage({id:'pages.configs.table.cols.status.0'}),
           status: 'warning'
         },
         1: {
-          text: '已上线',
+          text: intl.formatMessage({id:'pages.configs.table.cols.status.1'}),
           status: 'Processing'
         }
       },
-      width: 100
+      width: 120
     },
     {
-      title: '操作',
+      title: intl.formatMessage({id:'pages.configs.table.cols.action'}),
       width: 150,
       valueType: 'option',
       render: (text, record, _, action) => [
-        record.onlineStatus ? <a onClick={() => { offline(record) }}>下线</a> : <a onClick={() => { online(record) }}>上线</a>,
+        record.onlineStatus ? <a onClick={() => { offline(record) }}>
+          {
+            intl.formatMessage({
+              id: 'pages.configs.table.cols.action.offline'
+            })
+          }
+        </a> : <a onClick={() => { online(record) }}>
+          {
+            intl.formatMessage({
+              id: 'pages.configs.table.cols.action.publish'
+            })
+          }
+        </a>,
         <a
           onClick={() => {
             setCurrentRow(record);
             setUpdateModalVisible(true)
           }}
         >
-          编辑
+          {
+            intl.formatMessage({
+              id: 'pages.configs.table.cols.action.edit'
+            })
+          }
         </a>,
         <TableDropdown
         key="actionGroup"
@@ -355,8 +373,12 @@ const configs: React.FC = (props: any) => {
           }
         }
         menus={[
-          { key: 'history', name: '历史' },
-          { key: 'delete', name: '删除' },
+          { key: 'history', name: intl.formatMessage({
+            id: 'pages.configs.table.cols.action.history'
+          }) },
+          { key: 'delete', name: intl.formatMessage({
+            id: 'pages.configs.table.cols.action.delete'
+          }) },
         ]}
       />
       ]
@@ -377,16 +399,32 @@ const configs: React.FC = (props: any) => {
         request={(params, sorter, filter) => queryConfigs(appId,params)}
         toolBarRender={() => [
           <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { setCreateModalVisible(true); }}>
-            新建
+            {
+              intl.formatMessage({
+                id: 'pages.configs.table.cols.action.add'
+              })
+            }
           </Button>,
           <Button key="button" type="primary" hidden={selectedRowsState.length == 0} onClick={()=>{onlineSome(selectedRowsState)}}>
-            上线
+            {
+              intl.formatMessage({
+                id: 'pages.configs.table.cols.action.publish'
+              })
+            }
         </Button>,
           <Button key="button" type="primary" danger hidden={selectedRowsState.length == 0} onClick={()=>{offlineSome(selectedRowsState)}}>
-            下线
+            {
+              intl.formatMessage({
+                id: 'pages.configs.table.cols.action.offline'
+              })
+            }
        </Button>,
           <Button key="button" type="primary" onClick={()=>{ setjsonImportFormModalVisible(true) }}>
-            从json文件导入
+            {
+              intl.formatMessage({
+                id: 'pages.configs.table.cols.action.importfromjosnfile'
+              })
+            }
           </Button>
         ]}
         rowSelection={{
@@ -418,7 +456,7 @@ const configs: React.FC = (props: any) => {
      
       <ModalForm
         formRef={addFormRef}
-        title="新建配置"
+        title={intl.formatMessage({id:'pages.configs.from.add.title'})}
         visible={createModalVisible}
         onVisibleChange={setCreateModalVisible}
         onFinish={
@@ -441,7 +479,7 @@ const configs: React.FC = (props: any) => {
             },
           ]}
           readonly={true}
-          label="应用"
+          label={intl.formatMessage({id:'pages.configs.from.add.app'})}
           name="appName"
         />
         <ProFormText
@@ -460,7 +498,7 @@ const configs: React.FC = (props: any) => {
             {
             },
           ]}
-          label="组"
+          label={intl.formatMessage({id:'pages.configs.table.cols.g'})}
           name="group"
         />
         <ProFormText
@@ -469,7 +507,7 @@ const configs: React.FC = (props: any) => {
               required: true,
             },
           ]}
-          label="键"
+          label={intl.formatMessage({id:'pages.configs.table.cols.k'})}
           name="key"
         />
         <ProFormTextArea
@@ -478,7 +516,7 @@ const configs: React.FC = (props: any) => {
               required: true,
             },
           ]}
-          label="值"
+          label={intl.formatMessage({id:'pages.configs.table.cols.v'})}
           name="value"
           fieldProps={
             {
@@ -493,7 +531,7 @@ const configs: React.FC = (props: any) => {
             {
             },
           ]}
-          label="描述"
+          label={intl.formatMessage({id:'pages.configs.table.cols.desc'})}
           name="description"
         />
       </ModalForm>

@@ -129,4 +129,26 @@ export default {
   'pages.logs.table.time': `时间`,
   'pages.logs.table.content': `内容`,
 
+  'pages.configs.breadcrumbName': '配置项',
+  'pages.configs.table.cols.g': '组',
+  'pages.configs.table.cols.k': '键',
+  'pages.configs.table.cols.v': '值',
+  'pages.configs.table.cols.desc': '描述',
+  'pages.configs.table.cols.create_time': '创建时间',
+  'pages.configs.table.cols.status': '状态',
+  'pages.configs.table.cols.status.0': '待上线',
+  'pages.configs.table.cols.status.1': '已上线',
+  'pages.configs.table.cols.action': '操作',
+  'pages.configs.table.cols.action.add': '新建',
+  'pages.configs.table.cols.action.importfromjosnfile': '从JSON文件导入',
+  'pages.configs.table.cols.action.edit': '编辑',
+  'pages.configs.table.cols.action.delete': '删除',
+  'pages.configs.table.cols.action.publish': '上线',
+  'pages.configs.table.cols.action.offline': '下线',
+  'pages.configs.table.cols.action.history': '历史',
+
+  'pages.configs.from.add.title': '新建配置',
+  'pages.configs.from.add.app': '应用',
+  'pages.configs.from.importjson.selectfile': '选择文件'
+
 };

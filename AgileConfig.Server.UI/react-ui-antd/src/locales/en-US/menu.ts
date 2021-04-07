@@ -54,5 +54,6 @@ export default {
   'menu.list.node-list': 'Node',
   'menu.list.app-list': 'App',
   'menu.list.client-list': 'Client',
+  'menu.list.config-list': 'Configurations',
   'menu.list.logs-list': 'Log',
 };

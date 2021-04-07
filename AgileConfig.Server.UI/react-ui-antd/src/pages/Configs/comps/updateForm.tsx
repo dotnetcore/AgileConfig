@@ -1,5 +1,6 @@
 import {  ModalForm, ProFormText, ProFormTextArea } from "@ant-design/pro-form";
 import React from 'react';
+import { useIntl } from "react-intl";
 import { ConfigListItem } from "../data";
 export type UpdateFormProps = {
     appId: string,
@@ -12,9 +13,11 @@ export type UpdateFormProps = {
   };
 const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
 
+    const intl = useIntl();
+
     return (
     <ModalForm 
-    title="编辑配置"
+    title={intl.formatMessage({id:'pages.configs.from.add.title'})}
     initialValues={props.value}
     visible={props.updateModalVisible}
     modalProps={
@@ -40,7 +43,7 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
             },
           ]}
           readonly={true}
-          label="应用"
+          label={intl.formatMessage({id:'pages.configs.from.add.app'})}
           name="appName"
         />
         <ProFormText
@@ -58,7 +61,7 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
             {
             },
           ]}
-          label="组"
+          label={intl.formatMessage({id:'pages.configs.table.cols.g'})}
           name="group"
           readonly={true}
         />
@@ -68,7 +71,7 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
               required: true,
             },
           ]}
-          label="键"
+          label={intl.formatMessage({id:'pages.configs.table.cols.k'})}
           name="key"
           readonly={true}
         />
@@ -78,7 +81,7 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
               required: true,
             },
           ]}
-          label="值"
+          label={intl.formatMessage({id:'pages.configs.table.cols.v'})}
           name="value"
           fieldProps={
             {
@@ -93,7 +96,7 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
             {
             },
           ]}
-          label="描述"
+          label={intl.formatMessage({id:'pages.configs.table.cols.desc'})}
           name="description"
         />
     

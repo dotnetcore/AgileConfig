@@ -2,6 +2,7 @@ import { getToken } from "@/utils/authority";
 import { DeleteOutlined, UploadOutlined } from "@ant-design/icons";
 import { Button, message, Modal, Space, Table, Upload } from "antd";
 import React, { useState } from 'react';
+import { useIntl } from "react-intl";
 import { JsonImportItem } from "../data";
 import { addRangeConfig } from "../service";
 import styles from './jsonImport.less';
@@ -31,6 +32,7 @@ export type JsonImportFormProps = {
     }
   };
 const JsonImport : React.FC<JsonImportFormProps> = (props)=>{
+  const intl = useIntl();
     const [datasource, setDatasource] = useState<JsonImportItem[]>([]);
     const deleteItem = (item:JsonImportItem) => {
       const index = datasource.findIndex(x=>x.id === item.id);
@@ -43,23 +45,23 @@ const JsonImport : React.FC<JsonImportFormProps> = (props)=>{
     }
     const columns = [
         {
-          title: '组',
+          title: intl.formatMessage({id:'pages.configs.table.cols.g'}),
           dataIndex: 'group',
         },
         {
-          title: '键',
+          title: intl.formatMessage({id:'pages.configs.table.cols.k'}),
           dataIndex: 'key',
         },
         {
-          title: '值',
+          title: intl.formatMessage({id:'pages.configs.table.cols.v'}),
           dataIndex: 'value',
         },
         {
-          title: '操作',
+          title: intl.formatMessage({id:'pages.configs.table.cols.action'}),
           key: 'action',
           render: (text:string, record:any) => (
             <Space size="middle">
-              <a title="删除" onClick={ ()=>{ deleteItem(record) } }>
+              <a title={intl.formatMessage({id:'pages.configs.table.cols.action.delete'})} onClick={ ()=>{ deleteItem(record) } }>
                 <DeleteOutlined />
               </a>
             </Space>
@@ -95,7 +97,7 @@ const JsonImport : React.FC<JsonImportFormProps> = (props)=>{
       };
     return (
         <Modal 
-          title="从json文件导入" 
+          title={intl.formatMessage({id:'pages.configs.table.cols.action.importfromjosnfile'})} 
           width={1000} 
           visible={props.jsonImportModalVisible}
           onCancel={
@@ -114,7 +116,11 @@ const JsonImport : React.FC<JsonImportFormProps> = (props)=>{
           >
             <div className={styles.action_bar}>
               <Upload accept=".json" {...fileUploadProps}>
-                <Button type="primary" icon={<UploadOutlined />}>选择文件</Button>
+                <Button type="primary" icon={<UploadOutlined />}>
+                  {
+                    intl.formatMessage({id:'pages.configs.from.importjson.selectfile'})
+                  }
+                </Button>
               </Upload>
             </div>
             <Table 
