@@ -17,6 +17,15 @@ export default {
   'disconnecting': '正在断开',
   'disconnect_success': '断开成功！',
   'disconnect_fail': '断开失败！',
+  'publishing': '正在上线',
+  'publish_success': '上线成功！',
+  'publish_fail': '上线失败！',
+  'offlining': '正在下线',
+  'offline_success': '下线成功！',
+  'offline_fail': '下线失败！',
+  'rollbacking': '正在回滚',
+  'rollback_success': '回滚成功！',
+  'rollback_fail': '回滚失败！',
 
   'resetpassword.title': '修改密码',
   'resetpassword.oldpassword': '原密码',
@@ -149,6 +158,23 @@ export default {
 
   'pages.configs.from.add.title': '新建配置',
   'pages.configs.from.add.app': '应用',
-  'pages.configs.from.importjson.selectfile': '选择文件'
+  'pages.configs.from.importjson.selectfile': '选择文件',
+
+  'pages.configs.table.cols.v.tip':'过长会自动收缩',
+
+  'pages.config.history.title': '历史版本',
+  'pages.config.history.rollback': '回滚',
+  'pages.config.history.current': '当前版本',
+
+  'pages.config.confirm_rollback':'确定回滚至版本',
+  'pages.config.confirm_delete':'确定删除配置',
+  'pages.config.confirm_publish':'确定上线配置',
+  'pages.config.confirm_offline':'确定下线配置',
+
+  'pages.config.confirm_publish_some':'确定上线选中的配置？',
+  'pages.config.confirm_offline_some':'确定下线选中的配置？',
+
+  'pages.config.waitpublish_at_least_one':'请至少选中一个待上线配置项',
+  'pages.config.online_at_least_one':'请至少选中一个已上线配置项',
 
 };

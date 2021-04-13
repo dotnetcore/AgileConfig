@@ -17,6 +17,15 @@ export default {
   'disconnecting': 'Disconnecting',
   'disconnect_success': 'Disconnect successfully ！',
   'disconnect_fail': 'Disconnect failed !',
+  'publishing': 'Publishing',
+  'publish_success': 'Publish successfully !',
+  'publish_fail': 'Publish failed !',
+  'offlining': 'Offlining',
+  'offline_success': 'Offline successfully !',
+  'offline_fail': 'Offline failed !',
+  'rollbacking': 'Rollbacking',
+  'rollback_success': 'Rollback successfully !',
+  'rollback_fail': 'Rollback failed !',
 
   'resetpassword.title': 'Reset Password',
   'resetpassword.oldpassword': 'Old password',
@@ -152,6 +161,22 @@ export default {
 
   'pages.configs.from.add.title': 'Create',
   'pages.configs.from.add.app': 'App',
-  'pages.configs.from.importjson.selectfile': 'Select file'
+  'pages.configs.from.importjson.selectfile': 'Select file',
 
+  'pages.configs.table.cols.v.tip':'too long text will use ellipsis instead .',
+
+  'pages.config.history.title': 'History',
+  'pages.config.history.rollback': 'Rollback',
+  'pages.config.history.current': 'Current',
+
+  'pages.config.confirm_rollback':'Are you sure to rollback to hisory version ',
+  'pages.config.confirm_delete':'Are you sure to delete config ',
+  'pages.config.confirm_publish':'Are you sure to publish config ',
+  'pages.config.confirm_offline':'Are you sure to offline config ',
+
+  'pages.config.confirm_publish_some':'Are you sure to publish selected config items ?',
+  'pages.config.confirm_offline_some':'Are you sure to offline selected config items ?',
+
+  'pages.config.waitpublish_at_least_one':'please select one wait publish config item at least .',
+  'pages.config.online_at_least_one':'please select one online config item at least .',
 };

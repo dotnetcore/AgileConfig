@@ -13,154 +13,163 @@ import moment from 'moment';
 import styles from './index.less';
 import JsonImport from './comps/JsonImport';
 import { useIntl } from 'react-intl';
+import { getIntl, getLocale } from '@/.umi/plugin-locale/localeExports';
 
 const { confirm } = Modal;
 
 const handleOnline = async (fields: ConfigListItem) => {
-  const hide = message.loading('正在上线');
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({id:'publishing'}));
   try {
     const result = await onlineConfig({ ...fields });
     hide();
     const success = result.success;
     if (success) {
-      message.success('上线成功');
+      message.success(intl.formatMessage({id:'publish_success'}));
     } else {
-      message.error('上线失败请重试！');
+      message.error(intl.formatMessage({id:'publish_fail'}));
     }
     return success;
   } catch (error) {
     hide();
-    message.error('上线失败请重试！');
+    message.error(intl.formatMessage({id:'publish_fail'}));
     return false;
   }
 };
 
 const handleOnlineSome = async (configs: ConfigListItem[]) => {
-  const hide = message.loading('正在上线');
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({id:'publishing'}));
   try {
     const result = await onlineSomeConfigs(configs);
     hide();
     const success = result.success;
     if (success) {
-      message.success('上线成功');
+      message.success(intl.formatMessage({id:'publish_success'}));
     } else {
-      message.error('上线失败请重试！');
+      message.error(intl.formatMessage({id:'publish_fail'}));
     }
     return success;
   } catch (error) {
     hide();
-    message.error('上线失败请重试！');
+    message.error(intl.formatMessage({id:'publish_fail'}));
     return false;
   }
 };
 
 const handleOfflineSome = async (configs: ConfigListItem[]) => {
-  const hide = message.loading('正在下线');
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({id:'offlining'}));
   try {
     const result = await offlineSomeConfigs(configs);
     hide();
     const success = result.success;
     if (success) {
-      message.success('下线成功');
+      message.success(intl.formatMessage({id:'offline_success'}));
     } else {
-      message.error('下线失败请重试！');
+      message.error(intl.formatMessage({id:'offline_fail'}));
     }
     return success;
   } catch (error) {
     hide();
-    message.error('下线失败请重试！');
+    message.error(intl.formatMessage({id:'offline_fail'}));
     return false;
   }
 };
 
 const handleOffline = async (fields: ConfigListItem) => {
-  const hide = message.loading('正在下线');
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({id:'offlining'}));
   try {
     const result = await offlineConfig({ ...fields });
     hide();
     const success = result.success;
     if (success) {
-      message.success('下线成功');
+      message.success(intl.formatMessage({id:'offline_success'}));
     } else {
-      message.error('下线失败请重试！');
+      message.error(intl.formatMessage({id:'offline_fail'}));
     }
     return success;
   } catch (error) {
     hide();
-    message.error('下线失败请重试！');
+    message.error(intl.formatMessage({id:'offline_fail'}));
     return false;
   }
 };
 
 const handleDel = async (fields: ConfigListItem) => {
-  const hide = message.loading('正在删除');
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({id:'deleting'}));
   try {
     const result = await delConfig({ ...fields });
     hide();
     const success = result.success;
     if (success) {
-      message.success('删除成功');
+      message.success(intl.formatMessage({id:'delete_success'}));
     } else {
-      message.error('删除失败请重试！');
+      message.error(intl.formatMessage({id:'delete_fail'}));
     }
     return success;
   } catch (error) {
     hide();
-    message.error('删除失败请重试！');
+    message.error(intl.formatMessage({id:'delete_fail'}));
     return false;
   }
 };
 const handleAdd = async (fields: ConfigListItem) => {
-  const hide = message.loading('正在保存');
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({id:'saving'}));
   try {
     const result = await addConfig({ ...fields });
     hide();
     const success = result.success;
     if (success) {
-      message.success('新建成功');
+      message.success(intl.formatMessage({id:'save_success'}));
     } else {
       message.error(result.message);
     }
     return success;
   } catch (error) {
     hide();
-    message.error('新建失败请重试！');
+    message.error(intl.formatMessage({id:'save_fail'}));
     return false;
   }
 };
 const handleEdit = async (config: ConfigListItem) => {
-  const hide = message.loading('正在保存');
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({id:'saving'}));
   try {
     const result = await editConfig({ ...config });
     hide();
     const success = result.success;
     if (success) {
-      message.success('保存成功');
+      message.success(intl.formatMessage({id:'save_success'}));
     } else {
       message.error(result.message);
     }
     return success;
   } catch (error) {
     hide();
-    message.error('保存失败请重试！');
+    message.error(intl.formatMessage({id:'save_fail'}));
     return false;
   }
 };
 const handleRollback = async (config: ConfigModifyLog) => {
-  const hide = message.loading('正在回滚');
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({id: 'rollbacking'}));
   try {
     const result = await rollback({ ...config });
     hide();
     const success = result.success;
     if (success) {
-      message.success('回滚成功');
+      message.success(intl.formatMessage({id: 'rollback_success'}));
     } else {
       message.error(result.message);
     }
     return success;
   } catch (error) {
     hide();
-    message.error('回滚失败请重试！');
+    message.error(intl.formatMessage({id: 'rollback_fail'}));
     return false;
   }
 };
@@ -196,8 +205,9 @@ const configs: React.FC = (props: any) => {
     });
   }, []);
   const online = (config: ConfigListItem) => {
+    const confirmMsg = intl.formatMessage({id:'pages.config.confirm_publish'});
     confirm({
-      content: `确定上线配置【${config.key}】？`,
+      content: confirmMsg + `【${config.key}】？`,
       onOk: async () => {
         const result = await handleOnline(config);
         if (result) {
@@ -207,13 +217,14 @@ const configs: React.FC = (props: any) => {
     });
   }
   const onlineSome = (configs: ConfigListItem[]) => {
+    const warningMsg = intl.formatMessage({id:'pages.config.waitpublish_at_least_one'});
     const waitPublishConfigs = configs.filter(x=>x.onlineStatus === 0);
     if (!waitPublishConfigs.length) {
-      message.warning('请至少选中一个待上线配置项');
+      message.warning(warningMsg);
       return;
     }
     confirm({
-      content: `确定上线选中的配置？`,
+      content: intl.formatMessage({id:'pages.config.confirm_publish_some'}),
       onOk: async () => {
         const result = await handleOnlineSome(configs);
         if (result && actionRef.current) {
@@ -226,13 +237,14 @@ const configs: React.FC = (props: any) => {
     });
   }
   const offlineSome = (configs: ConfigListItem[]) => {
+    const warningMsg = intl.formatMessage({id:'pages.config.online_at_least_one'});
     const waitPublishConfigs = configs.filter(x=>x.onlineStatus === 1);
     if (!waitPublishConfigs.length) {
-      message.warning('请至少选中一个已上线配置项');
+      message.warning(warningMsg);
       return;
     }
     confirm({
-      content: `确定下线选中的配置？`,
+      content: intl.formatMessage({id:'pages.config.confirm_offline_some'}),
       onOk: async () => {
         const result = await handleOfflineSome(configs);
         if (result && actionRef.current) {
@@ -245,8 +257,9 @@ const configs: React.FC = (props: any) => {
     });
   }
   const offline = (config: ConfigListItem) => {
+    const confirmMsg = intl.formatMessage({id:'pages.config.confirm_offline'});
     confirm({
-      content: `确定下线配置【${config.key}】？`,
+      content: confirmMsg + `【${config.key}】？`,
       onOk: async () => {
         const result = await handleOffline(config);
         if (result) {
@@ -256,8 +269,9 @@ const configs: React.FC = (props: any) => {
     });
   }
   const delConfig = (config: ConfigListItem) => {
+    const confirmMsg = intl.formatMessage({id:'pages.config.confirm_delete'});
     confirm({
-      content: `确定删除配置【${config.key}】？`,
+      content: confirmMsg + `【${config.key}】？`,
       onOk: async () => {
         const result = await handleDel(config);
         if (result) {
@@ -267,8 +281,9 @@ const configs: React.FC = (props: any) => {
     });
   }
   const rollback = (config: ConfigModifyLog) => {
+    const confirmMsg = intl.formatMessage({id:'pages.config.confirm_rollback'});
     confirm({
-      content: `确定回滚至版本【${moment(config.modifyTime).format('YYYY-MM-DD HH:mm:ss')}】？`,
+      content: confirmMsg + `【${moment(config.modifyTime).format('YYYY-MM-DD HH:mm:ss')}】？`,
       onOk: async () => {
         const result = await handleRollback(config);
         if (result) {
@@ -295,7 +310,7 @@ const configs: React.FC = (props: any) => {
       hideInSearch: true,
       ellipsis: true,
       copyable: true,
-      tip: '过长会自动收缩',
+      tip: intl.formatMessage({id:'pages.configs.table.cols.v.tip'})
     },
     {
       title: intl.formatMessage({id:'pages.configs.table.cols.desc'}),
@@ -565,14 +580,18 @@ const configs: React.FC = (props: any) => {
           } />
       }
 
-      <Drawer title="版本历史" visible={modifyLogsModalVisible} width="400" onClose={() => { setmodifyLogsModalVisible(false); setModifyLogs([]); }} >
+      <Drawer title={intl.formatMessage({id:'pages.config.history.title'})} visible={modifyLogsModalVisible} width="400" onClose={() => { setmodifyLogsModalVisible(false); setModifyLogs([]); }} >
         <List
           className={styles.history}
           header={false}
           itemLayout="horizontal"
           dataSource={modifyLogs}
           renderItem={(item, index) => (
-            <List.Item className={styles.listitem} actions={index ? [<a className={styles.rollback} onClick={ ()=>{rollback(item)} }>回滚</a>] : []} >
+            <List.Item className={styles.listitem} actions={index ? [<a className={styles.rollback} onClick={ ()=>{rollback(item)} }>
+              {
+                intl.formatMessage({id:'pages.config.history.rollback'})
+              }
+            </a>] : []} >
               <List.Item.Meta
                 title={
 
@@ -580,15 +599,30 @@ const configs: React.FC = (props: any) => {
                     <Text style={{marginRight:'20px'}}>{moment(item.modifyTime).format('YYYY-MM-DD HH:mm:ss')}</Text>
                   &nbsp;
                     {
-                       index ? null : <Tag color="blue">当前版本</Tag>
+                       index ? null : <Tag color="blue">
+                         {
+                          intl.formatMessage({id:'pages.config.history.current'})
+                         }
+                       </Tag>
                     }
                   </div>
                 }
                 description={
                   <div>
-                    <div>组：{item.group}</div>
-                    <div>键：{item.key}</div>
-                    <div>值：{item.value}</div>
+                    <div>
+                      {
+                          intl.formatMessage({id:'pages.configs.table.cols.g'})
+                      }
+                      ：{item.group}</div>
+                    <div>
+                      {
+                          intl.formatMessage({id:'pages.configs.table.cols.k'})
+                      }
+                      ：{item.key}</div>
+                    <div>
+                      {
+                          intl.formatMessage({id:'pages.configs.table.cols.v'})
+                      }：{item.value}</div>
                   </div>
                 }
               />
