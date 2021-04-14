@@ -65,18 +65,21 @@ const Login: React.FC<LoginProps> = (props) => {
           return Promise.resolve();
         }}
       >
-        <Tabs activeKey={type} onChange={setType}>
-          <Tabs.TabPane
-            key="account"
-            tab={intl.formatMessage({
+        <div style={
+            {
+              textAlign: "center",
+              color: "#1890ff",
+              fontSize: "16px",
+              marginBottom: "20px"
+            }
+        }>
+          {
+            intl.formatMessage({
               id: 'pages.login.accountLogin.tab',
-            })}
-          />
-        </Tabs>
-
-        {type === 'account' && (
-          <>
-            <ProFormText.Password
+            })
+          }
+        </div>
+        <ProFormText.Password
               name="password"
               fieldProps={{
                 size: 'large',
@@ -97,8 +100,6 @@ const Login: React.FC<LoginProps> = (props) => {
                 },
               ]}
             />
-          </>
-        )}
         <div
           style={{
             marginBottom: 24,

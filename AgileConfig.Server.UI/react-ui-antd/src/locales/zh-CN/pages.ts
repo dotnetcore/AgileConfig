@@ -34,7 +34,7 @@ export default {
   'resetpassword.update_success': '修改密码成功,请使用新密码重新登录。',
   'resetpassword.update_fail': '修改密码失败。',
   
-  'pages.layouts.userLayout.title': 'AgielConfig - 轻量级配置中心',
+  'pages.layouts.userLayout.title': 'AgileConfig - 轻量级配置中心',
   'pages.login.accountLogin.tab': '使用管理员密码登录',
   'pages.login.accountLogin.errorMessage': '错误的密码，请重新再试',
   'pages.login.username.placeholder': '用户名: admin or user',

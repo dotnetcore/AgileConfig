@@ -37,7 +37,6 @@ const UserLayout: React.FC<UserLayoutProps> = (props) => {
     <HelmetProvider>
       <Helmet>
         <title>{title}</title>
-        <meta name="description" content={title} />
       </Helmet>
 
       <div className={styles.container}>

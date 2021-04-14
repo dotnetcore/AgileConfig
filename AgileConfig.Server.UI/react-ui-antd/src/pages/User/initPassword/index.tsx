@@ -68,14 +68,20 @@ import { initPassword } from './service';
              const result = handleSave(values as InitPasswordModel)
           }}
         >
-          <Tabs activeKey="account">
-            <Tabs.TabPane
-              key="account"
-              tab={intl.formatMessage({
-                id: 'pages.initpassword.tab',
-              })}
-            />
-          </Tabs>
+          <div style={
+            {
+              textAlign: "center",
+              color: "#1890ff",
+              fontSize: "16px",
+              marginBottom: "20px"
+            }
+        }>
+          {
+            intl.formatMessage({
+              id: 'pages.initpassword.tab',
+            })
+          }
+        </div>
           <ProFormText.Password
                name="password"
                fieldProps={{
