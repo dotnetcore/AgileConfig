@@ -77,9 +77,7 @@ const handleDel = async (fields: NodeItem) => {
         id: 'delete_success'
       }));
     } else {
-      message.error(intl.formatMessage({
-        id: 'delete_fail'
-      }));
+      message.error(result.message);
     }
     return success;
   } catch (error) {
