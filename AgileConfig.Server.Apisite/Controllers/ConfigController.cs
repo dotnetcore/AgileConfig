@@ -283,21 +283,24 @@ namespace AgileConfig.Server.Apisite.Controllers
                     AppId = config.AppId,
                     LogText = $"编辑配置【Key:{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
                 });
-                //notice clients
-                var action = new WebsocketAction
+                if (config.OnlineStatus == OnlineStatus.Online)
                 {
-                    Action = ActionConst.Update,
-                    Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value },
-                    OldItem = new ConfigItem { group = oldConfig.Group, key = oldConfig.Key, value = oldConfig.Value }
-                };
-                var nodes = await _serverNodeService.GetAllNodesAsync();
-                foreach (var node in nodes)
-                {
-                    if (node.Status == NodeStatus.Offline)
+                    //notice clients
+                    var action = new WebsocketAction
                     {
-                        continue;
+                        Action = ActionConst.Update,
+                        Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value },
+                        OldItem = new ConfigItem { group = oldConfig.Group, key = oldConfig.Key, value = oldConfig.Value }
+                    };
+                    var nodes = await _serverNodeService.GetAllNodesAsync();
+                    foreach (var node in nodes)
+                    {
+                        if (node.Status == NodeStatus.Offline)
+                        {
+                            continue;
+                        }
+                        await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, config.AppId, action);
                     }
-                    await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, config.AppId, action);
                 }
             }
 
