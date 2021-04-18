@@ -129,11 +129,14 @@ Install-Package AgileConfig.Client
   "AgileConfig": {
     "appId": "app",
     "secret": "xxx",
-    "nodes": "http://localhost:5000,http://localhost:5001"//多个节点使用逗号分隔
+    "nodes": "http://localhost:5000,http://localhost:5001"//多个节点使用逗号分隔,
+    "name": "client_name",
+    "tag": "tag1"
   }
 }
 
 ```
+在appsettings.json文件配置agileconfig的配置信息。
 ```
        public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
