@@ -113,11 +113,9 @@ const clients:React.FC = () => {
     },
     {
       title: intl.formatMessage({
-        id: 'pages.client.table.cols.appname'
+        id: 'pages.client.table.cols.ip'
       }),
-      dataIndex: 'appId',
-      valueType: 'select',
-      valueEnum: appEnums,
+      dataIndex: 'ip',
       hideInSearch: true,
     },
     {

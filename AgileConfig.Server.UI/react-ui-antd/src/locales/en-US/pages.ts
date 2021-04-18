@@ -129,6 +129,7 @@ export default {
   'pages.client.table.cols.appname': 'AppName',
   'pages.client.table.cols.name': 'ClientName',
   'pages.client.table.cols.tag': 'Tag',
+  'pages.client.table.cols.ip': 'IP',
   'pages.client.table.cols.action': 'Action',
   'pages.client.table.cols.action.refresh': 'Refresh',
   'pages.client.table.cols.action.disconnect': 'Disconnect',

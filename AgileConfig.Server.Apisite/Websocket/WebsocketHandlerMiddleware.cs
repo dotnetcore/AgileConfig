@@ -52,6 +52,7 @@ namespace AgileConfig.Server.Apisite.Websocket
                     WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
                     var name = context.Request.Headers["client_name"];
                     var tag = context.Request.Headers["client_tag"];
+                    var clientIp = GetRemoteIp(context.Request);
 
                     var client = new WebsocketClient()
                     {
@@ -60,10 +61,12 @@ namespace AgileConfig.Server.Apisite.Websocket
                         AppId = appId,
                         LastHeartbeatTime = DateTime.Now,
                         Name = name,
-                        Tag = tag
+                        Tag = tag,
+                        Ip = clientIp.ToString()
                     };
                     _websocketCollection.AddClient(client);
                     _logger.LogInformation("Websocket client {0} Added ", client.Id);
+
                     try
                     {
                         await Handle(context, client, configService);
@@ -84,6 +87,25 @@ namespace AgileConfig.Server.Apisite.Websocket
             {
                 await _next(context);
             }
+        }
+
+        public IPAddress GetRemoteIp(HttpRequest httpRequest)
+        {
+            IPAddress ip;
+            var headers = httpRequest.Headers.ToList();
+            if (headers.Exists((kvp) => kvp.Key == "X-Forwarded-For"))
+            {
+                // when running behind a load balancer you can expect this header
+                var header = headers.First((kvp) => kvp.Key == "X-Forwarded-For").Value.ToString();
+                IPAddress.TryParse(header, out ip);
+            }
+            else
+            {
+                // this will always have a value (running locally in development won't have the header)
+                ip = httpRequest.HttpContext.Connection.RemoteIpAddress;
+            }
+
+            return ip;
         }
 
         private async Task Handle(HttpContext context, WebsocketClient socketClient, IConfigService configService)

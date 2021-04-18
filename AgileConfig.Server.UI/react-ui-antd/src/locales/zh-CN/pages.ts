@@ -125,6 +125,7 @@ export default {
   'pages.client.table.cols.appid': '应用ID',
   'pages.client.table.cols.name': '客户端名称',
   'pages.client.table.cols.tag': '标签',
+  'pages.client.table.cols.ip': 'IP',
   'pages.client.table.cols.appname': '应用名称',
   'pages.client.table.cols.action': '操作',
   'pages.client.table.cols.action.refresh': '刷新配置',

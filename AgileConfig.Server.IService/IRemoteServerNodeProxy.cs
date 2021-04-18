@@ -18,6 +18,8 @@ namespace AgileConfig.Server.IService
 
         public string Name { get; set; }
 
+        public string Ip { get; set; }
+
         public DateTime LastHeartbeatTime { get; set; }
     }
 
