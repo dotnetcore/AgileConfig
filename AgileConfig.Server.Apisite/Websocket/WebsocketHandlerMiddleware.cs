@@ -50,12 +50,17 @@ namespace AgileConfig.Server.Apisite.Websocket
                         appId = appIdSecret.Item1;
                     }
                     WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
+                    var name = context.Request.Headers["client_name"];
+                    var tag = context.Request.Headers["client_tag"];
+
                     var client = new WebsocketClient()
                     {
                         Client = webSocket,
                         Id = Guid.NewGuid().ToString(),
                         AppId = appId,
-                        LastHeartbeatTime = DateTime.Now
+                        LastHeartbeatTime = DateTime.Now,
+                        Name = name,
+                        Tag = tag
                     };
                     _websocketCollection.AddClient(client);
                     _logger.LogInformation("Websocket client {0} Added ", client.Id);

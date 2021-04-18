@@ -165,7 +165,7 @@ namespace AgileConfig.Server.Apisite.Websocket
         {
             var clientInfos = _Clients
                                   .Values
-                                  .Select(c => new ClientInfo { Id = c.Id, AppId = c.AppId, LastHeartbeatTime = c.LastHeartbeatTime })
+                                  .Select(c => new ClientInfo { Id = c.Id, AppId = c.AppId, LastHeartbeatTime = c.LastHeartbeatTime, Tag = c.Tag, Name = c.Name })
                                   .OrderBy(c => c.AppId)
                                   .ThenByDescending(c => c.LastHeartbeatTime)
                                   .ToList();

@@ -16,6 +16,8 @@ namespace AgileConfig.Server.IService
 
         public string Tag { get;set; }
 
+        public string Name { get; set; }
+
         public DateTime LastHeartbeatTime { get; set; }
     }
 

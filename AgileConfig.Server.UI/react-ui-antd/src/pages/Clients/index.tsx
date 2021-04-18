@@ -120,7 +120,19 @@ const clients:React.FC = () => {
       valueEnum: appEnums,
       hideInSearch: true,
     },
-    
+    {
+      title: intl.formatMessage({
+        id: 'pages.client.table.cols.name'
+      }),
+      dataIndex: 'name',
+      hideInSearch: true,
+    },{
+      title: intl.formatMessage({
+        id: 'pages.client.table.cols.tag'
+      }),
+      dataIndex: 'tag',
+      hideInSearch: true,
+    },
     {
       title: intl.formatMessage({
         id: 'pages.client.table.cols.action'
