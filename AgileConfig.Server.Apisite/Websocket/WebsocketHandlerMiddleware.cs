@@ -13,6 +13,7 @@ using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 
 namespace AgileConfig.Server.Apisite.Websocket
 {
@@ -51,7 +52,7 @@ namespace AgileConfig.Server.Apisite.Websocket
                         var appIdSecret = appBasicAuth.GetAppIdSecret(context.Request);
                         appId = appIdSecret.Item1;
                     }
-                    var name = context.Request.Headers["client_name"];
+                    context.Request.Query.TryGetValue("client_name", out StringValues name);
                     if (!string.IsNullOrEmpty(name))
                     {
                         name = HttpUtility.UrlDecode(name);
@@ -60,7 +61,7 @@ namespace AgileConfig.Server.Apisite.Websocket
                     {
                         _logger.LogInformation("Websocket client request No Name property ");
                     }
-                    var tag = context.Request.Headers["client_tag"];
+                    context.Request.Query.TryGetValue("client_tag", out StringValues tag);
                     if (!string.IsNullOrEmpty(tag))
                     {
                         tag = HttpUtility.UrlDecode(tag);
