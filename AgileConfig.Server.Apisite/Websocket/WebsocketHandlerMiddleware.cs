@@ -51,19 +51,27 @@ namespace AgileConfig.Server.Apisite.Websocket
                         var appIdSecret = appBasicAuth.GetAppIdSecret(context.Request);
                         appId = appIdSecret.Item1;
                     }
-                    WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
                     var name = context.Request.Headers["client_name"];
                     if (!string.IsNullOrEmpty(name))
                     {
                         name = HttpUtility.UrlDecode(name);
+                    }
+                    else
+                    {
+                        _logger.LogInformation("Websocket client request No Name property ");
                     }
                     var tag = context.Request.Headers["client_tag"];
                     if (!string.IsNullOrEmpty(tag))
                     {
                         tag = HttpUtility.UrlDecode(tag);
                     }
+                    else
+                    {
+                        _logger.LogInformation("Websocket client request No TAG property ");
+                    }
+                    WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
+                   
                     var clientIp = GetRemoteIp(context.Request);
-
                     var client = new WebsocketClient()
                     {
                         Client = webSocket,
