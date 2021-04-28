@@ -7,11 +7,13 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 
 namespace AgileConfig.Server.Apisite.Websocket
 {
@@ -40,6 +42,7 @@ namespace AgileConfig.Server.Apisite.Websocket
                 {
                     if (!await appBasicAuth.ValidAsync(context.Request))
                     {
+                        context.Response.StatusCode = 401;
                         await context.Response.WriteAsync("basic auth failed .");
                         return;
                     }
@@ -49,11 +52,27 @@ namespace AgileConfig.Server.Apisite.Websocket
                         var appIdSecret = appBasicAuth.GetAppIdSecret(context.Request);
                         appId = appIdSecret.Item1;
                     }
+                    context.Request.Query.TryGetValue("client_name", out StringValues name);
+                    if (!string.IsNullOrEmpty(name))
+                    {
+                        name = HttpUtility.UrlDecode(name);
+                    }
+                    else
+                    {
+                        _logger.LogInformation("Websocket client request No Name property ");
+                    }
+                    context.Request.Query.TryGetValue("client_tag", out StringValues tag);
+                    if (!string.IsNullOrEmpty(tag))
+                    {
+                        tag = HttpUtility.UrlDecode(tag);
+                    }
+                    else
+                    {
+                        _logger.LogInformation("Websocket client request No TAG property ");
+                    }
                     WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
-                    var name = context.Request.Headers["client_name"];
-                    var tag = context.Request.Headers["client_tag"];
+                   
                     var clientIp = GetRemoteIp(context.Request);
-
                     var client = new WebsocketClient()
                     {
                         Client = webSocket,
@@ -75,6 +94,7 @@ namespace AgileConfig.Server.Apisite.Websocket
                     {
                         _logger.LogError(ex, "Handle websocket client {0} err .", client.Id);
                         await _websocketCollection.RemoveClient(client, WebSocketCloseStatus.Empty, ex.Message);
+                        context.Response.StatusCode = 500;
                         await context.Response.WriteAsync("closed");
                     }
                 }
