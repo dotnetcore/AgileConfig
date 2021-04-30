@@ -79,7 +79,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         {
             var appId = _appBasicAuthService.GetAppIdSecret(Request).Item1;
 
-            var configs = await _configService.GetByAppId(appId);
+            var configs = await _configService.GetByAppIdAsync(appId);
 
             return configs.Select(config => new ConfigVM()
             {

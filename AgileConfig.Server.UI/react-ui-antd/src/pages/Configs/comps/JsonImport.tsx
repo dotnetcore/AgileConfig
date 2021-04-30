@@ -97,7 +97,7 @@ const JsonImport : React.FC<JsonImportFormProps> = (props)=>{
       };
     return (
         <Modal 
-          title={intl.formatMessage({id:'pages.configs.table.cols.action.importfromjosnfile'})} 
+          title={intl.formatMessage({id:'pages.configs.table.cols.action.pop.importfromjosnfile'})} 
           width={1000} 
           visible={props.jsonImportModalVisible}
           onCancel={

@@ -121,7 +121,7 @@ namespace AgileConfig.Server.Service
             return await q.FirstAsync();
         }
 
-        public async Task<List<Config>> GetByAppId(string appId)
+        public async Task<List<Config>> GetByAppIdAsync(string appId)
         {
             return await _dbContext.Configs.Where(c =>
                 c.AppId == appId && c.Status == ConfigStatus.Enabled

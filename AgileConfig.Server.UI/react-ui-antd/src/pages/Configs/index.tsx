@@ -173,6 +173,7 @@ const handleRollback = async (config: ConfigModifyLog) => {
     return false;
   }
 };
+
 const configs: React.FC = (props: any) => {
   const appId = props.match.params.app_id;
   const appName = props.match.params.app_name;
@@ -434,12 +435,21 @@ const configs: React.FC = (props: any) => {
               })
             }
        </Button>,
-          <Button key="button" type="primary" onClick={()=>{ setjsonImportFormModalVisible(true) }}>
+          <Button onClick={()=>{ setjsonImportFormModalVisible(true) }}>
             {
               intl.formatMessage({
                 id: 'pages.configs.table.cols.action.importfromjosnfile'
               })
             }
+          </Button>,
+          <Button >
+            <a href={'/config/exportjson?appId=' + appId} target="_blank">
+              {
+                 intl.formatMessage({
+                  id: 'pages.configs.table.cols.action.exportJson'
+                })
+              }
+            </a>
           </Button>
         ]}
         rowSelection={{

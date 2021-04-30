@@ -152,7 +152,10 @@ export default {
   'pages.configs.table.cols.status.1': '已上线',
   'pages.configs.table.cols.action': '操作',
   'pages.configs.table.cols.action.add': '新建',
-  'pages.configs.table.cols.action.importfromjosnfile': '从JSON文件导入',
+  'pages.configs.table.cols.action.importfromjosnfile': '导入',
+  'pages.configs.table.cols.action.pop.importfromjosnfile': '从JSON文件导入',
+  'pages.configs.table.cols.action.exportJson': '导出',
+
   'pages.configs.table.cols.action.edit': '编辑',
   'pages.configs.table.cols.action.delete': '删除',
   'pages.configs.table.cols.action.publish': '上线',

@@ -20,33 +20,15 @@ namespace AgileConfig.Server.Common
 
         private static string DictToJsonString(Dictionary<string, object> dict)
         {
-            //var str = new StringBuilder();
-            //str.AppendLine("{");
-            //foreach (var kv in dict)
-            //{
-            //    var value = "";
-            //    if (kv.Value is string)
-            //    {
-            //        value = (string)kv.Value;
-            //        var kvStr = "  \"" + kv.Key + "\":" + "\"" + value + "\",";
-            //        str.AppendLine(kvStr);
-            //    }
-            //    else
-            //    {
-            //        value = DictToJsonString(kv.Value as Dictionary<string, object>);
-            //        var kvStr = "  \"" + kv.Key + "\":" + value + ",";
-            //        str.AppendLine(kvStr);
-            //    }
-            //}
-            //var index = str.ToString().LastIndexOf(',');
-            //str.Remove(index,1);
-            //str.AppendLine("}");
-
-            //return str.ToString();
-
             return JsonConvert.SerializeObject(dict, Formatting.Indented);
         }
 
+        /// <summary>
+        /// 把扁平化的键值对还原成字典嵌套字典的模式
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <param name="parent"></param>
         private static void Generate(string key, string value, Dictionary<string, object> parent)
         {
             if (string.IsNullOrWhiteSpace(key))

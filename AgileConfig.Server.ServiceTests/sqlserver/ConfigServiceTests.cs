@@ -400,7 +400,7 @@ namespace AgileConfig.Server.Service.Tests.sqlserver
             var result2 = await service.AddAsync(source2);
             Assert.IsTrue(result2);
 
-            var configs = await service.GetByAppId("001");
+            var configs = await service.GetByAppIdAsync("001");
             Assert.IsNotNull(configs);
             Assert.AreEqual(1, configs.Count);
         }

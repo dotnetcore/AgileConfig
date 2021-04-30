@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using AgileConfig.Server.Common;
+using System.Text;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -121,7 +122,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException("model");
             }
 
-            var configs = await _configService.GetByAppId(model.First().AppId);
+            var configs = await _configService.GetByAppIdAsync(model.First().AppId);
 
             var oldDict = new Dictionary<string, string>();
             configs.ForEach(item =>
@@ -225,7 +226,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 });
             }
 
-            var app = await _configService.GetByAppId(model.AppId);
+            var app = await _configService.GetByAppIdAsync(model.AppId);
             if (!app.Any())
             {
                 return Json(new
@@ -872,6 +873,27 @@ namespace AgileConfig.Server.Apisite.Controllers
                     data = addConfigs
                 });
             }
+        }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> ExportJson(string appId)
+        {
+            if (string.IsNullOrEmpty(appId))
+            {
+                throw new ArgumentNullException("appId");
+            }
+
+            var configs = await _configService.GetByAppIdAsync(appId);
+
+            var dict = new Dictionary<string, string>();
+            configs.ForEach(x=> {
+                var key = _configService.GenerateKey(x);
+                dict.Add(key, x.Value);
+            });
+
+            var json = DictionaryConvertToJson.ToJson(dict);
+
+            return File(Encoding.UTF8.GetBytes(json), "application/json", $"{appId}.json");
         }
     }
 }
