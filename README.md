@@ -61,6 +61,10 @@ oracle = Oracle
 sudo docker run --name agile_config -e adminConsole=true -e db:provider=sqlite -e db:conn="Data Source=agile_config.db" -p 5000:5000 -v /etc/localtime:/etc/localtime  kklldog/agile_config:latest
 ```
 ## use client
+install client lib from nuget：
+```
+Install-Package AgileConfig.Client -Version 1.1.8.4
+```
 add a agileconfig section in appsettings.json：
 ```
 {
