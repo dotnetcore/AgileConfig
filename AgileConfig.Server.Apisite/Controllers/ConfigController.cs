@@ -23,7 +23,6 @@ namespace AgileConfig.Server.Apisite.Controllers
         private readonly IModifyLogService _modifyLogService;
         private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
         private readonly IServerNodeService _serverNodeService;
-        private readonly ISysLogService _sysLogService;
         private readonly IAppService _appService;
 
         public ConfigController(
@@ -31,14 +30,12 @@ namespace AgileConfig.Server.Apisite.Controllers
                                 IModifyLogService modifyLogService,
                                 IRemoteServerNodeProxy remoteServerNodeProxy,
                                 IServerNodeService serverNodeService,
-                                ISysLogService sysLogService,
                                  IAppService appService)
         {
             _configService = configService;
             _modifyLogService = modifyLogService;
             _remoteServerNodeProxy = remoteServerNodeProxy;
             _serverNodeService = serverNodeService;
-            _sysLogService = sysLogService;
             _appService = appService;
         }
 
@@ -88,7 +85,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             if (result)
             {
                 //add syslog
-                await _sysLogService.AddSysLogAsync(new SysLog
+                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
@@ -183,7 +180,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                         LogText = $"新增配置【Key：{c.Key}】【Value：{c.Value}】【Group：{c.Group}】【AppId：{c.AppId}】"
                     });
                 });
-                await _sysLogService.AddRangeAsync(addSysLogs);
+                TinyEventBus.Instance.Fire(EventKeys.ADD_RANGE_SYSLOG, addSysLogs);
                 //add modify log 
                 var addModifyLogs = new List<ModifyLog>();
                 addConfigs.ForEach(c =>
@@ -277,13 +274,14 @@ namespace AgileConfig.Server.Apisite.Controllers
                     ModifyTime = config.UpdateTime.Value
                 });
                 //syslog
-                await _sysLogService.AddSysLogAsync(new SysLog
+                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
                     AppId = config.AppId,
                     LogText = $"编辑配置【Key:{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
                 });
+
                 if (config.OnlineStatus == OnlineStatus.Online)
                 {
                     //notice clients
@@ -425,7 +423,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             if (result)
             {
                 //add syslog
-                await _sysLogService.AddSysLogAsync(new SysLog
+                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
@@ -536,7 +534,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     ModifyTime = config.UpdateTime.Value
                 });
                 //add syslog
-                await _sysLogService.AddSysLogAsync(new SysLog
+                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
@@ -617,7 +615,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 var result = await _configService.UpdateAsync(config);
                 if (result)
                 {
-                    await _sysLogService.AddSysLogAsync(new SysLog
+                    TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
                     {
                         LogTime = DateTime.Now,
                         LogType = SysLogType.Normal,
@@ -669,7 +667,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _configService.UpdateAsync(config);
             if (result)
             {
-                await _sysLogService.AddSysLogAsync(new SysLog
+                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
@@ -729,7 +727,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 var result = await _configService.UpdateAsync(config);
                 if (result)
                 {
-                    await _sysLogService.AddSysLogAsync(new SysLog
+                    TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
                     {
                         LogTime = DateTime.Now,
                         LogType = SysLogType.Normal,
@@ -795,7 +793,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _configService.UpdateAsync(config);
             if (result)
             {
-                await _sysLogService.AddSysLogAsync(new SysLog
+                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,

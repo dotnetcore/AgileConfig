@@ -16,6 +16,7 @@ namespace AgileConfig.Server.Service
             sc.AddScoped<ISysLogService, SysLogService>();
             sc.AddScoped<IAppBasicAuthService, AppBasicAuthService>();
             sc.AddScoped<IAdmBasicAuthService, AdmBasicAuthService>();
+            sc.AddSingleton<IEventRegister, EventRegister>();
         }
     }
 }

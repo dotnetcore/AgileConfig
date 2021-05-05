@@ -7,6 +7,7 @@ using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
+using AgileConfig.Server.Common;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -54,7 +55,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _serverNodeService.AddAsync(node);
             if (result)
             {
-                await _sysLogService.AddSysLogAsync(new SysLog
+                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
@@ -101,7 +102,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _serverNodeService.DeleteAsync(node);
             if (result)
             {
-                await _sysLogService.AddSysLogAsync(new SysLog
+                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,

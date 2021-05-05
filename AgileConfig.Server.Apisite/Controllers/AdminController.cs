@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AgileConfig.Server.Apisite.Models;
+using AgileConfig.Server.Common;
+using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -11,11 +13,9 @@ namespace AgileConfig.Server.Apisite.Controllers
     public class AdminController : Controller
     {
         private readonly ISettingService _settingService;
-        private readonly ISysLogService _sysLogService;
-        public AdminController(ISettingService settingService, ISysLogService sysLogService)
+        public AdminController(ISettingService settingService)
         {
             _settingService = settingService;
-            _sysLogService = sysLogService;
         }
 
 
@@ -39,7 +39,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 var jwt = JWT.GetToken();
 
                 //addlog
-                await _sysLogService.AddSysLogAsync(new Data.Entity.SysLog
+                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = Data.Entity.SysLogType.Normal,
@@ -127,7 +127,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                await _sysLogService.AddSysLogAsync(new Data.Entity.SysLog
+                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = Data.Entity.SysLogType.Normal,
@@ -222,7 +222,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                await _sysLogService.AddSysLogAsync(new Data.Entity.SysLog
+                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new Data.Entity.SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = Data.Entity.SysLogType.Normal,

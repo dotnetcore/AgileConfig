@@ -21,7 +21,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         private readonly IModifyLogService _modifyLogService;
         private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
         private readonly IServerNodeService _serverNodeService;
-        private readonly ISysLogService _sysLogService;
         private readonly IAppBasicAuthService _appBasicAuthService;
 
         public ConfigController(
@@ -30,7 +29,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             IModifyLogService modifyLogService,
               IRemoteServerNodeProxy remoteServerNodeProxy,
                                 IServerNodeService serverNodeService,
-                                ISysLogService sysLogService,
                                 IAppBasicAuthService appBasicAuthService)
         {
             _configService = configService;
@@ -38,7 +36,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             _modifyLogService = modifyLogService;
             _remoteServerNodeProxy = remoteServerNodeProxy;
             _serverNodeService = serverNodeService;
-            _sysLogService = sysLogService;
             _appBasicAuthService = appBasicAuthService;
         }
 
@@ -135,7 +132,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 _modifyLogService,
                 _remoteServerNodeProxy,
                 _serverNodeService,
-                _sysLogService,
                 _appService
                 );
 
@@ -174,7 +170,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 _modifyLogService,
                 _remoteServerNodeProxy,
                 _serverNodeService,
-                _sysLogService,
                 _appService
                 );
 
@@ -202,7 +197,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 _modifyLogService,
                 _remoteServerNodeProxy,
                 _serverNodeService,
-                _sysLogService,
                 _appService
                 );
 
@@ -229,7 +223,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 _modifyLogService,
                 _remoteServerNodeProxy,
                 _serverNodeService,
-                _sysLogService,
                 _appService
                 );
 
@@ -256,7 +249,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 _modifyLogService,
                 _remoteServerNodeProxy,
                 _serverNodeService,
-                _sysLogService,
                 _appService
                 );
 

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Collections.Generic;
+using AgileConfig.Server.Common;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -16,12 +17,10 @@ namespace AgileConfig.Server.Apisite.Controllers
     public class AppController : Controller
     {
         private readonly IAppService _appService;
-        private readonly ISysLogService _sysLogService;
 
-        public AppController(IAppService appService, ISysLogService sysLogService)
+        public AppController(IAppService appService)
         {
             _appService = appService;
-            _sysLogService = sysLogService;
         }
 
         public async Task<IActionResult> Search(string name, string id, int current = 1, int pageSize = 20)
@@ -126,7 +125,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _appService.AddAsync(app, inheritanceApps);
             if (result)
             {
-                await _sysLogService.AddSysLogAsync(new SysLog
+                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
@@ -194,7 +193,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _appService.UpdateAsync(app, inheritanceApps);
             if (result)
             {
-                await _sysLogService.AddSysLogAsync(new SysLog
+                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
@@ -292,7 +291,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                await _sysLogService.AddSysLogAsync(new SysLog
+                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
@@ -329,7 +328,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                await _sysLogService.AddSysLogAsync(new SysLog
+                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,

@@ -33,6 +33,7 @@ namespace AgileConfig.Server.Apisite
 
             var sp = host.Services;
             sp.GetService<IRemoteServerNodeProxy>().TestEchoAsync();
+            sp.GetService<IEventRegister>().Init();
 
             host.Run();
         }

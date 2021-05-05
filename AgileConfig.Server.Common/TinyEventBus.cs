@@ -102,7 +102,7 @@ namespace AgileConfig.Server.Common
                             }
                             catch (Exception e)
                             {
-                                _logger.LogError(e, $"fire event {eventKey} error");
+                                _logger?.LogError(e, $"fire event {eventKey} error");
                             }
                         });
                     }

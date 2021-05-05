@@ -9,7 +9,7 @@ namespace AgileConfig.Server.IService
     {
         Task<bool> AddSysLogAsync(SysLog log);
 
-        Task<bool> AddRangeAsync(List<SysLog> logs);
+        Task<bool> AddRangeAsync(IEnumerable<SysLog> logs);
 
 
         Task<List<SysLog>> SearchPage(string appId, SysLogType? logType,DateTime? startTime, DateTime? endTime, int pageSize, int pageIndex);
