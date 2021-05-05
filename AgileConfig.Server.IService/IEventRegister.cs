@@ -21,6 +21,13 @@ namespace AgileConfig.Server.IService
         public const string DISABLE_OR_ENABLE_APP_SUCCESS = "DISABLE_OR_ENABLE_APP_SUCCESS";
         public const string DELETE_APP_SUCCESS = "DELETE_APP_SUCCESS";
 
+        public const string ADD_CONFIG_SUCCESS = "ADD_CONFIG_SUCCESS";
+        public const string EDIT_CONFIG_SUCCESS = "EDIT_CONFIG_SUCCESS";
+        public const string DELETE_CONFIG_SUCCESS = "DELETE_CONFIG_SUCCESS";
+        public const string PUBLISH_CONFIG_SUCCESS = "PUBLISH_CONFIG_SUCCESS";
+        public const string OFFLINE_CONFIG_SUCCESS = "OFFLINE_CONFIG_SUCCESS";
+        public const string ROLLBACK_CONFIG_SUCCESS = "ROLLBACK_CONFIG_SUCCESS";
+
         public const string ADD_SYSLOG = "ADD_SYSLOG";
 
         public const string ADD_RANGE_SYSLOG = "ADD_RANGE_SYSLOG";

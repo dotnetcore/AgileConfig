@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using AgileConfig.Server.Common;
 using System.Text;
+using System.Dynamic;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -84,14 +85,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                //add syslog
-                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    AppId = config.AppId,
-                    LogText = $"新增配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
-                });
+                TinyEventBus.Instance.Fire(EventKeys.ADD_CONFIG_SUCCESS, config);
                 //add modify log 
                 await _modifyLogService.AddAsync(new ModifyLog
                 {
@@ -169,18 +163,11 @@ namespace AgileConfig.Server.Apisite.Controllers
             if (result)
             {
                 //add syslogs
-                var addSysLogs = new List<SysLog>();
                 addConfigs.ForEach(c =>
                 {
-                    addSysLogs.Add(new SysLog
-                    {
-                        LogTime = DateTime.Now,
-                        LogType = SysLogType.Normal,
-                        AppId = c.AppId,
-                        LogText = $"新增配置【Key：{c.Key}】【Value：{c.Value}】【Group：{c.Group}】【AppId：{c.AppId}】"
-                    });
+                    TinyEventBus.Instance.Fire(EventKeys.ADD_CONFIG_SUCCESS, c);
                 });
-                TinyEventBus.Instance.Fire(EventKeys.ADD_RANGE_SYSLOG, addSysLogs);
+
                 //add modify log 
                 var addModifyLogs = new List<ModifyLog>();
                 addConfigs.ForEach(c =>
@@ -273,14 +260,8 @@ namespace AgileConfig.Server.Apisite.Controllers
                     Value = config.Value,
                     ModifyTime = config.UpdateTime.Value
                 });
-                //syslog
-                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    AppId = config.AppId,
-                    LogText = $"编辑配置【Key:{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
-                });
+
+                TinyEventBus.Instance.Fire(EventKeys.EDIT_CONFIG_SUCCESS, config);
 
                 if (config.OnlineStatus == OnlineStatus.Online)
                 {
@@ -422,14 +403,8 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                //add syslog
-                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    AppId = config.AppId,
-                    LogText = $"删除配置【Key:{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
-                });
+                TinyEventBus.Instance.Fire(EventKeys.DELETE_CONFIG_SUCCESS, config);
+
                 //notice clients
                 var action = await CreateRemoveWebsocketAction(config, config.AppId);
                 var nodes = await _serverNodeService.GetAllNodesAsync();
@@ -533,14 +508,12 @@ namespace AgileConfig.Server.Apisite.Controllers
                     Value = config.Value,
                     ModifyTime = config.UpdateTime.Value
                 });
-                //add syslog
-                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    AppId = config.AppId,
-                    LogText = $"回滚配置【Key:{config.Key}】 【Group：{config.Group}】 【AppId：{config.AppId}】至历史记录：{logId}"
-                });
+
+                dynamic param = new ExpandoObject();
+                param.config = config;
+                param.modifyLog = log;
+                TinyEventBus.Instance.Fire(EventKeys.ROLLBACK_CONFIG_SUCCESS, param);
+
                 //notice clients
                 var action = new WebsocketAction
                 {
@@ -615,13 +588,8 @@ namespace AgileConfig.Server.Apisite.Controllers
                 var result = await _configService.UpdateAsync(config);
                 if (result)
                 {
-                    TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
-                    {
-                        LogTime = DateTime.Now,
-                        LogType = SysLogType.Normal,
-                        AppId = config.AppId,
-                        LogText = $"下线配置【Key:{config.Key}】 【Group：{config.Group}】 【AppId：{config.AppId}】"
-                    });
+                    TinyEventBus.Instance.Fire(EventKeys.OFFLINE_CONFIG_SUCCESS, config);
+
                     //notice clients the config item is offline
                     var action = new WebsocketAction { Action = ActionConst.Remove, Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value } };
                     foreach (var node in nodes)
@@ -667,13 +635,8 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _configService.UpdateAsync(config);
             if (result)
             {
-                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    AppId = config.AppId,
-                    LogText = $"下线配置【Key:{config.Key}】 【Group：{config.Group}】 【AppId：{config.AppId}】"
-                });
+                TinyEventBus.Instance.Fire(EventKeys.OFFLINE_CONFIG_SUCCESS, config);
+
                 //notice clients the config item is offline
                 var action = new WebsocketAction { Action = ActionConst.Remove, Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value } };
                 var nodes = await _serverNodeService.GetAllNodesAsync();
@@ -727,13 +690,8 @@ namespace AgileConfig.Server.Apisite.Controllers
                 var result = await _configService.UpdateAsync(config);
                 if (result)
                 {
-                    TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
-                    {
-                        LogTime = DateTime.Now,
-                        LogType = SysLogType.Normal,
-                        AppId = config.AppId,
-                        LogText = $"上线配置【Key:{config.Key}】 【Group：{config.Group}】 【AppId：{config.AppId}】"
-                    });
+                    TinyEventBus.Instance.Fire(EventKeys.PUBLISH_CONFIG_SUCCESS, config);
+
                     //notice clients config item is published
                     var action = new WebsocketAction
                     {
@@ -793,13 +751,8 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _configService.UpdateAsync(config);
             if (result)
             {
-                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    AppId = config.AppId,
-                    LogText = $"上线配置【Key:{config.Key}】 【Group：{config.Group}】 【AppId：{config.AppId}】"
-                });
+                TinyEventBus.Instance.Fire(EventKeys.PUBLISH_CONFIG_SUCCESS, config);
+
                 //notice clients config item is published
                 var action = new WebsocketAction
                 {

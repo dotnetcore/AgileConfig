@@ -76,6 +76,7 @@ namespace AgileConfig.Server.Service
                 }
             });
 
+            // app
             TinyEventBus.Instance.Regist(EventKeys.EDIT_APP_SUCCESS, (param) =>
             {
                 var app = param as App;
@@ -121,21 +122,115 @@ namespace AgileConfig.Server.Service
                 }
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.ADD_SYSLOG, (parm) =>
+            TinyEventBus.Instance.Regist(EventKeys.DELETE_APP_SUCCESS, (param) =>
             {
-                var log = parm as SysLog;
-                if (log != null)
+                var app = param as App;
+                if (app != null)
                 {
+                    var log = new SysLog
+                    {
+                        LogTime = DateTime.Now,
+                        LogType = SysLogType.Normal,
+                        LogText = $"删除应用【AppId:{app.Id}】"
+                    };
+                    _sysLogService.AddSysLogAsync(log);
+                }
+            });
+            //config
+            TinyEventBus.Instance.Regist(EventKeys.ADD_CONFIG_SUCCESS, (param) =>
+            {
+                var config = param as Config;
+                if (config != null)
+                {
+                    var log = new SysLog
+                    {
+                        LogTime = DateTime.Now,
+                        LogType = SysLogType.Normal,
+                        AppId = config.AppId,
+                        LogText = $"新增配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
+                    };
+                    _sysLogService.AddSysLogAsync(log);
+                }
+            });
+            TinyEventBus.Instance.Regist(EventKeys.EDIT_CONFIG_SUCCESS, (param) =>
+            {
+                var config = param as Config;
+                if (config != null)
+                {
+                    var log = new SysLog
+                    {
+                        LogTime = DateTime.Now,
+                        LogType = SysLogType.Normal,
+                        AppId = config.AppId,
+                        LogText = $"编辑配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
+                    };
+                    _sysLogService.AddSysLogAsync(log);
+                }
+            });
+            TinyEventBus.Instance.Regist(EventKeys.DELETE_CONFIG_SUCCESS, (param) =>
+            {
+                var config = param as Config;
+                if (config != null)
+                {
+                    var log = new SysLog
+                    {
+                        LogTime = DateTime.Now,
+                        LogType = SysLogType.Normal,
+                        AppId = config.AppId,
+                        LogText = $"删除配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
+                    };
                     _sysLogService.AddSysLogAsync(log);
                 }
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.ADD_RANGE_SYSLOG, (parm) =>
+            TinyEventBus.Instance.Regist(EventKeys.OFFLINE_CONFIG_SUCCESS, (param) =>
             {
-                var logs = parm as IEnumerable<SysLog>;
-                if (logs != null)
+                var config = param as Config;
+                if (config != null)
                 {
-                    _sysLogService.AddRangeAsync(logs);
+                    var log = new SysLog
+                    {
+                        LogTime = DateTime.Now,
+                        LogType = SysLogType.Normal,
+                        AppId = config.AppId,
+                        LogText = $"下线配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
+                    };
+                    _sysLogService.AddSysLogAsync(log);
+                }
+            });
+
+            TinyEventBus.Instance.Regist(EventKeys.PUBLISH_CONFIG_SUCCESS, (param) =>
+            {
+                var config = param as Config;
+                if (config != null)
+                {
+                    var log = new SysLog
+                    {
+                        LogTime = DateTime.Now,
+                        LogType = SysLogType.Normal,
+                        AppId = config.AppId,
+                        LogText = $"上线配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
+                    };
+                    _sysLogService.AddSysLogAsync(log);
+                }
+            });
+
+            TinyEventBus.Instance.Regist(EventKeys.ROLLBACK_CONFIG_SUCCESS, (param) =>
+            {
+                dynamic param_dy = param;
+                Config config = param_dy.config;
+                ModifyLog modifyLog = param_dy.modifyLog;
+
+                if (config != null && modifyLog != null)
+                {
+                    var log = new SysLog
+                    {
+                        LogTime = DateTime.Now,
+                        LogType = SysLogType.Normal,
+                        AppId = config.AppId,
+                        LogText = $"回滚配置【Key:{config.Key}】 【Group：{config.Group}】 【AppId：{config.AppId}】至历史记录：{modifyLog.Id}"
+                    };
+                    _sysLogService.AddSysLogAsync(log);
                 }
             });
         }
