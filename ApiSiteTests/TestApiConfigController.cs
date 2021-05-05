@@ -65,7 +65,6 @@ namespace ApiSiteTests
                 modifyLogService.Object, 
                 remoteNodeProxy.Object,
                 serverNodeService.Object,
-                sysLogService.Object,
                 appBasicAuthService.Object);
             var act = await ctrl.GetAppConfig("001");
 
@@ -90,7 +89,6 @@ namespace ApiSiteTests
                 modifyLogService.Object,
                 remoteNodeProxy.Object,
                 serverNodeService.Object,
-                sysLogService.Object,
                 appBasicAuthService.Object);
             act = await ctrl.GetAppConfig("001");
 

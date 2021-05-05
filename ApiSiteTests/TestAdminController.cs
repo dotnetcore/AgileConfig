@@ -34,7 +34,7 @@ namespace ApiSiteTests
                     return authenticationService.Object;
                 });
 
-            var ctrl = new AdminController(settingService.Object, syslogService.Object);
+            var ctrl = new AdminController(settingService.Object);
             ctrl.ControllerContext = new ControllerContext();
             ctrl.ControllerContext.HttpContext = new DefaultHttpContext();
             ctrl.ControllerContext.HttpContext.RequestServices = sp.Object;
@@ -60,7 +60,7 @@ namespace ApiSiteTests
             settingService.Setup(s => s.ValidateAdminPassword("123456")).ReturnsAsync(true);
             var syslogService = new Mock<ISysLogService>();
 
-            var ctrl = new AdminController(settingService.Object, syslogService.Object);
+            var ctrl = new AdminController(settingService.Object);
             
         }
 
@@ -71,7 +71,7 @@ namespace ApiSiteTests
             var settingService = new Mock<ISettingService>();
             var syslogService = new Mock<ISysLogService>();
 
-            var ctrl = new AdminController(settingService.Object, syslogService.Object);
+            var ctrl = new AdminController(settingService.Object);
             var model = new InitPasswordVM
             {
                 password = "",
