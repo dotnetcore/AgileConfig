@@ -35,16 +35,9 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _settingService.ValidateAdminPassword(password);
             if (result)
             {
-
                 var jwt = JWT.GetToken();
-
-                //addlog
-                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = Data.Entity.SysLogType.Normal,
-                    LogText = $"管理员登录成功"
-                });
+                
+                TinyEventBus.Instance.Fire(EventKeys.ADMIN_LOGIN_SUCCESS);
 
                 return Json(new
                 {
@@ -127,12 +120,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = Data.Entity.SysLogType.Normal,
-                    LogText = $"管理员密码初始化成功"
-                });
+                TinyEventBus.Instance.Fire(EventKeys.INIT_ADMIN_PASSWORD_SUCCESS);
 
                 return Json(new
                 {
@@ -222,12 +210,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new Data.Entity.SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = Data.Entity.SysLogType.Normal,
-                    LogText = $"修改管理员密码成功"
-                });
+                TinyEventBus.Instance.Fire(EventKeys.RESET_ADMIN_PASSWORD_SUCCESS);
 
                 return Json(new
                 {

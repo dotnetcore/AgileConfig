@@ -32,7 +32,7 @@ namespace AgileConfig.Server.Common
         /// </summary>
         /// <param name="eventKey"></param>
         /// <param name="param"></param>
-        void Fire(string eventKey, object param);
+        void Fire(string eventKey, object param = null);
     }
 
     public class TinyEventBus : ITinyEventBus
@@ -84,7 +84,7 @@ namespace AgileConfig.Server.Common
         }
 
 
-        public void Fire(string eventKey, object param)
+        public void Fire(string eventKey, object param = null)
         {
             _events.TryGetValue(eventKey, out List<Action<object>> actions);
             if (actions != null)

@@ -125,12 +125,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _appService.AddAsync(app, inheritanceApps);
             if (result)
             {
-                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    LogText = $"新增应用【AppId：{app.Id}】【AppName：{app.Name}】"
-                });
+                TinyEventBus.Instance.Fire(EventKeys.ADD_APP_SUCCESS, app);
             }
 
             return Json(new
@@ -193,12 +188,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _appService.UpdateAsync(app, inheritanceApps);
             if (result)
             {
-                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    LogText = $"修改应用【AppId：{app.Id}】【AppName：{app.Name}】"
-                });
+                TinyEventBus.Instance.Fire(EventKeys.EDIT_APP_SUCCESS, app);
             }
             return Json(new
             {
@@ -291,12 +281,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    LogText = $"{(app.Enabled ? "启用" : "禁用")}应用【AppId】:{app.Id}"
-                });
+                TinyEventBus.Instance.Fire(EventKeys.DISABLE_OR_ENABLE_APP_SUCCESS, app);
             }
 
             return Json(new
@@ -328,12 +313,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    LogText = $"删除应用【AppId】:{app.Id}"
-                });
+                TinyEventBus.Instance.Fire(EventKeys.DELETE_APP_SUCCESS, app);
             }
 
             return Json(new
