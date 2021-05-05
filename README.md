@@ -61,6 +61,10 @@ oracle = Oracle
 sudo docker run --name agile_config -e adminConsole=true -e db:provider=sqlite -e db:conn="Data Source=agile_config.db" -p 5000:5000 -v /etc/localtime:/etc/localtime  kklldog/agile_config:latest
 ```
 ## use client
+install client lib from nuget：
+```
+Install-Package AgileConfig.Client -Version 1.1.8.4
+```
 add a agileconfig section in appsettings.json：
 ```
 {
@@ -144,6 +148,10 @@ public class HomeController : Controller
 ![](https://ftp.bmp.ovh/imgs/2021/04/74fbc7f1daab5deb.png)   
 ![](https://ftp.bmp.ovh/imgs/2021/04/9f38d55804e858d5.png)   
 
+## donate
+If this project is helpful to you, please scan the QR code below for a cup of coffee.    
+<img src = 'https://ftp.bmp.ovh/imgs/2021/04/c0146fa995e8074d.jpg'  width="300"/>    
+<img src = 'https://ftp.bmp.ovh/imgs/2021/04/1c8748c5732b8fbe.jpg' width="300"/>
 ## contact me
 mail：minj.zhou@gmail.com   
 qq group：1022985150
