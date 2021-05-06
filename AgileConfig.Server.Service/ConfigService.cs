@@ -190,7 +190,7 @@ namespace AgileConfig.Server.Service
         public async Task<string> AppPublishedConfigsMd5Cache(string appId)
         {
             var cacheKey = AppPublishedConfigsMd5CacheKey(appId);
-            if (_memoryCache.TryGetValue(cacheKey, out string md5))
+            if (_memoryCache != null && _memoryCache.TryGetValue(cacheKey, out string md5))
             {
                 return md5;
             }
@@ -199,7 +199,7 @@ namespace AgileConfig.Server.Service
 
             var cacheOp = new MemoryCacheEntryOptions()
             .SetAbsoluteExpiration(TimeSpan.FromSeconds(60));
-            _memoryCache.Set(cacheKey, md5, cacheOp);
+            _memoryCache?.Set(cacheKey, md5, cacheOp);
 
             return md5;
         }
@@ -217,12 +217,12 @@ namespace AgileConfig.Server.Service
         private void ClearAppPublishedConfigsMd5Cache(string appId)
         {
             var cacheKey = AppPublishedConfigsMd5CacheKey(appId);
-            _memoryCache.Remove(cacheKey);
+            _memoryCache?.Remove(cacheKey);
         }
         private void ClearAppPublishedConfigsMd5CacheWithInheritanced(string appId)
         {
             var cacheKey = AppPublishedConfigsMd5CacheKeyWithInheritanced(appId);
-            _memoryCache.Remove(cacheKey);
+            _memoryCache?.Remove(cacheKey);
         }
 
         public async Task<List<Config>> GetPublishedConfigsByAppId(string appId)
@@ -321,7 +321,7 @@ namespace AgileConfig.Server.Service
         public async Task<string> AppPublishedConfigsMd5CacheWithInheritanced(string appId)
         {
             var cacheKey = AppPublishedConfigsMd5CacheKeyWithInheritanced(appId);
-            if (_memoryCache.TryGetValue(cacheKey, out string md5))
+            if (_memoryCache != null && _memoryCache.TryGetValue(cacheKey, out string md5))
             {
                 return md5;
             }
@@ -330,7 +330,7 @@ namespace AgileConfig.Server.Service
 
             var cacheOp = new MemoryCacheEntryOptions()
             .SetAbsoluteExpiration(TimeSpan.FromSeconds(60));
-            _memoryCache.Set(cacheKey, md5, cacheOp);
+            _memoryCache?.Set(cacheKey, md5, cacheOp);
 
             return md5;
         }

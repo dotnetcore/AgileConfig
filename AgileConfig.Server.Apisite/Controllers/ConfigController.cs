@@ -6,7 +6,6 @@ using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
-using Agile.Config.Protocol;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
@@ -223,27 +222,11 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result && !IsOnlyUpdateDescription(config, oldConfig))
             {
-                TinyEventBus.Instance.Fire(EventKeys.EDIT_CONFIG_SUCCESS, config);
+                dynamic param = new ExpandoObject();
+                param.config = config;
+                param.oldConfig = oldConfig;
 
-                if (config.OnlineStatus == OnlineStatus.Online)
-                {
-                    //notice clients
-                    var action = new WebsocketAction
-                    {
-                        Action = ActionConst.Update,
-                        Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value },
-                        OldItem = new ConfigItem { group = oldConfig.Group, key = oldConfig.Key, value = oldConfig.Value }
-                    };
-                    var nodes = await _serverNodeService.GetAllNodesAsync();
-                    foreach (var node in nodes)
-                    {
-                        if (node.Status == NodeStatus.Offline)
-                        {
-                            continue;
-                        }
-                        await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, config.AppId, action);
-                    }
-                }
+                TinyEventBus.Instance.Fire(EventKeys.EDIT_CONFIG_SUCCESS, param);
             }
 
             return Json(new
@@ -366,19 +349,6 @@ namespace AgileConfig.Server.Apisite.Controllers
             if (result)
             {
                 TinyEventBus.Instance.Fire(EventKeys.DELETE_CONFIG_SUCCESS, config);
-
-                //notice clients
-                var action = await CreateRemoveWebsocketAction(config, config.AppId);
-                var nodes = await _serverNodeService.GetAllNodesAsync();
-                foreach (var node in nodes)
-                {
-                    if (node.Status == NodeStatus.Offline)
-                    {
-                        continue;
-                    }
-                    await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, config.AppId, action);
-                }
-
             }
 
             return Json(new
@@ -388,32 +358,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
-        private async Task<WebsocketAction> CreateRemoveWebsocketAction(Config oldConfig, string appId)
-        {
-            //获取app此时的配置列表合并继承的app配置 字典
-            var configs = await _configService.GetPublishedConfigsByAppIdWithInheritanced_Dictionary(appId);
-            var oldKey = _configService.GenerateKey(oldConfig);
-            //如果oldkey已经不存在，返回remove的action
-            if (!configs.ContainsKey(oldKey))
-            {
-                var action = new WebsocketAction { Action = ActionConst.Remove, Item = new ConfigItem { group = oldConfig.Group, key = oldConfig.Key, value = oldConfig.Value } };
-                return action;
-            }
-            else
-            {
-                //如果还在，那么说明有继承的app的配置项目的key跟oldkey一样，那么使用继承的配置的值
-                //返回update的action
-                var config = configs[oldKey];
-                var action = new WebsocketAction
-                {
-                    Action = ActionConst.Update,
-                    Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value },
-                    OldItem = new ConfigItem { group = oldConfig.Group, key = oldConfig.Key, value = oldConfig.Value }
-                };
 
-                return action;
-            }
-        }
 
         [HttpPost]
         public async Task<IActionResult> Rollback(string configId, string logId)
@@ -463,24 +408,9 @@ namespace AgileConfig.Server.Apisite.Controllers
                 dynamic param = new ExpandoObject();
                 param.config = config;
                 param.modifyLog = log;
-                TinyEventBus.Instance.Fire(EventKeys.ROLLBACK_CONFIG_SUCCESS, param);
+                param.oldConfig = oldConfig;
 
-                //notice clients
-                var action = new WebsocketAction
-                {
-                    Action = ActionConst.Update,
-                    Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value },
-                    OldItem = new ConfigItem { group = oldConfig.Group, key = oldConfig.Key, value = oldConfig.Value }
-                };
-                var nodes = await _serverNodeService.GetAllNodesAsync();
-                foreach (var node in nodes)
-                {
-                    if (node.Status == NodeStatus.Offline)
-                    {
-                        continue;
-                    }
-                    await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, config.AppId, action);
-                }
+                TinyEventBus.Instance.Fire(EventKeys.ROLLBACK_CONFIG_SUCCESS, param);
             }
 
             return Json(new
@@ -519,7 +449,6 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException("configIds");
             }
 
-            var nodes = await _serverNodeService.GetAllNodesAsync();
             foreach (var configId in configIds)
             {
                 var config = await _configService.GetAsync(configId);
@@ -540,17 +469,6 @@ namespace AgileConfig.Server.Apisite.Controllers
                 if (result)
                 {
                     TinyEventBus.Instance.Fire(EventKeys.OFFLINE_CONFIG_SUCCESS, config);
-
-                    //notice clients the config item is offline
-                    var action = new WebsocketAction { Action = ActionConst.Remove, Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value } };
-                    foreach (var node in nodes)
-                    {
-                        if (node.Status == NodeStatus.Offline)
-                        {
-                            continue;
-                        }
-                        await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, config.AppId, action);
-                    }
                 }
             }
             return Json(new
@@ -587,18 +505,6 @@ namespace AgileConfig.Server.Apisite.Controllers
             if (result)
             {
                 TinyEventBus.Instance.Fire(EventKeys.OFFLINE_CONFIG_SUCCESS, config);
-
-                //notice clients the config item is offline
-                var action = new WebsocketAction { Action = ActionConst.Remove, Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value } };
-                var nodes = await _serverNodeService.GetAllNodesAsync();
-                foreach (var node in nodes)
-                {
-                    if (node.Status == NodeStatus.Offline)
-                    {
-                        continue;
-                    }
-                    await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, config.AppId, action);
-                }
             }
 
             return Json(new
@@ -642,21 +548,6 @@ namespace AgileConfig.Server.Apisite.Controllers
                 if (result)
                 {
                     TinyEventBus.Instance.Fire(EventKeys.PUBLISH_CONFIG_SUCCESS, config);
-
-                    //notice clients config item is published
-                    var action = new WebsocketAction
-                    {
-                        Action = ActionConst.Add,
-                        Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value }
-                    };
-                    foreach (var node in nodes)
-                    {
-                        if (node.Status == NodeStatus.Offline)
-                        {
-                            continue;
-                        }
-                        await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, config.AppId, action);
-                    }
                 }
             }
             return Json(new
@@ -703,22 +594,6 @@ namespace AgileConfig.Server.Apisite.Controllers
             if (result)
             {
                 TinyEventBus.Instance.Fire(EventKeys.PUBLISH_CONFIG_SUCCESS, config);
-
-                //notice clients config item is published
-                var action = new WebsocketAction
-                {
-                    Action = ActionConst.Add,
-                    Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value }
-                };
-                var nodes = await _serverNodeService.GetAllNodesAsync();
-                foreach (var node in nodes)
-                {
-                    if (node.Status == NodeStatus.Offline)
-                    {
-                        continue;
-                    }
-                    await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, config.AppId, action);
-                }
             }
             return Json(new
             {
