@@ -12,10 +12,12 @@ namespace AgileConfig.Server.Service
     {
 
         private ISysLogService _sysLogService;
+        private IModifyLogService _modifyLogService;
 
         public EventRegister()
         {
             _sysLogService = new SysLogService(new FreeSqlContext(FreeSQL.Instance));
+            _modifyLogService = new ModifyLogService(new FreeSqlContext(FreeSQL.Instance));
         }
 
         public void Init()
@@ -150,6 +152,16 @@ namespace AgileConfig.Server.Service
                         LogText = $"新增配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
                     };
                     _sysLogService.AddSysLogAsync(log);
+
+                    _modifyLogService.AddAsync(new ModifyLog
+                    {
+                        Id = Guid.NewGuid().ToString("N"),
+                        ConfigId = config.Id,
+                        Key = config.Key,
+                        Group = config.Group,
+                        Value = config.Value,
+                        ModifyTime = config.CreateTime
+                    });
                 }
             });
             TinyEventBus.Instance.Regist(EventKeys.EDIT_CONFIG_SUCCESS, (param) =>
@@ -165,6 +177,16 @@ namespace AgileConfig.Server.Service
                         LogText = $"编辑配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
                     };
                     _sysLogService.AddSysLogAsync(log);
+
+                    _modifyLogService.AddAsync(new ModifyLog
+                    {
+                        Id = Guid.NewGuid().ToString("N"),
+                        ConfigId = config.Id,
+                        Key = config.Key,
+                        Group = config.Group,
+                        Value = config.Value,
+                        ModifyTime = config.UpdateTime.Value
+                    });
                 }
             });
             TinyEventBus.Instance.Regist(EventKeys.DELETE_CONFIG_SUCCESS, (param) =>
@@ -231,6 +253,16 @@ namespace AgileConfig.Server.Service
                         LogText = $"回滚配置【Key:{config.Key}】 【Group：{config.Group}】 【AppId：{config.AppId}】至历史记录：{modifyLog.Id}"
                     };
                     _sysLogService.AddSysLogAsync(log);
+
+                    _modifyLogService.AddAsync(new ModifyLog
+                    {
+                        Id = Guid.NewGuid().ToString("N"),
+                        ConfigId = config.Id,
+                        Key = config.Key,
+                        Group = config.Group,
+                        Value = config.Value,
+                        ModifyTime = config.UpdateTime.Value
+                    });
                 }
             });
         }

@@ -86,16 +86,6 @@ namespace AgileConfig.Server.Apisite.Controllers
             if (result)
             {
                 TinyEventBus.Instance.Fire(EventKeys.ADD_CONFIG_SUCCESS, config);
-                //add modify log 
-                await _modifyLogService.AddAsync(new ModifyLog
-                {
-                    Id = Guid.NewGuid().ToString("N"),
-                    ConfigId = config.Id,
-                    Key = config.Key,
-                    Group = config.Group,
-                    Value = config.Value,
-                    ModifyTime = config.CreateTime
-                });
             }
 
             return Json(new
@@ -162,27 +152,10 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                //add syslogs
                 addConfigs.ForEach(c =>
                 {
                     TinyEventBus.Instance.Fire(EventKeys.ADD_CONFIG_SUCCESS, c);
                 });
-
-                //add modify log 
-                var addModifyLogs = new List<ModifyLog>();
-                addConfigs.ForEach(c =>
-                {
-                    addModifyLogs.Add(new ModifyLog
-                    {
-                        Id = Guid.NewGuid().ToString("N"),
-                        ConfigId = c.Id,
-                        Key = c.Key,
-                        Group = c.Group,
-                        Value = c.Value,
-                        ModifyTime = c.CreateTime
-                    });
-                });
-                await _modifyLogService.AddRangAsync(addModifyLogs);
             }
 
             return Json(new
@@ -250,17 +223,6 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result && !IsOnlyUpdateDescription(config, oldConfig))
             {
-                //add modify log 
-                await _modifyLogService.AddAsync(new ModifyLog
-                {
-                    Id = Guid.NewGuid().ToString("N"),
-                    ConfigId = config.Id,
-                    Key = config.Key,
-                    Group = config.Group,
-                    Value = config.Value,
-                    ModifyTime = config.UpdateTime.Value
-                });
-
                 TinyEventBus.Instance.Fire(EventKeys.EDIT_CONFIG_SUCCESS, config);
 
                 if (config.OnlineStatus == OnlineStatus.Online)
@@ -498,17 +460,6 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _configService.UpdateAsync(config);
             if (result)
             {
-                //add modify log 
-                await _modifyLogService.AddAsync(new ModifyLog
-                {
-                    Id = Guid.NewGuid().ToString("N"),
-                    ConfigId = config.Id,
-                    Key = config.Key,
-                    Group = config.Group,
-                    Value = config.Value,
-                    ModifyTime = config.UpdateTime.Value
-                });
-
                 dynamic param = new ExpandoObject();
                 param.config = config;
                 param.modifyLog = log;
@@ -815,8 +766,6 @@ namespace AgileConfig.Server.Apisite.Controllers
                     config.Id = Guid.NewGuid().ToString();
                     addConfigs.Add(config);
                 }
-
-                //var result = await _configService.AddRangeAsync(configs);
 
                 return Json(new
                 {
