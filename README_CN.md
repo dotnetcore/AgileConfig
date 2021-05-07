@@ -78,8 +78,7 @@ sudo docker run --name agile_config -e adminConsole=true -e db:provider=sqlite -
 2. db:provider 配置程序的数据库类型。目前程序支持：sqlserver，mysql，sqlite, PostgreSql，Oracle 五种数据库。
 3. db:conn 配置数据库连接串    
    
-如果通过IIS部署，请自行下载publish分支源码进行编译。请先先编译react-ui-antd项目把dist内的产物复制到apisite项目的wwwroot/ui目录下。
-![](https://ftp.bmp.ovh/imgs/2021/04/88c43b8bbddb2c4e.png)
+> 注意：如果通过IIS部署，请自行下载publish分支源码进行编译。请先编译react-ui-antd项目把dist内的产物复制到apisite项目的wwwroot/ui目录下。
 ### 初始化管理员密码
 第一次运行程序需要初始化管理员密码    
 ![](https://ftp.bmp.ovh/imgs/2021/04/44242b327230c5e6.png)
