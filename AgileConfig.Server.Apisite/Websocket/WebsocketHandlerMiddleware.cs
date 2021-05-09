@@ -94,8 +94,7 @@ namespace AgileConfig.Server.Apisite.Websocket
                     {
                         _logger.LogError(ex, "Handle websocket client {0} err .", client.Id);
                         await _websocketCollection.RemoveClient(client, WebSocketCloseStatus.Empty, ex.Message);
-                        context.Response.StatusCode = 500;
-                        await context.Response.WriteAsync("closed");
+                        await context.Response.WriteAsync("500 closed");
                     }
                 }
                 else
