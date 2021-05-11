@@ -372,7 +372,7 @@ namespace AgileConfig.Server.Service
                             }
                             foreach (var item in noticeApps)
                             {
-                                _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, item.Key, item.Value);
+                                await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, item.Key, item.Value);
                             }
                         }
                     }
@@ -440,7 +440,7 @@ namespace AgileConfig.Server.Service
                             }
                             foreach (var item in noticeApps)
                             {
-                                _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, item.Key, item.Value);
+                                await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, item.Key, item.Value);
                             }
                         }
                     }
@@ -461,7 +461,7 @@ namespace AgileConfig.Server.Service
             if (currentApp.Type == AppType.Inheritance)
             {
                 var inheritancedFromApps = await _appService.GetInheritancedFromAppsAsync(config.AppId);
-                inheritancedFromApps.ForEach(async x =>
+                inheritancedFromApps.ForEach( x =>
                 {
                     needNoticeAppsActions.Add(x.Id, new WebsocketAction { 
                         Action = ActionConst.Reload
