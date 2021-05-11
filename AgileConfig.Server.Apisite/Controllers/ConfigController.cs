@@ -342,13 +342,17 @@ namespace AgileConfig.Server.Apisite.Controllers
                 });
             }
 
-            config.Status = ConfigStatus.Deleted;
+            var oldConfig = await _configService.GetAsync(id);
 
+            config.Status = ConfigStatus.Deleted;
             var result = await _configService.UpdateAsync(config);
 
             if (result)
             {
-                TinyEventBus.Instance.Fire(EventKeys.DELETE_CONFIG_SUCCESS, config);
+                dynamic param = new ExpandoObject();
+                param.config = config;
+                param.oldConfig = oldConfig;
+                TinyEventBus.Instance.Fire(EventKeys.DELETE_CONFIG_SUCCESS, param);
             }
 
             return Json(new
@@ -438,7 +442,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         /// <summary>
-        /// 上线多个配置
+        /// 下线多个配置
         /// </summary>
         /// <param name="configIds"></param>
         /// <returns></returns>
@@ -460,6 +464,8 @@ namespace AgileConfig.Server.Apisite.Controllers
                         message = "未找到对应的配置项。"
                     });
                 }
+                var oldConfig = await _configService.GetAsync(configId);
+
                 if (config.OnlineStatus == OnlineStatus.WaitPublish)
                 {
                     continue;
@@ -468,7 +474,10 @@ namespace AgileConfig.Server.Apisite.Controllers
                 var result = await _configService.UpdateAsync(config);
                 if (result)
                 {
-                    TinyEventBus.Instance.Fire(EventKeys.OFFLINE_CONFIG_SUCCESS, config);
+                    dynamic param = new ExpandoObject();
+                    param.config = config;
+                    param.oldConfig = oldConfig;
+                    TinyEventBus.Instance.Fire(EventKeys.OFFLINE_CONFIG_SUCCESS, param);
                 }
             }
             return Json(new
@@ -500,11 +509,17 @@ namespace AgileConfig.Server.Apisite.Controllers
                     message = "未找到对应的配置项。"
                 });
             }
+
+            var oldConfig = await _configService.GetAsync(configId);
+
             config.OnlineStatus = OnlineStatus.WaitPublish;
             var result = await _configService.UpdateAsync(config);
             if (result)
             {
-                TinyEventBus.Instance.Fire(EventKeys.OFFLINE_CONFIG_SUCCESS, config);
+                dynamic param = new ExpandoObject();
+                param.config = config;
+                param.oldConfig = oldConfig;
+                TinyEventBus.Instance.Fire(EventKeys.OFFLINE_CONFIG_SUCCESS, param);
             }
 
             return Json(new

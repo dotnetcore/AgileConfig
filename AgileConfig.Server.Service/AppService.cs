@@ -120,6 +120,31 @@ namespace AgileConfig.Server.Service
             return apps;
         }
 
+        /// <summary>
+        /// 查询所有继承自该app的应用
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <returns></returns>
+        public async Task<List<App>> GetInheritancedFromAppsAsync(string appId)
+        {
+            var appInheritanceds = await _dbContext.AppInheritanceds.Where(a => a.InheritancedAppId == appId).ToListAsync();
+            appInheritanceds = appInheritanceds.OrderBy(a => a.Sort).ToList();
+
+            var apps = new List<App>();
+
+            foreach (var item in appInheritanceds)
+            {
+                var app = await GetAsync(item.AppId);
+                if (app != null && app.Enabled)
+                {
+                    apps.Add(app);
+                }
+            }
+
+            return apps;
+        }
+
+
         public async Task<bool> UpdateAsync(App app, List<AppInheritanced> appInheritanceds)
         {
             _dbContext.Update(app);

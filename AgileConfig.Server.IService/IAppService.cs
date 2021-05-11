@@ -24,5 +24,7 @@ namespace AgileConfig.Server.IService
         Task<int> CountEnabledAppsAsync();
 
         Task<List<App>> GetInheritancedAppsAsync(string appId);
+
+        Task<List<App>> GetInheritancedFromAppsAsync(string appId);
     }
 }
