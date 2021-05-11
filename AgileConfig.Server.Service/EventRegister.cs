@@ -15,21 +15,15 @@ namespace AgileConfig.Server.Service
 {
     public class EventRegister : IEventRegister
     {
-        private IAppService _appService;
-        private IConfigService _configService;
-        private ISysLogService _sysLogService;
-        private IModifyLogService _modifyLogService;
+        private IAppService _appService => new AppService(new FreeSqlContext(FreeSQL.Instance));
+        private IConfigService _configService => new ConfigService(new FreeSqlContext(FreeSQL.Instance), null, _appService);
+        private ISysLogService _sysLogService => new SysLogService(new FreeSqlContext(FreeSQL.Instance));
+        private IModifyLogService _modifyLogService => new ModifyLogService(new FreeSqlContext(FreeSQL.Instance));
         private IRemoteServerNodeProxy _remoteServerNodeProxy;
-        private IServerNodeService _serverNodeService;
+        private IServerNodeService _serverNodeService => new ServerNodeService(new FreeSqlContext(FreeSQL.Instance));
 
         public EventRegister(IRemoteServerNodeProxy remoteServerNodeProxy)
         {
-            _appService = new AppService(new FreeSqlContext(FreeSQL.Instance));
-            _configService = new ConfigService(new FreeSqlContext(FreeSQL.Instance), null, _appService);
-            _sysLogService = new SysLogService(new FreeSqlContext(FreeSQL.Instance));
-            _modifyLogService = new ModifyLogService(new FreeSqlContext(FreeSQL.Instance));
-            _serverNodeService = new ServerNodeService(new FreeSqlContext(FreeSQL.Instance));
-
             _remoteServerNodeProxy = remoteServerNodeProxy;
         }
 
@@ -306,7 +300,7 @@ namespace AgileConfig.Server.Service
                 dynamic param_dy = param;
                 Config config = param_dy.config;
                 Config oldConfig = param_dy.oldConfig;
-                if (config != null )
+                if (config != null)
                 {
                     //notice clients the config item is offline
                     var nodes = await _serverNodeService.GetAllNodesAsync();
@@ -328,7 +322,7 @@ namespace AgileConfig.Server.Service
             });
 
 
-            
+
 
             TinyEventBus.Instance.Regist(EventKeys.PUBLISH_CONFIG_SUCCESS, (param) =>
             {
@@ -455,18 +449,20 @@ namespace AgileConfig.Server.Service
         /// <returns></returns>
         private async Task<Dictionary<string, WebsocketAction>> GetNeedNoticeInheritancedFromAppsAction(Config config)
         {
-            Dictionary<string, WebsocketAction> needNoticeAppsActions = new Dictionary<string, WebsocketAction> {
+            Dictionary<string, WebsocketAction> needNoticeAppsActions = new Dictionary<string, WebsocketAction>
+            {
             };
             var currentApp = await _appService.GetAsync(config.AppId);
             if (currentApp.Type == AppType.Inheritance)
             {
                 var inheritancedFromApps = await _appService.GetInheritancedFromAppsAsync(config.AppId);
-                inheritancedFromApps.ForEach( x =>
-                {
-                    needNoticeAppsActions.Add(x.Id, new WebsocketAction { 
-                        Action = ActionConst.Reload
-                    });
-                });
+                inheritancedFromApps.ForEach(x =>
+               {
+                   needNoticeAppsActions.Add(x.Id, new WebsocketAction
+                   {
+                       Action = ActionConst.Reload
+                   });
+               });
             }
 
             return needNoticeAppsActions;

@@ -33,15 +33,13 @@ namespace AgileConfig.Server.Service
                 return JsonConvert.SerializeObject(obj);
             }
         }
-        private IServerNodeService _serverNodeService;
+        private IServerNodeService _serverNodeService => new ServerNodeService(new FreeSqlContext(FreeSQL.Instance));
         private ILogger _logger;
-        private ISysLogService _sysLogService;
+        private ISysLogService _sysLogService => new SysLogService(new FreeSqlContext(FreeSQL.Instance));
         private static ConcurrentDictionary<string, ClientInfos> _serverNodeClientReports = new ConcurrentDictionary<string, ClientInfos>();
 
         public RemoteServerNodeProxy (ILoggerFactory loggerFactory)
         {
-            _sysLogService = new SysLogService(new FreeSqlContext(FreeSQL.Instance));
-            _serverNodeService = new ServerNodeService(new FreeSqlContext(FreeSQL.Instance));
             _logger = loggerFactory.CreateLogger<RemoteServerNodeProxy>();
         }
 
