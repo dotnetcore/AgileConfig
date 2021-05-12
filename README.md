@@ -152,6 +152,9 @@ public class HomeController : Controller
 If this project is helpful to you, please scan the QR code below for a cup of coffee.    
 <img src = 'https://ftp.bmp.ovh/imgs/2021/04/c0146fa995e8074d.jpg'  width="300"/>    
 <img src = 'https://ftp.bmp.ovh/imgs/2021/04/1c8748c5732b8fbe.jpg' width="300"/>
+   
+thanks for    
+大鹏￥66.66 , 瘦草￥6.66
 ## contact me
 mail：minj.zhou@gmail.com   
 qq group：1022985150
