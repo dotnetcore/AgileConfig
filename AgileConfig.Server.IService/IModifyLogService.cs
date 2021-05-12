@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.IService
 {
-    public interface IModifyLogService
+    public interface IModifyLogService: IDisposable
     {
         Task<List<ModifyLog>> Search(string configId);
 

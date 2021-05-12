@@ -334,5 +334,10 @@ namespace AgileConfig.Server.Service
 
             return md5;
         }
+
+        public void Dispose()
+        {
+            _dbContext.Dispose();
+        }
     }
 }

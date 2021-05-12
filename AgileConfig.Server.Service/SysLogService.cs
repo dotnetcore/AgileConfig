@@ -58,6 +58,11 @@ namespace AgileConfig.Server.Service
             return count;
         }
 
+        public void Dispose()
+        {
+            _dbContext.Dispose();
+        }
+
         public Task<List<SysLog>> SearchPage(string appId, SysLogType? logType, DateTime? startTime, DateTime? endTime, int pageSize, int pageIndex)
         {
             var query = _dbContext.SysLogs.Where(s => 1 == 1);

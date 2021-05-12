@@ -107,5 +107,10 @@ namespace AgileConfig.Server.Service
 
             return password == dbPassword.Value;
         }
+
+        public void Dispose()
+        {
+            _dbContext.Dispose();
+        }
     }
 }

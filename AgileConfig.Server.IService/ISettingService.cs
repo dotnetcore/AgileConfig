@@ -1,10 +1,11 @@
 ﻿using AgileConfig.Server.Data.Entity;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace AgileConfig.Server.IService
 {
-    public interface ISettingService
+    public interface ISettingService: IDisposable
     {
         Task<Setting> GetAsync(string id);
         Task<bool> AddAsync(Setting setting);

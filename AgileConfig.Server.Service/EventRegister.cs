@@ -15,13 +15,29 @@ namespace AgileConfig.Server.Service
 {
     public class EventRegister : IEventRegister
     {
-        private IAppService _appService => new AppService(new FreeSqlContext(FreeSQL.Instance));
-        private IConfigService _configService => new ConfigService(new FreeSqlContext(FreeSQL.Instance), null, _appService);
-        private ISysLogService _sysLogService => new SysLogService(new FreeSqlContext(FreeSQL.Instance));
-        private IModifyLogService _modifyLogService => new ModifyLogService(new FreeSqlContext(FreeSQL.Instance));
-        private IRemoteServerNodeProxy _remoteServerNodeProxy;
-        private IServerNodeService _serverNodeService => new ServerNodeService(new FreeSqlContext(FreeSQL.Instance));
+        private IAppService GetAppService()
+        {
+            return new AppService(new FreeSqlContext(FreeSQL.Instance));
+        }
+        private IConfigService GetConfigService()
+        {
+            return new ConfigService(new FreeSqlContext(FreeSQL.Instance), null, GetAppService());
+        }
 
+        private ISysLogService GetSysLogService() 
+        {
+            return new SysLogService(new FreeSqlContext(FreeSQL.Instance));
+        }
+        private IModifyLogService GetModifyLogService() 
+        {
+            return new ModifyLogService(new FreeSqlContext(FreeSQL.Instance));
+        }
+        private IServerNodeService GetServerNodeService()
+        {
+            return new ServerNodeService(new FreeSqlContext(FreeSQL.Instance)); 
+        }
+
+        private IRemoteServerNodeProxy _remoteServerNodeProxy;
         public EventRegister(IRemoteServerNodeProxy remoteServerNodeProxy)
         {
             _remoteServerNodeProxy = remoteServerNodeProxy;
@@ -52,9 +68,40 @@ namespace AgileConfig.Server.Service
                             Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value },
                             OldItem = new ConfigItem { group = oldConfig.Group, key = oldConfig.Key, value = oldConfig.Value }
                         };
-                        var nodes = await _serverNodeService.GetAllNodesAsync();
+                        using (var serverNodeService = GetServerNodeService())
+                        {
+                            var nodes = await serverNodeService.GetAllNodesAsync();
+                            var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(config);
+                            noticeApps.Add(config.AppId, action);
+
+                            foreach (var node in nodes)
+                            {
+                                if (node.Status == NodeStatus.Offline)
+                                {
+                                    continue;
+                                }
+                                foreach (var kv in noticeApps)
+                                {
+                                    await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, kv.Key, kv.Value);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            TinyEventBus.Instance.Regist(EventKeys.DELETE_CONFIG_SUCCESS, async (param) =>
+            {
+                dynamic param_dy = param;
+                Config config = param_dy.config;
+                Config oldConfig = param_dy.oldConfig;
+                if (config != null)
+                {
+                    var action = await CreateRemoveWebsocketAction(config, config.AppId);
+                    using (var serverNodeService = GetServerNodeService())
+                    {
+                        var nodes = await serverNodeService.GetAllNodesAsync();
                         var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(config);
-                        noticeApps.Add(config.AppId, action);
+                        noticeApps.Add(config.AppId, await CreateRemoveWebsocketAction(oldConfig, config.AppId));
 
                         foreach (var node in nodes)
                         {
@@ -70,31 +117,6 @@ namespace AgileConfig.Server.Service
                     }
                 }
             });
-            TinyEventBus.Instance.Regist(EventKeys.DELETE_CONFIG_SUCCESS, async (param) =>
-            {
-                dynamic param_dy = param;
-                Config config = param_dy.config;
-                Config oldConfig = param_dy.oldConfig;
-                if (config != null)
-                {
-                    var action = await CreateRemoveWebsocketAction(config, config.AppId);
-                    var nodes = await _serverNodeService.GetAllNodesAsync();
-                    var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(config);
-                    noticeApps.Add(config.AppId, await CreateRemoveWebsocketAction(oldConfig, config.AppId));
-
-                    foreach (var node in nodes)
-                    {
-                        if (node.Status == NodeStatus.Offline)
-                        {
-                            continue;
-                        }
-                        foreach (var kv in noticeApps)
-                        {
-                            await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, kv.Key, kv.Value);
-                        }
-                    }
-                }
-            });
             TinyEventBus.Instance.Regist(EventKeys.OFFLINE_CONFIG_SUCCESS, async (param) =>
             {
                 dynamic param_dy = param;
@@ -103,19 +125,22 @@ namespace AgileConfig.Server.Service
                 if (config != null)
                 {
                     //notice clients the config item is offline
-                    var nodes = await _serverNodeService.GetAllNodesAsync();
-                    var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(config);
-                    noticeApps.Add(config.AppId, await CreateRemoveWebsocketAction(oldConfig, config.AppId));
-
-                    foreach (var node in nodes)
+                    using (var serverNodeService = GetServerNodeService())
                     {
-                        if (node.Status == NodeStatus.Offline)
+                        var nodes = await serverNodeService.GetAllNodesAsync();
+                        var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(config);
+                        noticeApps.Add(config.AppId, await CreateRemoveWebsocketAction(oldConfig, config.AppId));
+
+                        foreach (var node in nodes)
                         {
-                            continue;
-                        }
-                        foreach (var kv in noticeApps)
-                        {
-                            await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, kv.Key, kv.Value);
+                            if (node.Status == NodeStatus.Offline)
+                            {
+                                continue;
+                            }
+                            foreach (var kv in noticeApps)
+                            {
+                                await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, kv.Key, kv.Value);
+                            }
                         }
                     }
                 }
@@ -134,19 +159,22 @@ namespace AgileConfig.Server.Service
                             Action = ActionConst.Add,
                             Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value }
                         };
-                        var nodes = await _serverNodeService.GetAllNodesAsync();
-                        var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(config);
-                        noticeApps.Add(config.AppId, action);
-
-                        foreach (var node in nodes)
+                        using (var serverNodeService = GetServerNodeService())
                         {
-                            if (node.Status == NodeStatus.Offline)
+                            var nodes = await serverNodeService.GetAllNodesAsync();
+                            var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(config);
+                            noticeApps.Add(config.AppId, action);
+
+                            foreach (var node in nodes)
                             {
-                                continue;
-                            }
-                            foreach (var item in noticeApps)
-                            {
-                                await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, item.Key, item.Value);
+                                if (node.Status == NodeStatus.Offline)
+                                {
+                                    continue;
+                                }
+                                foreach (var item in noticeApps)
+                                {
+                                    await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, item.Key, item.Value);
+                                }
                             }
                         }
                     }
@@ -172,19 +200,22 @@ namespace AgileConfig.Server.Service
                             Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value },
                             OldItem = new ConfigItem { group = oldConfig.Group, key = oldConfig.Key, value = oldConfig.Value }
                         };
-                        var nodes = await _serverNodeService.GetAllNodesAsync();
-                        var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(config);
-                        noticeApps.Add(config.AppId, action);
-
-                        foreach (var node in nodes)
+                        using (var serverNodeService = GetServerNodeService())
                         {
-                            if (node.Status == NodeStatus.Offline)
+                            var nodes = await serverNodeService.GetAllNodesAsync();
+                            var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(config);
+                            noticeApps.Add(config.AppId, action);
+
+                            foreach (var node in nodes)
                             {
-                                continue;
-                            }
-                            foreach (var item in noticeApps)
-                            {
-                                await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, item.Key, item.Value);
+                                if (node.Status == NodeStatus.Offline)
+                                {
+                                    continue;
+                                }
+                                foreach (var item in noticeApps)
+                                {
+                                    await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, item.Key, item.Value);
+                                }
                             }
                         }
                     }
@@ -205,7 +236,10 @@ namespace AgileConfig.Server.Service
                     LogType = SysLogType.Normal,
                     LogText = $"管理员登录成功"
                 };
-                _sysLogService.AddSysLogAsync(log);
+                using (var syslogService = GetSysLogService())
+                {
+                    syslogService.AddSysLogAsync(log);
+                }
             });
 
             TinyEventBus.Instance.Regist(EventKeys.INIT_ADMIN_PASSWORD_SUCCESS, (parm) =>
@@ -216,7 +250,10 @@ namespace AgileConfig.Server.Service
                     LogType = SysLogType.Normal,
                     LogText = $"管理员密码初始化成功"
                 };
-                _sysLogService.AddSysLogAsync(log);
+                using (var syslogService = GetSysLogService())
+                {
+                    syslogService.AddSysLogAsync(log);
+                }
             });
 
             TinyEventBus.Instance.Regist(EventKeys.RESET_ADMIN_PASSWORD_SUCCESS, (parm) =>
@@ -227,7 +264,10 @@ namespace AgileConfig.Server.Service
                     LogType = SysLogType.Normal,
                     LogText = $"修改管理员密码成功"
                 };
-                _sysLogService.AddSysLogAsync(log);
+                using (var syslogService = GetSysLogService())
+                {
+                    syslogService.AddSysLogAsync(log);
+                }
             });
 
             TinyEventBus.Instance.Regist(EventKeys.ADD_APP_SUCCESS, (param) =>
@@ -241,7 +281,10 @@ namespace AgileConfig.Server.Service
                         LogType = SysLogType.Normal,
                         LogText = $"新增应用【AppId：{app.Id}】【AppName：{app.Name}】"
                     };
-                    _sysLogService.AddSysLogAsync(log);
+                    using (var syslogService = GetSysLogService())
+                    {
+                        syslogService.AddSysLogAsync(log);
+                    }
                 }
             });
 
@@ -257,7 +300,10 @@ namespace AgileConfig.Server.Service
                         LogType = SysLogType.Normal,
                         LogText = $"编辑应用【AppId：{app.Id}】【AppName：{app.Name}】"
                     };
-                    _sysLogService.AddSysLogAsync(log);
+                    using (var syslogService = GetSysLogService())
+                    {
+                        syslogService.AddSysLogAsync(log);
+                    }
                 }
             });
 
@@ -272,7 +318,10 @@ namespace AgileConfig.Server.Service
                         LogType = SysLogType.Normal,
                         LogText = $"{(app.Enabled ? "启用" : "禁用")}应用【AppId:{app.Id}】"
                     };
-                    _sysLogService.AddSysLogAsync(log);
+                    using (var syslogService = GetSysLogService())
+                    {
+                        syslogService.AddSysLogAsync(log);
+                    }
                 }
             });
 
@@ -287,7 +336,10 @@ namespace AgileConfig.Server.Service
                         LogType = SysLogType.Normal,
                         LogText = $"删除应用【AppId:{app.Id}】"
                     };
-                    _sysLogService.AddSysLogAsync(log);
+                    using (var syslogService = GetSysLogService())
+                    {
+                        syslogService.AddSysLogAsync(log);
+                    }
                 }
             });
 
@@ -302,7 +354,10 @@ namespace AgileConfig.Server.Service
                         LogType = SysLogType.Normal,
                         LogText = $"删除应用【AppId:{app.Id}】"
                     };
-                    _sysLogService.AddSysLogAsync(log);
+                    using (var syslogService = GetSysLogService())
+                    {
+                        syslogService.AddSysLogAsync(log);
+                    }
                 }
             });
             //config
@@ -318,17 +373,23 @@ namespace AgileConfig.Server.Service
                         AppId = config.AppId,
                         LogText = $"新增配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
                     };
-                    _sysLogService.AddSysLogAsync(log);
-
-                    _modifyLogService.AddAsync(new ModifyLog
+                    using (var syslogService = GetSysLogService())
                     {
-                        Id = Guid.NewGuid().ToString("N"),
-                        ConfigId = config.Id,
-                        Key = config.Key,
-                        Group = config.Group,
-                        Value = config.Value,
-                        ModifyTime = config.CreateTime
-                    });
+                        syslogService.AddSysLogAsync(log);
+                    }
+
+                    using (var modifyLogService = GetModifyLogService())
+                    {
+                        modifyLogService.AddAsync(new ModifyLog
+                        {
+                            Id = Guid.NewGuid().ToString("N"),
+                            ConfigId = config.Id,
+                            Key = config.Key,
+                            Group = config.Group,
+                            Value = config.Value,
+                            ModifyTime = config.CreateTime
+                        });
+                    }
                 }
             });
             TinyEventBus.Instance.Regist(EventKeys.EDIT_CONFIG_SUCCESS, (param) =>
@@ -346,17 +407,23 @@ namespace AgileConfig.Server.Service
                         AppId = config.AppId,
                         LogText = $"编辑配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
                     };
-                    _sysLogService.AddSysLogAsync(log);
-
-                    _modifyLogService.AddAsync(new ModifyLog
+                    using (var syslogService = GetSysLogService())
                     {
-                        Id = Guid.NewGuid().ToString("N"),
-                        ConfigId = config.Id,
-                        Key = config.Key,
-                        Group = config.Group,
-                        Value = config.Value,
-                        ModifyTime = config.UpdateTime.Value
-                    });
+                        syslogService.AddSysLogAsync(log);
+                    }
+
+                    using (var modifyLogService = GetModifyLogService())
+                    {
+                        modifyLogService.AddAsync(new ModifyLog
+                        {
+                            Id = Guid.NewGuid().ToString("N"),
+                            ConfigId = config.Id,
+                            Key = config.Key,
+                            Group = config.Group,
+                            Value = config.Value,
+                            ModifyTime = config.UpdateTime.Value
+                        });
+                    }
                 }
             });
 
@@ -375,7 +442,10 @@ namespace AgileConfig.Server.Service
                         AppId = config.AppId,
                         LogText = $"删除配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
                     };
-                    _sysLogService.AddSysLogAsync(log);
+                    using (var syslogService = GetSysLogService())
+                    {
+                        syslogService.AddSysLogAsync(log);
+                    }
                 }
 
             });
@@ -394,7 +464,10 @@ namespace AgileConfig.Server.Service
                         AppId = config.AppId,
                         LogText = $"下线配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
                     };
-                    _sysLogService.AddSysLogAsync(log);
+                    using (var syslogService = GetSysLogService())
+                    {
+                        syslogService.AddSysLogAsync(log);
+                    }
                 }
             });
        
@@ -415,7 +488,10 @@ namespace AgileConfig.Server.Service
                         AppId = config.AppId,
                         LogText = $"上线配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
                     };
-                    _sysLogService.AddSysLogAsync(log);
+                    using (var syslogService = GetSysLogService())
+                    {
+                        syslogService.AddSysLogAsync(log);
+                    }
                 }
             });
            
@@ -436,17 +512,23 @@ namespace AgileConfig.Server.Service
                         AppId = config.AppId,
                         LogText = $"回滚配置【Key:{config.Key}】 【Group：{config.Group}】 【AppId：{config.AppId}】至历史记录：{modifyLog.Id}"
                     };
-                    _sysLogService.AddSysLogAsync(log);
-
-                    _modifyLogService.AddAsync(new ModifyLog
+                    using (var syslogService = GetSysLogService())
                     {
-                        Id = Guid.NewGuid().ToString("N"),
-                        ConfigId = config.Id,
-                        Key = config.Key,
-                        Group = config.Group,
-                        Value = config.Value,
-                        ModifyTime = config.UpdateTime.Value
-                    });
+                        syslogService.AddSysLogAsync(log);
+                    }
+
+                    using (var modifyLogService = GetModifyLogService())
+                    {
+                        modifyLogService.AddAsync(new ModifyLog
+                        {
+                            Id = Guid.NewGuid().ToString("N"),
+                            ConfigId = config.Id,
+                            Key = config.Key,
+                            Group = config.Group,
+                            Value = config.Value,
+                            ModifyTime = config.UpdateTime.Value
+                        });
+                    }
                 }
             });
          
@@ -462,46 +544,53 @@ namespace AgileConfig.Server.Service
             Dictionary<string, WebsocketAction> needNoticeAppsActions = new Dictionary<string, WebsocketAction>
             {
             };
-            var currentApp = await _appService.GetAsync(config.AppId);
-            if (currentApp.Type == AppType.Inheritance)
+            using (var appService = GetAppService())
             {
-                var inheritancedFromApps = await _appService.GetInheritancedFromAppsAsync(config.AppId);
-                inheritancedFromApps.ForEach(x =>
-               {
-                   needNoticeAppsActions.Add(x.Id, new WebsocketAction
-                   {
-                       Action = ActionConst.Reload
-                   });
-               });
-            }
+                var currentApp = await appService.GetAsync(config.AppId);
+                if (currentApp.Type == AppType.Inheritance)
+                {
+                    var inheritancedFromApps = await appService.GetInheritancedFromAppsAsync(config.AppId);
+                    inheritancedFromApps.ForEach(x =>
+                    {
+                        needNoticeAppsActions.Add(x.Id, new WebsocketAction
+                        {
+                            Action = ActionConst.Reload
+                        });
+                    });
+                }
 
-            return needNoticeAppsActions;
+                return needNoticeAppsActions;
+            }
+          
         }
 
         private async Task<WebsocketAction> CreateRemoveWebsocketAction(Config oldConfig, string appId)
         {
-            //获取app此时的配置列表合并继承的app配置 字典
-            var configs = await _configService.GetPublishedConfigsByAppIdWithInheritanced_Dictionary(appId);
-            var oldKey = _configService.GenerateKey(oldConfig);
-            //如果oldkey已经不存在，返回remove的action
-            if (!configs.ContainsKey(oldKey))
+            using (var configService = GetConfigService())
             {
-                var action = new WebsocketAction { Action = ActionConst.Remove, Item = new ConfigItem { group = oldConfig.Group, key = oldConfig.Key, value = oldConfig.Value } };
-                return action;
-            }
-            else
-            {
-                //如果还在，那么说明有继承的app的配置项目的key跟oldkey一样，那么使用继承的配置的值
-                //返回update的action
-                var config = configs[oldKey];
-                var action = new WebsocketAction
+                //获取app此时的配置列表合并继承的app配置 字典
+                var configs = await configService.GetPublishedConfigsByAppIdWithInheritanced_Dictionary(appId);
+                var oldKey = configService.GenerateKey(oldConfig);
+                //如果oldkey已经不存在，返回remove的action
+                if (!configs.ContainsKey(oldKey))
                 {
-                    Action = ActionConst.Update,
-                    Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value },
-                    OldItem = new ConfigItem { group = oldConfig.Group, key = oldConfig.Key, value = oldConfig.Value }
-                };
+                    var action = new WebsocketAction { Action = ActionConst.Remove, Item = new ConfigItem { group = oldConfig.Group, key = oldConfig.Key, value = oldConfig.Value } };
+                    return action;
+                }
+                else
+                {
+                    //如果还在，那么说明有继承的app的配置项目的key跟oldkey一样，那么使用继承的配置的值
+                    //返回update的action
+                    var config = configs[oldKey];
+                    var action = new WebsocketAction
+                    {
+                        Action = ActionConst.Update,
+                        Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value },
+                        OldItem = new ConfigItem { group = oldConfig.Group, key = oldConfig.Key, value = oldConfig.Value }
+                    };
 
-                return action;
+                    return action;
+                }
             }
         }
     }

@@ -53,6 +53,11 @@ namespace AgileConfig.Server.Service
             return result;
         }
 
+        public void Dispose()
+        {
+            _dbContext.Dispose();
+        }
+
         public async Task<List<ServerNode>> GetAllNodesAsync()
         {
             return await _dbContext.ServerNodes.Where(n => 1 == 1).ToListAsync();

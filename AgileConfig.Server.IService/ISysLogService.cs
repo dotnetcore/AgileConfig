@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.IService
 {
-    public interface ISysLogService
+    public interface ISysLogService: IDisposable
     {
         Task<bool> AddSysLogAsync(SysLog log);
 

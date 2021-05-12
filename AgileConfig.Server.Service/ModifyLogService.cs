@@ -32,6 +32,11 @@ namespace AgileConfig.Server.Service
             return x > 0;
         }
 
+        public void Dispose()
+        {
+            _dbContext.Dispose();
+        }
+
         public async Task<ModifyLog> GetAsync(string logId)
         {
             return await _dbContext.ModifyLogs.Where(m => m.Id == logId).ToOneAsync();
