@@ -33,12 +33,18 @@ namespace AgileConfig.Server.Service
                 return JsonConvert.SerializeObject(obj);
             }
         }
-        private IServerNodeService _serverNodeService => new ServerNodeService(new FreeSqlContext(FreeSQL.Instance));
+        private IServerNodeService GetGerverNodeService()
+        {
+            return new ServerNodeService(new FreeSqlContext(FreeSQL.Instance));
+        }
         private ILogger _logger;
-        private ISysLogService _sysLogService => new SysLogService(new FreeSqlContext(FreeSQL.Instance));
+        private ISysLogService GetSysLogService()
+        {
+            return new SysLogService(new FreeSqlContext(FreeSQL.Instance));
+        }
         private static ConcurrentDictionary<string, ClientInfos> _serverNodeClientReports = new ConcurrentDictionary<string, ClientInfos>();
 
-        public RemoteServerNodeProxy (ILoggerFactory loggerFactory)
+        public RemoteServerNodeProxy(ILoggerFactory loggerFactory)
         {
             _logger = loggerFactory.CreateLogger<RemoteServerNodeProxy>();
         }
@@ -66,12 +72,15 @@ namespace AgileConfig.Server.Service
                 }
             }, 5);
 
-            await _sysLogService.AddSysLogAsync(new SysLog
+            using (var service = GetSysLogService())
             {
-                LogTime = DateTime.Now,
-                LogType = result ? SysLogType.Normal : SysLogType.Warn,
-                LogText = $"通知节点{address}所有客户端：{action.Action} 响应：{(result ? "成功" : "失败")}"
-            });
+                await service.AddSysLogAsync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = result ? SysLogType.Normal : SysLogType.Warn,
+                    LogText = $"通知节点{address}所有客户端：{action.Action} 响应：{(result ? "成功" : "失败")}"
+                });
+            }
 
             return result;
         }
@@ -99,13 +108,16 @@ namespace AgileConfig.Server.Service
                 }
             }, 5);
 
-            await _sysLogService.AddSysLogAsync(new SysLog
+            using (var service = GetSysLogService())
             {
-                LogTime = DateTime.Now,
-                LogType = result ? SysLogType.Normal : SysLogType.Warn,
-                AppId = appId,
-                LogText = $"通知节点{address}应用{appId}的客户端：{action.Action} 响应：{(result ? "成功" : "失败")}"
-            });
+                await service.AddSysLogAsync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = result ? SysLogType.Normal : SysLogType.Warn,
+                    AppId = appId,
+                    LogText = $"通知节点{address}应用{appId}的客户端：{action.Action} 响应：{(result ? "成功" : "失败")}"
+                });
+            }
 
             return result;
         }
@@ -146,12 +158,15 @@ namespace AgileConfig.Server.Service
                 }
             }, 5);
 
-            await _sysLogService.AddSysLogAsync(new SysLog
+            using (var service = GetSysLogService())
             {
-                LogTime = DateTime.Now,
-                LogType = result ? SysLogType.Normal : SysLogType.Warn,
-                LogText = $"通知节点{address}的客户端{clientId}：{action.Action} 响应：{(result ? "成功" : "失败")}"
-            });
+                await service.AddSysLogAsync(new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = result ? SysLogType.Normal : SysLogType.Warn,
+                    LogText = $"通知节点{address}的客户端{clientId}：{action.Action} 响应：{(result ? "成功" : "失败")}"
+                });
+            }
 
             return result;
         }
@@ -172,98 +187,106 @@ namespace AgileConfig.Server.Service
             }
             if (report == null && address == "http://localhost:5000")
             {
-               Console.WriteLine("report null");
+                Console.WriteLine("report null");
             }
             return report;
         }
 
         public async Task TestEchoAsync(string address)
         {
-            var node = await _serverNodeService.GetAsync(address);
-            try
+            using (var service = GetGerverNodeService())
             {
-                FunctionUtil.TRY(() =>
+                var node = await service.GetAsync(address);
+                try
                 {
-                    using (var resp = (node.Address + "/home/echo").AsHttp().Send())
+                    FunctionUtil.TRY(() =>
                     {
-                        if (resp.StatusCode == System.Net.HttpStatusCode.OK && resp.GetResponseContent() == "ok")
+
+                        using (var resp = (node.Address + "/home/echo").AsHttp().Send())
                         {
-                            node.LastEchoTime = DateTime.Now;
-                            node.Status = Data.Entity.NodeStatus.Online;
-                            var report = GetClientReport(node);
-                            if (report != null)
+                            if (resp.StatusCode == System.Net.HttpStatusCode.OK && resp.GetResponseContent() == "ok")
                             {
-                                if (_serverNodeClientReports.ContainsKey(node.Address))
+                                node.LastEchoTime = DateTime.Now;
+                                node.Status = Data.Entity.NodeStatus.Online;
+                                var report = GetClientReport(node);
+                                if (report != null)
                                 {
-                                    _serverNodeClientReports[node.Address] = report;
+                                    if (_serverNodeClientReports.ContainsKey(node.Address))
+                                    {
+                                        _serverNodeClientReports[node.Address] = report;
+                                    }
+                                    else
+                                    {
+                                        _serverNodeClientReports.AddOrUpdate(node.Address, report, (k, r) => report);
+                                    }
+
                                 }
-                                else
-                                {
-                                    _serverNodeClientReports.AddOrUpdate(node.Address, report, (k, r) => report);
-                                }
-                                
                             }
+                            else
+                            {
+                                node.Status = Data.Entity.NodeStatus.Offline;
+                            }
+                            service.UpdateAsync(node);
                         }
-                        else
-                        {
-                            node.Status = Data.Entity.NodeStatus.Offline;
-                        }
-                        _serverNodeService.UpdateAsync(node);
-                    }
-                }, 5);
-            }
-            catch (Exception e)
-            {
-                _logger.LogInformation(e, "Try test node {0} echo , but fail .", node.Address);
+                    }, 5);
+                }
+                catch (Exception e)
+                {
+                    _logger.LogInformation(e, "Try test node {0} echo , but fail .", node.Address);
+                }
             }
         }
 
         public Task TestEchoAsync()
         {
-            return Task.Run(async () =>
+            using (var service = GetGerverNodeService())
             {
-                while (true)
+                return Task.Run(async () =>
                 {
-                    var nodes = await _serverNodeService.GetAllNodesAsync();
-                    nodes.ForEach(n =>
+                    while (true)
                     {
-                        try
+                        var nodes = await service.GetAllNodesAsync();
+                        nodes.ForEach(n =>
                         {
-                            FunctionUtil.TRY(() =>
+                            try
                             {
-                                using (var resp = (n.Address + "/home/echo").AsHttp().Send())
+                                FunctionUtil.TRY(() =>
                                 {
-                                    if (resp.StatusCode == System.Net.HttpStatusCode.OK && resp.GetResponseContent() == "ok")
+                                    using (var resp = (n.Address + "/home/echo").AsHttp().Send())
                                     {
-                                        n.LastEchoTime = DateTime.Now;
-                                        n.Status = Data.Entity.NodeStatus.Online;
-                                        var report = GetClientReport(n);
-                                        if (_serverNodeClientReports.ContainsKey(n.Address))
+                                        if (resp.StatusCode == System.Net.HttpStatusCode.OK && resp.GetResponseContent() == "ok")
                                         {
-                                            _serverNodeClientReports[n.Address] = report;
+                                            n.LastEchoTime = DateTime.Now;
+                                            n.Status = Data.Entity.NodeStatus.Online;
+                                            var report = GetClientReport(n);
+                                            if (_serverNodeClientReports.ContainsKey(n.Address))
+                                            {
+                                                _serverNodeClientReports[n.Address] = report;
+                                            }
+                                            else
+                                            {
+                                                _serverNodeClientReports.AddOrUpdate(n.Address, report, (k, r) => report);
+                                            }
                                         }
                                         else
                                         {
-                                            _serverNodeClientReports.AddOrUpdate(n.Address, report, (k, r) => report);
+                                            n.Status = Data.Entity.NodeStatus.Offline;
                                         }
+                                        service.UpdateAsync(n);
                                     }
-                                    else
-                                    {
-                                        n.Status = Data.Entity.NodeStatus.Offline;
-                                    }
-                                    _serverNodeService.UpdateAsync(n);
-                                }
-                            }, 5);
-                        }
-                        catch (Exception e)
-                        {
-                            _logger.LogInformation(e, "Try test node {0} echo , but fail .", n.Address);
-                        }
-                    });
+                                }, 5);
+                            }
+                            catch (Exception e)
+                            {
+                                _logger.LogInformation(e, "Try test node {0} echo , but fail .", n.Address);
+                            }
+                        });
 
-                    await Task.Delay(5000 * 1);
-                }
-            });
+                        await Task.Delay(5000 * 1);
+                    }
+                });
+            }
+          
         }
 
         private ClientInfos GetClientReport(ServerNode node)
