@@ -337,7 +337,9 @@ namespace AgileConfig.Server.Service
 
         public void Dispose()
         {
-            _dbContext.Dispose();
+            _dbContext?.Dispose();
+            _appService?.Dispose();
+            _memoryCache?.Dispose();
         }
     }
 }
