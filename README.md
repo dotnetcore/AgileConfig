@@ -63,7 +63,7 @@ sudo docker run --name agile_config -e adminConsole=true -e db:provider=sqlite -
 ## use client
 install client lib from nuget：
 ```
-Install-Package AgileConfig.Client -Version 1.1.8.4
+Install-Package AgileConfig.Client
 ```
 add a agileconfig section in appsettings.json：
 ```
