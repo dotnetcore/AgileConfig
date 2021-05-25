@@ -34,5 +34,8 @@ namespace AgileConfig.Server.Data.Entity
 
         [Column(Name = "type")]
         public AppType Type { get; set; }
+
+        [Column(Name = "app_admin",StringLength = 36)]
+        public string AppAdmin { get; set; }
     }
 }

@@ -185,10 +185,7 @@ namespace AgileConfig.Server.Service
                     i.Address = address;
                 });
             }
-            if (report == null && address == "http://localhost:5000")
-            {
-                Console.WriteLine("report null");
-            }
+           
             return report;
         }
 

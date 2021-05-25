@@ -1,14 +1,15 @@
 ﻿using FreeSql.DataAnnotations;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AgileConfig.Server.Data.Entity
 {
     [Table(Name = "agc_user")]
     public class User
     {
-        [Column(Name= "user_name" , StringLength = 50, IsPrimary = true)]
+        [Column(Name = "id", StringLength = 36)]
+        public string Id { get; set; }
+
+        [Column(Name= "user_name" , StringLength = 50)]
         public string UserName { get; set; }
 
         [Column(Name = "password", StringLength = 50)]
@@ -26,7 +27,13 @@ namespace AgileConfig.Server.Data.Entity
         [Column(Name = "update_time")]
         public DateTime? UpdateTime { get; set; }
 
-        [Column(Name = "enabled")]
-        public bool Enabled { get; set; }
+        [Column(Name = "status")]
+        public UserStatus Status { get; set; }
+    }
+
+    public enum UserStatus
+    {
+        Normal  = 0,
+        Deleted = -1
     }
 }
