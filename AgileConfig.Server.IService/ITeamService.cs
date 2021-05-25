@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.IService
 {
-    public interface ITeamService
+    public interface ITeamService: IDisposable
     {
         Task<bool> AddAsync(Team team);
         Task<Team> GetAsync(string teamId);

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.IService
 {
-    public interface IUserService
+    public interface IUserService: IDisposable
     {
         Task<User> GetUserAsync(string userId);
 

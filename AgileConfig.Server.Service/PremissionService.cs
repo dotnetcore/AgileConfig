@@ -1,32 +1,10 @@
 ﻿using AgileConfig.Server.Data.Entity;
+using AgileConfig.Server.IService;
 using System.Collections.Generic;
 
 namespace AgileConfig.Server.Service
 {
-    public class Functions
-    {
-        public const string User_Add = "User_Add";
-        public const string User_Edit = "User_Edit";
-        public const string User_Delete = "User_Delete";
-
-        public const string Team_Add = "Team_Add";
-        public const string Team_Edit = "Team_Edit";
-        public const string Team_Delete = "Team_Delete";
-
-        public const string App_Add = "App_Add";
-        public const string App_Edit = "App_Edit";
-        public const string App_Delete = "App_Delete";
-
-        public const string Config_Add = "Config_Add";
-        public const string Config_Edit = "Config_Edit";
-        public const string Config_Delete = "Config_Delete";
-
-        public const string Config_Publish = "Config_Publish";
-        public const string Config_Offline = "Config_Offline";
-
-    }
-
-    public class PremissionService
+    public class PremissionService : IPremissionService
     {
         private static Dictionary<Role, List<string>> _roleFunctions = new Dictionary<Role, List<string>>() {
             {
@@ -73,12 +51,14 @@ namespace AgileConfig.Server.Service
         };
         public List<string> GetRoleFunctions(Role role)
         {
+            var functions = new List<string>();
+
             if (_roleFunctions.ContainsKey(role))
             {
-                return _roleFunctions[role];
+                _roleFunctions[role].ForEach(x => functions.Add(x));
             }
 
-            return new List<string>();
+            return functions;
         }
 
 
@@ -86,8 +66,10 @@ namespace AgileConfig.Server.Service
         {
             var functions = new List<string>();
 
-            roles.ForEach(r=> {
-                GetRoleFunctions(r).ForEach(f=> {
+            roles.ForEach(r =>
+            {
+                GetRoleFunctions(r).ForEach(f =>
+                {
                     if (!functions.Contains(f))
                     {
                         functions.Add(f);

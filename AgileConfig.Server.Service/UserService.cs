@@ -127,5 +127,10 @@ namespace AgileConfig.Server.Service
 
             return result > 0;
         }
+
+        public void Dispose()
+        {
+            _dbContext?.Dispose();
+        }
     }
 }
