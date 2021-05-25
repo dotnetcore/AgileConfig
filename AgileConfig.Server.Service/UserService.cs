@@ -90,7 +90,7 @@ namespace AgileConfig.Server.Service
         {
             var userTeam = new UserTeam()
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = Guid.NewGuid().ToString("N"),
                 UserId = userId,
                 TeamId = teamId
             };
@@ -115,7 +115,7 @@ namespace AgileConfig.Server.Service
             var userRoles = new List<UserRole>();
             roles.ForEach(x=> {
                 userRoles.Add(new UserRole { 
-                    Id = Guid.NewGuid().ToString(),
+                    Id = Guid.NewGuid().ToString("N"),
                     AppId = appId,
                     UserId = userId,
                     Role = x
