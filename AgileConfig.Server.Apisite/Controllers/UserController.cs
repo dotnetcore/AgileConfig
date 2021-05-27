@@ -22,7 +22,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Search(string name, int current = 1, int pageSize = 20)
+        public async Task<IActionResult> Search(string userName,string team, int current = 1, int pageSize = 20)
         {
             if (current <= 0)
             {
@@ -35,7 +35,15 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             var users = await _userService.GetAll();
             users = users.Where(x => x.Status == UserStatus.Normal).ToList();
-            users = users.Where(x => x.UserName.Contains(name)).ToList();
+            if (!string.IsNullOrEmpty(userName))
+            {
+                users = users.Where(x => x.UserName != null && x.UserName.Contains(userName)).ToList();
+            }
+            if (!string.IsNullOrEmpty(team))
+            {
+                users = users.Where(x => x.Team != null && x.Team.Contains(team)).ToList();
+            }
+            users = users.OrderByDescending(x => x.CreateTime).ToList();
 
             var pageList = users.Skip((current - 1) * pageSize).Take(pageSize);
             var total = users.Count;
@@ -71,6 +79,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             user.Status = UserStatus.Normal;
             user.Team = model.Team;
             user.CreateTime = DateTime.Now;
+            user.UserName = model.UserName;
 
             var result = await _userService.AddAsync(user);
 

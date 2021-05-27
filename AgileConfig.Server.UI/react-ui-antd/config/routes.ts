@@ -16,7 +16,7 @@
             name: 'initPassword',
             path: '/user/initPassword',
             component: './User/initPassword',
-          },
+          }
         ],
       },
       {
@@ -73,6 +73,13 @@
                 path: '/logs',
                 component: './Logs',
               },
+              {
+                name: 'list.user-list',
+                icon: 'Bars',
+                path: '/users',
+                component: './User',
+              }
+              ,
               {
                 component: './404',
               },
