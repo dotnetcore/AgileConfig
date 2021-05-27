@@ -132,5 +132,10 @@ namespace AgileConfig.Server.Service
         {
             _dbContext?.Dispose();
         }
+
+        public async Task<List<User>> GetAll()
+        {
+            return await _dbContext.Users.Where(x => 1 == 1).ToListAsync();
+        }
     }
 }

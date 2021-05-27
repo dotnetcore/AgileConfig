@@ -8,6 +8,7 @@ namespace AgileConfig.Server.IService
 {
     public interface IUserService: IDisposable
     {
+        Task<List<User>> GetAll();
         Task<User> GetUserAsync(string userId);
 
         Task<User> GetUserByNameAsync(string userName);
