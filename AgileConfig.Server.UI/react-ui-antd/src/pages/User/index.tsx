@@ -4,9 +4,10 @@ import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
 import { Button, FormInstance, message,Modal } from 'antd';
 import React, { useState, useRef } from 'react';
 import { UserItem } from './data';
-import { queryUsers, addUser, delUser, editUser } from './service';
+import { queryUsers, addUser, delUser, editUser, resetPassword } from './service';
 import { useIntl, getIntl, getLocale } from 'umi';
-import { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
+import { ModalForm, ProFormText } from '@ant-design/pro-form';
+import UpdateUser from './comps/updateUser';
 
 const { confirm } = Modal;
 const handleAdd = async (fields: UserItem) => {
@@ -36,7 +37,31 @@ const handleAdd = async (fields: UserItem) => {
     return false;
   }
 };
-
+const handleEdit = async (user: UserItem) => {
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({
+    id:'saving'
+  }));
+  try {
+    const result = await editUser({ ...user });
+    hide();
+    const success = result.success;
+    if (success) {
+      message.success(intl.formatMessage({
+        id:'save_success'
+      }));
+    } else {
+      message.error(result.message);
+    }
+    return success;
+  } catch (error) {
+    hide();
+    message.error(intl.formatMessage({
+      id:'save_fail'
+    }));
+    return false;
+  }
+};
 const handleDel = async (fields: UserItem) => {
   const intl = getIntl(getLocale());
   const hide = message.loading(intl.formatMessage({
@@ -63,12 +88,40 @@ const handleDel = async (fields: UserItem) => {
   }
 };
 
-const nodeList:React.FC = () => {
+const handleResetPassword = async (fields: UserItem) => {
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({
+    id: 'deleting'
+  }));
+  try {
+    const result = await resetPassword(fields.id);
+    hide();
+    const success = result.success;
+    if (success) {
+      message.success(intl.formatMessage({
+        id: 'delete_success'
+      }));
+    } else {
+      message.error(result.message);
+    }
+    return success;
+  } catch (error) {
+    hide();
+    message.error(intl.formatMessage({
+      id: 'delete_fail'
+    }));
+    return false;
+  }
+};
+
+const userList:React.FC = () => {
   const actionRef = useRef<ActionType>();
   const addFormRef = useRef<FormInstance>();
   const intl = useIntl();
 
   const [createModalVisible, handleModalVisible] = useState<boolean>(false);
+  const [updateModalVisible, setUpdateModalVisible] = useState<boolean>(false);
+  const [currentRow, setCurrentRow] = useState<UserItem>();
   const columns: ProColumns<UserItem>[] = [
     {
       title: '用户名',
@@ -84,6 +137,37 @@ const nodeList:React.FC = () => {
       }),
       valueType: 'option',
       render: (text, record, _, action) => [
+        <a
+        onClick={() => {
+          setUpdateModalVisible(true);
+          setCurrentRow(record);
+          console.log('select user ', record);
+          console.log('current user ', currentRow);
+        }}
+        >
+          修改
+        </a>,
+         <a
+         onClick={ ()=> {
+          const msg = '确定重置用户' + `【${record.userName}】的密码为默认密码【123456】?`;
+          confirm({
+            icon: <ExclamationCircleOutlined />,
+            content: msg,
+            async onOk() {
+              console.log('reset password user ' + record.userName);
+              const success = await handleResetPassword(record);
+              if (success) {
+                actionRef.current?.reload();
+              }
+            },
+            onCancel() {
+              console.log('Cancel');
+            },
+          });
+        }}
+         >
+         重置密码
+         </a>,
         <Button  type="link" danger
           onClick={ ()=> {
             const msg = '确定删除用户' + `【${record.userName}】?`;
@@ -164,7 +248,7 @@ const nodeList:React.FC = () => {
           width="md"
           name="userName" 
         />
-        <ProFormText
+        <ProFormText.Password
           rules={[
             {
               required: true,
@@ -181,7 +265,34 @@ const nodeList:React.FC = () => {
         />
       </ModalForm>
 
+      {
+        updateModalVisible &&
+        <UpdateUser
+          value={currentRow}
+          setValue={setCurrentRow}
+          updateModalVisible={updateModalVisible}
+          onCancel={
+            () => {
+              setCurrentRow(undefined);
+              setUpdateModalVisible(false);
+            }
+          }
+          onSubmit={
+            async (value) => {
+              setCurrentRow(undefined);
+              const success = await handleEdit(value);
+              if (success) {
+                setUpdateModalVisible(false);
+                if (actionRef.current) {
+                  actionRef.current.reload();
+                }
+              }
+              addFormRef.current?.resetFields();
+            }
+          }/>
+      }
+
     </PageContainer>
   );
 }
-export default nodeList;
+export default userList;

@@ -36,3 +36,12 @@ export async function delUser(userId:string) {
     }
   });
 }
+
+export async function resetPassword(userId:string) {
+  return request('/user/resetPassword', {
+    method: 'POST',
+    params:{
+      userId: userId
+    }
+  });
+}
