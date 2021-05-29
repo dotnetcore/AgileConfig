@@ -1,12 +1,12 @@
 import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
-import { Button, FormInstance, message,Modal } from 'antd';
+import { Button, FormInstance, message,Modal, Space, Tag } from 'antd';
 import React, { useState, useRef } from 'react';
 import { UserItem } from './data';
 import { queryUsers, addUser, delUser, editUser, resetPassword } from './service';
 import { useIntl, getIntl, getLocale } from 'umi';
-import { ModalForm, ProFormText } from '@ant-design/pro-form';
+import { ModalForm, ProFormSelect, ProFormText } from '@ant-design/pro-form';
 import UpdateUser from './comps/updateUser';
 
 const { confirm } = Modal;
@@ -132,6 +132,23 @@ const userList:React.FC = () => {
       dataIndex: 'team',
     },
     {
+      title: '角色',
+      dataIndex: 'userRoles',
+      search: false,
+      renderFormItem: (_, { defaultRender }) => {
+        return defaultRender(_);
+      },
+      render: (_, record) => (
+        <Space>
+          {record.userRoles?.map((name:number) => (
+            <Tag color="blue" key={name}>
+              {name}
+            </Tag>
+          ))}
+        </Space>
+      ),
+    },
+    {
       title: intl.formatMessage({
         id: 'pages.node.table.cols.action'
       }),
@@ -245,7 +262,6 @@ const userList:React.FC = () => {
             },
           ]}
           label= "用户名"
-          width="md"
           name="userName" 
         />
         <ProFormText.Password
@@ -255,14 +271,33 @@ const userList:React.FC = () => {
             },
           ]}
           label= "密码"
-          width="md"
           name="password" 
         />
        <ProFormText
           label= "团队"
-          width="md"
           name="team" 
         />
+        <ProFormSelect
+                rules={[
+                  {
+                    required: true,
+                  },
+                ]}
+                  label="角色"
+                  name="userRoles"
+                  mode="multiple" 
+                  options = {[
+                    {
+                      value: 1,
+                      label: '管理员',
+                    },
+                    {
+                      value: 2,
+                      label: '普通用户',
+                    }
+                  ]}
+                >
+        </ProFormSelect> 
       </ModalForm>
 
       {

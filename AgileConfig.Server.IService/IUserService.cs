@@ -20,14 +20,8 @@ namespace AgileConfig.Server.IService
 
         Task<bool> UpdateAsync(User user);
 
-        Task<List<User>> GetUserByTeamAsync(string teamId);
 
-        Task<List<Team>> GetUserTeamsAsync(string userId);
+        Task<bool> UpdateUserRolesAsync(string userId, List<Role> roles);
 
-        Task<bool> AddUserToTeam(string userId, string teamId);
-
-        Task<bool> UpdateUserAppRoles(string userId, string appId, List<Role> roles);
-
-        Task<bool> RemoveUserFromTeam(string userId, string teamId);
     }
 }

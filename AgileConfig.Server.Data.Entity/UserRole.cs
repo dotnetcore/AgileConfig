@@ -9,9 +9,6 @@ namespace AgileConfig.Server.Data.Entity
         [Column(Name = "id", StringLength = 36)]
         public string Id { get; set; }
 
-        [Column(Name = "app_id", StringLength = 36)]
-        public string AppId { get; set; }
-
         [Column(Name = "user_id", StringLength = 50)]
         public string UserId { get; set; }
 
@@ -25,10 +22,16 @@ namespace AgileConfig.Server.Data.Entity
 
     public enum Role
     {
-        SystemAdmin = 0,//系统管理员
-        AppAdmin, //app管理员
-        Editor, //
-        Publisher //
+        SuperAdmin = 0,//系统管理员
+        Admin, //app管理员
+        NormalUser, //普通用户
+    }
+
+    public enum AppRole
+    {
+        APP_Editor = 10, //app维护
+        Config_Publisher = 11, // 配置项发布下线
+        Config_Editor = 12 //配置项编辑
     }
 
 }

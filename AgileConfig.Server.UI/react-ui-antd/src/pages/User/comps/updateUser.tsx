@@ -1,5 +1,5 @@
 import { useIntl } from "@/.umi/plugin-locale/localeExports";
-import {  ModalForm,  ProFormText } from "@ant-design/pro-form";
+import {  ModalForm,  ProFormSelect,  ProFormText } from "@ant-design/pro-form";
 import React from 'react';
 import { UserItem } from "../data";
 export type UpdateUserProps = {
@@ -31,24 +31,41 @@ const UpdateForm : React.FC<UpdateUserProps> = (props)=>{
     >
     <ProFormText
           label= "id"
-          width="md"
           name="id" 
           hidden={true}
           readonly={true}
         />
    <ProFormText
           label= "用户名"
-          width="md"
           name="userName" 
           readonly={true}
         />
  
        <ProFormText
           label= "团队"
-          width="md"
           name="team" 
         />
-
+    <ProFormSelect
+        rules={[
+          {
+            required: true,
+          },
+        ]}
+        label="角色"
+        name="userRoles"
+        mode="multiple" 
+        options = {[
+          {
+            value: 1,
+            label: '管理员',
+          },
+          {
+            value: 2,
+            label: '普通用户',
+          }
+        ]}
+    >
+        </ProFormSelect> 
     </ModalForm>
     );
 }

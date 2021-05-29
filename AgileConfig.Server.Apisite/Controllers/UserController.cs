@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Common;
+using System.Collections.Generic;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -22,7 +23,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Search(string userName,string team, int current = 1, int pageSize = 20)
+        public async Task<IActionResult> Search(string userName, string team, int current = 1, int pageSize = 20)
         {
             if (current <= 0)
             {
@@ -53,22 +54,45 @@ namespace AgileConfig.Server.Apisite.Controllers
                 totalPages++;
             }
 
+            var vms = new List<UserVM>();
+            foreach (var item in pageList)
+            {
+                var vm = new UserVM
+                {
+                    Id = item.Id,
+                    UserName = item.UserName,
+                    Team = item.Team,
+                    UserRoles = await _userService.GetUserRolesAsync(item.Id)
+                };
+                vms.Add(vm);
+            }
+
             return Json(new
             {
                 current,
                 pageSize,
                 success = true,
                 total = total,
-                data = pageList
+                data = vms
             });
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody]UserVM model)
+        public async Task<IActionResult> Add([FromBody] UserVM model)
         {
             if (model == null)
             {
                 throw new ArgumentNullException("model");
+            }
+
+            var exist = await _userService.GetUserByNameAsync(model.UserName);
+            if (exist != null)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "已存在用户" + model.UserName
+                });
             }
 
             var user = new User();
@@ -82,12 +106,11 @@ namespace AgileConfig.Server.Apisite.Controllers
             user.UserName = model.UserName;
 
             var result = await _userService.AddAsync(user);
-
+            var reuslt1 = await _userService.UpdateUserRolesAsync(user.Id, model.UserRoles);
             return Json(new
             {
-                data = user,
-                success = result,
-                message = !result ? "添加用户失败，请查看错误日志" : ""
+                success = result && reuslt1,
+                message = !(result && reuslt1) ? "添加用户失败，请查看错误日志" : ""
             });
         }
 
@@ -113,12 +136,12 @@ namespace AgileConfig.Server.Apisite.Controllers
             user.UpdateTime = DateTime.Now;
 
             var result = await _userService.UpdateAsync(user);
+            var reuslt1 = await _userService.UpdateUserRolesAsync(user.Id, model.UserRoles);
 
             return Json(new
             {
-                data = user,
-                success = result,
-                message = !result ? "修改用户失败，请查看错误日志" : ""
+                success = result && reuslt1,
+                message = !(result && reuslt1) ? "修改用户失败，请查看错误日志" : ""
             });
         }
 

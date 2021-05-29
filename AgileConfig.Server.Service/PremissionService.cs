@@ -8,44 +8,18 @@ namespace AgileConfig.Server.Service
     {
         private static Dictionary<Role, List<string>> _roleFunctions = new Dictionary<Role, List<string>>() {
             {
-                Role.SystemAdmin, new List<string>{
-                    Functions.App_Add,
-                    Functions.App_Delete,
-                    Functions.App_Edit,
-                    Functions.Team_Add,
-                    Functions.Team_Delete,
-                    Functions.Team_Edit,
-                    Functions.User_Add,
-                    Functions.User_Edit,
-                    Functions.User_Delete,
-                    Functions.Config_Add,
-                    Functions.Config_Delete,
-                    Functions.Config_Edit,
-                    Functions.Config_Offline,
-                    Functions.Config_Publish
+                Role.SuperAdmin, new List<string>{
+               
                 }
             },
             {
-                Role.AppAdmin, new List<string>{
-                    Functions.App_Edit,
-                    Functions.Config_Add,
-                    Functions.Config_Delete,
-                    Functions.Config_Edit,
-                    Functions.Config_Offline,
-                    Functions.Config_Publish
+               Role.Admin, new List<string>{
+
                 }
             },
             {
-                Role.Editor, new List<string>{
-                    Functions.Config_Add,
-                    Functions.Config_Delete,
-                    Functions.Config_Edit,
-                }
-            },
-            {
-                Role.Publisher, new List<string>{
-                    Functions.Config_Offline,
-                    Functions.Config_Publish
+                Role.NormalUser, new List<string>{
+                 
                 }
             }
         };

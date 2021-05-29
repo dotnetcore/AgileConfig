@@ -24,6 +24,8 @@ namespace AgileConfig.Server.Apisite.Models
         [MaxLength(50, ErrorMessage = "团队长度不能超过50位")]
         public string Team { get; set; }
 
+        public List<Role> UserRoles { get; set; }
+
         public UserStatus Status { get; set; }
     }
 }
