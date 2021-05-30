@@ -26,6 +26,8 @@ namespace AgileConfig.Server.Apisite.Models
 
         public List<Role> UserRoles { get; set; }
 
+        public List<string> UserRoleNames { get; set; }
+
         public UserStatus Status { get; set; }
     }
 }

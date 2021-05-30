@@ -1,5 +1,6 @@
 ﻿using FreeSql.DataAnnotations;
 using System;
+using System.ComponentModel;
 
 namespace AgileConfig.Server.Data.Entity
 {
@@ -22,9 +23,12 @@ namespace AgileConfig.Server.Data.Entity
 
     public enum Role
     {
-        SuperAdmin = 0,//系统管理员
-        Admin, //app管理员
-        NormalUser, //普通用户
+        [Description("超级管理员")]
+        SuperAdmin = 0,
+        [Description("管理员")]
+        Admin,
+        [Description("普通用户")]
+        NormalUser, 
     }
 
     public enum AppRole

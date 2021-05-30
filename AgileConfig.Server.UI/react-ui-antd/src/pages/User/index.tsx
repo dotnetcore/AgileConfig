@@ -140,7 +140,7 @@ const userList:React.FC = () => {
       },
       render: (_, record) => (
         <Space>
-          {record.userRoles?.map((name:number) => (
+          {record.userRoleNames?.map((name:string) => (
             <Tag color="blue" key={name}>
               {name}
             </Tag>

@@ -57,12 +57,14 @@ namespace AgileConfig.Server.Apisite.Controllers
             var vms = new List<UserVM>();
             foreach (var item in pageList)
             {
+                var roles = await _userService.GetUserRolesAsync(item.Id);
                 var vm = new UserVM
                 {
                     Id = item.Id,
                     UserName = item.UserName,
                     Team = item.Team,
-                    UserRoles = await _userService.GetUserRolesAsync(item.Id)
+                    UserRoles = roles,
+                    UserRoleNames = roles.Select(r=> r.ToDesc()).ToList()
                 };
                 vms.Add(vm);
             }
