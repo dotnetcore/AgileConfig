@@ -1,7 +1,7 @@
 import {
+  ContactsTwoTone,
   LockTwoTone,
 } from '@ant-design/icons';
-import { Alert, Tabs } from 'antd';
 import React, { useEffect, useState } from 'react';
 import ProForm, { ProFormText } from '@ant-design/pro-form';
 import { useIntl, connect, FormattedMessage } from 'umi';
@@ -79,6 +79,25 @@ const Login: React.FC<LoginProps> = (props) => {
             })
           }
         </div>
+        <ProFormText
+              name="userName"
+              fieldProps={{
+                size: 'large',
+                prefix: <ContactsTwoTone className={styles.prefixIcon} />,
+              }}
+              placeholder='账号'
+              rules={[
+                {
+                  required: true,
+                  message: (
+                    <FormattedMessage
+                      id="pages.login.password.required"
+                      defaultMessage="请输入账号！"
+                    />
+                  ),
+                },
+              ]}
+            />
         <ProFormText.Password
               name="password"
               fieldProps={{

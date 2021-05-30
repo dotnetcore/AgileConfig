@@ -7,21 +7,26 @@ using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
+using System.Linq.Expressions;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
     public class AdminController : Controller
     {
         private readonly ISettingService _settingService;
-        public AdminController(ISettingService settingService)
+        private readonly IUserService _userService;
+        public AdminController(ISettingService settingService, IUserService userService)
         {
             _settingService = settingService;
+            _userService = userService;
         }
 
 
         [HttpPost("admin/jwt/login")]
         public async Task<IActionResult> Login4AntdPro([FromBody] LoginVM model)
         {
+            string userName = model.userName;
             string password = model.password;
             if (string.IsNullOrEmpty(password))
             {
@@ -32,11 +37,13 @@ namespace AgileConfig.Server.Apisite.Controllers
                 });
             }
 
-            var result = await _settingService.ValidateAdminPassword(password);
+            var result = await _userService.ValidateUserPassword(userName, model.password);
             if (result)
             {
-                var jwt = JWT.GetToken();
-                
+                var user = (await _userService.GetUsersByNameAsync(userName)).First();
+                var userRoles = await _userService.GetUserRolesAsync(user.Id);
+                var jwt = JWT.GetToken(user.Id, user.UserName, userRoles.Any(r => r == Role.Admin || r == Role.SuperAdmin));
+
                 TinyEventBus.Instance.Fire(EventKeys.ADMIN_LOGIN_SUCCESS);
 
                 return Json(new
@@ -62,7 +69,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         [HttpGet]
         public async Task<IActionResult> PasswordInited()
         {
-            var has = await _settingService.HasAdminPassword();
+            var has = await _settingService.HasSuperAdmin();
             return Json(new
             {
                 success = true,
@@ -107,7 +114,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 });
             }
 
-            if (await _settingService.HasAdminPassword())
+            if (await _settingService.HasSuperAdmin())
             {
                 return Json(new
                 {
@@ -116,7 +123,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 });
             }
 
-            var result = await _settingService.SetAdminPassword(password);
+            var result = await _settingService.SetSuperAdminPassword(password);
 
             if (result)
             {
@@ -139,7 +146,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> ChangePassword([FromBody]ChangePasswordVM model)
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordVM model)
         {
             if (Appsettings.IsPreviewMode)
             {
@@ -164,7 +171,8 @@ namespace AgileConfig.Server.Apisite.Controllers
                 });
             }
 
-            var validOld = await _settingService.ValidateAdminPassword(oldPassword);
+            var userName = Request.HttpContext.User.Identity.Name;
+            var validOld = await _userService.ValidateUserPassword(userName, oldPassword);
 
             if (!validOld)
             {
@@ -206,7 +214,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 });
             }
 
-            var result = await _settingService.SetAdminPassword(password);
+            var result = await _settingService.SetSuperAdminPassword(password);
 
             if (result)
             {

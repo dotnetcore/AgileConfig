@@ -36,15 +36,15 @@ namespace AgileConfig.Server.Apisite
     }
     public class JWT
     {
-        public static string GetToken()
+        public static string GetToken(string userId, string userName, bool isAdmin)
         {
             //创建用户身份标识，可按需要添加更多信息
             var claims = new Claim[]
             {
     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-    new Claim("id", "admin", ClaimValueTypes.String), // 用户id
-    new Claim("name", "admin"), // 用户名
-    new Claim("admin", true.ToString() ,ClaimValueTypes.Boolean) // 是否是管理员
+    new Claim("id", userId, ClaimValueTypes.String), // 用户id
+    new Claim("name", userName), // 用户名
+    new Claim("admin", isAdmin.ToString() ,ClaimValueTypes.Boolean) // 是否是管理员
             };
             var key = Encoding.UTF8.GetBytes(JwtSetting.Instance.SecurityKey);
             //创建令牌

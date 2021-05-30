@@ -24,9 +24,7 @@ const handleAdd = async (fields: UserItem) => {
         id: 'save_success'
       }));
     } else {
-      message.error(intl.formatMessage({
-        id: 'save_fail'
-      }));
+      message.error(result.message);
     }
     return success;
   } catch (error) {

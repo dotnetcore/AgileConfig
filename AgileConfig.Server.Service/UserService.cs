@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
+using AgileConfig.Server.Common;
 
 namespace AgileConfig.Server.Service
 {
@@ -19,6 +20,12 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> AddAsync(User user)
         {
+            var old = await _dbContext.Users.Where(u => u.UserName == user.UserName && u.Status == UserStatus.Normal).FirstAsync();
+            if (old != null)
+            {
+                return false;
+            }
+
             await _dbContext.Users.AddAsync(user);
             var result = await _dbContext.SaveChangesAsync();
 
@@ -33,9 +40,9 @@ namespace AgileConfig.Server.Service
             return result > 0;
         }
 
-        public async Task<User> GetUserByNameAsync(string userName)
+        public async Task<List<User>> GetUsersByNameAsync(string userName)
         {
-            return await _dbContext.Users.Where(u => u.UserName == userName).ToOneAsync();
+            return await _dbContext.Users.Where(u => u.UserName == userName).ToListAsync();
         }
 
         public async Task<User> GetUserAsync(string id)
@@ -87,6 +94,22 @@ namespace AgileConfig.Server.Service
         public async Task<List<User>> GetAll()
         {
             return await _dbContext.Users.Where(x => 1 == 1).ToListAsync();
+        }
+
+        public async Task<bool> ValidateUserPassword(string userName, string password)
+        {
+            var user = await _dbContext.Users.Where(u => u.Status == UserStatus.Normal && u.UserName == userName).FirstAsync();
+            if (user == null)
+            {
+                return false;
+            }
+            
+            if (user.Password == Encrypt.Md5(password + user.Salt))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

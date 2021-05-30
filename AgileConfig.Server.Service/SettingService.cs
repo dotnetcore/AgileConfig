@@ -13,8 +13,8 @@ namespace AgileConfig.Server.Service
     {
         private FreeSqlContext _dbContext;
 
-        public string AdminPasswordSettingKey => "AdminPassword";
-        public string AdminPasswordHashSaltKey => "AdminPasswordHashSalt";
+        public string SuperAdminId => "super_admin";
+        public string SuperAdminUserName => "admin";
 
         public SettingService(FreeSqlContext context)
         {
@@ -41,7 +41,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> DeleteAsync(string settingId)
         {
-             var setting = await _dbContext.Settings.Where(s => s.Id == settingId).ToOneAsync();
+            var setting = await _dbContext.Settings.Where(s => s.Id == settingId).ToOneAsync();
             if (setting != null)
             {
                 _dbContext.Settings.Remove(setting);
@@ -68,7 +68,7 @@ namespace AgileConfig.Server.Service
             return x > 0;
         }
 
-        public async Task<bool> SetAdminPassword(string password)
+        public async Task<bool> SetSuperAdminPassword(string password)
         {
             if (string.IsNullOrEmpty(password))
             {
@@ -78,35 +78,28 @@ namespace AgileConfig.Server.Service
             var newSalt = Guid.NewGuid().ToString("N");
             password = Encrypt.Md5((password + newSalt));
 
-            await DeleteAsync(AdminPasswordHashSaltKey);
-            await DeleteAsync(AdminPasswordSettingKey);
+            var su = new User();
+            su.Id = SuperAdminId;
+            su.Password = password;
+            su.Salt = newSalt;
+            su.Status = UserStatus.Normal;
+            su.Team = "";
+            su.CreateTime = DateTime.Now;
+            su.UserName = SuperAdminUserName;
 
-            await AddAsync(new Setting { Id = AdminPasswordHashSaltKey, Value = newSalt, CreateTime = DateTime.Now });
-            await AddAsync(new Setting { Id = AdminPasswordSettingKey, Value = password, CreateTime = DateTime.Now });
+            _dbContext.Users.Add(su);
+            var result = await _dbContext.SaveChangesAsync();
 
-            return true;
+            return result > 0;
         }
 
-        public async Task<bool> HasAdminPassword()
+        public async Task<bool> HasSuperAdmin()
         {
-            var password = await GetAsync(AdminPasswordSettingKey);
+            var admin = await _dbContext.Users.Where(x => x.Id == SuperAdminId).FirstAsync();
 
-            return password != null;
+            return admin != null;
         }
 
-        public async Task<bool> ValidateAdminPassword(string password)
-        {
-            var dbPassword = await GetAsync(AdminPasswordSettingKey);
-            if (dbPassword == null || string.IsNullOrEmpty(dbPassword.Value) || string.IsNullOrEmpty(password))
-            {
-                return false;
-            }
-
-            var salt = await GetAsync(AdminPasswordHashSaltKey);
-            password = Encrypt.Md5((password + salt.Value));
-
-            return password == dbPassword.Value;
-        }
 
         public void Dispose()
         {

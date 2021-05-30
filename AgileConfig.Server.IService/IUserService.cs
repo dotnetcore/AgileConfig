@@ -11,7 +11,7 @@ namespace AgileConfig.Server.IService
         Task<List<User>> GetAll();
         Task<User> GetUserAsync(string userId);
 
-        Task<User> GetUserByNameAsync(string userName);
+        Task<List<User>> GetUsersByNameAsync(string userName);
         Task<List<Role>> GetUserRolesAsync(string userId);
 
         Task<bool> AddAsync(User user);
@@ -22,6 +22,9 @@ namespace AgileConfig.Server.IService
 
 
         Task<bool> UpdateUserRolesAsync(string userId, List<Role> roles);
+
+
+        Task<bool> ValidateUserPassword(string userName, string password);
 
     }
 }

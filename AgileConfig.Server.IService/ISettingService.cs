@@ -25,26 +25,22 @@ namespace AgileConfig.Server.IService
         /// <summary>
         /// 管理员密码存储键
         /// </summary>
-        string AdminPasswordSettingKey { get; }
+        string SuperAdminId { get; }
+
+        string SuperAdminUserName { get; }
 
         /// <summary>
         /// 是否已经设置密码
         /// </summary>
         /// <returns></returns>
-        Task<bool> HasAdminPassword();
+        Task<bool> HasSuperAdmin();
 
         /// <summary>
         /// 设置管理员密码
         /// </summary>
         /// <param name="password"></param>
         /// <returns></returns>
-        Task<bool> SetAdminPassword(string password);
+        Task<bool> SetSuperAdminPassword(string password);
 
-        /// <summary>
-        /// 校验管理员密码
-        /// </summary>
-        /// <param name="password"></param>
-        /// <returns></returns>
-        Task<bool> ValidateAdminPassword(string password);
     }
 }

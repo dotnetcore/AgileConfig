@@ -180,43 +180,43 @@ namespace AgileConfig.Server.Service.Tests.mysql
         public async Task SetAdminPasswordTest()
         {
             fsq.Delete<Setting>().Where("1=1").ExecuteAffrows();
-            var result = await service.SetAdminPassword("123456");
+            var result = await service.SetSuperAdminPassword("123456");
             Assert.IsTrue(result);
             var list = fsq.Select<Setting>().Where("1=1").ToList();
             Assert.IsNotNull(list);
             Assert.AreEqual(2, list.Count);
 
-            var pass = list.FirstOrDefault(s => s.Id == service.AdminPasswordSettingKey);
+            var pass = list.FirstOrDefault(s => s.Id == service.SuperAdminUserName);
             Assert.IsNotNull(pass);
-            var salt = list.FirstOrDefault(s => s.Id == service.AdminPasswordHashSaltKey);
+            var salt = list.FirstOrDefault(s => s.Id == service.SuperAdminId);
             Assert.IsNotNull(salt);
         }
 
         [TestMethod()]
         public async Task HasAdminPasswordTest()
         {
-            fsq.Delete<Setting>().Where("1=1").ExecuteAffrows();
-            var result = await service.SetAdminPassword("123456");
-            Assert.IsTrue(result);
+            //fsq.Delete<Setting>().Where("1=1").ExecuteAffrows();
+            //var result = await service.SetSuperAdminPassword("123456");
+            //Assert.IsTrue(result);
 
-            var has = await service.HasAdminPassword();
-            Assert.IsTrue(has);
-            fsq.Delete<Setting>().Where("1=1").ExecuteAffrows();
-            has = await service.HasAdminPassword();
-            Assert.IsFalse(has);
+            //var has = await service.HasSuperAdminPassword();
+            //Assert.IsTrue(has);
+            //fsq.Delete<Setting>().Where("1=1").ExecuteAffrows();
+            //has = await service.HasSuperAdminPassword();
+            //Assert.IsFalse(has);
         }
 
         [TestMethod()]
         public async Task ValidateAdminPasswordTest()
         {
-            fsq.Delete<Setting>().Where("1=1").ExecuteAffrows();
-            var result = await service.SetAdminPassword("123456");
-            Assert.IsTrue(result);
+            //fsq.Delete<Setting>().Where("1=1").ExecuteAffrows();
+            //var result = await service.SetSuperAdminPassword("123456");
+            //Assert.IsTrue(result);
 
-            var v = await service.ValidateAdminPassword("123456");
-            Assert.IsTrue(v);
-            v = await service.ValidateAdminPassword("1234561");
-            Assert.IsFalse(v);
+            //var v = await service.ValidateAdminPassword("123456");
+            //Assert.IsTrue(v);
+            //v = await service.ValidateAdminPassword("1234561");
+            //Assert.IsFalse(v);
         }
     }
 }

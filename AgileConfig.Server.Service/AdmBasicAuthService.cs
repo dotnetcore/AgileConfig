@@ -10,9 +10,11 @@ namespace AgileConfig.Server.Service
     public class AdmBasicAuthService : IAdmBasicAuthService
     {
         private readonly ISettingService _settingService;
-        public AdmBasicAuthService(ISettingService settingService)
+        private readonly IUserService _userService;
+        public AdmBasicAuthService(ISettingService settingService, IUserService userService)
         {
             _settingService = settingService;
+            _userService = userService;
         }
   
         /// <summary>
@@ -69,7 +71,7 @@ namespace AgileConfig.Server.Service
                 return false;
             }
 
-            var result = await _settingService.ValidateAdminPassword(password);
+            var result = await _userService.ValidateUserPassword(_settingService.SuperAdminUserName,password);
             return result;
         }
     }

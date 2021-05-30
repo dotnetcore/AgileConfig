@@ -50,9 +50,10 @@ const UserModel: UserModelType = {
     },
     *fetchCurrent(_, { call, put }) {
       const sysInfo = yield call(systemInfo);
+      console.log('sysinfo ', sysInfo);
       const response = {
-        name: '管理员',
-        userid: sysInfo.userName,
+        name: sysInfo.currentUser.userName,
+        userid: sysInfo.currentUser.userId,
         passwordInited: sysInfo.passwordInited
       };
       yield put({

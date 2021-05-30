@@ -16,10 +16,12 @@ namespace AgileConfig.Server.Apisite.Controllers
     public class UserController : Controller
     {
         private readonly IUserService _userService;
+        private readonly ISettingService _settingService;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, ISettingService settingService)
         {
             _userService = userService;
+            _settingService = settingService;
         }
 
         [HttpGet]
@@ -35,7 +37,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var users = await _userService.GetAll();
-            users = users.Where(x => x.Status == UserStatus.Normal).ToList();
+            users = users.Where(x => x.Status == UserStatus.Normal && x.Id != _settingService.SuperAdminId).ToList();
             if (!string.IsNullOrEmpty(userName))
             {
                 users = users.Where(x => x.UserName != null && x.UserName.Contains(userName)).ToList();
@@ -64,7 +66,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     UserName = item.UserName,
                     Team = item.Team,
                     UserRoles = roles,
-                    UserRoleNames = roles.Select(r=> r.ToDesc()).ToList()
+                    UserRoleNames = roles.Select(r => r.ToDesc()).ToList()
                 };
                 vms.Add(vm);
             }
@@ -87,8 +89,8 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException("model");
             }
 
-            var exist = await _userService.GetUserByNameAsync(model.UserName);
-            if (exist != null)
+            var oldUsers = await _userService.GetUsersByNameAsync(model.UserName);
+            if (oldUsers.Any(x=>x.Status == UserStatus.Normal))
             {
                 return Json(new
                 {
