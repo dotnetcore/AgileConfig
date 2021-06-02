@@ -64,7 +64,7 @@ const UpdateForm : React.FC<UpdateUserProps> = (props)=>{
             label: '普通用户',
           }
         ]}
-    >
+      >
         </ProFormSelect> 
     </ModalForm>
     );

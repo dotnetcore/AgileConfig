@@ -377,7 +377,8 @@ const appList: React.FC = () => {
            intl.formatMessage({
             id: 'pages.app.form.public'
           })
-        } name="inheritanced" checkedChildren={true} unCheckedChildren={false}></ProFormSwitch>
+        } name="inheritanced" checkedChildren={true} unCheckedChildren={false}>
+        </ProFormSwitch>
         <ProFormDependency name={
           ["inheritanced"]
         }>

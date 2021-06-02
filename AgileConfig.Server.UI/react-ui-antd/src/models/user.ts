@@ -52,8 +52,8 @@ const UserModel: UserModelType = {
       const sysInfo = yield call(systemInfo);
       console.log('sysinfo ', sysInfo);
       const response = {
-        name: sysInfo.currentUser.userName,
-        userid: sysInfo.currentUser.userId,
+        name: sysInfo.currentUser?.userName,
+        userid: sysInfo.currentUser?.userId,
         passwordInited: sysInfo.passwordInited
       };
       yield put({

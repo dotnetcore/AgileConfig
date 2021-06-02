@@ -116,7 +116,7 @@ class AvatarDropdown extends React.Component<GlobalHeaderRightProps,{changePassw
             }
                  src="/icons/avatar.png"></img>
                  {
-                   currentUser.name
+                   currentUser?.name
                  }
             </span>
           </span>
