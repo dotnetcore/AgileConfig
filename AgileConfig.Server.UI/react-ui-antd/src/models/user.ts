@@ -56,7 +56,7 @@ const UserModel: UserModelType = {
         name: sysInfo.currentUser?.userName,
         userid: sysInfo.currentUser?.userId,
         passwordInited: sysInfo.passwordInited,
-        currentAuthority: sysInfo.currentUser.currentAuthority
+        currentAuthority: sysInfo.currentUser?.currentAuthority
       };
       yield put({
         type: 'saveCurrentUser',

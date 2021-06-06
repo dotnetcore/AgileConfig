@@ -208,5 +208,20 @@ namespace AgileConfig.Server.Apisite.Controllers
                 message = !result ? "删除用户失败，请查看错误日志" : ""
             });
         }
+
+        [HttpGet]
+        public async Task<IActionResult> adminUsers()
+        {
+            var adminUsers = await _userService.GetUsersByRoleAsync(Role.Admin);
+
+            return Json(new
+            {
+                success = true,
+                data = adminUsers.Select(x=> new UserVM { 
+                    Id = x.Id,
+                    UserName = x.UserName
+                })
+            });
+        }
     }
 }

@@ -45,3 +45,9 @@ export async function resetPassword(userId:string) {
     }
   });
 }
+
+export async function adminUsers() {
+  return request('/user/adminUsers', {
+    method: 'GET',
+  });
+}

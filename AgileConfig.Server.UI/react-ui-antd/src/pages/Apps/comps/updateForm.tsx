@@ -3,6 +3,8 @@ import {  ModalForm, ProFormDependency, ProFormSelect, ProFormSwitch, ProFormTex
 import React from 'react';
 import { AppListItem } from "../data";
 import { inheritancedApps } from "../service";
+import { adminUsers } from '@/pages/User/service';
+
 export type UpdateFormProps = {
     onSubmit: (values: AppListItem) => Promise<void>;
     onCancel: () => void;
@@ -103,7 +105,17 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
         }
       }
     </ProFormDependency>
-   
+    <ProFormSelect
+                  label="管理员"
+                  name="appAdmin"
+                  request={async () => {
+                    const result = await adminUsers();
+                    return result.data.map( (x: { userName: string, id: string })=> {
+                      console.log(x);
+                      return { label:x.userName, value:x.id};
+                    });
+                  }}
+        ></ProFormSelect>
     <ProFormSwitch label={
       intl.formatMessage({
         id: 'pages.app.form.enabled'

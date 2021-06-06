@@ -53,14 +53,6 @@ namespace AgileConfig.Server.Service
 
         public async Task<List<Role>> GetUserRolesAsync(string userId)
         {
-            if (userId == SettingService.SuperAdminId)
-            {
-                return new List<Role> { 
-                    Role.SuperAdmin,
-                    Role.Admin
-                };
-            }
-
             var userRoles = await _dbContext.UserRoles.Where(x => x.UserId == userId).ToListAsync();
 
             return userRoles.Select(x => x.Role).ToList();
@@ -118,6 +110,16 @@ namespace AgileConfig.Server.Service
             }
 
             return false;
+        }
+
+        public async Task<List<User>> GetUsersByRoleAsync(Role role)
+        {
+            var users = await FreeSQL.Instance.Select<User, UserRole>()
+                .InnerJoin((a, b) => a.Id == b.UserId)
+                .Where((a, b) => b.Role == role)
+                .ToListAsync((a, b) => a);
+
+            return users;
         }
     }
 }

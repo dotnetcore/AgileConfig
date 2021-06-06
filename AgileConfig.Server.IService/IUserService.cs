@@ -26,5 +26,7 @@ namespace AgileConfig.Server.IService
 
         Task<bool> ValidateUserPassword(string userName, string password);
 
+        Task<List<User>> GetUsersByRoleAsync(Role role);
+
     }
 }

@@ -8,6 +8,7 @@ import {getIntl, getLocale, Link, useIntl} from 'umi';
 import UpdateForm from './comps/updateForm';
 import { AppListItem, AppListParams, AppListResult } from './data';
 import { addApp, editApp, delApp, queryApps, inheritancedApps,enableOrdisableApp } from './service';
+import { adminUsers } from '@/pages/User/service';
 import { getAuthority } from '@/utils/authority';
 
 const { confirm } = Modal;
@@ -264,6 +265,9 @@ const appList: React.FC = () => {
             })
           }
         </a>,
+        <a>
+          授权
+        </a>,
         <Button type="link" danger 
           hidden={!hasRole('Admin')}
           onClick={() => {
@@ -426,6 +430,17 @@ const appList: React.FC = () => {
             }
           }
         </ProFormDependency>
+        <ProFormSelect
+                  label="管理员"
+                  name="appAdmin"
+                  request={async () => {
+                    const result = await adminUsers();
+                    return result.data.map( (x: { userName: string, id: string })=> {
+                      console.log(x);
+                      return { label:x.userName, value:x.id};
+                    });
+                  }}
+        ></ProFormSelect>
         <ProFormSwitch label={
           intl.formatMessage({
             id: 'pages.app.form.enabled'

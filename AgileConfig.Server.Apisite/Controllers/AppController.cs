@@ -64,7 +64,8 @@ namespace AgileConfig.Server.Apisite.Controllers
                                                                             (inheritancedApps).Select(ia => ia.Id).ToList(),
                     inheritancedAppNames = item.Type == AppType.Inheritance ?
                                                                             new List<string>() :
-                                                                            (inheritancedApps).Select(ia => ia.Name).ToList()
+                                                                            (inheritancedApps).Select(ia => ia.Name).ToList(),
+                    AppAdmin = item.AppAdmin
                 });
             }
 
@@ -105,6 +106,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             app.CreateTime = DateTime.Now;
             app.UpdateTime = null;
             app.Type = model.Inheritanced ? AppType.Inheritance : AppType.PRIVATE;
+            app.AppAdmin = model.AppAdmin;
 
             var inheritanceApps = new List<AppInheritanced>();
             if (!model.Inheritanced && model.inheritancedApps != null)
@@ -169,6 +171,8 @@ namespace AgileConfig.Server.Apisite.Controllers
             app.Enabled = model.Enabled;
             app.UpdateTime = DateTime.Now;
             app.Type = model.Inheritanced ? AppType.Inheritance : AppType.PRIVATE;
+            app.AppAdmin = model.AppAdmin;
+
             var inheritanceApps = new List<AppInheritanced>();
             if (!model.Inheritanced && model.inheritancedApps != null)
             {
@@ -215,7 +219,8 @@ namespace AgileConfig.Server.Apisite.Controllers
                     CreateTime = item.CreateTime,
                     inheritancedApps = item.Type == AppType.Inheritance ?
                                                                             new List<string>() :
-                                                                            (await _appService.GetInheritancedAppsAsync(item.Id)).Select(ia => ia.Id).ToList()
+                                                                            (await _appService.GetInheritancedAppsAsync(item.Id)).Select(ia => ia.Id).ToList(),
+                    AppAdmin = item.AppAdmin
                 });
             }
 
@@ -241,7 +246,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             vm.Secret = app.Secret;
             vm.Inheritanced = app.Type == AppType.Inheritance;
             vm.Enabled = app.Enabled;
-
+            vm.AppAdmin = app.AppAdmin;
             vm.inheritancedApps = (await _appService.GetInheritancedAppsAsync(id)).Select(x => x.Id).ToList();
 
             return Json(new

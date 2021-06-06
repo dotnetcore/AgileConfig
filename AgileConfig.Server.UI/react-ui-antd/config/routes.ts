@@ -75,7 +75,7 @@
               },
               {
                 name: 'list.user-list',
-                icon: 'Bars',
+                icon: 'User',
                 path: '/users',
                 component: './User',
                 authority: ['Admin'],

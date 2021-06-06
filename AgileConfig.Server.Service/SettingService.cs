@@ -86,8 +86,23 @@ namespace AgileConfig.Server.Service
             su.Team = "";
             su.CreateTime = DateTime.Now;
             su.UserName = SuperAdminUserName;
-
             _dbContext.Users.Add(su);
+
+            var ursa = new UserRole()
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Role = Role.SuperAdmin,
+                UserId = SuperAdminId
+            };
+            _dbContext.UserRoles.Add(ursa);
+            var ura = new UserRole()
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Role = Role.Admin,
+                UserId = SuperAdminId
+            };
+            _dbContext.UserRoles.Add(ura);
+
             var result = await _dbContext.SaveChangesAsync();
 
             return result > 0;

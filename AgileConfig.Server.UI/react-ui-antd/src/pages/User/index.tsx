@@ -139,7 +139,9 @@ const userList:React.FC = () => {
       render: (_, record) => (
         <Space>
           {record.userRoleNames?.map((name:string) => (
-            <Tag color="blue" key={name}>
+            <Tag color={
+              name === '管理员'? 'gold':'blue'
+            } key={name}>
               {name}
             </Tag>
           ))}

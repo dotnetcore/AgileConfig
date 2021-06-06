@@ -1,6 +1,7 @@
 import {
   ContactsTwoTone,
   LockTwoTone,
+  UserOutlined,
 } from '@ant-design/icons';
 import React, { useEffect, useState } from 'react';
 import ProForm, { ProFormText } from '@ant-design/pro-form';
@@ -83,7 +84,7 @@ const Login: React.FC<LoginProps> = (props) => {
               name="userName"
               fieldProps={{
                 size: 'large',
-                prefix: <ContactsTwoTone className={styles.prefixIcon} />,
+                prefix: <UserOutlined className={styles.prefixIcon} />,
               }}
               placeholder='账号'
               rules={[

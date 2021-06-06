@@ -24,6 +24,8 @@ namespace AgileConfig.Server.Apisite.Models
 
         public List<string> inheritancedAppNames { get; set; }
 
+        public string AppAdmin { get; set; }
+
     }
 
     public class AppListVM : AppVM
