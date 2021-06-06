@@ -8,8 +8,17 @@ import {getIntl, getLocale, Link, useIntl} from 'umi';
 import UpdateForm from './comps/updateForm';
 import { AppListItem, AppListParams, AppListResult } from './data';
 import { addApp, editApp, delApp, queryApps, inheritancedApps,enableOrdisableApp } from './service';
+import { getAuthority } from '@/utils/authority';
 
 const { confirm } = Modal;
+
+const hasRole = (role:string) => {
+  const roles = getAuthority();
+  if (Array.isArray(roles))
+    return roles.find(x=>x === role) !== undefined;
+
+  return false;
+}
 
 const handleAdd = async (fields: AppListItem) => {
   const intl = getIntl(getLocale());
@@ -255,7 +264,8 @@ const appList: React.FC = () => {
             })
           }
         </a>,
-        <Button type="link" danger
+        <Button type="link" danger 
+          hidden={!hasRole('Admin')}
           onClick={() => {
             const msg = intl.formatMessage({
               id:'pages.app.delete_msg'
@@ -298,15 +308,22 @@ const appList: React.FC = () => {
         rowKey="id"
         columns={columns}
         request={(params, sorter, filter) => handleQuery(params)}
-        toolBarRender={() => [
-          <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { setCreateModalVisible(true) }}>
-            {
-              intl.formatMessage({
-                id:'pages.app.table.cols.action.add'
-              })
-            }
-          </Button>
-        ]}
+        toolBarRender={() => {
+
+          if  (hasRole('Admin')) {
+           return [
+              <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { setCreateModalVisible(true) }}>
+              {
+                intl.formatMessage({
+                  id:'pages.app.table.cols.action.add'
+                })
+              }
+            </Button>
+          ]
+          }
+
+          return [];
+        }}
         //dataSource={dataSource}
       />
       <ModalForm

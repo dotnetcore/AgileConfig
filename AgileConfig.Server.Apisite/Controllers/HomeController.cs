@@ -3,6 +3,7 @@ using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -49,6 +50,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             string userId = HttpContext.User.FindFirst("id")?.Value;
             var userRoles = await _userService.GetUserRolesAsync(userId);
+
             return Json(new { 
                 appVer,
                 passwordInited=await _settingService.HasSuperAdmin(),
@@ -56,7 +58,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 {
                     userId = userId,
                     userName,
-                    userRoles
+                    currentAuthority = userRoles.Select(r => r.ToString())
                 }
             });
         }

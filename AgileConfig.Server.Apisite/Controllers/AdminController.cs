@@ -51,7 +51,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     status = "ok",
                     token = jwt,
                     type = "Bearer",
-                    currentAuthority = "admin"
+                    currentAuthority = userRoles.Select(r => r.ToString())
                 });
             }
 

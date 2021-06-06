@@ -53,6 +53,14 @@ namespace AgileConfig.Server.Service
 
         public async Task<List<Role>> GetUserRolesAsync(string userId)
         {
+            if (userId == SettingService.SuperAdminId)
+            {
+                return new List<Role> { 
+                    Role.SuperAdmin,
+                    Role.Admin
+                };
+            }
+
             var userRoles = await _dbContext.UserRoles.Where(x => x.UserId == userId).ToListAsync();
 
             return userRoles.Select(x => x.Role).ToList();

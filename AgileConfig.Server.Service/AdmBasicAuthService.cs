@@ -71,7 +71,7 @@ namespace AgileConfig.Server.Service
                 return false;
             }
 
-            var result = await _userService.ValidateUserPassword(_settingService.SuperAdminUserName,password);
+            var result = await _userService.ValidateUserPassword(SettingService.SuperAdminUserName,password);
             return result;
         }
     }

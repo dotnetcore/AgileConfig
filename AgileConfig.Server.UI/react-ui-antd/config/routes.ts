@@ -26,7 +26,6 @@
           {
             path: '/',
             component: '../layouts/BasicLayout',
-            authority: ['admin', 'user'],
             routes: [
               {
                 path: '/',
@@ -53,6 +52,7 @@
                 icon: 'Appstore',
                 path: '/app',
                 component: './Apps',
+                
               },
               {
                 name: 'list.config-list',
@@ -78,6 +78,7 @@
                 icon: 'Bars',
                 path: '/users',
                 component: './User',
+                authority: ['Admin'],
               }
               ,
               {

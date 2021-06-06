@@ -186,9 +186,9 @@ namespace AgileConfig.Server.Service.Tests.mysql
             Assert.IsNotNull(list);
             Assert.AreEqual(2, list.Count);
 
-            var pass = list.FirstOrDefault(s => s.Id == service.SuperAdminUserName);
+            var pass = list.FirstOrDefault(s => s.Id == SettingService.SuperAdminUserName);
             Assert.IsNotNull(pass);
-            var salt = list.FirstOrDefault(s => s.Id == service.SuperAdminId);
+            var salt = list.FirstOrDefault(s => s.Id == SettingService.SuperAdminId);
             Assert.IsNotNull(salt);
         }
 

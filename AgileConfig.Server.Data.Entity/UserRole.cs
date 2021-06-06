@@ -27,7 +27,7 @@ namespace AgileConfig.Server.Data.Entity
         SuperAdmin = 0,
         [Description("管理员")]
         Admin,
-        [Description("普通用户")]
+        [Description("操作员")]
         NormalUser, 
     }
 

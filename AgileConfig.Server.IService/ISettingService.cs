@@ -23,13 +23,6 @@ namespace AgileConfig.Server.IService
         Task<List<Setting>> GetAllSettingsAsync();
 
         /// <summary>
-        /// 管理员密码存储键
-        /// </summary>
-        string SuperAdminId { get; }
-
-        string SuperAdminUserName { get; }
-
-        /// <summary>
         /// 是否已经设置密码
         /// </summary>
         /// <returns></returns>

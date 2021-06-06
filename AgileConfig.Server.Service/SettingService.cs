@@ -13,8 +13,8 @@ namespace AgileConfig.Server.Service
     {
         private FreeSqlContext _dbContext;
 
-        public string SuperAdminId => "super_admin";
-        public string SuperAdminUserName => "admin";
+        public const string SuperAdminId = "super_admin";
+        public const string SuperAdminUserName = "admin";
 
         public SettingService(FreeSqlContext context)
         {

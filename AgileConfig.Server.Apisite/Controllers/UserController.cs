@@ -9,6 +9,7 @@ using System.Linq;
 using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Common;
 using System.Collections.Generic;
+using AgileConfig.Server.Service;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -37,7 +38,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var users = await _userService.GetAll();
-            users = users.Where(x => x.Status == UserStatus.Normal && x.Id != _settingService.SuperAdminId).ToList();
+            users = users.Where(x => x.Status == UserStatus.Normal && x.Id != SettingService.SuperAdminId).ToList();
             if (!string.IsNullOrEmpty(userName))
             {
                 users = users.Where(x => x.UserName != null && x.UserName.Contains(userName)).ToList();

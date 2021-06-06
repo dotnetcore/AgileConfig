@@ -291,7 +291,7 @@ const userList:React.FC = () => {
                     },
                     {
                       value: 2,
-                      label: '普通用户',
+                      label: '操作员',
                     }
                   ]}
                 >
