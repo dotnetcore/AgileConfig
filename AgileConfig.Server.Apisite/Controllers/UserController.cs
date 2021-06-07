@@ -217,9 +217,27 @@ namespace AgileConfig.Server.Apisite.Controllers
             return Json(new
             {
                 success = true,
-                data = adminUsers.Select(x=> new UserVM { 
+                data = adminUsers.OrderBy(x=>x.Team).ThenBy(x => x.UserName).Select(x=> new UserVM { 
                     Id = x.Id,
-                    UserName = x.UserName
+                    UserName = x.UserName,
+                    Team = x.Team
+                })
+            });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> AllUsers()
+        {
+            var users = await _userService.GetAll();
+
+            return Json(new
+            {
+                success = true,
+                data = users.OrderBy(x => x.Team).ThenBy(x=>x.UserName).Select(x => new UserVM
+                {
+                    Id = x.Id,
+                    UserName = x.UserName,
+                    Team = x.Team
                 })
             });
         }

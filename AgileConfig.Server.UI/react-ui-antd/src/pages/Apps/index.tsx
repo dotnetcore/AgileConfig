@@ -10,6 +10,7 @@ import { AppListItem, AppListParams, AppListResult } from './data';
 import { addApp, editApp, delApp, queryApps, inheritancedApps,enableOrdisableApp } from './service';
 import { adminUsers } from '@/pages/User/service';
 import { getAuthority } from '@/utils/authority';
+import UserAuth from './comps/userAuth';
 
 const { confirm } = Modal;
 
@@ -107,6 +108,8 @@ const appList: React.FC = () => {
 
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [updateModalVisible, setUpdateModalVisible] = useState<boolean>(false);
+  const [userAuthModalVisible, setUserAuthModalVisible] = useState<boolean>(false);
+
   const [currentRow, setCurrentRow] = useState<AppListItem>();
   const [dataSource, setDataSource] = useState<AppListResult>();
   const handleQuery = async (params: AppListParams) => {
@@ -255,8 +258,6 @@ const appList: React.FC = () => {
           onClick={() => {
             setUpdateModalVisible(true);
             setCurrentRow(record);
-            console.log('select app ', record);
-            console.log('current app ', currentRow);
           }}
         >
           {
@@ -265,7 +266,11 @@ const appList: React.FC = () => {
             })
           }
         </a>,
-        <a>
+        <a 
+          onClick={()=>{
+            setUserAuthModalVisible(true);
+            setCurrentRow(record);
+          }}>
           授权
         </a>,
         <Button type="link" danger 
@@ -435,9 +440,9 @@ const appList: React.FC = () => {
                   name="appAdmin"
                   request={async () => {
                     const result = await adminUsers();
-                    return result.data.map( (x: { userName: string, id: string })=> {
+                    return result.data.map( (x: { userName: string, id: string, team:string })=> {
                       console.log(x);
-                      return { label:x.userName, value:x.id};
+                      return { label:x.userName + ' - ' + (x.team?x.team:''), value:x.id};
                     });
                   }}
         ></ProFormSelect>
@@ -474,6 +479,24 @@ const appList: React.FC = () => {
               addFormRef.current?.resetFields();
             }
           }/>
+      }
+      {
+        userAuthModalVisible && 
+        <UserAuth
+          value = {currentRow}
+          userAuthModalVisible={userAuthModalVisible}
+          onCancel={
+            () => {
+              setUserAuthModalVisible(false);
+            }
+          }
+          onSubmit={
+            async (value) => {
+              setUserAuthModalVisible(false);
+            }
+          }
+        >
+        </UserAuth>
       }
     </PageContainer>
   );

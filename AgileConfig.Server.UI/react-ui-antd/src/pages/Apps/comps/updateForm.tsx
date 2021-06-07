@@ -110,9 +110,9 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
                   name="appAdmin"
                   request={async () => {
                     const result = await adminUsers();
-                    return result.data.map( (x: { userName: string, id: string })=> {
+                    return result.data.map( (x: { userName: string, id: string, team:string })=> {
                       console.log(x);
-                      return { label:x.userName, value:x.id};
+                      return { label:x.userName + ' - ' + (x.team?x.team:''), value:x.id};
                     });
                   }}
         ></ProFormSelect>

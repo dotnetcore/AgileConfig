@@ -51,3 +51,9 @@ export async function adminUsers() {
     method: 'GET',
   });
 }
+
+export async function allUsers() {
+  return request('/user/allUsers', {
+    method: 'GET',
+  });
+}
