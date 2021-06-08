@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Agile.Config.Protocol;
 using AgileConfig.Server.Apisite.Websocket;
 using Microsoft.AspNetCore.Mvc;
@@ -47,7 +48,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         [HttpPost]
-        public IActionResult OneClientDoActionAsync([FromQuery]string clientId, [FromBody]WebsocketAction action)
+        public async Task<IActionResult> OneClientDoActionAsync([FromQuery]string clientId, [FromBody]WebsocketAction action)
         {
             var client = WebsocketCollection.Instance.Get(clientId);
             if (client == null)
@@ -59,7 +60,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException(nameof(action));
             }
 
-            WebsocketCollection.Instance.SendActionToOne(client, action);
+            await WebsocketCollection.Instance.SendActionToOne(client, action);
 
             return Json(new
             {
