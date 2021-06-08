@@ -343,23 +343,6 @@ namespace AgileConfig.Server.Service
                 }
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.DELETE_APP_SUCCESS, (param) =>
-            {
-                var app = param as App;
-                if (app != null)
-                {
-                    var log = new SysLog
-                    {
-                        LogTime = DateTime.Now,
-                        LogType = SysLogType.Normal,
-                        LogText = $"删除应用【AppId:{app.Id}】"
-                    };
-                    using (var syslogService = GetSysLogService())
-                    {
-                        syslogService.AddSysLogAsync(log);
-                    }
-                }
-            });
             //config
             TinyEventBus.Instance.Regist(EventKeys.ADD_CONFIG_SUCCESS, (param) =>
             {
