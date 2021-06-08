@@ -3,7 +3,6 @@ using AgileConfig.Server.IService;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using AgileConfig.Server.Data.Freesql;
 using System.Linq;
 
@@ -164,6 +163,10 @@ namespace AgileConfig.Server.Service
         public async Task<bool> SaveUserAppAuth(string appId, List<string> userIds,string permission) 
         {
             var userAppAuthList = new List<UserAppAuth>();
+            if (userIds == null)
+            {
+                userIds = new List<string>();
+            }
             foreach (var userId in userIds)
             {
                 userAppAuthList.Add(new UserAppAuth { 
@@ -176,14 +179,28 @@ namespace AgileConfig.Server.Service
             await _dbContext.UserAppAuths.RemoveAsync(x => x.AppId == appId && x.Permission == permission);
             await _dbContext.UserAppAuths.AddRangeAsync(userAppAuthList);
 
-            var result = await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
 
-            return result > 0;
+            return true;
         }
 
         public void Dispose()
         {
             _dbContext.Dispose();
+        }
+
+        public async Task<List<User>> GetUserAppAuth(string appId, string permission)
+        {
+            var auths = await _dbContext.UserAppAuths.Where(x => x.AppId == appId && x.Permission == permission).ToListAsync();
+
+            var users = new List<User>();
+            foreach (var auth in auths)
+            {
+                var user = await _dbContext.Users.Where(u => u.Id == auth.UserId).FirstAsync();
+                users.Add(user);
+            }
+
+            return users;
         }
     }
 }

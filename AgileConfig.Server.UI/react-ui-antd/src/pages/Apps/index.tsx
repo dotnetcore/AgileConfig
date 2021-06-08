@@ -3,11 +3,11 @@ import { ModalForm,  ProFormDependency, ProFormSelect, ProFormSwitch, ProFormTex
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
 import { Button, FormInstance, message, Modal, Space, Switch, Tag } from 'antd';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {getIntl, getLocale, Link, useIntl} from 'umi';
 import UpdateForm from './comps/updateForm';
-import { AppListItem, AppListParams, AppListResult } from './data';
-import { addApp, editApp, delApp, queryApps, inheritancedApps,enableOrdisableApp } from './service';
+import { AppListItem, AppListParams, AppListResult, UserAppAuth } from './data';
+import { addApp, editApp, delApp, queryApps, inheritancedApps,enableOrdisableApp, saveAppAuth, getUserAppAuth } from './service';
 import { adminUsers } from '@/pages/User/service';
 import { getAuthority } from '@/utils/authority';
 import UserAuth from './comps/userAuth';
@@ -99,6 +99,31 @@ const handleDel = async (fields: AppListItem) => {
     return false;
   }
 };
+const handleUserAppAuth = async (model: UserAppAuth) => {
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({
+    id:'saving'
+  }));
+  try {
+    const result = await saveAppAuth({ ...model });
+    hide();
+    const success = result.success;
+    if (success) {
+      message.success(intl.formatMessage({
+        id:'save_success'
+      }));
+    } else {
+      message.error(result.message);
+    }
+    return success;
+  } catch (error) {
+    hide();
+    message.error(intl.formatMessage({
+      id:'save_fail'
+    }));
+    return false;
+  }
+};
 
 const appList: React.FC = () => {
   const actionRef = useRef<ActionType>();
@@ -109,9 +134,9 @@ const appList: React.FC = () => {
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [updateModalVisible, setUpdateModalVisible] = useState<boolean>(false);
   const [userAuthModalVisible, setUserAuthModalVisible] = useState<boolean>(false);
-
   const [currentRow, setCurrentRow] = useState<AppListItem>();
   const [dataSource, setDataSource] = useState<AppListResult>();
+
   const handleQuery = async (params: AppListParams) => {
     const result = await queryApps(params);
     setDataSource(result);
@@ -492,7 +517,10 @@ const appList: React.FC = () => {
           }
           onSubmit={
             async (value) => {
-              setUserAuthModalVisible(false);
+              const success = await handleUserAppAuth(value);
+              if (success) {
+                setUserAuthModalVisible(false);
+              }
             }
           }
         >

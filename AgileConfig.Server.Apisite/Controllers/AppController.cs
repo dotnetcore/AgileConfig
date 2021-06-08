@@ -382,5 +382,27 @@ namespace AgileConfig.Server.Apisite.Controllers
                 success = result && result1
             });
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetUserAppAuth(string appId)
+        {
+            if (string.IsNullOrEmpty(appId))
+            {
+                throw new ArgumentNullException(nameof(appId));
+            }
+
+            var result = new AppAuthVM
+            {
+                AppId = appId
+            };
+            result.EditConfigPermissionUsers = (await _appService.GetUserAppAuth(appId, _premissionService.EditConfigPermissionKey)).Select(x=>x.Id).ToList();
+            result.PublishConfigPermissionUsers = (await _appService.GetUserAppAuth(appId, _premissionService.PublishConfigPermissionKey)).Select(x => x.Id).ToList();
+
+            return Json(new
+            {
+                success = true,
+                data = result
+            });
+        }
     }
 }

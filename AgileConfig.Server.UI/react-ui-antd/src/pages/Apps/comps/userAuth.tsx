@@ -1,12 +1,12 @@
 import { useIntl } from "@/.umi/plugin-locale/localeExports";
-import { UserItem } from "@/pages/User/data";
-import { adminUsers, allUsers } from "@/pages/User/service";
-import {  ModalForm, ProFormSelect } from "@ant-design/pro-form";
+import { allUsers } from "@/pages/User/service";
+import { ModalForm, ProFormSelect, ProFormText } from "@ant-design/pro-form";
 import React, { useEffect, useState } from 'react';
-import { AppListItem } from "../data";
+import { AppListItem, UserAppAuth } from "../data";
+import { getUserAppAuth } from "../service";
 
 export type UserAuthProps = {
-    onSubmit: (values: AppListItem) => Promise<void>;
+    onSubmit: (values: UserAppAuth) => Promise<void>;
     onCancel: () => void;
     userAuthModalVisible: boolean;
     value: AppListItem | undefined ;
@@ -14,6 +14,7 @@ export type UserAuthProps = {
 const UserAuth : React.FC<UserAuthProps> = (props)=>{
     const intl = useIntl();
     const [users, setUsers] = useState<{lable:string, value:string}[]>();
+    const [userAppAuthState, setUserAppAuthState] = useState<UserAppAuth>({appId: ''});
 
     useEffect(()=>{
       allUsers().then( resp=>{
@@ -23,11 +24,24 @@ const UserAuth : React.FC<UserAuthProps> = (props)=>{
         setUsers(usermp);
       });
     },[]);
-
+    useEffect(()=>{
+      if (props.value?.id) {
+        const appId = props.value.id
+        getUserAppAuth(appId).then(resp => {
+          const auth:UserAppAuth = {
+            appId: appId,
+            editConfigPermissionUsers : resp.data.editConfigPermissionUsers,
+            publishConfigPermissionUsers: resp.data.publishConfigPermissionUsers
+          };
+          console.log('user app auth', auth);
+          setUserAppAuthState(auth);
+        });
+      }
+    },[props.value?.id]);
     return (
     <ModalForm 
-    title={props.value?.name + ' - 用户授权'}
-    initialValues={props.value}
+    title={userAppAuthState.appId + ' - 用户授权'}
+    initialValues={userAppAuthState}
     visible={props.userAuthModalVisible}
     modalProps={
       {
@@ -40,10 +54,15 @@ const UserAuth : React.FC<UserAuthProps> = (props)=>{
        props.onSubmit
     }
     >
+    <ProFormText
+      readonly={true}
+      name="appId"
+      hidden={true}
+    />
     <ProFormSelect
                   mode="multiple"
                   label="配置修改权"
-                  name="configEditUsers"
+                  name="editConfigPermissionUsers"
                   options={
                     users
                   }
@@ -63,7 +82,7 @@ const UserAuth : React.FC<UserAuthProps> = (props)=>{
     <ProFormSelect
                   mode="multiple"
                   label="配置上下线权"
-                  name="configPublishUsers"
+                  name="publishConfigPermissionUsers"
                   options={
                     users
                   }

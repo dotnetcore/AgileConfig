@@ -24,3 +24,9 @@ export type AppListResult = {
     success: boolean
     total: number
 }
+
+export type UserAppAuth = {
+  appId: string,
+  editConfigPermissionUsers?: string[],
+  publishConfigPermissionUsers?: string[]
+}
