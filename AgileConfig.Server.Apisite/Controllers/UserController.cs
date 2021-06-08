@@ -17,12 +17,10 @@ namespace AgileConfig.Server.Apisite.Controllers
     public class UserController : Controller
     {
         private readonly IUserService _userService;
-        private readonly ISettingService _settingService;
 
-        public UserController(IUserService userService, ISettingService settingService)
+        public UserController(IUserService userService)
         {
             _userService = userService;
-            _settingService = settingService;
         }
 
         [HttpGet]

@@ -17,10 +17,12 @@ namespace AgileConfig.Server.Apisite.Controllers
     public class AppController : Controller
     {
         private readonly IAppService _appService;
+        private readonly IPremissionService _premissionService;
 
-        public AppController(IAppService appService)
+        public AppController(IAppService appService, IPremissionService premissionService)
         {
             _appService = appService;
+            _premissionService = premissionService;
         }
 
         public async Task<IActionResult> Search(string name, string id, int current = 1, int pageSize = 20)
@@ -356,6 +358,28 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 success = true,
                 data = vms
+            });
+        }
+
+        /// <summary>
+        /// 保存app的授权信息
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<IActionResult> SaveAppAuth([FromBody] AppAuthVM model)
+        {
+            if (model == null)
+            {
+                throw new ArgumentNullException(nameof(model));
+            }
+
+            var result = await _appService.SaveUserAppAuth(model.AppId, model.EditConfigPermissionUsers, _premissionService.EditConfigPermissionKey);
+            var result1 = await _appService.SaveUserAppAuth(model.AppId, model.PublishConfigPermissionUsers, _premissionService.PublishConfigPermissionKey);
+
+            return Json(new
+            {
+                success = result && result1
             });
         }
     }

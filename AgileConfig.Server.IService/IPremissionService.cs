@@ -30,8 +30,9 @@ namespace AgileConfig.Server.IService
 
     public interface IPremissionService
     {
-        List<string> GetRoleFunctions(Role role);
-        List<string> GetRolesFunctions(List<Role> roles);
+         string EditConfigPermissionKey { get; }
+
+         string PublishConfigPermissionKey { get; }
     }
 
 }

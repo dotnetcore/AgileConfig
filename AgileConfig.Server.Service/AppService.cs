@@ -161,6 +161,26 @@ namespace AgileConfig.Server.Service
             return result;
         }
 
+        public async Task<bool> SaveUserAppAuth(string appId, List<string> userIds,string permission) 
+        {
+            var userAppAuthList = new List<UserAppAuth>();
+            foreach (var userId in userIds)
+            {
+                userAppAuthList.Add(new UserAppAuth { 
+                    Id = Guid.NewGuid().ToString("N"),
+                    AppId = appId,
+                    UserId = userId,
+                    Permission = permission
+                });
+            }
+            await _dbContext.UserAppAuths.RemoveAsync(x => x.AppId == appId && x.Permission == permission);
+            await _dbContext.UserAppAuths.AddRangeAsync(userAppAuthList);
+
+            var result = await _dbContext.SaveChangesAsync();
+
+            return result > 0;
+        }
+
         public void Dispose()
         {
             _dbContext.Dispose();
