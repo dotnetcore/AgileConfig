@@ -14,7 +14,7 @@ export type UserAuthProps = {
 const UserAuth : React.FC<UserAuthProps> = (props)=>{
     const intl = useIntl();
     const [users, setUsers] = useState<{lable:string, value:string}[]>();
-    const [userAppAuthState, setUserAppAuthState] = useState<UserAppAuth>({appId: ''});
+    const [userAppAuthState, setUserAppAuthState] = useState<UserAppAuth>();
 
     useEffect(()=>{
       allUsers().then( resp=>{
@@ -28,19 +28,19 @@ const UserAuth : React.FC<UserAuthProps> = (props)=>{
       if (props.value?.id) {
         const appId = props.value.id
         getUserAppAuth(appId).then(resp => {
-          const auth:UserAppAuth = {
+          var auth:UserAppAuth = {
             appId: appId,
             editConfigPermissionUsers : resp.data.editConfigPermissionUsers,
             publishConfigPermissionUsers: resp.data.publishConfigPermissionUsers
           };
-          console.log('user app auth', auth);
           setUserAppAuthState(auth);
         });
       }
     },[props.value?.id]);
     return (
+      userAppAuthState ?
     <ModalForm 
-    title={userAppAuthState.appId + ' - 用户授权'}
+    title={props.value?.name + ' - 用户授权'}
     initialValues={userAppAuthState}
     visible={props.userAuthModalVisible}
     modalProps={
@@ -55,9 +55,9 @@ const UserAuth : React.FC<UserAuthProps> = (props)=>{
     }
     >
     <ProFormText
+      hidden={true}
       readonly={true}
       name="appId"
-      hidden={true}
     />
     <ProFormSelect
                   mode="multiple"
@@ -100,6 +100,8 @@ const UserAuth : React.FC<UserAuthProps> = (props)=>{
         >
     </ProFormSelect>
     </ModalForm>
+    :
+    <div></div>
     );
 }
 

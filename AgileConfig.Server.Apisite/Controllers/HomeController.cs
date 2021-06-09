@@ -58,7 +58,8 @@ namespace AgileConfig.Server.Apisite.Controllers
                 {
                     userId = userId,
                     userName,
-                    currentAuthority = userRoles.Select(r => r.ToString())
+                    currentAuthority = userRoles.Select(r => r.ToString()),
+                    currentFunctions = new string[] { "global_addapp" }
                 }
             });
         }

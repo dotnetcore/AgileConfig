@@ -3,7 +3,7 @@ import type { Reducer, Effect } from 'umi';
 import { getIntl, history, getLocale  } from 'umi';
 
 import { accountLogin } from '@/services/login';
-import { setAuthority, setToken } from '@/utils/authority';
+import { setAuthority, setFunctions, setToken } from '@/utils/authority';
 import { getPageQuery } from '@/utils/utils';
 import { message } from 'antd';
 
@@ -74,6 +74,8 @@ const Model: LoginModelType = {
 
     logout() {
       setToken('');
+      setAuthority([]);
+      setFunctions([]);
       const { redirect } = getPageQuery();
       // Note: There may be security issues, please note
       if (window.location.pathname !== '/user/login' && !redirect) {
@@ -87,6 +89,7 @@ const Model: LoginModelType = {
   reducers: {
     changeLoginStatus(state, { payload }) {
       setAuthority(payload.currentAuthority);
+      setFunctions(payload.currentFunctions);
       setToken(payload.token);
       return {
         ...state,

@@ -51,7 +51,8 @@ namespace AgileConfig.Server.Apisite.Controllers
                     status = "ok",
                     token = jwt,
                     type = "Bearer",
-                    currentAuthority = userRoles.Select(r => r.ToString())
+                    currentAuthority = userRoles.Select(r => r.ToString()),
+                    currentFunctions = new string[] { "global_addapp" }
                 });
             }
 

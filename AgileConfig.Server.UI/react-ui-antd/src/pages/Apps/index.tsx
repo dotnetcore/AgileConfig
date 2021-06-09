@@ -3,24 +3,17 @@ import { ModalForm,  ProFormDependency, ProFormSelect, ProFormSwitch, ProFormTex
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
 import { Button, FormInstance, message, Modal, Space, Switch, Tag } from 'antd';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import {getIntl, getLocale, Link, useIntl} from 'umi';
 import UpdateForm from './comps/updateForm';
 import { AppListItem, AppListParams, AppListResult, UserAppAuth } from './data';
-import { addApp, editApp, delApp, queryApps, inheritancedApps,enableOrdisableApp, saveAppAuth, getUserAppAuth } from './service';
+import { addApp, editApp, delApp, queryApps, inheritancedApps,enableOrdisableApp, saveAppAuth } from './service';
 import { adminUsers } from '@/pages/User/service';
 import { getAuthority } from '@/utils/authority';
 import UserAuth from './comps/userAuth';
+import AuthorizedEle from '@/components/Authorized/AuthorizedElement';
 
 const { confirm } = Modal;
-
-const hasRole = (role:string) => {
-  const roles = getAuthority();
-  if (Array.isArray(roles))
-    return roles.find(x=>x === role) !== undefined;
-
-  return false;
-}
 
 const handleAdd = async (fields: AppListItem) => {
   const intl = getIntl(getLocale());
@@ -299,7 +292,6 @@ const appList: React.FC = () => {
           授权
         </a>,
         <Button type="link" danger 
-          hidden={!hasRole('Admin')}
           onClick={() => {
             const msg = intl.formatMessage({
               id:'pages.app.delete_msg'
@@ -343,20 +335,17 @@ const appList: React.FC = () => {
         columns={columns}
         request={(params, sorter, filter) => handleQuery(params)}
         toolBarRender={() => {
-
-          if  (hasRole('Admin')) {
-           return [
-              <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { setCreateModalVisible(true) }}>
-              {
-                intl.formatMessage({
-                  id:'pages.app.table.cols.action.add'
-                })
-              }
-            </Button>
-          ]
-          }
-
-          return [];
+          return [
+            <AuthorizedEle  judgeKey="addapp" > 
+               <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { setCreateModalVisible(true) }}>
+                 {
+                   intl.formatMessage({
+                     id:'pages.app.table.cols.action.add'
+                   })
+                 }
+               </Button>
+            </AuthorizedEle>
+         ]
         }}
         //dataSource={dataSource}
       />
