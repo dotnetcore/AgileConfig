@@ -2,37 +2,33 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace AgileConfig.Server.IService
 {
     public class Functions
     {
-        public const string User_Add = "User_Add";
-        public const string User_Edit = "User_Edit";
-        public const string User_Delete = "User_Delete";
+        public const string App_Add = "APP_ADD";
+        public const string App_Edit = "APP_EDIT";
+        public const string App_Delete = "APP_DELETE";
+        public const string App_Auth = "APP_AUTH";
 
-        public const string Team_Add = "Team_Add";
-        public const string Team_Edit = "Team_Edit";
-        public const string Team_Delete = "Team_Delete";
+        public const string Config_Add = "CONFIG_ADD";
+        public const string Config_Edit = "CONFIG_EDIT";
+        public const string Config_Delete = "CONFIG_DELETE";
 
-        public const string App_Add = "App_Add";
-        public const string App_Edit = "App_Edit";
-        public const string App_Delete = "App_Delete";
-
-        public const string Config_Add = "Config_Add";
-        public const string Config_Edit = "Config_Edit";
-        public const string Config_Delete = "Config_Delete";
-
-        public const string Config_Publish = "Config_Publish";
-        public const string Config_Offline = "Config_Offline";
+        public const string Config_Publish = "CONFIG_PUBLISH";
+        public const string Config_Offline = "CONFIG_OFFLINE";
 
     }
 
-    public interface IPremissionService
+    public interface IPermissionService
     {
          string EditConfigPermissionKey { get; }
 
          string PublishConfigPermissionKey { get; }
+
+        Task<List<string>> GetUserPermission(string userId);
     }
 
 }

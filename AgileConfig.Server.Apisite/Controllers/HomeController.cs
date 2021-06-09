@@ -12,10 +12,16 @@ namespace AgileConfig.Server.Apisite.Controllers
     {
         private readonly ISettingService _settingService;
         private readonly IUserService _userService;
-        public HomeController(ISettingService settingService, IUserService userService)
+        private readonly IPermissionService _permissionService;
+
+        public HomeController(
+            ISettingService settingService, 
+            IUserService userService,
+            IPermissionService permissionService)
         {
             _settingService = settingService;
             _userService = userService;
+            _permissionService = permissionService;
         }
 
         [AllowAnonymous]
@@ -50,6 +56,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             string userId = HttpContext.User.FindFirst("id")?.Value;
             var userRoles = await _userService.GetUserRolesAsync(userId);
+            var userFunctions = await _permissionService.GetUserPermission(userId);
 
             return Json(new { 
                 appVer,
@@ -59,7 +66,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     userId = userId,
                     userName,
                     currentAuthority = userRoles.Select(r => r.ToString()),
-                    currentFunctions = new string[] { "global_addapp" }
+                    currentFunctions = userFunctions
                 }
             });
         }

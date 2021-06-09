@@ -16,10 +16,15 @@ namespace AgileConfig.Server.Apisite.Controllers
     {
         private readonly ISettingService _settingService;
         private readonly IUserService _userService;
-        public AdminController(ISettingService settingService, IUserService userService)
+        private readonly IPermissionService _permissionService;
+        public AdminController(
+            ISettingService settingService, 
+            IUserService userService,
+            IPermissionService permissionService)
         {
             _settingService = settingService;
             _userService = userService;
+            _permissionService = permissionService;
         }
 
 
@@ -43,6 +48,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 var user = (await _userService.GetUsersByNameAsync(userName)).First();
                 var userRoles = await _userService.GetUserRolesAsync(user.Id);
                 var jwt = JWT.GetToken(user.Id, user.UserName, userRoles.Any(r => r == Role.Admin || r == Role.SuperAdmin));
+                var userFunctions = await _permissionService.GetUserPermission(user.Id);
 
                 TinyEventBus.Instance.Fire(EventKeys.ADMIN_LOGIN_SUCCESS);
 
@@ -52,7 +58,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     token = jwt,
                     type = "Bearer",
                     currentAuthority = userRoles.Select(r => r.ToString()),
-                    currentFunctions = new string[] { "global_addapp" }
+                    currentFunctions = userFunctions
                 });
             }
 

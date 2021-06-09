@@ -9,9 +9,9 @@ import UpdateForm from './comps/updateForm';
 import { AppListItem, AppListParams, AppListResult, UserAppAuth } from './data';
 import { addApp, editApp, delApp, queryApps, inheritancedApps,enableOrdisableApp, saveAppAuth } from './service';
 import { adminUsers } from '@/pages/User/service';
-import { getAuthority } from '@/utils/authority';
 import UserAuth from './comps/userAuth';
 import AuthorizedEle from '@/components/Authorized/AuthorizedElement';
+import functionKeys from '@/models/functionKeys';
 
 const { confirm } = Modal;
 
@@ -249,11 +249,15 @@ const appList: React.FC = () => {
       }),
       dataIndex: 'enabled',
       render: (dom, entity) => {
-        return <Switch checked={entity.enabled} size="small" onChange={
-          (e)=>{
-            handleEnabledChange(e, entity);
-          }
-           }/>
+        return <AuthorizedEle appId={entity.id} judgeKey={functionKeys.App_Edit} noMatch={
+                  <Switch checked={entity.enabled} size="small" />
+                }>
+                <Switch checked={entity.enabled} size="small" onChange={
+                (e)=>{
+                  handleEnabledChange(e, entity);
+                }
+                }/>
+        </AuthorizedEle>
       },
       hideInSearch: true
     },
@@ -272,52 +276,61 @@ const appList: React.FC = () => {
       >{intl.formatMessage({
         id:'pages.app.table.cols.action.configs'
       })}</Link>,
-        <a
-          onClick={() => {
-            setUpdateModalVisible(true);
-            setCurrentRow(record);
-          }}
-        >
-          {
-            intl.formatMessage({
-              id:'pages.app.table.cols.action.edit'
-            })
-          }
-        </a>,
-        <a 
-          onClick={()=>{
-            setUserAuthModalVisible(true);
-            setCurrentRow(record);
-          }}>
-          授权
-        </a>,
-        <Button type="link" danger 
-          onClick={() => {
-            const msg = intl.formatMessage({
-              id:'pages.app.delete_msg'
-            }) + `【${record.name}】?`;
-            confirm({
-              icon: <ExclamationCircleOutlined />,
-              content: msg,
-              async onOk() {
-                console.log('delete app ' + record.name);
-                const success = await handleDel(record);
-                if (success) {
-                  actionRef.current?.reload();
-                }
-              },
-              onCancel() {
-                console.log('Cancel');
-              },
-            });
-          }}
-        >
-          {
-            intl.formatMessage({
-              id:'pages.app.table.cols.action.delete'
-            })
-          }
-        </Button>
+        <AuthorizedEle appId={record.id}  judgeKey={functionKeys.App_Edit}>
+          <a
+            onClick={() => {
+              setUpdateModalVisible(true);
+              setCurrentRow(record);
+            }}
+          >
+            {
+              intl.formatMessage({
+                id:'pages.app.table.cols.action.edit'
+              })
+            }
+          </a>
+        </AuthorizedEle>
+        ,
+        <AuthorizedEle appId={record.id}  judgeKey={functionKeys.App_Auth}>
+          <a 
+            onClick={()=>{
+              setUserAuthModalVisible(true);
+              setCurrentRow(record);
+            }}>
+            授权
+          </a>
+        </AuthorizedEle>
+        ,
+        <AuthorizedEle  appId={record.id}  judgeKey={functionKeys.App_Delete}>
+          <Button type="link" danger 
+            onClick={() => {
+              const msg = intl.formatMessage({
+                id:'pages.app.delete_msg'
+              }) + `【${record.name}】?`;
+              confirm({
+                icon: <ExclamationCircleOutlined />,
+                content: msg,
+                async onOk() {
+                  console.log('delete app ' + record.name);
+                  const success = await handleDel(record);
+                  if (success) {
+                    actionRef.current?.reload();
+                  }
+                },
+                onCancel() {
+                  console.log('Cancel');
+                },
+              });
+            }}
+          >
+            {
+              intl.formatMessage({
+                id:'pages.app.table.cols.action.delete'
+              })
+            }
+          </Button>
+        </AuthorizedEle>
+        
       ]
     }
   ];
@@ -336,7 +349,7 @@ const appList: React.FC = () => {
         request={(params, sorter, filter) => handleQuery(params)}
         toolBarRender={() => {
           return [
-            <AuthorizedEle  judgeKey="addapp" > 
+            <AuthorizedEle  judgeKey={functionKeys.App_Add} > 
                <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { setCreateModalVisible(true) }}>
                  {
                    intl.formatMessage({

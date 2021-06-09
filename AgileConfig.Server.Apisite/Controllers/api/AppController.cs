@@ -15,9 +15,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api
     public class AppController : Controller
     {
         private readonly IAppService _appService;
-        private readonly IPremissionService _premissionService;
+        private readonly IPermissionService _premissionService;
 
-        public AppController(IAppService appService, IPremissionService premissionService)
+        public AppController(IAppService appService, IPermissionService premissionService)
         {
             _appService = appService;
             _premissionService = premissionService;

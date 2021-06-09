@@ -16,10 +16,16 @@ const AuthorizedEle: React.FunctionComponent<AuthorizedProps>  = (props)=>{
     functions = getFunctions();
   }
   const check = ()=>{
-    var key = functions.find(x=>x ==='global_'+ props.judgeKey );
+    let appId = '';
+    if (props.appId) {
+      appId = props.appId;
+    }
+    let matchKey = ('GLOBAL_'+ props.judgeKey);
+    let key = functions.find(x=>x === matchKey);
     if (key) return true;
 
-    key = functions.find(x=>x ==='app_'+ props.appId + '_' + props.judgeKey );
+    matchKey = ('APP_'+ appId + '_' + props.judgeKey);
+    key = functions.find(x=>x === matchKey);
     if (key) return true;
 
     return false;
