@@ -1,4 +1,5 @@
 import { useIntl } from "@/.umi/plugin-locale/localeExports";
+import { getAuthority } from "@/utils/authority";
 import {  ModalForm,  ProFormSelect,  ProFormText } from "@ant-design/pro-form";
 import React from 'react';
 import { UserItem } from "../data";
@@ -11,7 +12,16 @@ export type UpdateUserProps = {
   };
 const UpdateForm : React.FC<UpdateUserProps> = (props)=>{
     const intl = useIntl();
-
+    const hasUserRole = (role:string) => {
+      const authority = getAuthority();
+      if (Array.isArray(authority)) {
+        if (authority.find(x=> x === role)) {
+          return true;
+        }
+      }
+    
+      return false;
+    }
     return (
     <ModalForm 
     width="400px"
@@ -54,16 +64,21 @@ const UpdateForm : React.FC<UpdateUserProps> = (props)=>{
         label="角色"
         name="userRoles"
         mode="multiple" 
-        options = {[
-          {
-            value: 1,
-            label: '管理员',
-          },
-          {
+        options = {
+          hasUserRole('SuperAdmin')?[
+            {
+              value: 1,
+              label: '管理员',
+            },
+            {
+              value: 2,
+              label: '操作员',
+            }
+          ]:[{
             value: 2,
             label: '操作员',
-          }
-        ]}
+          }]
+        }
       >
         </ProFormSelect> 
     </ModalForm>

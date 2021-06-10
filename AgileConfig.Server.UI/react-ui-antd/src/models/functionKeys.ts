@@ -23,4 +23,9 @@ export default {
 
     Config_Publish: 'CONFIG_PUBLISH',
     Config_Offline: 'CONFIG_OFFLINE',
+
+    Node_Delete: 'NODE_DELETE',
+    Node_Add: 'NODE_ADD',
+
+    Client_Disconnect: 'CLIENT_DISCONNECT'
 }

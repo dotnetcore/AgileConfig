@@ -211,7 +211,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         public async Task<IActionResult> adminUsers()
         {
             var adminUsers = await _userService.GetUsersByRoleAsync(Role.Admin);
-
+            adminUsers = adminUsers.Where(x => x.Status == UserStatus.Normal).ToList();
             return Json(new
             {
                 success = true,
@@ -227,6 +227,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         public async Task<IActionResult> AllUsers()
         {
             var users = await _userService.GetAll();
+            users = users.Where(x => x.Status == UserStatus.Normal && x.Id != SettingService.SuperAdminId).ToList();
 
             return Json(new
             {

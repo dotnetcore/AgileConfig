@@ -106,6 +106,11 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
       }
     </ProFormDependency>
     <ProFormSelect
+              rules={[
+                {
+                  required: true,
+                },
+              ]}
                   label="管理员"
                   name="appAdmin"
                   request={async () => {

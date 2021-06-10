@@ -1,5 +1,8 @@
 import { useIntl } from "@/.umi/plugin-locale/localeExports";
+import { checkUserPermission } from "@/components/Authorized/AuthorizedElement";
+import functionKeys from "@/models/functionKeys";
 import { allUsers } from "@/pages/User/service";
+import { getFunctions } from "@/utils/authority";
 import { ModalForm, ProFormSelect, ProFormText } from "@ant-design/pro-form";
 import React, { useEffect, useState } from 'react';
 import { AppListItem, UserAppAuth } from "../data";
@@ -43,6 +46,13 @@ const UserAuth : React.FC<UserAuthProps> = (props)=>{
     title={props.value?.name + ' - 用户授权'}
     initialValues={userAppAuthState}
     visible={props.userAuthModalVisible}
+    submitter = {
+      checkUserPermission(getFunctions(),functionKeys.App_Auth, props.value?.id)?{
+        submitButtonProps:{}
+      }:{
+        submitButtonProps:{style:{display:"none"}}
+      }
+    }
     modalProps={
       {
         onCancel: ()=>{
@@ -66,6 +76,7 @@ const UserAuth : React.FC<UserAuthProps> = (props)=>{
                   options={
                     users
                   }
+                  readonly={!checkUserPermission(getFunctions(),functionKeys.App_Auth, props.value?.id)}
                   fieldProps={
                     {
                       filterOption:(item, option)=>{
@@ -86,6 +97,7 @@ const UserAuth : React.FC<UserAuthProps> = (props)=>{
                   options={
                     users
                   }
+                  readonly={!checkUserPermission(getFunctions(),functionKeys.App_Auth, props.value?.id)}
                   fieldProps={
                     {
                       filterOption:(item, option)=>{

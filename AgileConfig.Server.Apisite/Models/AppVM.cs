@@ -26,6 +26,8 @@ namespace AgileConfig.Server.Apisite.Models
 
         public string AppAdmin { get; set; }
 
+        public string AppAdminName { get; set; }
+
     }
 
     public class AppListVM : AppVM

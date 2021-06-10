@@ -7,6 +7,22 @@ type AuthorizedProps = {
   noMatch?: React.ReactNode;
 };
 
+export const checkUserPermission = (functions:string[],judgeKey:string, appid:string|undefined)=>{
+  let appId = '';
+  if (appid) {
+    appId = appid ;
+  }
+  let matchKey = ('GLOBAL_'+ judgeKey);
+  let key = functions.find(x=>x === matchKey);
+  if (key) return true;
+
+  matchKey = ('APP_'+ appId + '_' + judgeKey);
+  key = functions.find(x=>x === matchKey);
+  if (key) return true;
+
+  return false;
+}
+
 const AuthorizedEle: React.FunctionComponent<AuthorizedProps>  = (props)=>{
   
   let functions:string[] = [];
@@ -15,22 +31,9 @@ const AuthorizedEle: React.FunctionComponent<AuthorizedProps>  = (props)=>{
   } else {
     functions = getFunctions();
   }
-  const check = ()=>{
-    let appId = '';
-    if (props.appId) {
-      appId = props.appId;
-    }
-    let matchKey = ('GLOBAL_'+ props.judgeKey);
-    let key = functions.find(x=>x === matchKey);
-    if (key) return true;
 
-    matchKey = ('APP_'+ appId + '_' + props.judgeKey);
-    key = functions.find(x=>x === matchKey);
-    if (key) return true;
-
-    return false;
-  }
-  return check()? <>{props.children}</> : <>{props.noMatch}</>
+  return checkUserPermission(functions,props.judgeKey,props?.appId)? <>{props.children}</> : <>{props.noMatch}</>
 };
 
 export default AuthorizedEle;
+

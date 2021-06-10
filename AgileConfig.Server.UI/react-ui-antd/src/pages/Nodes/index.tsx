@@ -7,6 +7,8 @@ import React, { useState, useRef } from 'react';
 import { NodeItem } from './data';
 import { queryNodes, addNode, delNode,allClientReload } from './service';
 import { useIntl, getIntl, getLocale } from 'umi';
+import AuthorizedEle from '@/components/Authorized/AuthorizedElement';
+import functionKeys from '@/models/functionKeys';
 
 const { confirm } = Modal;
 const handleAdd = async (fields: NodeItem) => {
@@ -141,7 +143,7 @@ const nodeList:React.FC = () => {
       }),
       valueType: 'option',
       render: (text, record, _, action) => [
-        <a onClick={
+        <a key="0" onClick={
           ()=>{
             handleAllReload(record)
           }
@@ -152,7 +154,8 @@ const nodeList:React.FC = () => {
             })
           }
         </a>,
-        <Button  type="link" danger
+        <AuthorizedEle key="1" judgeKey={functionKeys.Node_Delete}>
+<         Button  type="link" danger
           onClick={ ()=> {
             const msg = intl.formatMessage({id: 'pages.node.delete_msg'}) + `【${record.address}】?`;
             confirm({
@@ -187,6 +190,8 @@ const nodeList:React.FC = () => {
               })
           }
         </Button >
+        </AuthorizedEle>
+        
       ]
     }
   ];
@@ -202,15 +207,17 @@ const nodeList:React.FC = () => {
         search={false}
         request = { (params, sorter, filter) => queryNodes() }
         toolBarRender={() => [
-          <Button key="button" icon={<PlusOutlined />} type="primary"
-          onClick={ ()=>{ handleModalVisible(true) } }
-          >
-            {
-              intl.formatMessage({
-                id: 'pages.node.action.add'
-              })
-            }
-          </Button>
+          <AuthorizedEle key="0" judgeKey={functionKeys.Node_Add}>
+            <Button key="button" icon={<PlusOutlined />} type="primary"
+              onClick={ ()=>{ handleModalVisible(true) } }
+              >
+              {
+                intl.formatMessage({
+                  id: 'pages.node.action.add'
+                })
+              }
+            </Button>
+          </AuthorizedEle>
         ]}
       />
       <ModalForm 

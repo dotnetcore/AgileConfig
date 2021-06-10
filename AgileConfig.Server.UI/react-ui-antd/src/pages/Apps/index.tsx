@@ -196,12 +196,9 @@ const appList: React.FC = () => {
       hideInSearch: true
     },
     {
-      title: intl.formatMessage({
-        id:'pages.app.table.cols.update_time'
-      }),
-      dataIndex: 'updateTime',
-      valueType: 'dateTime',
-      hideInSearch: true
+      title: '管理员',
+      dataIndex: 'appAdminName',
+      hideInSearch: true,
     },
     {
       title: intl.formatMessage({
@@ -267,7 +264,7 @@ const appList: React.FC = () => {
       }),
       valueType: 'option',
       render: (text, record, _, action) => [
-        <Link 
+        <Link key="0"
         to={
           {
             pathname:'/app/config/' + record.id + '/' + record.name,
@@ -276,7 +273,7 @@ const appList: React.FC = () => {
       >{intl.formatMessage({
         id:'pages.app.table.cols.action.configs'
       })}</Link>,
-        <AuthorizedEle appId={record.id}  judgeKey={functionKeys.App_Edit}>
+        <AuthorizedEle key="1" appId={record.id}  judgeKey={functionKeys.App_Edit}>
           <a
             onClick={() => {
               setUpdateModalVisible(true);
@@ -291,17 +288,15 @@ const appList: React.FC = () => {
           </a>
         </AuthorizedEle>
         ,
-        <AuthorizedEle appId={record.id}  judgeKey={functionKeys.App_Auth}>
-          <a 
+          <a key="2"
             onClick={()=>{
               setUserAuthModalVisible(true);
               setCurrentRow(record);
             }}>
             授权
           </a>
-        </AuthorizedEle>
         ,
-        <AuthorizedEle  appId={record.id}  judgeKey={functionKeys.App_Delete}>
+        <AuthorizedEle key="3" appId={record.id}  judgeKey={functionKeys.App_Delete}>
           <Button type="link" danger 
             onClick={() => {
               const msg = intl.formatMessage({
@@ -344,12 +339,13 @@ const appList: React.FC = () => {
         search={{
           labelWidth: 'auto',
         }}
-        rowKey="id"
+        
+        rowKey={row=>row.id}
         columns={columns}
         request={(params, sorter, filter) => handleQuery(params)}
         toolBarRender={() => {
           return [
-            <AuthorizedEle  judgeKey={functionKeys.App_Add} > 
+            <AuthorizedEle key="0" judgeKey={functionKeys.App_Add} > 
                <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { setCreateModalVisible(true) }}>
                  {
                    intl.formatMessage({
@@ -463,6 +459,11 @@ const appList: React.FC = () => {
           }
         </ProFormDependency>
         <ProFormSelect
+                rules={[
+                  {
+                    required: true,
+                  },
+                ]}
                   label="管理员"
                   name="appAdmin"
                   request={async () => {

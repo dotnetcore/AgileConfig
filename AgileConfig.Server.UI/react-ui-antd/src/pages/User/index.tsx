@@ -8,6 +8,7 @@ import { queryUsers, addUser, delUser, editUser, resetPassword } from './service
 import { useIntl, getIntl, getLocale } from 'umi';
 import { ModalForm, ProFormSelect, ProFormText } from '@ant-design/pro-form';
 import UpdateUser from './comps/updateUser';
+import { getAuthority } from '@/utils/authority';
 
 const { confirm } = Modal;
 const handleAdd = async (fields: UserItem) => {
@@ -112,6 +113,30 @@ const handleResetPassword = async (fields: UserItem) => {
   }
 };
 
+const hasUserRole = (role:string) => {
+  const authority = getAuthority();
+  if (Array.isArray(authority)) {
+    if (authority.find(x=> x === role)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+const checkUserListModifyPermission = (user:UserItem) => {
+  const authMap = { 'SuperAdmin': 0,'Admin':1,'NormalUser':2};
+  let currentAuthNum = 2;
+  const roles = getAuthority();
+  if (Array.isArray(roles)) {
+    let max = roles.map(x=> authMap[x]).sort((a, b) => a - b)[0];
+    currentAuthNum = max;
+  }
+  let userAuthNum = user.userRoles.sort((a, b) => a - b)[0];
+
+  return currentAuthNum < userAuthNum;
+}
+
 const userList:React.FC = () => {
   const actionRef = useRef<ActionType>();
   const addFormRef = useRef<FormInstance>();
@@ -153,8 +178,8 @@ const userList:React.FC = () => {
         id: 'pages.node.table.cols.action'
       }),
       valueType: 'option',
-      render: (text, record, _, action) => [
-        <a
+      render: (text, record, _, action) => checkUserListModifyPermission(record)?[
+        <a key="0"
         onClick={() => {
           setUpdateModalVisible(true);
           setCurrentRow(record);
@@ -164,7 +189,7 @@ const userList:React.FC = () => {
         >
           修改
         </a>,
-         <a
+         <a key="1"
          onClick={ ()=> {
           const msg = '确定重置用户' + `【${record.userName}】的密码为默认密码【123456】?`;
           confirm({
@@ -185,7 +210,7 @@ const userList:React.FC = () => {
          >
          重置密码
          </a>,
-        <Button  type="link" danger
+        <Button key="2" type="link" danger
           onClick={ ()=> {
             const msg = '确定删除用户' + `【${record.userName}】?`;
             confirm({
@@ -206,7 +231,7 @@ const userList:React.FC = () => {
         >
           删除
         </Button >
-      ]
+      ]:[]
     }
   ];
   return (
@@ -220,7 +245,8 @@ const userList:React.FC = () => {
         columns = {columns}
         request = { (params, sorter, filter) => queryUsers(params) }
         toolBarRender={() => [
-          <Button key="button" icon={<PlusOutlined />} type="primary"
+          (hasUserRole('SuperAdmin')||hasUserRole('Admin'))? 
+          <Button key="0" icon={<PlusOutlined />} type="primary"
           onClick={ ()=>{ handleModalVisible(true) } }
           >
             {
@@ -229,6 +255,8 @@ const userList:React.FC = () => {
               })
             }
           </Button>
+          :
+          <span key="1"></span>
         ]}
       />
 
@@ -286,7 +314,7 @@ const userList:React.FC = () => {
                   label="角色"
                   name="userRoles"
                   mode="multiple" 
-                  options = {[
+                  options = {hasUserRole('SuperAdmin')?[
                     {
                       value: 1,
                       label: '管理员',
@@ -295,7 +323,11 @@ const userList:React.FC = () => {
                       value: 2,
                       label: '操作员',
                     }
-                  ]}
+                  ]:[
+                  {
+                    value: 2,
+                    label: '操作员',
+                  }]}
                 >
         </ProFormSelect> 
       </ModalForm>

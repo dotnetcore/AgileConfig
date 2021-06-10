@@ -20,6 +20,10 @@ namespace AgileConfig.Server.IService
         public const string Config_Publish = "CONFIG_PUBLISH";
         public const string Config_Offline = "CONFIG_OFFLINE";
 
+        public const string Node_Add = "NODE_ADD";
+        public const string Node_Delete = "NODE_DELETE";
+
+        public const string Client_Disconnect = "CLIENT_DISCONNECT";
     }
 
     public interface IPermissionService

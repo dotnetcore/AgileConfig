@@ -18,9 +18,11 @@ namespace AgileConfig.Server.Apisite.Controllers
     {
         private readonly IAppService _appService;
         private readonly IPermissionService _premissionService;
+        private readonly IUserService _userService;
 
-        public AppController(IAppService appService, IPermissionService premissionService)
+        public AppController(IAppService appService, IPermissionService premissionService, IUserService userService)
         {
+            _userService = userService;
             _appService = appService;
             _premissionService = premissionService;
         }
@@ -67,7 +69,8 @@ namespace AgileConfig.Server.Apisite.Controllers
                     inheritancedAppNames = item.Type == AppType.Inheritance ?
                                                                             new List<string>() :
                                                                             (inheritancedApps).Select(ia => ia.Name).ToList(),
-                    AppAdmin = item.AppAdmin
+                    AppAdmin = item.AppAdmin,
+                    AppAdminName = (await _userService.GetUserAsync(item.AppAdmin))?.UserName
                 });
             }
 

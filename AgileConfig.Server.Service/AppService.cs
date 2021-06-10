@@ -197,7 +197,10 @@ namespace AgileConfig.Server.Service
             foreach (var auth in auths)
             {
                 var user = await _dbContext.Users.Where(u => u.Id == auth.UserId).FirstAsync();
-                users.Add(user);
+                if (user != null)
+                {
+                    users.Add(user);
+                }
             }
 
             return users;

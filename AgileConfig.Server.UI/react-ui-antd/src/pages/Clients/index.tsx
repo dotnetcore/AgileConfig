@@ -1,4 +1,6 @@
 import { getIntl, getLocale } from '@/.umi/plugin-locale/localeExports';
+import AuthorizedEle from '@/components/Authorized/AuthorizedElement';
+import functionKeys from '@/models/functionKeys';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
@@ -148,31 +150,33 @@ const clients:React.FC = () => {
             })
           }
         </a>,
-        <Button type="link" danger onClick={
-         ()=>{
-          const msg = intl.formatMessage({
-                        id: 'pages.client.disconnect_message'
-                      }) + `【${record.id}】`;
-          confirm({
-            icon: <ExclamationCircleOutlined />,
-            content: msg,
-            async onOk() {
-              console.log('disconnect client ' + record.id);
-              const success = await handleClientOffline(record);
-              if (success) {
-                actionRef.current?.reload();
-              }
-            },
-            onCancel() {
-            },
-          });
-          }}>
-           {
-             intl.formatMessage({
-              id: 'pages.client.table.cols.action.disconnect'
-            })
-           }
-        </Button>
+        <AuthorizedEle judgeKey={functionKeys.Client_Disconnect}>
+          <Button type="link" danger onClick={
+          ()=>{
+            const msg = intl.formatMessage({
+                          id: 'pages.client.disconnect_message'
+                        }) + `【${record.id}】`;
+            confirm({
+              icon: <ExclamationCircleOutlined />,
+              content: msg,
+              async onOk() {
+                console.log('disconnect client ' + record.id);
+                const success = await handleClientOffline(record);
+                if (success) {
+                  actionRef.current?.reload();
+                }
+              },
+              onCancel() {
+              },
+            });
+            }}>
+            {
+              intl.formatMessage({
+                id: 'pages.client.table.cols.action.disconnect'
+              })
+            }
+          </Button>
+        </AuthorizedEle>
       ]
     }
   ];

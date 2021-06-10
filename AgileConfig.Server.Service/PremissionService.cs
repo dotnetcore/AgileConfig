@@ -26,12 +26,21 @@ namespace AgileConfig.Server.Service
             "GLOBAL_" + Functions.Config_Delete,
             "GLOBAL_" + Functions.Config_Edit,
             "GLOBAL_" + Functions.Config_Offline,
-            "GLOBAL_" + Functions.Config_Publish
+            "GLOBAL_" + Functions.Config_Publish,
+
+            "GLOBAL_" + Functions.Node_Add,
+            "GLOBAL_" + Functions.Node_Delete,
+
+            "GLOBAL_" + Functions.Client_Disconnect,
         };
 
         private static readonly List<string> Template_NormalAdminPermissions = new List<string>
         {
             "GLOBAL_" + Functions.App_Add,
+            "GLOBAL_" + Functions.Node_Add,
+            "GLOBAL_" + Functions.Node_Delete,
+            "GLOBAL_" + Functions.Client_Disconnect,
+            
             "APP_{0}_" + Functions.App_Delete,
             "APP_{0}_" + Functions.App_Edit,
             "APP_{0}_" + Functions.App_Auth,
@@ -40,7 +49,7 @@ namespace AgileConfig.Server.Service
             "APP_{0}_" + Functions.Config_Delete,
             "APP_{0}_" + Functions.Config_Edit,
             "APP_{0}_" + Functions.Config_Offline,
-            "APP_{0}_" + Functions.Config_Publish
+            "APP_{0}_" + Functions.Config_Publish,
         };
 
         private static readonly List<string> Template_NormalUserPermissions_Edit = new List<string>
