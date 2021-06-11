@@ -4,7 +4,7 @@ import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
 import { Button, FormInstance, message, Modal, Space, Switch, Tag } from 'antd';
 import React, { useState, useRef } from 'react';
-import {getIntl, getLocale, Link, useIntl} from 'umi';
+import {CurrentUser, getIntl, getLocale, Link, useIntl} from 'umi';
 import UpdateForm from './comps/updateForm';
 import { AppListItem, AppListParams, AppListResult, UserAppAuth } from './data';
 import { addApp, editApp, delApp, queryApps, inheritancedApps,enableOrdisableApp, saveAppAuth } from './service';
@@ -12,8 +12,16 @@ import { adminUsers } from '@/pages/User/service';
 import UserAuth from './comps/userAuth';
 import AuthorizedEle from '@/components/Authorized/AuthorizedElement';
 import functionKeys from '@/models/functionKeys';
+import { current } from '@/services/user';
+import { getUserInfo, setAuthority, setFunctions } from '@/utils/authority';
 
 const { confirm } = Modal;
+
+const fetchSystemInfo = async () => {
+   const result = await current();
+   setAuthority(result.currentUser.currentAuthority);
+   setFunctions(result.currentUser.currentFunctions)
+}
 
 const handleAdd = async (fields: AppListItem) => {
   const intl = getIntl(getLocale());
@@ -25,6 +33,7 @@ const handleAdd = async (fields: AppListItem) => {
     hide();
     const success = result.success;
     if (success) {
+      fetchSystemInfo();
       message.success(intl.formatMessage({
         id:'save_success'
       }));
@@ -50,6 +59,7 @@ const handleEdit = async (app: AppListItem) => {
     hide();
     const success = result.success;
     if (success) {
+      fetchSystemInfo();
       message.success(intl.formatMessage({
         id:'save_success'
       }));
@@ -75,6 +85,7 @@ const handleDel = async (fields: AppListItem) => {
     hide();
     const success = result.success;
     if (success) {
+      fetchSystemInfo();
       message.success(intl.formatMessage({
         id:'delete_success'
       }));
@@ -102,6 +113,7 @@ const handleUserAppAuth = async (model: UserAppAuth) => {
     hide();
     const success = result.success;
     if (success) {
+      fetchSystemInfo();
       message.success(intl.formatMessage({
         id:'save_success'
       }));
@@ -118,7 +130,8 @@ const handleUserAppAuth = async (model: UserAppAuth) => {
   }
 };
 
-const appList: React.FC = () => {
+const appList: React.FC = (props) => {
+
   const actionRef = useRef<ActionType>();
   const addFormRef = useRef<FormInstance>();
  
@@ -464,6 +477,7 @@ const appList: React.FC = () => {
                     required: true,
                   },
                 ]}
+                  initialValue={getUserInfo().userid}
                   label="管理员"
                   name="appAdmin"
                   request={async () => {

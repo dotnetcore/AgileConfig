@@ -3,7 +3,7 @@ import type { Reducer, Effect } from 'umi';
 import { getIntl, history, getLocale  } from 'umi';
 
 import { accountLogin } from '@/services/login';
-import { setAuthority, setFunctions, setToken } from '@/utils/authority';
+import { setAuthority, setFunctions, setToken, setUserInfo } from '@/utils/authority';
 import { getPageQuery } from '@/utils/utils';
 import { message } from 'antd';
 
@@ -76,6 +76,7 @@ const Model: LoginModelType = {
       setToken('');
       setAuthority([]);
       setFunctions([]);
+      setUserInfo({name:'',userid:''})
       const { redirect } = getPageQuery();
       // Note: There may be security issues, please note
       if (window.location.pathname !== '/user/login' && !redirect) {

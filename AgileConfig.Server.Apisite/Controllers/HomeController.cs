@@ -40,7 +40,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             return Redirect("/ui");
         }
 
-        public async Task<IActionResult> SystemInfo()
+        public async Task<IActionResult> Current()
         {
             string appVer = System.Reflection.Assembly.GetAssembly(typeof(AgileConfig.Server.Apisite.Program)).GetName().Version.ToString();
             string userName = HttpContext.User.FindFirst("name")?.Value;

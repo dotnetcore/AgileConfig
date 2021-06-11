@@ -86,14 +86,14 @@ const Login: React.FC<LoginProps> = (props) => {
                 size: 'large',
                 prefix: <UserOutlined className={styles.prefixIcon} />,
               }}
-              placeholder='账号'
+              placeholder='用户名'
               rules={[
                 {
                   required: true,
                   message: (
                     <FormattedMessage
-                      id="pages.login.password.required"
-                      defaultMessage="请输入账号！"
+                      id="pages.login.username.required"
+                      defaultMessage="请输入用户名！"
                     />
                   ),
                 },
