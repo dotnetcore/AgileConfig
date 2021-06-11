@@ -29,7 +29,7 @@ AgileConfig秉承轻量化的特点，部署简单、配置简单、使用简单
 8. 如果所有节点都故障，客户端支持从本地缓存读取配置
 9. 支持Restful API维护配置
     
-演示地址：[AgileConfig Server Demo](http://agileconfig.xbaby.xyz:5000)   密码：123456   
+演示地址：[AgileConfig Server Demo](http://agileconfig.xbaby.xyz:5000)   用户名：admin 密码：123456   
 客户端项目：[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
 示例项目：    
 [AgileConfigMVCSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigMVCSample)   
@@ -81,7 +81,7 @@ sudo docker run --name agile_config -e adminConsole=true -e db:provider=sqlite -
    
 > 注意：如果通过IIS部署，请自行下载publish分支源码进行编译。请先编译react-ui-antd项目把dist内的产物复制到apisite项目的wwwroot/ui目录下。
 ### 初始化管理员密码
-第一次运行程序需要初始化管理员密码    
+第一次运行程序需要初始化超级管理员密码，超管用户名固定为 admin    
 ![](https://ftp.bmp.ovh/imgs/2021/04/44242b327230c5e6.png)
 ### 节点
 AgileConfig支持多节点部署，所有的节点都是平行的。为了简化部署，AgileConfig并没有单独的控制台程序，请直接使用任意一个节点作为控制台。当环境变量adminConsole=true时，该节点同时兼备数据节点跟控制台功能。为了控制台能够管理节点，所以需要在控制台配置节点的信息。
