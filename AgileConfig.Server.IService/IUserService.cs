@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.IService
 {
-    public interface IUserService
+    public interface IUserService: IDisposable
     {
+        Task<List<User>> GetAll();
         Task<User> GetUserAsync(string userId);
 
-        Task<User> GetUserByNameAsync(string userName);
+        Task<List<User>> GetUsersByNameAsync(string userName);
         Task<List<Role>> GetUserRolesAsync(string userId);
 
         Task<bool> AddAsync(User user);
@@ -19,14 +20,13 @@ namespace AgileConfig.Server.IService
 
         Task<bool> UpdateAsync(User user);
 
-        Task<List<User>> GetUserByTeamAsync(string teamId);
 
-        Task<List<Team>> GetUserTeamsAsync(string userId);
+        Task<bool> UpdateUserRolesAsync(string userId, List<Role> roles);
 
-        Task<bool> AddUserToTeam(string userId, string teamId);
 
-        Task<bool> UpdateUserAppRoles(string userId, string appId, List<Role> roles);
+        Task<bool> ValidateUserPassword(string userName, string password);
 
-        Task<bool> RemoveUserFromTeam(string userId, string teamId);
+        Task<List<User>> GetUsersByRoleAsync(Role role);
+
     }
 }

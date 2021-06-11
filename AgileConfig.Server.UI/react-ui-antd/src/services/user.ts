@@ -12,6 +12,6 @@ export async function queryNotices(): Promise<any> {
   return request('/api/notices');
 }
 
-export async function systemInfo(): Promise<any> {
-  return request('/Home/SystemInfo');
+export async function current(): Promise<any> {
+  return request('/Home/current');
 }

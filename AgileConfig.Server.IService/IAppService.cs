@@ -27,5 +27,9 @@ namespace AgileConfig.Server.IService
         Task<List<App>> GetInheritancedAppsAsync(string appId);
 
         Task<List<App>> GetInheritancedFromAppsAsync(string appId);
+
+        Task<bool> SaveUserAppAuth(string appId, List<string> userIds, string permission);
+
+        Task<List<User>> GetUserAppAuth(string appId, string permission);
     }
 }

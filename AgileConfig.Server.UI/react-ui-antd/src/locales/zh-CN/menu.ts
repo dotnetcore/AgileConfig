@@ -26,6 +26,7 @@ export default {
   'menu.list.app-list': '应用',
   'menu.list.node-list': '节点',
   'menu.list.config-list': '配置项',
+  'menu.list.user-list': '用户',
   'menu.list.client-list': '客户端',
   'menu.list.logs-list': '日志',
   'menu.list.basic-list': '标准列表',

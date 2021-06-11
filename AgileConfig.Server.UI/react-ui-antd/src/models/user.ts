@@ -1,6 +1,7 @@
 import type { Effect, Reducer } from 'umi';
 
-import { systemInfo, query as queryUsers } from '@/services/user';
+import { current, query as queryUsers } from '@/services/user';
+import { setAuthority, setFunctions, setUserInfo } from '@/utils/authority';
 
 export type CurrentUser = {
   avatar?: string;
@@ -49,11 +50,14 @@ const UserModel: UserModelType = {
       });
     },
     *fetchCurrent(_, { call, put }) {
-      const sysInfo = yield call(systemInfo);
+      const sysInfo = yield call(current);
+      console.log('sysinfo ', sysInfo);
       const response = {
-        name: '管理员',
-        userid: sysInfo.userName,
-        passwordInited: sysInfo.passwordInited
+        name: sysInfo.currentUser?.userName,
+        userid: sysInfo.currentUser?.userId,
+        passwordInited: sysInfo.passwordInited,
+        currentAuthority: sysInfo.currentUser?.currentAuthority,
+        currentFunctions: sysInfo.currentUser?.currentFunctions
       };
       yield put({
         type: 'saveCurrentUser',
@@ -64,6 +68,9 @@ const UserModel: UserModelType = {
 
   reducers: {
     saveCurrentUser(state, action) {
+      setAuthority(action.payload.currentAuthority);
+      setFunctions(action.payload.currentFunctions);
+      setUserInfo({name:action.payload.name, userid: action.payload.userid});
       return {
         ...state,
         currentUser: action.payload || {},

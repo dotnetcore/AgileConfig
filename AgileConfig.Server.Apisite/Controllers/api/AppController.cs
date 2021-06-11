@@ -15,10 +15,14 @@ namespace AgileConfig.Server.Apisite.Controllers.api
     public class AppController : Controller
     {
         private readonly IAppService _appService;
+        private readonly IPermissionService _premissionService;
+        private readonly IUserService _userService;
 
-        public AppController(IAppService appService)
+        public AppController(IAppService appService, IPermissionService premissionService, IUserService userService)
         {
             _appService = appService;
+            _premissionService = premissionService;
+            _userService = userService;
         }
 
         [HttpGet]
@@ -43,7 +47,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         public async Task<IActionResult> GetById(string id)
         {
             var ctrl = new Controllers.AppController(
-             _appService
+             _appService,
+             _premissionService,
+             _userService
              );
             var result = (await ctrl.Get(id)) as JsonResult;
             dynamic obj = result.Value;
@@ -84,7 +90,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             }
 
             var ctrl = new Controllers.AppController(
-                _appService
+                _appService,
+                _premissionService,
+                _userService
                 );
 
             var result = (await ctrl.Add(model)) as JsonResult;
@@ -118,7 +126,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             }
 
             var ctrl = new Controllers.AppController(
-                  _appService
+                  _appService,
+                  _premissionService,
+                  _userService
                   );
 
             model.Id = id;
@@ -141,7 +151,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         public async Task<IActionResult> Delete(string id)
         {
             var ctrl = new Controllers.AppController(
-                    _appService
+                    _appService,
+                    _premissionService,
+                    _userService
                     );
 
             var result = (await ctrl.Delete(id)) as JsonResult;

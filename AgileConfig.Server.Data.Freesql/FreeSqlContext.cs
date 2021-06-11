@@ -32,9 +32,8 @@ namespace AgileConfig.Server.Data.Freesql
 
         public DbSet<User> Users { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
-        public DbSet<Team> Teams { get; set; }
-        public DbSet<UserTeam> UserTeams { get; set; }
 
+        public DbSet<UserAppAuth> UserAppAuths { get; set; }
 
     }
 }

@@ -31,6 +31,33 @@ export function setAuthority(authority: string | string[] ): void {
   reloadAuthorized();
 }
 
+// use localStorage to store the authority info, which might be sent from server in actual project.
+export function getFunctions(str?: string): string[] {
+  const authorityString =
+    typeof str === 'undefined' && localStorage ? localStorage.getItem('antd-pro-functions') : str;
+  // authorityString could be admin, "admin", ["admin"]
+  let authority;
+  try {
+    if (authorityString) {
+      authority = JSON.parse(authorityString);
+    }
+  } catch (e) {
+    authority = authorityString;
+  }
+  if (typeof authority === 'string') {
+    return [authority];
+  }
+
+  return authority;
+}
+
+export function setFunctions(authority: string | string[] ): void {
+  const proAuthority = typeof authority === 'string' ? [authority] : authority;
+  localStorage.setItem('antd-pro-functions', JSON.stringify(proAuthority));
+  // auto reload
+  reloadAuthorized();
+}
+
 export function setToken(token:string): void {
   localStorage.setItem('token', token);
 }
@@ -42,4 +69,17 @@ export function getToken(): string {
   }
 
   return '';
+}
+
+export function setUserInfo(user:{name:string, userid:string}) {
+  const json = JSON.stringify(user);
+  localStorage.setItem('userinfo', json);
+}
+export function getUserInfo():{name:string, userid:string} {
+  const json = localStorage.getItem('userinfo');
+  if (json){
+    return JSON.parse(json);
+  }
+
+  return {name:'',userid:''};
 }

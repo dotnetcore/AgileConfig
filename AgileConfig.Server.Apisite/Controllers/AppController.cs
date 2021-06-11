@@ -17,10 +17,14 @@ namespace AgileConfig.Server.Apisite.Controllers
     public class AppController : Controller
     {
         private readonly IAppService _appService;
+        private readonly IPermissionService _premissionService;
+        private readonly IUserService _userService;
 
-        public AppController(IAppService appService)
+        public AppController(IAppService appService, IPermissionService premissionService, IUserService userService)
         {
+            _userService = userService;
             _appService = appService;
+            _premissionService = premissionService;
         }
 
         public async Task<IActionResult> Search(string name, string id, int current = 1, int pageSize = 20)
@@ -64,7 +68,9 @@ namespace AgileConfig.Server.Apisite.Controllers
                                                                             (inheritancedApps).Select(ia => ia.Id).ToList(),
                     inheritancedAppNames = item.Type == AppType.Inheritance ?
                                                                             new List<string>() :
-                                                                            (inheritancedApps).Select(ia => ia.Name).ToList()
+                                                                            (inheritancedApps).Select(ia => ia.Name).ToList(),
+                    AppAdmin = item.AppAdmin,
+                    AppAdminName = (await _userService.GetUserAsync(item.AppAdmin))?.UserName
                 });
             }
 
@@ -105,6 +111,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             app.CreateTime = DateTime.Now;
             app.UpdateTime = null;
             app.Type = model.Inheritanced ? AppType.Inheritance : AppType.PRIVATE;
+            app.AppAdmin = model.AppAdmin;
 
             var inheritanceApps = new List<AppInheritanced>();
             if (!model.Inheritanced && model.inheritancedApps != null)
@@ -169,6 +176,8 @@ namespace AgileConfig.Server.Apisite.Controllers
             app.Enabled = model.Enabled;
             app.UpdateTime = DateTime.Now;
             app.Type = model.Inheritanced ? AppType.Inheritance : AppType.PRIVATE;
+            app.AppAdmin = model.AppAdmin;
+
             var inheritanceApps = new List<AppInheritanced>();
             if (!model.Inheritanced && model.inheritancedApps != null)
             {
@@ -215,7 +224,8 @@ namespace AgileConfig.Server.Apisite.Controllers
                     CreateTime = item.CreateTime,
                     inheritancedApps = item.Type == AppType.Inheritance ?
                                                                             new List<string>() :
-                                                                            (await _appService.GetInheritancedAppsAsync(item.Id)).Select(ia => ia.Id).ToList()
+                                                                            (await _appService.GetInheritancedAppsAsync(item.Id)).Select(ia => ia.Id).ToList(),
+                    AppAdmin = item.AppAdmin
                 });
             }
 
@@ -241,7 +251,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             vm.Secret = app.Secret;
             vm.Inheritanced = app.Type == AppType.Inheritance;
             vm.Enabled = app.Enabled;
-
+            vm.AppAdmin = app.AppAdmin;
             vm.inheritancedApps = (await _appService.GetInheritancedAppsAsync(id)).Select(x => x.Id).ToList();
 
             return Json(new
@@ -351,6 +361,50 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 success = true,
                 data = vms
+            });
+        }
+
+        /// <summary>
+        /// 保存app的授权信息
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<IActionResult> SaveAppAuth([FromBody] AppAuthVM model)
+        {
+            if (model == null)
+            {
+                throw new ArgumentNullException(nameof(model));
+            }
+
+            var result = await _appService.SaveUserAppAuth(model.AppId, model.EditConfigPermissionUsers, _premissionService.EditConfigPermissionKey);
+            var result1 = await _appService.SaveUserAppAuth(model.AppId, model.PublishConfigPermissionUsers, _premissionService.PublishConfigPermissionKey);
+
+            return Json(new
+            {
+                success = result && result1
+            });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetUserAppAuth(string appId)
+        {
+            if (string.IsNullOrEmpty(appId))
+            {
+                throw new ArgumentNullException(nameof(appId));
+            }
+
+            var result = new AppAuthVM
+            {
+                AppId = appId
+            };
+            result.EditConfigPermissionUsers = (await _appService.GetUserAppAuth(appId, _premissionService.EditConfigPermissionKey)).Select(x=>x.Id).ToList();
+            result.PublishConfigPermissionUsers = (await _appService.GetUserAppAuth(appId, _premissionService.PublishConfigPermissionKey)).Select(x => x.Id).ToList();
+
+            return Json(new
+            {
+                success = true,
+                data = result
             });
         }
     }

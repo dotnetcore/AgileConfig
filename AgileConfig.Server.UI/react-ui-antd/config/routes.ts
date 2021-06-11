@@ -16,7 +16,7 @@
             name: 'initPassword',
             path: '/user/initPassword',
             component: './User/initPassword',
-          },
+          }
         ],
       },
       {
@@ -26,7 +26,6 @@
           {
             path: '/',
             component: '../layouts/BasicLayout',
-            authority: ['admin', 'user'],
             routes: [
               {
                 path: '/',
@@ -53,6 +52,7 @@
                 icon: 'Appstore',
                 path: '/app',
                 component: './Apps',
+                
               },
               {
                 name: 'list.config-list',
@@ -73,6 +73,14 @@
                 path: '/logs',
                 component: './Logs',
               },
+              {
+                name: 'list.user-list',
+                icon: 'User',
+                path: '/users',
+                component: './User',
+                authority: ['Admin'],
+              }
+              ,
               {
                 component: './404',
               },

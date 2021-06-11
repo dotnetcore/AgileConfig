@@ -2,7 +2,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import { ModalForm, ProFormSwitch, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns, TableDropdown } from '@ant-design/pro-table';
-import { Button, Drawer, FormInstance, List, message, Modal, Tag } from 'antd';
+import { Button, Drawer, FormInstance, List, message, Modal, Space, Tag } from 'antd';
 import React, { useState, useRef, useEffect } from 'react';
 import { queryApps } from '../Apps/service';
 import UpdateForm from './comps/updateForm';
@@ -14,6 +14,9 @@ import styles from './index.less';
 import JsonImport from './comps/JsonImport';
 import { useIntl } from 'react-intl';
 import { getIntl, getLocale } from '@/.umi/plugin-locale/localeExports';
+import AuthorizedEle, { checkUserPermission } from '@/components/Authorized/AuthorizedElement';
+import functionKeys from '@/models/functionKeys';
+import { getFunctions } from '@/utils/authority';
 
 const { confirm } = Modal;
 
@@ -346,57 +349,76 @@ const configs: React.FC = (props: any) => {
       width: 150,
       valueType: 'option',
       render: (text, record, _, action) => [
-        record.onlineStatus ? <a onClick={() => { offline(record) }}>
+        <AuthorizedEle key="0" judgeKey={functionKeys.Config_Publish} appId={record.appId}>
           {
-            intl.formatMessage({
-              id: 'pages.configs.table.cols.action.offline'
-            })
-          }
-        </a> : <a onClick={() => { online(record) }}>
-          {
-            intl.formatMessage({
-              id: 'pages.configs.table.cols.action.publish'
-            })
-          }
-        </a>,
-        <a
-          onClick={() => {
-            setCurrentRow(record);
-            setUpdateModalVisible(true)
-          }}
-        >
-          {
-            intl.formatMessage({
-              id: 'pages.configs.table.cols.action.edit'
-            })
-          }
-        </a>,
-        <TableDropdown
-        key="actionGroup"
-        onSelect={async (item) => 
-          {
-            if (item == 'history') {
-              setmodifyLogsModalVisible(true)
-              const result = await queryModifyLogs(record)
-              if (result.success) {
-                setModifyLogs(result.data);
+            record.onlineStatus ? <a onClick={() => { offline(record) }}>
+            {
+              intl.formatMessage({
+                id: 'pages.configs.table.cols.action.offline'
+              })
+            }
+            </a> : <a onClick={() => { online(record) }}>
+              {
+                intl.formatMessage({
+                  id: 'pages.configs.table.cols.action.publish'
+                })
               }
-            }
-
-            if (item == 'delete') {
-              delConfig(record);
-            }
+            </a>
           }
-        }
-        menus={[
-          { key: 'history', name: intl.formatMessage({
-            id: 'pages.configs.table.cols.action.history'
-          }) },
-          { key: 'delete', name: intl.formatMessage({
-            id: 'pages.configs.table.cols.action.delete'
-          }) },
-        ]}
-      />
+        </AuthorizedEle>
+        ,
+        <AuthorizedEle key="1" judgeKey={functionKeys.Config_Edit} appId={record.appId}>
+          <a
+            onClick={() => {
+              setCurrentRow(record);
+              setUpdateModalVisible(true)
+            }}
+          >
+            {
+              intl.formatMessage({
+                id: 'pages.configs.table.cols.action.edit'
+              })
+            }
+          </a>
+        </AuthorizedEle>
+        ,
+        <AuthorizedEle key="2" judgeKey={functionKeys.Config_Delete} appId={record.appId}>
+          <TableDropdown
+              key="actionGroup"
+              onSelect={async (item) => 
+                {
+                  if (item == 'history') {
+                    setCurrentRow(record);
+                    setmodifyLogsModalVisible(true)
+                    const result = await queryModifyLogs(record)
+                    if (result.success) {
+                      setModifyLogs(result.data);
+                    }
+                  }
+
+                  if (item == 'delete') {
+                    delConfig(record);
+                  }
+                }
+              }
+              menus={
+                checkUserPermission(getFunctions(),functionKeys.Config_Delete,appId)?
+                [
+                  { key: 'history', name: intl.formatMessage({
+                    id: 'pages.configs.table.cols.action.history'
+                  }) },
+                  { key: 'delete', name: intl.formatMessage({
+                    id: 'pages.configs.table.cols.action.delete'
+                  }) },
+                ]:
+                [
+                  { key: 'history', name: intl.formatMessage({
+                    id: 'pages.configs.table.cols.action.history'
+                  }) },
+                ]
+              }
+            />
+        </AuthorizedEle>
       ]
     },
   ];
@@ -414,35 +436,47 @@ const configs: React.FC = (props: any) => {
         }}
         request={(params, sorter, filter) => queryConfigs(appId,params)}
         toolBarRender={() => [
-          <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { setCreateModalVisible(true); }}>
+          <AuthorizedEle key="0" judgeKey={functionKeys.Config_Add} appId={appId}>
+            <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { setCreateModalVisible(true); }}>
             {
               intl.formatMessage({
                 id: 'pages.configs.table.cols.action.add'
               })
             }
-          </Button>,
-          <Button key="button" type="primary" hidden={selectedRowsState.length == 0} onClick={()=>{onlineSome(selectedRowsState)}}>
-            {
-              intl.formatMessage({
-                id: 'pages.configs.table.cols.action.publish'
-              })
-            }
-        </Button>,
-          <Button key="button" type="primary" danger hidden={selectedRowsState.length == 0} onClick={()=>{offlineSome(selectedRowsState)}}>
-            {
-              intl.formatMessage({
-                id: 'pages.configs.table.cols.action.offline'
-              })
-            }
-       </Button>,
+            </Button>
+          </AuthorizedEle>
+          ,
+          <AuthorizedEle key="1" judgeKey={functionKeys.Config_Publish} appId={appId}>
+            <Button key="button" type="primary" hidden={selectedRowsState.length == 0} onClick={()=>{onlineSome(selectedRowsState)}}>
+                {
+                  intl.formatMessage({
+                    id: 'pages.configs.table.cols.action.publish'
+                  })
+                }
+            </Button>
+          </AuthorizedEle>
+          ,
+          <AuthorizedEle key="2" judgeKey={functionKeys.Config_Publish} appId={appId}>
+            <Button key="button" type="primary" danger hidden={selectedRowsState.length == 0} onClick={()=>{offlineSome(selectedRowsState)}}>
+              {
+                intl.formatMessage({
+                  id: 'pages.configs.table.cols.action.offline'
+                })
+              }
+        </Button>
+        </AuthorizedEle>
+        ,
+        <AuthorizedEle key="3" judgeKey={functionKeys.Config_Add} appId={appId}>
           <Button onClick={()=>{ setjsonImportFormModalVisible(true) }}>
             {
               intl.formatMessage({
                 id: 'pages.configs.table.cols.action.importfromjosnfile'
               })
             }
-          </Button>,
-          <Button >
+          </Button>
+        </AuthorizedEle>
+         ,
+          <Button key="4">
             <a href={'/config/exportjson?appId=' + appId} target="_blank">
               {
                  intl.formatMessage({
@@ -597,11 +631,15 @@ const configs: React.FC = (props: any) => {
           itemLayout="horizontal"
           dataSource={modifyLogs}
           renderItem={(item, index) => (
-            <List.Item className={styles.listitem} actions={index ? [<a className={styles.rollback} onClick={ ()=>{rollback(item)} }>
-              {
-                intl.formatMessage({id:'pages.config.history.rollback'})
-              }
-            </a>] : []} >
+            <List.Item className={styles.listitem} actions={index ? [
+                <AuthorizedEle key="0" judgeKey={functionKeys.Config_Edit} appId={appId}>
+                  <a className={styles.rollback} onClick={ ()=>{rollback(item)} }>
+                  {
+                    intl.formatMessage({id:'pages.config.history.rollback'})
+                  }
+                </a>
+                </AuthorizedEle>
+              ] : []} >
               <List.Item.Meta
                 title={
 

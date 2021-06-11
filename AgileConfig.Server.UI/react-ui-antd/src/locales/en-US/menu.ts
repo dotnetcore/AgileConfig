@@ -55,5 +55,6 @@ export default {
   'menu.list.app-list': 'App',
   'menu.list.client-list': 'Client',
   'menu.list.config-list': 'Configurations',
+  'menu.list.user-list': 'User',
   'menu.list.logs-list': 'Log',
 };
