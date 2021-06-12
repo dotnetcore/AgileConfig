@@ -10,6 +10,7 @@ using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Common;
 using System.Collections.Generic;
 using AgileConfig.Server.Service;
+using System.Dynamic;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -110,6 +111,15 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             var result = await _userService.AddAsync(user);
             var reuslt1 = await _userService.UpdateUserRolesAsync(user.Id, model.UserRoles);
+
+            if (result)
+            {
+                dynamic param = new ExpandoObject();
+                param.userName = this.GetCurrentUserName();
+                param.user = user;
+                TinyEventBus.Instance.Fire(EventKeys.ADD_USER_SUCCESS, param);
+            }
+
             return Json(new
             {
                 success = result && reuslt1,
@@ -141,6 +151,14 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _userService.UpdateAsync(user);
             var reuslt1 = await _userService.UpdateUserRolesAsync(user.Id, model.UserRoles);
 
+            if (result)
+            {
+                dynamic param = new ExpandoObject();
+                param.userName = this.GetCurrentUserName();
+                param.user = user;
+                TinyEventBus.Instance.Fire(EventKeys.EDIT_USER_SUCCESS, param);
+            }
+
             return Json(new
             {
                 success = result && reuslt1,
@@ -171,6 +189,13 @@ namespace AgileConfig.Server.Apisite.Controllers
             user.Password = Encrypt.Md5(DefaultPassword + user.Salt);
 
             var result = await _userService.UpdateAsync(user);
+            if (result)
+            {
+                dynamic param = new ExpandoObject();
+                param.user = user;
+                param.userName = this.GetCurrentUserName();
+                TinyEventBus.Instance.Fire(EventKeys.RESET_USER_PASSWORD_SUCCESS, param);
+            }
 
             return Json(new
             {
@@ -199,6 +224,13 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             user.Status = UserStatus.Deleted;
             var result = await _userService.UpdateAsync(user);
+            if (result)
+            {
+                dynamic param = new ExpandoObject();
+                param.userName = this.GetCurrentUserName();
+                param.user = user;
+                TinyEventBus.Instance.Fire(EventKeys.DELETE_USER_SUCCESS, param);
+            }
 
             return Json(new
             {

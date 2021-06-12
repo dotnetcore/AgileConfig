@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using AgileConfig.Server.Common;
+using System.Dynamic;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -55,12 +56,10 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _serverNodeService.AddAsync(node);
             if (result)
             {
-                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    LogText = $"新增节点：{node.Address}"
-                });
+                dynamic param = new ExpandoObject();
+                param.node = node;
+                param.userName = this.GetCurrentUserName();
+                TinyEventBus.Instance.Fire(EventKeys.ADD_NODE_SUCCESS, param);
                 await _remoteServerNodeProxy.TestEchoAsync(node.Address);
             }
            
@@ -102,12 +101,10 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _serverNodeService.DeleteAsync(node);
             if (result)
             {
-                TinyEventBus.Instance.Fire(EventKeys.ADD_SYSLOG, new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    LogText = $"删除节点：{node.Address}"
-                });
+                dynamic param = new ExpandoObject();
+                param.node = node;
+                param.userName = this.GetCurrentUserName();
+                TinyEventBus.Instance.Fire(EventKeys.DELETE_NODE_SUCCESS, param);
             }
             return Json(new
             {

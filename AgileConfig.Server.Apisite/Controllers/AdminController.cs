@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Dynamic;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -50,7 +51,9 @@ namespace AgileConfig.Server.Apisite.Controllers
                 var jwt = JWT.GetToken(user.Id, user.UserName, userRoles.Any(r => r == Role.Admin || r == Role.SuperAdmin));
                 var userFunctions = await _permissionService.GetUserPermission(user.Id);
 
-                TinyEventBus.Instance.Fire(EventKeys.ADMIN_LOGIN_SUCCESS);
+                dynamic param = new ExpandoObject();
+                param.userName = user.UserName;
+                TinyEventBus.Instance.Fire(EventKeys.USER_LOGIN_SUCCESS, param);
 
                 return Json(new
                 {
@@ -134,7 +137,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                TinyEventBus.Instance.Fire(EventKeys.INIT_ADMIN_PASSWORD_SUCCESS);
+                TinyEventBus.Instance.Fire(EventKeys.INIT_SUPERADMIN_PASSWORD_SUCCESS);
 
                 return Json(new
                 {
@@ -178,7 +181,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 });
             }
 
-            var userName = Request.HttpContext.User.Identity.Name;
+            var userName = this.GetCurrentUserName();
             var validOld = await _userService.ValidateUserPassword(userName, oldPassword);
 
             if (!validOld)
@@ -221,11 +224,27 @@ namespace AgileConfig.Server.Apisite.Controllers
                 });
             }
 
-            var result = await _settingService.SetSuperAdminPassword(password);
+            var users = await _userService.GetUsersByNameAsync(this.GetCurrentUserName());
+            var user = users.Where(x => x.Status == UserStatus.Normal).FirstOrDefault();
+
+            if (user == null)
+            {
+                return Json(new
+                {
+                    message = "未找到对应的用户",
+                    err_code = "err_resetpassword_06",
+                    success = false
+                });
+            }
+
+            user.Password = Encrypt.Md5(password + user.Salt);
+            var result = await _userService.UpdateAsync(user);
 
             if (result)
             {
-                TinyEventBus.Instance.Fire(EventKeys.RESET_ADMIN_PASSWORD_SUCCESS);
+                dynamic param = new ExpandoObject();
+                param.userName = user.UserName;
+                TinyEventBus.Instance.Fire(EventKeys.CHANGE_USER_PASSWORD_SUCCESS, param);
 
                 return Json(new
                 {

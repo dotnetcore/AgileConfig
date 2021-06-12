@@ -67,11 +67,11 @@ export default {
   'pages.admin.subPage.title': ' 这个页面只有 admin 权限才能查看',
   'pages.admin.subPage.alertMessage': 'umi ui 现已发布，欢迎使用 npm run ui 启动体验。',
 
-  'pages.initpassword.tab': '初始化管理员密码',
+  'pages.initpassword.tab': '初始化超级管理员密码',
   'pages.initpassword.submit': '确定',
   'pages.initpassword.ag_password.placeholder' : '再次输入密码',
-  'pages.initpassword.init_tip': "首次登录前请设置管理员密码",
-  'pages.initpassword.init_success': "  初始化成功，请使用管理员密码重新登录",
+  'pages.initpassword.init_tip': "首次登录前请设置超级管理员密码",
+  'pages.initpassword.init_success': "  初始化成功，请使用超级管理员密码重新登录",
 
   'pages.home.summary.node': '节点',
   'pages.home.summary.app': '应用',

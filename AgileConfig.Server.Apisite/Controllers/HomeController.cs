@@ -43,7 +43,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         public async Task<IActionResult> Current()
         {
             string appVer = System.Reflection.Assembly.GetAssembly(typeof(AgileConfig.Server.Apisite.Program)).GetName().Version.ToString();
-            string userName = HttpContext.User.FindFirst("name")?.Value;
+            string userName = this.GetCurrentUserName();
             if (string.IsNullOrEmpty(userName))
             {
                 return Json(new
@@ -54,7 +54,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 });
             }
 
-            string userId = HttpContext.User.FindFirst("id")?.Value;
+            string userId = this.GetCurrentUserId();
             var userRoles = await _userService.GetUserRolesAsync(userId);
             var userFunctions = await _permissionService.GetUserPermission(userId);
 
