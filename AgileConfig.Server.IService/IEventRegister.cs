@@ -11,10 +11,9 @@ namespace AgileConfig.Server.IService
 
     public class EventKeys
     {
-        public const string ADMIN_LOGIN_SUCCESS = "ADMIN_LOGIN_SUCCESS";
+        public const string USER_LOGIN_SUCCESS = "USER_LOGIN_SUCCESS";
 
-        public const string INIT_ADMIN_PASSWORD_SUCCESS = "INIT_ADMIN_PASSWORD_SUCCESS";
-        public const string RESET_ADMIN_PASSWORD_SUCCESS = "RESET_ADMIN_PASSWORD_SUCCESS";
+        public const string INIT_SUPERADMIN_PASSWORD_SUCCESS = "INIT_SUPERADMIN_PASSWORD_SUCCESS";
 
         public const string ADD_APP_SUCCESS = "ADD_APP_SUCCESS";
         public const string EDIT_APP_SUCCESS = "EDIT_APP_SUCCESS";
@@ -28,9 +27,16 @@ namespace AgileConfig.Server.IService
         public const string OFFLINE_CONFIG_SUCCESS = "OFFLINE_CONFIG_SUCCESS";
         public const string ROLLBACK_CONFIG_SUCCESS = "ROLLBACK_CONFIG_SUCCESS";
 
-        public const string ADD_SYSLOG = "ADD_SYSLOG";
+        public const string ADD_NODE_SUCCESS = "ADD_NODE_SUCCESS";
+        public const string DELETE_NODE_SUCCESS = "DELETE_NODE_SUCCESS";
 
-        public const string ADD_RANGE_SYSLOG = "ADD_RANGE_SYSLOG";
+        public const string ADD_USER_SUCCESS = "ADD_USER_SUCCESS";
+        public const string EDIT_USER_SUCCESS = "EDIT_USER_SUCCESS";
+        public const string DELETE_USER_SUCCESS = "DELETE_USER_SUCCESS";
+        public const string CHANGE_USER_PASSWORD_SUCCESS = "CHANGE_USER_PASSWORD_SUCCESS";
+        public const string RESET_USER_PASSWORD_SUCCESS = "RESET_USER_PASSWORD_SUCCESS";
+
+        public const string DISCONNECT_CLIENT_SUCCESS = "DISCONNECT_CLIENT_SUCCESS";
 
     }
 }

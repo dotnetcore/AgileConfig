@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Collections.Generic;
 using AgileConfig.Server.Common;
+using System.Dynamic;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -132,7 +133,10 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _appService.AddAsync(app, inheritanceApps);
             if (result)
             {
-                TinyEventBus.Instance.Fire(EventKeys.ADD_APP_SUCCESS, app);
+                dynamic param = new ExpandoObject();
+                param.app = app;
+                param.userName = this.GetCurrentUserName();
+                TinyEventBus.Instance.Fire(EventKeys.ADD_APP_SUCCESS, param);
             }
 
             return Json(new
@@ -197,7 +201,10 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _appService.UpdateAsync(app, inheritanceApps);
             if (result)
             {
-                TinyEventBus.Instance.Fire(EventKeys.EDIT_APP_SUCCESS, app);
+                dynamic param = new ExpandoObject();
+                param.app = app;
+                param.userName = this.GetCurrentUserName();
+                TinyEventBus.Instance.Fire(EventKeys.EDIT_APP_SUCCESS, param);
             }
             return Json(new
             {
@@ -291,7 +298,10 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                TinyEventBus.Instance.Fire(EventKeys.DISABLE_OR_ENABLE_APP_SUCCESS, app);
+                dynamic param = new ExpandoObject();
+                param.app = app;
+                param.userName = this.GetCurrentUserName();
+                TinyEventBus.Instance.Fire(EventKeys.DISABLE_OR_ENABLE_APP_SUCCESS, param);
             }
 
             return Json(new
@@ -323,7 +333,10 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                TinyEventBus.Instance.Fire(EventKeys.DELETE_APP_SUCCESS, app);
+                dynamic param = new ExpandoObject();
+                param.app = app;
+                param.userName = this.GetCurrentUserName();
+                TinyEventBus.Instance.Fire(EventKeys.DELETE_APP_SUCCESS, param);
             }
 
             return Json(new

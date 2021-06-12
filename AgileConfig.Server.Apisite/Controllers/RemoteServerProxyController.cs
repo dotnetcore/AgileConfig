@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Dynamic;
 using System.Threading.Tasks;
 
 namespace AgileConfig.Server.Apisite.Controllers
@@ -49,6 +50,13 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             var action = new WebsocketAction { Action = "offline" };
             var result = await _remoteServerNodeProxy.OneClientDoActionAsync(address, clientId, action);
+            if (result)
+            {
+                dynamic param = new ExpandoObject();
+                param.clientId = clientId;
+                param.userName = this.GetCurrentUserName();
+                TinyEventBus.Instance.Fire(EventKeys.DISCONNECT_CLIENT_SUCCESS, param);
+            }
 
             _logger.LogInformation("Request remote node {0} 's action OneClientDoAction {1} .", address, result ? "success" : "fail");
 

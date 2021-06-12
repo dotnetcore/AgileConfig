@@ -228,13 +228,15 @@ namespace AgileConfig.Server.Service
         /// </summary>
         private void RegisterAddSysLog()
         {
-            TinyEventBus.Instance.Regist(EventKeys.ADMIN_LOGIN_SUCCESS, (parm) =>
+            TinyEventBus.Instance.Regist(EventKeys.USER_LOGIN_SUCCESS, (param) =>
             {
+                dynamic param_dy = param as dynamic;
+                string userName = param_dy.userName;
                 var log = new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
-                    LogText = $"管理员登录成功"
+                    LogText = $"{userName} 登录成功"
                 };
                 using (var syslogService = GetSysLogService())
                 {
@@ -242,13 +244,13 @@ namespace AgileConfig.Server.Service
                 }
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.INIT_ADMIN_PASSWORD_SUCCESS, (parm) =>
+            TinyEventBus.Instance.Regist(EventKeys.INIT_SUPERADMIN_PASSWORD_SUCCESS, (parm) =>
             {
                 var log = new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
-                    LogText = $"管理员密码初始化成功"
+                    LogText = $"超级管理员密码初始化成功"
                 };
                 using (var syslogService = GetSysLogService())
                 {
@@ -256,13 +258,34 @@ namespace AgileConfig.Server.Service
                 }
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.RESET_ADMIN_PASSWORD_SUCCESS, (parm) =>
+            TinyEventBus.Instance.Regist(EventKeys.RESET_USER_PASSWORD_SUCCESS, (param) =>
             {
+                dynamic param_dy = param as dynamic;
+                User user = param_dy.user;
+                string userName = param_dy.userName;
+
                 var log = new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
-                    LogText = $"修改管理员密码成功"
+                    LogText = $"用户 {userName} 重置 {user.UserName} 的密码为默认密码 "
+                };
+                using (var syslogService = GetSysLogService())
+                {
+                    syslogService.AddSysLogAsync(log);
+                }
+            });
+
+            TinyEventBus.Instance.Regist(EventKeys.CHANGE_USER_PASSWORD_SUCCESS, (param) =>
+            {
+                dynamic param_dy = param as dynamic;
+                string userName = param_dy.userName;
+
+                var log = new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    LogText = $"修改用户 {userName} 的密码成功"
                 };
                 using (var syslogService = GetSysLogService())
                 {
@@ -272,14 +295,16 @@ namespace AgileConfig.Server.Service
 
             TinyEventBus.Instance.Regist(EventKeys.ADD_APP_SUCCESS, (param) =>
             {
-                var app = param as App;
+                dynamic param_dy = param;
+                App app = param_dy.app;
+                string userName = param_dy.userName;
                 if (app != null)
                 {
                     var log = new SysLog
                     {
                         LogTime = DateTime.Now,
                         LogType = SysLogType.Normal,
-                        LogText = $"新增应用【AppId：{app.Id}】【AppName：{app.Name}】"
+                        LogText = $"用户：{userName} 新增应用【AppId：{app.Id}】【AppName：{app.Name}】"
                     };
                     using (var syslogService = GetSysLogService())
                     {
@@ -291,14 +316,16 @@ namespace AgileConfig.Server.Service
             // app
             TinyEventBus.Instance.Regist(EventKeys.EDIT_APP_SUCCESS, (param) =>
             {
-                var app = param as App;
+                dynamic param_dy = param;
+                App app = param_dy.app;
+                string userName = param_dy.userName;
                 if (app != null)
                 {
                     var log = new SysLog
                     {
                         LogTime = DateTime.Now,
                         LogType = SysLogType.Normal,
-                        LogText = $"编辑应用【AppId：{app.Id}】【AppName：{app.Name}】"
+                        LogText = $"用户：{userName} 编辑应用【AppId：{app.Id}】【AppName：{app.Name}】"
                     };
                     using (var syslogService = GetSysLogService())
                     {
@@ -309,14 +336,16 @@ namespace AgileConfig.Server.Service
 
             TinyEventBus.Instance.Regist(EventKeys.DISABLE_OR_ENABLE_APP_SUCCESS, (param) =>
             {
-                var app = param as App;
+                dynamic param_dy = param;
+                App app = param_dy.app;
+                string userName = param_dy.userName;
                 if (app != null)
                 {
                     var log = new SysLog
                     {
                         LogTime = DateTime.Now,
                         LogType = SysLogType.Normal,
-                        LogText = $"{(app.Enabled ? "启用" : "禁用")}应用【AppId:{app.Id}】"
+                        LogText = $"用户：{userName} {(app.Enabled ? "启用" : "禁用")}应用【AppId:{app.Id}】"
                     };
                     using (var syslogService = GetSysLogService())
                     {
@@ -327,14 +356,16 @@ namespace AgileConfig.Server.Service
 
             TinyEventBus.Instance.Regist(EventKeys.DELETE_APP_SUCCESS, (param) =>
             {
-                var app = param as App;
+                dynamic param_dy = param;
+                App app = param_dy.app;
+                string userName = param_dy.userName;
                 if (app != null)
                 {
                     var log = new SysLog
                     {
                         LogTime = DateTime.Now,
                         LogType = SysLogType.Normal,
-                        LogText = $"删除应用【AppId:{app.Id}】"
+                        LogText = $"用户：{userName} 删除应用【AppId:{app.Id}】"
                     };
                     using (var syslogService = GetSysLogService())
                     {
@@ -346,7 +377,10 @@ namespace AgileConfig.Server.Service
             //config
             TinyEventBus.Instance.Regist(EventKeys.ADD_CONFIG_SUCCESS, (param) =>
             {
-                var config = param as Config;
+                dynamic param_dy = param;
+                Config config = param_dy.config;
+                string userName = param_dy.userName;
+
                 if (config != null)
                 {
                     var log = new SysLog
@@ -354,7 +388,7 @@ namespace AgileConfig.Server.Service
                         LogTime = DateTime.Now,
                         LogType = SysLogType.Normal,
                         AppId = config.AppId,
-                        LogText = $"新增配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
+                        LogText = $"用户：{userName} 新增配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
                     };
                     using (var syslogService = GetSysLogService())
                     {
@@ -380,6 +414,7 @@ namespace AgileConfig.Server.Service
                 dynamic param_dy = param;
                 Config config = param_dy.config;
                 Config oldConfig = param_dy.oldConfig;
+                string userName = param_dy.userName;
 
                 if (config != null)
                 {
@@ -388,7 +423,7 @@ namespace AgileConfig.Server.Service
                         LogTime = DateTime.Now,
                         LogType = SysLogType.Normal,
                         AppId = config.AppId,
-                        LogText = $"编辑配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
+                        LogText = $"用户：{userName} 编辑配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
                     };
                     using (var syslogService = GetSysLogService())
                     {
@@ -416,6 +451,8 @@ namespace AgileConfig.Server.Service
             {
                 dynamic param_dy = param;
                 Config config = param_dy.config;
+                string userName = param_dy.userName;
+
                 if (config != null)
                 {
                     var log = new SysLog
@@ -423,7 +460,7 @@ namespace AgileConfig.Server.Service
                         LogTime = DateTime.Now,
                         LogType = SysLogType.Normal,
                         AppId = config.AppId,
-                        LogText = $"删除配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
+                        LogText = $"用户：{userName} 删除配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
                     };
                     using (var syslogService = GetSysLogService())
                     {
@@ -438,6 +475,8 @@ namespace AgileConfig.Server.Service
             {
                 dynamic param_dy = param;
                 Config config = param_dy.config;
+                string userName = param_dy.userName;
+
                 if (config != null)
                 {
                     var log = new SysLog
@@ -445,7 +484,7 @@ namespace AgileConfig.Server.Service
                         LogTime = DateTime.Now,
                         LogType = SysLogType.Normal,
                         AppId = config.AppId,
-                        LogText = $"下线配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
+                        LogText = $"用户：{userName} 下线配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
                     };
                     using (var syslogService = GetSysLogService())
                     {
@@ -460,7 +499,9 @@ namespace AgileConfig.Server.Service
 
             TinyEventBus.Instance.Regist(EventKeys.PUBLISH_CONFIG_SUCCESS, (param) =>
             {
-                Config config = param as Config;
+                dynamic param_dy = param;
+                Config config = param_dy.config;
+                string userName = param_dy.userName;
 
                 if (config != null)
                 {
@@ -469,7 +510,7 @@ namespace AgileConfig.Server.Service
                         LogTime = DateTime.Now,
                         LogType = SysLogType.Normal,
                         AppId = config.AppId,
-                        LogText = $"上线配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
+                        LogText = $"用户：{userName} 上线配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
                     };
                     using (var syslogService = GetSysLogService())
                     {
@@ -485,6 +526,7 @@ namespace AgileConfig.Server.Service
                 dynamic param_dy = param;
                 Config config = param_dy.config;
                 ModifyLog modifyLog = param_dy.modifyLog;
+                string userName = param_dy.userName;
 
                 if (config != null && modifyLog != null)
                 {
@@ -493,7 +535,7 @@ namespace AgileConfig.Server.Service
                         LogTime = DateTime.Now,
                         LogType = SysLogType.Normal,
                         AppId = config.AppId,
-                        LogText = $"回滚配置【Key:{config.Key}】 【Group：{config.Group}】 【AppId：{config.AppId}】至历史记录：{modifyLog.Id}"
+                        LogText = $"用户：{userName} 回滚配置【Key:{config.Key}】 【Group：{config.Group}】 【AppId：{config.AppId}】至历史记录：{modifyLog.Id}"
                     };
                     using (var syslogService = GetSysLogService())
                     {
@@ -514,7 +556,114 @@ namespace AgileConfig.Server.Service
                     }
                 }
             });
-         
+
+            TinyEventBus.Instance.Regist(EventKeys.ADD_NODE_SUCCESS, (param) =>
+            {
+                dynamic param_dy = param;
+                ServerNode node = param_dy.node;
+                string userName = param_dy.userName;
+
+                var log = new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    LogText = $"用户：{userName} 添加节点：{node.Address}"
+                };
+                using (var syslogService = GetSysLogService())
+                {
+                    syslogService.AddSysLogAsync(log);
+                }
+            });
+
+            TinyEventBus.Instance.Regist(EventKeys.DELETE_NODE_SUCCESS, (param) =>
+            {
+                dynamic param_dy = param;
+                ServerNode node = param_dy.node;
+                string userName = param_dy.userName;
+
+                var log = new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    LogText = $"用户：{userName} 删除节点：{node.Address}"
+                };
+                using (var syslogService = GetSysLogService())
+                {
+                    syslogService.AddSysLogAsync(log);
+                }
+            });
+
+            TinyEventBus.Instance.Regist(EventKeys.ADD_USER_SUCCESS, (param) =>
+            {
+                dynamic param_dy = param;
+                User user = param_dy.user;
+                string userName = param_dy.userName;
+
+                var log = new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    LogText = $"用户：{userName} 添加用户：{user.UserName} 成功"
+                };
+                using (var syslogService = GetSysLogService())
+                {
+                    syslogService.AddSysLogAsync(log);
+                }
+            });
+
+            TinyEventBus.Instance.Regist(EventKeys.EDIT_USER_SUCCESS, (param) =>
+            {
+                dynamic param_dy = param;
+                User user = param_dy.user;
+                string userName = param_dy.userName;
+
+                var log = new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    LogText = $"用户：{userName} 编辑用户：{user.UserName} 成功"
+                };
+                using (var syslogService = GetSysLogService())
+                {
+                    syslogService.AddSysLogAsync(log);
+                }
+            });
+
+            TinyEventBus.Instance.Regist(EventKeys.DELETE_USER_SUCCESS, (param) =>
+            {
+                dynamic param_dy = param;
+                User user = param_dy.user;
+                string userName = param_dy.userName;
+
+                var log = new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    LogText = $"用户：{userName} 删除用户：{user.UserName} 成功"
+                };
+                using (var syslogService = GetSysLogService())
+                {
+                    syslogService.AddSysLogAsync(log);
+                }
+            });
+
+            TinyEventBus.Instance.Regist(EventKeys.DISCONNECT_CLIENT_SUCCESS, (param) =>
+            {
+                dynamic param_dy = param;
+                string clientId = param_dy.clientId;
+                string userName = param_dy.userName;
+
+                var log = new SysLog
+                {
+                    LogTime = DateTime.Now,
+                    LogType = SysLogType.Normal,
+                    LogText = $"用户：{userName} 断开客户端 {clientId} 成功"
+                };
+                using (var syslogService = GetSysLogService())
+                {
+                    syslogService.AddSysLogAsync(log);
+                }
+            });
         }
 
         /// <summary>

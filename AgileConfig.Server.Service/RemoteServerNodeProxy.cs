@@ -78,7 +78,7 @@ namespace AgileConfig.Server.Service
                 {
                     LogTime = DateTime.Now,
                     LogType = result ? SysLogType.Normal : SysLogType.Warn,
-                    LogText = $"通知节点{address}所有客户端：{action.Action} 响应：{(result ? "成功" : "失败")}"
+                    LogText = $"通知节点【{address}】所有客户端：【{action.Action}】 响应：{(result ? "成功" : "失败")}"
                 });
             }
 
@@ -115,7 +115,7 @@ namespace AgileConfig.Server.Service
                     LogTime = DateTime.Now,
                     LogType = result ? SysLogType.Normal : SysLogType.Warn,
                     AppId = appId,
-                    LogText = $"通知节点{address}应用{appId}的客户端：{action.Action} 响应：{(result ? "成功" : "失败")}"
+                    LogText = $"通知节点【{address}】应用【{appId}】的客户端：【{action.Action}】 响应：{(result ? "成功" : "失败")}"
                 });
             }
 
@@ -164,7 +164,7 @@ namespace AgileConfig.Server.Service
                 {
                     LogTime = DateTime.Now,
                     LogType = result ? SysLogType.Normal : SysLogType.Warn,
-                    LogText = $"通知节点{address}的客户端{clientId}：{action.Action} 响应：{(result ? "成功" : "失败")}"
+                    LogText = $"通知节点【{address}】的客户端【{clientId}】：【{action.Action}】 响应：{(result ? "成功" : "失败")}"
                 });
             }
 

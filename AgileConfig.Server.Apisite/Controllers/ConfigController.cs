@@ -84,7 +84,10 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                TinyEventBus.Instance.Fire(EventKeys.ADD_CONFIG_SUCCESS, config);
+                dynamic param = new ExpandoObject();
+                param.config = config;
+                param.userName = this.GetCurrentUserName();
+                TinyEventBus.Instance.Fire(EventKeys.ADD_CONFIG_SUCCESS, param);
             }
 
             return Json(new
@@ -151,8 +154,12 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
+                var userName = this.GetCurrentUserName();
                 addConfigs.ForEach(c =>
                 {
+                    dynamic param = new ExpandoObject();
+                    param.config = c;
+                    param.userName = userName;
                     TinyEventBus.Instance.Fire(EventKeys.ADD_CONFIG_SUCCESS, c);
                 });
             }
@@ -225,7 +232,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 dynamic param = new ExpandoObject();
                 param.config = config;
                 param.oldConfig = oldConfig;
-
+                param.userName = this.GetCurrentUserName();
                 TinyEventBus.Instance.Fire(EventKeys.EDIT_CONFIG_SUCCESS, param);
             }
 
@@ -352,6 +359,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 dynamic param = new ExpandoObject();
                 param.config = config;
                 param.oldConfig = oldConfig;
+                param.userName = this.GetCurrentUserName();
                 TinyEventBus.Instance.Fire(EventKeys.DELETE_CONFIG_SUCCESS, param);
             }
 
@@ -413,7 +421,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 param.config = config;
                 param.modifyLog = log;
                 param.oldConfig = oldConfig;
-
+                param.userName = this.GetCurrentUserName();
                 TinyEventBus.Instance.Fire(EventKeys.ROLLBACK_CONFIG_SUCCESS, param);
             }
 
@@ -477,6 +485,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     dynamic param = new ExpandoObject();
                     param.config = config;
                     param.oldConfig = oldConfig;
+                    param.userName = this.GetCurrentUserName();
                     TinyEventBus.Instance.Fire(EventKeys.OFFLINE_CONFIG_SUCCESS, param);
                 }
             }
@@ -519,6 +528,8 @@ namespace AgileConfig.Server.Apisite.Controllers
                 dynamic param = new ExpandoObject();
                 param.config = config;
                 param.oldConfig = oldConfig;
+                param.userName = this.GetCurrentUserName();
+
                 TinyEventBus.Instance.Fire(EventKeys.OFFLINE_CONFIG_SUCCESS, param);
             }
 
@@ -562,7 +573,10 @@ namespace AgileConfig.Server.Apisite.Controllers
                 var result = await _configService.UpdateAsync(config);
                 if (result)
                 {
-                    TinyEventBus.Instance.Fire(EventKeys.PUBLISH_CONFIG_SUCCESS, config);
+                    dynamic param = new ExpandoObject();
+                    param.config = config;
+                    param.userName = this.GetCurrentUserName();
+                    TinyEventBus.Instance.Fire(EventKeys.PUBLISH_CONFIG_SUCCESS, param);
                 }
             }
             return Json(new
@@ -608,7 +622,10 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _configService.UpdateAsync(config);
             if (result)
             {
-                TinyEventBus.Instance.Fire(EventKeys.PUBLISH_CONFIG_SUCCESS, config);
+                dynamic param = new ExpandoObject();
+                param.config = config;
+                param.userName = this.GetCurrentUserName();
+                TinyEventBus.Instance.Fire(EventKeys.PUBLISH_CONFIG_SUCCESS, param);
             }
             return Json(new
             {
