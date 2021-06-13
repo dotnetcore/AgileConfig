@@ -29,7 +29,7 @@ This is a lightweight configuration center based on .net core . It is easy to de
 5. restful api
 6. version management
     
-Demo Project ：[AgileConfig Server Demo](http://agileconfig.xbaby.xyz:5000)   username:admin password ：123456   
+Demo Project ：[AgileConfig Server Demo](http://agileconfig.xbaby.xyz:5000)   username ：admin password ：123456   
 client project ：[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
 samples ：    
 [AgileConfigMVCSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigMVCSample)   
