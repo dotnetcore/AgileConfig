@@ -147,7 +147,8 @@ namespace AgileConfig.Server.Service
             });
             TinyEventBus.Instance.Regist(EventKeys.PUBLISH_CONFIG_SUCCESS, async (param) =>
             {
-                Config config = param as Config;
+                dynamic param_dy = param;
+                Config config = param_dy.config;
 
                 if (config != null)
                 {
