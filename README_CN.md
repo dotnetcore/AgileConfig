@@ -29,6 +29,7 @@ AgileConfig秉承轻量化的特点，部署简单、配置简单、使用简单
 8. 如果所有节点都故障，客户端支持从本地缓存读取配置
 9. 支持Restful API维护配置
     
+Gitee 镜像：[https://gitee.com/kklldog/AgileConfig](https://gitee.com/kklldog/AgileConfig)    
 演示地址：[AgileConfig Server Demo](http://agileconfig.xbaby.xyz:5000)   用户名：admin 密码：123456   
 客户端项目：[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
 示例项目：    
@@ -143,14 +144,7 @@ Install-Package AgileConfig.Client
             Host.CreateDefaultBuilder(args)
             .ConfigureAppConfiguration((context, config) =>
             {
-                //new一个client实例，无参构造会从本地appsettings.json文件读取配置
-                var configClient = new ConfigClient();
-                //使用AddAgileConfig配置一个新的IConfigurationSource
-                config.AddAgileConfig(configClient);
-                //找一个变量挂载client实例，以便其他地方可以直接使用实例访问配置
-                ConfigClient = configClient;
-                //注册配置项修改事件
-                configClient.ConfigChanged += ConfigClient_ConfigChanged;
+                config.AddAgileConfig(arg => Console.WriteLine($"config changed , action:{arg.Action} key:{arg.Key}"));
             })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
