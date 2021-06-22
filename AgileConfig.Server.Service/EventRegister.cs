@@ -229,7 +229,7 @@ namespace AgileConfig.Server.Service
         /// </summary>
         private void RegisterAddSysLog()
         {
-            TinyEventBus.Instance.Regist(EventKeys.USER_LOGIN_SUCCESS, (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.USER_LOGIN_SUCCESS, async (param) =>
             {
                 dynamic param_dy = param as dynamic;
                 string userName = param_dy.userName;
@@ -241,11 +241,11 @@ namespace AgileConfig.Server.Service
                 };
                 using (var syslogService = GetSysLogService())
                 {
-                    syslogService.AddSysLogAsync(log);
+                    await syslogService.AddSysLogAsync(log);
                 }
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.INIT_SUPERADMIN_PASSWORD_SUCCESS, (parm) =>
+            TinyEventBus.Instance.Regist(EventKeys.INIT_SUPERADMIN_PASSWORD_SUCCESS, async (parm) =>
             {
                 var log = new SysLog
                 {
@@ -255,11 +255,11 @@ namespace AgileConfig.Server.Service
                 };
                 using (var syslogService = GetSysLogService())
                 {
-                    syslogService.AddSysLogAsync(log);
+                    await syslogService.AddSysLogAsync(log);
                 }
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.RESET_USER_PASSWORD_SUCCESS, (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.RESET_USER_PASSWORD_SUCCESS, async (param) =>
             {
                 dynamic param_dy = param as dynamic;
                 User user = param_dy.user;
@@ -273,11 +273,11 @@ namespace AgileConfig.Server.Service
                 };
                 using (var syslogService = GetSysLogService())
                 {
-                    syslogService.AddSysLogAsync(log);
+                    await syslogService.AddSysLogAsync(log);
                 }
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.CHANGE_USER_PASSWORD_SUCCESS, (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.CHANGE_USER_PASSWORD_SUCCESS, async (param) =>
             {
                 dynamic param_dy = param as dynamic;
                 string userName = param_dy.userName;
@@ -290,11 +290,11 @@ namespace AgileConfig.Server.Service
                 };
                 using (var syslogService = GetSysLogService())
                 {
-                    syslogService.AddSysLogAsync(log);
+                    await syslogService.AddSysLogAsync(log);
                 }
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.ADD_APP_SUCCESS, (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.ADD_APP_SUCCESS, async (param) =>
             {
                 dynamic param_dy = param;
                 App app = param_dy.app;
@@ -309,13 +309,13 @@ namespace AgileConfig.Server.Service
                     };
                     using (var syslogService = GetSysLogService())
                     {
-                        syslogService.AddSysLogAsync(log);
+                        await syslogService.AddSysLogAsync(log);
                     }
                 }
             });
 
             // app
-            TinyEventBus.Instance.Regist(EventKeys.EDIT_APP_SUCCESS, (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.EDIT_APP_SUCCESS, async (param) =>
             {
                 dynamic param_dy = param;
                 App app = param_dy.app;
@@ -330,12 +330,12 @@ namespace AgileConfig.Server.Service
                     };
                     using (var syslogService = GetSysLogService())
                     {
-                        syslogService.AddSysLogAsync(log);
+                        await syslogService.AddSysLogAsync(log);
                     }
                 }
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.DISABLE_OR_ENABLE_APP_SUCCESS, (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.DISABLE_OR_ENABLE_APP_SUCCESS, async (param) =>
             {
                 dynamic param_dy = param;
                 App app = param_dy.app;
@@ -350,12 +350,12 @@ namespace AgileConfig.Server.Service
                     };
                     using (var syslogService = GetSysLogService())
                     {
-                        syslogService.AddSysLogAsync(log);
+                        await syslogService.AddSysLogAsync(log);
                     }
                 }
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.DELETE_APP_SUCCESS, (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.DELETE_APP_SUCCESS, async (param) =>
             {
                 dynamic param_dy = param;
                 App app = param_dy.app;
@@ -370,13 +370,13 @@ namespace AgileConfig.Server.Service
                     };
                     using (var syslogService = GetSysLogService())
                     {
-                        syslogService.AddSysLogAsync(log);
+                        await syslogService.AddSysLogAsync(log);
                     }
                 }
             });
 
             //config
-            TinyEventBus.Instance.Regist(EventKeys.ADD_CONFIG_SUCCESS, (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.ADD_CONFIG_SUCCESS, async (param) =>
             {
                 dynamic param_dy = param;
                 Config config = param_dy.config;
@@ -393,12 +393,12 @@ namespace AgileConfig.Server.Service
                     };
                     using (var syslogService = GetSysLogService())
                     {
-                        syslogService.AddSysLogAsync(log);
+                        await syslogService.AddSysLogAsync(log);
                     }
 
                     using (var modifyLogService = GetModifyLogService())
                     {
-                        modifyLogService.AddAsync(new ModifyLog
+                        await modifyLogService.AddAsync(new ModifyLog
                         {
                             Id = Guid.NewGuid().ToString("N"),
                             ConfigId = config.Id,
@@ -410,7 +410,7 @@ namespace AgileConfig.Server.Service
                     }
                 }
             });
-            TinyEventBus.Instance.Regist(EventKeys.EDIT_CONFIG_SUCCESS, (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.EDIT_CONFIG_SUCCESS, async (param) =>
             {
                 dynamic param_dy = param;
                 Config config = param_dy.config;
@@ -428,12 +428,12 @@ namespace AgileConfig.Server.Service
                     };
                     using (var syslogService = GetSysLogService())
                     {
-                        syslogService.AddSysLogAsync(log);
+                        await syslogService.AddSysLogAsync(log);
                     }
 
                     using (var modifyLogService = GetModifyLogService())
                     {
-                        modifyLogService.AddAsync(new ModifyLog
+                        await modifyLogService.AddAsync(new ModifyLog
                         {
                             Id = Guid.NewGuid().ToString("N"),
                             ConfigId = config.Id,
@@ -448,7 +448,7 @@ namespace AgileConfig.Server.Service
 
          
 
-            TinyEventBus.Instance.Regist(EventKeys.DELETE_CONFIG_SUCCESS, (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.DELETE_CONFIG_SUCCESS, async (param) =>
             {
                 dynamic param_dy = param;
                 Config config = param_dy.config;
@@ -465,14 +465,14 @@ namespace AgileConfig.Server.Service
                     };
                     using (var syslogService = GetSysLogService())
                     {
-                        syslogService.AddSysLogAsync(log);
+                        await syslogService.AddSysLogAsync(log);
                     }
                 }
 
             });
         
 
-            TinyEventBus.Instance.Regist(EventKeys.OFFLINE_CONFIG_SUCCESS, (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.OFFLINE_CONFIG_SUCCESS, async (param) =>
             {
                 dynamic param_dy = param;
                 Config config = param_dy.config;
@@ -489,7 +489,7 @@ namespace AgileConfig.Server.Service
                     };
                     using (var syslogService = GetSysLogService())
                     {
-                        syslogService.AddSysLogAsync(log);
+                        await syslogService.AddSysLogAsync(log);
                     }
                 }
             });
@@ -498,7 +498,7 @@ namespace AgileConfig.Server.Service
 
 
 
-            TinyEventBus.Instance.Regist(EventKeys.PUBLISH_CONFIG_SUCCESS, (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.PUBLISH_CONFIG_SUCCESS, async (param) =>
             {
                 dynamic param_dy = param;
                 Config config = param_dy.config;
@@ -515,14 +515,14 @@ namespace AgileConfig.Server.Service
                     };
                     using (var syslogService = GetSysLogService())
                     {
-                        syslogService.AddSysLogAsync(log);
+                        await syslogService.AddSysLogAsync(log);
                     }
                 }
             });
            
 
 
-            TinyEventBus.Instance.Regist(EventKeys.ROLLBACK_CONFIG_SUCCESS, (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.ROLLBACK_CONFIG_SUCCESS, async (param) =>
             {
                 dynamic param_dy = param;
                 Config config = param_dy.config;
@@ -540,12 +540,12 @@ namespace AgileConfig.Server.Service
                     };
                     using (var syslogService = GetSysLogService())
                     {
-                        syslogService.AddSysLogAsync(log);
+                        await syslogService.AddSysLogAsync(log);
                     }
 
                     using (var modifyLogService = GetModifyLogService())
                     {
-                        modifyLogService.AddAsync(new ModifyLog
+                        await modifyLogService.AddAsync(new ModifyLog
                         {
                             Id = Guid.NewGuid().ToString("N"),
                             ConfigId = config.Id,
@@ -558,7 +558,7 @@ namespace AgileConfig.Server.Service
                 }
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.ADD_NODE_SUCCESS, (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.ADD_NODE_SUCCESS, async (param) =>
             {
                 dynamic param_dy = param;
                 ServerNode node = param_dy.node;
@@ -572,11 +572,11 @@ namespace AgileConfig.Server.Service
                 };
                 using (var syslogService = GetSysLogService())
                 {
-                    syslogService.AddSysLogAsync(log);
+                    await syslogService.AddSysLogAsync(log);
                 }
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.DELETE_NODE_SUCCESS, (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.DELETE_NODE_SUCCESS, async (param) =>
             {
                 dynamic param_dy = param;
                 ServerNode node = param_dy.node;
@@ -590,11 +590,11 @@ namespace AgileConfig.Server.Service
                 };
                 using (var syslogService = GetSysLogService())
                 {
-                    syslogService.AddSysLogAsync(log);
+                    await syslogService.AddSysLogAsync(log);
                 }
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.ADD_USER_SUCCESS, (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.ADD_USER_SUCCESS, async (param) =>
             {
                 dynamic param_dy = param;
                 User user = param_dy.user;
@@ -608,11 +608,11 @@ namespace AgileConfig.Server.Service
                 };
                 using (var syslogService = GetSysLogService())
                 {
-                    syslogService.AddSysLogAsync(log);
+                   await syslogService.AddSysLogAsync(log);
                 }
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.EDIT_USER_SUCCESS, (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.EDIT_USER_SUCCESS, async (param) =>
             {
                 dynamic param_dy = param;
                 User user = param_dy.user;
@@ -626,11 +626,11 @@ namespace AgileConfig.Server.Service
                 };
                 using (var syslogService = GetSysLogService())
                 {
-                    syslogService.AddSysLogAsync(log);
+                    await syslogService.AddSysLogAsync(log);
                 }
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.DELETE_USER_SUCCESS, (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.DELETE_USER_SUCCESS, async (param) =>
             {
                 dynamic param_dy = param;
                 User user = param_dy.user;
@@ -644,11 +644,11 @@ namespace AgileConfig.Server.Service
                 };
                 using (var syslogService = GetSysLogService())
                 {
-                    syslogService.AddSysLogAsync(log);
+                    await syslogService.AddSysLogAsync(log);
                 }
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.DISCONNECT_CLIENT_SUCCESS, (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.DISCONNECT_CLIENT_SUCCESS,async (param) =>
             {
                 dynamic param_dy = param;
                 string clientId = param_dy.clientId;
@@ -662,7 +662,7 @@ namespace AgileConfig.Server.Service
                 };
                 using (var syslogService = GetSysLogService())
                 {
-                    syslogService.AddSysLogAsync(log);
+                    await syslogService.AddSysLogAsync(log);
                 }
             });
         }
