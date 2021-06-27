@@ -46,7 +46,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _userService.ValidateUserPassword(userName, model.password);
             if (result)
             {
-                var user = (await _userService.GetUsersByNameAsync(userName)).First();
+                var user = (await _userService.GetUsersByNameAsync(userName)).First(x => x.Status == UserStatus.Normal);
                 var userRoles = await _userService.GetUserRolesAsync(user.Id);
                 var jwt = JWT.GetToken(user.Id, user.UserName, userRoles.Any(r => r == Role.Admin || r == Role.SuperAdmin));
                 var userFunctions = await _permissionService.GetUserPermission(user.Id);
