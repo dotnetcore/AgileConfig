@@ -19,10 +19,10 @@ namespace AgileConfig.Server.Apisite.Controllers
     public class AppController : Controller
     {
         private readonly IAppService _appService;
-        private readonly IPermissionService _premissionService;
+        private readonly IPremissionService _premissionService;
         private readonly IUserService _userService;
 
-        public AppController(IAppService appService, IPermissionService premissionService, IUserService userService)
+        public AppController(IAppService appService, IPremissionService premissionService, IUserService userService)
         {
             _userService = userService;
             _appService = appService;
@@ -86,6 +86,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "App.Add", Functions.App_Add })]
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] AppVM model)
         {
@@ -148,7 +149,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
-
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "App.Edit", Functions.App_Edit })]
         [HttpPost]
         public async Task<IActionResult> Edit([FromBody] AppVM model)
         {
@@ -275,6 +276,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "App.DisableOrEanble", Functions.App_Edit })]
         [HttpPost]
         public async Task<IActionResult> DisableOrEanble(string id)
         {
@@ -312,6 +314,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "App.Delete", Functions.App_Delete })]
         [HttpPost]
         public async Task<IActionResult> Delete(string id)
         {
@@ -383,6 +386,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "App.Auth", Functions.App_Auth })]
         [HttpPost]
         public async Task<IActionResult> SaveAppAuth([FromBody] AppAuthVM model)
         {

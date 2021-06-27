@@ -377,7 +377,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
 
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Edit", Functions.Config_Edit })]
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Rollback", Functions.Config_Edit })]
         [HttpPost]
         public async Task<IActionResult> Rollback(string configId, string logId)
         {
@@ -693,6 +693,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> ExportJson(string appId)
         {
             if (string.IsNullOrEmpty(appId))

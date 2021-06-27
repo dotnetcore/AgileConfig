@@ -18,11 +18,11 @@ namespace AgileConfig.Server.Apisite.Controllers
     {
         private readonly ISettingService _settingService;
         private readonly IUserService _userService;
-        private readonly IPermissionService _permissionService;
+        private readonly IPremissionService _permissionService;
         public AdminController(
             ISettingService settingService, 
             IUserService userService,
-            IPermissionService permissionService)
+            IPremissionService permissionService)
         {
             _settingService = settingService;
             _userService = userService;

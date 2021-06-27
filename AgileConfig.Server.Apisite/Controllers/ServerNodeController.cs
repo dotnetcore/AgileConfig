@@ -30,6 +30,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             _remoteServerNodeProxy = remoteServerNodeProxy;
         }
 
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Node.Add", Functions.Node_Add })]
         [HttpPost]
         public async Task<IActionResult> Add([FromBody]ServerNodeVM model)
         {
@@ -72,7 +73,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
-
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Node.Delete", Functions.Node_Delete })]
         [HttpPost]
         public async Task<IActionResult> Delete([FromBody]ServerNodeVM model)
         {

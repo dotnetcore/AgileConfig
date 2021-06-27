@@ -15,7 +15,7 @@ namespace AgileConfig.Server.Apisite.Filters
         /// <summary>
         /// 因为 attribute 不能传递 func 参数，所有从 action 的参数内获取 appId 的操作只能提前内置在一个静态字典内。
         /// </summary>
-        static Dictionary<string, Func<ActionExecutingContext, IPermissionService, IConfigService, string>> _getAppIdParamFuncs = new Dictionary<string, Func<ActionExecutingContext, IPermissionService, IConfigService, string>>
+        static Dictionary<string, Func<ActionExecutingContext, IPremissionService, IConfigService, string>> _getAppIdParamFuncs = new Dictionary<string, Func<ActionExecutingContext, IPremissionService, IConfigService, string>>
         {
             {
                 "Config.Add",(args, premission, config)=> { var model = args.ActionArguments["model"];  return (model as ConfigVM)?.AppId; }
@@ -33,17 +33,103 @@ namespace AgileConfig.Server.Apisite.Filters
 
                         return config.AppId;
                     }
+            },
+            {
+                "Config.Offline", (args, premission, configService) =>  {
+                        var id = args.ActionArguments["configId"] ;
+                        var config = configService.GetAsync(id.ToString()).GetAwaiter().GetResult();
+
+                        return config.AppId;
+                    }
+            }
+            ,
+            {
+                "Config.OfflineSome", (args, premission, configService) =>  {
+                        var ids = args.ActionArguments["configIds"] as List<string>;
+                        var id = ids?.FirstOrDefault();
+                        var config = configService.GetAsync(id.ToString()).GetAwaiter().GetResult();
+
+                        return config.AppId;
+                    }
+            }
+            ,
+            {
+                "Config.Publish", (args, premission, configService) =>  {
+                        var id = args.ActionArguments["configId"] ;
+                        var config = configService.GetAsync(id.ToString()).GetAwaiter().GetResult();
+
+                        return config.AppId;
+                    }
+            }
+            ,
+            {
+                "Config.PublishSome", (args, premission, configService) =>  {
+                        var ids = args.ActionArguments["configIds"] as List<string>;
+                        var id = ids?.FirstOrDefault();
+                        var config = configService.GetAsync(id.ToString()).GetAwaiter().GetResult();
+
+                        return config.AppId;
+                    }
+            },
+             {
+                "Config.Rollback", (args, premission, configService) =>  {
+                        var id = args.ActionArguments["configId"] as string;
+                        var config = configService.GetAsync(id.ToString()).GetAwaiter().GetResult();
+
+                        return config.AppId;
+                    }
+            },
+             {
+                "App.Add", (args, premission, configService) =>  {
+                    return  "";
+                    }
+            },
+             {
+                "App.Edit", (args, premission, configService) =>  {
+                      var app = args.ActionArguments["model"] as AppVM;
+                      return app.Id;
+                }
+            },
+             {
+                "App.Delete", (args, premission, configService) =>  {
+                    var id = args.ActionArguments["id"] as string;
+                    return id;
+                }
+            },
+             {
+                "App.DisableOrEanble", (args, premission, configService) =>  {
+                    var id = args.ActionArguments["id"] as string;
+                    return id;
+                }
+            },
+             {
+                "App.Auth", (args, premission, configService) =>  {
+                    var model = args.ActionArguments["model"] as AppAuthVM;
+                    return model?.AppId;
+                }
+            },
+             {
+                "Node.Add", (args, premission, configService) =>  {
+                    var id = args.ActionArguments["id"] as string;
+                    return id;
+                }
+            },
+             {
+                "Node.Delete", (args, premission, configService) =>  {
+                    var model = args.ActionArguments["model"] as AppAuthVM;
+                    return model?.AppId;
+                }
             }
         };
 
         private const string _globalMatchPatten = "GLOBAL_{0}";
         private const string _appMatchPatten = "APP_{0}_{1}";
 
-        private IPermissionService _premissionService;
+        private IPremissionService _premissionService;
         private IConfigService _configService;
         private string _actionName;
         private string _functionKey;
-        public PremissionCheckAttribute(IPermissionService premissionService, IConfigService configService, string actionName, string functionKey)
+        public PremissionCheckAttribute(IPremissionService premissionService, IConfigService configService, string actionName, string functionKey)
         {
             _premissionService = premissionService;
             _configService = configService;

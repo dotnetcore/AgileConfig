@@ -82,6 +82,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "User.Add", Functions.User_Add })]
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] UserVM model)
         {
@@ -128,6 +129,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "User.Edit", Functions.User_Edit })]
         [HttpPost]
         public async Task<IActionResult> Edit([FromBody] UserVM model)
         {
@@ -169,6 +171,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
         const string DefaultPassword = "123456";
 
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "User.ResetPassword", Functions.User_Edit })]
         [HttpPost]
         public async Task<IActionResult> ResetPassword(string userId)
         {
@@ -205,6 +208,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "User.Delete", Functions.User_Delete })]
         [HttpPost]
         public async Task<IActionResult> Delete(string userId)
         {
