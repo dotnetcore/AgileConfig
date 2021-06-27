@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Dynamic;
+using AgileConfig.Server.Apisite.Utilites;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -17,11 +18,11 @@ namespace AgileConfig.Server.Apisite.Controllers
     {
         private readonly ISettingService _settingService;
         private readonly IUserService _userService;
-        private readonly IPermissionService _permissionService;
+        private readonly IPremissionService _permissionService;
         public AdminController(
             ISettingService settingService, 
             IUserService userService,
-            IPermissionService permissionService)
+            IPremissionService permissionService)
         {
             _settingService = settingService;
             _userService = userService;
@@ -46,7 +47,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _userService.ValidateUserPassword(userName, model.password);
             if (result)
             {
-                var user = (await _userService.GetUsersByNameAsync(userName)).First(x => x.Status == UserStatus.Normal);
+                var user = (await _userService.GetUsersByNameAsync(userName)).First();
                 var userRoles = await _userService.GetUserRolesAsync(user.Id);
                 var jwt = JWT.GetToken(user.Id, user.UserName, userRoles.Any(r => r == Role.Admin || r == Role.SuperAdmin));
                 var userFunctions = await _permissionService.GetUserPermission(user.Id);
