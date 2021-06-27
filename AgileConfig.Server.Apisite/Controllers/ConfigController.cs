@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using AgileConfig.Server.Common;
 using System.Text;
 using System.Dynamic;
+using AgileConfig.Server.Apisite.Utilites;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -39,6 +40,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             _appService = appService;
         }
 
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Add", Functions.Config_Add })]
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] ConfigVM model)
         {
@@ -95,7 +97,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 success = result,
                 message = !result ? "新建配置失败，请查看错误日志" : "",
                 data = config
-            }) ;
+            });
         }
         [HttpPost]
         public async Task<IActionResult> AddRange([FromBody] List<ConfigVM> model)
@@ -693,7 +695,8 @@ namespace AgileConfig.Server.Apisite.Controllers
             var configs = await _configService.GetByAppIdAsync(appId);
 
             var dict = new Dictionary<string, string>();
-            configs.ForEach(x=> {
+            configs.ForEach(x =>
+            {
                 var key = _configService.GenerateKey(x);
                 dict.Add(key, x.Value);
             });
