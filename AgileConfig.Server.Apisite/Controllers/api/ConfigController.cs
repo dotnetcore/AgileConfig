@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AgileConfig.Server.Apisite.Controllers.api
 {
-    [TypeFilter(typeof(AppBasicAuthenticationAttribute))]
+    [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
     [Route("api/[controller]")]
     public class ConfigController : Controller
     {
@@ -113,6 +113,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             };
         }
 
+        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Add", Functions.Config_Add })]
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] ConfigVM model)
         {
@@ -151,6 +152,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             });
         }
 
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Edit", Functions.Config_Edit })]
         [HttpPut("{id}")]
         public async Task<IActionResult> Edit(string id, [FromBody] ConfigVM model)
         {
@@ -189,6 +191,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             });
         }
 
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Delete", Functions.Config_Delete })]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
@@ -215,8 +218,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             });
         }
 
-        [HttpPost("publish/{id}")]
-        public async Task<IActionResult> Publish(string id)
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Publish", Functions.Config_Publish })]
+        [HttpPost("publish/{configId}")]
+        public async Task<IActionResult> Publish(string configId)
         {
             var ctrl = new Controllers.ConfigController(
                 _configService,
@@ -226,7 +230,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 _appService
                 );
 
-            var result = (await ctrl.Publish(id)) as JsonResult;
+            var result = (await ctrl.Publish(configId)) as JsonResult;
 
             dynamic obj = result.Value;
             if (obj.success == true)
@@ -241,8 +245,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             });
         }
 
-        [HttpPost("offline/{id}")]
-        public async Task<IActionResult> Offline(string id)
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Offline", Functions.Config_Offline })]
+        [HttpPost("offline/{configId}")]
+        public async Task<IActionResult> Offline(string configId)
         {
             var ctrl = new Controllers.ConfigController(
                 _configService,
@@ -252,7 +257,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 _appService
                 );
 
-            var result = (await ctrl.Offline(id)) as JsonResult;
+            var result = (await ctrl.Offline(configId)) as JsonResult;
 
             dynamic obj = result.Value;
             if (obj.success == true)

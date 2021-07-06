@@ -30,7 +30,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         {
             var apps = await _appService.GetAllAppsAsync();
             var vms = apps.Select(x => {
-                return new AppVM
+                return new 
                 {
                     Id = x.Id,
                     Name = x.Name,
@@ -64,7 +64,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                     appVM.Secret,
                     appVM.Inheritanced,
                     appVM.Enabled,
-                    appVM.inheritancedApps
+                    appVM.inheritancedApps,
+                    appVM.AppAdmin
                 }) ;
             }
 
@@ -75,6 +76,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             });
         }
 
+        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "App.Add", Functions.App_Add })]
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] AppVM model)
         {
@@ -111,6 +113,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             });
         }
 
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "App.Edit", Functions.App_Edit })]
         [HttpPut("{id}")]
         public async Task<IActionResult> Edit(string id, [FromBody] AppVM model)
         {
@@ -147,6 +150,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             });
         }
 
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "App.Delete", Functions.App_Delete })]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {

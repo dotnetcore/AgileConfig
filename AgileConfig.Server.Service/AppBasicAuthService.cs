@@ -67,6 +67,11 @@ namespace AgileConfig.Server.Service
             return (appId, sec);
         }
 
+        public (string, string) GetUserNamePassword(HttpRequest httpRequest)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<bool> ValidAsync(HttpRequest httpRequest)
         {
             var appIdSecret = GetAppIdSecret(httpRequest);

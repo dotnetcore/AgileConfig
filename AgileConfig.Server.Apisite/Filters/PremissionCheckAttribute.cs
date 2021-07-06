@@ -15,7 +15,7 @@ namespace AgileConfig.Server.Apisite.Filters
         /// <summary>
         /// 因为 attribute 不能传递 func 参数，所有从 action 的参数内获取 appId 的操作只能提前内置在一个静态字典内。
         /// </summary>
-        static Dictionary<string, Func<ActionExecutingContext, IPremissionService, IConfigService, string>> _getAppIdParamFuncs = new Dictionary<string, Func<ActionExecutingContext, IPremissionService, IConfigService, string>>
+        protected static Dictionary<string, Func<ActionExecutingContext, IPremissionService, IConfigService, string>> _getAppIdParamFuncs = new Dictionary<string, Func<ActionExecutingContext, IPremissionService, IConfigService, string>>
         {
             {
                 "Config.Add",(args, premission, config)=> { var model = args.ActionArguments["model"];  return (model as ConfigVM)?.AppId; }
@@ -122,13 +122,13 @@ namespace AgileConfig.Server.Apisite.Filters
             }
         };
 
-        private const string _globalMatchPatten = "GLOBAL_{0}";
-        private const string _appMatchPatten = "APP_{0}_{1}";
+        protected const string GlobalMatchPatten = "GLOBAL_{0}";
+        protected const string AppMatchPatten = "APP_{0}_{1}";
 
-        private IPremissionService _premissionService;
-        private IConfigService _configService;
-        private string _actionName;
-        private string _functionKey;
+        protected IPremissionService _premissionService;
+        protected IConfigService _configService;
+        protected string _actionName;
+        protected string _functionKey;
         public PremissionCheckAttribute(IPremissionService premissionService, IConfigService configService, string actionName, string functionKey)
         {
             _premissionService = premissionService;
@@ -136,13 +136,29 @@ namespace AgileConfig.Server.Apisite.Filters
             _actionName = actionName;
             _functionKey = functionKey;
         }
-        public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+
+        protected virtual Task<string> GetUserId(ActionExecutingContext context)
         {
             var userId = context.HttpContext.GetUserIdFromClaim();
+            return Task.FromResult(userId);
+        }
+
+        public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+        {
+            var userId = await GetUserId(context);
+            if (string.IsNullOrEmpty(userId))
+            {
+                //no permission
+                context.HttpContext.Response.StatusCode = 403;
+                context.Result = new ContentResult();
+                await base.OnActionExecutionAsync(context, next);
+                return;
+            }
+
             var userFunctions = await _premissionService.GetUserPermission(userId);
 
             //judge global
-            var matchKey = string.Format(_globalMatchPatten, _functionKey);
+            var matchKey = string.Format(GlobalMatchPatten, _functionKey);
             if (userFunctions.Contains(matchKey))
             {
                 await base.OnActionExecutionAsync(context, next);
@@ -156,7 +172,7 @@ namespace AgileConfig.Server.Apisite.Filters
             }
             if (!string.IsNullOrEmpty(appId))
             {
-                matchKey = string.Format(_appMatchPatten, appId, _functionKey);
+                matchKey = string.Format(AppMatchPatten, appId, _functionKey);
                 if (userFunctions.Contains(matchKey))
                 {
                     await base.OnActionExecutionAsync(context, next);

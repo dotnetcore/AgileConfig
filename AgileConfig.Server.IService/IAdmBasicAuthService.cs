@@ -7,6 +7,6 @@ namespace AgileConfig.Server.IService
     /// </summary>
     public interface IAdmBasicAuthService : IBasicAuthService
     {
-        string GetPassword(HttpRequest httpRequest);
+        (string,string) GetUserNamePassword(HttpRequest httpRequest);
     }
 }

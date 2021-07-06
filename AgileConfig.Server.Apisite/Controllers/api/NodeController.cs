@@ -38,6 +38,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             return Json(vms);
         }
 
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Node.Add", Functions.Node_Add })]
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] ServerNodeVM model)
         {
@@ -68,6 +69,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             });
         }
 
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Node.Delete", Functions.Node_Delete })]
         [HttpDelete()]
         public async Task<IActionResult> Delete([FromQuery] string address)
         {
