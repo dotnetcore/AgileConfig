@@ -164,7 +164,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     dynamic param = new ExpandoObject();
                     param.config = c;
                     param.userName = userName;
-                    TinyEventBus.Instance.Fire(EventKeys.ADD_CONFIG_SUCCESS, c);
+                    TinyEventBus.Instance.Fire(EventKeys.ADD_CONFIG_SUCCESS, param);
                 });
             }
 
