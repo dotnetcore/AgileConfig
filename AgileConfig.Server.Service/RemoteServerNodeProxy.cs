@@ -11,6 +11,7 @@ using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -33,16 +34,21 @@ namespace AgileConfig.Server.Service
                 return JsonConvert.SerializeObject(obj);
             }
         }
+
         private IServerNodeService GetGerverNodeService()
         {
             return new ServerNodeService(new FreeSqlContext(FreeSQL.Instance));
         }
+
         private ILogger _logger;
+
         private ISysLogService GetSysLogService()
         {
             return new SysLogService(new FreeSqlContext(FreeSQL.Instance));
         }
-        private static ConcurrentDictionary<string, ClientInfos> _serverNodeClientReports = new ConcurrentDictionary<string, ClientInfos>();
+
+        private static ConcurrentDictionary<string, ClientInfos> _serverNodeClientReports =
+            new ConcurrentDictionary<string, ClientInfos>();
 
         public RemoteServerNodeProxy(ILoggerFactory loggerFactory)
         {
@@ -54,15 +60,15 @@ namespace AgileConfig.Server.Service
             var result = await FunctionUtil.TRY(async () =>
             {
                 using (var resp = await (address + "/RemoteOP/AllClientsDoAction")
-                        .AsHttp("POST", action)
-                        .Config(new RequestOptions { ContentType = "application/json" })
-                        .SendAsync())
+                    .AsHttp("POST", action)
+                    .Config(new RequestOptions {ContentType = "application/json"})
+                    .SendAsync())
                 {
                     if (resp.StatusCode == System.Net.HttpStatusCode.OK)
                     {
                         var result = resp.Deserialize<dynamic>();
 
-                        if ((bool)result.success)
+                        if ((bool) result.success)
                         {
                             return true;
                         }
@@ -90,15 +96,15 @@ namespace AgileConfig.Server.Service
             var result = await FunctionUtil.TRY(async () =>
             {
                 using (var resp = await (address + "/RemoteOP/AppClientsDoAction".AppendQueryString("appId", appId))
-                                       .AsHttp("POST", action)
-                                       .Config(new RequestOptions { ContentType = "application/json" })
-                                       .SendAsync())
+                    .AsHttp("POST", action)
+                    .Config(new RequestOptions {ContentType = "application/json"})
+                    .SendAsync())
                 {
                     if (resp.StatusCode == System.Net.HttpStatusCode.OK)
                     {
                         var result = resp.Deserialize<dynamic>();
 
-                        if ((bool)result.success)
+                        if ((bool) result.success)
                         {
                             return true;
                         }
@@ -127,15 +133,15 @@ namespace AgileConfig.Server.Service
             var result = await FunctionUtil.TRY(async () =>
             {
                 using (var resp = await (address + "/RemoteOP/OneClientDoAction?clientId=" + clientId)
-                            .AsHttp("POST", action)
-                            .Config(new RequestOptions { ContentType = "application/json" })
-                            .SendAsync())
+                    .AsHttp("POST", action)
+                    .Config(new RequestOptions {ContentType = "application/json"})
+                    .SendAsync())
                 {
                     if (resp.StatusCode == System.Net.HttpStatusCode.OK)
                     {
                         var result = resp.Deserialize<dynamic>();
 
-                        if ((bool)result.success)
+                        if ((bool) result.success)
                         {
                             if (action.Action == ActionConst.Offline || action.Action == ActionConst.Remove)
                             {
@@ -177,120 +183,111 @@ namespace AgileConfig.Server.Service
             {
                 return null;
             }
+
             _serverNodeClientReports.TryGetValue(address, out ClientInfos report);
             if (report != null)
             {
-                report.Infos?.ForEach(i =>
-                {
-                    i.Address = address;
-                });
+                report.Infos?.ForEach(i => { i.Address = address; });
             }
-           
+
             return report;
         }
 
         public async Task TestEchoAsync(string address)
         {
-            using (var service = GetGerverNodeService())
+            using var service = GetGerverNodeService();
+            var node = await service.GetAsync(address);
+            try
             {
-                var node = await service.GetAsync(address);
-                try
+                await FunctionUtil.TRY(async () =>
                 {
-                    FunctionUtil.TRY(() =>
+                    using var resp = (node.Address + "/home/echo").AsHttp().Send();
+                    if (resp.StatusCode == System.Net.HttpStatusCode.OK && resp.GetResponseContent() == "ok")
                     {
-
-                        using (var resp = (node.Address + "/home/echo").AsHttp().Send())
+                        node.LastEchoTime = DateTime.Now;
+                        node.Status = Data.Entity.NodeStatus.Online;
+                        var report = GetClientReport(node);
+                        if (report != null)
                         {
-                            if (resp.StatusCode == System.Net.HttpStatusCode.OK && resp.GetResponseContent() == "ok")
+                            if (_serverNodeClientReports.ContainsKey(node.Address))
                             {
-                                node.LastEchoTime = DateTime.Now;
-                                node.Status = Data.Entity.NodeStatus.Online;
-                                var report = GetClientReport(node);
-                                if (report != null)
-                                {
-                                    if (_serverNodeClientReports.ContainsKey(node.Address))
-                                    {
-                                        _serverNodeClientReports[node.Address] = report;
-                                    }
-                                    else
-                                    {
-                                        _serverNodeClientReports.AddOrUpdate(node.Address, report, (k, r) => report);
-                                    }
-
-                                }
+                                _serverNodeClientReports[node.Address] = report;
                             }
                             else
                             {
-                                node.Status = Data.Entity.NodeStatus.Offline;
+                                _serverNodeClientReports.AddOrUpdate(node.Address, report, (k, r) => report);
                             }
-                            service.UpdateAsync(node);
                         }
-                    }, 5);
-                }
-                catch (Exception e)
-                {
-                    _logger.LogInformation(e, "Try test node {0} echo , but fail .", node.Address);
-                }
+                    }
+                    else
+                    {
+                        node.Status = Data.Entity.NodeStatus.Offline;
+                    }
+
+                    await service.UpdateAsync(node);
+                }, 5);
+            }
+            catch (Exception e)
+            {
+                _logger.LogInformation(e, "Try test node {0} echo , but fail .", node.Address);
             }
         }
 
         public Task TestEchoAsync()
         {
-            using (var service = GetGerverNodeService())
+            return Task.Run(async () =>
             {
-                return Task.Run(async () =>
+                while (true)
                 {
-                    while (true)
+                    using var service = GetGerverNodeService();
+                    var nodes = await service.GetAllNodesAsync();
+                    nodes.ForEach(n =>
                     {
-                        var nodes = await service.GetAllNodesAsync();
-                        nodes.ForEach(n =>
+                        try
                         {
-                            try
+                            FunctionUtil.TRY(async () =>
                             {
-                                FunctionUtil.TRY(() =>
+                                using var resp = (n.Address + "/home/echo").AsHttp().Send();
+                                if (resp.StatusCode == HttpStatusCode.OK && resp.GetResponseContent() == "ok")
                                 {
-                                    using (var resp = (n.Address + "/home/echo").AsHttp().Send())
+                                    n.LastEchoTime = DateTime.Now;
+                                    n.Status = NodeStatus.Online;
+                                    var report = GetClientReport(n);
+                                    if (_serverNodeClientReports.ContainsKey(n.Address))
                                     {
-                                        if (resp.StatusCode == System.Net.HttpStatusCode.OK && resp.GetResponseContent() == "ok")
-                                        {
-                                            n.LastEchoTime = DateTime.Now;
-                                            n.Status = Data.Entity.NodeStatus.Online;
-                                            var report = GetClientReport(n);
-                                            if (_serverNodeClientReports.ContainsKey(n.Address))
-                                            {
-                                                _serverNodeClientReports[n.Address] = report;
-                                            }
-                                            else
-                                            {
-                                                _serverNodeClientReports.AddOrUpdate(n.Address, report, (k, r) => report);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            n.Status = Data.Entity.NodeStatus.Offline;
-                                        }
-                                        service.UpdateAsync(n);
+                                        _serverNodeClientReports[n.Address] = report;
                                     }
-                                }, 5);
-                            }
-                            catch (Exception e)
-                            {
-                                _logger.LogInformation(e, "Try test node {0} echo , but fail .", n.Address);
-                            }
-                        });
+                                    else
+                                    {
+                                        _serverNodeClientReports.AddOrUpdate(n.Address, report,
+                                            (k, r) => report);
+                                    }
+                                }
+                                else
+                                {
+                                    n.Status = NodeStatus.Offline;
+                                }
 
-                        await Task.Delay(5000 * 1);
-                    }
-                });
-            }
-          
+                                await service.UpdateAsync(n);
+                            }, 5);
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.LogInformation(e, "Try test node {0} echo , but fail .", n.Address);
+                        }
+                    });
+
+                    await Task.Delay(5000 * 1);
+                }
+            });
         }
 
         private ClientInfos GetClientReport(ServerNode node)
         {
             return FunctionUtil.TRY(() =>
             {
-                using (var resp = (node.Address + "/report/Clients").AsHttp().Config(new RequestOptions(new SerializeProvider())).Send())
+                using (var resp = (node.Address + "/report/Clients").AsHttp()
+                    .Config(new RequestOptions(new SerializeProvider())).Send())
                 {
                     if (resp.StatusCode == System.Net.HttpStatusCode.OK)
                     {
