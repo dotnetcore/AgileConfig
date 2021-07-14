@@ -31,10 +31,6 @@ namespace AgileConfig.Server.Apisite
             var host = CreateWebHostBuilder(args)
                 .Build();
 
-            var sp = host.Services;
-            sp.GetService<IRemoteServerNodeProxy>().TestEchoAsync();
-            sp.GetService<IEventRegister>().Init();
-
             host.Run();
         }
 
