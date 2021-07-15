@@ -34,6 +34,7 @@
 
   <ItemGroup>
     <Folder Include="logs\" />
+    <Folder Include="Views\Shared" />
     <Folder Include="wwwroot\ui\" />
   </ItemGroup>
 
