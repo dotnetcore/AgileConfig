@@ -45,7 +45,11 @@ namespace AgileConfig.Server.Service
                 _dbContext.Apps.Remove(app);
                 //怕有的同学误删app导致要恢复，所以保留配置项吧。
                 var configs = await _dbContext.Configs.Where(x => x.AppId == app.Id).ToListAsync();
-                configs.ForEach(x => x.Status = ConfigStatus.Deleted);
+                foreach (var item in configs)
+                {
+                    item.Status = ConfigStatus.Deleted;
+                    await _dbContext.UpdateAsync(item);
+                }
             }
             int x = await _dbContext.SaveChangesAsync();
             var result = x > 0;
