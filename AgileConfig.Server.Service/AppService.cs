@@ -21,7 +21,7 @@ namespace AgileConfig.Server.Service
         {
             await _dbContext.Apps.AddAsync(app);
             int x = await _dbContext.SaveChangesAsync();
-            var result =  x > 0;
+            var result = x > 0;
 
             return result;
         }
@@ -43,6 +43,9 @@ namespace AgileConfig.Server.Service
             if (app != null)
             {
                 _dbContext.Apps.Remove(app);
+                //怕有的同学误删app导致要恢复，所以保留配置项吧。
+                var configs = await _dbContext.Configs.Where(x => x.AppId == app.Id).ToListAsync();
+                configs.ForEach(x => x.Status = ConfigStatus.Deleted);
             }
             int x = await _dbContext.SaveChangesAsync();
             var result = x > 0;
@@ -70,7 +73,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<List<App>> GetAllAppsAsync()
         {
-            return await  _dbContext.Apps.Where(a=> 1==1).ToListAsync();
+            return await _dbContext.Apps.Where(a => 1 == 1).ToListAsync();
         }
 
         public async Task<bool> UpdateAsync(App app)
@@ -110,7 +113,7 @@ namespace AgileConfig.Server.Service
             foreach (var item in appInheritanceds)
             {
                 var app = await GetAsync(item.InheritancedAppId);
-                if (app!=null && app.Enabled)
+                if (app != null && app.Enabled)
                 {
                     apps.Add(app);
                 }
@@ -160,7 +163,7 @@ namespace AgileConfig.Server.Service
             return result;
         }
 
-        public async Task<bool> SaveUserAppAuth(string appId, List<string> userIds,string permission) 
+        public async Task<bool> SaveUserAppAuth(string appId, List<string> userIds, string permission)
         {
             var userAppAuthList = new List<UserAppAuth>();
             if (userIds == null)
@@ -169,7 +172,8 @@ namespace AgileConfig.Server.Service
             }
             foreach (var userId in userIds)
             {
-                userAppAuthList.Add(new UserAppAuth { 
+                userAppAuthList.Add(new UserAppAuth
+                {
                     Id = Guid.NewGuid().ToString("N"),
                     AppId = appId,
                     UserId = userId,
