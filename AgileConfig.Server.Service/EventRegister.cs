@@ -365,7 +365,7 @@ namespace AgileConfig.Server.Service
                     var log = new SysLog
                     {
                         LogTime = DateTime.Now,
-                        LogType = SysLogType.Normal,
+                        LogType = SysLogType.Warn,
                         LogText = $"用户：{userName} 删除应用【AppId:{app.Id}】"
                     };
                     using (var syslogService = GetSysLogService())
@@ -459,7 +459,7 @@ namespace AgileConfig.Server.Service
                     var log = new SysLog
                     {
                         LogTime = DateTime.Now,
-                        LogType = SysLogType.Normal,
+                        LogType = SysLogType.Warn,
                         AppId = config.AppId,
                         LogText = $"用户：{userName} 删除配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
                     };
@@ -483,7 +483,7 @@ namespace AgileConfig.Server.Service
                     var log = new SysLog
                     {
                         LogTime = DateTime.Now,
-                        LogType = SysLogType.Normal,
+                        LogType = SysLogType.Warn,
                         AppId = config.AppId,
                         LogText = $"用户：{userName} 下线配置【Key：{config.Key}】【Value：{config.Value}】【Group：{config.Group}】【AppId：{config.AppId}】"
                     };
@@ -534,7 +534,7 @@ namespace AgileConfig.Server.Service
                     var log = new SysLog
                     {
                         LogTime = DateTime.Now,
-                        LogType = SysLogType.Normal,
+                        LogType = SysLogType.Warn,
                         AppId = config.AppId,
                         LogText = $"用户：{userName} 回滚配置【Key:{config.Key}】 【Group：{config.Group}】 【AppId：{config.AppId}】至历史记录：{modifyLog.Id}"
                     };
@@ -585,7 +585,7 @@ namespace AgileConfig.Server.Service
                 var log = new SysLog
                 {
                     LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
+                    LogType = SysLogType.Warn,
                     LogText = $"用户：{userName} 删除节点：{node.Address}"
                 };
                 using (var syslogService = GetSysLogService())
@@ -639,7 +639,7 @@ namespace AgileConfig.Server.Service
                 var log = new SysLog
                 {
                     LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
+                    LogType = SysLogType.Warn,
                     LogText = $"用户：{userName} 删除用户：{user.UserName} 成功"
                 };
                 using (var syslogService = GetSysLogService())
@@ -657,7 +657,7 @@ namespace AgileConfig.Server.Service
                 var log = new SysLog
                 {
                     LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
+                    LogType = SysLogType.Warn,
                     LogText = $"用户：{userName} 断开客户端 {clientId} 成功"
                 };
                 using (var syslogService = GetSysLogService())
