@@ -57,8 +57,16 @@ oracle = Oracle
 
 ## useage
 ### run node
-```
-sudo docker run --name agile_config -e adminConsole=true -e db:provider=sqlite -e db:conn="Data Source=agile_config.db" -p 5000:5000 -v /etc/localtime:/etc/localtime  kklldog/agile_config:latest
+``` shell
+sudo docker run \
+--name agile_config \
+-e adminConsole=true \
+-e db:provider=sqlite \
+-e db:conn="Data Source=db\agile_config.db" \
+-p 5000:5000 \
+-v /etc/localtime:/etc/localtime \
+#-v /your_host_dir:/app/db \
+-d kklldog/agile_config:latest
 ```
 ## use client
 install client lib from nuget：
@@ -66,7 +74,7 @@ install client lib from nuget：
 Install-Package AgileConfig.Client
 ```
 add a agileconfig section in appsettings.json：
-```
+``` json
 {
   "Logging": {
     "LogLevel": {
@@ -88,57 +96,56 @@ add a agileconfig section in appsettings.json：
 }
 
 ```
-```
-       public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-            .ConfigureAppConfiguration((context, config) =>
-            {
-        
-                config.AddAgileConfig();
-            })
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
-
-
+```c#
+public static IHostBuilder CreateHostBuilder(string[] args) =>
+    Host.CreateDefaultBuilder(args)
+        .ConfigureAppConfiguration((context, config) =>
+        {
+            //default appsettings.json
+            //config.AddAgileConfig(new ConfigClient($"appsettings.{context.HostingEnvironment.EnvironmentName}.json"));
+            config.AddAgileConfig(arg => Console.WriteLine($"config changed , action:{arg.Action} key:{arg.Key}"));
+        })
+        .ConfigureWebHostDefaults(webBuilder =>
+        {
+            webBuilder.UseStartup<Startup>();
+        });
 ```
 ## read configuration
-```
+``` c#
 public class HomeController : Controller
+{
+    private readonly ILogger<HomeController> _logger;
+    private readonly IConfiguration _IConfiguration;
+    private readonly IOptions<DbConfigOptions> _dbOptions;
+
+    public HomeController(ILogger<HomeController> logger, IConfiguration configuration, IOptions<DbConfigOptions> dbOptions)
     {
-        private readonly ILogger<HomeController> _logger;
-        private readonly IConfiguration _IConfiguration;
-        private readonly IOptions<DbConfigOptions> _dbOptions;
-
-        public HomeController(ILogger<HomeController> logger, IConfiguration configuration, IOptions<DbConfigOptions> dbOptions)
-        {
-            _logger = logger;
-            _IConfiguration = configuration;
-            _dbOptions = dbOptions;
-        }
-
-        public IActionResult Index()
-        {
-            return View();
-        }
-
-        /// <summary>
-        /// By IConfiguration to read
-        /// </summary>
-        /// <returns></returns>
-        public IActionResult ByIConfiguration()
-        {
-            var userId = _IConfiguration["userId"];
-            var dbConn = _IConfiguration["db:connection"];
-
-            ViewBag.userId = userId;
-            ViewBag.dbConn = dbConn;
-
-            return View();
-        }
-
+        _logger = logger;
+        _IConfiguration = configuration;
+        _dbOptions = dbOptions;
     }
+
+    public IActionResult Index()
+    {
+        return View();
+    }
+
+    /// <summary>
+    /// By IConfiguration to read
+    /// </summary>
+    /// <returns></returns>
+    public IActionResult ByIConfiguration()
+    {
+        var userId = _IConfiguration["userId"];
+        var dbConn = _IConfiguration["db:connection"];
+
+        ViewBag.userId = userId;
+        ViewBag.dbConn = dbConn;
+
+        return View();
+    }
+
+}
 ```
 ## screenshots
 ![](https://ftp.bmp.ovh/imgs/2021/04/44242b327230c5e6.png)   
