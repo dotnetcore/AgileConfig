@@ -5,7 +5,8 @@ export type ConfigListItem = {
     group: string
     id: string
     key: string
-    onlineStatus: number
+    onlineStatus: number,
+    editStatus: number,
     status: number
     updateTime: Date
     value: string

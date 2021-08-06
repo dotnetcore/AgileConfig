@@ -81,6 +81,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             config.CreateTime = DateTime.Now;
             config.UpdateTime = null;
             config.OnlineStatus = OnlineStatus.WaitPublish;
+            config.EditStatus = EditStatus.Add;
 
             var result = await _configService.AddAsync(config);
 
@@ -151,6 +152,8 @@ namespace AgileConfig.Server.Apisite.Controllers
                 config.CreateTime = DateTime.Now;
                 config.UpdateTime = null;
                 config.OnlineStatus = OnlineStatus.WaitPublish;
+                config.EditStatus = EditStatus.Add;
+
                 addConfigs.Add(config);
             }
 
@@ -229,6 +232,12 @@ namespace AgileConfig.Server.Apisite.Controllers
             config.Value = model.Value;
             config.Group = model.Group;
             config.UpdateTime = DateTime.Now;
+            if (config.OnlineStatus == OnlineStatus.Online)
+            {
+                //如果是已发布的配置，修改后状态设置为编辑
+                config.EditStatus = EditStatus.Edit;
+                config.OnlineStatus = OnlineStatus.WaitPublish;
+            }
 
             var result = await _configService.UpdateAsync(config);
 
@@ -274,11 +283,12 @@ namespace AgileConfig.Server.Apisite.Controllers
         /// <summary>
         /// 按多条件进行搜索
         /// </summary>
-        /// <param name="appId"></param>
-        /// <param name="group"></param>
-        /// <param name="key"></param>
-        /// <param name="pageSize"></param>
-        /// <param name="pageIndex"></param>
+        /// <param name="appId">应用id</param>
+        /// <param name="group">分组</param>
+        /// <param name="key">键</param>
+        /// <param name="onlineStatus">在线状态</param>
+        /// <param name="pageSize">分页大小</param>
+        /// <param name="current">当前页</param>
         /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> Search(string appId, string group, string key, OnlineStatus? onlineStatus, int pageSize = 20, int current = 1)
@@ -302,11 +312,6 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             var page = configs.Skip((current - 1) * pageSize).Take(pageSize).ToList();
             var total = configs.Count();
-            var totalPages = total / pageSize;
-            if ((total % pageSize) > 0)
-            {
-                totalPages++;
-            }
 
             return Json(new
             {
@@ -357,7 +362,8 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             var oldConfig = await _configService.GetAsync(id);
 
-            config.Status = ConfigStatus.Deleted;
+            config.EditStatus = EditStatus.Deleted;
+            //config.Status = ConfigStatus.Deleted;
             var result = await _configService.UpdateAsync(config);
 
             if (result)
@@ -407,7 +413,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             };
 
             var log = await _modifyLogService.GetAsync(logId);
-            if (config == null)
+            if (log == null)
             {
                 return Json(new
                 {
@@ -693,7 +699,6 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
         }
 
-        [AllowAnonymous]
         public async Task<IActionResult> ExportJson(string appId)
         {
             if (string.IsNullOrEmpty(appId))
@@ -713,6 +718,32 @@ namespace AgileConfig.Server.Apisite.Controllers
             var json = DictionaryConvertToJson.ToJson(dict);
 
             return File(Encoding.UTF8.GetBytes(json), "application/json", $"{appId}.json");
+        }
+
+        public async Task<IActionResult> WaitPublishStatus(string appId)
+        {
+            if (string.IsNullOrEmpty(appId))
+            {
+                throw new ArgumentNullException("appId");
+            }
+
+            var configs = await _configService.Search(appId, "", "");
+            configs = configs.Where(x => x.Status == ConfigStatus.Enabled && x.OnlineStatus == OnlineStatus.WaitPublish).ToList();
+
+            var addCount = configs.Count(x => x.EditStatus == EditStatus.Add);
+            var editCount = configs.Count(x => x.EditStatus == EditStatus.Edit);
+            var deleteCount = configs.Count(x => x.EditStatus == EditStatus.Deleted);
+
+            return Json(new
+            {
+                success = true,
+                data = new 
+                {
+                    addCount,
+                    editCount,
+                    deleteCount
+                }
+            });
         }
     }
 }

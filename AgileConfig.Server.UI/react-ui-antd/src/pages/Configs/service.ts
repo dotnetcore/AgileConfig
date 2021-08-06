@@ -83,12 +83,22 @@ export async function queryModifyLogs(config: ConfigListItem) {
     }
   });
 }
+
 export async function rollback(config: ConfigModifyLog) {
   return request('/config/rollback', {
     method: 'POST',
     params:{
       configId: config.configId,
       logId: config.id
+    }
+  });
+}
+
+export async function getWaitPublishStatus(appId: string) {
+  return request('/config/WaitPublishStatus', {
+    method: 'GET',
+    params:{
+      appId: appId
     }
   });
 }

@@ -70,6 +70,7 @@ namespace AgileConfig.Server.Data.Freesql
                     instance.CodeFirst.SyncStructure<User>();
                     instance.CodeFirst.SyncStructure<UserRole>();
                     instance.CodeFirst.SyncStructure<UserAppAuth>();
+                    instance.CodeFirst.SyncStructure<ConfigPublished>();
                 }
                 catch (Exception ex)
                 {

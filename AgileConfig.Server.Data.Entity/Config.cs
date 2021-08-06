@@ -9,6 +9,14 @@ namespace AgileConfig.Server.Data.Entity
         Enabled = 1,
     }
 
+    public enum EditStatus
+    {
+        Add = 0,
+        Edit = 1,
+        Deleted = 2,
+        Commit = 10
+    }
+
     public enum OnlineStatus
     {
         WaitPublish = 0,
@@ -46,5 +54,8 @@ namespace AgileConfig.Server.Data.Entity
 
         [Column(Name = "online_status")]
         public OnlineStatus OnlineStatus { get; set; }
+
+        [Column(Name = "edit_status")]
+        public EditStatus EditStatus { get; set; }
     }
 }

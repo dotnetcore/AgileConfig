@@ -1,4 +1,4 @@
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined, VerticalAlignBottomOutlined, VerticalAlignTopOutlined } from '@ant-design/icons';
 import { ModalForm, ProFormSwitch, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns, TableDropdown } from '@ant-design/pro-table';
@@ -7,7 +7,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { queryApps } from '../Apps/service';
 import UpdateForm from './comps/updateForm';
 import { ConfigListItem, ConfigModifyLog } from './data';
-import { queryConfigs, onlineConfig, offlineConfig, delConfig, addConfig, editConfig, queryModifyLogs,rollback,onlineSomeConfigs,offlineSomeConfigs } from './service';
+import { queryConfigs, onlineConfig, offlineConfig, delConfig, addConfig, editConfig, queryModifyLogs,rollback,onlineSomeConfigs,offlineSomeConfigs, getWaitPublishStatus } from './service';
 import Text from 'antd/lib/typography/Text';
 import moment from 'moment';
 import styles from './index.less';
@@ -188,6 +188,16 @@ const configs: React.FC = (props: any) => {
   const [currentRow, setCurrentRow] = useState<ConfigListItem>();
   const [selectedRowsState, setSelectedRows] = useState<ConfigListItem[]>([]);
   const [modifyLogs, setModifyLogs] = useState<ConfigModifyLog[]>([]);
+  const [waitPublishStatus, setWaitPublishStatus] = useState<{
+    addCount: number,
+    editCount: number,
+    deleteCount: number
+  }>({
+    addCount: 0,
+    editCount: 0,
+    deleteCount: 0
+  });
+  const [tableData, setTableData] = useState<ConfigListItem[]>([]);
   const actionRef = useRef<ActionType>();
   const addFormRef = useRef<FormInstance>();
   const intl = useIntl();
@@ -208,6 +218,14 @@ const configs: React.FC = (props: any) => {
       setAppEnums({ ...x });
     });
   }, []);
+  useEffect(() => {
+    getWaitPublishStatus(appId).then(x => {
+      console.log('WaitPublishStatus ', x);
+      if (x.success) {
+        setWaitPublishStatus(x.data);
+      }      
+    })
+  }, [tableData]);
   const online = (config: ConfigListItem) => {
     const confirmMsg = intl.formatMessage({id:'pages.config.confirm_publish'});
     confirm({
@@ -298,7 +316,20 @@ const configs: React.FC = (props: any) => {
     });
   }
 
+  const editStatusEnums = {
+    0: '新增',
+    1: '编辑',
+    2: '删除',
+    10: ''
+  }
+  const editStatusColors = {
+    0: 'blue',
+    1: 'gold',
+    2: 'red',
+    10: ''
+  }
   const columns: ProColumns<ConfigListItem>[] = [
+ 
     {
       title: intl.formatMessage({id:'pages.configs.table.cols.g'}),
       dataIndex: 'group',
@@ -330,6 +361,18 @@ const configs: React.FC = (props: any) => {
       width: 150
     },
     {
+      title: '编辑状态',
+      dataIndex: 'editStatus',
+      search: false,
+      render: (_, record) => (
+         <Tag color={editStatusColors[record.editStatus]}>
+           {
+              editStatusEnums[record.editStatus]
+           }
+         </Tag>
+      ),
+    },
+    {
       title: intl.formatMessage({id:'pages.configs.table.cols.status'}),
       dataIndex: 'onlineStatus',
       valueEnum: {
@@ -349,24 +392,6 @@ const configs: React.FC = (props: any) => {
       width: 150,
       valueType: 'option',
       render: (text, record, _, action) => [
-        <AuthorizedEle key="0" judgeKey={functionKeys.Config_Publish} appId={record.appId}>
-          {
-            record.onlineStatus ? <a onClick={() => { offline(record) }}>
-            {
-              intl.formatMessage({
-                id: 'pages.configs.table.cols.action.offline'
-              })
-            }
-            </a> : <a onClick={() => { online(record) }}>
-              {
-                intl.formatMessage({
-                  id: 'pages.configs.table.cols.action.publish'
-                })
-              }
-            </a>
-          }
-        </AuthorizedEle>
-        ,
         <AuthorizedEle key="1" judgeKey={functionKeys.Config_Edit} appId={record.appId}>
           <a
             onClick={() => {
@@ -435,6 +460,7 @@ const configs: React.FC = (props: any) => {
           labelWidth: 'auto',
         }}
         request={(params, sorter, filter) => queryConfigs(appId,params)}
+        headerTitle= {`add:${waitPublishStatus.addCount} edit:${waitPublishStatus.editCount} delete:${waitPublishStatus.deleteCount}`}
         toolBarRender={() => [
           <AuthorizedEle key="0" judgeKey={functionKeys.Config_Add} appId={appId}>
             <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { setCreateModalVisible(true); }}>
@@ -447,7 +473,7 @@ const configs: React.FC = (props: any) => {
           </AuthorizedEle>
           ,
           <AuthorizedEle key="1" judgeKey={functionKeys.Config_Publish} appId={appId}>
-            <Button key="button" type="primary" hidden={selectedRowsState.length == 0} onClick={()=>{onlineSome(selectedRowsState)}}>
+            <Button key="button" icon={<VerticalAlignTopOutlined />} type="primary" hidden={selectedRowsState.length == 0} onClick={()=>{onlineSome(selectedRowsState)}}>
                 {
                   intl.formatMessage({
                     id: 'pages.configs.table.cols.action.publish'
@@ -456,16 +482,6 @@ const configs: React.FC = (props: any) => {
             </Button>
           </AuthorizedEle>
           ,
-          <AuthorizedEle key="2" judgeKey={functionKeys.Config_Publish} appId={appId}>
-            <Button key="button" type="primary" danger hidden={selectedRowsState.length == 0} onClick={()=>{offlineSome(selectedRowsState)}}>
-              {
-                intl.formatMessage({
-                  id: 'pages.configs.table.cols.action.offline'
-                })
-              }
-        </Button>
-        </AuthorizedEle>
-        ,
         <AuthorizedEle key="3" judgeKey={functionKeys.Config_Add} appId={appId}>
           <Button onClick={()=>{ setjsonImportFormModalVisible(true) }}>
             {
@@ -491,6 +507,12 @@ const configs: React.FC = (props: any) => {
             setSelectedRows(selectedRows);
           },
         }}
+        postData={
+          (data:ConfigListItem[])=>{
+            setTableData(data);
+            return data;
+          }
+        }
       />
       {
         jsonImportFormModalVisible&&
