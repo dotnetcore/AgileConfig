@@ -7,6 +7,14 @@ namespace AgileConfig.Server.IService
 {
     public interface IConfigService: IDisposable
     {
+        /// <summary>
+        /// 发布当前待发布的配置项
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <param name="operatorr"></param>
+        /// <returns></returns>
+        Task<bool> Publish(string appId, string operatorr);
+
         Task<Config> GetAsync(string id);
 
         Task<Config> GetByAppIdKey(string appId, string group, string key);
