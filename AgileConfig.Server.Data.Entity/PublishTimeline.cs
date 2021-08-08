@@ -18,7 +18,8 @@ namespace AgileConfig.Server.Data.Entity
         [Column(Name = "publish_user_id", StringLength = 36)]
         public string PublishUserId { get; set; }
 
-        public  int Version { get; set; }
+        [Column(Name = "version")]
+        public int Version { get; set; }
 
     }
 }

@@ -31,6 +31,7 @@ namespace AgileConfig.Server.Data.Entity
         [Column(Name = "description", StringLength = 200)]
         public string Description { get; set; }
 
-        public  EditStatus EditStatus { get; set; }
+        [Column(Name = "edit_status")]
+        public EditStatus EditStatus { get; set; }
     }
 }

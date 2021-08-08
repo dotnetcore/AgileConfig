@@ -232,21 +232,31 @@ namespace AgileConfig.Server.Apisite.Controllers
             config.Value = model.Value;
             config.Group = model.Group;
             config.UpdateTime = DateTime.Now;
-            if (config.OnlineStatus == OnlineStatus.Online)
+
+            if (!IsOnlyUpdateDescription(config, oldConfig))
             {
-                //如果是已发布的配置，修改后状态设置为编辑
-                config.EditStatus = EditStatus.Edit;
+                var isPublished = await _configService.IsPublishedAsync(config.Id);
+                if (isPublished)
+                {
+                    //如果是已发布的配置，修改后状态设置为编辑
+                    config.EditStatus = EditStatus.Edit;
+                }
+                else
+                {
+                    //如果没有发布，说明是新增的，一直维持新增状态
+                    config.EditStatus = EditStatus.Add;
+                }
                 config.OnlineStatus = OnlineStatus.WaitPublish;
             }
 
             var result = await _configService.UpdateAsync(config);
 
-            if (result && !IsOnlyUpdateDescription(config, oldConfig))
+            if (result)
             {
                 dynamic param = new ExpandoObject();
                 param.config = config;
-                param.oldConfig = oldConfig;
                 param.userName = this.GetCurrentUserName();
+                param.oldConfig = config;
                 TinyEventBus.Instance.Fire(EventKeys.EDIT_CONFIG_SUCCESS, param);
             }
 
@@ -308,7 +318,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 configs = configs.Where(c => c.OnlineStatus == onlineStatus).ToList();
             }
-            configs = configs.OrderBy(c => c.AppId).ThenBy(c => c.Group).ThenBy(c => c.Key).ToList();
+            configs = configs.OrderBy(c => c.AppId).ThenBy(c=>c.EditStatus).ThenBy(c => c.Group).ThenBy(c => c.Key).ThenBy(c=>c.CreateTime).ToList();
 
             var page = configs.Skip((current - 1) * pageSize).Take(pageSize).ToList();
             var total = configs.Count();
@@ -360,17 +370,21 @@ namespace AgileConfig.Server.Apisite.Controllers
                 });
             }
 
-            var oldConfig = await _configService.GetAsync(id);
-
             config.EditStatus = EditStatus.Deleted;
-            //config.Status = ConfigStatus.Deleted;
-            var result = await _configService.UpdateAsync(config);
+            config.OnlineStatus = OnlineStatus.WaitPublish;
 
+            var isPublished = await _configService.IsPublishedAsync(config.Id);
+            if (!isPublished)
+            {
+                //如果已经没有发布过直接删掉
+                config.Status = ConfigStatus.Deleted;
+            }
+
+            var result = await _configService.UpdateAsync(config);
             if (result)
             {
                 dynamic param = new ExpandoObject();
                 param.config = config;
-                param.oldConfig = oldConfig;
                 param.userName = this.GetCurrentUserName();
                 TinyEventBus.Instance.Fire(EventKeys.DELETE_CONFIG_SUCCESS, param);
             }
@@ -378,7 +392,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             return Json(new
             {
                 success = result,
-                message = !result ? "修改配置失败，请查看错误日志" : ""
+                message = !result ? "删除配置失败，请查看错误日志" : ""
             });
         }
 
@@ -462,195 +476,41 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         /// <summary>
-        /// 下线多个配置
+        /// 发布所有待发布的配置项
         /// </summary>
-        /// <param name="configIds"></param>
+        /// <param name="appId">应用id</param>
         /// <returns></returns>
-
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.OfflineSome", Functions.Config_Offline })]
-        public async Task<IActionResult> OfflineSome([FromBody] List<string> configIds)
-        {
-            if (configIds == null)
-            {
-                throw new ArgumentNullException("configIds");
-            }
-
-            foreach (var configId in configIds)
-            {
-                var config = await _configService.GetAsync(configId);
-                if (config == null)
-                {
-                    return Json(new
-                    {
-                        success = false,
-                        message = "未找到对应的配置项。"
-                    });
-                }
-                var oldConfig = await _configService.GetAsync(configId);
-
-                if (config.OnlineStatus == OnlineStatus.WaitPublish)
-                {
-                    continue;
-                }
-                config.OnlineStatus = OnlineStatus.WaitPublish;
-                var result = await _configService.UpdateAsync(config);
-                if (result)
-                {
-                    dynamic param = new ExpandoObject();
-                    param.config = config;
-                    param.oldConfig = oldConfig;
-                    param.userName = this.GetCurrentUserName();
-                    TinyEventBus.Instance.Fire(EventKeys.OFFLINE_CONFIG_SUCCESS, param);
-                }
-            }
-            return Json(new
-            {
-                success = true,
-                message = "下线配置成功"
-            });
-        }
-
-        /// <summary>
-        /// 下线
-        /// </summary>
-        /// <param name="configId"></param>
-        /// <returns></returns>
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Offline", Functions.Config_Offline })]
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.PublishAsync", Functions.Config_Publish })]
         [HttpPost]
-        public async Task<IActionResult> Offline(string configId)
+        public async Task<IActionResult> Publish(string appId)
         {
-            if (string.IsNullOrEmpty(configId))
+            if (string.IsNullOrEmpty(appId))
             {
-                throw new ArgumentNullException("configId");
+                throw new ArgumentNullException("appId");
             }
 
-            var config = await _configService.GetAsync(configId);
-            if (config == null)
-            {
-                return Json(new
-                {
-                    success = false,
-                    message = "未找到对应的配置项。"
-                });
-            }
+            var ret = _configService.Publish(appId, this.GetCurrentUserId());
 
-            var oldConfig = await _configService.GetAsync(configId);
-
-            config.OnlineStatus = OnlineStatus.WaitPublish;
-            var result = await _configService.UpdateAsync(config);
-            if (result)
+            if (ret.result)
             {
+                var timelineNode = await _configService.GetPublishTimeLineNode(ret.publishTimelineId);
                 dynamic param = new ExpandoObject();
-                param.config = config;
-                param.oldConfig = oldConfig;
-                param.userName = this.GetCurrentUserName();
-
-                TinyEventBus.Instance.Fire(EventKeys.OFFLINE_CONFIG_SUCCESS, param);
-            }
-
-            return Json(new
-            {
-                success = result,
-                message = !result ? "下线配置失败，请查看错误日志" : ""
-            });
-        }
-
-
-        /// <summary>
-        /// 上线多个配置
-        /// </summary>
-        /// <param name="configIds"></param>
-        /// <returns></returns>
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.PublishSome", Functions.Config_Publish })]
-        public async Task<IActionResult> PublishSome([FromBody] List<string> configIds)
-        {
-            if (configIds == null)
-            {
-                throw new ArgumentNullException("configIds");
-            }
-
-            var nodes = await _serverNodeService.GetAllNodesAsync();
-            foreach (var configId in configIds)
-            {
-                var config = await _configService.GetAsync(configId);
-                if (config == null)
-                {
-                    return Json(new
-                    {
-                        success = false,
-                        message = "未找到对应的配置项。"
-                    });
-                }
-                if (config.OnlineStatus == OnlineStatus.Online)
-                {
-                    continue;
-                }
-                config.OnlineStatus = OnlineStatus.Online;
-                var result = await _configService.UpdateAsync(config);
-                if (result)
-                {
-                    dynamic param = new ExpandoObject();
-                    param.config = config;
-                    param.userName = this.GetCurrentUserName();
-                    TinyEventBus.Instance.Fire(EventKeys.PUBLISH_CONFIG_SUCCESS, param);
-                }
-            }
-            return Json(new
-            {
-                success = true,
-                message = "上线配置成功"
-            });
-        }
-
-        /// <summary>
-        /// 上线1个配置
-        /// </summary>
-        /// <param name="configId"></param>
-        /// <returns></returns>
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Publish", Functions.Config_Publish })]
-        [HttpPost]
-        public async Task<IActionResult> Publish(string configId)
-        {
-            if (string.IsNullOrEmpty(configId))
-            {
-                throw new ArgumentNullException("configId");
-            }
-
-            var config = await _configService.GetAsync(configId);
-            if (config == null)
-            {
-                return Json(new
-                {
-                    success = false,
-                    message = "未找到对应的配置项。"
-                });
-            }
-
-            if (config.OnlineStatus == OnlineStatus.Online)
-            {
-                return Json(new
-                {
-                    success = false,
-                    message = "该配置已上线"
-                });
-            }
-
-            config.OnlineStatus = OnlineStatus.Online;
-            var result = await _configService.UpdateAsync(config);
-            if (result)
-            {
-                dynamic param = new ExpandoObject();
-                param.config = config;
+                param.publishTimelineNode = timelineNode;
                 param.userName = this.GetCurrentUserName();
                 TinyEventBus.Instance.Fire(EventKeys.PUBLISH_CONFIG_SUCCESS, param);
             }
+
             return Json(new
             {
-                success = result,
-                message = !result ? "上线配置失败，请查看错误日志" : ""
+                success = ret.result,
+                message = !ret.result ? "上线配置失败，请查看错误日志" : ""
             });
         }
 
+        /// <summary>
+        /// 预览上传的json文件
+        /// </summary>
+        /// <returns></returns>
         public IActionResult PreViewJsonFile()
         {
             List<IFormFile> files = Request.Form.Files.ToList();
@@ -699,6 +559,11 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
         }
 
+        /// <summary>
+        /// 导出json文件
+        /// </summary>
+        /// <param name="appId">应用id</param>
+        /// <returns></returns>
         public async Task<IActionResult> ExportJson(string appId)
         {
             if (string.IsNullOrEmpty(appId))
@@ -720,6 +585,11 @@ namespace AgileConfig.Server.Apisite.Controllers
             return File(Encoding.UTF8.GetBytes(json), "application/json", $"{appId}.json");
         }
 
+        /// <summary>
+        /// 获取待发布的明细
+        /// </summary>
+        /// <param name="appId">应用id</param>
+        /// <returns></returns>
         public async Task<IActionResult> WaitPublishStatus(string appId)
         {
             if (string.IsNullOrEmpty(appId))
@@ -728,7 +598,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var configs = await _configService.Search(appId, "", "");
-            configs = configs.Where(x => x.Status == ConfigStatus.Enabled && x.OnlineStatus == OnlineStatus.WaitPublish).ToList();
+            configs = configs.Where(x => x.Status == ConfigStatus.Enabled && x.EditStatus != EditStatus.Commit).ToList();
 
             var addCount = configs.Count(x => x.EditStatus == EditStatus.Add);
             var editCount = configs.Count(x => x.EditStatus == EditStatus.Edit);

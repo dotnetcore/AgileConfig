@@ -29,8 +29,10 @@ namespace AgileConfig.Server.Data.Entity
         [Column(Name = "publish_timeline_id", StringLength = 36)]
         public string PublishTimelineId { get; set; }
 
+        [Column(Name = "version")]
         public int Version { get; set; }
 
+        [Column(Name = "status")]
         public ConfigStatus Status { get; set; }
     }
 }
