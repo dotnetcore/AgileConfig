@@ -39,66 +39,6 @@ const handlePublish = async (appId: string) => {
   }
 };
 
-const handleOnlineSome = async (configs: ConfigListItem[]) => {
-  const intl = getIntl(getLocale());
-  const hide = message.loading(intl.formatMessage({id:'publishing'}));
-  try {
-    const result = await onlineSomeConfigs(configs);
-    hide();
-    const success = result.success;
-    if (success) {
-      message.success(intl.formatMessage({id:'publish_success'}));
-    } else {
-      message.error(intl.formatMessage({id:'publish_fail'}));
-    }
-    return success;
-  } catch (error) {
-    hide();
-    message.error(intl.formatMessage({id:'publish_fail'}));
-    return false;
-  }
-};
-
-const handleOfflineSome = async (configs: ConfigListItem[]) => {
-  const intl = getIntl(getLocale());
-  const hide = message.loading(intl.formatMessage({id:'offlining'}));
-  try {
-    const result = await offlineSomeConfigs(configs);
-    hide();
-    const success = result.success;
-    if (success) {
-      message.success(intl.formatMessage({id:'offline_success'}));
-    } else {
-      message.error(intl.formatMessage({id:'offline_fail'}));
-    }
-    return success;
-  } catch (error) {
-    hide();
-    message.error(intl.formatMessage({id:'offline_fail'}));
-    return false;
-  }
-};
-
-const handleOffline = async (fields: ConfigListItem) => {
-  const intl = getIntl(getLocale());
-  const hide = message.loading(intl.formatMessage({id:'offlining'}));
-  try {
-    const result = await offlineConfig({ ...fields });
-    hide();
-    const success = result.success;
-    if (success) {
-      message.success(intl.formatMessage({id:'offline_success'}));
-    } else {
-      message.error(intl.formatMessage({id:'offline_fail'}));
-    }
-    return success;
-  } catch (error) {
-    hide();
-    message.error(intl.formatMessage({id:'offline_fail'}));
-    return false;
-  }
-};
-
 const handleDel = async (fields: ConfigListItem) => {
   const intl = getIntl(getLocale());
   const hide = message.loading(intl.formatMessage({id:'deleting'}));
@@ -241,27 +181,6 @@ const configs: React.FC = (props: any) => {
     });
   }
 
-  const onlineSome = (configs: ConfigListItem[]) => {
-    const warningMsg = intl.formatMessage({id:'pages.config.waitpublish_at_least_one'});
-    const waitPublishConfigs = configs.filter(x=>x.onlineStatus === 0);
-    if (!waitPublishConfigs.length) {
-      message.warning(warningMsg);
-      return;
-    }
-    confirm({
-      content: intl.formatMessage({id:'pages.config.confirm_publish_some'}),
-      onOk: async () => {
-        const result = await handleOnlineSome(configs);
-        if (result && actionRef.current) {
-          if (actionRef.current?.clearSelected){
-            actionRef.current?.clearSelected();
-          }
-          actionRef.current?.reload();
-        }
-      }
-    });
-  }
-  
   const delConfig = (config: ConfigListItem) => {
     const confirmMsg = intl.formatMessage({id:'pages.config.confirm_delete'});
     confirm({
@@ -305,6 +224,7 @@ const configs: React.FC = (props: any) => {
     {
       title: intl.formatMessage({id:'pages.configs.table.cols.g'}),
       dataIndex: 'group',
+      copyable: true
     },
     {
       title: intl.formatMessage({id:'pages.configs.table.cols.k'}),
@@ -436,7 +356,7 @@ const configs: React.FC = (props: any) => {
         headerTitle= {`add:${waitPublishStatus.addCount} edit:${waitPublishStatus.editCount} delete:${waitPublishStatus.deleteCount}`}
         toolBarRender={() => [
           <AuthorizedEle key="0" judgeKey={functionKeys.Config_Add} appId={appId}>
-            <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { setCreateModalVisible(true); }}>
+            <Button key="button" icon={<PlusOutlined />}  onClick={() => { setCreateModalVisible(true); }}>
             {
               intl.formatMessage({
                 id: 'pages.configs.table.cols.action.add'
@@ -445,7 +365,7 @@ const configs: React.FC = (props: any) => {
             </Button>
           </AuthorizedEle>
           ,
-          <AuthorizedEle key="1" judgeKey={functionKeys.Config_Publish} appId={appId}>
+          <AuthorizedEle key="2" judgeKey={functionKeys.Config_Publish} appId={appId} >
             <Button key="button" icon={<VerticalAlignTopOutlined />} type="primary" 
                     hidden={(waitPublishStatus.addCount + waitPublishStatus.editCount + waitPublishStatus.deleteCount) === 0} 
                     onClick={()=>{publish(appId)}}>
@@ -454,6 +374,14 @@ const configs: React.FC = (props: any) => {
                     id: 'pages.configs.table.cols.action.publish'
                   })
                 }
+            </Button>
+          </AuthorizedEle>
+          ,
+          <AuthorizedEle key="1" judgeKey={functionKeys.Config_Publish} appId={appId}>
+            <Button key="button"  >
+              {
+                '历史版本'
+              }
             </Button>
           </AuthorizedEle>
           ,
