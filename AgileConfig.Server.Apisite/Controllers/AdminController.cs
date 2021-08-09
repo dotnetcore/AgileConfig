@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Dynamic;
+using AgileConfig.Server.Apisite.Utilites;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -17,11 +18,11 @@ namespace AgileConfig.Server.Apisite.Controllers
     {
         private readonly ISettingService _settingService;
         private readonly IUserService _userService;
-        private readonly IPermissionService _permissionService;
+        private readonly IPremissionService _permissionService;
         public AdminController(
             ISettingService settingService, 
             IUserService userService,
-            IPermissionService permissionService)
+            IPremissionService permissionService)
         {
             _settingService = settingService;
             _userService = userService;

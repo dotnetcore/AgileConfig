@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace AgileConfig.Server.Service
 {
-    public class PermissionService : IPermissionService
+    public class PermissionService : IPremissionService
     {
         private FreeSqlContext _dbContext;
         public PermissionService(FreeSqlContext freeSql)
@@ -32,6 +32,10 @@ namespace AgileConfig.Server.Service
             "GLOBAL_" + Functions.Node_Delete,
 
             "GLOBAL_" + Functions.Client_Disconnect,
+
+            "GLOBAL_" + Functions.User_Add,
+            "GLOBAL_" + Functions.User_Edit,
+            "GLOBAL_" + Functions.User_Delete,
         };
 
         private static readonly List<string> Template_NormalAdminPermissions = new List<string>
@@ -40,7 +44,11 @@ namespace AgileConfig.Server.Service
             "GLOBAL_" + Functions.Node_Add,
             "GLOBAL_" + Functions.Node_Delete,
             "GLOBAL_" + Functions.Client_Disconnect,
-            
+
+            "GLOBAL_" + Functions.User_Add,
+            "GLOBAL_" + Functions.User_Edit,
+            "GLOBAL_" + Functions.User_Delete,
+
             "APP_{0}_" + Functions.App_Delete,
             "APP_{0}_" + Functions.App_Edit,
             "APP_{0}_" + Functions.App_Auth,
@@ -202,7 +210,10 @@ namespace AgileConfig.Server.Service
             foreach (var appAuth in userAuths)
             {
                 var app = await _dbContext.Apps.Where(x=>x.Id == appAuth.AppId).FirstAsync();
-                apps.Add(app);
+                if (app!= null)
+                {
+                    apps.Add(app);
+                }
             }
 
             return apps;

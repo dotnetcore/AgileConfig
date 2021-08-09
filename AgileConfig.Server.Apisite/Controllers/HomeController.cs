@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System.Linq;
+using AgileConfig.Server.Apisite.Utilites;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -12,12 +13,12 @@ namespace AgileConfig.Server.Apisite.Controllers
     {
         private readonly ISettingService _settingService;
         private readonly IUserService _userService;
-        private readonly IPermissionService _permissionService;
+        private readonly IPremissionService _permissionService;
 
         public HomeController(
             ISettingService settingService, 
             IUserService userService,
-            IPermissionService permissionService)
+            IPremissionService permissionService)
         {
             _settingService = settingService;
             _userService = userService;

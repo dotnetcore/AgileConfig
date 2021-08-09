@@ -50,6 +50,7 @@ namespace AgileConfig.Server.Apisite
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0).AddRazorRuntimeCompilation();
             services.AddFreeSqlDbContext();
             services.AddBusinessServices();
+            services.AddHostedService<InitService>();
             services.AddAntiforgery(o => o.SuppressXFrameOptionsHeader = true);
         }
 

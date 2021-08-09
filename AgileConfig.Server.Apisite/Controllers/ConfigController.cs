@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using AgileConfig.Server.Common;
 using System.Text;
 using System.Dynamic;
+using AgileConfig.Server.Apisite.Utilites;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -39,6 +40,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             _appService = appService;
         }
 
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Add", Functions.Config_Add })]
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] ConfigVM model)
         {
@@ -95,8 +97,10 @@ namespace AgileConfig.Server.Apisite.Controllers
                 success = result,
                 message = !result ? "新建配置失败，请查看错误日志" : "",
                 data = config
-            }) ;
+            });
         }
+
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.AddRange", Functions.Config_Add })]
         [HttpPost]
         public async Task<IActionResult> AddRange([FromBody] List<ConfigVM> model)
         {
@@ -160,7 +164,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     dynamic param = new ExpandoObject();
                     param.config = c;
                     param.userName = userName;
-                    TinyEventBus.Instance.Fire(EventKeys.ADD_CONFIG_SUCCESS, c);
+                    TinyEventBus.Instance.Fire(EventKeys.ADD_CONFIG_SUCCESS, param);
                 });
             }
 
@@ -171,6 +175,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Edit", Functions.Config_Edit })]
         [HttpPost]
         public async Task<IActionResult> Edit([FromBody] ConfigVM model)
         {
@@ -331,6 +336,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Delete", Functions.Config_Delete })]
         [HttpPost]
         public async Task<IActionResult> Delete(string id)
         {
@@ -371,7 +377,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
 
-
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Rollback", Functions.Config_Edit })]
         [HttpPost]
         public async Task<IActionResult> Rollback(string configId, string logId)
         {
@@ -454,6 +460,8 @@ namespace AgileConfig.Server.Apisite.Controllers
         /// </summary>
         /// <param name="configIds"></param>
         /// <returns></returns>
+
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.OfflineSome", Functions.Config_Offline })]
         public async Task<IActionResult> OfflineSome([FromBody] List<string> configIds)
         {
             if (configIds == null)
@@ -501,6 +509,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         /// </summary>
         /// <param name="configId"></param>
         /// <returns></returns>
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Offline", Functions.Config_Offline })]
         [HttpPost]
         public async Task<IActionResult> Offline(string configId)
         {
@@ -546,6 +555,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         /// </summary>
         /// <param name="configIds"></param>
         /// <returns></returns>
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.PublishSome", Functions.Config_Publish })]
         public async Task<IActionResult> PublishSome([FromBody] List<string> configIds)
         {
             if (configIds == null)
@@ -591,6 +601,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         /// </summary>
         /// <param name="configId"></param>
         /// <returns></returns>
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Publish", Functions.Config_Publish })]
         [HttpPost]
         public async Task<IActionResult> Publish(string configId)
         {
@@ -693,7 +704,8 @@ namespace AgileConfig.Server.Apisite.Controllers
             var configs = await _configService.GetByAppIdAsync(appId);
 
             var dict = new Dictionary<string, string>();
-            configs.ForEach(x=> {
+            configs.ForEach(x =>
+            {
                 var key = _configService.GenerateKey(x);
                 dict.Add(key, x.Value);
             });

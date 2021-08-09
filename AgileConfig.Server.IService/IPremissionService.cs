@@ -24,9 +24,13 @@ namespace AgileConfig.Server.IService
         public const string Node_Delete = "NODE_DELETE";
 
         public const string Client_Disconnect = "CLIENT_DISCONNECT";
+
+        public const string User_Add = "USER_ADD";
+        public const string User_Edit = "USER_EDIT";
+        public const string User_Delete = "USER_DELETE";
     }
 
-    public interface IPermissionService
+    public interface IPremissionService
     {
          string EditConfigPermissionKey { get; }
 

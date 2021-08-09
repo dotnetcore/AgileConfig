@@ -6,7 +6,7 @@
 
 
 
-
+[![Member project of .NET Core Community](https://img.shields.io/badge/member%20project%20of-NCC-9e20c9.svg)](https://github.com/dotnetcore)
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/kklldog/agileconfig/.NET%20Core)
 ![GitHub stars](https://img.shields.io/github/stars/kklldog/AgileConfig)
 ![Commit Date](https://img.shields.io/github/last-commit/kklldog/AgileConfig/master.svg?logo=github&logoColor=green&label=commit)
@@ -150,8 +150,8 @@ public class HomeController : Controller
 
 ## donate
 If this project is helpful to you, please scan the QR code below for a cup of coffee.    
-<img src = 'https://ftp.bmp.ovh/imgs/2021/04/c0146fa995e8074d.jpg'  width="300"/>    
-<img src = 'https://ftp.bmp.ovh/imgs/2021/04/1c8748c5732b8fbe.jpg' width="300"/>
+ <img src="https://ftp.bmp.ovh/imgs/2021/07/c0146fa995e8074d.jpg" width="300">
+  <img src="https://ftp.bmp.ovh/imgs/2021/07/1c8748c5732b8fbe.jpg" width="300">
    
 ## thanks 💖💖💖    
 大鹏￥66.66 , 瘦草￥6.66
