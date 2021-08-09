@@ -7,6 +7,14 @@ namespace AgileConfig.Server.IService
 {
     public interface IConfigService: IDisposable
     {
+        /// <summary>
+        /// 发布当前待发布的配置项
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <param name="operatorr"></param>
+        /// <returns></returns>
+        (bool result, string publishTimelineId) Publish(string appId, string operatorr);
+
         Task<Config> GetAsync(string id);
 
         Task<Config> GetByAppIdKey(string appId, string group, string key);
@@ -79,5 +87,26 @@ namespace AgileConfig.Server.IService
         /// <param name="config"></param>
         /// <returns></returns>
         string GenerateKey(Config config);
+
+        /// <summary>
+        /// 判断是否已经发布
+        /// </summary>
+        /// <param name="configId"></param>
+        /// <returns></returns>
+        Task<bool> IsPublishedAsync(string configId);
+
+        /// <summary>
+        /// 根据发布时间点获取发布的详细信息
+        /// </summary>
+        /// <param name="publishTimelineId"></param>
+        /// <returns></returns>
+        Task<List<PublishDetail>> GetPublishDetailByPublishTimelineId(string publishTimelineId);
+
+        /// <summary>
+        /// 查询发布时间节点
+        /// </summary>
+        /// <param name="publishTimelineId"></param>
+        /// <returns></returns>
+        Task<PublishTimeline> GetPublishTimeLineNode(string publishTimelineId);
     }
 }

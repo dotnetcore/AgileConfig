@@ -222,7 +222,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Publish", Functions.Config_Publish })]
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.PublishAsync", Functions.Config_Publish })]
         [HttpPost("publish/{configId}")]
         public async Task<IActionResult> Publish(string configId)
         {
@@ -235,34 +235,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 );
 
             var result = (await ctrl.Publish(configId)) as JsonResult;
-
-            dynamic obj = result.Value;
-            if (obj.success == true)
-            {
-                return Ok();
-            }
-
-            Response.StatusCode = 400;
-            return Json(new
-            {
-                obj.message
-            });
-        }
-
-        [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Offline", Functions.Config_Offline })]
-        [HttpPost("offline/{configId}")]
-        public async Task<IActionResult> Offline(string configId)
-        {
-            var ctrl = new Controllers.ConfigController(
-                _configService,
-                _modifyLogService,
-                _remoteServerNodeProxy,
-                _serverNodeService,
-                _appService
-                );
-
-            var result = (await ctrl.Offline(configId)) as JsonResult;
 
             dynamic obj = result.Value;
             if (obj.success == true)

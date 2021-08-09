@@ -12,8 +12,14 @@ namespace AgileConfig.Server.Data.Freesql
         {
         }
 
+        public IFreeSql Freesql
+        {
+            get;
+        }
+
         public FreeSqlContext(IFreeSql freeSql) : base(freeSql, null)
         {
+            Freesql = freeSql;
         }
 
         public DbSet<App> Apps { get; set; }
@@ -34,6 +40,10 @@ namespace AgileConfig.Server.Data.Freesql
         public DbSet<UserRole> UserRoles { get; set; }
 
         public DbSet<UserAppAuth> UserAppAuths { get; set; }
+
+        public DbSet<ConfigPublished> ConfigPublished { get; set; }
+        public DbSet<PublishDetail> PublishDetail { get; set; }
+        public DbSet<PublishTimeline> PublishTimeline { get; set; }
 
     }
 }
