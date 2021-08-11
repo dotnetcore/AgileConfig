@@ -180,7 +180,7 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
 > 注意：如果节点使用nginx反代的话，需要对nginx进行配置，使其支持websocket协议，不然客户端跟节点的长连接没法建立。
 
 ## 读取配置
-AgileConfig支持asp.net core 标准的IConfiguration，跟IOptions模式读取配置。还支持直接通过AgileConfigClient实例直接读取：
+AgileConfig支持asp.net core 标准的IConfiguration，跟IOptions模式读取配置。
 ``` c#
 public class HomeController : Controller
 {
@@ -213,21 +213,6 @@ public class HomeController : Controller
         ViewBag.dbConn = dbConn;
 
         return View();
-    }
-
-    /// <summary>
-    /// 直接使用ConfigClient的实例读取配置
-    /// </summary>
-    /// <returns></returns>
-    public IActionResult ByInstance()
-    {
-        var userId = Program.ConfigClient["userId"];
-        var dbConn = Program.ConfigClient["db:connection"];
-
-        ViewBag.userId = userId;
-        ViewBag.dbConn = dbConn;
-
-        return View("ByInstance");
     }
 
     /// <summary>

@@ -164,21 +164,6 @@ public class HomeController : Controller
     }
 
     /// <summary>
-    /// By ConfigClient to read
-    /// </summary>
-    /// <returns></returns>
-    public IActionResult ByInstance()
-    {
-        var userId = Program.ConfigClient["userId"];
-        var dbConn = Program.ConfigClient["db:connection"];
-
-        ViewBag.userId = userId;
-        ViewBag.dbConn = dbConn;
-
-        return View("ByInstance");
-    }
-
-    /// <summary>
     /// By Options to read
     /// </summary>
     /// <returns></returns>
