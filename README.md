@@ -96,13 +96,13 @@ add a agileconfig section in appsettings.json：
 }
 
 ```
-```c#
+appsettings.json
+``` c#
 public static IHostBuilder CreateHostBuilder(string[] args) =>
     Host.CreateDefaultBuilder(args)
         .ConfigureAppConfiguration((context, config) =>
         {
             //default appsettings.json
-            //config.AddAgileConfig(new ConfigClient($"appsettings.{context.HostingEnvironment.EnvironmentName}.json"));
             config.AddAgileConfig(arg => Console.WriteLine($"config changed , action:{arg.Action} key:{arg.Key}"));
         })
         .ConfigureWebHostDefaults(webBuilder =>
@@ -110,7 +110,25 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
             webBuilder.UseStartup<Startup>();
         });
 ```
+appsettings.{env}.json
+``` c#
+public static IHostBuilder CreateHostBuilder(string[] args) =>
+    Host.CreateDefaultBuilder(args)
+        .ConfigureAppConfiguration((context, config) =>
+        {
+            var envName = context.HostingEnvironment.EnvironmentName;
+            var configClient = new ConfigClient($"appsettings.{envName}.json");
+            config.AddAgileConfig(configClient, arg => Console.WriteLine($"config changed , action:{arg.Action} key:{arg.Key}"));
+        })
+        .ConfigureWebHostDefaults(webBuilder =>
+        {
+            webBuilder.UseStartup<Startup>();
+        });
+```
+
+
 ## read configuration
+
 ``` c#
 public class HomeController : Controller
 {
@@ -145,8 +163,83 @@ public class HomeController : Controller
         return View();
     }
 
+    /// <summary>
+    /// By ConfigClient to read
+    /// </summary>
+    /// <returns></returns>
+    public IActionResult ByInstance()
+    {
+        var userId = Program.ConfigClient["userId"];
+        var dbConn = Program.ConfigClient["db:connection"];
+
+        ViewBag.userId = userId;
+        ViewBag.dbConn = dbConn;
+
+        return View("ByInstance");
+    }
+
+    /// <summary>
+    /// By Options to read
+    /// </summary>
+    /// <returns></returns>
+    public IActionResult ByOptions()
+    {
+        var dbConn = _dbOptions.Value.connection;
+        ViewBag.dbConn = dbConn;
+
+        return View("ByOptions");
+    }
 }
 ```
+
+dependency injection
+``` c#
+public class Startup
+{
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddAgileConfig();
+    }
+}
+```
+
+``` c#
+public class HomeController : Controller
+{
+    private readonly IConfigClient _configClient
+
+    public HomeController(IConfigClient configClient)
+    {
+        _configClient = configClient;
+    }
+
+    public IActionResult Index()
+    {
+        return View();
+    }
+
+    /// <summary>
+    /// By IConfigClient to read
+    /// </summary>
+    /// <returns></returns>
+    public IActionResult ByIConfigClient()
+    {
+        var userId = _configClient["userId"];
+        var dbConn = _configClient["db:connection"];
+
+        foreach (var item in _configClient.Data)
+        {
+            Console.WriteLine($"{item.Key} = {item.Value}");
+        }
+
+        ViewBag.userId = userId;
+        ViewBag.dbConn = dbConn;
+
+        return View();
+    }
+}
+```
+
 ## screenshots
 ![](https://ftp.bmp.ovh/imgs/2021/04/44242b327230c5e6.png)   
 ![](https://ftp.bmp.ovh/imgs/2021/04/7e93011590c55d12.png)   

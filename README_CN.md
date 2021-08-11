@@ -154,7 +154,6 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
         .ConfigureAppConfiguration((context, config) =>
         {
             //default appsettings.json
-            //config.AddAgileConfig(new ConfigClient($"appsettings.{context.HostingEnvironment.EnvironmentName}.json"));
             config.AddAgileConfig(arg => Console.WriteLine($"config changed , action:{arg.Action} key:{arg.Key}"));
         })
         .ConfigureWebHostDefaults(webBuilder =>
@@ -162,6 +161,22 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
             webBuilder.UseStartup<Startup>();
         });
 ```
+根据环境变量读取appsettings.{env}.json配置信息。
+``` c#
+public static IHostBuilder CreateHostBuilder(string[] args) =>
+    Host.CreateDefaultBuilder(args)
+        .ConfigureAppConfiguration((context, config) =>
+        {
+            var envName = context.HostingEnvironment.EnvironmentName;
+            var configClient = new ConfigClient($"appsettings.{envName}.json");
+            config.AddAgileConfig(configClient, arg => Console.WriteLine($"config changed , action:{arg.Action} key:{arg.Key}"));
+        })
+        .ConfigureWebHostDefaults(webBuilder =>
+        {
+            webBuilder.UseStartup<Startup>();
+        });
+```
+
 > 注意：如果节点使用nginx反代的话，需要对nginx进行配置，使其支持websocket协议，不然客户端跟节点的长连接没法建立。
 
 ## 读取配置
@@ -228,6 +243,55 @@ public class HomeController : Controller
     }
 }
 ```
+
+在Startup内使用AddAgileConfig配置注入，然后其他地方就可以通过IConfigClient来获取这个实例。
+``` c#
+public class Startup
+{
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddAgileConfig();
+    }
+}
+```
+
+``` c#
+public class HomeController : Controller
+{
+    private readonly IConfigClient _configClient
+
+    public HomeController(IConfigClient configClient)
+    {
+        _configClient = configClient;
+    }
+
+    public IActionResult Index()
+    {
+        return View();
+    }
+
+    /// <summary>
+    /// 使用IConfigClient读取配置
+    /// </summary>
+    /// <returns></returns>
+    public IActionResult ByIConfigClient()
+    {
+        var userId = _configClient["userId"];
+        var dbConn = _configClient["db:connection"];
+
+        foreach (var item in _configClient.Data)
+        {
+            Console.WriteLine($"{item.Key} = {item.Value}");
+        }
+
+        ViewBag.userId = userId;
+        ViewBag.dbConn = dbConn;
+
+        return View();
+    }
+}
+```
+
 ## 联系我
 有什么问题可以mail我：minj.zhou@gmail.com   
 也可以加qq群：1022985150
