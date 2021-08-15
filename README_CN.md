@@ -31,7 +31,7 @@ Gitee 镜像：[https://gitee.com/kklldog/AgileConfig](https://gitee.com/kklldog
 8. 如果所有节点都故障，客户端支持从本地缓存读取配置
 9. 支持Restful API维护配置
     
-演示地址：[AgileConfig Server Demo](http://agileconfig.xbaby.xyz:5000)   用户名：admin 密码：123456   
+演示地址：[AgileConfig Server Demo](http://agileconfig_server.xbaby.xyz)   用户名：admin 密码：123456   
 客户端项目：[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
 示例项目：    
 [AgileConfigMVCSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigMVCSample)   
