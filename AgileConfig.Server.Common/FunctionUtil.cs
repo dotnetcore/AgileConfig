@@ -97,7 +97,7 @@ namespace AgileConfig.Server.Common
                     result = await func();
                     break;
                 }
-                catch (Exception ex)
+                catch 
                 {
                 }
             }
