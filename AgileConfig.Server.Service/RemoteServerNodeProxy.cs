@@ -186,10 +186,10 @@ namespace AgileConfig.Server.Service
                 };
             }
 
-            var result = await FunctionUtil.TRYAsync(async () =>
+            try
             {
                 using (var resp = await (address + "/report/Clients").AsHttp()
-                .Config(new RequestOptions(new SerializeProvider())).SendAsync())
+               .Config(new RequestOptions(new SerializeProvider())).SendAsync())
                 {
                     if (resp.StatusCode == System.Net.HttpStatusCode.OK)
                     {
@@ -207,9 +207,17 @@ namespace AgileConfig.Server.Service
                         Infos = new List<ClientInfo>()
                     };
                 }
-            }, 1);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError($"Try to get client infos from node {address} occur ERROR . ", ex);
+            }
 
-            return result;
+            return new ClientInfos()
+            {
+                ClientCount = 0,
+                Infos = new List<ClientInfo>()
+            };
         }
 
         public async Task TestEchoAsync(string address)
