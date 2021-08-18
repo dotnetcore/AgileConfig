@@ -59,14 +59,14 @@ namespace AgileConfig.Server.Service
             {
                 using (var resp = await (address + "/RemoteOP/AllClientsDoAction")
                     .AsHttp("POST", action)
-                    .Config(new RequestOptions {ContentType = "application/json"})
+                    .Config(new RequestOptions { ContentType = "application/json" })
                     .SendAsync())
                 {
                     if (resp.StatusCode == System.Net.HttpStatusCode.OK)
                     {
                         var result = resp.Deserialize<dynamic>();
 
-                        if ((bool) result.success)
+                        if ((bool)result.success)
                         {
                             return true;
                         }
@@ -95,14 +95,14 @@ namespace AgileConfig.Server.Service
             {
                 using (var resp = await (address + "/RemoteOP/AppClientsDoAction".AppendQueryString("appId", appId))
                     .AsHttp("POST", action)
-                    .Config(new RequestOptions {ContentType = "application/json"})
+                    .Config(new RequestOptions { ContentType = "application/json" })
                     .SendAsync())
                 {
                     if (resp.StatusCode == System.Net.HttpStatusCode.OK)
                     {
                         var result = resp.Deserialize<dynamic>();
 
-                        if ((bool) result.success)
+                        if ((bool)result.success)
                         {
                             return true;
                         }
@@ -132,14 +132,14 @@ namespace AgileConfig.Server.Service
             {
                 using (var resp = await (address + "/RemoteOP/OneClientDoAction?clientId=" + clientId)
                     .AsHttp("POST", action)
-                    .Config(new RequestOptions {ContentType = "application/json"})
+                    .Config(new RequestOptions { ContentType = "application/json" })
                     .SendAsync())
                 {
                     if (resp.StatusCode == System.Net.HttpStatusCode.OK)
                     {
                         var result = resp.Deserialize<dynamic>();
 
-                        if ((bool) result.success)
+                        if ((bool)result.success)
                         {
                             if (action.Action == ActionConst.Offline || action.Action == ActionConst.Remove)
                             {
@@ -177,31 +177,39 @@ namespace AgileConfig.Server.Service
 
         public async Task<ClientInfos> GetClientsReportAsync(string address)
         {
-            var report = new ClientInfos()
-            {
-                ClientCount = 0,
-                Infos = new List<ClientInfo>()
-            };
             if (string.IsNullOrEmpty(address))
             {
-                return report;
-            }
-
-            using (var resp = await (address + "/report/Clients").AsHttp()
-                .Config(new RequestOptions(new SerializeProvider())).SendAsync())
-            {
-                if (resp.StatusCode == System.Net.HttpStatusCode.OK)
+                return new ClientInfos()
                 {
-                    report = resp.Deserialize<ClientInfos>();
-                    if (report != null)
-                    {
-                        report.Infos?.ForEach(i => { i.Address = address; });
-                        return report;
-                    }
-                }
-
-                return report;
+                    ClientCount = 0,
+                    Infos = new List<ClientInfo>()
+                };
             }
+
+            var result = await FunctionUtil.TRYAsync(async () =>
+            {
+                using (var resp = await (address + "/report/Clients").AsHttp()
+                .Config(new RequestOptions(new SerializeProvider())).SendAsync())
+                {
+                    if (resp.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        var clients = resp.Deserialize<ClientInfos>();
+                        if (clients != null)
+                        {
+                            clients.Infos?.ForEach(i => { i.Address = address; });
+                            return clients;
+                        }
+                    }
+
+                    return new ClientInfos()
+                    {
+                        ClientCount = 0,
+                        Infos = new List<ClientInfo>()
+                    };
+                }
+            }, 1);
+
+            return result;
         }
 
         public async Task TestEchoAsync(string address)
