@@ -63,7 +63,7 @@ namespace AgileConfig.Server.Service
                         using (var configService = NewConfigService())
                         {
                             var publishDetail =
-                                await configService.GetPublishDetailByPublishTimelineId(timelineNode.Id);
+                                await configService.GetPublishDetailByPublishTimelineIdAsync(timelineNode.Id);
                             foreach (var row in publishDetail)
                             {
                                 var action = new WebsocketAction
@@ -378,7 +378,7 @@ namespace AgileConfig.Server.Service
 
                 using (var configService = NewConfigService())
                 {
-                    var publishDetail = await configService.GetPublishDetailByPublishTimelineId(node.Id);
+                    var publishDetail = await configService.GetPublishDetailByPublishTimelineIdAsync(node.Id);
                     using (var modifyLogService = NewModifyLogService())
                     {
                         foreach (var row in publishDetail)

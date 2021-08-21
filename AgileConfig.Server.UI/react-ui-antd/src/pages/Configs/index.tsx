@@ -17,6 +17,7 @@ import { getIntl, getLocale } from '@/.umi/plugin-locale/localeExports';
 import AuthorizedEle, { checkUserPermission } from '@/components/Authorized/AuthorizedElement';
 import functionKeys from '@/models/functionKeys';
 import { getFunctions } from '@/utils/authority';
+import VersionHistory from './comps/versionHistory';
 
 const { confirm } = Modal;
 
@@ -124,6 +125,7 @@ const configs: React.FC = (props: any) => {
   const [updateModalVisible, setUpdateModalVisible] = useState<boolean>(false);
   const [modifyLogsModalVisible, setmodifyLogsModalVisible] = useState<boolean>(false);
   const [jsonImportFormModalVisible, setjsonImportFormModalVisible] = useState<boolean>(false);
+  const [versionHistoryFormModalVisible, setVersionHistoryFormModalVisible] = useState<boolean>(false);
   const [currentRow, setCurrentRow] = useState<ConfigListItem>();
   const [selectedRowsState, setSelectedRows] = useState<ConfigListItem[]>([]);
   const [modifyLogs, setModifyLogs] = useState<ConfigModifyLog[]>([]);
@@ -378,7 +380,7 @@ const configs: React.FC = (props: any) => {
           </AuthorizedEle>
           ,
           <AuthorizedEle key="1" judgeKey={functionKeys.Config_Publish} appId={appId}>
-            <Button key="button"  >
+            <Button key="button"  onClick={()=>{ setVersionHistoryFormModalVisible(true) }}>
               {
                 '历史版本'
               }
@@ -437,7 +439,26 @@ const configs: React.FC = (props: any) => {
           
         </JsonImport>
       }
-     
+      {
+        versionHistoryFormModalVisible&&
+        <VersionHistory
+          onSaveSuccess={
+            ()=>{
+              setVersionHistoryFormModalVisible(false);
+              actionRef.current?.reload();
+            }
+          }
+        onCancel={
+          ()=>{
+            setVersionHistoryFormModalVisible(false);
+          }
+        }
+          appId={appId}
+          appName={appName}
+          versionHistoryModalVisible ={versionHistoryFormModalVisible}> 
+          
+        </VersionHistory>
+      }
       <ModalForm
         formRef={addFormRef}
         title={intl.formatMessage({id:'pages.configs.from.add.title'})}

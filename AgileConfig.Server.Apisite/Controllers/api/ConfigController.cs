@@ -132,8 +132,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             var ctrl = new Controllers.ConfigController(
                 _configService,
                 _modifyLogService,
-                _remoteServerNodeProxy,
-                _serverNodeService,
                 _appService
                 );
 
@@ -172,8 +170,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             var ctrl = new Controllers.ConfigController(
                 _configService,
                 _modifyLogService,
-                _remoteServerNodeProxy,
-                _serverNodeService,
                 _appService
                 );
 
@@ -201,8 +197,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             var ctrl = new Controllers.ConfigController(
                 _configService,
                 _modifyLogService,
-                _remoteServerNodeProxy,
-                _serverNodeService,
                 _appService
                 );
 
@@ -229,8 +223,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             var ctrl = new Controllers.ConfigController(
                 _configService,
                 _modifyLogService,
-                _remoteServerNodeProxy,
-                _serverNodeService,
                 _appService
                 );
 

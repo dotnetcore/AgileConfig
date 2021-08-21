@@ -111,3 +111,12 @@ export async function publish(appId: string) {
     }
   });
 }
+
+export async function getPublishHistory(appId: string) {
+  return request('/config/publishHistory', {
+    method: 'GET',
+    params:{
+      appId: appId
+    }
+  });
+}

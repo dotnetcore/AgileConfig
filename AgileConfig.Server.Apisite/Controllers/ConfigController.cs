@@ -22,21 +22,15 @@ namespace AgileConfig.Server.Apisite.Controllers
     {
         private readonly IConfigService _configService;
         private readonly IModifyLogService _modifyLogService;
-        private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
-        private readonly IServerNodeService _serverNodeService;
         private readonly IAppService _appService;
 
         public ConfigController(
                                 IConfigService configService,
                                 IModifyLogService modifyLogService,
-                                IRemoteServerNodeProxy remoteServerNodeProxy,
-                                IServerNodeService serverNodeService,
                                  IAppService appService)
         {
             _configService = configService;
             _modifyLogService = modifyLogService;
-            _remoteServerNodeProxy = remoteServerNodeProxy;
-            _serverNodeService = serverNodeService;
             _appService = appService;
         }
 
@@ -493,7 +487,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (ret.result)
             {
-                var timelineNode = await _configService.GetPublishTimeLineNode(ret.publishTimelineId);
+                var timelineNode = await _configService.GetPublishTimeLineNodeAsync(ret.publishTimelineId);
                 dynamic param = new ExpandoObject();
                 param.publishTimelineNode = timelineNode;
                 param.userName = this.GetCurrentUserName();
@@ -613,6 +607,39 @@ namespace AgileConfig.Server.Apisite.Controllers
                     editCount,
                     deleteCount
                 }
+            });
+        }
+
+        /// <summary>
+        /// 获取发布详情的历史
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> PublishHistory(string appId)
+        {
+            if (string.IsNullOrEmpty(appId))
+            {
+                throw new ArgumentNullException("appId");
+            }
+
+            var history = await _configService.GetPublishDetailListAsync(appId);
+
+            var result = new List<object>();
+            foreach (var publishDetails in history.GroupBy(x => x.Version).OrderByDescending( g=>g.Key))
+            {
+                var data = publishDetails.ToList();
+                result.Add(new
+                {
+                    key = publishDetails.Key,
+                    timelineNode = await _configService.GetPublishTimeLineNodeAsync(data.FirstOrDefault()?.PublishTimelineId),
+                    list = data
+                });
+            }
+
+            return Json(new
+            {
+                success = true,
+                data = result
             });
         }
     }

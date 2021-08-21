@@ -100,13 +100,27 @@ namespace AgileConfig.Server.IService
         /// </summary>
         /// <param name="publishTimelineId"></param>
         /// <returns></returns>
-        Task<List<PublishDetail>> GetPublishDetailByPublishTimelineId(string publishTimelineId);
+        Task<List<PublishDetail>> GetPublishDetailByPublishTimelineIdAsync(string publishTimelineId);
 
         /// <summary>
         /// 查询发布时间节点
         /// </summary>
         /// <param name="publishTimelineId"></param>
         /// <returns></returns>
-        Task<PublishTimeline> GetPublishTimeLineNode(string publishTimelineId);
+        Task<PublishTimeline> GetPublishTimeLineNodeAsync(string publishTimelineId);
+
+        /// <summary>
+        /// 获取发布历史
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <returns></returns>
+        Task<List<PublishTimeline>> GetPublishTimelineHistoryAsync(string appId);
+
+        /// <summary>
+        /// 获取发布详情列表
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <returns></returns>
+        Task<List<PublishDetail>> GetPublishDetailListAsync(string appId);
     }
 }
