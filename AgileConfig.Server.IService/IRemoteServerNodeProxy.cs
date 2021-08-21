@@ -61,7 +61,7 @@ namespace AgileConfig.Server.IService
         /// </summary>
         /// <param name="address"></param>
         /// <returns></returns>
-        ClientInfos GetClientsReport(string address);
+        Task<ClientInfos> GetClientsReportAsync(string address);
 
         /// <summary>
         /// 探测所有个节点是否在线

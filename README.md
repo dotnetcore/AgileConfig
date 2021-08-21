@@ -29,7 +29,7 @@ This is a lightweight configuration center based on .net core . It is easy to de
 5. restful api
 6. version management
     
-Demo Project ：[AgileConfig Server Demo](http://agileconfig.xbaby.xyz:5000)   username ：admin password ：123456   
+Demo Project ：[AgileConfig Server Demo](http://agileconfig_server.xbaby.xyz)   username ：admin password ：123456   
 client project ：[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
 samples ：    
 [AgileConfigMVCSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigMVCSample)   
@@ -57,8 +57,16 @@ oracle = Oracle
 
 ## useage
 ### run node
-```
-sudo docker run --name agile_config -e adminConsole=true -e db:provider=sqlite -e db:conn="Data Source=agile_config.db" -p 5000:5000 -v /etc/localtime:/etc/localtime  kklldog/agile_config:latest
+``` shell
+sudo docker run \
+--name agile_config \
+-e adminConsole=true \
+-e db:provider=sqlite \
+-e db:conn="Data Source=db\agile_config.db" \
+-p 5000:5000 \
+-v /etc/localtime:/etc/localtime \
+#-v /your_host_dir:/app/db \
+-d kklldog/agile_config:latest
 ```
 ## use client
 install client lib from nuget：
@@ -66,7 +74,7 @@ install client lib from nuget：
 Install-Package AgileConfig.Client
 ```
 add a agileconfig section in appsettings.json：
-```
+``` json
 {
   "Logging": {
     "LogLevel": {
@@ -88,58 +96,135 @@ add a agileconfig section in appsettings.json：
 }
 
 ```
+appsettings.json
+``` c#
+public static IHostBuilder CreateHostBuilder(string[] args) =>
+    Host.CreateDefaultBuilder(args)
+        .ConfigureAppConfiguration((context, config) =>
+        {
+            //default appsettings.json
+            config.AddAgileConfig(arg => Console.WriteLine($"config changed , action:{arg.Action} key:{arg.Key}"));
+        })
+        .ConfigureWebHostDefaults(webBuilder =>
+        {
+            webBuilder.UseStartup<Startup>();
+        });
 ```
-       public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-            .ConfigureAppConfiguration((context, config) =>
-            {
-        
-                config.AddAgileConfig();
-            })
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
+appsettings.{env}.json
+``` c#
+public static IHostBuilder CreateHostBuilder(string[] args) =>
+    Host.CreateDefaultBuilder(args)
+        .ConfigureAppConfiguration((context, config) =>
+        {
+            var envName = context.HostingEnvironment.EnvironmentName;
+            var configClient = new ConfigClient($"appsettings.{envName}.json");
+            config.AddAgileConfig(configClient, arg => Console.WriteLine($"config changed , action:{arg.Action} key:{arg.Key}"));
+        })
+        .ConfigureWebHostDefaults(webBuilder =>
+        {
+            webBuilder.UseStartup<Startup>();
+        });
+```
 
 
-```
 ## read configuration
-```
+
+``` c#
 public class HomeController : Controller
+{
+    private readonly ILogger<HomeController> _logger;
+    private readonly IConfiguration _IConfiguration;
+    private readonly IOptions<DbConfigOptions> _dbOptions;
+
+    public HomeController(ILogger<HomeController> logger, IConfiguration configuration, IOptions<DbConfigOptions> dbOptions)
     {
-        private readonly ILogger<HomeController> _logger;
-        private readonly IConfiguration _IConfiguration;
-        private readonly IOptions<DbConfigOptions> _dbOptions;
-
-        public HomeController(ILogger<HomeController> logger, IConfiguration configuration, IOptions<DbConfigOptions> dbOptions)
-        {
-            _logger = logger;
-            _IConfiguration = configuration;
-            _dbOptions = dbOptions;
-        }
-
-        public IActionResult Index()
-        {
-            return View();
-        }
-
-        /// <summary>
-        /// By IConfiguration to read
-        /// </summary>
-        /// <returns></returns>
-        public IActionResult ByIConfiguration()
-        {
-            var userId = _IConfiguration["userId"];
-            var dbConn = _IConfiguration["db:connection"];
-
-            ViewBag.userId = userId;
-            ViewBag.dbConn = dbConn;
-
-            return View();
-        }
-
+        _logger = logger;
+        _IConfiguration = configuration;
+        _dbOptions = dbOptions;
     }
+
+    public IActionResult Index()
+    {
+        return View();
+    }
+
+    /// <summary>
+    /// By IConfiguration to read
+    /// </summary>
+    /// <returns></returns>
+    public IActionResult ByIConfiguration()
+    {
+        var userId = _IConfiguration["userId"];
+        var dbConn = _IConfiguration["db:connection"];
+
+        ViewBag.userId = userId;
+        ViewBag.dbConn = dbConn;
+
+        return View();
+    }
+
+    /// <summary>
+    /// By Options to read
+    /// </summary>
+    /// <returns></returns>
+    public IActionResult ByOptions()
+    {
+        var dbConn = _dbOptions.Value.connection;
+        ViewBag.dbConn = dbConn;
+
+        return View("ByOptions");
+    }
+}
 ```
+
+dependency injection
+``` c#
+public class Startup
+{
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddAgileConfig();
+    }
+}
+```
+
+``` c#
+public class HomeController : Controller
+{
+    private readonly IConfigClient _configClient
+
+    public HomeController(IConfigClient configClient)
+    {
+        _configClient = configClient;
+    }
+
+    public IActionResult Index()
+    {
+        return View();
+    }
+
+    /// <summary>
+    /// By IConfigClient to read
+    /// </summary>
+    /// <returns></returns>
+    public IActionResult ByIConfigClient()
+    {
+        var userId = _configClient["userId"];
+        var dbConn = _configClient["db:connection"];
+
+        foreach (var item in _configClient.Data)
+        {
+            Console.WriteLine($"{item.Key} = {item.Value}");
+        }
+
+        ViewBag.userId = userId;
+        ViewBag.dbConn = dbConn;
+
+        return View();
+    }
+}
+```
+
 ## screenshots
 ![](https://ftp.bmp.ovh/imgs/2021/04/44242b327230c5e6.png)   
 ![](https://ftp.bmp.ovh/imgs/2021/04/7e93011590c55d12.png)   
@@ -154,7 +239,7 @@ If this project is helpful to you, please scan the QR code below for a cup of co
   <img src="https://ftp.bmp.ovh/imgs/2021/07/1c8748c5732b8fbe.jpg" width="300">
    
 ## thanks 💖💖💖    
-大鹏￥66.66 , 瘦草￥6.66
+大鹏￥66.66 , 瘦草￥6.66 , ziana￥10.0
 ## contact me
 mail：minj.zhou@gmail.com   
 qq group：1022985150
