@@ -11,8 +11,6 @@ using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace AgileConfig.Server.Service
@@ -57,18 +55,18 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> AllClientsDoActionAsync(string address, WebsocketAction action)
         {
-            var result = await FunctionUtil.TRY(async () =>
+            var result = await FunctionUtil.TRYAsync(async () =>
             {
                 using (var resp = await (address + "/RemoteOP/AllClientsDoAction")
                     .AsHttp("POST", action)
-                    .Config(new RequestOptions {ContentType = "application/json"})
+                    .Config(new RequestOptions { ContentType = "application/json" })
                     .SendAsync())
                 {
                     if (resp.StatusCode == System.Net.HttpStatusCode.OK)
                     {
                         var result = resp.Deserialize<dynamic>();
 
-                        if ((bool) result.success)
+                        if ((bool)result.success)
                         {
                             return true;
                         }
@@ -93,18 +91,18 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> AppClientsDoActionAsync(string address, string appId, WebsocketAction action)
         {
-            var result = await FunctionUtil.TRY(async () =>
+            var result = await FunctionUtil.TRYAsync(async () =>
             {
                 using (var resp = await (address + "/RemoteOP/AppClientsDoAction".AppendQueryString("appId", appId))
                     .AsHttp("POST", action)
-                    .Config(new RequestOptions {ContentType = "application/json"})
+                    .Config(new RequestOptions { ContentType = "application/json" })
                     .SendAsync())
                 {
                     if (resp.StatusCode == System.Net.HttpStatusCode.OK)
                     {
                         var result = resp.Deserialize<dynamic>();
 
-                        if ((bool) result.success)
+                        if ((bool)result.success)
                         {
                             return true;
                         }
@@ -130,18 +128,18 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> OneClientDoActionAsync(string address, string clientId, WebsocketAction action)
         {
-            var result = await FunctionUtil.TRY(async () =>
+            var result = await FunctionUtil.TRYAsync(async () =>
             {
                 using (var resp = await (address + "/RemoteOP/OneClientDoAction?clientId=" + clientId)
                     .AsHttp("POST", action)
-                    .Config(new RequestOptions {ContentType = "application/json"})
+                    .Config(new RequestOptions { ContentType = "application/json" })
                     .SendAsync())
                 {
                     if (resp.StatusCode == System.Net.HttpStatusCode.OK)
                     {
                         var result = resp.Deserialize<dynamic>();
 
-                        if ((bool) result.success)
+                        if ((bool)result.success)
                         {
                             if (action.Action == ActionConst.Offline || action.Action == ActionConst.Remove)
                             {
@@ -177,20 +175,49 @@ namespace AgileConfig.Server.Service
             return result;
         }
 
-        public ClientInfos GetClientsReport(string address)
+        public async Task<ClientInfos> GetClientsReportAsync(string address)
         {
             if (string.IsNullOrEmpty(address))
             {
-                return null;
+                return new ClientInfos()
+                {
+                    ClientCount = 0,
+                    Infos = new List<ClientInfo>()
+                };
             }
 
-            _serverNodeClientReports.TryGetValue(address, out ClientInfos report);
-            if (report != null)
+            try
             {
-                report.Infos?.ForEach(i => { i.Address = address; });
+                using (var resp = await (address + "/report/Clients").AsHttp()
+               .Config(new RequestOptions(new SerializeProvider())).SendAsync())
+                {
+                    if (resp.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        var clients = resp.Deserialize<ClientInfos>();
+                        if (clients != null)
+                        {
+                            clients.Infos?.ForEach(i => { i.Address = address; });
+                            return clients;
+                        }
+                    }
+
+                    return new ClientInfos()
+                    {
+                        ClientCount = 0,
+                        Infos = new List<ClientInfo>()
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError($"Try to get client infos from node {address} occur ERROR . ", ex);
             }
 
-            return report;
+            return new ClientInfos()
+            {
+                ClientCount = 0,
+                Infos = new List<ClientInfo>()
+            };
         }
 
         public async Task TestEchoAsync(string address)
@@ -199,33 +226,18 @@ namespace AgileConfig.Server.Service
             var node = await service.GetAsync(address);
             try
             {
-                await FunctionUtil.TRY(async () =>
+                using var resp = await (node.Address + "/home/echo").AsHttp().SendAsync();
+                if (resp.StatusCode == System.Net.HttpStatusCode.OK && (await resp.GetResponseContentAsync()) == "ok")
                 {
-                    using var resp = (node.Address + "/home/echo").AsHttp().Send();
-                    if (resp.StatusCode == System.Net.HttpStatusCode.OK && resp.GetResponseContent() == "ok")
-                    {
-                        node.LastEchoTime = DateTime.Now;
-                        node.Status = Data.Entity.NodeStatus.Online;
-                        var report = GetClientReport(node);
-                        if (report != null)
-                        {
-                            if (_serverNodeClientReports.ContainsKey(node.Address))
-                            {
-                                _serverNodeClientReports[node.Address] = report;
-                            }
-                            else
-                            {
-                                _serverNodeClientReports.AddOrUpdate(node.Address, report, (k, r) => report);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        node.Status = Data.Entity.NodeStatus.Offline;
-                    }
+                    node.LastEchoTime = DateTime.Now;
+                    node.Status = Data.Entity.NodeStatus.Online;
+                }
+                else
+                {
+                    node.Status = Data.Entity.NodeStatus.Offline;
+                }
 
-                    await service.UpdateAsync(node);
-                }, 5);
+                await service.UpdateAsync(node);
             }
             catch (Exception e)
             {
@@ -241,69 +253,15 @@ namespace AgileConfig.Server.Service
                 {
                     using var service = GetGerverNodeService();
                     var nodes = await service.GetAllNodesAsync();
-                    nodes.ForEach(n =>
-                    {
-                        try
-                        {
-                            FunctionUtil.TRY(async () =>
-                            {
-                                using var resp = (n.Address + "/home/echo").AsHttp().Send();
-                                if (resp.StatusCode == HttpStatusCode.OK && resp.GetResponseContent() == "ok")
-                                {
-                                    n.LastEchoTime = DateTime.Now;
-                                    n.Status = NodeStatus.Online;
-                                    var report = GetClientReport(n);
-                                    if (_serverNodeClientReports.ContainsKey(n.Address))
-                                    {
-                                        _serverNodeClientReports[n.Address] = report;
-                                    }
-                                    else
-                                    {
-                                        _serverNodeClientReports.AddOrUpdate(n.Address, report,
-                                            (k, r) => report);
-                                    }
-                                }
-                                else
-                                {
-                                    n.Status = NodeStatus.Offline;
-                                }
 
-                                await service.UpdateAsync(n);
-                            }, 5);
-                        }
-                        catch (Exception e)
-                        {
-                            _logger.LogInformation(e, "Try test node {0} echo , but fail .", n.Address);
-                        }
-                    });
+                    foreach (var node in nodes)
+                    {
+                        await TestEchoAsync(node.Address);
+                    }
 
                     await Task.Delay(5000 * 1);
                 }
             });
-        }
-
-        private ClientInfos GetClientReport(ServerNode node)
-        {
-            return FunctionUtil.TRY(() =>
-            {
-                using (var resp = (node.Address + "/report/Clients").AsHttp()
-                    .Config(new RequestOptions(new SerializeProvider())).Send())
-                {
-                    if (resp.StatusCode == System.Net.HttpStatusCode.OK)
-                    {
-                        var content = resp.GetResponseContent();
-                        _logger.LogTrace($"ServerNode: {node.Address} report clients infomation , {content}");
-
-                        var report = resp.Deserialize<ClientInfos>();
-                        if (report != null)
-                        {
-                            return report;
-                        }
-                    }
-
-                    return null;
-                }
-            }, 5);
         }
     }
 }
