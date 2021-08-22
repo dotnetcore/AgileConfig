@@ -517,5 +517,12 @@ namespace AgileConfig.Server.Service
 
             return list;
         }
+
+        public async Task<List<PublishDetail>> GetConfigPublishedHistory(string configId)
+        {
+            var list = await _dbContext.PublishDetail.Where(x => x.ConfigId == configId).ToListAsync();
+
+            return list;
+        }
     }
 }

@@ -21,16 +21,13 @@ namespace AgileConfig.Server.Apisite.Controllers
     public class ConfigController : Controller
     {
         private readonly IConfigService _configService;
-        private readonly IModifyLogService _modifyLogService;
         private readonly IAppService _appService;
 
         public ConfigController(
                                 IConfigService configService,
-                                IModifyLogService modifyLogService,
                                  IAppService appService)
         {
             _configService = configService;
-            _modifyLogService = modifyLogService;
             _appService = appService;
         }
 
@@ -420,30 +417,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 Value = config.Value
             };
 
-            var log = await _modifyLogService.GetAsync(logId);
-            if (log == null)
-            {
-                return Json(new
-                {
-                    success = false,
-                    message = "未找到对应的配置项的历史记录项。"
-                });
-            }
-            config.Key = log.Key;
-            config.Group = log.Group;
-            config.Value = log.Value;
-            config.UpdateTime = DateTime.Now;
-
             var result = await _configService.UpdateAsync(config);
-            if (result)
-            {
-                dynamic param = new ExpandoObject();
-                param.config = config;
-                param.modifyLog = log;
-                param.oldConfig = oldConfig;
-                param.userName = this.GetCurrentUserName();
-                TinyEventBus.Instance.Fire(EventKeys.ROLLBACK_CONFIG_SUCCESS, param);
-            }
 
             return Json(new
             {
@@ -453,19 +427,30 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ModifyLogs(string configId)
+        public async Task<IActionResult> ConfigPublishedHistory(string configId)
         {
             if (string.IsNullOrEmpty(configId))
             {
                 throw new ArgumentNullException("configId");
             }
 
-            var logs = await _modifyLogService.Search(configId);
+            var configPublishedHistory = await _configService.GetConfigPublishedHistory(configId);
+            var result = new List<object>();
+
+            foreach (var publishDetail in configPublishedHistory.OrderByDescending(x=>x.Version))
+            {
+                var timelineNode = await _configService.GetPublishTimeLineNodeAsync(publishDetail.PublishTimelineId);
+                result.Add(new
+                {
+                    timelineNode,
+                    config = publishDetail
+                });
+            }
 
             return Json(new
             {
                 success = true,
-                data = logs.OrderByDescending(l => l.ModifyTime).ToList()
+                data = result
             }); ;
         }
 

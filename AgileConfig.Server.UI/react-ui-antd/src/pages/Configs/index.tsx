@@ -1,13 +1,13 @@
-import { PlusOutlined, VerticalAlignBottomOutlined, VerticalAlignTopOutlined } from '@ant-design/icons';
-import { ModalForm, ProFormSwitch, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
+import { PlusOutlined, VerticalAlignTopOutlined } from '@ant-design/icons';
+import { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns, TableDropdown } from '@ant-design/pro-table';
-import { Button, Drawer, FormInstance, List, message, Modal, Space, Tag } from 'antd';
+import { Button, Drawer, FormInstance, List, message, Modal, Tag } from 'antd';
 import React, { useState, useRef, useEffect } from 'react';
 import { queryApps } from '../Apps/service';
 import UpdateForm from './comps/updateForm';
-import { ConfigListItem, ConfigModifyLog } from './data';
-import { queryConfigs, onlineConfig, offlineConfig, delConfig, addConfig, editConfig, queryModifyLogs,rollback,onlineSomeConfigs,offlineSomeConfigs, getWaitPublishStatus, publish } from './service';
+import { ConfigListItem, PublishDetial, PublishDetialConfig } from './data';
+import { queryConfigs, delConfig, addConfig, editConfig, queryConfigPublishedHistory,rollback, getWaitPublishStatus, publish } from './service';
 import Text from 'antd/lib/typography/Text';
 import moment from 'moment';
 import styles from './index.less';
@@ -97,7 +97,7 @@ const handleEdit = async (config: ConfigListItem) => {
     return false;
   }
 };
-const handleRollback = async (config: ConfigModifyLog) => {
+const handleRollback = async (config: PublishDetial) => {
   const intl = getIntl(getLocale());
   const hide = message.loading(intl.formatMessage({id: 'rollbacking'}));
   try {
@@ -128,7 +128,7 @@ const configs: React.FC = (props: any) => {
   const [versionHistoryFormModalVisible, setVersionHistoryFormModalVisible] = useState<boolean>(false);
   const [currentRow, setCurrentRow] = useState<ConfigListItem>();
   const [selectedRowsState, setSelectedRows] = useState<ConfigListItem[]>([]);
-  const [modifyLogs, setModifyLogs] = useState<ConfigModifyLog[]>([]);
+  const [configPublishedHistory, setModifyLogs] = useState<PublishDetialConfig[]>([]);
   const [waitPublishStatus, setWaitPublishStatus] = useState<{
     addCount: number,
     editCount: number,
@@ -195,12 +195,12 @@ const configs: React.FC = (props: any) => {
       }
     });
   }
-  const rollback = (config: ConfigModifyLog) => {
+  const rollback = (config: PublishDetialConfig) => {
     const confirmMsg = intl.formatMessage({id:'pages.config.confirm_rollback'});
     confirm({
-      content: confirmMsg + `【${moment(config.modifyTime).format('YYYY-MM-DD HH:mm:ss')}】？`,
+      content: confirmMsg + `【${moment(config.timelineNode?.publishTime).format('YYYY-MM-DD HH:mm:ss')}】？`,
       onOk: async () => {
-        const result = await handleRollback(config);
+        const result = await handleRollback(config.config);
         if (result) {
           setmodifyLogsModalVisible(false);
           actionRef.current?.reload();
@@ -323,7 +323,7 @@ const configs: React.FC = (props: any) => {
                   if (item == 'history') {
                     setCurrentRow(record);
                     setmodifyLogsModalVisible(true)
-                    const result = await queryModifyLogs(record)
+                    const result = await queryConfigPublishedHistory(record)
                     if (result.success) {
                       setModifyLogs(result.data);
                     }
@@ -575,7 +575,7 @@ const configs: React.FC = (props: any) => {
           className={styles.history}
           header={false}
           itemLayout="horizontal"
-          dataSource={modifyLogs}
+          dataSource={configPublishedHistory}
           renderItem={(item, index) => (
             <List.Item className={styles.listitem} actions={index ? [
                 <AuthorizedEle key="0" judgeKey={functionKeys.Config_Edit} appId={appId}>
@@ -590,7 +590,7 @@ const configs: React.FC = (props: any) => {
                 title={
 
                   <div>
-                    <Text style={{marginRight:'20px'}}>{moment(item.modifyTime).format('YYYY-MM-DD HH:mm:ss')}</Text>
+                    <Text style={{marginRight:'20px'}}>{moment(item.timelineNode?.publishTime).format('YYYY-MM-DD HH:mm:ss')}</Text>
                   &nbsp;
                     {
                        index ? null : <Tag color="blue">
@@ -607,16 +607,16 @@ const configs: React.FC = (props: any) => {
                       {
                           intl.formatMessage({id:'pages.configs.table.cols.g'})
                       }
-                      ：{item.group}</div>
+                      ：{item.config.group}</div>
                     <div>
                       {
                           intl.formatMessage({id:'pages.configs.table.cols.k'})
                       }
-                      ：{item.key}</div>
+                      ：{item.config.key}</div>
                     <div>
                       {
                           intl.formatMessage({id:'pages.configs.table.cols.v'})
-                      }：{item.value}</div>
+                      }：{item.config.value}</div>
                   </div>
                 }
               />

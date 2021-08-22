@@ -49,6 +49,16 @@ export type PublishDetial =  {
   value: string,
   id: string,
   editStatus: number,
+  version: number,
+  configId: string
+}
+
+export type PublishedConfig =  {
+  group: string,
+  key: string,
+  value: string,
+  id: string,
+  publishTime: number,
   version: number
 }
 
@@ -56,4 +66,9 @@ export type PublishDetialNode =  {
   key: string,
   timelineNode: PublishTimelineNode,
   list: PublishDetial[]
+}
+
+export type PublishDetialConfig =  {
+  timelineNode: PublishTimelineNode,
+  config: PublishDetial
 }

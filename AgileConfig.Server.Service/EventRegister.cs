@@ -29,10 +29,6 @@ namespace AgileConfig.Server.Service
         {
             return new SysLogService(new FreeSqlContext(FreeSQL.Instance));
         }
-        private IModifyLogService NewModifyLogService() 
-        {
-            return new ModifyLogService(new FreeSqlContext(FreeSQL.Instance));
-        }
         private IServerNodeService NewServerNodeService()
         {
             return new ServerNodeService(new FreeSqlContext(FreeSQL.Instance)); 
@@ -379,21 +375,6 @@ namespace AgileConfig.Server.Service
                 using (var configService = NewConfigService())
                 {
                     var publishDetail = await configService.GetPublishDetailByPublishTimelineIdAsync(node.Id);
-                    using (var modifyLogService = NewModifyLogService())
-                    {
-                        foreach (var row in publishDetail)
-                        {
-                            await modifyLogService.AddAsync(new ModifyLog()
-                            {
-                                ConfigId = row.ConfigId,
-                                Group = row.Group,
-                                Id = Guid.NewGuid().ToString("N"),
-                                Key = row.Key,
-                                ModifyTime = node.PublishTime.Value,
-                                Value = row.Value
-                            });
-                        }
-                    }
                 }
                 
             });
@@ -404,35 +385,21 @@ namespace AgileConfig.Server.Service
             {
                 dynamic param_dy = param;
                 Config config = param_dy.config;
-                ModifyLog modifyLog = param_dy.modifyLog;
                 string userName = param_dy.userName;
 
-                if (config != null && modifyLog != null)
+                if (config != null )
                 {
                     var log = new SysLog
                     {
                         LogTime = DateTime.Now,
                         LogType = SysLogType.Warn,
                         AppId = config.AppId,
-                        LogText = $"用户：{userName} 回滚配置【Key:{config.Key}】 【Group：{config.Group}】 【AppId：{config.AppId}】至历史记录：{modifyLog.Id}"
                     };
                     using (var syslogService = NewSysLogService())
                     {
                         await syslogService.AddSysLogAsync(log);
                     }
 
-                    using (var modifyLogService = NewModifyLogService())
-                    {
-                        await modifyLogService.AddAsync(new ModifyLog
-                        {
-                            Id = Guid.NewGuid().ToString("N"),
-                            ConfigId = config.Id,
-                            Key = config.Key,
-                            Group = config.Group,
-                            Value = config.Value,
-                            ModifyTime = config.UpdateTime.Value
-                        });
-                    }
                 }
             });
 

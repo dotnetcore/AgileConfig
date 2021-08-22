@@ -62,7 +62,6 @@ namespace AgileConfig.Server.Data.Freesql
                 {
                     instance.CodeFirst.SyncStructure<App>();
                     instance.CodeFirst.SyncStructure<Config>();
-                    instance.CodeFirst.SyncStructure<ModifyLog>();
                     instance.CodeFirst.SyncStructure<ServerNode>();
                     instance.CodeFirst.SyncStructure<Setting>();
                     instance.CodeFirst.SyncStructure<SysLog>();
