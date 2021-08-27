@@ -64,7 +64,8 @@ const clients:React.FC = () => {
     const arr:any[] = [];
     result.data.forEach((x:{address:string})=>{
        arr.push({
-         value: x.address
+         value: x.address,
+         label: x.address,
        });
     });
 
