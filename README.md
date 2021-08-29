@@ -239,7 +239,7 @@ If this project is helpful to you, please scan the QR code below for a cup of co
   <img src="https://ftp.bmp.ovh/imgs/2021/07/1c8748c5732b8fbe.jpg" width="300">
    
 ## thanks 💖💖💖    
-大鹏￥66.66 , 瘦草￥6.66 + 88 , ziana￥10.0 , Nullable￥9.99
+大鹏￥66.66 , 瘦草￥6.66 + 88 , ziana￥10.0 , Nullable￥9.99 , *三 ￥6.66
 ## contact me
 mail：minj.zhou@gmail.com   
 qq group：1022985150
