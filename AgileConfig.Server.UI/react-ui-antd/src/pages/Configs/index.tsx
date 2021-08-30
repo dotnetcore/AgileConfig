@@ -577,15 +577,7 @@ const configs: React.FC = (props: any) => {
           itemLayout="horizontal"
           dataSource={configPublishedHistory}
           renderItem={(item, index) => (
-            <List.Item className={styles.listitem} actions={index ? [
-                <AuthorizedEle key="0" judgeKey={functionKeys.Config_Edit} appId={appId}>
-                  <a className={styles.rollback} onClick={ ()=>{rollback(item)} }>
-                  {
-                    intl.formatMessage({id:'pages.config.history.rollback'})
-                  }
-                </a>
-                </AuthorizedEle>
-              ] : []} >
+            <List.Item className={styles.listitem}  >
               <List.Item.Meta
                 title={
 

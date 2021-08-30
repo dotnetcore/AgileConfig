@@ -1,10 +1,11 @@
-import { message, Modal, Table, Tag } from "antd";
-import Title from "antd/lib/skeleton/Title";
+import { Button, Col, message, Modal, Row, Space, Table, Tag } from "antd";
+import styles from './versionHistory.less';
 import moment from "moment";
 import React, { useState,useEffect } from 'react';
 import { useIntl } from "react-intl";
-import { PublishDetial, PublishDetialNode } from "../data";
+import { PublishDetialNode } from "../data";
 import { getPublishHistory } from "../service";
+import { Link } from "umi";
 export type VersionHistoryFormProps = {
     appId: string,
     appName: string,
@@ -78,15 +79,11 @@ const VersionHistory : React.FC<VersionHistoryFormProps> = (props)=>{
             }
           }
           >
-            <div style={{
-              maxHeight:600,
-              overflowY:"scroll"
-            }}>
+            <div className={styles.historyContainer}>
             {
               datasource.map(e=> 
-                <div style={{marginBottom: 30}}>
+                <div className={styles.historyVersionTable}>
                   <Table 
-                    
                     key={e.key}
                     rowKey="id"
                     size="small"
@@ -98,9 +95,18 @@ const VersionHistory : React.FC<VersionHistoryFormProps> = (props)=>{
                     pagination={false}
                     dataSource={e.list} 
                     columns={columns}
-                    bordered
                     >
                   </Table>
+                  <div>
+                  <Row justify="end">
+                    <Col span={2} >
+                      <Button type="link" style={{marginTop:20}} >
+                        回滚
+                      </Button >
+                    </Col>
+                  </Row>
+                   
+                  </div>
                 </div>
                 
               )
