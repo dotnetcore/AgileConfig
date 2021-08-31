@@ -627,5 +627,23 @@ namespace AgileConfig.Server.Apisite.Controllers
                 data = result
             });
         }
+
+        public async Task<IActionResult> CancelEdit(string configId)
+        {
+            if (string.IsNullOrEmpty(configId))
+            {
+                throw new ArgumentNullException("configId");
+            }
+
+            var config = await _configService.GetAsync(configId);
+            if (config == null)
+            {
+                throw new Exception("Can not find config by id " + configId);
+            }
+
+            //if (config.EditStatus == EditStatus.Commit)
+
+            return null;
+        }
     }
 }

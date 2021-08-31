@@ -5,7 +5,6 @@ import React, { useState,useEffect } from 'react';
 import { useIntl } from "react-intl";
 import { PublishDetialNode } from "../data";
 import { getPublishHistory } from "../service";
-import { Link } from "umi";
 export type VersionHistoryFormProps = {
     appId: string,
     appName: string,
@@ -100,7 +99,7 @@ const VersionHistory : React.FC<VersionHistoryFormProps> = (props)=>{
                   <div>
                   <Row justify="end">
                     <Col span={2} >
-                      <Button type="link" style={{marginTop:20}} >
+                      <Button type="primary" style={{marginTop:20}} >
                         回滚
                       </Button >
                     </Col>

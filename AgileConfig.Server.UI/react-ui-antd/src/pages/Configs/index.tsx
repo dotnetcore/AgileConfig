@@ -2,7 +2,7 @@ import { PlusOutlined, VerticalAlignTopOutlined } from '@ant-design/icons';
 import { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns, TableDropdown } from '@ant-design/pro-table';
-import { Button, Drawer, FormInstance, List, message, Modal, Tag } from 'antd';
+import { Badge, Button, Drawer, FormInstance, List, message, Modal, Space, Tag } from 'antd';
 import React, { useState, useRef, useEffect } from 'react';
 import { queryApps } from '../Apps/service';
 import UpdateForm from './comps/updateForm';
@@ -331,7 +331,14 @@ const configs: React.FC = (props: any) => {
                 }
               }
               menus={
+                record.editStatus === 10 ?
                 [
+                  { key: 'history', name: intl.formatMessage({
+                    id: 'pages.configs.table.cols.action.history'
+                  }) }
+                ]:
+                [
+                  { key: 'cancelEdit', name: '撤销编辑' },
                   { key: 'history', name: intl.formatMessage({
                     id: 'pages.configs.table.cols.action.history'
                   }) }
@@ -355,7 +362,19 @@ const configs: React.FC = (props: any) => {
           labelWidth: 'auto',
         }}
         request={(params, sorter, filter) => queryConfigs(appId,params)}
-        headerTitle= {`add:${waitPublishStatus.addCount} edit:${waitPublishStatus.editCount} delete:${waitPublishStatus.deleteCount}`}
+        headerTitle= {
+          <Space size="middle">
+              <Badge count={waitPublishStatus.addCount} size="small" offset={[-5, 0]}>
+                <Tag color="blue" hidden={waitPublishStatus.addCount===0}>新增</Tag>
+              </Badge>
+              <Badge count={waitPublishStatus.editCount} size="small" offset={[-5, 0]}>
+                <Tag color="gold" hidden={waitPublishStatus.editCount===0}>编辑</Tag>
+              </Badge>
+              <Badge count={waitPublishStatus.deleteCount} size="small" offset={[-5, 0]}>
+                <Tag color="red" hidden={waitPublishStatus.deleteCount===0}>删除</Tag>
+              </Badge>
+          </Space>
+        }
         toolBarRender={() => [
           <AuthorizedEle key="0" judgeKey={functionKeys.Config_Add} appId={appId}>
             <Button key="button" icon={<PlusOutlined />}  onClick={() => { setCreateModalVisible(true); }}>

@@ -524,5 +524,19 @@ namespace AgileConfig.Server.Service
 
             return list;
         }
+
+        public async Task<List<ConfigPublished>> GetPublishedConfigsAsync(string appId)
+        {
+            var list = await _dbContext.ConfigPublished.Where(x => x.AppId == appId && x.Status == ConfigStatus.Enabled).ToListAsync();
+
+            return list;
+        }
+
+        public async Task<ConfigPublished> GetPublishedConfigAsync(string configId)
+        {
+            var one = await _dbContext.ConfigPublished.Where(x => x.ConfigId == configId && x.Status == ConfigStatus.Enabled).ToOneAsync();
+
+            return one;
+        }
     }
 }

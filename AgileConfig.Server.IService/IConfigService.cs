@@ -129,5 +129,19 @@ namespace AgileConfig.Server.IService
         /// <param name="configId"></param>
         /// <returns></returns>
         Task<List<PublishDetail>> GetConfigPublishedHistory(string configId);
+
+        /// <summary>
+        /// 获取当前发布的配置
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <returns></returns>
+        Task<List<ConfigPublished>> GetPublishedConfigsAsync(string appId);
+
+        /// <summary>
+        /// 获取单个发布的配置
+        /// </summary>
+        /// <param name="configId"></param>
+        /// <returns></returns>
+        Task<ConfigPublished> GetPublishedConfigAsync(string configId);
     }
 }
