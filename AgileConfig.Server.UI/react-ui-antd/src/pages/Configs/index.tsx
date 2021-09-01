@@ -1,4 +1,4 @@
-import { PlusOutlined, VerticalAlignTopOutlined } from '@ant-design/icons';
+import { CiCircleOutlined, DeleteOutlined, PlusOutlined, RollbackOutlined, VerticalAlignTopOutlined } from '@ant-design/icons';
 import { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns, TableDropdown } from '@ant-design/pro-table';
@@ -170,7 +170,18 @@ const configs: React.FC = (props: any) => {
 
   const publish = (appId: string) => {
     confirm({
-      content: '确定发布当前待发布的配置项吗？',
+      content: <div>
+        {
+          '确定发布当前所有待发布的配置项吗？'
+        }
+        <br />
+        <br />
+        <div>
+          {
+            `新增:${waitPublishStatus.addCount}项  编辑:${waitPublishStatus.editCount}项  删除:${waitPublishStatus.deleteCount}项`
+          }
+        </div>
+      </div>,
       onOk: async () => {
         const result = await handlePublish(appId);
         if (result && actionRef.current) {
@@ -376,7 +387,7 @@ const configs: React.FC = (props: any) => {
         }
         toolBarRender={() => [
           <AuthorizedEle key="0" judgeKey={functionKeys.Config_Add} appId={appId}>
-            <Button key="button" icon={<PlusOutlined />}  onClick={() => { setCreateModalVisible(true); }}>
+            <Button key="button" type="primary"  icon={<PlusOutlined />}  onClick={() => { setCreateModalVisible(true); }}>
             {
               intl.formatMessage({
                 id: 'pages.configs.table.cols.action.add'
@@ -397,6 +408,29 @@ const configs: React.FC = (props: any) => {
             </Button>
           </AuthorizedEle>
           ,
+          <AuthorizedEle key="5" judgeKey={functionKeys.Config_Edit} appId={appId} >
+            {
+              selectedRowsState.filter(x=>x.editStatus != 10).length > 0 ?
+              <Button key="button"  type="primary" icon={<RollbackOutlined />}
+                    >
+                撤销编辑
+              </Button>
+              :
+              <></>
+            }
+            
+          </AuthorizedEle>
+        ,
+        <AuthorizedEle key="6" judgeKey={functionKeys.Config_Edit} appId={appId} >
+          {
+            selectedRowsState.length > 0 ?
+            <Button key="button"  type="primary" icon={<DeleteOutlined />}
+                    >
+                删除
+            </Button>:<></>
+          }
+        </AuthorizedEle>
+        ,
           <AuthorizedEle key="1" judgeKey={functionKeys.Config_Publish} appId={appId}>
             <Button key="button"  onClick={()=>{ setVersionHistoryFormModalVisible(true) }}>
               {

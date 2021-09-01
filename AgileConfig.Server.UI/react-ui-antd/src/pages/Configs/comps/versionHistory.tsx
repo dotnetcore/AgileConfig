@@ -102,6 +102,9 @@ const VersionHistory : React.FC<VersionHistoryFormProps> = (props)=>{
           >
             <div className={styles.historyContainer}>
             {
+              datasource.length === 0 ?
+              '暂无数据'
+              :
               datasource.map( (e, i)=> 
                 <div className={styles.historyVersionTable}>
                   <Table 
