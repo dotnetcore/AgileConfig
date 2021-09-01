@@ -21,22 +21,13 @@ namespace AgileConfig.Server.Apisite.Controllers
     public class ConfigController : Controller
     {
         private readonly IConfigService _configService;
-        private readonly IModifyLogService _modifyLogService;
-        private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
-        private readonly IServerNodeService _serverNodeService;
         private readonly IAppService _appService;
 
         public ConfigController(
                                 IConfigService configService,
-                                IModifyLogService modifyLogService,
-                                IRemoteServerNodeProxy remoteServerNodeProxy,
-                                IServerNodeService serverNodeService,
                                  IAppService appService)
         {
             _configService = configService;
-            _modifyLogService = modifyLogService;
-            _remoteServerNodeProxy = remoteServerNodeProxy;
-            _serverNodeService = serverNodeService;
             _appService = appService;
         }
 
@@ -426,30 +417,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 Value = config.Value
             };
 
-            var log = await _modifyLogService.GetAsync(logId);
-            if (log == null)
-            {
-                return Json(new
-                {
-                    success = false,
-                    message = "未找到对应的配置项的历史记录项。"
-                });
-            }
-            config.Key = log.Key;
-            config.Group = log.Group;
-            config.Value = log.Value;
-            config.UpdateTime = DateTime.Now;
-
             var result = await _configService.UpdateAsync(config);
-            if (result)
-            {
-                dynamic param = new ExpandoObject();
-                param.config = config;
-                param.modifyLog = log;
-                param.oldConfig = oldConfig;
-                param.userName = this.GetCurrentUserName();
-                TinyEventBus.Instance.Fire(EventKeys.ROLLBACK_CONFIG_SUCCESS, param);
-            }
 
             return Json(new
             {
@@ -459,19 +427,30 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ModifyLogs(string configId)
+        public async Task<IActionResult> ConfigPublishedHistory(string configId)
         {
             if (string.IsNullOrEmpty(configId))
             {
                 throw new ArgumentNullException("configId");
             }
 
-            var logs = await _modifyLogService.Search(configId);
+            var configPublishedHistory = await _configService.GetConfigPublishedHistory(configId);
+            var result = new List<object>();
+
+            foreach (var publishDetail in configPublishedHistory.OrderByDescending(x=>x.Version))
+            {
+                var timelineNode = await _configService.GetPublishTimeLineNodeAsync(publishDetail.PublishTimelineId);
+                result.Add(new
+                {
+                    timelineNode,
+                    config = publishDetail
+                });
+            }
 
             return Json(new
             {
                 success = true,
-                data = logs.OrderByDescending(l => l.ModifyTime).ToList()
+                data = result
             }); ;
         }
 
@@ -493,7 +472,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (ret.result)
             {
-                var timelineNode = await _configService.GetPublishTimeLineNode(ret.publishTimelineId);
+                var timelineNode = await _configService.GetPublishTimeLineNodeAsync(ret.publishTimelineId);
                 dynamic param = new ExpandoObject();
                 param.publishTimelineNode = timelineNode;
                 param.userName = this.GetCurrentUserName();
@@ -614,6 +593,57 @@ namespace AgileConfig.Server.Apisite.Controllers
                     deleteCount
                 }
             });
+        }
+
+        /// <summary>
+        /// 获取发布详情的历史
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> PublishHistory(string appId)
+        {
+            if (string.IsNullOrEmpty(appId))
+            {
+                throw new ArgumentNullException("appId");
+            }
+
+            var history = await _configService.GetPublishDetailListAsync(appId);
+
+            var result = new List<object>();
+            foreach (var publishDetails in history.GroupBy(x => x.Version).OrderByDescending( g=>g.Key))
+            {
+                var data = publishDetails.ToList();
+                result.Add(new
+                {
+                    key = publishDetails.Key,
+                    timelineNode = await _configService.GetPublishTimeLineNodeAsync(data.FirstOrDefault()?.PublishTimelineId),
+                    list = data
+                });
+            }
+
+            return Json(new
+            {
+                success = true,
+                data = result
+            });
+        }
+
+        public async Task<IActionResult> CancelEdit(string configId)
+        {
+            if (string.IsNullOrEmpty(configId))
+            {
+                throw new ArgumentNullException("configId");
+            }
+
+            var config = await _configService.GetAsync(configId);
+            if (config == null)
+            {
+                throw new Exception("Can not find config by id " + configId);
+            }
+
+            //if (config.EditStatus == EditStatus.Commit)
+
+            return null;
         }
     }
 }

@@ -1,13 +1,13 @@
-import { PlusOutlined, VerticalAlignBottomOutlined, VerticalAlignTopOutlined } from '@ant-design/icons';
-import { ModalForm, ProFormSwitch, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
+import { PlusOutlined, VerticalAlignTopOutlined } from '@ant-design/icons';
+import { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns, TableDropdown } from '@ant-design/pro-table';
-import { Button, Drawer, FormInstance, List, message, Modal, Space, Tag } from 'antd';
+import { Badge, Button, Drawer, FormInstance, List, message, Modal, Space, Tag } from 'antd';
 import React, { useState, useRef, useEffect } from 'react';
 import { queryApps } from '../Apps/service';
 import UpdateForm from './comps/updateForm';
-import { ConfigListItem, ConfigModifyLog } from './data';
-import { queryConfigs, onlineConfig, offlineConfig, delConfig, addConfig, editConfig, queryModifyLogs,rollback,onlineSomeConfigs,offlineSomeConfigs, getWaitPublishStatus, publish } from './service';
+import { ConfigListItem, PublishDetial, PublishDetialConfig } from './data';
+import { queryConfigs, delConfig, addConfig, editConfig, queryConfigPublishedHistory,rollback, getWaitPublishStatus, publish } from './service';
 import Text from 'antd/lib/typography/Text';
 import moment from 'moment';
 import styles from './index.less';
@@ -17,6 +17,7 @@ import { getIntl, getLocale } from '@/.umi/plugin-locale/localeExports';
 import AuthorizedEle, { checkUserPermission } from '@/components/Authorized/AuthorizedElement';
 import functionKeys from '@/models/functionKeys';
 import { getFunctions } from '@/utils/authority';
+import VersionHistory from './comps/versionHistory';
 
 const { confirm } = Modal;
 
@@ -96,7 +97,7 @@ const handleEdit = async (config: ConfigListItem) => {
     return false;
   }
 };
-const handleRollback = async (config: ConfigModifyLog) => {
+const handleRollback = async (config: PublishDetial) => {
   const intl = getIntl(getLocale());
   const hide = message.loading(intl.formatMessage({id: 'rollbacking'}));
   try {
@@ -124,9 +125,10 @@ const configs: React.FC = (props: any) => {
   const [updateModalVisible, setUpdateModalVisible] = useState<boolean>(false);
   const [modifyLogsModalVisible, setmodifyLogsModalVisible] = useState<boolean>(false);
   const [jsonImportFormModalVisible, setjsonImportFormModalVisible] = useState<boolean>(false);
+  const [versionHistoryFormModalVisible, setVersionHistoryFormModalVisible] = useState<boolean>(false);
   const [currentRow, setCurrentRow] = useState<ConfigListItem>();
   const [selectedRowsState, setSelectedRows] = useState<ConfigListItem[]>([]);
-  const [modifyLogs, setModifyLogs] = useState<ConfigModifyLog[]>([]);
+  const [configPublishedHistory, setModifyLogs] = useState<PublishDetialConfig[]>([]);
   const [waitPublishStatus, setWaitPublishStatus] = useState<{
     addCount: number,
     editCount: number,
@@ -193,12 +195,12 @@ const configs: React.FC = (props: any) => {
       }
     });
   }
-  const rollback = (config: ConfigModifyLog) => {
+  const rollback = (config: PublishDetialConfig) => {
     const confirmMsg = intl.formatMessage({id:'pages.config.confirm_rollback'});
     confirm({
-      content: confirmMsg + `【${moment(config.modifyTime).format('YYYY-MM-DD HH:mm:ss')}】？`,
+      content: confirmMsg + `【${moment(config.timelineNode?.publishTime).format('YYYY-MM-DD HH:mm:ss')}】？`,
       onOk: async () => {
-        const result = await handleRollback(config);
+        const result = await handleRollback(config.config);
         if (result) {
           setmodifyLogsModalVisible(false);
           actionRef.current?.reload();
@@ -321,7 +323,7 @@ const configs: React.FC = (props: any) => {
                   if (item == 'history') {
                     setCurrentRow(record);
                     setmodifyLogsModalVisible(true)
-                    const result = await queryModifyLogs(record)
+                    const result = await queryConfigPublishedHistory(record)
                     if (result.success) {
                       setModifyLogs(result.data);
                     }
@@ -329,7 +331,14 @@ const configs: React.FC = (props: any) => {
                 }
               }
               menus={
+                record.editStatus === 10 ?
                 [
+                  { key: 'history', name: intl.formatMessage({
+                    id: 'pages.configs.table.cols.action.history'
+                  }) }
+                ]:
+                [
+                  { key: 'cancelEdit', name: '撤销编辑' },
                   { key: 'history', name: intl.formatMessage({
                     id: 'pages.configs.table.cols.action.history'
                   }) }
@@ -353,7 +362,19 @@ const configs: React.FC = (props: any) => {
           labelWidth: 'auto',
         }}
         request={(params, sorter, filter) => queryConfigs(appId,params)}
-        headerTitle= {`add:${waitPublishStatus.addCount} edit:${waitPublishStatus.editCount} delete:${waitPublishStatus.deleteCount}`}
+        headerTitle= {
+          <Space size="middle">
+              <Badge count={waitPublishStatus.addCount} size="small" offset={[-5, 0]}>
+                <Tag color="blue" hidden={waitPublishStatus.addCount===0}>新增</Tag>
+              </Badge>
+              <Badge count={waitPublishStatus.editCount} size="small" offset={[-5, 0]}>
+                <Tag color="gold" hidden={waitPublishStatus.editCount===0}>编辑</Tag>
+              </Badge>
+              <Badge count={waitPublishStatus.deleteCount} size="small" offset={[-5, 0]}>
+                <Tag color="red" hidden={waitPublishStatus.deleteCount===0}>删除</Tag>
+              </Badge>
+          </Space>
+        }
         toolBarRender={() => [
           <AuthorizedEle key="0" judgeKey={functionKeys.Config_Add} appId={appId}>
             <Button key="button" icon={<PlusOutlined />}  onClick={() => { setCreateModalVisible(true); }}>
@@ -378,7 +399,7 @@ const configs: React.FC = (props: any) => {
           </AuthorizedEle>
           ,
           <AuthorizedEle key="1" judgeKey={functionKeys.Config_Publish} appId={appId}>
-            <Button key="button"  >
+            <Button key="button"  onClick={()=>{ setVersionHistoryFormModalVisible(true) }}>
               {
                 '历史版本'
               }
@@ -437,7 +458,26 @@ const configs: React.FC = (props: any) => {
           
         </JsonImport>
       }
-     
+      {
+        versionHistoryFormModalVisible&&
+        <VersionHistory
+          onSaveSuccess={
+            ()=>{
+              setVersionHistoryFormModalVisible(false);
+              actionRef.current?.reload();
+            }
+          }
+        onCancel={
+          ()=>{
+            setVersionHistoryFormModalVisible(false);
+          }
+        }
+          appId={appId}
+          appName={appName}
+          versionHistoryModalVisible ={versionHistoryFormModalVisible}> 
+          
+        </VersionHistory>
+      }
       <ModalForm
         formRef={addFormRef}
         title={intl.formatMessage({id:'pages.configs.from.add.title'})}
@@ -554,22 +594,14 @@ const configs: React.FC = (props: any) => {
           className={styles.history}
           header={false}
           itemLayout="horizontal"
-          dataSource={modifyLogs}
+          dataSource={configPublishedHistory}
           renderItem={(item, index) => (
-            <List.Item className={styles.listitem} actions={index ? [
-                <AuthorizedEle key="0" judgeKey={functionKeys.Config_Edit} appId={appId}>
-                  <a className={styles.rollback} onClick={ ()=>{rollback(item)} }>
-                  {
-                    intl.formatMessage({id:'pages.config.history.rollback'})
-                  }
-                </a>
-                </AuthorizedEle>
-              ] : []} >
+            <List.Item className={styles.listitem}  >
               <List.Item.Meta
                 title={
 
                   <div>
-                    <Text style={{marginRight:'20px'}}>{moment(item.modifyTime).format('YYYY-MM-DD HH:mm:ss')}</Text>
+                    <Text style={{marginRight:'20px'}}>{moment(item.timelineNode?.publishTime).format('YYYY-MM-DD HH:mm:ss')}</Text>
                   &nbsp;
                     {
                        index ? null : <Tag color="blue">
@@ -586,16 +618,16 @@ const configs: React.FC = (props: any) => {
                       {
                           intl.formatMessage({id:'pages.configs.table.cols.g'})
                       }
-                      ：{item.group}</div>
+                      ：{item.config.group}</div>
                     <div>
                       {
                           intl.formatMessage({id:'pages.configs.table.cols.k'})
                       }
-                      ：{item.key}</div>
+                      ：{item.config.key}</div>
                     <div>
                       {
                           intl.formatMessage({id:'pages.configs.table.cols.v'})
-                      }：{item.value}</div>
+                      }：{item.config.value}</div>
                   </div>
                 }
               />

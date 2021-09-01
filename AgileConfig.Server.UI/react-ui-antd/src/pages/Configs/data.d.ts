@@ -35,3 +35,40 @@ export type JsonImportItem =  {
   id: string,
   appId: string
 }
+
+export type PublishTimelineNode =  {
+  id: string,
+  version: number,
+  publishUserId: string,
+  publishTime: Date
+}
+
+export type PublishDetial =  {
+  group: string,
+  key: string,
+  value: string,
+  id: string,
+  editStatus: number,
+  version: number,
+  configId: string
+}
+
+export type PublishedConfig =  {
+  group: string,
+  key: string,
+  value: string,
+  id: string,
+  publishTime: number,
+  version: number
+}
+
+export type PublishDetialNode =  {
+  key: string,
+  timelineNode: PublishTimelineNode,
+  list: PublishDetial[]
+}
+
+export type PublishDetialConfig =  {
+  timelineNode: PublishTimelineNode,
+  config: PublishDetial
+}

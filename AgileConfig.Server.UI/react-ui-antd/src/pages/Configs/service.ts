@@ -1,5 +1,5 @@
 import request from '@/utils/request';
-import { ConfigListItem, ConfigListParams, ConfigModifyLog, JsonImportItem } from './data';
+import { ConfigListItem, ConfigListParams, ConfigModifyLog, JsonImportItem, PublishDetial } from './data';
 
 export async function queryConfigs(appId:string, params: ConfigListParams) {
   return request('/config/search', {
@@ -75,8 +75,8 @@ export async function editConfig(config: ConfigListItem) {
   });
 }
 
-export async function queryModifyLogs(config: ConfigListItem) {
-  return request('/config/modifyLogs', {
+export async function queryConfigPublishedHistory(config: ConfigListItem) {
+  return request('/config/ConfigPublishedHistory', {
     method: 'GET',
     params:{
       configId: config.id
@@ -84,7 +84,7 @@ export async function queryModifyLogs(config: ConfigListItem) {
   });
 }
 
-export async function rollback(config: ConfigModifyLog) {
+export async function rollback(config: PublishDetial) {
   return request('/config/rollback', {
     method: 'POST',
     params:{
@@ -106,6 +106,15 @@ export async function getWaitPublishStatus(appId: string) {
 export async function publish(appId: string) {
   return request('/config/publish', {
     method: 'POST',
+    params:{
+      appId: appId
+    }
+  });
+}
+
+export async function getPublishHistory(appId: string) {
+  return request('/config/publishHistory', {
+    method: 'GET',
     params:{
       appId: appId
     }

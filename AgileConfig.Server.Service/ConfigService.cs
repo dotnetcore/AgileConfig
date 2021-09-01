@@ -490,16 +490,51 @@ namespace AgileConfig.Server.Service
            return any;
         }
 
-        public async Task<List<PublishDetail>> GetPublishDetailByPublishTimelineId(string publishTimelineId)
+        public async Task<List<PublishDetail>> GetPublishDetailByPublishTimelineIdAsync(string publishTimelineId)
         {
             var list = await _dbContext.PublishDetail.Where(x => x.PublishTimelineId == publishTimelineId).ToListAsync();
 
             return list;
         }
 
-        public async Task<PublishTimeline> GetPublishTimeLineNode(string publishTimelineId)
+        public async Task<PublishTimeline> GetPublishTimeLineNodeAsync(string publishTimelineId)
         {
             var one = await _dbContext.PublishTimeline.Where(x => x.Id == publishTimelineId).FirstAsync();
+
+            return one;
+        }
+
+        public async Task<List<PublishTimeline>> GetPublishTimelineHistoryAsync(string appId)
+        {
+            var list = await _dbContext.PublishTimeline.Where(x => x.AppId == appId).ToListAsync();
+
+            return list;
+        }
+
+        public async Task<List<PublishDetail>> GetPublishDetailListAsync(string appId)
+        {
+            var list = await _dbContext.PublishDetail.Where(x => x.AppId == appId).ToListAsync();
+
+            return list;
+        }
+
+        public async Task<List<PublishDetail>> GetConfigPublishedHistory(string configId)
+        {
+            var list = await _dbContext.PublishDetail.Where(x => x.ConfigId == configId).ToListAsync();
+
+            return list;
+        }
+
+        public async Task<List<ConfigPublished>> GetPublishedConfigsAsync(string appId)
+        {
+            var list = await _dbContext.ConfigPublished.Where(x => x.AppId == appId && x.Status == ConfigStatus.Enabled).ToListAsync();
+
+            return list;
+        }
+
+        public async Task<ConfigPublished> GetPublishedConfigAsync(string configId)
+        {
+            var one = await _dbContext.ConfigPublished.Where(x => x.ConfigId == configId && x.Status == ConfigStatus.Enabled).ToOneAsync();
 
             return one;
         }

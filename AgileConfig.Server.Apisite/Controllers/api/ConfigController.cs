@@ -17,7 +17,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
     {
         private readonly IConfigService _configService;
         private readonly IAppService _appService;
-        private readonly IModifyLogService _modifyLogService;
         private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
         private readonly IServerNodeService _serverNodeService;
         private readonly IAppBasicAuthService _appBasicAuthService;
@@ -25,14 +24,12 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         public ConfigController(
             IConfigService configService,
             IAppService appService,
-            IModifyLogService modifyLogService,
               IRemoteServerNodeProxy remoteServerNodeProxy,
                                 IServerNodeService serverNodeService,
                                 IAppBasicAuthService appBasicAuthService)
         {
             _configService = configService;
             _appService = appService;
-            _modifyLogService = modifyLogService;
             _remoteServerNodeProxy = remoteServerNodeProxy;
             _serverNodeService = serverNodeService;
             _appBasicAuthService = appBasicAuthService;
@@ -131,9 +128,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
             var ctrl = new Controllers.ConfigController(
                 _configService,
-                _modifyLogService,
-                _remoteServerNodeProxy,
-                _serverNodeService,
                 _appService
                 );
 
@@ -171,9 +165,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
             var ctrl = new Controllers.ConfigController(
                 _configService,
-                _modifyLogService,
-                _remoteServerNodeProxy,
-                _serverNodeService,
                 _appService
                 );
 
@@ -200,9 +191,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         {
             var ctrl = new Controllers.ConfigController(
                 _configService,
-                _modifyLogService,
-                _remoteServerNodeProxy,
-                _serverNodeService,
                 _appService
                 );
 
@@ -228,9 +216,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         {
             var ctrl = new Controllers.ConfigController(
                 _configService,
-                _modifyLogService,
-                _remoteServerNodeProxy,
-                _serverNodeService,
                 _appService
                 );
 
