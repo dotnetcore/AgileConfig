@@ -359,11 +359,14 @@ namespace AgileConfig.Server.Service
                 //这里默认admin console 实例只部署一个，如果部署多个同步操作，这个version会有问题
                 var versionMax = _dbContext.PublishTimeline.Select.Where(x=>x.AppId == appId).Max(x => x.Version);
 
+                var user = _dbContext.Users.Where(x => x.Id == operatorr).ToOne();
+
                 var publishTimelineNode = new PublishTimeline();
                 publishTimelineNode.AppId = appId;
                 publishTimelineNode.Id = Guid.NewGuid().ToString("N");
                 publishTimelineNode.PublishTime = DateTime.Now;
-                publishTimelineNode.PublishUserId = operatorr;
+                publishTimelineNode.PublishUserId = user.Id;
+                publishTimelineNode.PublishUserName = user.UserName;
                 publishTimelineNode.Version = versionMax + 1;
 
                 var publishDetails = new List<PublishDetail>();

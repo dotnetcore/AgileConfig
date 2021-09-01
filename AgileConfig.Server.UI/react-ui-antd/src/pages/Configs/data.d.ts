@@ -40,6 +40,7 @@ export type PublishTimelineNode =  {
   id: string,
   version: number,
   publishUserId: string,
+  publishUserName: string,
   publishTime: Date
 }
 

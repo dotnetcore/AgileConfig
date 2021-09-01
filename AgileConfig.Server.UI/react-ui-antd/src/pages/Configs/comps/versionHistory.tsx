@@ -112,7 +112,7 @@ const VersionHistory : React.FC<VersionHistoryFormProps> = (props)=>{
                       (row) => {
                         return <>
                         {
-                          moment(e.timelineNode.publishTime).format('YYYY-MM-DD HH:mm:ss')+' / ' +e.timelineNode.publishUserId + '  '
+                          moment(e.timelineNode.publishTime).format('YYYY-MM-DD HH:mm:ss')+' / ' +e.timelineNode.publishUserName + '  '
                         }
                         {
                           i === 0 ? <Tag>当前版本</Tag> : ''
