@@ -538,5 +538,47 @@ namespace AgileConfig.Server.Service
 
             return one;
         }
+
+        public async Task<bool> RollbackAsync(string publishTimelineId)
+        {
+            var publishNode = await _dbContext.PublishTimeline.Where(x => x.Id == publishTimelineId).ToOneAsync();
+            var version = publishNode.Version;
+
+            var publishedConfigs = await _dbContext.ConfigPublished.Where(x => x.Version == version).ToListAsync();
+            var currentConfigs = await _dbContext.Configs.Where(x => x.Status == ConfigStatus.Enabled).ToListAsync();
+
+            //把当前的全部软删除
+            foreach (var item in currentConfigs)
+            {
+                item.Status = ConfigStatus.Deleted;
+            }
+            await _dbContext.Configs.UpdateRangeAsync(currentConfigs);
+            //根据id把所有发布项目设置为启用
+            var now = DateTime.Now;
+            foreach (var item in publishedConfigs)
+            {
+                var config = await _dbContext.Configs.Where(x => x.Id == item.ConfigId).ToOneAsync();
+                config.Status = ConfigStatus.Enabled;
+                config.Value = item.Value;
+                config.UpdateTime = now;
+                config.EditStatus = EditStatus.Commit;
+                config.OnlineStatus = OnlineStatus.Online;
+
+                await _dbContext.Configs.UpdateAsync(config);
+            }
+            //删除version之后的版本
+            await _dbContext.ConfigPublished.RemoveAsync(x=>x.Version > version);
+            //设置为发布状态
+            foreach (var item in publishedConfigs)
+            {
+                item.Status = ConfigStatus.Enabled;
+                await _dbContext.ConfigPublished.UpdateAsync(item);
+            }
+            //删除发布时间轴version之后的版本
+            await _dbContext.PublishTimeline.RemoveAsync(x => x.Version > version);
+            await _dbContext.PublishDetail.RemoveAsync(x=>x.Version > version);
+
+            return await _dbContext.SaveChangesAsync() > 0;
+        }
     }
 }

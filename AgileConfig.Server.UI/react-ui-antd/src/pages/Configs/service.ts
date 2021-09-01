@@ -84,12 +84,11 @@ export async function queryConfigPublishedHistory(config: ConfigListItem) {
   });
 }
 
-export async function rollback(config: PublishDetial) {
+export async function rollback(publishTimelineId: string) {
   return request('/config/rollback', {
     method: 'POST',
     params:{
-      configId: config.configId,
-      logId: config.id
+      publishTimelineId: publishTimelineId,
     }
   });
 }
@@ -117,6 +116,15 @@ export async function getPublishHistory(appId: string) {
     method: 'GET',
     params:{
       appId: appId
+    }
+  });
+}
+
+export async function cancelEdit(configId: string) {
+  return request('/config/cancelEdit', {
+    method: 'POST',
+    params:{
+      configId: configId
     }
   });
 }

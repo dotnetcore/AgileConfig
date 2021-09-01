@@ -44,11 +44,11 @@ namespace AgileConfig.Server.IService
 
         Task<bool> AddRangeAsync(List<Config> configs);
 
-        Task<bool> DeleteAsync(Config app);
+        Task<bool> DeleteAsync(Config config);
 
-        Task<bool> DeleteAsync(string appId);
+        Task<bool> DeleteAsync(string configId);
 
-        Task<bool> UpdateAsync(Config app);
+        Task<bool> UpdateAsync(Config config);
 
         Task<List<Config>> GetAllConfigsAsync();
 
@@ -143,5 +143,12 @@ namespace AgileConfig.Server.IService
         /// <param name="configId"></param>
         /// <returns></returns>
         Task<ConfigPublished> GetPublishedConfigAsync(string configId);
+
+        /// <summary>
+        /// 回滚至某个时刻的发布版本
+        /// </summary>
+        /// <param name="publishTimelineId"></param>
+        /// <returns></returns>
+        Task<bool> RollbackAsync(string publishTimelineId);
     }
 }

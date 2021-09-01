@@ -4,14 +4,36 @@ import moment from "moment";
 import React, { useState,useEffect } from 'react';
 import { useIntl } from "react-intl";
 import { PublishDetialNode } from "../data";
-import { getPublishHistory } from "../service";
+import { getPublishHistory, rollback } from "../service";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
+
+const handleRollback = async (timelineId: string) => {
+  const hide = message.loading('正在回滚');
+  try {
+    const result = await rollback(timelineId);
+    hide();
+    const success = result.success;
+    if (success) {
+      message.success('回滚成功！');
+    } else {
+      message.error(result.message);
+    }
+    return success;
+  } catch (error) {
+    hide();
+    message.error('回滚失败！');
+    return false;
+  }
+};
+
 export type VersionHistoryFormProps = {
     appId: string,
     appName: string,
     versionHistoryModalVisible: boolean;
-    onCancel: () => void;
+    onCancel: (reload: boolean) => void;
     onSaveSuccess: ()=> void;
   };
+const { confirm } = Modal;
 const VersionHistory : React.FC<VersionHistoryFormProps> = (props)=>{
   const intl = useIntl();
   const editStatusEnums = {
@@ -74,13 +96,13 @@ const VersionHistory : React.FC<VersionHistoryFormProps> = (props)=>{
           visible={props.versionHistoryModalVisible}
           onCancel={
             ()=>{
-              props.onCancel();
+              props.onCancel(false);
             }
           }
           >
             <div className={styles.historyContainer}>
             {
-              datasource.map(e=> 
+              datasource.map( (e, i)=> 
                 <div className={styles.historyVersionTable}>
                   <Table 
                     key={e.key}
@@ -88,7 +110,14 @@ const VersionHistory : React.FC<VersionHistoryFormProps> = (props)=>{
                     size="small"
                     title={
                       (row) => {
-                        return moment(e.timelineNode.publishTime).format('YYYY-MM-DD HH:mm:ss')+' / ' +e.timelineNode.publishUserId
+                        return <>
+                        {
+                          moment(e.timelineNode.publishTime).format('YYYY-MM-DD HH:mm:ss')+' / ' +e.timelineNode.publishUserId + '  '
+                        }
+                        {
+                          i === 0 ? <Tag>当前版本</Tag> : ''
+                        }
+                        </>
                       }
                     }
                     pagination={false}
@@ -99,7 +128,27 @@ const VersionHistory : React.FC<VersionHistoryFormProps> = (props)=>{
                   <div>
                   <Row justify="end">
                     <Col span={2} >
-                      <Button type="primary" style={{marginTop:20}} >
+                      <Button type="primary" style={{marginTop:20}} hidden={i===0} 
+                        onClick={()=>{
+                          confirm({
+                            onOk:async ()=>{
+                              const result = await handleRollback(e.timelineNode.id);
+                              if (result) {
+                                props.onCancel(true)
+                              }  
+                            },
+                            icon: <ExclamationCircleOutlined />,
+                            content: <div>
+                              {`确定回滚至【${moment(e.timelineNode.publishTime).format('YYYY-MM-DD HH:mm:ss')}】时刻的发布版本吗？`}
+                              <br></br>
+                              <br></br>
+                              <div>
+                                注意：本操作会清空当前所有待发布的配置项
+                              </div>
+                            </div>
+                          });
+                        }}
+                      >
                         回滚
                       </Button >
                     </Col>

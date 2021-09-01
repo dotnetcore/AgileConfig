@@ -390,34 +390,14 @@ namespace AgileConfig.Server.Apisite.Controllers
 
         [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Rollback", Functions.Config_Edit })]
         [HttpPost]
-        public async Task<IActionResult> Rollback(string configId, string logId)
+        public async Task<IActionResult> Rollback(string publishTimelineId)
         {
-            if (string.IsNullOrEmpty(configId))
+            if (string.IsNullOrEmpty(publishTimelineId))
             {
-                throw new ArgumentNullException("configId");
-            }
-            if (string.IsNullOrEmpty(logId))
-            {
-                throw new ArgumentNullException("logId");
+                throw new ArgumentNullException("publishTimelineId");
             }
 
-            var config = await _configService.GetAsync(configId);
-            if (config == null)
-            {
-                return Json(new
-                {
-                    success = false,
-                    message = "未找到对应的配置项。"
-                });
-            }
-            var oldConfig = new Config
-            {
-                Key = config.Key,
-                Group = config.Group,
-                Value = config.Value
-            };
-
-            var result = await _configService.UpdateAsync(config);
+            var result = await _configService.RollbackAsync(publishTimelineId);
 
             return Json(new
             {
@@ -641,9 +621,45 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new Exception("Can not find config by id " + configId);
             }
 
-            //if (config.EditStatus == EditStatus.Commit)
+            if (config.EditStatus == EditStatus.Commit)
+            {
+                return Json(new
+                {
+                    success = true
+                });
+            }
 
-            return null;
+            if (config.EditStatus == EditStatus.Add)
+            {
+                await _configService.DeleteAsync(config);
+            }
+            if (config.EditStatus == EditStatus.Deleted || config.EditStatus == EditStatus.Edit)
+            {
+                config.OnlineStatus = OnlineStatus.Online;
+                config.EditStatus = EditStatus.Commit;
+                config.UpdateTime = DateTime.Now;
+
+                var publishedConfig = await _configService.GetPublishedConfigAsync(configId);
+                if (publishedConfig == null)
+                {
+                    //
+                    throw new Exception("Can not find published config by id " + configId);
+                }
+                else
+                {
+                    config.Value = publishedConfig.Value;
+                    config.OnlineStatus = OnlineStatus.Online;
+                }
+                //reset value
+
+                await _configService.UpdateAsync(config);
+            }
+
+
+            return Json(new
+            {
+                success = true
+            });
         }
     }
 }

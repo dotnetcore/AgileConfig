@@ -6,8 +6,8 @@ import { Badge, Button, Drawer, FormInstance, List, message, Modal, Space, Tag }
 import React, { useState, useRef, useEffect } from 'react';
 import { queryApps } from '../Apps/service';
 import UpdateForm from './comps/updateForm';
-import { ConfigListItem, PublishDetial, PublishDetialConfig } from './data';
-import { queryConfigs, delConfig, addConfig, editConfig, queryConfigPublishedHistory,rollback, getWaitPublishStatus, publish } from './service';
+import { ConfigListItem, PublishDetialConfig } from './data';
+import { queryConfigs, delConfig, addConfig, editConfig, queryConfigPublishedHistory, getWaitPublishStatus, publish, cancelEdit } from './service';
 import Text from 'antd/lib/typography/Text';
 import moment from 'moment';
 import styles from './index.less';
@@ -97,25 +97,25 @@ const handleEdit = async (config: ConfigListItem) => {
     return false;
   }
 };
-const handleRollback = async (config: PublishDetial) => {
-  const intl = getIntl(getLocale());
-  const hide = message.loading(intl.formatMessage({id: 'rollbacking'}));
+
+
+const handleCancelEdit = async (id: string) => {
+  const hide = message.loading('正在撤销');
   try {
-    const result = await rollback({ ...config });
-    hide();
+    const result = await cancelEdit(id);
     const success = result.success;
     if (success) {
-      message.success(intl.formatMessage({id: 'rollback_success'}));
+      message.success('撤销成功！');
     } else {
       message.error(result.message);
     }
     return success;
   } catch (error) {
     hide();
-    message.error(intl.formatMessage({id: 'rollback_fail'}));
+    message.error('撤销失败！');
     return false;
   }
-};
+}
 
 const configs: React.FC = (props: any) => {
   const appId = props.match.params.app_id;
@@ -190,19 +190,6 @@ const configs: React.FC = (props: any) => {
       onOk: async () => {
         const result = await handleDel(config);
         if (result) {
-          actionRef.current?.reload();
-        }
-      }
-    });
-  }
-  const rollback = (config: PublishDetialConfig) => {
-    const confirmMsg = intl.formatMessage({id:'pages.config.confirm_rollback'});
-    confirm({
-      content: confirmMsg + `【${moment(config.timelineNode?.publishTime).format('YYYY-MM-DD HH:mm:ss')}】？`,
-      onOk: async () => {
-        const result = await handleRollback(config.config);
-        if (result) {
-          setmodifyLogsModalVisible(false);
           actionRef.current?.reload();
         }
       }
@@ -327,6 +314,18 @@ const configs: React.FC = (props: any) => {
                     if (result.success) {
                       setModifyLogs(result.data);
                     }
+                  }
+
+                  if (item == 'cancelEdit') {
+                    confirm({
+                      content:`确定撤销对配置【${record.group?record.group:''}${record.group?':':''}${record.key}】的编辑吗？`,
+                      onOk: async ()=>{
+                        const result = await handleCancelEdit(record.id);
+                        if (result) {
+                          actionRef.current?.reload();
+                        }
+                      }
+                    })
                   }
                 }
               }
@@ -468,8 +467,11 @@ const configs: React.FC = (props: any) => {
             }
           }
         onCancel={
-          ()=>{
+          (reload)=>{
             setVersionHistoryFormModalVisible(false);
+            if (reload) {
+              actionRef.current?.reload();
+            }
           }
         }
           appId={appId}
@@ -602,14 +604,6 @@ const configs: React.FC = (props: any) => {
 
                   <div>
                     <Text style={{marginRight:'20px'}}>{moment(item.timelineNode?.publishTime).format('YYYY-MM-DD HH:mm:ss')}</Text>
-                  &nbsp;
-                    {
-                       index ? null : <Tag color="blue">
-                         {
-                          intl.formatMessage({id:'pages.config.history.current'})
-                         }
-                       </Tag>
-                    }
                   </div>
                 }
                 description={
