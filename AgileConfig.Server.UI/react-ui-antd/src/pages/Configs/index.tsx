@@ -7,7 +7,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { queryApps } from '../Apps/service';
 import UpdateForm from './comps/updateForm';
 import { ConfigListItem, PublishDetialConfig } from './data';
-import { queryConfigs, delConfig, addConfig, editConfig, queryConfigPublishedHistory, getWaitPublishStatus, publish, cancelEdit } from './service';
+import { queryConfigs, delConfig, addConfig, editConfig, queryConfigPublishedHistory, getWaitPublishStatus, publish, cancelEdit, exportJson } from './service';
 import Text from 'antd/lib/typography/Text';
 import moment from 'moment';
 import styles from './index.less';
@@ -103,6 +103,7 @@ const handleCancelEdit = async (id: string) => {
   const hide = message.loading('正在撤销');
   try {
     const result = await cancelEdit(id);
+    hide();
     const success = result.success;
     if (success) {
       message.success('撤销成功！');
@@ -113,6 +114,28 @@ const handleCancelEdit = async (id: string) => {
   } catch (error) {
     hide();
     message.error('撤销失败！');
+    return false;
+  }
+}
+
+const handleExportJson = async (appId: string) => {
+  const hide = message.loading('正在导出');
+  try {
+    const file = await exportJson(appId);
+    hide();
+    var fileURL = URL.createObjectURL(file);
+    var a = document.createElement('a');
+    a.href = fileURL;
+    a.target = '_blank';
+    a.download = appId+'.json';
+    document.body.appendChild(a);
+    a.click();
+    URL.revokeObjectURL(a.href);
+    document.body.removeChild(a);
+    return true;
+  } catch (error) {
+    hide();
+    message.error('导出失败！');
     return false;
   }
 }
@@ -449,14 +472,10 @@ const configs: React.FC = (props: any) => {
           </Button>
         </AuthorizedEle>
          ,
-          <Button key="4">
-            <a href={'/config/exportjson?appId=' + appId} target="_blank">
-              {
-                 intl.formatMessage({
-                  id: 'pages.configs.table.cols.action.exportJson'
-                })
-              }
-            </a>
+          <Button key="4" onClick={()=>{
+            handleExportJson(appId)
+          }}>
+            导出
           </Button>
         ]}
         rowSelection={{

@@ -128,3 +128,13 @@ export async function cancelEdit(configId: string) {
     }
   });
 }
+
+export async function exportJson(appId: string) {
+  return request('/config/ExportJson', {
+    method: 'POST',
+    params:{
+      appId: appId
+    },
+    responseType: "blob"
+  });
+}
