@@ -39,7 +39,7 @@ namespace AgileConfig.Server.Service
         }
         public async Task<bool> UpdateAsync(Config config)
         {
-            _dbContext.Update(config);
+            await _dbContext.UpdateAsync(config);
             var x = await _dbContext.SaveChangesAsync();
 
             var result = x > 0;
@@ -48,6 +48,16 @@ namespace AgileConfig.Server.Service
                 ClearAppPublishedConfigsMd5Cache(config.AppId);
                 ClearAppPublishedConfigsMd5CacheWithInheritanced(config.AppId);
             }
+
+            return result;
+        }
+
+        public async Task<bool> UpdateAsync(List<Config> configs)
+        {
+            await _dbContext.UpdateRangeAsync(configs);
+            var x = await _dbContext.SaveChangesAsync();
+
+            var result = x > 0;
 
             return result;
         }

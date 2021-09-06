@@ -7,7 +7,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { queryApps } from '../Apps/service';
 import UpdateForm from './comps/updateForm';
 import { ConfigListItem, PublishDetialConfig } from './data';
-import { queryConfigs, delConfig, addConfig, editConfig, queryConfigPublishedHistory, getWaitPublishStatus, publish, cancelEdit, exportJson } from './service';
+import { queryConfigs, delConfig,delConfigs, addConfig, editConfig, queryConfigPublishedHistory, getWaitPublishStatus, publish, cancelEdit, exportJson } from './service';
 import Text from 'antd/lib/typography/Text';
 import moment from 'moment';
 import styles from './index.less';
@@ -45,6 +45,25 @@ const handleDel = async (fields: ConfigListItem) => {
   const hide = message.loading(intl.formatMessage({id:'deleting'}));
   try {
     const result = await delConfig({ ...fields });
+    hide();
+    const success = result.success;
+    if (success) {
+      message.success(intl.formatMessage({id:'delete_success'}));
+    } else {
+      message.error(intl.formatMessage({id:'delete_fail'}));
+    }
+    return success;
+  } catch (error) {
+    hide();
+    message.error(intl.formatMessage({id:'delete_fail'}));
+    return false;
+  }
+};
+const handleDelSome = async (configs: ConfigListItem[]):Promise<boolean> => {
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({id:'deleting'}));
+  try {
+    const result = await delConfigs(configs);
     hide();
     const success = result.success;
     if (success) {
@@ -200,9 +219,21 @@ const configs: React.FC = (props: any) => {
         <br />
         <br />
         <div>
+          <span style={{ marginRight: 20 }}>
+            {
+              `新增: ${waitPublishStatus.addCount} 项`
+            }
+          </span> 
+          <span style={{ marginRight: 20 }}>
           {
-            `新增:${waitPublishStatus.addCount}项  编辑:${waitPublishStatus.editCount}项  删除:${waitPublishStatus.deleteCount}项`
-          }
+              `编辑: ${waitPublishStatus.editCount} 项`
+            }
+          </span> 
+          <span style={{ marginRight: 20 }}>
+            {
+              `删除: ${waitPublishStatus.deleteCount} 项`
+            }
+          </span>
         </div>
       </div>,
       onOk: async () => {
@@ -420,7 +451,7 @@ const configs: React.FC = (props: any) => {
           </AuthorizedEle>
           ,
           <AuthorizedEle key="2" judgeKey={functionKeys.Config_Publish} appId={appId} >
-            <Button key="button" icon={<VerticalAlignTopOutlined />} type="primary" 
+            <Button key="button" icon={<VerticalAlignTopOutlined />} type="primary" className="success"
                     hidden={(waitPublishStatus.addCount + waitPublishStatus.editCount + waitPublishStatus.deleteCount) === 0} 
                     onClick={()=>{publish(appId)}}>
                 {
@@ -435,6 +466,14 @@ const configs: React.FC = (props: any) => {
             {
               selectedRowsState.filter(x=>x.editStatus != 10).length > 0 ?
               <Button key="button"  type="primary" icon={<RollbackOutlined />}
+                      className="warn"
+                      onClick={
+                        ()=>{
+                          confirm({
+                            content:`确定撤销选中配置项的编辑状态吗？`,
+                          })
+                        }
+                      }
                     >
                 撤销编辑
               </Button>
@@ -448,6 +487,20 @@ const configs: React.FC = (props: any) => {
           {
             selectedRowsState.length > 0 ?
             <Button key="button"  type="primary" icon={<DeleteOutlined />}
+                    className="danger"
+                    onClick={
+                      ()=>{
+                        confirm({
+                          content:`确定删除选中的配置项吗？`,
+                          onOk: async ()=>{
+                            const result = await handleDelSome(selectedRowsState)
+                            if (result) {
+                              actionRef.current?.reload();
+                            }
+                          }
+                        })
+                      }
+                    }
                     >
                 删除
             </Button>:<></>

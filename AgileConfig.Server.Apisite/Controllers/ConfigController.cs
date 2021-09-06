@@ -387,6 +387,51 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Delete", Functions.Config_Delete })]
+        [HttpPost]
+        public async Task<IActionResult> DeleteSome([FromBody]List<string> ids)
+        {
+            if (ids == null)
+            {
+                throw new ArgumentNullException("ids");
+            }
+
+            List<Config> deleteConfigs = new List<Config>();
+
+            foreach (var id in ids)
+            {
+                var config = await _configService.GetAsync(id);
+                if (config == null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "未找到对应的配置项。"
+                    });
+                }
+
+                config.EditStatus = EditStatus.Deleted;
+                config.OnlineStatus = OnlineStatus.WaitPublish;
+
+                var isPublished = await _configService.IsPublishedAsync(config.Id);
+                if (!isPublished)
+                {
+                    //如果已经没有发布过直接删掉
+                    config.Status = ConfigStatus.Deleted;
+                }
+
+                deleteConfigs.Add(config);
+            }
+
+            var result = await _configService.UpdateAsync(deleteConfigs);
+
+            return Json(new
+            {
+                success = result,
+                message = !result ? "删除配置失败，请查看错误日志" : ""
+            });
+        }
+
 
         [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Rollback", Functions.Config_Edit })]
         [HttpPost]

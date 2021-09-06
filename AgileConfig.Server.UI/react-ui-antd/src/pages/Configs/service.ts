@@ -50,6 +50,13 @@ export async function delConfig(config: ConfigListItem) {
   });
 }
 
+export async function delConfigs(configs: ConfigListItem[]) {
+  return request('/config/deleteSome', {
+    method: 'POST',
+    data: configs.map(c=>c.id)
+  });
+}
+
 export async function addConfig(config: ConfigListItem) {
   return request('/config/add', {
     method: 'POST',

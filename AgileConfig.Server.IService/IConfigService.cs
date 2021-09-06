@@ -50,6 +50,8 @@ namespace AgileConfig.Server.IService
 
         Task<bool> UpdateAsync(Config config);
 
+        Task<bool> UpdateAsync(List<Config> configs);
+
         Task<List<Config>> GetAllConfigsAsync();
 
         Task<int> CountEnabledConfigsAsync();
