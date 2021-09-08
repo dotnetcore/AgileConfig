@@ -62,6 +62,54 @@ namespace AgileConfig.Server.Service
             return result;
         }
 
+        public async Task<bool> CancelEdit(List<string> ids)
+        {
+            foreach (var configId in ids)
+            {
+                var config = await _dbContext.Configs.Where(c => c.Id == configId).ToOneAsync();
+                ;
+                if (config == null)
+                {
+                    throw new Exception("Can not find config by id " + configId);
+                }
+
+                if (config.EditStatus == EditStatus.Commit)
+                {
+                    continue;
+                }
+
+                if (config.EditStatus == EditStatus.Add)
+                {
+                    await _dbContext.Configs.RemoveAsync(x => x.Id == configId);
+                }
+                if (config.EditStatus == EditStatus.Deleted || config.EditStatus == EditStatus.Edit)
+                {
+                    config.OnlineStatus = OnlineStatus.Online;
+                    config.EditStatus = EditStatus.Commit;
+                    config.UpdateTime = DateTime.Now;
+
+                    var publishedConfig = await GetPublishedConfigAsync(configId);
+                    if (publishedConfig == null)
+                    {
+                        //
+                        throw new Exception("Can not find published config by id " + configId);
+                    }
+                    else
+                    {
+                        //reset value
+                        config.Value = publishedConfig.Value;
+                        config.OnlineStatus = OnlineStatus.Online;
+                    }
+
+                    await _dbContext.Configs.UpdateAsync(config);
+                }
+            }
+
+            var result = await _dbContext.SaveChangesAsync();
+
+            return result > 0;
+        }
+
         public async Task<bool> DeleteAsync(Config config)
         {
             config = await _dbContext.Configs.Where(c => c.Id == config.Id).ToOneAsync();
@@ -367,7 +415,7 @@ namespace AgileConfig.Server.Service
                     x.Status == ConfigStatus.Enabled &&
                     x.EditStatus != EditStatus.Commit).ToList();
                 //这里默认admin console 实例只部署一个，如果部署多个同步操作，这个version会有问题
-                var versionMax = _dbContext.PublishTimeline.Select.Where(x=>x.AppId == appId).Max(x => x.Version);
+                var versionMax = _dbContext.PublishTimeline.Select.Where(x => x.AppId == appId).Max(x => x.Version);
 
                 var user = _dbContext.Users.Where(x => x.Id == operatorr).ToOne();
 
@@ -497,10 +545,10 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> IsPublishedAsync(string configId)
         {
-           var any = await _dbContext.ConfigPublished.Select.AnyAsync(
-                x => x.ConfigId == configId && x.Status == ConfigStatus.Enabled);
+            var any = await _dbContext.ConfigPublished.Select.AnyAsync(
+                 x => x.ConfigId == configId && x.Status == ConfigStatus.Enabled);
 
-           return any;
+            return any;
         }
 
         public async Task<List<PublishDetail>> GetPublishDetailByPublishTimelineIdAsync(string publishTimelineId)
@@ -580,7 +628,7 @@ namespace AgileConfig.Server.Service
                 await _dbContext.Configs.UpdateAsync(config);
             }
             //删除version之后的版本
-            await _dbContext.ConfigPublished.RemoveAsync(x=>x.Version > version);
+            await _dbContext.ConfigPublished.RemoveAsync(x => x.Version > version);
             //设置为发布状态
             foreach (var item in publishedConfigs)
             {
@@ -589,7 +637,7 @@ namespace AgileConfig.Server.Service
             }
             //删除发布时间轴version之后的版本
             await _dbContext.PublishTimeline.RemoveAsync(x => x.Version > version);
-            await _dbContext.PublishDetail.RemoveAsync(x=>x.Version > version);
+            await _dbContext.PublishDetail.RemoveAsync(x => x.Version > version);
 
             return await _dbContext.SaveChangesAsync() > 0;
         }

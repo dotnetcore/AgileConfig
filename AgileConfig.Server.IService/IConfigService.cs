@@ -52,6 +52,13 @@ namespace AgileConfig.Server.IService
 
         Task<bool> UpdateAsync(List<Config> configs);
 
+        /// <summary>
+        /// 撤销编辑状态
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <returns></returns>
+        Task<bool> CancelEdit(List<string> ids);
+
         Task<List<Config>> GetAllConfigsAsync();
 
         Task<int> CountEnabledConfigsAsync();

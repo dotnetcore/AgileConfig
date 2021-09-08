@@ -7,7 +7,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { queryApps } from '../Apps/service';
 import UpdateForm from './comps/updateForm';
 import { ConfigListItem, PublishDetialConfig } from './data';
-import { queryConfigs, delConfig,delConfigs, addConfig, editConfig, queryConfigPublishedHistory, getWaitPublishStatus, publish, cancelEdit, exportJson } from './service';
+import { queryConfigs, delConfig,delConfigs, addConfig, editConfig, queryConfigPublishedHistory, getWaitPublishStatus, publish, cancelEdit, exportJson, cancelSomeEdit } from './service';
 import Text from 'antd/lib/typography/Text';
 import moment from 'moment';
 import styles from './index.less';
@@ -75,6 +75,24 @@ const handleDelSome = async (configs: ConfigListItem[]):Promise<boolean> => {
   } catch (error) {
     hide();
     message.error(intl.formatMessage({id:'delete_fail'}));
+    return false;
+  }
+};
+const handleCancelEditSome = async (configs: ConfigListItem[]):Promise<boolean> => {
+  const hide = message.loading('正在撤销');
+  try {
+    const result = await cancelSomeEdit(configs.map(x=>x.id));
+    hide();
+    const success = result.success;
+    if (success) {
+      message.success('撤销成功');
+    } else {
+      message.error('撤销失败');
+    }
+    return success;
+  } catch (error) {
+    hide();
+    message.error('撤销失败');
     return false;
   }
 };
@@ -278,7 +296,8 @@ const configs: React.FC = (props: any) => {
     {
       title: intl.formatMessage({id:'pages.configs.table.cols.g'}),
       dataIndex: 'group',
-      copyable: true
+      copyable: true,
+      sorter: true,
     },
     {
       title: intl.formatMessage({id:'pages.configs.table.cols.k'}),
@@ -304,7 +323,8 @@ const configs: React.FC = (props: any) => {
       dataIndex: 'createTime',
       hideInSearch: true,
       valueType: 'dateTime',
-      width: 150
+      width: 150,
+      sorter: true,
     },
     {
       title: '编辑状态',
@@ -425,7 +445,19 @@ const configs: React.FC = (props: any) => {
         search={{
           labelWidth: 'auto',
         }}
-        request={(params, sorter, filter) => queryConfigs(appId,params)}
+        request={(params, sorter, filter) => {
+          let sortField = 'createTime';
+          let ascOrDesc = 'descend';
+          for (const key in sorter) {
+            sortField = key;
+            const val = sorter[key];
+            if (val) {
+              ascOrDesc = val;
+            }
+          }
+          console.log(sortField, ascOrDesc);
+          return queryConfigs(appId,{ sortField, ascOrDesc, ...params })
+        }}
         headerTitle= {
           <Space size="middle">
               <Badge count={waitPublishStatus.addCount} size="small" offset={[-5, 0]}>
@@ -441,7 +473,7 @@ const configs: React.FC = (props: any) => {
         }
         toolBarRender={() => [
           <AuthorizedEle key="0" judgeKey={functionKeys.Config_Add} appId={appId}>
-            <Button key="button" type="primary"  icon={<PlusOutlined />}  onClick={() => { setCreateModalVisible(true); }}>
+            <Button key="button" type="primary" icon={<PlusOutlined />}  onClick={() => { setCreateModalVisible(true); }}>
             {
               intl.formatMessage({
                 id: 'pages.configs.table.cols.action.add'
@@ -464,13 +496,22 @@ const configs: React.FC = (props: any) => {
           ,
           <AuthorizedEle key="5" judgeKey={functionKeys.Config_Edit} appId={appId} >
             {
-              selectedRowsState.filter(x=>x.editStatus != 10).length > 0 ?
+              selectedRowsState.filter(x=>x.editStatus !== 10).length > 0 ?
               <Button key="button"  type="primary" icon={<RollbackOutlined />}
                       className="warn"
                       onClick={
                         ()=>{
                           confirm({
                             content:`确定撤销选中配置项的编辑状态吗？`,
+                            onOk: async ()=>{
+                              const result = await handleCancelEditSome(selectedRowsState.filter(x=>x.editStatus !== 10))
+                              if (result) {
+                                if (actionRef.current?.clearSelected){
+                                  actionRef.current?.clearSelected();
+                                }
+                                actionRef.current?.reload();
+                              }
+                            }
                           })
                         }
                       }
@@ -495,6 +536,9 @@ const configs: React.FC = (props: any) => {
                           onOk: async ()=>{
                             const result = await handleDelSome(selectedRowsState)
                             if (result) {
+                              if (actionRef.current?.clearSelected){
+                                actionRef.current?.clearSelected();
+                              }
                               actionRef.current?.reload();
                             }
                           }

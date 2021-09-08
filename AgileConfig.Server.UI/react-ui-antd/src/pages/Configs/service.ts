@@ -1,5 +1,5 @@
 import request from '@/utils/request';
-import { ConfigListItem, ConfigListParams, ConfigModifyLog, JsonImportItem, PublishDetial } from './data';
+import { ConfigListItem, ConfigListParams, JsonImportItem } from './data';
 
 export async function queryConfigs(appId:string, params: ConfigListParams) {
   return request('/config/search', {
@@ -133,6 +133,13 @@ export async function cancelEdit(configId: string) {
     params:{
       configId: configId
     }
+  });
+}
+
+export async function cancelSomeEdit(ids: string[]) {
+  return request('/config/cancelSomeEdit', {
+    method: 'POST',
+    data: ids
   });
 }
 

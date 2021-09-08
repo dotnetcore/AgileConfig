@@ -292,7 +292,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         /// <param name="current">当前页</param>
         /// <returns></returns>
         [HttpGet]
-        public async Task<IActionResult> Search(string appId, string group, string key, OnlineStatus? onlineStatus, int pageSize = 20, int current = 1)
+        public async Task<IActionResult> Search(string appId, string group, string key, OnlineStatus? onlineStatus, string sortField, string ascOrDesc, int pageSize = 20, int current = 1)
         {
             if (pageSize <= 0)
             {
@@ -309,7 +309,29 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 configs = configs.Where(c => c.OnlineStatus == onlineStatus).ToList();
             }
-            configs = configs.OrderBy(c => c.AppId).ThenBy(c=>c.EditStatus).ThenBy(c => c.Group).ThenBy(c => c.Key).ThenBy(c=>c.CreateTime).ToList();
+
+            if (sortField == "createTime")
+            {
+                if (ascOrDesc.StartsWith("asc"))
+                {
+                    configs = configs.OrderBy(x => x.CreateTime).ToList();
+                }
+                else
+                {
+                    configs = configs.OrderByDescending(x => x.CreateTime).ToList();
+                }
+            }
+            if (sortField == "group")
+            {
+                if (ascOrDesc.StartsWith("asc"))
+                {
+                    configs = configs.OrderBy(x => x.Group).ToList();
+                }
+                else
+                {
+                    configs = configs.OrderByDescending(x => x.Group).ToList();
+                }
+            }
 
             var page = configs.Skip((current - 1) * pageSize).Take(pageSize).ToList();
             var total = configs.Count();
@@ -660,46 +682,22 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException("configId");
             }
 
-            var config = await _configService.GetAsync(configId);
-            if (config == null)
+            await _configService.CancelEdit(new List<string>() {configId});
+
+            return Json(new
             {
-                throw new Exception("Can not find config by id " + configId);
+                success = true
+            });
+        }
+
+        public async Task<IActionResult> CancelSomeEdit([FromBody]List<string> ids)
+        {
+            if (ids == null)
+            {
+                throw new ArgumentNullException("ids");
             }
 
-            if (config.EditStatus == EditStatus.Commit)
-            {
-                return Json(new
-                {
-                    success = true
-                });
-            }
-
-            if (config.EditStatus == EditStatus.Add)
-            {
-                await _configService.DeleteAsync(config);
-            }
-            if (config.EditStatus == EditStatus.Deleted || config.EditStatus == EditStatus.Edit)
-            {
-                config.OnlineStatus = OnlineStatus.Online;
-                config.EditStatus = EditStatus.Commit;
-                config.UpdateTime = DateTime.Now;
-
-                var publishedConfig = await _configService.GetPublishedConfigAsync(configId);
-                if (publishedConfig == null)
-                {
-                    //
-                    throw new Exception("Can not find published config by id " + configId);
-                }
-                else
-                {
-                    config.Value = publishedConfig.Value;
-                    config.OnlineStatus = OnlineStatus.Online;
-                }
-                //reset value
-
-                await _configService.UpdateAsync(config);
-            }
-
+            await _configService.CancelEdit(ids);
 
             return Json(new
             {
