@@ -24,5 +24,7 @@ namespace AgileConfig.Server.Data.Entity
         [Column(Name = "version")]
         public int Version { get; set; }
 
+        [Column(Name = "log", StringLength = 100)]
+        public string Log { get; set; }
     }
 }

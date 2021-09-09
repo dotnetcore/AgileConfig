@@ -11,9 +11,10 @@ namespace AgileConfig.Server.IService
         /// 发布当前待发布的配置项
         /// </summary>
         /// <param name="appId"></param>
+        /// <param name="log"></param>
         /// <param name="operatorr"></param>
         /// <returns></returns>
-        (bool result, string publishTimelineId) Publish(string appId, string operatorr);
+        (bool result, string publishTimelineId) Publish(string appId, string log, string operatorr);
 
         Task<Config> GetAsync(string id);
 

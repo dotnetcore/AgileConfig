@@ -109,10 +109,11 @@ export async function getWaitPublishStatus(appId: string) {
   });
 }
 
-export async function publish(appId: string) {
+export async function publish(appId: string, publistLog: string) {
   return request('/config/publish', {
     method: 'POST',
-    params:{
+    data:{
+      log:publistLog,
       appId: appId
     }
   });

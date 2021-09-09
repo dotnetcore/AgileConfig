@@ -2,7 +2,7 @@ import { CiCircleOutlined, DeleteOutlined, PlusOutlined, RollbackOutlined, Verti
 import { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns, TableDropdown } from '@ant-design/pro-table';
-import { Badge, Button, Drawer, FormInstance, List, message, Modal, Space, Tag } from 'antd';
+import { Badge, Button, Drawer, FormInstance, Input, List, message, Modal, Space, Tag } from 'antd';
 import React, { useState, useRef, useEffect } from 'react';
 import { queryApps } from '../Apps/service';
 import UpdateForm from './comps/updateForm';
@@ -19,12 +19,13 @@ import functionKeys from '@/models/functionKeys';
 import { getFunctions } from '@/utils/authority';
 import VersionHistory from './comps/versionHistory';
 
+const { TextArea } = Input;
 const { confirm } = Modal;
 
-const handlePublish = async (appId: string) => {
+const handlePublish = async (appId: string, log:string) => {
   const hide = message.loading('正在发布');
   try {
-    const result = await publish(appId);
+    const result = await publish(appId, log);
     hide();
     const success = result.success;
     if (success) {
@@ -201,6 +202,7 @@ const configs: React.FC = (props: any) => {
   const [tableData, setTableData] = useState<ConfigListItem[]>([]);
   const actionRef = useRef<ActionType>();
   const addFormRef = useRef<FormInstance>();
+  let _publishLog:string = '';
   const intl = useIntl();
   const getAppEnums = async () => {
     const result = await queryApps({})
@@ -229,6 +231,7 @@ const configs: React.FC = (props: any) => {
   }, [tableData]);
 
   const publish = (appId: string) => {
+    _publishLog = '';
     confirm({
       content: <div>
         {
@@ -237,25 +240,16 @@ const configs: React.FC = (props: any) => {
         <br />
         <br />
         <div>
-          <span style={{ marginRight: 20 }}>
-            {
-              `新增: ${waitPublishStatus.addCount} 项`
-            }
-          </span> 
-          <span style={{ marginRight: 20 }}>
-          {
-              `编辑: ${waitPublishStatus.editCount} 项`
-            }
-          </span> 
-          <span style={{ marginRight: 20 }}>
-            {
-              `删除: ${waitPublishStatus.deleteCount} 项`
-            }
-          </span>
+         <TextArea autoSize placeholder="请填写发布日志" maxLength={50} showCount={true}
+          onChange={(e)=>{
+            _publishLog = e.target.value;
+          }}
+         >
+         </TextArea>
         </div>
       </div>,
       onOk: async () => {
-        const result = await handlePublish(appId);
+        const result = await handlePublish(appId, _publishLog);
         if (result && actionRef.current) {
           if (actionRef.current?.clearSelected){
             actionRef.current?.clearSelected();

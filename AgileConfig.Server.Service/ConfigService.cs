@@ -405,9 +405,10 @@ namespace AgileConfig.Server.Service
         /// 发布当前待发布的配置项
         /// </summary>
         /// <param name="appId">应用id</param>
+        /// <param name="log">发布日志</param>
         /// <param name="operatorr">操作员</param>
         /// <returns></returns>
-        public (bool result, string publishTimelineId) Publish(string appId, string operatorr)
+        public (bool result, string publishTimelineId) Publish(string appId, string log, string operatorr)
         {
             lock (Lockobj)
             {
@@ -426,9 +427,9 @@ namespace AgileConfig.Server.Service
                 publishTimelineNode.PublishUserId = user.Id;
                 publishTimelineNode.PublishUserName = user.UserName;
                 publishTimelineNode.Version = versionMax + 1;
+                publishTimelineNode.Log = log;
 
                 var publishDetails = new List<PublishDetail>();
-
                 waitPublishConfigs.ForEach(x =>
                 {
                     publishDetails.Add(new PublishDetail()

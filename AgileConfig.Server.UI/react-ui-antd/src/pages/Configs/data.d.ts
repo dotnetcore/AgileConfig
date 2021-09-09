@@ -43,7 +43,8 @@ export type PublishTimelineNode =  {
   version: number,
   publishUserId: string,
   publishUserName: string,
-  publishTime: Date
+  publishTime: Date,
+  log: string
 }
 
 export type PublishDetial =  {

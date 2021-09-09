@@ -106,7 +106,7 @@ const VersionHistory : React.FC<VersionHistoryFormProps> = (props)=>{
               '暂无数据'
               :
               datasource.map( (e, i)=> 
-                <div className={styles.historyVersionTable}>
+                <div key={e.key} className={styles.historyVersionTable}>
                   <Table 
                     key={e.key}
                     rowKey="id"
@@ -120,6 +120,11 @@ const VersionHistory : React.FC<VersionHistoryFormProps> = (props)=>{
                         {
                           i === 0 ? <Tag>当前版本</Tag> : ''
                         }
+                        <div style={{color:"#8c8c8c"}}>
+                          {
+                            e.timelineNode.log
+                          }
+                        </div>
                         </>
                       }
                     }

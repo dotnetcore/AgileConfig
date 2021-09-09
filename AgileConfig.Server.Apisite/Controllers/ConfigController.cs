@@ -508,14 +508,19 @@ namespace AgileConfig.Server.Apisite.Controllers
         /// <returns></returns>
         [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.PublishAsync", Functions.Config_Publish })]
         [HttpPost]
-        public async Task<IActionResult> Publish(string appId)
+        public async Task<IActionResult> Publish([FromBody]PublishLogVM model)
         {
-            if (string.IsNullOrEmpty(appId))
+            if (model == null)
+            {
+                throw new ArgumentNullException("model");
+            }
+            if (string.IsNullOrEmpty(model.AppId))
             {
                 throw new ArgumentNullException("appId");
             }
 
-            var ret = _configService.Publish(appId, this.GetCurrentUserId());
+            var appId = model.AppId;
+            var ret = _configService.Publish(appId, model.Log, this.GetCurrentUserId());
 
             if (ret.result)
             {

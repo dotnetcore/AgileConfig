@@ -219,7 +219,10 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 _appService
                 );
 
-            var result = (await ctrl.Publish(configId)) as JsonResult;
+            var result = (await ctrl.Publish(new PublishLogVM()
+            {
+                AppId = configId
+            })) as JsonResult;
 
             dynamic obj = result.Value;
             if (obj.success == true)
