@@ -83,7 +83,43 @@ namespace AgileConfig.Server.Service
                 }
 
             });
-          
+
+            TinyEventBus.Instance.Regist(EventKeys.ROLLBACK_CONFIG_SUCCESS, (param) =>
+            {
+                dynamic param_dy = param;
+                PublishTimeline timelineNode = param_dy.timelineNode;
+                if (timelineNode != null)
+                {
+                    Task.Run(async () =>
+                    {
+                        using (var configService = NewConfigService())
+                        {
+                            using (var serverNodeService = NewServerNodeService())
+                            {
+                                var nodes = await serverNodeService.GetAllNodesAsync();
+                                var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(timelineNode.AppId);
+                                noticeApps.Add(timelineNode.AppId, new WebsocketAction { Action = ActionConst.Reload });
+
+                                foreach (var node in nodes)
+                                {
+                                    if (node.Status == NodeStatus.Offline)
+                                    {
+                                        continue;
+                                    }
+
+                                    foreach (var item in noticeApps)
+                                    {
+                                        await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, item.Key,
+                                            item.Value);
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+            });
+
         }
 
         /// <summary>
