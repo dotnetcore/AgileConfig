@@ -522,6 +522,9 @@ namespace AgileConfig.Server.Service
 
                 var result = _dbContext.SaveChanges();
 
+                ClearAppPublishedConfigsMd5Cache(appId);
+                ClearAppPublishedConfigsMd5CacheWithInheritanced(appId);
+
                 return (result > 0, publishTimelineNode.Id);
             }
         }
@@ -621,6 +624,9 @@ namespace AgileConfig.Server.Service
             //删除发布时间轴version之后的版本
             await _dbContext.PublishTimeline.RemoveAsync(x => x.Version > version);
             await _dbContext.PublishDetail.RemoveAsync(x => x.Version > version);
+
+            ClearAppPublishedConfigsMd5Cache(publishNode.AppId);
+            ClearAppPublishedConfigsMd5CacheWithInheritanced(publishNode.AppId);
 
             return await _dbContext.SaveChangesAsync() > 0;
         }
