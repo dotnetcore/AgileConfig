@@ -62,16 +62,11 @@ namespace AgileConfig.Server.Service
                                 await configService.GetPublishDetailByPublishTimelineIdAsync(timelineNode.Id);
                             foreach (var row in publishDetail)
                             {
-                                var action = new WebsocketAction
-                                {
-                                    Action = ActionConst.Add,
-                                    Item = new ConfigItem {group = row.Group, key = row.Key, value = row.Value}
-                                };
                                 using (var serverNodeService = NewServerNodeService())
                                 {
                                     var nodes = await serverNodeService.GetAllNodesAsync();
                                     var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(row.AppId);
-                                    noticeApps.Add(row.AppId, action);
+                                    noticeApps.Add(row.AppId, new WebsocketAction { Action = ActionConst.Reload } );
 
                                     foreach (var node in nodes)
                                     {
