@@ -58,28 +58,23 @@ namespace AgileConfig.Server.Service
                     {
                         using (var configService = NewConfigService())
                         {
-                            var publishDetail =
-                                await configService.GetPublishDetailByPublishTimelineIdAsync(timelineNode.Id);
-                            foreach (var row in publishDetail)
+                            using (var serverNodeService = NewServerNodeService())
                             {
-                                using (var serverNodeService = NewServerNodeService())
+                                var nodes = await serverNodeService.GetAllNodesAsync();
+                                var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(timelineNode.AppId);
+                                noticeApps.Add(timelineNode.AppId, new WebsocketAction { Action = ActionConst.Reload });
+
+                                foreach (var node in nodes)
                                 {
-                                    var nodes = await serverNodeService.GetAllNodesAsync();
-                                    var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(row.AppId);
-                                    noticeApps.Add(row.AppId, new WebsocketAction { Action = ActionConst.Reload } );
-
-                                    foreach (var node in nodes)
+                                    if (node.Status == NodeStatus.Offline)
                                     {
-                                        if (node.Status == NodeStatus.Offline)
-                                        {
-                                            continue;
-                                        }
+                                        continue;
+                                    }
 
-                                        foreach (var item in noticeApps)
-                                        {
-                                            await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, item.Key,
-                                                item.Value);
-                                        }
+                                    foreach (var item in noticeApps)
+                                    {
+                                        await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, item.Key,
+                                            item.Value);
                                     }
                                 }
                             }
@@ -612,34 +607,5 @@ namespace AgileConfig.Server.Service
           
         }
 
-        private async Task<WebsocketAction> CreateRemoveWebsocketAction(Config oldConfig, string appId)
-        {
-            using (var configService = NewConfigService())
-            {
-                //获取app此时的配置列表合并继承的app配置 字典
-                var configs = await configService.GetPublishedConfigsByAppIdWithInheritanced_Dictionary(appId);
-                var oldKey = configService.GenerateKey(oldConfig);
-                //如果oldkey已经不存在，返回remove的action
-                if (!configs.ContainsKey(oldKey))
-                {
-                    var action = new WebsocketAction { Action = ActionConst.Remove, Item = new ConfigItem { group = oldConfig.Group, key = oldConfig.Key, value = oldConfig.Value } };
-                    return action;
-                }
-                else
-                {
-                    //如果还在，那么说明有继承的app的配置项目的key跟oldkey一样，那么使用继承的配置的值
-                    //返回update的action
-                    var config = configs[oldKey];
-                    var action = new WebsocketAction
-                    {
-                        Action = ActionConst.Update,
-                        Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value },
-                        OldItem = new ConfigItem { group = oldConfig.Group, key = oldConfig.Key, value = oldConfig.Value }
-                    };
-
-                    return action;
-                }
-            }
-        }
     }
 }
