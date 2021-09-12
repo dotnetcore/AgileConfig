@@ -446,7 +446,13 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var result = await _configService.UpdateAsync(deleteConfigs);
-
+            if (result)
+            {
+                dynamic param = new ExpandoObject();
+                param.userName = this.GetCurrentUserName();
+                param.appId = deleteConfigs.First().AppId;
+                TinyEventBus.Instance.Fire(EventKeys.DELETE_CONFIG_SOME_SUCCESS, param);
+            }
             return Json(new
             {
                 success = result,
@@ -465,6 +471,14 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var result = await _configService.RollbackAsync(publishTimelineId);
+
+            if (result)
+            {
+                dynamic param = new ExpandoObject();
+                param.userName = this.GetCurrentUserName();
+                param.timelineNode = await _configService.GetPublishTimeLineNodeAsync(publishTimelineId);
+                TinyEventBus.Instance.Fire(EventKeys.ROLLBACK_CONFIG_SUCCESS, param);
+            }
 
             return Json(new
             {
@@ -687,7 +701,15 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException("configId");
             }
 
-            await _configService.CancelEdit(new List<string>() {configId});
+            var result = await _configService.CancelEdit(new List<string>() {configId});
+
+            if (result)
+            {
+                dynamic param = new ExpandoObject();
+                param.config = await _configService.GetAsync(configId);
+                param.userName = this.GetCurrentUserName();
+                TinyEventBus.Instance.Fire(EventKeys.CANCEL_EDIT_CONFIG_SUCCESS, param);
+            }
 
             return Json(new
             {
@@ -702,7 +724,16 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException("ids");
             }
 
-            await _configService.CancelEdit(ids);
+            var result = await _configService.CancelEdit(ids);
+
+            if (result)
+            {
+                var config = await _configService.GetAsync(ids.First());
+                dynamic param = new ExpandoObject();
+                param.userName = this.GetCurrentUserName();
+                param.appId = config.AppId;
+                TinyEventBus.Instance.Fire(EventKeys.CANCEL_EDIT_CONFIG_SOME_SUCCESS, param);
+            }
 
             return Json(new
             {

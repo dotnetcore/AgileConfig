@@ -93,44 +93,7 @@ namespace AgileConfig.Server.Service
                 }
 
             });
-            TinyEventBus.Instance.Regist(EventKeys.ROLLBACK_CONFIG_SUCCESS, async (param) =>
-            {
-                dynamic param_dy = param;
-                Config config = param_dy.config;
-                Config oldConfig = param_dy.oldConfig;
-
-                if (config != null && oldConfig != null)
-                {
-                    if (config.OnlineStatus == OnlineStatus.Online)
-                    {
-                        //notice clients
-                        var action = new WebsocketAction
-                        {
-                            Action = ActionConst.Update,
-                            Item = new ConfigItem { group = config.Group, key = config.Key, value = config.Value },
-                            OldItem = new ConfigItem { group = oldConfig.Group, key = oldConfig.Key, value = oldConfig.Value }
-                        };
-                        using (var serverNodeService = NewServerNodeService())
-                        {
-                            var nodes = await serverNodeService.GetAllNodesAsync();
-                            var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(config.AppId);
-                            noticeApps.Add(config.AppId, action);
-
-                            foreach (var node in nodes)
-                            {
-                                if (node.Status == NodeStatus.Offline)
-                                {
-                                    continue;
-                                }
-                                foreach (var item in noticeApps)
-                                {
-                                    await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, item.Key, item.Value);
-                                }
-                            }
-                        }
-                    }
-                }
-            });
+          
         }
 
         /// <summary>
@@ -138,7 +101,7 @@ namespace AgileConfig.Server.Service
         /// </summary>
         private void RegisterAddSysLog()
         {
-            TinyEventBus.Instance.Regist(EventKeys.USER_LOGIN_SUCCESS, async (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.USER_LOGIN_SUCCESS, (param) =>
             {
                 dynamic param_dy = param as dynamic;
                 string userName = param_dy.userName;
@@ -148,13 +111,16 @@ namespace AgileConfig.Server.Service
                     LogType = SysLogType.Normal,
                     LogText = $"{userName} 登录成功"
                 };
-                using (var syslogService = NewSysLogService())
+                Task.Run(async () =>
                 {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                    using (var syslogService = NewSysLogService())
+                    {
+                        await syslogService.AddSysLogAsync(log);
+                    }
+                });
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.INIT_SUPERADMIN_PASSWORD_SUCCESS, async (parm) =>
+            TinyEventBus.Instance.Regist(EventKeys.INIT_SUPERADMIN_PASSWORD_SUCCESS,  (parm) =>
             {
                 var log = new SysLog
                 {
@@ -162,13 +128,16 @@ namespace AgileConfig.Server.Service
                     LogType = SysLogType.Normal,
                     LogText = $"超级管理员密码初始化成功"
                 };
-                using (var syslogService = NewSysLogService())
+                Task.Run(async () =>
                 {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                    using (var syslogService = NewSysLogService())
+                    {
+                        await syslogService.AddSysLogAsync(log);
+                    }
+                });
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.RESET_USER_PASSWORD_SUCCESS, async (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.RESET_USER_PASSWORD_SUCCESS,  (param) =>
             {
                 dynamic param_dy = param as dynamic;
                 User user = param_dy.user;
@@ -180,13 +149,16 @@ namespace AgileConfig.Server.Service
                     LogType = SysLogType.Normal,
                     LogText = $"用户 {userName} 重置 {user.UserName} 的密码为默认密码 "
                 };
-                using (var syslogService = NewSysLogService())
+                Task.Run(async () =>
                 {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                    using (var syslogService = NewSysLogService())
+                    {
+                        await syslogService.AddSysLogAsync(log);
+                    }
+                });
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.CHANGE_USER_PASSWORD_SUCCESS, async (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.CHANGE_USER_PASSWORD_SUCCESS, (param) =>
             {
                 dynamic param_dy = param as dynamic;
                 string userName = param_dy.userName;
@@ -197,13 +169,16 @@ namespace AgileConfig.Server.Service
                     LogType = SysLogType.Normal,
                     LogText = $"修改用户 {userName} 的密码成功"
                 };
-                using (var syslogService = NewSysLogService())
+                Task.Run(async () =>
                 {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                    using (var syslogService = NewSysLogService())
+                    {
+                        await syslogService.AddSysLogAsync(log);
+                    }
+                });
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.ADD_APP_SUCCESS, async (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.ADD_APP_SUCCESS, (param) =>
             {
                 dynamic param_dy = param;
                 App app = param_dy.app;
@@ -216,15 +191,18 @@ namespace AgileConfig.Server.Service
                         LogType = SysLogType.Normal,
                         LogText = $"用户：{userName} 新增应用【AppId：{app.Id}】【AppName：{app.Name}】"
                     };
-                    using (var syslogService = NewSysLogService())
+                    Task.Run(async () =>
                     {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                        using (var syslogService = NewSysLogService())
+                        {
+                            await syslogService.AddSysLogAsync(log);
+                        }
+                    });
                 }
             });
 
             // app
-            TinyEventBus.Instance.Regist(EventKeys.EDIT_APP_SUCCESS, async (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.EDIT_APP_SUCCESS, (param) =>
             {
                 dynamic param_dy = param;
                 App app = param_dy.app;
@@ -237,14 +215,17 @@ namespace AgileConfig.Server.Service
                         LogType = SysLogType.Normal,
                         LogText = $"用户：{userName} 编辑应用【AppId：{app.Id}】【AppName：{app.Name}】"
                     };
-                    using (var syslogService = NewSysLogService())
+                    Task.Run(async () =>
                     {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                        using (var syslogService = NewSysLogService())
+                        {
+                            await syslogService.AddSysLogAsync(log);
+                        }
+                    });
                 }
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.DISABLE_OR_ENABLE_APP_SUCCESS, async (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.DISABLE_OR_ENABLE_APP_SUCCESS, (param) =>
             {
                 dynamic param_dy = param;
                 App app = param_dy.app;
@@ -257,14 +238,17 @@ namespace AgileConfig.Server.Service
                         LogType = SysLogType.Normal,
                         LogText = $"用户：{userName} {(app.Enabled ? "启用" : "禁用")}应用【AppId:{app.Id}】"
                     };
-                    using (var syslogService = NewSysLogService())
+                    Task.Run(async () =>
                     {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                        using (var syslogService = NewSysLogService())
+                        {
+                            await syslogService.AddSysLogAsync(log);
+                        }
+                    });
                 }
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.DELETE_APP_SUCCESS, async (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.DELETE_APP_SUCCESS, (param) =>
             {
                 dynamic param_dy = param;
                 App app = param_dy.app;
@@ -277,15 +261,18 @@ namespace AgileConfig.Server.Service
                         LogType = SysLogType.Warn,
                         LogText = $"用户：{userName} 删除应用【AppId:{app.Id}】"
                     };
-                    using (var syslogService = NewSysLogService())
+                    Task.Run(async () =>
                     {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                        using (var syslogService = NewSysLogService())
+                        {
+                            await syslogService.AddSysLogAsync(log);
+                        }
+                    });
                 }
             });
 
             //config
-            TinyEventBus.Instance.Regist(EventKeys.ADD_CONFIG_SUCCESS, async (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.ADD_CONFIG_SUCCESS, (param) =>
             {
                 dynamic param_dy = param;
                 Config config = param_dy.config;
@@ -300,10 +287,13 @@ namespace AgileConfig.Server.Service
                         AppId = config.AppId,
                         LogText = $"用户：{userName} 新增配置【Group：{config.Group}】【Key：{config.Key}】【AppId：{config.AppId}】【待发布】"
                     };
-                    using (var syslogService = NewSysLogService())
+                    Task.Run(async () =>
                     {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                        using (var syslogService = NewSysLogService())
+                        {
+                            await syslogService.AddSysLogAsync(log);
+                        }
+                    });
                 }
             });
             TinyEventBus.Instance.Regist(EventKeys.EDIT_CONFIG_SUCCESS, (param) =>
@@ -331,8 +321,7 @@ namespace AgileConfig.Server.Service
                 }
             });
 
-         
-            TinyEventBus.Instance.Regist(EventKeys.DELETE_CONFIG_SUCCESS, async (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.DELETE_CONFIG_SUCCESS, (param) =>
             {
                 dynamic param_dy = param;
                 Config config = param_dy.config;
@@ -347,15 +336,40 @@ namespace AgileConfig.Server.Service
                         AppId = config.AppId,
                         LogText = $"用户：{userName} 删除配置【Group：{config.Group}】【Key：{config.Key}】【AppId：{config.AppId}】【待发布】"
                     };
-                    using (var syslogService = NewSysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                    Task.Run(async ()=> {
+                        using (var syslogService = NewSysLogService())
+                        {
+                            await syslogService.AddSysLogAsync(log);
+                        }
+                    });
                 }
 
             });
-        
-            TinyEventBus.Instance.Regist(EventKeys.PUBLISH_CONFIG_SUCCESS, async (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.DELETE_CONFIG_SOME_SUCCESS,  (param) =>
+            {
+                dynamic param_dy = param;
+                string userName = param_dy.userName;
+                string appId = param_dy.appId;
+                if (appId != null)
+                {
+                    var log = new SysLog
+                    {
+                        LogTime = DateTime.Now,
+                        LogType = SysLogType.Warn,
+                        AppId = appId,
+                        LogText = $"用户：{userName} 批量删除配置"
+                    };
+                    Task.Run(async ()=> {
+                        using (var syslogService = NewSysLogService())
+                        {
+                            await syslogService.AddSysLogAsync(log);
+                        }
+                    });
+                }
+
+            });
+
+            TinyEventBus.Instance.Regist(EventKeys.PUBLISH_CONFIG_SUCCESS, (param) =>
             {
                 dynamic param_dy = param;
                 PublishTimeline node = param_dy.publishTimelineNode;
@@ -365,45 +379,92 @@ namespace AgileConfig.Server.Service
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
                     AppId = node.AppId,
-                    LogText = $"用户：{userName} 发布配置【AppId：{node.AppId}】【版本：{node.Version}】"
+                    LogText = $"用户：{userName} 发布配置【AppId：{node.AppId}】【版本：{node.PublishTime.Value:yyyyMMddHHmmss}】"
                 };
-                using (var syslogService = NewSysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
-
-                using (var configService = NewConfigService())
-                {
-                    var publishDetail = await configService.GetPublishDetailByPublishTimelineIdAsync(node.Id);
-                }
+                Task.Run(async ()=> {
+                    using (var syslogService = NewSysLogService())
+                    {
+                        await syslogService.AddSysLogAsync(log);
+                    }
+                    using (var configService = NewConfigService())
+                    {
+                        var publishDetail = await configService.GetPublishDetailByPublishTimelineIdAsync(node.Id);
+                    }
+                });
                 
             });
-           
-
-
-            TinyEventBus.Instance.Regist(EventKeys.ROLLBACK_CONFIG_SUCCESS, async (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.ROLLBACK_CONFIG_SUCCESS, (param) =>
             {
                 dynamic param_dy = param;
-                Config config = param_dy.config;
                 string userName = param_dy.userName;
+                PublishTimeline timelineNode = param_dy.timelineNode;
 
-                if (config != null )
+                if (timelineNode != null)
                 {
                     var log = new SysLog
                     {
                         LogTime = DateTime.Now,
                         LogType = SysLogType.Warn,
-                        AppId = config.AppId,
+                        AppId = timelineNode.AppId,
+                        LogText = $"{userName} 回滚应用【{timelineNode.AppId}】至发布版本【{timelineNode.PublishTime.Value:yyyyMMddHHmmss}】"
                     };
-                    using (var syslogService = NewSysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
-
+                    Task.Run(async () => {
+                        using (var syslogService = NewSysLogService())
+                        {
+                            await syslogService.AddSysLogAsync(log);
+                        }
+                    });
                 }
             });
+            TinyEventBus.Instance.Regist(EventKeys.CANCEL_EDIT_CONFIG_SUCCESS,  (param) =>
+            {
+                dynamic param_dy = param;
+                string userName = param_dy.userName;
+                Config config = param_dy.config;
 
-            TinyEventBus.Instance.Regist(EventKeys.ADD_NODE_SUCCESS, async (param) =>
+                if (config != null)
+                {
+                    var log = new SysLog
+                    {
+                        LogTime = DateTime.Now,
+                        LogType = SysLogType.Normal,
+                        AppId = config.AppId,
+                        LogText = $"{userName} 撤销编辑状态的配置【Group：{config.Group}】【Key：{config.Key}】【AppId：{config.AppId}】"
+                    };
+                    Task.Run(async () =>
+                    {
+                        using (var syslogService = NewSysLogService())
+                        {
+                            await syslogService.AddSysLogAsync(log);
+                        }
+                    });
+                }
+            });
+            TinyEventBus.Instance.Regist(EventKeys.CANCEL_EDIT_CONFIG_SOME_SUCCESS, (param) =>
+            {
+                dynamic param_dy = param;
+                string userName = param_dy.userName;
+                string appId = param_dy.appId;
+
+                if (appId != null)
+                {
+                    var log = new SysLog
+                    {
+                        LogTime = DateTime.Now,
+                        LogType = SysLogType.Normal,
+                        AppId = appId,
+                        LogText = $"{userName} 批量撤销编辑状态的配置"
+                    };
+                    Task.Run(async () =>
+                    {
+                        using (var syslogService = NewSysLogService())
+                        {
+                            await syslogService.AddSysLogAsync(log);
+                        }
+                    });
+                }
+            });
+            TinyEventBus.Instance.Regist(EventKeys.ADD_NODE_SUCCESS, (param) =>
             {
                 dynamic param_dy = param;
                 ServerNode node = param_dy.node;
@@ -415,13 +476,15 @@ namespace AgileConfig.Server.Service
                     LogType = SysLogType.Normal,
                     LogText = $"用户：{userName} 添加节点：{node.Address}"
                 };
-                using (var syslogService = NewSysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                Task.Run(async () => {
+                    using (var syslogService = NewSysLogService())
+                    {
+                        await syslogService.AddSysLogAsync(log);
+                    }
+                });
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.DELETE_NODE_SUCCESS, async (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.DELETE_NODE_SUCCESS, (param) =>
             {
                 dynamic param_dy = param;
                 ServerNode node = param_dy.node;
@@ -433,13 +496,15 @@ namespace AgileConfig.Server.Service
                     LogType = SysLogType.Warn,
                     LogText = $"用户：{userName} 删除节点：{node.Address}"
                 };
-                using (var syslogService = NewSysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                Task.Run(async () => {
+                    using (var syslogService = NewSysLogService())
+                    {
+                        await syslogService.AddSysLogAsync(log);
+                    }
+                });
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.ADD_USER_SUCCESS, async (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.ADD_USER_SUCCESS, (param) =>
             {
                 dynamic param_dy = param;
                 User user = param_dy.user;
@@ -451,13 +516,15 @@ namespace AgileConfig.Server.Service
                     LogType = SysLogType.Normal,
                     LogText = $"用户：{userName} 添加用户：{user.UserName} 成功"
                 };
-                using (var syslogService = NewSysLogService())
-                {
-                   await syslogService.AddSysLogAsync(log);
-                }
+                Task.Run(async () => {
+                    using (var syslogService = NewSysLogService())
+                    {
+                        await syslogService.AddSysLogAsync(log);
+                    }
+                });
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.EDIT_USER_SUCCESS, async (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.EDIT_USER_SUCCESS, (param) =>
             {
                 dynamic param_dy = param;
                 User user = param_dy.user;
@@ -469,13 +536,15 @@ namespace AgileConfig.Server.Service
                     LogType = SysLogType.Normal,
                     LogText = $"用户：{userName} 编辑用户：{user.UserName} 成功"
                 };
-                using (var syslogService = NewSysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                Task.Run(async () => {
+                    using (var syslogService = NewSysLogService())
+                    {
+                        await syslogService.AddSysLogAsync(log);
+                    }
+                });
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.DELETE_USER_SUCCESS, async (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.DELETE_USER_SUCCESS, (param) =>
             {
                 dynamic param_dy = param;
                 User user = param_dy.user;
@@ -487,13 +556,15 @@ namespace AgileConfig.Server.Service
                     LogType = SysLogType.Warn,
                     LogText = $"用户：{userName} 删除用户：{user.UserName} 成功"
                 };
-                using (var syslogService = NewSysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                Task.Run(async () => {
+                    using (var syslogService = NewSysLogService())
+                    {
+                        await syslogService.AddSysLogAsync(log);
+                    }
+                });
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.DISCONNECT_CLIENT_SUCCESS,async (param) =>
+            TinyEventBus.Instance.Regist(EventKeys.DISCONNECT_CLIENT_SUCCESS, (param) =>
             {
                 dynamic param_dy = param;
                 string clientId = param_dy.clientId;
@@ -505,11 +576,15 @@ namespace AgileConfig.Server.Service
                     LogType = SysLogType.Warn,
                     LogText = $"用户：{userName} 断开客户端 {clientId} 成功"
                 };
-                using (var syslogService = NewSysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                Task.Run(async () => {
+                    using (var syslogService = NewSysLogService())
+                    {
+                        await syslogService.AddSysLogAsync(log);
+                    }
+                });
             });
+
+
         }
 
         /// <summary>
