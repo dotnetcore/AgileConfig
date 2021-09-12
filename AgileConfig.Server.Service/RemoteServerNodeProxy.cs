@@ -141,7 +141,7 @@ namespace AgileConfig.Server.Service
 
                         if ((bool)result.success)
                         {
-                            if (action.Action == ActionConst.Offline || action.Action == ActionConst.Remove)
+                            if (action.Action == ActionConst.Offline)
                             {
                                 if (_serverNodeClientReports.ContainsKey(address))
                                 {

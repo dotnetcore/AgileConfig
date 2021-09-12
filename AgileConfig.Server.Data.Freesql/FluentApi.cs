@@ -20,7 +20,19 @@ namespace AgileConfig.Server.Data.Freesql
                     eb.Property(a => a.Value).HasMaxLength(4000);
                 }
             });
-            freeSql.CodeFirst.Entity<ModifyLog>(eb => {
+            freeSql.CodeFirst.Entity<ConfigPublished>(eb => {
+                eb.Property(a => a.Value).HasColumnName("v");
+                if (freeSql.Ado.DataType == FreeSql.DataType.Oracle)
+                {
+                    //因为oracle的nvarchar2的长度不支持4000，使用-1使用clob
+                    eb.Property(a => a.Value).HasMaxLength(-1);
+                }
+                else
+                {
+                    eb.Property(a => a.Value).HasMaxLength(4000);
+                }
+            });
+            freeSql.CodeFirst.Entity<PublishDetail>(eb => {
                 eb.Property(a => a.Value).HasColumnName("v");
                 if (freeSql.Ado.DataType == FreeSql.DataType.Oracle)
                 {
