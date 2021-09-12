@@ -395,9 +395,10 @@ namespace AgileConfig.Server.Service
             lock (Lockobj)
             {
                 var waitPublishConfigs = _dbContext.Configs.Where(x =>
+                    x.AppId == appId &&
                     x.Status == ConfigStatus.Enabled &&
                     x.EditStatus != EditStatus.Commit).ToList();
-                //这里默认admin console 实例只部署一个，如果部署多个同步操作，这个version会有问题
+                //这里默认admin console 实例只部署一个，如果部署多个同步操作，高并发的时候这个version会有问题
                 var versionMax = _dbContext.PublishTimeline.Select.Where(x => x.AppId == appId).Max(x => x.Version);
 
                 var user = _dbContext.Users.Where(x => x.Id == operatorr).ToOne();
@@ -590,9 +591,10 @@ namespace AgileConfig.Server.Service
         {
             var publishNode = await _dbContext.PublishTimeline.Where(x => x.Id == publishTimelineId).ToOneAsync();
             var version = publishNode.Version;
+            var appId = publishNode.AppId;
 
-            var publishedConfigs = await _dbContext.ConfigPublished.Where(x => x.Version == version).ToListAsync();
-            var currentConfigs = await _dbContext.Configs.Where(x => x.Status == ConfigStatus.Enabled).ToListAsync();
+            var publishedConfigs = await _dbContext.ConfigPublished.Where(x => x.AppId == appId && x.Version == version).ToListAsync();
+            var currentConfigs = await _dbContext.Configs.Where(x => x.AppId == appId && x.Status == ConfigStatus.Enabled).ToListAsync();
 
             //把当前的全部软删除
             foreach (var item in currentConfigs)
@@ -604,7 +606,7 @@ namespace AgileConfig.Server.Service
             var now = DateTime.Now;
             foreach (var item in publishedConfigs)
             {
-                var config = await _dbContext.Configs.Where(x => x.Id == item.ConfigId).ToOneAsync();
+                var config = await _dbContext.Configs.Where(x => x.AppId == appId && x.Id == item.ConfigId).ToOneAsync();
                 config.Status = ConfigStatus.Enabled;
                 config.Value = item.Value;
                 config.UpdateTime = now;
@@ -614,7 +616,7 @@ namespace AgileConfig.Server.Service
                 await _dbContext.Configs.UpdateAsync(config);
             }
             //删除version之后的版本
-            await _dbContext.ConfigPublished.RemoveAsync(x => x.Version > version);
+            await _dbContext.ConfigPublished.RemoveAsync(x => x.AppId == appId && x.Version > version);
             //设置为发布状态
             foreach (var item in publishedConfigs)
             {
@@ -622,11 +624,11 @@ namespace AgileConfig.Server.Service
                 await _dbContext.ConfigPublished.UpdateAsync(item);
             }
             //删除发布时间轴version之后的版本
-            await _dbContext.PublishTimeline.RemoveAsync(x => x.Version > version);
-            await _dbContext.PublishDetail.RemoveAsync(x => x.Version > version);
+            await _dbContext.PublishTimeline.RemoveAsync(x => x.AppId == appId && x.Version > version);
+            await _dbContext.PublishDetail.RemoveAsync(x => x.AppId == appId && x.Version > version);
 
-            ClearAppPublishedConfigsMd5Cache(publishNode.AppId);
-            ClearAppPublishedConfigsMd5CacheWithInheritanced(publishNode.AppId);
+            ClearAppPublishedConfigsMd5Cache(appId);
+            ClearAppPublishedConfigsMd5CacheWithInheritanced(appId);
 
             return await _dbContext.SaveChangesAsync() > 0;
         }
