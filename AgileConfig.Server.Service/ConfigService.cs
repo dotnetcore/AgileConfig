@@ -29,11 +29,6 @@ namespace AgileConfig.Server.Service
             int x = await _dbContext.SaveChangesAsync();
 
             var result = x > 0;
-            if (result)
-            {
-                ClearAppPublishedConfigsMd5Cache(config.AppId);
-                ClearAppPublishedConfigsMd5CacheWithInheritanced(config.AppId);
-            }
 
             return result;
         }
@@ -43,11 +38,6 @@ namespace AgileConfig.Server.Service
             var x = await _dbContext.SaveChangesAsync();
 
             var result = x > 0;
-            if (result)
-            {
-                ClearAppPublishedConfigsMd5Cache(config.AppId);
-                ClearAppPublishedConfigsMd5CacheWithInheritanced(config.AppId);
-            }
 
             return result;
         }
@@ -120,11 +110,6 @@ namespace AgileConfig.Server.Service
             int x = await _dbContext.SaveChangesAsync();
 
             var result = x > 0;
-            if (result)
-            {
-                ClearAppPublishedConfigsMd5Cache(config.AppId);
-                ClearAppPublishedConfigsMd5CacheWithInheritanced(config.AppId);
-            }
 
             return result;
         }
@@ -139,11 +124,6 @@ namespace AgileConfig.Server.Service
             int x = await _dbContext.SaveChangesAsync();
 
             var result = x > 0;
-            if (result)
-            {
-                ClearAppPublishedConfigsMd5Cache(config.AppId);
-                ClearAppPublishedConfigsMd5CacheWithInheritanced(config.AppId);
-            }
 
             return result;
         }
@@ -221,6 +201,15 @@ namespace AgileConfig.Server.Service
 
             return $"{config.Group}:{config.Key}";
         }
+        public string GenerateKey(ConfigPublished config)
+        {
+            if (string.IsNullOrEmpty(config.Group))
+            {
+                return config.Key;
+            }
+
+            return $"{config.Group}:{config.Key}";
+        }
 
         /// <summary>
         /// 获取当前app的配置集合的md5版本
@@ -229,8 +218,8 @@ namespace AgileConfig.Server.Service
         /// <returns></returns>
         public async Task<string> AppPublishedConfigsMd5(string appId)
         {
-            var configs = await _dbContext.Configs.Where(c =>
-                c.AppId == appId && c.Status == ConfigStatus.Enabled && c.OnlineStatus == OnlineStatus.Online
+            var configs = await _dbContext.ConfigPublished.Where(c =>
+                c.AppId == appId && c.Status == ConfigStatus.Enabled 
             ).ToListAsync();
 
             var keyStr = string.Join('&', configs.Select(c => GenerateKey(c)).ToArray().OrderBy(k => k));
@@ -283,13 +272,6 @@ namespace AgileConfig.Server.Service
             _memoryCache?.Remove(cacheKey);
         }
 
-        public async Task<List<Config>> GetPublishedConfigsByAppId(string appId)
-        {
-            return await _dbContext.Configs.Where(c =>
-                 c.AppId == appId && c.Status == ConfigStatus.Enabled && c.OnlineStatus == OnlineStatus.Online
-             ).ToListAsync();
-        }
-
         public async Task<bool> AddRangeAsync(List<Config> configs)
         {
             await _dbContext.Configs.AddRangeAsync(configs);
@@ -340,10 +322,10 @@ namespace AgileConfig.Server.Service
             for (int i = 0; i < apps.Count; i++)
             {
                 var id = apps[i];
-                var publishConfigs = await GetPublishedConfigsByAppId(id);
+                var publishConfigs = await GetPublishedConfigsAsync(id);
                 for (int j = 0; j < publishConfigs.Count; j++)
                 {
-                    var config = publishConfigs[j];
+                    var config = publishConfigs[j].Convert();
                     var key = GenerateKey(config);
                     if (configs.ContainsKey(key))
                     {

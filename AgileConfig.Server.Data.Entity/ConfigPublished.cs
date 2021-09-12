@@ -34,5 +34,20 @@ namespace AgileConfig.Server.Data.Entity
 
         [Column(Name = "status")]
         public ConfigStatus Status { get; set; }
+
+    }
+
+    public static class ConfigPublishedExt
+    {
+        public static Config Convert(this ConfigPublished configPublished)
+        {
+            return new Config
+            {
+                Id = configPublished.ConfigId,
+                Group = configPublished.Group,
+                Key = configPublished.Key,
+                Value = configPublished.Value
+            };
+        }
     }
 }

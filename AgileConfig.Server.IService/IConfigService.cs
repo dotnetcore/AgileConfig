@@ -28,9 +28,9 @@ namespace AgileConfig.Server.IService
         /// <returns></returns>
         Task<List<Config>> Search(string appId, string group, string key);
         Task<List<Config>> GetByAppIdAsync(string appId);
-        Task<List<Config>> GetPublishedConfigsByAppId(string appId);
+
         /// <summary>
-        /// 获取app相关的配置继承的app的配置一并查出
+        /// 获取app相关的已发布的配置继承的app的配置一并查出
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
