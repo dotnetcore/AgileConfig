@@ -48,8 +48,8 @@ namespace ApiSiteTests
                 return list;
             }
             var configService = new Mock<IConfigService>();
-            configService.Setup(s => s.GetPublishedConfigsByAppId("001"))
-                .ReturnsAsync(newConfigs);
+            //configService.Setup(s => s.GetPublishedConfigsAsync("001"))
+            //    .ReturnsAsync(newConfigs);
             configService.Setup(s => s.GetPublishedConfigsByAppIdWithInheritanced("001"))
                 .ReturnsAsync(newConfigs);
 
