@@ -17,7 +17,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
     {
         private readonly IConfigService _configService;
         private readonly IAppService _appService;
-        private readonly IModifyLogService _modifyLogService;
         private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
         private readonly IServerNodeService _serverNodeService;
         private readonly IAppBasicAuthService _appBasicAuthService;
@@ -25,14 +24,12 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         public ConfigController(
             IConfigService configService,
             IAppService appService,
-            IModifyLogService modifyLogService,
               IRemoteServerNodeProxy remoteServerNodeProxy,
                                 IServerNodeService serverNodeService,
                                 IAppBasicAuthService appBasicAuthService)
         {
             _configService = configService;
             _appService = appService;
-            _modifyLogService = modifyLogService;
             _remoteServerNodeProxy = remoteServerNodeProxy;
             _serverNodeService = serverNodeService;
             _appBasicAuthService = appBasicAuthService;
@@ -131,9 +128,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
             var ctrl = new Controllers.ConfigController(
                 _configService,
-                _modifyLogService,
-                _remoteServerNodeProxy,
-                _serverNodeService,
                 _appService
                 );
 
@@ -171,9 +165,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
             var ctrl = new Controllers.ConfigController(
                 _configService,
-                _modifyLogService,
-                _remoteServerNodeProxy,
-                _serverNodeService,
                 _appService
                 );
 
@@ -200,9 +191,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         {
             var ctrl = new Controllers.ConfigController(
                 _configService,
-                _modifyLogService,
-                _remoteServerNodeProxy,
-                _serverNodeService,
                 _appService
                 );
 
@@ -222,47 +210,19 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Publish", Functions.Config_Publish })]
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.PublishAsync", Functions.Config_Publish })]
         [HttpPost("publish/{configId}")]
         public async Task<IActionResult> Publish(string configId)
         {
             var ctrl = new Controllers.ConfigController(
                 _configService,
-                _modifyLogService,
-                _remoteServerNodeProxy,
-                _serverNodeService,
                 _appService
                 );
 
-            var result = (await ctrl.Publish(configId)) as JsonResult;
-
-            dynamic obj = result.Value;
-            if (obj.success == true)
+            var result = (await ctrl.Publish(new PublishLogVM()
             {
-                return Ok();
-            }
-
-            Response.StatusCode = 400;
-            return Json(new
-            {
-                obj.message
-            });
-        }
-
-        [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Offline", Functions.Config_Offline })]
-        [HttpPost("offline/{configId}")]
-        public async Task<IActionResult> Offline(string configId)
-        {
-            var ctrl = new Controllers.ConfigController(
-                _configService,
-                _modifyLogService,
-                _remoteServerNodeProxy,
-                _serverNodeService,
-                _appService
-                );
-
-            var result = (await ctrl.Offline(configId)) as JsonResult;
+                AppId = configId
+            })) as JsonResult;
 
             dynamic obj = result.Value;
             if (obj.success == true)

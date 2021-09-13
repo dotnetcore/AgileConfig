@@ -23,9 +23,13 @@ namespace AgileConfig.Server.IService
         public const string ADD_CONFIG_SUCCESS = "ADD_CONFIG_SUCCESS";
         public const string EDIT_CONFIG_SUCCESS = "EDIT_CONFIG_SUCCESS";
         public const string DELETE_CONFIG_SUCCESS = "DELETE_CONFIG_SUCCESS";
+        public const string DELETE_CONFIG_SOME_SUCCESS = "DELETE_CONFIG_SOME_SUCCESS";
+
         public const string PUBLISH_CONFIG_SUCCESS = "PUBLISH_CONFIG_SUCCESS";
         public const string OFFLINE_CONFIG_SUCCESS = "OFFLINE_CONFIG_SUCCESS";
         public const string ROLLBACK_CONFIG_SUCCESS = "ROLLBACK_CONFIG_SUCCESS";
+        public const string CANCEL_EDIT_CONFIG_SUCCESS = "CANCEL_EDIT_CONFIG_SUCCESS";
+        public const string CANCEL_EDIT_CONFIG_SOME_SUCCESS = "CANCEL_EDIT_CONFIG_SOME_SUCCESS";
 
         public const string ADD_NODE_SUCCESS = "ADD_NODE_SUCCESS";
         public const string DELETE_NODE_SUCCESS = "DELETE_NODE_SUCCESS";

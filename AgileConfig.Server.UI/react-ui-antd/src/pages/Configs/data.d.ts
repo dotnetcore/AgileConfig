@@ -5,7 +5,8 @@ export type ConfigListItem = {
     group: string
     id: string
     key: string
-    onlineStatus: number
+    onlineStatus: number,
+    editStatus: number,
     status: number
     updateTime: Date
     value: string
@@ -25,6 +26,8 @@ export type ConfigListParams = {
   key?: string;
   pageSize?: number;
   current?: number;
+  sortField: string;
+  ascOrDesc: string;
 };
 
 export type JsonImportItem =  {
@@ -33,4 +36,43 @@ export type JsonImportItem =  {
   value: string,
   id: string,
   appId: string
+}
+
+export type PublishTimelineNode =  {
+  id: string,
+  version: number,
+  publishUserId: string,
+  publishUserName: string,
+  publishTime: Date,
+  log: string
+}
+
+export type PublishDetial =  {
+  group: string,
+  key: string,
+  value: string,
+  id: string,
+  editStatus: number,
+  version: number,
+  configId: string
+}
+
+export type PublishedConfig =  {
+  group: string,
+  key: string,
+  value: string,
+  id: string,
+  publishTime: number,
+  version: number
+}
+
+export type PublishDetialNode =  {
+  key: string,
+  timelineNode: PublishTimelineNode,
+  list: PublishDetial[]
+}
+
+export type PublishDetialConfig =  {
+  timelineNode: PublishTimelineNode,
+  config: PublishDetial
 }

@@ -48,12 +48,11 @@ namespace ApiSiteTests
                 return list;
             }
             var configService = new Mock<IConfigService>();
-            configService.Setup(s => s.GetPublishedConfigsByAppId("001"))
-                .ReturnsAsync(newConfigs);
+            //configService.Setup(s => s.GetPublishedConfigsAsync("001"))
+            //    .ReturnsAsync(newConfigs);
             configService.Setup(s => s.GetPublishedConfigsByAppIdWithInheritanced("001"))
                 .ReturnsAsync(newConfigs);
 
-            var modifyLogService = new Mock<IModifyLogService>();
             var remoteNodeProxy = new Mock<IRemoteServerNodeProxy>();
             var serverNodeService = new Mock<IServerNodeService>();
             var sysLogService = new Mock<ISysLogService>();
@@ -62,7 +61,6 @@ namespace ApiSiteTests
             var ctrl = new ConfigController(
                 configService.Object,
                 appService.Object,
-                modifyLogService.Object, 
                 remoteNodeProxy.Object,
                 serverNodeService.Object,
                 appBasicAuthService.Object);
@@ -86,7 +84,6 @@ namespace ApiSiteTests
             ctrl = new ConfigController(
                 configService.Object,
                 appService.Object,
-                modifyLogService.Object,
                 remoteNodeProxy.Object,
                 serverNodeService.Object,
                 appBasicAuthService.Object);
