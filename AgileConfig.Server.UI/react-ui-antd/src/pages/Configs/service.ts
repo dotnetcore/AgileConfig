@@ -1,5 +1,5 @@
 import request from '@/utils/request';
-import { ConfigListItem, ConfigListParams, ConfigModifyLog, JsonImportItem } from './data';
+import { ConfigListItem, ConfigListParams, JsonImportItem } from './data';
 
 export async function queryConfigs(appId:string, params: ConfigListParams) {
   return request('/config/search', {
@@ -50,6 +50,13 @@ export async function delConfig(config: ConfigListItem) {
   });
 }
 
+export async function delConfigs(configs: ConfigListItem[]) {
+  return request('/config/deleteSome', {
+    method: 'POST',
+    data: configs.map(c=>c.id)
+  });
+}
+
 export async function addConfig(config: ConfigListItem) {
   return request('/config/add', {
     method: 'POST',
@@ -75,20 +82,74 @@ export async function editConfig(config: ConfigListItem) {
   });
 }
 
-export async function queryModifyLogs(config: ConfigListItem) {
-  return request('/config/modifyLogs', {
+export async function queryConfigPublishedHistory(config: ConfigListItem) {
+  return request('/config/ConfigPublishedHistory', {
     method: 'GET',
     params:{
       configId: config.id
     }
   });
 }
-export async function rollback(config: ConfigModifyLog) {
+
+export async function rollback(publishTimelineId: string) {
   return request('/config/rollback', {
     method: 'POST',
     params:{
-      configId: config.configId,
-      logId: config.id
+      publishTimelineId: publishTimelineId,
     }
+  });
+}
+
+export async function getWaitPublishStatus(appId: string) {
+  return request('/config/WaitPublishStatus', {
+    method: 'GET',
+    params:{
+      appId: appId
+    }
+  });
+}
+
+export async function publish(appId: string, publistLog: string) {
+  return request('/config/publish', {
+    method: 'POST',
+    data:{
+      log:publistLog,
+      appId: appId
+    }
+  });
+}
+
+export async function getPublishHistory(appId: string) {
+  return request('/config/publishHistory', {
+    method: 'GET',
+    params:{
+      appId: appId
+    }
+  });
+}
+
+export async function cancelEdit(configId: string) {
+  return request('/config/cancelEdit', {
+    method: 'POST',
+    params:{
+      configId: configId
+    }
+  });
+}
+
+export async function cancelSomeEdit(ids: string[]) {
+  return request('/config/cancelSomeEdit', {
+    method: 'POST',
+    data: ids
+  });
+}
+
+export async function exportJson(appId: string) {
+  return request('/config/ExportJson', {
+    method: 'POST',
+    params:{
+      appId: appId
+    },
+    responseType: "blob"
   });
 }

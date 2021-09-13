@@ -151,8 +151,8 @@ export default {
   'pages.configs.table.cols.desc': '描述',
   'pages.configs.table.cols.create_time': '创建时间',
   'pages.configs.table.cols.status': '状态',
-  'pages.configs.table.cols.status.0': '待上线',
-  'pages.configs.table.cols.status.1': '已上线',
+  'pages.configs.table.cols.status.0': '待发布',
+  'pages.configs.table.cols.status.1': '已发布',
   'pages.configs.table.cols.action': '操作',
   'pages.configs.table.cols.action.add': '新建',
   'pages.configs.table.cols.action.importfromjosnfile': '导入',
@@ -161,7 +161,7 @@ export default {
 
   'pages.configs.table.cols.action.edit': '编辑',
   'pages.configs.table.cols.action.delete': '删除',
-  'pages.configs.table.cols.action.publish': '上线',
+  'pages.configs.table.cols.action.publish': '发布',
   'pages.configs.table.cols.action.offline': '下线',
   'pages.configs.table.cols.action.history': '历史',
 

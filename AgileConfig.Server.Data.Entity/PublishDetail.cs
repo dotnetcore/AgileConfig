@@ -3,34 +3,22 @@ using System;
 
 namespace AgileConfig.Server.Data.Entity
 {
-    public enum ConfigStatus
-    {
-        Deleted = 0,
-        Enabled = 1,
-    }
-
-    public enum EditStatus
-    {
-        Add = 0,
-        Edit = 1,
-        Deleted = 2,
-        Commit = 10
-    }
-
-    public enum OnlineStatus
-    {
-        WaitPublish = 0,
-        Online = 1,
-    }
-
-    [Table(Name = "agc_config")]
-    public class Config
+    [Table(Name = "agc_publish_detail")]
+    public class PublishDetail
     {
         [Column(Name = "id", StringLength = 36)]
         public string Id { get; set; }
 
         [Column(Name = "app_id", StringLength = 36)]
         public string AppId { get; set; }
+
+        public int Version { get; set; }
+
+        [Column(Name = "publish_timeline_id", StringLength = 36)]
+        public string PublishTimelineId { get; set; }
+
+        [Column(Name = "config_id", StringLength = 36)]
+        public string ConfigId { get; set; }
 
         [Column(Name = "g", StringLength = 100)]
         public string Group { get; set; }
@@ -42,18 +30,6 @@ namespace AgileConfig.Server.Data.Entity
 
         [Column(Name = "description", StringLength = 200)]
         public string Description { get; set; }
-
-        [Column(Name = "create_time")]
-        public DateTime CreateTime { get; set; }
-
-        [Column(Name = "update_time")]
-        public DateTime? UpdateTime { get; set; }
-
-        [Column(Name = "status")]
-        public ConfigStatus Status { get; set; }
-
-        [Column(Name = "online_status")]
-        public OnlineStatus OnlineStatus { get; set; }
 
         [Column(Name = "edit_status")]
         public EditStatus EditStatus { get; set; }

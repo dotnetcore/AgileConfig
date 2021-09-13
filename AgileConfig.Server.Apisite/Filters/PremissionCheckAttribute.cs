@@ -54,7 +54,7 @@ namespace AgileConfig.Server.Apisite.Filters
             }
             ,
             {
-                "Config.Publish", (args, premission, configService) =>  {
+                "Config.PublishAsync", (args, premission, configService) =>  {
                         var id = args.ActionArguments["configId"] ;
                         var config = configService.GetAsync(id.ToString()).GetAwaiter().GetResult();
 
