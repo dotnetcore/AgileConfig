@@ -71,7 +71,7 @@ const UserAuth : React.FC<UserAuthProps> = (props)=>{
     />
     <ProFormSelect
                   mode="multiple"
-                  label="配置修改权"
+                  label="修改权"
                   name="editConfigPermissionUsers"
                   options={
                     users
@@ -92,7 +92,7 @@ const UserAuth : React.FC<UserAuthProps> = (props)=>{
     </ProFormSelect>    
     <ProFormSelect
                   mode="multiple"
-                  label="配置上下线权"
+                  label="发布权"
                   name="publishConfigPermissionUsers"
                   options={
                     users
