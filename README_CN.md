@@ -78,7 +78,7 @@ sudo docker run \
 --name agile_config \
 -e adminConsole=true \
 -e db:provider=sqlite \
--e db:conn="Data Source=db\agile_config.db" \
+-e db:conn="Data Source=agile_config.db" \
 -p 5000:5000 \
 -v /etc/localtime:/etc/localtime \
 #-v /your_host_dir:/app/db \
