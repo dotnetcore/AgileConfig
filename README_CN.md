@@ -160,6 +160,14 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
         {
             webBuilder.UseStartup<Startup>();
         });
+  ------or UseAgileConfig -------
+     public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .UseAgileConfig(e => Console.WriteLine($"configs {e.Action}"))
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
 ```
 根据环境变量读取appsettings.{env}.json配置信息。
 ``` c#
