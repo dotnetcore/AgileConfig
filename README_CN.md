@@ -78,7 +78,7 @@ sudo docker run \
 --name agile_config \
 -e adminConsole=true \
 -e db:provider=sqlite \
--e db:conn="Data Source=db\agile_config.db" \
+-e db:conn="Data Source=agile_config.db" \
 -p 5000:5000 \
 -v /etc/localtime:/etc/localtime \
 #-v /your_host_dir:/app/db \
@@ -160,6 +160,14 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
         {
             webBuilder.UseStartup<Startup>();
         });
+  ------or UseAgileConfig -------
+     public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .UseAgileConfig(e => Console.WriteLine($"configs {e.Action}"))
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
 ```
 根据环境变量读取appsettings.{env}.json配置信息。
 ``` c#
@@ -288,4 +296,4 @@ public class HomeController : Controller
 
         
 ### 感谢💖💖💖
-大鹏￥66.66 , 瘦草￥6.66 + 88 , ziana￥10.0 , Nullable￥9.99 , *三 ￥6.66
+大鹏￥66.66 , 瘦草￥6.66 + 88 , ziana￥10.0 , Nullable￥9.99 , *三 ￥6.66 , HHM ￥6.66

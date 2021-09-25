@@ -464,7 +464,7 @@ const appList: React.FC = (props) => {
                     const result = await inheritancedApps('');
                     return result.data.map( (x: { name: string, id: string })=> {
                       console.log(x);
-                      return { label:(x.name + x.id), value:x.id};
+                      return { label:x.name, value:x.id};
                     });
                   }}
                 ></ProFormSelect> : null
