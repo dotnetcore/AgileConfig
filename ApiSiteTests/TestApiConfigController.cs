@@ -57,13 +57,15 @@ namespace ApiSiteTests
             var serverNodeService = new Mock<IServerNodeService>();
             var sysLogService = new Mock<ISysLogService>();
             var appBasicAuthService = new Mock<IAppBasicAuthService>();
+            var userSErvice = new Mock<IUserService>();
 
             var ctrl = new ConfigController(
                 configService.Object,
                 appService.Object,
                 remoteNodeProxy.Object,
                 serverNodeService.Object,
-                appBasicAuthService.Object);
+                appBasicAuthService.Object,
+                userSErvice.Object);
             var act = await ctrl.GetAppConfig("001");
 
             Assert.IsNotNull(act);
@@ -86,7 +88,8 @@ namespace ApiSiteTests
                 appService.Object,
                 remoteNodeProxy.Object,
                 serverNodeService.Object,
-                appBasicAuthService.Object);
+                appBasicAuthService.Object,
+                userSErvice.Object);
             act = await ctrl.GetAppConfig("001");
 
             Assert.IsNotNull(act);

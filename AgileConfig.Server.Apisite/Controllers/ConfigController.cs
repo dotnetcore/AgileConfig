@@ -22,13 +22,16 @@ namespace AgileConfig.Server.Apisite.Controllers
     {
         private readonly IConfigService _configService;
         private readonly IAppService _appService;
+        private readonly IUserService _userService;
 
         public ConfigController(
                                 IConfigService configService,
-                                 IAppService appService)
+                                 IAppService appService,
+                                 IUserService userService)
         {
             _configService = configService;
             _appService = appService;
+            _userService = userService;
         }
 
         [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Add", Functions.Config_Add })]
@@ -534,7 +537,8 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var appId = model.AppId;
-            var ret = _configService.Publish(appId, model.Log, this.GetCurrentUserId());
+            var userId = await this.GetCurrentUserId(_userService);
+            var ret = _configService.Publish(appId, model.Log, userId);
 
             if (ret.result)
             {

@@ -20,19 +20,22 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
         private readonly IServerNodeService _serverNodeService;
         private readonly IAppBasicAuthService _appBasicAuthService;
+        private readonly IUserService _userService;
 
         public ConfigController(
             IConfigService configService,
             IAppService appService,
               IRemoteServerNodeProxy remoteServerNodeProxy,
                                 IServerNodeService serverNodeService,
-                                IAppBasicAuthService appBasicAuthService)
+                                IAppBasicAuthService appBasicAuthService,
+                                IUserService userService)
         {
             _configService = configService;
             _appService = appService;
             _remoteServerNodeProxy = remoteServerNodeProxy;
             _serverNodeService = serverNodeService;
             _appBasicAuthService = appBasicAuthService;
+            _userService = userService;
         }
 
         /// <summary>
@@ -128,8 +131,10 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
             var ctrl = new Controllers.ConfigController(
                 _configService,
-                _appService
+                _appService,
+                _userService
                 );
+            ctrl.ControllerContext.HttpContext = HttpContext;
 
             var result = (await ctrl.Add(model)) as JsonResult;
 
@@ -148,7 +153,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Edit", Functions.Config_Edit })]
+        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Edit", Functions.Config_Edit })]
         [HttpPut("{id}")]
         public async Task<IActionResult> Edit(string id, [FromBody] ConfigVM model)
         {
@@ -165,8 +170,10 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
             var ctrl = new Controllers.ConfigController(
                 _configService,
-                _appService
+                _appService,
+                _userService
                 );
+            ctrl.ControllerContext.HttpContext = HttpContext;
 
             model.Id = id;
             var result = (await ctrl.Edit(model)) as JsonResult;
@@ -185,14 +192,16 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Delete", Functions.Config_Delete })]
+        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Delete", Functions.Config_Delete })]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
             var ctrl = new Controllers.ConfigController(
                 _configService,
-                _appService
+                _appService,
+                _userService
                 );
+            ctrl.ControllerContext.HttpContext = HttpContext;
 
             var result = (await ctrl.Delete(id)) as JsonResult;
 
@@ -210,18 +219,20 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.PublishAsync", Functions.Config_Publish })]
-        [HttpPost("publish/{configId}")]
-        public async Task<IActionResult> Publish(string configId)
+        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Publish", Functions.Config_Publish })]
+        [HttpPost("publish")]
+        public async Task<IActionResult> Publish(string appId)
         {
             var ctrl = new Controllers.ConfigController(
                 _configService,
-                _appService
+                _appService,
+                _userService
                 );
+            ctrl.ControllerContext.HttpContext = HttpContext;
 
             var result = (await ctrl.Publish(new PublishLogVM()
             {
-                AppId = configId
+                AppId = appId
             })) as JsonResult;
 
             dynamic obj = result.Value;
