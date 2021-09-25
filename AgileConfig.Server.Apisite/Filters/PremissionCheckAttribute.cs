@@ -1,5 +1,6 @@
 ﻿using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Apisite.Utilites;
+using AgileConfig.Server.Common;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -54,11 +55,10 @@ namespace AgileConfig.Server.Apisite.Filters
             }
             ,
             {
-                "Config.PublishAsync", (args, premission, configService) =>  {
-                        var id = args.ActionArguments["configId"] ;
-                        var config = configService.GetAsync(id.ToString()).GetAwaiter().GetResult();
+                "Config.Publish", (args, premission, configService) =>  {
+                        var id = args.ActionArguments["appId"] ;
 
-                        return config.AppId;
+                        return id.ToString();
                     }
             }
             ,
@@ -73,10 +73,9 @@ namespace AgileConfig.Server.Apisite.Filters
             },
              {
                 "Config.Rollback", (args, premission, configService) =>  {
-                        var id = args.ActionArguments["configId"] as string;
-                        var config = configService.GetAsync(id.ToString()).GetAwaiter().GetResult();
+                        var id = args.ActionArguments["appId"] as string;
 
-                        return config.AppId;
+                        return id;
                     }
             },
              {
@@ -125,14 +124,16 @@ namespace AgileConfig.Server.Apisite.Filters
         protected const string GlobalMatchPatten = "GLOBAL_{0}";
         protected const string AppMatchPatten = "APP_{0}_{1}";
 
-        protected IPremissionService _premissionService;
-        protected IConfigService _configService;
-        protected string _actionName;
-        protected string _functionKey;
-        public PremissionCheckAttribute(IPremissionService premissionService, IConfigService configService, string actionName, string functionKey)
+        private IPremissionService _premissionService;
+        private IConfigService _configService;
+
+        private string _actionName;
+        private string _functionKey;
+        public PremissionCheckAttribute(IPremissionService premissionService, IConfigService configService,string actionName, string functionKey)
         {
             _premissionService = premissionService;
             _configService = configService;
+
             _actionName = actionName;
             _functionKey = functionKey;
         }
@@ -140,6 +141,7 @@ namespace AgileConfig.Server.Apisite.Filters
         protected virtual Task<string> GetUserId(ActionExecutingContext context)
         {
             var userId = context.HttpContext.GetUserIdFromClaim();
+
             return Task.FromResult(userId);
         }
 

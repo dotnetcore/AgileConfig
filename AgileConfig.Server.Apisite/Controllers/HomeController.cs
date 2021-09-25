@@ -55,7 +55,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 });
             }
 
-            string userId = this.GetCurrentUserId();
+            string userId = await this.GetCurrentUserId(_userService);
             var userRoles = await _userService.GetUserRolesAsync(userId);
             var userFunctions = await _permissionService.GetUserPermission(userId);
 
