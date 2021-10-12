@@ -412,7 +412,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Delete", Functions.Config_Delete })]
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.DeleteSome", Functions.Config_Delete })]
         [HttpPost]
         public async Task<IActionResult> DeleteSome([FromBody]List<string> ids)
         {
@@ -523,7 +523,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         /// </summary>
         /// <param name="appId">应用id</param>
         /// <returns></returns>
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.PublishAsync", Functions.Config_Publish })]
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Publish", Functions.Config_Publish })]
         [HttpPost]
         public async Task<IActionResult> Publish([FromBody]PublishLogVM model)
         {

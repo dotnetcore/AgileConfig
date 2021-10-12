@@ -35,6 +35,14 @@ namespace AgileConfig.Server.Apisite.Filters
                         return config.AppId;
                     }
             },
+               {
+                "Config.DeleteSome", (args, premission, configService) =>  {
+                        var ids = args.ActionArguments["ids"] as List<string>;
+                        var config = configService.GetAsync(ids.FirstOrDefault()).GetAwaiter().GetResult();
+
+                        return config.AppId;
+                    }
+            },
             {
                 "Config.Offline", (args, premission, configService) =>  {
                         var id = args.ActionArguments["configId"] ;
@@ -56,26 +64,17 @@ namespace AgileConfig.Server.Apisite.Filters
             ,
             {
                 "Config.Publish", (args, premission, configService) =>  {
-                        var id = args.ActionArguments["appId"] ;
+                        var model = args.ActionArguments["model"] as PublishLogVM;
 
-                        return id.ToString();
+                        return model?.AppId;
                     }
             }
             ,
-            {
-                "Config.PublishSome", (args, premission, configService) =>  {
-                        var ids = args.ActionArguments["configIds"] as List<string>;
-                        var id = ids?.FirstOrDefault();
-                        var config = configService.GetAsync(id.ToString()).GetAwaiter().GetResult();
-
-                        return config.AppId;
-                    }
-            },
              {
                 "Config.Rollback", (args, premission, configService) =>  {
-                        var id = args.ActionArguments["appId"] as string;
-
-                        return id;
+                        var timelineId = args.ActionArguments["publishTimelineId"] as string;
+                        var detail = configService.GetPublishDetailByPublishTimelineIdAsync(timelineId).GetAwaiter().GetResult();
+                        return detail.FirstOrDefault()?.AppId;
                     }
             },
              {
@@ -129,7 +128,7 @@ namespace AgileConfig.Server.Apisite.Filters
 
         private string _actionName;
         private string _functionKey;
-        public PremissionCheckAttribute(IPremissionService premissionService, IConfigService configService,string actionName, string functionKey)
+        public PremissionCheckAttribute(IPremissionService premissionService, IConfigService configService, string actionName, string functionKey)
         {
             _premissionService = premissionService;
             _configService = configService;
