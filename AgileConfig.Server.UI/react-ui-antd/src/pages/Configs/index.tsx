@@ -2,7 +2,7 @@ import { CiCircleOutlined, DeleteOutlined, PlusOutlined, RollbackOutlined, Verti
 import { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns, TableDropdown } from '@ant-design/pro-table';
-import { Badge, Button, Drawer, FormInstance, Input, List, message, Modal, Space, Tag } from 'antd';
+import { Badge, Button, Drawer, FormInstance, Input, List, message, Modal, Radio, Space, Tag } from 'antd';
 import React, { useState, useRef, useEffect } from 'react';
 import { queryApps } from '../Apps/service';
 import UpdateForm from './comps/updateForm';
@@ -18,6 +18,7 @@ import AuthorizedEle, { checkUserPermission } from '@/components/Authorized/Auth
 import functionKeys from '@/models/functionKeys';
 import { getFunctions } from '@/utils/authority';
 import VersionHistory from './comps/versionHistory';
+import { divide } from 'lodash';
 
 const { TextArea } = Input;
 const { confirm } = Modal;
@@ -428,7 +429,24 @@ const configs: React.FC = (props: any) => {
     },
   ];
   return (
-    <PageContainer header={{ title: appName }}>
+    <PageContainer pageHeaderRender={
+        ()=>{
+          return <div style={{padding:20, display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+            <span className="ant-page-header-heading-title">
+              {
+                appName
+              }
+            </span>
+            <div>
+            <Radio.Group defaultValue="DEV" buttonStyle="solid">
+              <Radio.Button value="DEV">DEV</Radio.Button>
+              <Radio.Button value="TEST">TEST</Radio.Button>
+              <Radio.Button value="PROD">PROD</Radio.Button>
+            </Radio.Group>
+            </div>
+          </div>
+        }
+      }>
       <ProTable
         actionRef={actionRef}
         rowKey="id"
