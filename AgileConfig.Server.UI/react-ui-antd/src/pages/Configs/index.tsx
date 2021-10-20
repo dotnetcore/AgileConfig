@@ -14,11 +14,9 @@ import styles from './index.less';
 import JsonImport from './comps/JsonImport';
 import { useIntl } from 'react-intl';
 import { getIntl, getLocale } from '@/.umi/plugin-locale/localeExports';
-import AuthorizedEle, { checkUserPermission } from '@/components/Authorized/AuthorizedElement';
+import AuthorizedEle from '@/components/Authorized/AuthorizedElement';
 import functionKeys from '@/models/functionKeys';
-import { getFunctions } from '@/utils/authority';
 import VersionHistory from './comps/versionHistory';
-import { divide } from 'lodash';
 
 const { TextArea } = Input;
 const { confirm } = Modal;
@@ -182,6 +180,7 @@ const handleExportJson = async (appId: string) => {
 const configs: React.FC = (props: any) => {
   const appId = props.match.params.app_id;
   const appName = props.match.params.app_name;
+  const [currentEnv, setCurrentEnv] = useState<string>('DEV');
   const [appEnums, setAppEnums] = useState<any>();
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [updateModalVisible, setUpdateModalVisible] = useState<boolean>(false);
@@ -223,7 +222,7 @@ const configs: React.FC = (props: any) => {
     });
   }, []);
   useEffect(() => {
-    getWaitPublishStatus(appId).then(x => {
+    getWaitPublishStatus(appId, currentEnv).then(x => {
       console.log('WaitPublishStatus ', x);
       if (x.success) {
         setWaitPublishStatus(x.data);
@@ -438,7 +437,12 @@ const configs: React.FC = (props: any) => {
               }
             </span>
             <div>
-            <Radio.Group defaultValue="DEV" buttonStyle="solid">
+            <Radio.Group defaultValue="DEV" buttonStyle="solid" size="small" onChange={
+              (e)=>{
+                console.log(e.target.value);
+                setCurrentEnv(e.target.value);
+                actionRef.current?.reload(true);
+              }}>
               <Radio.Button value="DEV">DEV</Radio.Button>
               <Radio.Button value="TEST">TEST</Radio.Button>
               <Radio.Button value="PROD">PROD</Radio.Button>
@@ -468,7 +472,7 @@ const configs: React.FC = (props: any) => {
             }
           }
           console.log(sortField, ascOrDesc);
-          return queryConfigs(appId,{ sortField, ascOrDesc, ...params })
+          return queryConfigs(appId, currentEnv, { sortField, ascOrDesc, ...params })
         }}
         headerTitle= {
           <Space size="middle">

@@ -1,11 +1,12 @@
 import request from '@/utils/request';
 import { ConfigListItem, ConfigListParams, JsonImportItem } from './data';
 
-export async function queryConfigs(appId:string, params: ConfigListParams) {
+export async function queryConfigs(appId:string,env:string, params: ConfigListParams) {
   return request('/config/search', {
     params:
       {
         appId,
+        env,
         ...params
       }
   });
@@ -100,11 +101,12 @@ export async function rollback(publishTimelineId: string) {
   });
 }
 
-export async function getWaitPublishStatus(appId: string) {
+export async function getWaitPublishStatus(appId: string, env: string) {
   return request('/config/WaitPublishStatus', {
     method: 'GET',
     params:{
-      appId: appId
+      appId: appId,
+      env: env
     }
   });
 }
