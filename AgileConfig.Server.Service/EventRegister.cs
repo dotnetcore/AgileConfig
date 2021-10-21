@@ -311,7 +311,7 @@ namespace AgileConfig.Server.Service
                         LogTime = DateTime.Now,
                         LogType = SysLogType.Normal,
                         AppId = config.AppId,
-                        LogText = $"用户：{userName} 新增配置【Group：{config.Group}】【Key：{config.Key}】【AppId：{config.AppId}】【待发布】"
+                        LogText = $"用户：{userName} 新增配置【Group：{config.Group}】【Key：{config.Key}】【AppId：{config.AppId}】【Env：{config.Env}】【待发布】"
                     };
                     Task.Run(async () =>
                     {
@@ -335,7 +335,7 @@ namespace AgileConfig.Server.Service
                         LogTime = DateTime.Now,
                         LogType = SysLogType.Normal,
                         AppId = config.AppId,
-                        LogText = $"用户：{userName} 编辑配置【Group：{config.Group}】【Key：{config.Key}】【AppId：{config.AppId}】【待发布】"
+                        LogText = $"用户：{userName} 编辑配置【Group：{config.Group}】【Key：{config.Key}】【AppId：{config.AppId}】【Env：{config.Env}】【待发布】"
                     };
                     Task.Run(async () =>
                     {
@@ -360,7 +360,7 @@ namespace AgileConfig.Server.Service
                         LogTime = DateTime.Now,
                         LogType = SysLogType.Warn,
                         AppId = config.AppId,
-                        LogText = $"用户：{userName} 删除配置【Group：{config.Group}】【Key：{config.Key}】【AppId：{config.AppId}】【待发布】"
+                        LogText = $"用户：{userName} 删除配置【Group：{config.Group}】【Key：{config.Key}】【AppId：{config.AppId}】【Env：{config.Env}】【待发布】"
                     };
                     Task.Run(async ()=> {
                         using (var syslogService = NewSysLogService())
@@ -376,6 +376,7 @@ namespace AgileConfig.Server.Service
                 dynamic param_dy = param;
                 string userName = param_dy.userName;
                 string appId = param_dy.appId;
+                string env = param_dy.env;
                 if (appId != null)
                 {
                     var log = new SysLog
@@ -383,7 +384,7 @@ namespace AgileConfig.Server.Service
                         LogTime = DateTime.Now,
                         LogType = SysLogType.Warn,
                         AppId = appId,
-                        LogText = $"用户：{userName} 批量删除配置"
+                        LogText = $"用户：{userName} 批量删除配置【Env：{env}】"
                     };
                     Task.Run(async ()=> {
                         using (var syslogService = NewSysLogService())
@@ -406,7 +407,7 @@ namespace AgileConfig.Server.Service
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
                     AppId = node.AppId,
-                    LogText = $"用户：{userName} 发布配置【AppId：{node.AppId}】【版本：{node.PublishTime.Value:yyyyMMddHHmmss}】"
+                    LogText = $"用户：{userName} 发布配置【AppId：{node.AppId}】【Env：{env}】【版本：{node.PublishTime.Value:yyyyMMddHHmmss}】"
                 };
                 Task.Run(async ()=> {
                     using (var syslogService = NewSysLogService())
@@ -421,6 +422,7 @@ namespace AgileConfig.Server.Service
                 dynamic param_dy = param;
                 string userName = param_dy.userName;
                 PublishTimeline timelineNode = param_dy.timelineNode;
+                string env = param_dy.env;
 
                 if (timelineNode != null)
                 {
@@ -429,7 +431,7 @@ namespace AgileConfig.Server.Service
                         LogTime = DateTime.Now,
                         LogType = SysLogType.Warn,
                         AppId = timelineNode.AppId,
-                        LogText = $"{userName} 回滚应用【{timelineNode.AppId}】至发布版本【{timelineNode.PublishTime.Value:yyyyMMddHHmmss}】"
+                        LogText = $"{userName} 回滚应用【{timelineNode.AppId}】【Env：{env}】至发布版本【{timelineNode.PublishTime.Value:yyyyMMddHHmmss}】"
                     };
                     Task.Run(async () => {
                         using (var syslogService = NewSysLogService())
@@ -452,7 +454,7 @@ namespace AgileConfig.Server.Service
                         LogTime = DateTime.Now,
                         LogType = SysLogType.Normal,
                         AppId = config.AppId,
-                        LogText = $"{userName} 撤销编辑状态的配置【Group：{config.Group}】【Key：{config.Key}】【AppId：{config.AppId}】"
+                        LogText = $"{userName} 撤销编辑状态的配置【Group：{config.Group}】【Key：{config.Key}】【AppId：{config.AppId}】【Env：{config.Env}】"
                     };
                     Task.Run(async () =>
                     {
@@ -468,6 +470,7 @@ namespace AgileConfig.Server.Service
                 dynamic param_dy = param;
                 string userName = param_dy.userName;
                 string appId = param_dy.appId;
+                string env = param_dy.env;
 
                 if (appId != null)
                 {
@@ -476,7 +479,7 @@ namespace AgileConfig.Server.Service
                         LogTime = DateTime.Now,
                         LogType = SysLogType.Normal,
                         AppId = appId,
-                        LogText = $"{userName} 批量撤销编辑状态的配置"
+                        LogText = $"{userName} 批量撤销编辑状态的配置【Env：{env}】"
                     };
                     Task.Run(async () =>
                     {

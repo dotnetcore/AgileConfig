@@ -491,6 +491,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 dynamic param = new ExpandoObject();
                 param.userName = this.GetCurrentUserName();
                 param.appId = deleteConfigs.First().AppId;
+                param.env = env;
                 TinyEventBus.Instance.Fire(EventKeys.DELETE_CONFIG_SOME_SUCCESS, param);
             }
             return Json(new
@@ -521,6 +522,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 dynamic param = new ExpandoObject();
                 param.userName = this.GetCurrentUserName();
                 param.timelineNode = await _configService.GetPublishTimeLineNodeAsync(publishTimelineId, env);
+                param.env = env;
                 TinyEventBus.Instance.Fire(EventKeys.ROLLBACK_CONFIG_SUCCESS, param);
             }
 
@@ -595,6 +597,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 dynamic param = new ExpandoObject();
                 param.publishTimelineNode = timelineNode;
                 param.userName = this.GetCurrentUserName();
+                param.env = env;
                 TinyEventBus.Instance.Fire(EventKeys.PUBLISH_CONFIG_SUCCESS, param);
             }
 
@@ -777,6 +780,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 dynamic param = new ExpandoObject();
                 param.config = await _configService.GetAsync(configId, env);
                 param.userName = this.GetCurrentUserName();
+                param.env = env;
                 TinyEventBus.Instance.Fire(EventKeys.CANCEL_EDIT_CONFIG_SUCCESS, param);
             }
 
@@ -805,6 +809,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 dynamic param = new ExpandoObject();
                 param.userName = this.GetCurrentUserName();
                 param.appId = config.AppId;
+                param.env = env;
                 TinyEventBus.Instance.Fire(EventKeys.CANCEL_EDIT_CONFIG_SOME_SUCCESS, param);
             }
 
