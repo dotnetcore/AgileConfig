@@ -44,8 +44,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <param name="appId"></param>
         /// <returns></returns>
         [TypeFilter(typeof(AppBasicAuthenticationAttribute))]
-        [HttpGet("app/{appId}")]
-        public async Task<ActionResult<List<ConfigVM>>> GetAppConfig(string appId, [FromQuery]string env)
+        [HttpGet("app/{appId}/{env}")]
+        public async Task<ActionResult<List<ConfigVM>>> GetAppConfig(string appId, string env)
         {
             if (string.IsNullOrEmpty(appId))
             {
@@ -53,7 +53,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             }
             if (string.IsNullOrEmpty(env))
             {
-                throw new ArgumentNullException("env");
+                env = "DEV";
             }
 
             var app = await _appService.GetAsync(appId);
