@@ -140,11 +140,12 @@ namespace AgileConfig.Server.Service
             return await _dbContext.Configs.Where(c => c.Status == ConfigStatus.Enabled).ToListAsync();
         }
 
-        public async Task<Config> GetByAppIdKey(string appId, string group, string key)
+        public async Task<Config> GetByAppIdKeyEnv(string appId, string group, string key, string env)
         {
             var q = _dbContext.Configs.Where(c =>
                  c.AppId == appId &&
                  c.Key == key &&
+                 c.Env == env &&
                  c.Status == ConfigStatus.Enabled
             );
             if (string.IsNullOrEmpty(group))
@@ -159,16 +160,16 @@ namespace AgileConfig.Server.Service
             return await q.FirstAsync();
         }
 
-        public async Task<List<Config>> GetByAppIdAsync(string appId)
+        public async Task<List<Config>> GetByAppIdAsync(string appId, string env)
         {
             return await _dbContext.Configs.Where(c =>
-                c.AppId == appId && c.Status == ConfigStatus.Enabled
+                c.AppId == appId && c.Status == ConfigStatus.Enabled && c.Env == env
             ).ToListAsync();
         }
 
-        public async Task<List<Config>> Search(string appId, string group, string key)
+        public async Task<List<Config>> Search(string appId, string group, string key, string env)
         {
-            var q = _dbContext.Configs.Where(c => c.Status == ConfigStatus.Enabled);
+            var q = _dbContext.Configs.Where(c => c.Status == ConfigStatus.Enabled && c.Env == env);
             if (!string.IsNullOrEmpty(appId))
             {
                 q = q.Where(c => c.AppId == appId);
@@ -219,7 +220,7 @@ namespace AgileConfig.Server.Service
         public async Task<string> AppPublishedConfigsMd5(string appId)
         {
             var configs = await _dbContext.ConfigPublished.Where(c =>
-                c.AppId == appId && c.Status == ConfigStatus.Enabled 
+                c.AppId == appId && c.Status == ConfigStatus.Enabled
             ).ToListAsync();
 
             var keyStr = string.Join('&', configs.Select(c => GenerateKey(c)).ToArray().OrderBy(k => k));
@@ -292,9 +293,9 @@ namespace AgileConfig.Server.Service
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        public async Task<List<Config>> GetPublishedConfigsByAppIdWithInheritanced(string appId)
+        public async Task<List<Config>> GetPublishedConfigsByAppIdWithInheritanced(string appId, string env)
         {
-            var configs = await GetPublishedConfigsByAppIdWithInheritanced_Dictionary(appId);
+            var configs = await GetPublishedConfigsByAppIdWithInheritanced_Dictionary(appId, env);
 
             return configs.Values.ToList();
         }
@@ -304,7 +305,7 @@ namespace AgileConfig.Server.Service
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        public async Task<Dictionary<string, Config>> GetPublishedConfigsByAppIdWithInheritanced_Dictionary(string appId)
+        public async Task<Dictionary<string, Config>> GetPublishedConfigsByAppIdWithInheritanced_Dictionary(string appId, string env)
         {
             var apps = new List<string>();
             var inheritanceApps = await _appService.GetInheritancedAppsAsync(appId);
@@ -322,7 +323,7 @@ namespace AgileConfig.Server.Service
             for (int i = 0; i < apps.Count; i++)
             {
                 var id = apps[i];
-                var publishConfigs = await GetPublishedConfigsAsync(id);
+                var publishConfigs = await GetPublishedConfigsAsync(id, env);
                 for (int j = 0; j < publishConfigs.Count; j++)
                 {
                     var config = publishConfigs[j].Convert();
@@ -342,9 +343,9 @@ namespace AgileConfig.Server.Service
             return configs;
         }
 
-        public async Task<string> AppPublishedConfigsMd5WithInheritanced(string appId)
+        public async Task<string> AppPublishedConfigsMd5WithInheritanced(string appId, string env)
         {
-            var configs = await GetPublishedConfigsByAppIdWithInheritanced(appId);
+            var configs = await GetPublishedConfigsByAppIdWithInheritanced(appId, env);
 
             var keyStr = string.Join('&', configs.Select(c => GenerateKey(c)).ToArray().OrderBy(k => k));
             var valStr = string.Join('&', configs.Select(c => c.Value).ToArray().OrderBy(v => v));
@@ -358,7 +359,7 @@ namespace AgileConfig.Server.Service
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        public async Task<string> AppPublishedConfigsMd5CacheWithInheritanced(string appId)
+        public async Task<string> AppPublishedConfigsMd5CacheWithInheritanced(string appId, string env)
         {
             var cacheKey = AppPublishedConfigsMd5CacheKeyWithInheritanced(appId);
             if (_memoryCache != null && _memoryCache.TryGetValue(cacheKey, out string md5))
@@ -366,7 +367,7 @@ namespace AgileConfig.Server.Service
                 return md5;
             }
 
-            md5 = await AppPublishedConfigsMd5WithInheritanced(appId);
+            md5 = await AppPublishedConfigsMd5WithInheritanced(appId, env);
 
             var cacheOp = new MemoryCacheEntryOptions()
             .SetAbsoluteExpiration(TimeSpan.FromSeconds(60));
@@ -390,12 +391,13 @@ namespace AgileConfig.Server.Service
         /// <param name="log">发布日志</param>
         /// <param name="operatorr">操作员</param>
         /// <returns></returns>
-        public (bool result, string publishTimelineId) Publish(string appId, string log, string operatorr)
+        public (bool result, string publishTimelineId) Publish(string appId, string log, string operatorr, string env)
         {
             lock (Lockobj)
             {
                 var waitPublishConfigs = _dbContext.Configs.Where(x =>
                     x.AppId == appId &&
+                    x.Env == env &&
                     x.Status == ConfigStatus.Enabled &&
                     x.EditStatus != EditStatus.Commit).ToList();
                 //这里默认admin console 实例只部署一个，如果部署多个同步操作，高并发的时候这个version会有问题
@@ -411,6 +413,7 @@ namespace AgileConfig.Server.Service
                 publishTimelineNode.PublishUserName = user.UserName;
                 publishTimelineNode.Version = versionMax + 1;
                 publishTimelineNode.Log = log;
+                publishTimelineNode.Env = env;
 
                 var publishDetails = new List<PublishDetail>();
                 waitPublishConfigs.ForEach(x =>
@@ -426,7 +429,8 @@ namespace AgileConfig.Server.Service
                         Key = x.Key,
                         Value = x.Value,
                         PublishTimelineId = publishTimelineNode.Id,
-                        Version = publishTimelineNode.Version
+                        Version = publishTimelineNode.Version,
+                        Env = env
                     });
 
                     if (x.EditStatus == EditStatus.Deleted)
@@ -444,7 +448,7 @@ namespace AgileConfig.Server.Service
                 });
 
                 //当前发布的配置
-                var publishedConfigs = _dbContext.ConfigPublished.Where(x => x.Status == ConfigStatus.Enabled && x.AppId == appId).ToList();
+                var publishedConfigs = _dbContext.ConfigPublished.Where(x => x.Status == ConfigStatus.Enabled && x.AppId == appId && x.Env == env).ToList();
                 //复制一份新版本，最后插入发布表
                 var publishedConfigsCopy = new List<ConfigPublished>();
                 publishedConfigs.ForEach(x =>
@@ -460,7 +464,8 @@ namespace AgileConfig.Server.Service
                         PublishTime = publishTimelineNode.PublishTime,
                         Status = ConfigStatus.Enabled,
                         Version = publishTimelineNode.Version,
-                        Value = x.Value
+                        Value = x.Value,
+                        Env = x.Env
                     });
                     x.Status = ConfigStatus.Deleted;
                 });
@@ -480,7 +485,8 @@ namespace AgileConfig.Server.Service
                             PublishTime = publishTimelineNode.PublishTime,
                             Status = ConfigStatus.Enabled,
                             Value = x.Value,
-                            Version = publishTimelineNode.Version
+                            Version = publishTimelineNode.Version,
+                            Env = env
                         });
                     }
                     if (x.EditStatus == EditStatus.Edit)
@@ -552,30 +558,30 @@ namespace AgileConfig.Server.Service
             return one;
         }
 
-        public async Task<List<PublishTimeline>> GetPublishTimelineHistoryAsync(string appId)
+        public async Task<List<PublishTimeline>> GetPublishTimelineHistoryAsync(string appId, string env)
         {
-            var list = await _dbContext.PublishTimeline.Where(x => x.AppId == appId).ToListAsync();
+            var list = await _dbContext.PublishTimeline.Where(x => x.AppId == appId && x.Env == env).ToListAsync();
 
             return list;
         }
 
-        public async Task<List<PublishDetail>> GetPublishDetailListAsync(string appId)
+        public async Task<List<PublishDetail>> GetPublishDetailListAsync(string appId, string env)
         {
-            var list = await _dbContext.PublishDetail.Where(x => x.AppId == appId).ToListAsync();
+            var list = await _dbContext.PublishDetail.Where(x => x.AppId == appId && x.Env == env).ToListAsync();
 
             return list;
         }
 
-        public async Task<List<PublishDetail>> GetConfigPublishedHistory(string configId)
+        public async Task<List<PublishDetail>> GetConfigPublishedHistory(string configId, string env)
         {
-            var list = await _dbContext.PublishDetail.Where(x => x.ConfigId == configId).ToListAsync();
+            var list = await _dbContext.PublishDetail.Where(x => x.ConfigId == configId && x.Env == env).ToListAsync();
 
             return list;
         }
 
-        public async Task<List<ConfigPublished>> GetPublishedConfigsAsync(string appId)
+        public async Task<List<ConfigPublished>> GetPublishedConfigsAsync(string appId, string env)
         {
-            var list = await _dbContext.ConfigPublished.Where(x => x.AppId == appId && x.Status == ConfigStatus.Enabled).ToListAsync();
+            var list = await _dbContext.ConfigPublished.Where(x => x.AppId == appId && x.Status == ConfigStatus.Enabled && x.Env == env).ToListAsync();
 
             return list;
         }
@@ -592,9 +598,9 @@ namespace AgileConfig.Server.Service
             var publishNode = await _dbContext.PublishTimeline.Where(x => x.Id == publishTimelineId).ToOneAsync();
             var version = publishNode.Version;
             var appId = publishNode.AppId;
-
-            var publishedConfigs = await _dbContext.ConfigPublished.Where(x => x.AppId == appId && x.Version == version).ToListAsync();
-            var currentConfigs = await _dbContext.Configs.Where(x => x.AppId == appId && x.Status == ConfigStatus.Enabled).ToListAsync();
+            var env = publishNode.Env;
+            var publishedConfigs = await _dbContext.ConfigPublished.Where(x => x.AppId == appId && x.Version == version && x.Env == env).ToListAsync();
+            var currentConfigs = await _dbContext.Configs.Where(x => x.AppId == appId && x.Status == ConfigStatus.Enabled && x.Env == env).ToListAsync();
 
             //把当前的全部软删除
             foreach (var item in currentConfigs)
@@ -616,7 +622,7 @@ namespace AgileConfig.Server.Service
                 await _dbContext.Configs.UpdateAsync(config);
             }
             //删除version之后的版本
-            await _dbContext.ConfigPublished.RemoveAsync(x => x.AppId == appId && x.Version > version);
+            await _dbContext.ConfigPublished.RemoveAsync(x => x.AppId == appId && x.Env == env && x.Version > version);
             //设置为发布状态
             foreach (var item in publishedConfigs)
             {
@@ -624,8 +630,8 @@ namespace AgileConfig.Server.Service
                 await _dbContext.ConfigPublished.UpdateAsync(item);
             }
             //删除发布时间轴version之后的版本
-            await _dbContext.PublishTimeline.RemoveAsync(x => x.AppId == appId && x.Version > version);
-            await _dbContext.PublishDetail.RemoveAsync(x => x.AppId == appId && x.Version > version);
+            await _dbContext.PublishTimeline.RemoveAsync(x => x.AppId == appId && x.Env == env && x.Version > version);
+            await _dbContext.PublishDetail.RemoveAsync(x => x.AppId == appId && x.Env == env && x.Version > version);
 
             ClearAppPublishedConfigsMd5Cache(appId);
             ClearAppPublishedConfigsMd5CacheWithInheritanced(appId);

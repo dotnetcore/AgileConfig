@@ -14,33 +14,34 @@ namespace AgileConfig.Server.IService
         /// <param name="log"></param>
         /// <param name="operatorr"></param>
         /// <returns></returns>
-        (bool result, string publishTimelineId) Publish(string appId, string log, string operatorr);
+        (bool result, string publishTimelineId) Publish(string appId, string log, string operatorr, string env);
 
         Task<Config> GetAsync(string id);
 
-        Task<Config> GetByAppIdKey(string appId, string group, string key);
+        Task<Config> GetByAppIdKeyEnv(string appId, string group, string key, string env);
         /// <summary>
         /// 根据appId,group,key查询配置，其中group，key使用like查询
         /// </summary>
         /// <param name="appId"></param>
         /// <param name="group"></param>
         /// <param name="key"></param>
+        /// <param name="env">环境</param>
         /// <returns></returns>
-        Task<List<Config>> Search(string appId, string group, string key);
-        Task<List<Config>> GetByAppIdAsync(string appId);
+        Task<List<Config>> Search(string appId, string group, string key, string env);
+        Task<List<Config>> GetByAppIdAsync(string appId, string env);
 
         /// <summary>
         /// 获取app相关的已发布的配置继承的app的配置一并查出
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        Task<List<Config>> GetPublishedConfigsByAppIdWithInheritanced(string appId);
+        Task<List<Config>> GetPublishedConfigsByAppIdWithInheritanced(string appId, string env);
         /// <summary>
         /// 获取app的配置项继承的app配置合并进来转换为字典
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        Task<Dictionary<string, Config>> GetPublishedConfigsByAppIdWithInheritanced_Dictionary(string appId);
+        Task<Dictionary<string, Config>> GetPublishedConfigsByAppIdWithInheritanced_Dictionary(string appId, string env);
         Task<bool> AddAsync(Config config);
 
         Task<bool> AddRangeAsync(List<Config> configs);
@@ -75,7 +76,7 @@ namespace AgileConfig.Server.IService
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        Task<string> AppPublishedConfigsMd5WithInheritanced(string appId);
+        Task<string> AppPublishedConfigsMd5WithInheritanced(string appId, string env);
         
         /// <summary>
         /// 计算已发布配置项的MD5进行缓存
@@ -89,7 +90,7 @@ namespace AgileConfig.Server.IService
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        Task<string> AppPublishedConfigsMd5CacheWithInheritanced(string appId);
+        Task<string> AppPublishedConfigsMd5CacheWithInheritanced(string appId, string env);
 
         /// <summary>
         /// 构造key
@@ -124,28 +125,29 @@ namespace AgileConfig.Server.IService
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        Task<List<PublishTimeline>> GetPublishTimelineHistoryAsync(string appId);
+        Task<List<PublishTimeline>> GetPublishTimelineHistoryAsync(string appId, string env);
 
         /// <summary>
         /// 获取发布详情列表
         /// </summary>
         /// <param name="appId"></param>
+        /// <param name="env"></param>
         /// <returns></returns>
-        Task<List<PublishDetail>> GetPublishDetailListAsync(string appId);
+        Task<List<PublishDetail>> GetPublishDetailListAsync(string appId, string env);
 
         /// <summary>
         /// 获取某个配置的发布历史
         /// </summary>
         /// <param name="configId"></param>
         /// <returns></returns>
-        Task<List<PublishDetail>> GetConfigPublishedHistory(string configId);
+        Task<List<PublishDetail>> GetConfigPublishedHistory(string configId, string env);
 
         /// <summary>
         /// 获取当前发布的配置
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        Task<List<ConfigPublished>> GetPublishedConfigsAsync(string appId);
+        Task<List<ConfigPublished>> GetPublishedConfigsAsync(string appId, string env);
 
         /// <summary>
         /// 获取单个发布的配置

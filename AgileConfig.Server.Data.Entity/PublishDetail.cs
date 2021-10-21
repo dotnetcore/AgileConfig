@@ -33,5 +33,8 @@ namespace AgileConfig.Server.Data.Entity
 
         [Column(Name = "edit_status")]
         public EditStatus EditStatus { get; set; }
+
+        [Column(Name = "env")]
+        public string Env { get; set; }
     }
 }

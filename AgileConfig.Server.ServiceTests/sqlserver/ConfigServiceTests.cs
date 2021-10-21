@@ -339,10 +339,10 @@ namespace AgileConfig.Server.Service.Tests.sqlserver
             var result2 = await service.AddAsync(source2);
             Assert.IsTrue(result2);
 
-            var config = await service.GetByAppIdKey("001", "g", "k");
+            var config = await service.GetByAppIdKeyEnv("001", "g", "k", "");
             Assert.IsNotNull(config);
 
-            var config1 = await service.GetByAppIdKey("002", "g", "k");
+            var config1 = await service.GetByAppIdKeyEnv("002", "g", "k", "");
             Assert.IsNull(config1);
         }
 
@@ -400,7 +400,7 @@ namespace AgileConfig.Server.Service.Tests.sqlserver
             var result2 = await service.AddAsync(source2);
             Assert.IsTrue(result2);
 
-            var configs = await service.GetByAppIdAsync("001");
+            var configs = await service.GetByAppIdAsync("001", "");
             Assert.IsNotNull(configs);
             Assert.AreEqual(1, configs.Count);
         }
@@ -459,13 +459,13 @@ namespace AgileConfig.Server.Service.Tests.sqlserver
             var result2 = await service.AddAsync(source2);
             Assert.IsTrue(result2);
 
-            var configs = await service.Search("001", "", "");
+            var configs = await service.Search("001", "", "", "");
             Assert.IsNotNull(configs);
             Assert.AreEqual(1, configs.Count);
-            var configs1 = await service.Search("", "o", "");
+            var configs1 = await service.Search("", "o", "", "");
             Assert.IsNotNull(configs1);
             Assert.AreEqual(1, configs1.Count);
-            var configs2 = await service.Search("", "", "e");
+            var configs2 = await service.Search("", "", "e", "");
             Assert.IsNotNull(configs2);
             Assert.AreEqual(1, configs2.Count);
         }
@@ -785,7 +785,7 @@ namespace AgileConfig.Server.Service.Tests.sqlserver
             fsq.Insert(source3).ExecuteAffrows();
             fsq.Insert(appref).ExecuteAffrows();
 
-            var dict = await service.GetPublishedConfigsByAppIdWithInheritanced_Dictionary(app.Id);
+            var dict = await service.GetPublishedConfigsByAppIdWithInheritanced_Dictionary(app.Id, "");
             Assert.IsNotNull(dict);
             Assert.AreEqual(4, dict.Keys.Count);
 
@@ -826,7 +826,7 @@ namespace AgileConfig.Server.Service.Tests.sqlserver
             fsq.Insert(source4).ExecuteAffrows();
             fsq.Insert(source5).ExecuteAffrows();
 
-            dict = await service.GetPublishedConfigsByAppIdWithInheritanced_Dictionary(app.Id);
+            dict = await service.GetPublishedConfigsByAppIdWithInheritanced_Dictionary(app.Id, "");
             Assert.IsNotNull(dict);
             Assert.AreEqual(5, dict.Keys.Count);
 
@@ -863,7 +863,7 @@ namespace AgileConfig.Server.Service.Tests.sqlserver
             appref1.Sort = 2;
             appref1.Id = Guid.NewGuid().ToString();
             fsq.Insert(appref1).ExecuteAffrows();
-            dict = await service.GetPublishedConfigsByAppIdWithInheritanced_Dictionary(app.Id);
+            dict = await service.GetPublishedConfigsByAppIdWithInheritanced_Dictionary(app.Id, "");
             Assert.IsNotNull(dict);
             Assert.AreEqual(5, dict.Keys.Count);
 

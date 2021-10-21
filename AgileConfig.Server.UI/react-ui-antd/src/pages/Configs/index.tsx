@@ -21,10 +21,10 @@ import VersionHistory from './comps/versionHistory';
 const { TextArea } = Input;
 const { confirm } = Modal;
 
-const handlePublish = async (appId: string, log:string) => {
+const handlePublish = async (appId: string, log:string, env:string) => {
   const hide = message.loading('正在发布');
   try {
-    const result = await publish(appId, log);
+    const result = await publish(appId, log, env);
     hide();
     const success = result.success;
     if (success) {
@@ -40,11 +40,11 @@ const handlePublish = async (appId: string, log:string) => {
   }
 };
 
-const handleDel = async (fields: ConfigListItem) => {
+const handleDel = async (fields: ConfigListItem, env:string) => {
   const intl = getIntl(getLocale());
   const hide = message.loading(intl.formatMessage({id:'deleting'}));
   try {
-    const result = await delConfig({ ...fields });
+    const result = await delConfig({ ...fields }, env);
     hide();
     const success = result.success;
     if (success) {
@@ -59,11 +59,11 @@ const handleDel = async (fields: ConfigListItem) => {
     return false;
   }
 };
-const handleDelSome = async (configs: ConfigListItem[]):Promise<boolean> => {
+const handleDelSome = async (configs: ConfigListItem[], env: string):Promise<boolean> => {
   const intl = getIntl(getLocale());
   const hide = message.loading(intl.formatMessage({id:'deleting'}));
   try {
-    const result = await delConfigs(configs);
+    const result = await delConfigs(configs, env);
     hide();
     const success = result.success;
     if (success) {
@@ -78,10 +78,10 @@ const handleDelSome = async (configs: ConfigListItem[]):Promise<boolean> => {
     return false;
   }
 };
-const handleCancelEditSome = async (configs: ConfigListItem[]):Promise<boolean> => {
+const handleCancelEditSome = async (configs: ConfigListItem[], env: string):Promise<boolean> => {
   const hide = message.loading('正在撤销');
   try {
-    const result = await cancelSomeEdit(configs.map(x=>x.id));
+    const result = await cancelSomeEdit(configs.map(x=>x.id), env);
     hide();
     const success = result.success;
     if (success) {
@@ -96,11 +96,11 @@ const handleCancelEditSome = async (configs: ConfigListItem[]):Promise<boolean> 
     return false;
   }
 };
-const handleAdd = async (fields: ConfigListItem) => {
+const handleAdd = async (fields: ConfigListItem, env:string) => {
   const intl = getIntl(getLocale());
   const hide = message.loading(intl.formatMessage({id:'saving'}));
   try {
-    const result = await addConfig({ ...fields });
+    const result = await addConfig({ ...fields }, env);
     hide();
     const success = result.success;
     if (success) {
@@ -115,11 +115,11 @@ const handleAdd = async (fields: ConfigListItem) => {
     return false;
   }
 };
-const handleEdit = async (config: ConfigListItem) => {
+const handleEdit = async (config: ConfigListItem, env:string) => {
   const intl = getIntl(getLocale());
   const hide = message.loading(intl.formatMessage({id:'saving'}));
   try {
-    const result = await editConfig({ ...config });
+    const result = await editConfig({ ...config }, env);
     hide();
     const success = result.success;
     if (success) {
@@ -136,10 +136,10 @@ const handleEdit = async (config: ConfigListItem) => {
 };
 
 
-const handleCancelEdit = async (id: string) => {
+const handleCancelEdit = async (id: string, env:string) => {
   const hide = message.loading('正在撤销');
   try {
-    const result = await cancelEdit(id);
+    const result = await cancelEdit(id, env);
     hide();
     const success = result.success;
     if (success) {
@@ -155,10 +155,10 @@ const handleCancelEdit = async (id: string) => {
   }
 }
 
-const handleExportJson = async (appId: string) => {
+const handleExportJson = async (appId: string, env:string) => {
   const hide = message.loading('正在导出');
   try {
-    const file = await exportJson(appId);
+    const file = await exportJson(appId, env);
     hide();
     var fileURL = URL.createObjectURL(file);
     var a = document.createElement('a');
@@ -249,7 +249,7 @@ const configs: React.FC = (props: any) => {
         </div>
       </div>,
       onOk: async () => {
-        const result = await handlePublish(appId, _publishLog);
+        const result = await handlePublish(appId, _publishLog, currentEnv);
         if (result && actionRef.current) {
           if (actionRef.current?.clearSelected){
             actionRef.current?.clearSelected();
@@ -265,7 +265,7 @@ const configs: React.FC = (props: any) => {
     confirm({
       content: confirmMsg + `【${config.key}】？`,
       onOk: async () => {
-        const result = await handleDel(config);
+        const result = await handleDel(config, currentEnv);
         if (result) {
           actionRef.current?.reload();
         }
@@ -389,7 +389,7 @@ const configs: React.FC = (props: any) => {
                   if (item == 'history') {
                     setCurrentRow(record);
                     setmodifyLogsModalVisible(true)
-                    const result = await queryConfigPublishedHistory(record)
+                    const result = await queryConfigPublishedHistory(record, currentEnv)
                     if (result.success) {
                       setModifyLogs(result.data);
                     }
@@ -399,7 +399,7 @@ const configs: React.FC = (props: any) => {
                     confirm({
                       content:`确定撤销对配置【${record.group?record.group:''}${record.group?':':''}${record.key}】的编辑吗？`,
                       onOk: async ()=>{
-                        const result = await handleCancelEdit(record.id);
+                        const result = await handleCancelEdit(record.id, currentEnv);
                         if (result) {
                           actionRef.current?.reload();
                         }
@@ -520,7 +520,7 @@ const configs: React.FC = (props: any) => {
                           confirm({
                             content:`确定撤销选中配置项的编辑状态吗？`,
                             onOk: async ()=>{
-                              const result = await handleCancelEditSome(selectedRowsState.filter(x=>x.editStatus !== 10))
+                              const result = await handleCancelEditSome(selectedRowsState.filter(x=>x.editStatus !== 10), currentEnv)
                               if (result) {
                                 if (actionRef.current?.clearSelected){
                                   actionRef.current?.clearSelected();
@@ -550,7 +550,7 @@ const configs: React.FC = (props: any) => {
                         confirm({
                           content:`确定删除选中的配置项吗？`,
                           onOk: async ()=>{
-                            const result = await handleDelSome(selectedRowsState)
+                            const result = await handleDelSome(selectedRowsState, currentEnv)
                             if (result) {
                               if (actionRef.current?.clearSelected){
                                 actionRef.current?.clearSelected();
@@ -586,7 +586,7 @@ const configs: React.FC = (props: any) => {
         </AuthorizedEle>
          ,
           <Button key="4" onClick={()=>{
-            handleExportJson(appId)
+            handleExportJson(appId, currentEnv)
           }}>
             导出
           </Button>
@@ -640,10 +640,10 @@ const configs: React.FC = (props: any) => {
             }
           }
         }
+          env={currentEnv}
           appId={appId}
           appName={appName}
           versionHistoryModalVisible ={versionHistoryFormModalVisible}> 
-          
         </VersionHistory>
       }
       <ModalForm
@@ -653,7 +653,7 @@ const configs: React.FC = (props: any) => {
         onVisibleChange={setCreateModalVisible}
         onFinish={
           async (value) => {
-            const success = await handleAdd(value as ConfigListItem);
+            const success = await handleAdd(value as ConfigListItem, currentEnv);
             if (success) {
               setCreateModalVisible(false);
               if (actionRef.current) {
@@ -745,7 +745,7 @@ const configs: React.FC = (props: any) => {
           onSubmit={
             async (value) => {
               setCurrentRow(undefined);
-              const success = await handleEdit(value);
+              const success = await handleEdit(value, currentEnv);
               if (success) {
                 setUpdateModalVisible(false);
                 if (actionRef.current) {

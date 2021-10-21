@@ -12,8 +12,8 @@ export async function queryConfigs(appId:string,env:string, params: ConfigListPa
   });
 }
 
-export async function onlineConfig(config: ConfigListItem) {
-  return request('/config/publish', {
+export async function onlineConfig(config: ConfigListItem, env: string) {
+  return request('/config/publish?env=' + env, {
     method: 'POST',
     params: {
       configId: config.id
@@ -21,20 +21,20 @@ export async function onlineConfig(config: ConfigListItem) {
   });
 }
 
-export async function onlineSomeConfigs(configs: ConfigListItem[]) {
-  return request('/config/PublishSome', {
+export async function onlineSomeConfigs(configs: ConfigListItem[], env: string) {
+  return request('/config/PublishSome?env=' + env, {
     method: 'POST',
     data: configs.map(c=>c.id)
   });
 }
-export async function offlineSomeConfigs(configs: ConfigListItem[]) {
-  return request('/config/OfflineSome', {
+export async function offlineSomeConfigs(configs: ConfigListItem[], env: string) {
+  return request('/config/OfflineSome?env=' + env, {
     method: 'POST',
     data: configs.map(c=>c.id)
   });
 }
-export async function offlineConfig(config: ConfigListItem) {
-  return request('/config/offline', {
+export async function offlineConfig(config: ConfigListItem, env:string) {
+  return request('/config/offline?env=' + env, {
     method: 'POST',
     params: {
       configId: config.id
@@ -42,8 +42,8 @@ export async function offlineConfig(config: ConfigListItem) {
   });
 }
 
-export async function delConfig(config: ConfigListItem) {
-  return request('/config/delete', {
+export async function delConfig(config: ConfigListItem, env:string) {
+  return request('/config/delete?env=' + env, {
     method: 'POST',
     params: {
       id: config.id
@@ -51,15 +51,15 @@ export async function delConfig(config: ConfigListItem) {
   });
 }
 
-export async function delConfigs(configs: ConfigListItem[]) {
-  return request('/config/deleteSome', {
+export async function delConfigs(configs: ConfigListItem[], env:string) {
+  return request('/config/deleteSome?env=' + env, {
     method: 'POST',
     data: configs.map(c=>c.id)
   });
 }
 
-export async function addConfig(config: ConfigListItem) {
-  return request('/config/add', {
+export async function addConfig(config: ConfigListItem, env:string) {
+  return request('/config/add?env=' + env, {
     method: 'POST',
     data: {
       ...config
@@ -67,15 +67,15 @@ export async function addConfig(config: ConfigListItem) {
   });
 }
 
-export async function addRangeConfig(list: JsonImportItem[]) {
-  return request('/config/AddRange', {
+export async function addRangeConfig(list: JsonImportItem[], env: string) {
+  return request('/config/AddRange?env=' + env, {
     method: 'POST',
     data: list
   });
 }
 
-export async function editConfig(config: ConfigListItem) {
-  return request('/config/edit', {
+export async function editConfig(config: ConfigListItem, env: string) {
+  return request('/config/edit?env=' + env, {
     method: 'POST',
     data: {
       ...config
@@ -83,8 +83,8 @@ export async function editConfig(config: ConfigListItem) {
   });
 }
 
-export async function queryConfigPublishedHistory(config: ConfigListItem) {
-  return request('/config/ConfigPublishedHistory', {
+export async function queryConfigPublishedHistory(config: ConfigListItem, env: string) {
+  return request('/config/ConfigPublishedHistory?env=' + env, {
     method: 'GET',
     params:{
       configId: config.id
@@ -92,8 +92,8 @@ export async function queryConfigPublishedHistory(config: ConfigListItem) {
   });
 }
 
-export async function rollback(publishTimelineId: string) {
-  return request('/config/rollback', {
+export async function rollback(publishTimelineId: string, env:string) {
+  return request('/config/rollback?env=' + env, {
     method: 'POST',
     params:{
       publishTimelineId: publishTimelineId,
@@ -111,8 +111,8 @@ export async function getWaitPublishStatus(appId: string, env: string) {
   });
 }
 
-export async function publish(appId: string, publistLog: string) {
-  return request('/config/publish', {
+export async function publish(appId: string, publistLog: string, env:string) {
+  return request('/config/publish?env=' + env, {
     method: 'POST',
     data:{
       log:publistLog,
@@ -121,8 +121,8 @@ export async function publish(appId: string, publistLog: string) {
   });
 }
 
-export async function getPublishHistory(appId: string) {
-  return request('/config/publishHistory', {
+export async function getPublishHistory(appId: string, env:string) {
+  return request('/config/publishHistory?env=' + env, {
     method: 'GET',
     params:{
       appId: appId
@@ -130,8 +130,8 @@ export async function getPublishHistory(appId: string) {
   });
 }
 
-export async function cancelEdit(configId: string) {
-  return request('/config/cancelEdit', {
+export async function cancelEdit(configId: string, env:string) {
+  return request('/config/cancelEdit?env=' + env, {
     method: 'POST',
     params:{
       configId: configId
@@ -139,15 +139,15 @@ export async function cancelEdit(configId: string) {
   });
 }
 
-export async function cancelSomeEdit(ids: string[]) {
-  return request('/config/cancelSomeEdit', {
+export async function cancelSomeEdit(ids: string[], env:string) {
+  return request('/config/cancelSomeEdit?env=' + env, {
     method: 'POST',
     data: ids
   });
 }
 
-export async function exportJson(appId: string) {
-  return request('/config/ExportJson', {
+export async function exportJson(appId: string, env:string) {
+  return request('/config/ExportJson?env=' + env, {
     method: 'POST',
     params:{
       appId: appId

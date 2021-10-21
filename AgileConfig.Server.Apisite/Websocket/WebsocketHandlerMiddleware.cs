@@ -137,7 +137,8 @@ namespace AgileConfig.Server.Apisite.Websocket
                 {
                     //如果是ping，回复本地数据的md5版本
                     var appId = context.Request.Headers["appid"];
-                    var md5 = await configService.AppPublishedConfigsMd5CacheWithInheritanced(appId);
+                    var env = context.Request.Headers["env"];
+                    var md5 = await configService.AppPublishedConfigsMd5CacheWithInheritanced(appId, env);
                     await SendMessage(socketClient.Client, $"V:{md5}");
                 }
                 else

@@ -7,10 +7,10 @@ import { PublishDetialNode } from "../data";
 import { getPublishHistory, rollback } from "../service";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 
-const handleRollback = async (timelineId: string) => {
+const handleRollback = async (timelineId: string, env: string) => {
   const hide = message.loading('正在回滚');
   try {
-    const result = await rollback(timelineId);
+    const result = await rollback(timelineId, env);
     hide();
     const success = result.success;
     if (success) {
@@ -30,6 +30,7 @@ export type VersionHistoryFormProps = {
     appId: string,
     appName: string,
     versionHistoryModalVisible: boolean;
+    env: string,
     onCancel: (reload: boolean) => void;
     onSaveSuccess: ()=> void;
   };
@@ -50,7 +51,7 @@ const VersionHistory : React.FC<VersionHistoryFormProps> = (props)=>{
   }
     const [datasource, setDatasource] = useState<PublishDetialNode[]>([]);
     useEffect(() => {
-      getPublishHistory(props.appId).then(resp => {
+      getPublishHistory(props.appId, props.env).then(resp => {
         if (resp.success) {
           setDatasource(resp.data);
         }   
@@ -140,7 +141,7 @@ const VersionHistory : React.FC<VersionHistoryFormProps> = (props)=>{
                         onClick={()=>{
                           confirm({
                             onOk:async ()=>{
-                              const result = await handleRollback(e.timelineNode.id);
+                              const result = await handleRollback(e.timelineNode.id, props.env);
                               if (result) {
                                 props.onCancel(true)
                               }  

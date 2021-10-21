@@ -45,7 +45,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <returns></returns>
         [TypeFilter(typeof(AppBasicAuthenticationAttribute))]
         [HttpGet("app/{appId}")]
-        public async Task<ActionResult<List<ConfigVM>>> GetAppConfig(string appId)
+        public async Task<ActionResult<List<ConfigVM>>> GetAppConfig(string appId, string env)
         {
             var app = await _appService.GetAsync(appId);
             if (!app.Enabled)
@@ -53,7 +53,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 return NotFound();
             }
 
-            var configs = await _configService.GetPublishedConfigsByAppIdWithInheritanced(appId);
+            var configs = await _configService.GetPublishedConfigsByAppIdWithInheritanced(appId, env);
 
             var vms = configs.Select(c =>
             {
@@ -73,9 +73,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [HttpGet()]
-        public async Task<ActionResult<List<ConfigVM>>> GetConfigs(string appId)
+        public async Task<ActionResult<List<ConfigVM>>> GetConfigs(string appId, string env)
         {
-            var configs = await _configService.GetByAppIdAsync(appId);
+            var configs = await _configService.GetByAppIdAsync(appId, env);
 
             return configs.Select(config => new ConfigVM()
             {
@@ -116,7 +116,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Add", Functions.Config_Add })]
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] ConfigVM model)
+        public async Task<IActionResult> Add([FromBody] ConfigVM model, string env)
         {
             var requiredResult = CheckRequired(model);
 
@@ -136,7 +136,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 );
             ctrl.ControllerContext.HttpContext = HttpContext;
 
-            var result = (await ctrl.Add(model)) as JsonResult;
+            var result = (await ctrl.Add(model, env)) as JsonResult;
 
             dynamic obj = result.Value;
 
@@ -155,7 +155,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Edit", Functions.Config_Edit })]
         [HttpPut("{id}")]
-        public async Task<IActionResult> Edit(string id, [FromBody] ConfigVM model)
+        public async Task<IActionResult> Edit(string id, [FromBody] ConfigVM model, string env)
         {
             var requiredResult = CheckRequired(model);
 
@@ -176,7 +176,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             ctrl.ControllerContext.HttpContext = HttpContext;
 
             model.Id = id;
-            var result = (await ctrl.Edit(model)) as JsonResult;
+            var result = (await ctrl.Edit(model, env)) as JsonResult;
 
             dynamic obj = result.Value;
             if (obj.success == true)
@@ -194,7 +194,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Delete", Functions.Config_Delete })]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete(string id, string env)
         {
             var ctrl = new Controllers.ConfigController(
                 _configService,
@@ -203,7 +203,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 );
             ctrl.ControllerContext.HttpContext = HttpContext;
 
-            var result = (await ctrl.Delete(id)) as JsonResult;
+            var result = (await ctrl.Delete(id, env)) as JsonResult;
 
             dynamic obj = result.Value;
             if (obj.success == true)
@@ -221,7 +221,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Publish", Functions.Config_Publish })]
         [HttpPost("publish")]
-        public async Task<IActionResult> Publish(string appId)
+        public async Task<IActionResult> Publish(string appId, string env)
         {
             var ctrl = new Controllers.ConfigController(
                 _configService,
@@ -233,7 +233,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             var result = (await ctrl.Publish(new PublishLogVM()
             {
                 AppId = appId
-            })) as JsonResult;
+            }, env)) as JsonResult;
 
             dynamic obj = result.Value;
             if (obj.success == true)

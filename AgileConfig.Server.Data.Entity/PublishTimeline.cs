@@ -26,5 +26,8 @@ namespace AgileConfig.Server.Data.Entity
 
         [Column(Name = "log", StringLength = 100)]
         public string Log { get; set; }
+
+        [Column(Name = "env")]
+        public string Env { get; set; }
     }
 }

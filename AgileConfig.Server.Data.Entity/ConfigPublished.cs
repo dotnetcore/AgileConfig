@@ -35,6 +35,9 @@ namespace AgileConfig.Server.Data.Entity
         [Column(Name = "status")]
         public ConfigStatus Status { get; set; }
 
+        [Column(Name = "env")]
+        public string Env { get; set; }
+
     }
 
     public static class ConfigPublishedExt

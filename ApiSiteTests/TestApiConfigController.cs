@@ -50,7 +50,7 @@ namespace ApiSiteTests
             var configService = new Mock<IConfigService>();
             //configService.Setup(s => s.GetPublishedConfigsAsync("001"))
             //    .ReturnsAsync(newConfigs);
-            configService.Setup(s => s.GetPublishedConfigsByAppIdWithInheritanced("001"))
+            configService.Setup(s => s.GetPublishedConfigsByAppIdWithInheritanced("001", ""))
                 .ReturnsAsync(newConfigs);
 
             var remoteNodeProxy = new Mock<IRemoteServerNodeProxy>();
@@ -66,7 +66,7 @@ namespace ApiSiteTests
                 serverNodeService.Object,
                 appBasicAuthService.Object,
                 userSErvice.Object);
-            var act = await ctrl.GetAppConfig("001");
+            var act = await ctrl.GetAppConfig("001", "");
 
             Assert.IsNotNull(act);
             Assert.IsNotNull(act.Value);
@@ -90,7 +90,7 @@ namespace ApiSiteTests
                 serverNodeService.Object,
                 appBasicAuthService.Object,
                 userSErvice.Object);
-            act = await ctrl.GetAppConfig("001");
+            act = await ctrl.GetAppConfig("001", "");
 
             Assert.IsNotNull(act);
             Assert.IsNull(act.Value);
