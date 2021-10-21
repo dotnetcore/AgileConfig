@@ -17,6 +17,7 @@ import { getIntl, getLocale } from '@/.umi/plugin-locale/localeExports';
 import AuthorizedEle from '@/components/Authorized/AuthorizedElement';
 import functionKeys from '@/models/functionKeys';
 import VersionHistory from './comps/versionHistory';
+import { getEnvList } from '@/utils/authority';
 
 const { TextArea } = Input;
 const { confirm } = Modal;
@@ -180,7 +181,6 @@ const handleExportJson = async (appId: string, env:string) => {
 const configs: React.FC = (props: any) => {
   const appId = props.match.params.app_id;
   const appName = props.match.params.app_name;
-  const [currentEnv, setCurrentEnv] = useState<string>('DEV');
   const [appEnums, setAppEnums] = useState<any>();
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [updateModalVisible, setUpdateModalVisible] = useState<boolean>(false);
@@ -199,6 +199,8 @@ const configs: React.FC = (props: any) => {
     editCount: 0,
     deleteCount: 0
   });
+  const envList = getEnvList();
+  const [currentEnv, setCurrentEnv] = useState<string>(envList[0]);
   const [tableData, setTableData] = useState<ConfigListItem[]>([]);
   const actionRef = useRef<ActionType>();
   const addFormRef = useRef<FormInstance>();
@@ -437,15 +439,17 @@ const configs: React.FC = (props: any) => {
               }
             </span>
             <div>
-            <Radio.Group defaultValue="DEV" buttonStyle="solid" size="small" onChange={
+            <Radio.Group defaultValue={currentEnv} buttonStyle="solid" size="small" onChange={
               (e)=>{
                 console.log(e.target.value);
                 setCurrentEnv(e.target.value);
                 actionRef.current?.reload(true);
               }}>
-              <Radio.Button value="DEV">DEV</Radio.Button>
-              <Radio.Button value="TEST">TEST</Radio.Button>
-              <Radio.Button value="PROD">PROD</Radio.Button>
+                {
+                  envList.map(e=>{
+                    return <Radio.Button value={e} key={e}>{e}</Radio.Button>
+                  })
+                }
             </Radio.Group>
             </div>
           </div>

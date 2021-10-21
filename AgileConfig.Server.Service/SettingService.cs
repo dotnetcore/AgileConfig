@@ -15,7 +15,7 @@ namespace AgileConfig.Server.Service
         public const string SuperAdminId = "super_admin";
         public const string SuperAdminUserName = "admin";
 
-        public const string DefaultEnvironment = "DEV,TEST,PROD";
+        public const string DefaultEnvironment = "DEV,TEST,STAGING,PROD";
         public const string DefaultEnvironmentKey = "environment";
 
         public SettingService(FreeSqlContext context)
@@ -146,7 +146,7 @@ namespace AgileConfig.Server.Service
             await InitDefaultEnvironment();
             var env = await _dbContext.Settings.Where(x => x.Id == DefaultEnvironmentKey).FirstAsync();
 
-            return env.Value.Split(',');
+            return env.Value.ToUpper().Split(',');
         }
     }
 }
