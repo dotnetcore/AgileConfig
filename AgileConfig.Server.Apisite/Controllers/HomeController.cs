@@ -43,13 +43,11 @@ namespace AgileConfig.Server.Apisite.Controllers
 
         public async Task<IActionResult> Current()
         {
-            string appVer = System.Reflection.Assembly.GetAssembly(typeof(AgileConfig.Server.Apisite.Program)).GetName().Version.ToString();
             string userName = this.GetCurrentUserName();
             if (string.IsNullOrEmpty(userName))
             {
                 return Json(new
                 {
-                    appVer,
                     currentUser =new { 
                     }
                 });
@@ -60,8 +58,6 @@ namespace AgileConfig.Server.Apisite.Controllers
             var userFunctions = await _permissionService.GetUserPermission(userId);
 
             return Json(new { 
-                appVer,
-                passwordInited=await _settingService.HasSuperAdmin(),
                 currentUser = new
                 {
                     userId = userId,
@@ -69,6 +65,28 @@ namespace AgileConfig.Server.Apisite.Controllers
                     currentAuthority = userRoles.Select(r => r.ToString()),
                     currentFunctions = userFunctions
                 }
+            });
+        }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> Sys()
+        {
+            string appVer = System.Reflection.Assembly.GetAssembly(typeof(AgileConfig.Server.Apisite.Program)).GetName().Version.ToString();
+            string userName = this.GetCurrentUserName();
+            if (string.IsNullOrEmpty(userName))
+            {
+                return Json(new
+                {
+                    appVer,
+                });
+            }
+
+            var envList = await _settingService.GetEnvironmentList();
+            return Json(new
+            {
+                appVer,
+                passwordInited = await _settingService.HasSuperAdmin(),
+                envList
             });
         }
 

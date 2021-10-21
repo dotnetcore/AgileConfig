@@ -4,7 +4,7 @@ import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
 import { Button, FormInstance, message, Modal, Space, Switch, Tag } from 'antd';
 import React, { useState, useRef } from 'react';
-import {CurrentUser, getIntl, getLocale, Link, useIntl} from 'umi';
+import { getIntl, getLocale, Link, useIntl} from 'umi';
 import UpdateForm from './comps/updateForm';
 import { AppListItem, AppListParams, AppListResult, UserAppAuth } from './data';
 import { addApp, editApp, delApp, queryApps, inheritancedApps,enableOrdisableApp, saveAppAuth } from './service';
