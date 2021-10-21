@@ -44,7 +44,7 @@ namespace AgileConfig.Server.IService
         Task<Dictionary<string, Config>> GetPublishedConfigsByAppIdWithInheritanced_Dictionary(string appId, string env);
         Task<bool> AddAsync(Config config);
 
-        Task<bool> AddRangeAsync(List<Config> configs);
+        Task<bool> AddRangeAsync(List<Config> configs, string env);
 
         Task<bool> DeleteAsync(Config config);
 
@@ -83,7 +83,7 @@ namespace AgileConfig.Server.IService
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        Task<string> AppPublishedConfigsMd5Cache(string appId);
+        Task<string> AppPublishedConfigsMd5Cache(string appId, string env);
 
         /// <summary>
         /// 计算已发布配置项的MD5进行缓存 合并继承app的配置

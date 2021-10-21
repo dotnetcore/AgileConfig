@@ -163,7 +163,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 addConfigs.Add(config);
             }
 
-            var result = await _configService.AddRangeAsync(addConfigs);
+            var result = await _configService.AddRangeAsync(addConfigs, env);
 
             if (result)
             {

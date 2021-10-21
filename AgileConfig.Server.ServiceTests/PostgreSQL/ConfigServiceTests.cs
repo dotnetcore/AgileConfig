@@ -685,7 +685,7 @@ namespace AgileConfig.Server.Service.Tests.PostgreSQL
             var result = await service.AddRangeAsync(new List<Config> {
                 source,
                 source1
-            });
+            }, "");
             Assert.IsTrue(result);
 
             var config = fsq.Select<Config>(new

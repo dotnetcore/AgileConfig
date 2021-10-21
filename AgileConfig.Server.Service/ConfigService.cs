@@ -235,9 +235,9 @@ namespace AgileConfig.Server.Service
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        public async Task<string> AppPublishedConfigsMd5Cache(string appId)
+        public async Task<string> AppPublishedConfigsMd5Cache(string appId, string env)
         {
-            var cacheKey = AppPublishedConfigsMd5CacheKey(appId);
+            var cacheKey = AppPublishedConfigsMd5CacheKey(appId, env);
             if (_memoryCache != null && _memoryCache.TryGetValue(cacheKey, out string md5))
             {
                 return md5;
@@ -252,28 +252,28 @@ namespace AgileConfig.Server.Service
             return md5;
         }
 
-        private string AppPublishedConfigsMd5CacheKey(string appId)
+        private string AppPublishedConfigsMd5CacheKey(string appId, string env)
         {
-            return $"ConfigService_AppPublishedConfigsMd5Cache_{appId}";
+            return $"ConfigService_AppPublishedConfigsMd5Cache_{appId}_{env}";
         }
 
-        private string AppPublishedConfigsMd5CacheKeyWithInheritanced(string appId)
+        private string AppPublishedConfigsMd5CacheKeyWithInheritanced(string appId, string env)
         {
-            return $"ConfigService_AppPublishedConfigsMd5CacheWithInheritanced_{appId}";
+            return $"ConfigService_AppPublishedConfigsMd5CacheWithInheritanced_{appId}_{env}";
         }
 
-        private void ClearAppPublishedConfigsMd5Cache(string appId)
+        private void ClearAppPublishedConfigsMd5Cache(string appId, string env)
         {
-            var cacheKey = AppPublishedConfigsMd5CacheKey(appId);
+            var cacheKey = AppPublishedConfigsMd5CacheKey(appId, env);
             _memoryCache?.Remove(cacheKey);
         }
-        private void ClearAppPublishedConfigsMd5CacheWithInheritanced(string appId)
+        private void ClearAppPublishedConfigsMd5CacheWithInheritanced(string appId, string env)
         {
-            var cacheKey = AppPublishedConfigsMd5CacheKeyWithInheritanced(appId);
+            var cacheKey = AppPublishedConfigsMd5CacheKeyWithInheritanced(appId, env);
             _memoryCache?.Remove(cacheKey);
         }
 
-        public async Task<bool> AddRangeAsync(List<Config> configs)
+        public async Task<bool> AddRangeAsync(List<Config> configs, string env)
         {
             await _dbContext.Configs.AddRangeAsync(configs);
             int x = await _dbContext.SaveChangesAsync();
@@ -281,8 +281,8 @@ namespace AgileConfig.Server.Service
             var result = x > 0;
             if (result)
             {
-                ClearAppPublishedConfigsMd5Cache(configs.First().AppId);
-                ClearAppPublishedConfigsMd5CacheWithInheritanced(configs.First().AppId);
+                ClearAppPublishedConfigsMd5Cache(configs.First().AppId, env);
+                ClearAppPublishedConfigsMd5CacheWithInheritanced(configs.First().AppId, env);
             }
 
             return result;
@@ -361,7 +361,7 @@ namespace AgileConfig.Server.Service
         /// <returns></returns>
         public async Task<string> AppPublishedConfigsMd5CacheWithInheritanced(string appId, string env)
         {
-            var cacheKey = AppPublishedConfigsMd5CacheKeyWithInheritanced(appId);
+            var cacheKey = AppPublishedConfigsMd5CacheKeyWithInheritanced(appId, env);
             if (_memoryCache != null && _memoryCache.TryGetValue(cacheKey, out string md5))
             {
                 return md5;
@@ -529,8 +529,8 @@ namespace AgileConfig.Server.Service
 
                 var result = _dbContext.SaveChanges();
 
-                ClearAppPublishedConfigsMd5Cache(appId);
-                ClearAppPublishedConfigsMd5CacheWithInheritanced(appId);
+                ClearAppPublishedConfigsMd5Cache(appId, env);
+                ClearAppPublishedConfigsMd5CacheWithInheritanced(appId, env);
 
                 return (result > 0, publishTimelineNode.Id);
             }
@@ -633,8 +633,8 @@ namespace AgileConfig.Server.Service
             await _dbContext.PublishTimeline.RemoveAsync(x => x.AppId == appId && x.Env == env && x.Version > version);
             await _dbContext.PublishDetail.RemoveAsync(x => x.AppId == appId && x.Env == env && x.Version > version);
 
-            ClearAppPublishedConfigsMd5Cache(appId);
-            ClearAppPublishedConfigsMd5CacheWithInheritanced(appId);
+            ClearAppPublishedConfigsMd5Cache(appId, env);
+            ClearAppPublishedConfigsMd5CacheWithInheritanced(appId, env);
 
             return await _dbContext.SaveChangesAsync() > 0;
         }

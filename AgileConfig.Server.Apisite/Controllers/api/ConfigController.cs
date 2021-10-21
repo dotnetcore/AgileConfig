@@ -45,8 +45,17 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <returns></returns>
         [TypeFilter(typeof(AppBasicAuthenticationAttribute))]
         [HttpGet("app/{appId}")]
-        public async Task<ActionResult<List<ConfigVM>>> GetAppConfig(string appId, string env)
+        public async Task<ActionResult<List<ConfigVM>>> GetAppConfig(string appId, [FromQuery]string env)
         {
+            if (string.IsNullOrEmpty(appId))
+            {
+                throw new ArgumentNullException("appId");
+            }
+            if (string.IsNullOrEmpty(env))
+            {
+                throw new ArgumentNullException("env");
+            }
+
             var app = await _appService.GetAsync(appId);
             if (!app.Enabled)
             {
