@@ -30,7 +30,8 @@ namespace AgileConfig.Server.Apisite.Filters
             {
                 "Config.Delete", (args, premission, configService) =>  {
                         var id = args.ActionArguments["id"];
-                        var config = configService.GetAsync(id.ToString()).GetAwaiter().GetResult();
+                        var env = args.ActionArguments["env"];
+                        var config = configService.GetAsync(id.ToString(),env.ToString()).GetAwaiter().GetResult();
 
                         return config.AppId;
                     }
@@ -38,7 +39,8 @@ namespace AgileConfig.Server.Apisite.Filters
                {
                 "Config.DeleteSome", (args, premission, configService) =>  {
                         var ids = args.ActionArguments["ids"] as List<string>;
-                        var config = configService.GetAsync(ids.FirstOrDefault()).GetAwaiter().GetResult();
+                        var env = args.ActionArguments["env"];
+                        var config = configService.GetAsync(ids.FirstOrDefault(),env.ToString()).GetAwaiter().GetResult();
 
                         return config.AppId;
                     }
@@ -46,7 +48,8 @@ namespace AgileConfig.Server.Apisite.Filters
             {
                 "Config.Offline", (args, premission, configService) =>  {
                         var id = args.ActionArguments["configId"] ;
-                        var config = configService.GetAsync(id.ToString()).GetAwaiter().GetResult();
+                        var env = args.ActionArguments["env"];
+                        var config = configService.GetAsync(id.ToString(),env.ToString()).GetAwaiter().GetResult();
 
                         return config.AppId;
                     }
@@ -56,7 +59,8 @@ namespace AgileConfig.Server.Apisite.Filters
                 "Config.OfflineSome", (args, premission, configService) =>  {
                         var ids = args.ActionArguments["configIds"] as List<string>;
                         var id = ids?.FirstOrDefault();
-                        var config = configService.GetAsync(id.ToString()).GetAwaiter().GetResult();
+                        var env = args.ActionArguments["env"];
+                        var config = configService.GetAsync(id.ToString(), env.ToString()).GetAwaiter().GetResult();
 
                         return config.AppId;
                     }
@@ -73,7 +77,8 @@ namespace AgileConfig.Server.Apisite.Filters
              {
                 "Config.Rollback", (args, premission, configService) =>  {
                         var timelineId = args.ActionArguments["publishTimelineId"] as string;
-                        var detail = configService.GetPublishDetailByPublishTimelineIdAsync(timelineId).GetAwaiter().GetResult();
+                        var env = args.ActionArguments["env"] as string;
+                        var detail = configService.GetPublishDetailByPublishTimelineIdAsync(timelineId, env).GetAwaiter().GetResult();
                         return detail.FirstOrDefault()?.AppId;
                     }
             },

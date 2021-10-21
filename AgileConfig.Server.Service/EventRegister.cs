@@ -400,6 +400,7 @@ namespace AgileConfig.Server.Service
                 dynamic param_dy = param;
                 PublishTimeline node = param_dy.publishTimelineNode;
                 string userName = param_dy.userName;
+                string env = param_dy.env;
                 var log = new SysLog
                 {
                     LogTime = DateTime.Now,
@@ -411,10 +412,6 @@ namespace AgileConfig.Server.Service
                     using (var syslogService = NewSysLogService())
                     {
                         await syslogService.AddSysLogAsync(log);
-                    }
-                    using (var configService = NewConfigService())
-                    {
-                        var publishDetail = await configService.GetPublishDetailByPublishTimelineIdAsync(node.Id);
                     }
                 });
                 

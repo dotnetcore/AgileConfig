@@ -83,7 +83,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             config.EditStatus = EditStatus.Add;
             config.Env = env;
 
-            var result = await _configService.AddAsync(config);
+            var result = await _configService.AddAsync(config, env);
 
             if (result)
             {
@@ -198,7 +198,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 env = "DEV";
             }
 
-            var config = await _configService.GetAsync(model.Id);
+            var config = await _configService.GetAsync(model.Id, env);
             if (config == null)
             {
                 return Json(new
@@ -247,7 +247,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (!IsOnlyUpdateDescription(config, oldConfig))
             {
-                var isPublished = await _configService.IsPublishedAsync(config.Id);
+                var isPublished = await _configService.IsPublishedAsync(config.Id, env);
                 if (isPublished)
                 {
                     //如果是已发布的配置，修改后状态设置为编辑
@@ -261,7 +261,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 config.OnlineStatus = OnlineStatus.WaitPublish;
             }
 
-            var result = await _configService.UpdateAsync(config);
+            var result = await _configService.UpdateAsync(config, env);
 
             if (result)
             {
@@ -291,9 +291,9 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> All()
+        public async Task<IActionResult> All(string env)
         {
-            var configs = await _configService.GetAllConfigsAsync();
+            var configs = await _configService.GetAllConfigsAsync(env);
 
             return Json(new
             {
@@ -385,7 +385,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 env = "DEV";
             }
 
-            var config = await _configService.GetAsync(id);
+            var config = await _configService.GetAsync(id, env);
 
             return Json(new
             {
@@ -409,7 +409,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 env = "DEV";
             }
 
-            var config = await _configService.GetAsync(id);
+            var config = await _configService.GetAsync(id, env);
             if (config == null)
             {
                 return Json(new
@@ -422,14 +422,14 @@ namespace AgileConfig.Server.Apisite.Controllers
             config.EditStatus = EditStatus.Deleted;
             config.OnlineStatus = OnlineStatus.WaitPublish;
 
-            var isPublished = await _configService.IsPublishedAsync(config.Id);
+            var isPublished = await _configService.IsPublishedAsync(config.Id, env);
             if (!isPublished)
             {
                 //如果已经没有发布过直接删掉
                 config.Status = ConfigStatus.Deleted;
             }
 
-            var result = await _configService.UpdateAsync(config);
+            var result = await _configService.UpdateAsync(config, env);
             if (result)
             {
                 dynamic param = new ExpandoObject();
@@ -462,7 +462,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             foreach (var id in ids)
             {
-                var config = await _configService.GetAsync(id);
+                var config = await _configService.GetAsync(id, env);
                 if (config == null)
                 {
                     return Json(new
@@ -475,7 +475,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 config.EditStatus = EditStatus.Deleted;
                 config.OnlineStatus = OnlineStatus.WaitPublish;
 
-                var isPublished = await _configService.IsPublishedAsync(config.Id);
+                var isPublished = await _configService.IsPublishedAsync(config.Id, env);
                 if (!isPublished)
                 {
                     //如果已经没有发布过直接删掉
@@ -485,7 +485,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 deleteConfigs.Add(config);
             }
 
-            var result = await _configService.UpdateAsync(deleteConfigs);
+            var result = await _configService.UpdateAsync(deleteConfigs, env);
             if (result)
             {
                 dynamic param = new ExpandoObject();
@@ -514,13 +514,13 @@ namespace AgileConfig.Server.Apisite.Controllers
                 env = "DEV";
             }
 
-            var result = await _configService.RollbackAsync(publishTimelineId);
+            var result = await _configService.RollbackAsync(publishTimelineId, env);
 
             if (result)
             {
                 dynamic param = new ExpandoObject();
                 param.userName = this.GetCurrentUserName();
-                param.timelineNode = await _configService.GetPublishTimeLineNodeAsync(publishTimelineId);
+                param.timelineNode = await _configService.GetPublishTimeLineNodeAsync(publishTimelineId, env);
                 TinyEventBus.Instance.Fire(EventKeys.ROLLBACK_CONFIG_SUCCESS, param);
             }
 
@@ -548,7 +548,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             foreach (var publishDetail in configPublishedHistory.OrderByDescending(x=>x.Version))
             {
-                var timelineNode = await _configService.GetPublishTimeLineNodeAsync(publishDetail.PublishTimelineId);
+                var timelineNode = await _configService.GetPublishTimeLineNodeAsync(publishDetail.PublishTimelineId, env);
                 result.Add(new
                 {
                     timelineNode,
@@ -591,7 +591,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (ret.result)
             {
-                var timelineNode = await _configService.GetPublishTimeLineNodeAsync(ret.publishTimelineId);
+                var timelineNode = await _configService.GetPublishTimeLineNodeAsync(ret.publishTimelineId, env);
                 dynamic param = new ExpandoObject();
                 param.publishTimelineNode = timelineNode;
                 param.userName = this.GetCurrentUserName();
@@ -747,7 +747,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 result.Add(new
                 {
                     key = publishDetails.Key,
-                    timelineNode = await _configService.GetPublishTimeLineNodeAsync(data.FirstOrDefault()?.PublishTimelineId),
+                    timelineNode = await _configService.GetPublishTimeLineNodeAsync(data.FirstOrDefault()?.PublishTimelineId, env),
                     list = data
                 });
             }
@@ -770,12 +770,12 @@ namespace AgileConfig.Server.Apisite.Controllers
                 env = "DEV";
             }
 
-            var result = await _configService.CancelEdit(new List<string>() {configId});
+            var result = await _configService.CancelEdit(new List<string>() {configId}, env);
 
             if (result)
             {
                 dynamic param = new ExpandoObject();
-                param.config = await _configService.GetAsync(configId);
+                param.config = await _configService.GetAsync(configId, env);
                 param.userName = this.GetCurrentUserName();
                 TinyEventBus.Instance.Fire(EventKeys.CANCEL_EDIT_CONFIG_SUCCESS, param);
             }
@@ -797,11 +797,11 @@ namespace AgileConfig.Server.Apisite.Controllers
                 env = "DEV";
             }
 
-            var result = await _configService.CancelEdit(ids);
+            var result = await _configService.CancelEdit(ids, env);
 
             if (result)
             {
-                var config = await _configService.GetAsync(ids.First());
+                var config = await _configService.GetAsync(ids.First(), env);
                 dynamic param = new ExpandoObject();
                 param.userName = this.GetCurrentUserName();
                 param.appId = config.AppId;

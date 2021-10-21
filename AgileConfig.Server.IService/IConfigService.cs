@@ -16,7 +16,7 @@ namespace AgileConfig.Server.IService
         /// <returns></returns>
         (bool result, string publishTimelineId) Publish(string appId, string log, string operatorr, string env);
 
-        Task<Config> GetAsync(string id);
+        Task<Config> GetAsync(string id, string env);
 
         Task<Config> GetByAppIdKeyEnv(string appId, string group, string key, string env);
         /// <summary>
@@ -42,26 +42,26 @@ namespace AgileConfig.Server.IService
         /// <param name="appId"></param>
         /// <returns></returns>
         Task<Dictionary<string, Config>> GetPublishedConfigsByAppIdWithInheritanced_Dictionary(string appId, string env);
-        Task<bool> AddAsync(Config config);
+        Task<bool> AddAsync(Config config, string env);
 
         Task<bool> AddRangeAsync(List<Config> configs, string env);
 
-        Task<bool> DeleteAsync(Config config);
+        Task<bool> DeleteAsync(Config config, string env);
 
-        Task<bool> DeleteAsync(string configId);
+        Task<bool> DeleteAsync(string configId, string env);
 
-        Task<bool> UpdateAsync(Config config);
+        Task<bool> UpdateAsync(Config config, string env);
 
-        Task<bool> UpdateAsync(List<Config> configs);
+        Task<bool> UpdateAsync(List<Config> configs, string env);
 
         /// <summary>
         /// 撤销编辑状态
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
-        Task<bool> CancelEdit(List<string> ids);
+        Task<bool> CancelEdit(List<string> ids, string env);
 
-        Task<List<Config>> GetAllConfigsAsync();
+        Task<List<Config>> GetAllConfigsAsync(string env);
 
         Task<int> CountEnabledConfigsAsync();
 
@@ -70,7 +70,7 @@ namespace AgileConfig.Server.IService
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        Task<string> AppPublishedConfigsMd5(string appId);
+        Task<string> AppPublishedConfigsMd5(string appId, string env);
         /// <summary>
         /// 计算已发布配置项的MD5 合并继承app的配置
         /// </summary>
@@ -104,21 +104,21 @@ namespace AgileConfig.Server.IService
         /// </summary>
         /// <param name="configId"></param>
         /// <returns></returns>
-        Task<bool> IsPublishedAsync(string configId);
+        Task<bool> IsPublishedAsync(string configId, string env);
 
         /// <summary>
         /// 根据发布时间点获取发布的详细信息
         /// </summary>
         /// <param name="publishTimelineId"></param>
         /// <returns></returns>
-        Task<List<PublishDetail>> GetPublishDetailByPublishTimelineIdAsync(string publishTimelineId);
+        Task<List<PublishDetail>> GetPublishDetailByPublishTimelineIdAsync(string publishTimelineId, string env);
 
         /// <summary>
         /// 查询发布时间节点
         /// </summary>
         /// <param name="publishTimelineId"></param>
         /// <returns></returns>
-        Task<PublishTimeline> GetPublishTimeLineNodeAsync(string publishTimelineId);
+        Task<PublishTimeline> GetPublishTimeLineNodeAsync(string publishTimelineId, string env);
 
         /// <summary>
         /// 获取发布历史
@@ -154,13 +154,13 @@ namespace AgileConfig.Server.IService
         /// </summary>
         /// <param name="configId"></param>
         /// <returns></returns>
-        Task<ConfigPublished> GetPublishedConfigAsync(string configId);
+        Task<ConfigPublished> GetPublishedConfigAsync(string configId, string env);
 
         /// <summary>
         /// 回滚至某个时刻的发布版本
         /// </summary>
         /// <param name="publishTimelineId"></param>
         /// <returns></returns>
-        Task<bool> RollbackAsync(string publishTimelineId);
+        Task<bool> RollbackAsync(string publishTimelineId, string env);
     }
 }

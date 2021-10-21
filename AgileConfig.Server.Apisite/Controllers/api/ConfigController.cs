@@ -101,9 +101,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [HttpGet("{id}")]
-        public async Task<ActionResult<ConfigVM>> GetConfig(string id)
+        public async Task<ActionResult<ConfigVM>> GetConfig(string id, string env)
         {
-            var config = await _configService.GetAsync(id);
+            var config = await _configService.GetAsync(id, env);
             if (config == null || config.Status == ConfigStatus.Deleted)
             {
                 return NotFound();
