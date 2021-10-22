@@ -28,7 +28,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         [HttpPost]
-        public IActionResult AppClientsDoActionAsync([FromQuery]string appId, [FromBody]WebsocketAction action)
+        public IActionResult AppClientsDoActionAsync([FromQuery]string appId,[FromQuery]string env, [FromBody]WebsocketAction action)
         {
             if (string.IsNullOrEmpty(appId))
             {
@@ -38,8 +38,12 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 throw new ArgumentNullException(nameof(action));
             }
+            if (string.IsNullOrEmpty(env))
+            {
+                throw new ArgumentNullException(nameof(env));
+            }
 
-            WebsocketCollection.Instance.SendActionToAppClients(appId, action);
+            WebsocketCollection.Instance.SendActionToAppClients(appId, env, action);
 
             return Json(new
             {

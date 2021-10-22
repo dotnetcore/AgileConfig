@@ -115,6 +115,11 @@ const clients:React.FC = () => {
       hideInSearch: true,
     },
     {
+      title: '环境',
+      dataIndex: 'env',
+      hideInSearch: true,
+    },
+    {
       title: intl.formatMessage({
         id: 'pages.client.table.cols.ip'
       }),

@@ -89,11 +89,11 @@ namespace AgileConfig.Server.Service
             return result;
         }
 
-        public async Task<bool> AppClientsDoActionAsync(string address, string appId, WebsocketAction action)
+        public async Task<bool> AppClientsDoActionAsync(string address, string appId, string env, WebsocketAction action)
         {
             var result = await FunctionUtil.TRYAsync(async () =>
             {
-                using (var resp = await (address + "/RemoteOP/AppClientsDoAction".AppendQueryString("appId", appId))
+                using (var resp = await (address + "/RemoteOP/AppClientsDoAction".AppendQueryString("appId", appId).AppendQueryString("env", env))
                     .AsHttp("POST", action)
                     .Config(new RequestOptions { ContentType = "application/json" })
                     .SendAsync())

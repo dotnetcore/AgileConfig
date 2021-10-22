@@ -16,22 +16,22 @@ namespace AgileConfig.Server.Service
 {
     public class EventRegister : IEventRegister
     {
-        private IAppService GetAppService()
+        private IAppService NewAppService()
         {
             return new AppService(new FreeSqlContext(FreeSQL.Instance));
         }
         private IConfigService NewConfigService()
         {
-            return new ConfigService(new FreeSqlContext(FreeSQL.Instance), null, GetAppService());
+            return new ConfigService(NewAppService(), new SettingService(new FreeSqlContext(FreeSQL.Instance)), new UserService(new FreeSqlContext(FreeSQL.Instance)));
         }
 
-        private ISysLogService NewSysLogService() 
+        private ISysLogService NewSysLogService()
         {
             return new SysLogService(new FreeSqlContext(FreeSQL.Instance));
         }
         private IServerNodeService NewServerNodeService()
         {
-            return new ServerNodeService(new FreeSqlContext(FreeSQL.Instance)); 
+            return new ServerNodeService(new FreeSqlContext(FreeSQL.Instance));
         }
 
         private IRemoteServerNodeProxy _remoteServerNodeProxy;
@@ -48,41 +48,44 @@ namespace AgileConfig.Server.Service
 
         private void RegisterWebsocketAction()
         {
-            TinyEventBus.Instance.Regist(EventKeys.PUBLISH_CONFIG_SUCCESS,  (param) =>
-            {
-                dynamic param_dy = param;
-                PublishTimeline timelineNode = param_dy.publishTimelineNode;
-                if (timelineNode != null)
-                {
-                    Task.Run(async () =>
-                    {
-                        using (var configService = NewConfigService())
-                        {
-                            using (var serverNodeService = NewServerNodeService())
-                            {
-                                var nodes = await serverNodeService.GetAllNodesAsync();
-                                var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(timelineNode.AppId);
-                                noticeApps.Add(timelineNode.AppId, new WebsocketAction { Action = ActionConst.Reload });
+            TinyEventBus.Instance.Regist(EventKeys.PUBLISH_CONFIG_SUCCESS, (param) =>
+           {
+               dynamic param_dy = param;
+               PublishTimeline timelineNode = param_dy.publishTimelineNode;
+               if (timelineNode != null)
+               {
+                   Task.Run(async () =>
+                   {
+                       using (var configService = NewConfigService())
+                       {
+                           using (var serverNodeService = NewServerNodeService())
+                           {
+                               var nodes = await serverNodeService.GetAllNodesAsync();
+                               var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(timelineNode.AppId);
+                               noticeApps.Add(timelineNode.AppId, new WebsocketAction { Action = ActionConst.Reload });
 
-                                foreach (var node in nodes)
-                                {
-                                    if (node.Status == NodeStatus.Offline)
-                                    {
-                                        continue;
-                                    }
+                               foreach (var node in nodes)
+                               {
+                                   if (node.Status == NodeStatus.Offline)
+                                   {
+                                       continue;
+                                   }
 
-                                    foreach (var item in noticeApps)
-                                    {
-                                        await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, item.Key,
-                                            item.Value);
-                                    }
-                                }
-                            }
-                        }
-                    });
-                }
+                                   foreach (var item in noticeApps)
+                                   {
+                                       await _remoteServerNodeProxy.AppClientsDoActionAsync(
+                                           node.Address,
+                                           item.Key,
+                                           timelineNode.Env,
+                                           item.Value);
+                                   }
+                               }
+                           }
+                       }
+                   });
+               }
 
-            });
+           });
 
             TinyEventBus.Instance.Regist(EventKeys.ROLLBACK_CONFIG_SUCCESS, (param) =>
             {
@@ -110,6 +113,7 @@ namespace AgileConfig.Server.Service
                                     foreach (var item in noticeApps)
                                     {
                                         await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, item.Key,
+                                            timelineNode.Env,
                                             item.Value);
                                     }
                                 }
@@ -146,43 +150,43 @@ namespace AgileConfig.Server.Service
                 });
             });
 
-            TinyEventBus.Instance.Regist(EventKeys.INIT_SUPERADMIN_PASSWORD_SUCCESS,  (parm) =>
-            {
-                var log = new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    LogText = $"超级管理员密码初始化成功"
-                };
-                Task.Run(async () =>
-                {
-                    using (var syslogService = NewSysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
-                });
-            });
+            TinyEventBus.Instance.Regist(EventKeys.INIT_SUPERADMIN_PASSWORD_SUCCESS, (parm) =>
+           {
+               var log = new SysLog
+               {
+                   LogTime = DateTime.Now,
+                   LogType = SysLogType.Normal,
+                   LogText = $"超级管理员密码初始化成功"
+               };
+               Task.Run(async () =>
+               {
+                   using (var syslogService = NewSysLogService())
+                   {
+                       await syslogService.AddSysLogAsync(log);
+                   }
+               });
+           });
 
-            TinyEventBus.Instance.Regist(EventKeys.RESET_USER_PASSWORD_SUCCESS,  (param) =>
-            {
-                dynamic param_dy = param as dynamic;
-                User user = param_dy.user;
-                string userName = param_dy.userName;
+            TinyEventBus.Instance.Regist(EventKeys.RESET_USER_PASSWORD_SUCCESS, (param) =>
+           {
+               dynamic param_dy = param as dynamic;
+               User user = param_dy.user;
+               string userName = param_dy.userName;
 
-                var log = new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = SysLogType.Normal,
-                    LogText = $"用户 {userName} 重置 {user.UserName} 的密码为默认密码 "
-                };
-                Task.Run(async () =>
-                {
-                    using (var syslogService = NewSysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
-                });
-            });
+               var log = new SysLog
+               {
+                   LogTime = DateTime.Now,
+                   LogType = SysLogType.Normal,
+                   LogText = $"用户 {userName} 重置 {user.UserName} 的密码为默认密码 "
+               };
+               Task.Run(async () =>
+               {
+                   using (var syslogService = NewSysLogService())
+                   {
+                       await syslogService.AddSysLogAsync(log);
+                   }
+               });
+           });
 
             TinyEventBus.Instance.Regist(EventKeys.CHANGE_USER_PASSWORD_SUCCESS, (param) =>
             {
@@ -362,31 +366,8 @@ namespace AgileConfig.Server.Service
                         AppId = config.AppId,
                         LogText = $"用户：{userName} 删除配置【Group：{config.Group}】【Key：{config.Key}】【AppId：{config.AppId}】【Env：{config.Env}】【待发布】"
                     };
-                    Task.Run(async ()=> {
-                        using (var syslogService = NewSysLogService())
-                        {
-                            await syslogService.AddSysLogAsync(log);
-                        }
-                    });
-                }
-
-            });
-            TinyEventBus.Instance.Regist(EventKeys.DELETE_CONFIG_SOME_SUCCESS,  (param) =>
-            {
-                dynamic param_dy = param;
-                string userName = param_dy.userName;
-                string appId = param_dy.appId;
-                string env = param_dy.env;
-                if (appId != null)
-                {
-                    var log = new SysLog
+                    Task.Run(async () =>
                     {
-                        LogTime = DateTime.Now,
-                        LogType = SysLogType.Warn,
-                        AppId = appId,
-                        LogText = $"用户：{userName} 批量删除配置【Env：{env}】"
-                    };
-                    Task.Run(async ()=> {
                         using (var syslogService = NewSysLogService())
                         {
                             await syslogService.AddSysLogAsync(log);
@@ -395,6 +376,31 @@ namespace AgileConfig.Server.Service
                 }
 
             });
+            TinyEventBus.Instance.Regist(EventKeys.DELETE_CONFIG_SOME_SUCCESS, (param) =>
+           {
+               dynamic param_dy = param;
+               string userName = param_dy.userName;
+               string appId = param_dy.appId;
+               string env = param_dy.env;
+               if (appId != null)
+               {
+                   var log = new SysLog
+                   {
+                       LogTime = DateTime.Now,
+                       LogType = SysLogType.Warn,
+                       AppId = appId,
+                       LogText = $"用户：{userName} 批量删除配置【Env：{env}】"
+                   };
+                   Task.Run(async () =>
+                   {
+                       using (var syslogService = NewSysLogService())
+                       {
+                           await syslogService.AddSysLogAsync(log);
+                       }
+                   });
+               }
+
+           });
 
             TinyEventBus.Instance.Regist(EventKeys.PUBLISH_CONFIG_SUCCESS, (param) =>
             {
@@ -409,13 +415,14 @@ namespace AgileConfig.Server.Service
                     AppId = node.AppId,
                     LogText = $"用户：{userName} 发布配置【AppId：{node.AppId}】【Env：{env}】【版本：{node.PublishTime.Value:yyyyMMddHHmmss}】"
                 };
-                Task.Run(async ()=> {
+                Task.Run(async () =>
+                {
                     using (var syslogService = NewSysLogService())
                     {
                         await syslogService.AddSysLogAsync(log);
                     }
                 });
-                
+
             });
             TinyEventBus.Instance.Regist(EventKeys.ROLLBACK_CONFIG_SUCCESS, (param) =>
             {
@@ -433,29 +440,6 @@ namespace AgileConfig.Server.Service
                         AppId = timelineNode.AppId,
                         LogText = $"{userName} 回滚应用【{timelineNode.AppId}】【Env：{env}】至发布版本【{timelineNode.PublishTime.Value:yyyyMMddHHmmss}】"
                     };
-                    Task.Run(async () => {
-                        using (var syslogService = NewSysLogService())
-                        {
-                            await syslogService.AddSysLogAsync(log);
-                        }
-                    });
-                }
-            });
-            TinyEventBus.Instance.Regist(EventKeys.CANCEL_EDIT_CONFIG_SUCCESS,  (param) =>
-            {
-                dynamic param_dy = param;
-                string userName = param_dy.userName;
-                Config config = param_dy.config;
-
-                if (config != null)
-                {
-                    var log = new SysLog
-                    {
-                        LogTime = DateTime.Now,
-                        LogType = SysLogType.Normal,
-                        AppId = config.AppId,
-                        LogText = $"{userName} 撤销编辑状态的配置【Group：{config.Group}】【Key：{config.Key}】【AppId：{config.AppId}】【Env：{config.Env}】"
-                    };
                     Task.Run(async () =>
                     {
                         using (var syslogService = NewSysLogService())
@@ -465,6 +449,30 @@ namespace AgileConfig.Server.Service
                     });
                 }
             });
+            TinyEventBus.Instance.Regist(EventKeys.CANCEL_EDIT_CONFIG_SUCCESS, (param) =>
+           {
+               dynamic param_dy = param;
+               string userName = param_dy.userName;
+               Config config = param_dy.config;
+
+               if (config != null)
+               {
+                   var log = new SysLog
+                   {
+                       LogTime = DateTime.Now,
+                       LogType = SysLogType.Normal,
+                       AppId = config.AppId,
+                       LogText = $"{userName} 撤销编辑状态的配置【Group：{config.Group}】【Key：{config.Key}】【AppId：{config.AppId}】【Env：{config.Env}】"
+                   };
+                   Task.Run(async () =>
+                   {
+                       using (var syslogService = NewSysLogService())
+                       {
+                           await syslogService.AddSysLogAsync(log);
+                       }
+                   });
+               }
+           });
             TinyEventBus.Instance.Regist(EventKeys.CANCEL_EDIT_CONFIG_SOME_SUCCESS, (param) =>
             {
                 dynamic param_dy = param;
@@ -502,7 +510,8 @@ namespace AgileConfig.Server.Service
                     LogType = SysLogType.Normal,
                     LogText = $"用户：{userName} 添加节点：{node.Address}"
                 };
-                Task.Run(async () => {
+                Task.Run(async () =>
+                {
                     using (var syslogService = NewSysLogService())
                     {
                         await syslogService.AddSysLogAsync(log);
@@ -522,7 +531,8 @@ namespace AgileConfig.Server.Service
                     LogType = SysLogType.Warn,
                     LogText = $"用户：{userName} 删除节点：{node.Address}"
                 };
-                Task.Run(async () => {
+                Task.Run(async () =>
+                {
                     using (var syslogService = NewSysLogService())
                     {
                         await syslogService.AddSysLogAsync(log);
@@ -542,7 +552,8 @@ namespace AgileConfig.Server.Service
                     LogType = SysLogType.Normal,
                     LogText = $"用户：{userName} 添加用户：{user.UserName} 成功"
                 };
-                Task.Run(async () => {
+                Task.Run(async () =>
+                {
                     using (var syslogService = NewSysLogService())
                     {
                         await syslogService.AddSysLogAsync(log);
@@ -562,7 +573,8 @@ namespace AgileConfig.Server.Service
                     LogType = SysLogType.Normal,
                     LogText = $"用户：{userName} 编辑用户：{user.UserName} 成功"
                 };
-                Task.Run(async () => {
+                Task.Run(async () =>
+                {
                     using (var syslogService = NewSysLogService())
                     {
                         await syslogService.AddSysLogAsync(log);
@@ -582,7 +594,8 @@ namespace AgileConfig.Server.Service
                     LogType = SysLogType.Warn,
                     LogText = $"用户：{userName} 删除用户：{user.UserName} 成功"
                 };
-                Task.Run(async () => {
+                Task.Run(async () =>
+                {
                     using (var syslogService = NewSysLogService())
                     {
                         await syslogService.AddSysLogAsync(log);
@@ -602,7 +615,8 @@ namespace AgileConfig.Server.Service
                     LogType = SysLogType.Warn,
                     LogText = $"用户：{userName} 断开客户端 {clientId} 成功"
                 };
-                Task.Run(async () => {
+                Task.Run(async () =>
+                {
                     using (var syslogService = NewSysLogService())
                     {
                         await syslogService.AddSysLogAsync(log);
@@ -623,7 +637,7 @@ namespace AgileConfig.Server.Service
             Dictionary<string, WebsocketAction> needNoticeAppsActions = new Dictionary<string, WebsocketAction>
             {
             };
-            using (var appService = GetAppService())
+            using (var appService = NewAppService())
             {
                 var currentApp = await appService.GetAsync(appId);
                 if (currentApp.Type == AppType.Inheritance)
@@ -640,7 +654,7 @@ namespace AgileConfig.Server.Service
 
                 return needNoticeAppsActions;
             }
-          
+
         }
 
     }

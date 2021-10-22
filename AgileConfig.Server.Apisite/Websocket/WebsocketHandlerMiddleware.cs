@@ -49,6 +49,16 @@ namespace AgileConfig.Server.Apisite.Websocket
                         var appIdSecret = appBasicAuth.GetAppIdSecret(context.Request);
                         appId = appIdSecret.Item1;
                     }
+                    var env = context.Request.Headers["env"];
+                    if (!string.IsNullOrEmpty(env))
+                    {
+                        env = HttpUtility.UrlDecode(env);
+                    }
+                    else
+                    {
+                        env = "DEV";
+                        _logger.LogInformation("Websocket client request No ENV property , set default DEV ");
+                    }
                     context.Request.Query.TryGetValue("client_name", out StringValues name);
                     if (!string.IsNullOrEmpty(name))
                     {
@@ -78,7 +88,8 @@ namespace AgileConfig.Server.Apisite.Websocket
                         LastHeartbeatTime = DateTime.Now,
                         Name = name,
                         Tag = tag,
-                        Ip = clientIp.ToString()
+                        Ip = clientIp.ToString(),
+                        Env = env
                     };
                     _websocketCollection.AddClient(client);
                     _logger.LogInformation("Websocket client {0} Added ", client.Id);

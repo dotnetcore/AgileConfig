@@ -122,5 +122,9 @@ namespace AgileConfig.Server.Service
             return users;
         }
 
+        public User GetUser(string userId)
+        {
+            return _dbContext.Users.Where(u => u.Id == userId).ToOne();
+        }
     }
 }

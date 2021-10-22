@@ -64,13 +64,13 @@ namespace AgileConfig.Server.Apisite.Websocket
             }
         }
 
-        public void SendActionToAppClients(string appId, WebsocketAction action)
+        public void SendActionToAppClients(string appId,string env, WebsocketAction action)
         {
             if (_Clients.Count == 0)
             {
                 return;
             }
-            var appClients = _Clients.Values.Where(c => c.AppId == appId);
+            var appClients = _Clients.Values.Where(c => c.AppId == appId && c.Env == env);
             if (appClients.Count() == 0)
             {
                 return;
@@ -171,7 +171,9 @@ namespace AgileConfig.Server.Apisite.Websocket
                                       LastHeartbeatTime = c.LastHeartbeatTime, 
                                       Tag = c.Tag, 
                                       Name = c.Name,
-                                      Ip = c.Ip })
+                                      Ip = c.Ip ,
+                                      Env = c.Env
+                                  })
                                   .OrderBy(c => c.AppId)
                                   .ThenByDescending(c => c.LastHeartbeatTime)
                                   .ToList();

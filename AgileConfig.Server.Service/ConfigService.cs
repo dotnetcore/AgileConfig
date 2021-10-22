@@ -12,21 +12,31 @@ namespace AgileConfig.Server.Service
 {
     public class ConfigService : IConfigService
     {
-        private readonly FreeSqlContext _dbContext;
         private readonly IMemoryCache _memoryCache;
         private readonly IAppService _appService;
+        private readonly ISettingService _settingService;
+        private readonly IUserService _userService;
 
-        public ConfigService(FreeSqlContext context, IMemoryCache memoryCache, IAppService appService)
+        public ConfigService(IMemoryCache memoryCache, IAppService appService, ISettingService settingService, IUserService userService)
         {
-            _dbContext = context;
             _memoryCache = memoryCache;
             _appService = appService;
+            _settingService = settingService;
+            _userService = userService;
+        }
+        public ConfigService( IAppService appService, ISettingService settingService, IUserService userService)
+        {
+            _appService = appService;
+            _settingService = settingService;
+            _userService = userService;
         }
 
         public async Task<bool> AddAsync(Config config, string env)
         {
-            await _dbContext.Configs.AddAsync(config);
-            int x = await _dbContext.SaveChangesAsync();
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
+            await dbcontext.Configs.AddAsync(config);
+            int x = await dbcontext.SaveChangesAsync();
 
             var result = x > 0;
 
@@ -34,8 +44,9 @@ namespace AgileConfig.Server.Service
         }
         public async Task<bool> UpdateAsync(Config config, string env)
         {
-            await _dbContext.UpdateAsync(config);
-            var x = await _dbContext.SaveChangesAsync();
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+            await dbcontext.UpdateAsync(config);
+            var x = await dbcontext.SaveChangesAsync();
 
             var result = x > 0;
 
@@ -44,8 +55,10 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> UpdateAsync(List<Config> configs, string env)
         {
-            await _dbContext.UpdateRangeAsync(configs);
-            var x = await _dbContext.SaveChangesAsync();
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
+            await dbcontext.UpdateRangeAsync(configs);
+            var x = await dbcontext.SaveChangesAsync();
 
             var result = x > 0;
 
@@ -54,9 +67,11 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> CancelEdit(List<string> ids, string env)
         {
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
             foreach (var configId in ids)
             {
-                var config = await _dbContext.Configs.Where(c => c.Id == configId).ToOneAsync();
+                var config = await dbcontext.Configs.Where(c => c.Id == configId).ToOneAsync();
                 ;
                 if (config == null)
                 {
@@ -70,7 +85,7 @@ namespace AgileConfig.Server.Service
 
                 if (config.EditStatus == EditStatus.Add)
                 {
-                    await _dbContext.Configs.RemoveAsync(x => x.Id == configId);
+                    await dbcontext.Configs.RemoveAsync(x => x.Id == configId);
                 }
                 if (config.EditStatus == EditStatus.Deleted || config.EditStatus == EditStatus.Edit)
                 {
@@ -91,23 +106,25 @@ namespace AgileConfig.Server.Service
                         config.OnlineStatus = OnlineStatus.Online;
                     }
 
-                    await _dbContext.Configs.UpdateAsync(config);
+                    await dbcontext.Configs.UpdateAsync(config);
                 }
             }
 
-            var result = await _dbContext.SaveChangesAsync();
+            var result = await dbcontext.SaveChangesAsync();
 
             return result > 0;
         }
 
         public async Task<bool> DeleteAsync(Config config, string env)
         {
-            config = await _dbContext.Configs.Where(c => c.Id == config.Id).ToOneAsync();
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
+            config = await dbcontext.Configs.Where(c => c.Id == config.Id).ToOneAsync();
             if (config != null)
             {
-                _dbContext.Configs.Remove(config);
+                dbcontext.Configs.Remove(config);
             }
-            int x = await _dbContext.SaveChangesAsync();
+            int x = await dbcontext.SaveChangesAsync();
 
             var result = x > 0;
 
@@ -116,12 +133,14 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> DeleteAsync(string configId, string env)
         {
-            var config = await _dbContext.Configs.Where(c => c.Id == configId).ToOneAsync();
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
+            var config = await dbcontext.Configs.Where(c => c.Id == configId).ToOneAsync();
             if (config != null)
             {
-                _dbContext.Configs.Remove(config);
+                dbcontext.Configs.Remove(config);
             }
-            int x = await _dbContext.SaveChangesAsync();
+            int x = await dbcontext.SaveChangesAsync();
 
             var result = x > 0;
 
@@ -130,19 +149,25 @@ namespace AgileConfig.Server.Service
 
         public async Task<Config> GetAsync(string id, string env)
         {
-            var config = await _dbContext.Configs.Where(c => c.Id == id).ToOneAsync();
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
+            var config = await dbcontext.Configs.Where(c => c.Id == id).ToOneAsync();
 
             return config;
         }
 
         public async Task<List<Config>> GetAllConfigsAsync(string env)
         {
-            return await _dbContext.Configs.Where(c => c.Status == ConfigStatus.Enabled && c.Env == env).ToListAsync();
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
+            return await dbcontext.Configs.Where(c => c.Status == ConfigStatus.Enabled && c.Env == env).ToListAsync();
         }
 
         public async Task<Config> GetByAppIdKeyEnv(string appId, string group, string key, string env)
         {
-            var q = _dbContext.Configs.Where(c =>
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
+            var q = dbcontext.Configs.Where(c =>
                  c.AppId == appId &&
                  c.Key == key &&
                  c.Env == env &&
@@ -162,14 +187,18 @@ namespace AgileConfig.Server.Service
 
         public async Task<List<Config>> GetByAppIdAsync(string appId, string env)
         {
-            return await _dbContext.Configs.Where(c =>
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
+            return await dbcontext.Configs.Where(c =>
                 c.AppId == appId && c.Status == ConfigStatus.Enabled && c.Env == env
             ).ToListAsync();
         }
 
         public async Task<List<Config>> Search(string appId, string group, string key, string env)
         {
-            var q = _dbContext.Configs.Where(c => c.Status == ConfigStatus.Enabled && c.Env == env);
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
+            var q = dbcontext.Configs.Where(c => c.Status == ConfigStatus.Enabled && c.Env == env);
             if (!string.IsNullOrEmpty(appId))
             {
                 q = q.Where(c => c.AppId == appId);
@@ -188,8 +217,21 @@ namespace AgileConfig.Server.Service
 
         public async Task<int> CountEnabledConfigsAsync()
         {
+            int count = 0;
+            var envs = await _settingService.GetEnvironmentList();
+            foreach (var e in envs)
+            {
+                count += await CountEnabledConfigsAsync(e);
+            }
+
+            return count;
+        }
+
+        public async Task<int> CountEnabledConfigsAsync(string env)
+        {
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
             //这里计算所有的配置
-            var q = await _dbContext.Configs.Where(c => c.Status == ConfigStatus.Enabled).CountAsync();
+            var q = await dbcontext.Configs.Where(c => c.Status == ConfigStatus.Enabled).CountAsync();
 
             return (int)q;
         }
@@ -220,7 +262,9 @@ namespace AgileConfig.Server.Service
         /// <returns></returns>
         public async Task<string> AppPublishedConfigsMd5(string appId, string env)
         {
-            var configs = await _dbContext.ConfigPublished.Where(c =>
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
+            var configs = await dbcontext.ConfigPublished.Where(c =>
                 c.AppId == appId && c.Status == ConfigStatus.Enabled
                 &&  c.Env == env
             ).ToListAsync();
@@ -277,8 +321,10 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> AddRangeAsync(List<Config> configs, string env)
         {
-            await _dbContext.Configs.AddRangeAsync(configs);
-            int x = await _dbContext.SaveChangesAsync();
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
+            await dbcontext.Configs.AddRangeAsync(configs);
+            int x = await dbcontext.SaveChangesAsync();
 
             var result = x > 0;
             if (result)
@@ -380,8 +426,9 @@ namespace AgileConfig.Server.Service
 
         public void Dispose()
         {
-            _dbContext?.Dispose();
             _appService?.Dispose();
+            _settingService?.Dispose();
+            _userService?.Dispose();
         }
 
         private static readonly object Lockobj = new object();
@@ -397,15 +444,17 @@ namespace AgileConfig.Server.Service
         {
             lock (Lockobj)
             {
-                var waitPublishConfigs = _dbContext.Configs.Where(x =>
+                using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
+                var waitPublishConfigs = dbcontext.Configs.Where(x =>
                     x.AppId == appId &&
                     x.Env == env &&
                     x.Status == ConfigStatus.Enabled &&
                     x.EditStatus != EditStatus.Commit).ToList();
                 //这里默认admin console 实例只部署一个，如果部署多个同步操作，高并发的时候这个version会有问题
-                var versionMax = _dbContext.PublishTimeline.Select.Where(x => x.AppId == appId).Max(x => x.Version);
+                var versionMax = dbcontext.PublishTimeline.Select.Where(x => x.AppId == appId).Max(x => x.Version);
 
-                var user = _dbContext.Users.Where(x => x.Id == operatorr).ToOne();
+                var user = _userService.GetUser(operatorr);
 
                 var publishTimelineNode = new PublishTimeline();
                 publishTimelineNode.AppId = appId;
@@ -450,7 +499,7 @@ namespace AgileConfig.Server.Service
                 });
 
                 //当前发布的配置
-                var publishedConfigs = _dbContext.ConfigPublished.Where(x => x.Status == ConfigStatus.Enabled && x.AppId == appId && x.Env == env).ToList();
+                var publishedConfigs = dbcontext.ConfigPublished.Where(x => x.Status == ConfigStatus.Enabled && x.AppId == appId && x.Env == env).ToList();
                 //复制一份新版本，最后插入发布表
                 var publishedConfigsCopy = new List<ConfigPublished>();
                 publishedConfigs.ForEach(x =>
@@ -523,13 +572,13 @@ namespace AgileConfig.Server.Service
                     }
                 });
 
-                _dbContext.Configs.UpdateRange(waitPublishConfigs);
-                _dbContext.PublishTimeline.Add(publishTimelineNode);
-                _dbContext.PublishDetail.AddRange(publishDetails);
-                _dbContext.ConfigPublished.UpdateRange(publishedConfigs);
-                _dbContext.ConfigPublished.AddRange(publishedConfigsCopy);
+                dbcontext.Configs.UpdateRange(waitPublishConfigs);
+                dbcontext.PublishTimeline.Add(publishTimelineNode);
+                dbcontext.PublishDetail.AddRange(publishDetails);
+                dbcontext.ConfigPublished.UpdateRange(publishedConfigs);
+                dbcontext.ConfigPublished.AddRange(publishedConfigsCopy);
 
-                var result = _dbContext.SaveChanges();
+                var result = dbcontext.SaveChanges();
 
                 ClearAppPublishedConfigsMd5Cache(appId, env);
                 ClearAppPublishedConfigsMd5CacheWithInheritanced(appId, env);
@@ -540,7 +589,9 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> IsPublishedAsync(string configId, string env)
         {
-            var any = await _dbContext.ConfigPublished.Select.AnyAsync(
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
+            var any = await dbcontext.ConfigPublished.Select.AnyAsync(
                  x => x.ConfigId == configId 
                  && x.Env == env
                  && x.Status == ConfigStatus.Enabled);
@@ -550,49 +601,63 @@ namespace AgileConfig.Server.Service
 
         public async Task<List<PublishDetail>> GetPublishDetailByPublishTimelineIdAsync(string publishTimelineId, string env)
         {
-            var list = await _dbContext.PublishDetail.Where(x => x.PublishTimelineId == publishTimelineId && x.Env == env).ToListAsync();
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
+            var list = await dbcontext.PublishDetail.Where(x => x.PublishTimelineId == publishTimelineId && x.Env == env).ToListAsync();
 
             return list;
         }
 
         public async Task<PublishTimeline> GetPublishTimeLineNodeAsync(string publishTimelineId, string env)
         {
-            var one = await _dbContext.PublishTimeline.Where(x => x.Id == publishTimelineId && x.Env == env).FirstAsync();
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
+            var one = await dbcontext.PublishTimeline.Where(x => x.Id == publishTimelineId && x.Env == env).FirstAsync();
 
             return one;
         }
 
         public async Task<List<PublishTimeline>> GetPublishTimelineHistoryAsync(string appId, string env)
         {
-            var list = await _dbContext.PublishTimeline.Where(x => x.AppId == appId && x.Env == env).ToListAsync();
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
+            var list = await dbcontext.PublishTimeline.Where(x => x.AppId == appId && x.Env == env).ToListAsync();
 
             return list;
         }
 
         public async Task<List<PublishDetail>> GetPublishDetailListAsync(string appId, string env)
         {
-            var list = await _dbContext.PublishDetail.Where(x => x.AppId == appId && x.Env == env).ToListAsync();
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
+            var list = await dbcontext.PublishDetail.Where(x => x.AppId == appId && x.Env == env).ToListAsync();
 
             return list;
         }
 
         public async Task<List<PublishDetail>> GetConfigPublishedHistory(string configId, string env)
         {
-            var list = await _dbContext.PublishDetail.Where(x => x.ConfigId == configId && x.Env == env).ToListAsync();
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
+            var list = await dbcontext.PublishDetail.Where(x => x.ConfigId == configId && x.Env == env).ToListAsync();
 
             return list;
         }
 
         public async Task<List<ConfigPublished>> GetPublishedConfigsAsync(string appId, string env)
         {
-            var list = await _dbContext.ConfigPublished.Where(x => x.AppId == appId && x.Status == ConfigStatus.Enabled && x.Env == env).ToListAsync();
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
+            var list = await dbcontext.ConfigPublished.Where(x => x.AppId == appId && x.Status == ConfigStatus.Enabled && x.Env == env).ToListAsync();
 
             return list;
         }
 
         public async Task<ConfigPublished> GetPublishedConfigAsync(string configId, string env)
         {
-            var one = await _dbContext.ConfigPublished.Where(x => x.ConfigId == configId 
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
+            var one = await dbcontext.ConfigPublished.Where(x => x.ConfigId == configId 
                                                                 && x.Status == ConfigStatus.Enabled
                                                                 && x.Env == env
                                                                 ).ToOneAsync();
@@ -602,47 +667,49 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> RollbackAsync(string publishTimelineId, string env)
         {
-            var publishNode = await _dbContext.PublishTimeline.Where(x => x.Id == publishTimelineId && x.Env == env).ToOneAsync();
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
+            var publishNode = await dbcontext.PublishTimeline.Where(x => x.Id == publishTimelineId && x.Env == env).ToOneAsync();
             var version = publishNode.Version;
             var appId = publishNode.AppId;
-            var publishedConfigs = await _dbContext.ConfigPublished.Where(x => x.AppId == appId && x.Version == version && x.Env == env).ToListAsync();
-            var currentConfigs = await _dbContext.Configs.Where(x => x.AppId == appId && x.Status == ConfigStatus.Enabled && x.Env == env).ToListAsync();
+            var publishedConfigs = await dbcontext.ConfigPublished.Where(x => x.AppId == appId && x.Version == version && x.Env == env).ToListAsync();
+            var currentConfigs = await dbcontext.Configs.Where(x => x.AppId == appId && x.Status == ConfigStatus.Enabled && x.Env == env).ToListAsync();
 
             //把当前的全部软删除
             foreach (var item in currentConfigs)
             {
                 item.Status = ConfigStatus.Deleted;
             }
-            await _dbContext.Configs.UpdateRangeAsync(currentConfigs);
+            await dbcontext.Configs.UpdateRangeAsync(currentConfigs);
             //根据id把所有发布项目设置为启用
             var now = DateTime.Now;
             foreach (var item in publishedConfigs)
             {
-                var config = await _dbContext.Configs.Where(x => x.AppId == appId && x.Id == item.ConfigId).ToOneAsync();
+                var config = await dbcontext.Configs.Where(x => x.AppId == appId && x.Id == item.ConfigId).ToOneAsync();
                 config.Status = ConfigStatus.Enabled;
                 config.Value = item.Value;
                 config.UpdateTime = now;
                 config.EditStatus = EditStatus.Commit;
                 config.OnlineStatus = OnlineStatus.Online;
 
-                await _dbContext.Configs.UpdateAsync(config);
+                await dbcontext.Configs.UpdateAsync(config);
             }
             //删除version之后的版本
-            await _dbContext.ConfigPublished.RemoveAsync(x => x.AppId == appId && x.Env == env && x.Version > version);
+            await dbcontext.ConfigPublished.RemoveAsync(x => x.AppId == appId && x.Env == env && x.Version > version);
             //设置为发布状态
             foreach (var item in publishedConfigs)
             {
                 item.Status = ConfigStatus.Enabled;
-                await _dbContext.ConfigPublished.UpdateAsync(item);
+                await dbcontext.ConfigPublished.UpdateAsync(item);
             }
             //删除发布时间轴version之后的版本
-            await _dbContext.PublishTimeline.RemoveAsync(x => x.AppId == appId && x.Env == env && x.Version > version);
-            await _dbContext.PublishDetail.RemoveAsync(x => x.AppId == appId && x.Env == env && x.Version > version);
+            await dbcontext.PublishTimeline.RemoveAsync(x => x.AppId == appId && x.Env == env && x.Version > version);
+            await dbcontext.PublishDetail.RemoveAsync(x => x.AppId == appId && x.Env == env && x.Version > version);
 
             ClearAppPublishedConfigsMd5Cache(appId, env);
             ClearAppPublishedConfigsMd5CacheWithInheritanced(appId, env);
 
-            return await _dbContext.SaveChangesAsync() > 0;
+            return await dbcontext.SaveChangesAsync() > 0;
         }
     }
 }
