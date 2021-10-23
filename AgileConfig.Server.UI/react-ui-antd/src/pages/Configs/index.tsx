@@ -623,8 +623,9 @@ const configs: React.FC = (props: any) => {
         }
           appId={appId}
           appName={appName}
-          jsonImportModalVisible={jsonImportFormModalVisible}> 
-          
+          jsonImportModalVisible={jsonImportFormModalVisible}
+          env={currentEnv}
+          > 
         </JsonImport>
       }
       {
