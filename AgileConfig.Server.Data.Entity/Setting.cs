@@ -11,7 +11,7 @@ namespace AgileConfig.Server.Data.Entity
         [Column(Name = "id", StringLength = 36)]
         public string Id { get; set; }
 
-        [Column(Name = "value", StringLength = 50)]
+        [Column(Name = "value", StringLength = 200)]
         public string Value { get; set; }
 
         [Column(Name = "create_time")]
