@@ -8,6 +8,13 @@ namespace AgileConfig.Server.IService
     public interface IConfigService: IDisposable
     {
         /// <summary>
+        /// 如果环境为空，返回默认环境，默认环境为数据库设置的环境列表的第一个
+        /// </summary>
+        /// <param name="env"></param>
+        /// <returns></returns>
+        Task<string> IfEnvEmptySetDefaultAsync(string env);
+
+        /// <summary>
         /// 发布当前待发布的配置项
         /// </summary>
         /// <param name="appId"></param>

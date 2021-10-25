@@ -149,10 +149,7 @@ namespace AgileConfig.Server.Apisite.Websocket
                     //如果是ping，回复本地数据的md5版本
                     var appId = context.Request.Headers["appid"];
                     var env = context.Request.Headers["env"];
-                    if (string.IsNullOrEmpty(env))
-                    {
-                        env = "DEV";
-                    }
+                    env = await configService.IfEnvEmptySetDefaultAsync(env);
                     var md5 = await configService.AppPublishedConfigsMd5CacheWithInheritanced(appId, env);
                     await SendMessage(socketClient.Client, $"V:{md5}");
                 }

@@ -31,6 +31,22 @@ namespace AgileConfig.Server.Service
             _userService = userService;
         }
 
+        public async Task<string> IfEnvEmptySetDefaultAsync(string env)
+        {
+            if (!string.IsNullOrEmpty(env))
+            {
+                return env;
+            }
+
+            var envList = await _settingService.GetEnvironmentList();
+            if (envList == null || envList.Length == 0)
+            {
+                return "";
+            }
+
+            return envList[0];
+        }
+
         public async Task<bool> AddAsync(Config config, string env)
         {
             using var dbcontext = FreeSqlDbContextFactory.Create(env);

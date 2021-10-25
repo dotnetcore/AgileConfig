@@ -51,10 +51,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             {
                 throw new ArgumentNullException("appId");
             }
-            if (string.IsNullOrEmpty(env))
-            {
-                env = "DEV";
-            }
+            env = await _configService.IfEnvEmptySetDefaultAsync(env);
 
             var app = await _appService.GetAsync(appId);
             if (!app.Enabled)
@@ -84,6 +81,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [HttpGet()]
         public async Task<ActionResult<List<ConfigVM>>> GetConfigs(string appId, string env)
         {
+            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+
             var configs = await _configService.GetByAppIdAsync(appId, env);
 
             return configs.Select(config => new ConfigVM()
@@ -103,6 +102,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [HttpGet("{id}")]
         public async Task<ActionResult<ConfigVM>> GetConfig(string id, string env)
         {
+            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+
             var config = await _configService.GetAsync(id, env);
             if (config == null || config.Status == ConfigStatus.Deleted)
             {
@@ -128,6 +129,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         public async Task<IActionResult> Add([FromBody] ConfigVM model, string env)
         {
             var requiredResult = CheckRequired(model);
+            env = await _configService.IfEnvEmptySetDefaultAsync(env);
 
             if (!requiredResult.Item1)
             {
@@ -167,6 +169,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         public async Task<IActionResult> Edit(string id, [FromBody] ConfigVM model, string env)
         {
             var requiredResult = CheckRequired(model);
+            env = await _configService.IfEnvEmptySetDefaultAsync(env);
 
             if (!requiredResult.Item1)
             {
@@ -205,6 +208,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id, string env)
         {
+            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+
             var ctrl = new Controllers.ConfigController(
                 _configService,
                 _appService,
@@ -232,6 +237,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [HttpPost("publish")]
         public async Task<IActionResult> Publish(string appId, string env)
         {
+            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+
             var ctrl = new Controllers.ConfigController(
                 _configService,
                 _appService,
