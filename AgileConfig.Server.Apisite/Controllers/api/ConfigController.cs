@@ -264,6 +264,33 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             });
         }
 
+        [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
+        [HttpGet("PublishHistory")]
+        public async Task<IActionResult> PublishHistory(string appId, string env)
+        {
+            if (string.IsNullOrEmpty(appId))
+            {
+                throw new ArgumentNullException("appId");
+            }
+            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+
+            var history = await _configService.GetPublishDetailListAsync(appId, env);
+
+            var result = new List<object>();
+            foreach (var publishDetails in history.GroupBy(x => x.Version).OrderByDescending(g => g.Key))
+            {
+                var data = publishDetails.ToList();
+                result.Add(new
+                {
+                    key = publishDetails.Key,
+                    timelineNode = await _configService.GetPublishTimeLineNodeAsync(data.FirstOrDefault()?.PublishTimelineId, env),
+                    list = data
+                });
+            }
+
+            return Json(result);
+        }
+
         private (bool, string) CheckRequired(ConfigVM model)
         {
             if (string.IsNullOrEmpty(model.Key))
