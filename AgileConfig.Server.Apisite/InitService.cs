@@ -20,8 +20,12 @@ namespace AgileConfig.Server.Apisite
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _remoteServerNodeProxy.TestEchoAsync();
-            _eventRegister.Init();
+            if (Appsettings.IsAdminConsoleMode)
+            {
+                _remoteServerNodeProxy.TestEchoAsync();
+                _eventRegister.Init();
+            }
+
             return  Task.CompletedTask;
         }
 
