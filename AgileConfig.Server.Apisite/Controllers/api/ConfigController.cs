@@ -265,7 +265,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
-        [HttpGet("PublishHistory")]
+        [HttpGet("Publish_History")]
         public async Task<IActionResult> PublishHistory(string appId, string env)
         {
             if (string.IsNullOrEmpty(appId))
@@ -274,21 +274,18 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             }
             env = await _configService.IfEnvEmptySetDefaultAsync(env);
 
-            var history = await _configService.GetPublishDetailListAsync(appId, env);
+            var history = await _configService.GetPublishTimelineHistoryAsync(appId, env);
 
-            var result = new List<object>();
-            foreach (var publishDetails in history.GroupBy(x => x.Version).OrderByDescending(g => g.Key))
-            {
-                var data = publishDetails.ToList();
-                result.Add(new
-                {
-                    key = publishDetails.Key,
-                    timelineNode = await _configService.GetPublishTimeLineNodeAsync(data.FirstOrDefault()?.PublishTimelineId, env),
-                    list = data
-                });
-            }
+            history = history.OrderByDescending(x => x.Version).ToList();
 
-            return Json(result);
+            var vms = history.Select(x=> new { 
+                x.Id,
+                x.Version,
+                x.Log,
+                publish_time = x.PublishTime
+            });
+
+            return Json(vms);
         }
 
         private (bool, string) CheckRequired(ConfigVM model)
