@@ -4,7 +4,7 @@ import { useIntl,history } from 'umi';
 export type itemInfoProps = {
     type: string,
     icon: JSX.Element,
-    count: number,
+    count: string,
     link: string
   }
 

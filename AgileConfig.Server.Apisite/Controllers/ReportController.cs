@@ -141,6 +141,15 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 if (serverNode.Status == NodeStatus.Offline)
                 {
+                    result.Add(new
+                    {
+                        n = serverNode,
+                        server_status = new ClientInfos
+                        { 
+                            ClientCount = 0,
+                            Infos = new List<ClientInfo>()
+                        }
+                    });
                     continue;
                 }
                 result.Add(new

@@ -6,7 +6,8 @@ import styles from '../index.less';
 
 export type summaryProps = {
     clientCount?: number,
-    nodeCount?: number
+    nodeCount?: number,
+    nodeOnCount?: number
   }
   
   const Summary: React.FC<summaryProps> = (props) => {
@@ -23,10 +24,10 @@ export type summaryProps = {
     return (
       <div className={styles.panel}>
         <div className={styles.summary}>
-        <ItemInfo count={props.nodeCount??0} type="node" link="/node" icon={<DatabaseOutlined ></DatabaseOutlined>}></ItemInfo>
-        <ItemInfo count={appCount} type="app" link="/app" icon={<AppstoreOutlined ></AppstoreOutlined>}></ItemInfo>
-        <ItemInfo count={configCount} type="config" link="/app" icon={<TableOutlined ></TableOutlined>}></ItemInfo>
-        <ItemInfo count={props.clientCount??0} type="client" link="/client" icon={<ShrinkOutlined ></ShrinkOutlined>}></ItemInfo>
+        <ItemInfo count={props.nodeOnCount + '/' + props.nodeCount} type="node" link="/node" icon={<DatabaseOutlined ></DatabaseOutlined>}></ItemInfo>
+        <ItemInfo count={appCount + ''} type="app" link="/app" icon={<AppstoreOutlined ></AppstoreOutlined>}></ItemInfo>
+        <ItemInfo count={configCount + ''} type="config" link="/app" icon={<TableOutlined ></TableOutlined>}></ItemInfo>
+        <ItemInfo count={props.clientCount + ''} type="client" link="/client" icon={<ShrinkOutlined ></ShrinkOutlined>}></ItemInfo>
         </div>
       </div>
     );
