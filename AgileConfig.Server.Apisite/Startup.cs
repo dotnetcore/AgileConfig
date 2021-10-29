@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Text;
 using AgileConfig.Server.Apisite.UIExtension;
 using AgileConfig.Server.Apisite.Websocket;
@@ -16,6 +17,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 namespace AgileConfig.Server.Apisite
 {
@@ -48,6 +50,12 @@ namespace AgileConfig.Server.Apisite
                       });
             services.AddCors();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0).AddRazorRuntimeCompilation();
+
+            if (Appsettings.IsPreviewMode)
+            {
+                AddSwaggerService(services);
+            }
+
             services.AddFreeSqlDbContext();
             services.AddBusinessServices();
             services.AddHostedService<InitService>();
@@ -65,6 +73,11 @@ namespace AgileConfig.Server.Apisite
             {
                 app.UseMiddleware<ExceptionHandlerMiddleware>();
             }
+            if (Appsettings.IsPreviewMode)
+            {
+                AddSwaggerMiddleWare(app);
+            }
+
             app.UseMiddleware<ReactUIMiddleware>();
 
             app.UseCors(op=> {
@@ -85,6 +98,26 @@ namespace AgileConfig.Server.Apisite
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapDefaultControllerRoute();
+            });
+        }
+
+        private void AddSwaggerService(IServiceCollection services)
+        {
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+                var basePath = Path.GetDirectoryName(typeof(Program).Assembly.Location);
+                var xmlPath = Path.Combine(basePath, "AgileConfig.Server.Apisite.xml");
+                c.IncludeXmlComments(xmlPath);
+            });
+        }
+
+        private void AddSwaggerMiddleWare(IApplicationBuilder app) 
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("v1/swagger.json", "My API V1");
             });
         }
     }

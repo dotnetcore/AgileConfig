@@ -1,4 +1,5 @@
-﻿using AgileConfig.Server.Apisite.Filters;
+﻿using AgileConfig.Server.Apisite.Controllers.api.Models;
+using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.Apisite.Controllers.api
 {
+    /// <summary>
+    /// 节点操作接口
+    /// </summary>
     [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
     [Route("api/[controller]")]
     public class NodeController : Controller
@@ -23,12 +27,17 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             _remoteServerNodeProxy = remoteServerNodeProxy;
         }
 
+        /// <summary>
+        /// 获取所有节点
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<ActionResult<IEnumerable<ApiNodeVM>>> GetAll()
         {
             var nodes = await _serverNodeService.GetAllNodesAsync();
 
-            var vms = nodes.Select(x=> new ServerNodeVM { 
+            var vms = nodes.Select(x=> new ApiNodeVM
+            { 
                 Address = x.Address,
                 Remark = x.Remark,
                 LastEchoTime = x.LastEchoTime,
@@ -38,9 +47,15 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             return Json(vms);
         }
 
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Node.Add", Functions.Node_Add })]
+        /// <summary>
+        /// 添加节点
+        /// </summary>
+        /// <param name="model">节点模型</param>
+        /// <returns></returns>
+        [ProducesResponseType(201)]
+        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Node.Add", Functions.Node_Add })]
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] ServerNodeVM model)
+        public async Task<IActionResult> Add([FromBody] ApiNodeVM model)
         {
             var requiredResult = CheckRequired(model);
 
@@ -49,12 +64,18 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 Response.StatusCode = 400;
                 return Json(new
                 {
-                    message = requiredResult.Item2
+                    message = "添加节点失败"
                 });
             }
 
             var ctrl = new ServerNodeController(_serverNodeService, _sysLogService, _remoteServerNodeProxy);
-            var result = (await ctrl.Add(model)) as JsonResult;
+            ctrl.ControllerContext.HttpContext = HttpContext;
+            var result = (await ctrl.Add(new ServerNodeVM { 
+                Address = model.Address,
+                Remark = model.Remark,
+                LastEchoTime = model.LastEchoTime,
+                Status = model.Status
+            })) as JsonResult;
 
             dynamic obj = result.Value;
             if (obj.success == true)
@@ -69,11 +90,18 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             });
         }
 
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Node.Delete", Functions.Node_Delete })]
+        /// <summary>
+        /// 删除节点
+        /// </summary>
+        /// <param name="address">节点地址</param>
+        /// <returns></returns>
+        [ProducesResponseType(204)]
+        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Node.Delete", Functions.Node_Delete })]
         [HttpDelete()]
         public async Task<IActionResult> Delete([FromQuery] string address)
         {
             var ctrl = new ServerNodeController(_serverNodeService, _sysLogService, _remoteServerNodeProxy);
+            ctrl.ControllerContext.HttpContext = HttpContext;
             var result = (await ctrl.Delete(new ServerNodeVM { Address = address })) as JsonResult;
 
             dynamic obj = result.Value;
@@ -89,7 +117,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             });
         }
 
-        private (bool, string) CheckRequired(ServerNodeVM model)
+        private (bool, string) CheckRequired(ApiNodeVM model)
         {
             if (string.IsNullOrEmpty(model.Address))
             {

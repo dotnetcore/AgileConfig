@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
+using AgileConfig.Server.Apisite.Controllers.api.Models;
 using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Apisite.Models;
-using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
@@ -41,13 +40,15 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         /// <summary>
-        /// 根据appid查所有发布的配置项
+        /// 根据appid查所有发布的配置项 , 包括继承过来的配置项.
+        /// 注意： 这个接口用的不是用户名密码的认证，用的是appid + secret的认证
         /// </summary>
-        /// <param name="appId"></param>
+        /// <param name="appId">应用id</param>
+        /// <param name="env">环境</param>
         /// <returns></returns>
         [TypeFilter(typeof(AppBasicAuthenticationAttribute))]
         [HttpGet("app/{appId}")]
-        public async Task<ActionResult<List<ConfigVM>>> GetAppConfig(string appId, [FromQuery]string env)
+        public async Task<ActionResult<List<ApiConfigVM>>> GetAppConfig(string appId, [FromQuery]string env)
         {
             if (string.IsNullOrEmpty(appId))
             {
@@ -65,29 +66,37 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
             var vms = configs.Select(c =>
             {
-                return new ConfigVM()
+                return new ApiConfigVM()
                 {
                     Id = c.Id,
                     AppId = c.AppId,
                     Group = c.Group,
                     Key = c.Key,
                     Value = c.Value,
-                    Status = c.Status
+                    Status = c.Status,
+                    OnlineStatus = c.OnlineStatus,
+                    EditStatus = c.EditStatus
                 };
             });
 
             return vms.ToList();
         }
 
+        /// <summary>
+        /// 根据应用id查找配置，这些配置有可能是未发布的配置 。请跟 config/app/{appId} 接口加以区分。
+        /// </summary>
+        /// <param name="appId">应用id</param>
+        /// <param name="env">环境</param>
+        /// <returns></returns>
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [HttpGet()]
-        public async Task<ActionResult<List<ConfigVM>>> GetConfigs(string appId, string env)
+        public async Task<ActionResult<List<ApiConfigVM>>> GetConfigs(string appId, string env)
         {
             env = await _configService.IfEnvEmptySetDefaultAsync(env);
 
             var configs = await _configService.GetByAppIdAsync(appId, env);
 
-            return configs.Select(config => new ConfigVM()
+            return configs.Select(config => new ApiConfigVM()
             {
                 Id = config.Id,
                 AppId = config.AppId,
@@ -96,13 +105,20 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 Value = config.Value,
                 Status = config.Status,
                 Description = config.Description,
-                OnlineStatus = config.OnlineStatus
+                OnlineStatus = config.OnlineStatus,
+                EditStatus = config.EditStatus
             }).ToList();
         }
 
+        /// <summary>
+        /// 根据编号获取配置项的详情
+        /// </summary>
+        /// <param name="id">配置id</param>
+        /// <param name="env">环境</param>
+        /// <returns></returns>
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [HttpGet("{id}")]
-        public async Task<ActionResult<ConfigVM>> GetConfig(string id, string env)
+        public async Task<ActionResult<ApiConfigVM>> GetConfig(string id, string env)
         {
             env = await _configService.IfEnvEmptySetDefaultAsync(env);
 
@@ -112,7 +128,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 return NotFound();
             }
 
-            return new ConfigVM()
+            return new ApiConfigVM()
             {
                 Id = config.Id,
                 AppId = config.AppId,
@@ -121,14 +137,22 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 Value = config.Value,
                 Status = config.Status,
                 Description = config.Description,
-                OnlineStatus = config.OnlineStatus
+                OnlineStatus = config.OnlineStatus,
+                EditStatus = config.EditStatus
             };
         }
 
+        /// <summary>
+        /// 添加一个配置项
+        /// </summary>
+        /// <param name="model">配置模型</param>
+        /// <param name="env">环境</param>
+        /// <returns></returns>
+        [ProducesResponseType(201)]
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Add", Functions.Config_Add })]
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] ConfigVM model, string env)
+        public async Task<IActionResult> Add([FromBody] ApiConfigVM model, string env)
         {
             var requiredResult = CheckRequired(model);
             env = await _configService.IfEnvEmptySetDefaultAsync(env);
@@ -149,7 +173,15 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 );
             ctrl.ControllerContext.HttpContext = HttpContext;
 
-            var result = (await ctrl.Add(model, env)) as JsonResult;
+            var result = (await ctrl.Add(new ConfigVM()
+            {
+                Id = model.Id,
+                AppId = model.AppId,
+                Group = model.Group,
+                Key = model.Key,
+                Value = model.Value,
+                Description = model.Description
+            }, env)) as JsonResult;
 
             dynamic obj = result.Value;
 
@@ -165,10 +197,17 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             });
         }
 
+        /// <summary>
+        /// 编辑一个配置
+        /// </summary>
+        /// <param name="id">编号</param>
+        /// <param name="model">模型</param>
+        /// <param name="env">环境</param>
+        /// <returns></returns>
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Edit", Functions.Config_Edit })]
         [HttpPut("{id}")]
-        public async Task<IActionResult> Edit(string id, [FromBody] ConfigVM model, string env)
+        public async Task<IActionResult> Edit(string id, [FromBody] ApiConfigVM model, string env)
         {
             var requiredResult = CheckRequired(model);
             env = await _configService.IfEnvEmptySetDefaultAsync(env);
@@ -190,7 +229,15 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             ctrl.ControllerContext.HttpContext = HttpContext;
 
             model.Id = id;
-            var result = (await ctrl.Edit(model, env)) as JsonResult;
+            var result = (await ctrl.Edit(new ConfigVM()
+            {
+                Id = model.Id,
+                AppId = model.AppId,
+                Group = model.Group,
+                Key = model.Key,
+                Value = model.Value,
+                Description = model.Description
+            }, env)) as JsonResult;
 
             dynamic obj = result.Value;
             if (obj.success == true)
@@ -205,6 +252,13 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             });
         }
 
+        /// <summary>
+        /// 删除一个配置
+        /// </summary>
+        /// <param name="id">配置id</param>
+        /// <param name="env">环境</param>
+        /// <returns></returns>
+        [ProducesResponseType(204)]
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Delete", Functions.Config_Delete })]
         [HttpDelete("{id}")]
@@ -234,92 +288,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             });
         }
 
-        [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
-        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Publish", Functions.Config_Publish })]
-        [HttpPost("publish")]
-        public async Task<IActionResult> Publish(string appId, string env)
-        {
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
-
-            var ctrl = new Controllers.ConfigController(
-                _configService,
-                _appService,
-                _userService
-                );
-            ctrl.ControllerContext.HttpContext = HttpContext;
-
-            var result = (await ctrl.Publish(new PublishLogVM()
-            {
-                AppId = appId
-            }, env)) as JsonResult;
-
-            dynamic obj = result.Value;
-            if (obj.success == true)
-            {
-                return Ok();
-            }
-
-            Response.StatusCode = 400;
-            return Json(new
-            {
-                obj.message
-            });
-        }
-
-        [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
-        [HttpGet("Publish_History")]
-        public async Task<IActionResult> PublishHistory(string appId, string env)
-        {
-            if (string.IsNullOrEmpty(appId))
-            {
-                throw new ArgumentNullException("appId");
-            }
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
-
-            var history = await _configService.GetPublishTimelineHistoryAsync(appId, env);
-
-            history = history.OrderByDescending(x => x.Version).ToList();
-
-            var vms = history.Select(x=> new { 
-                x.Id,
-                x.Version,
-                x.Log,
-                publish_time = x.PublishTime
-            });
-
-            return Json(vms);
-        }
-
-        [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
-        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Rollback_API", Functions.Config_Publish })]
-        [HttpPost("rollback")]
-        public async Task<IActionResult> Rollback(string historyId, string env)
-        {
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
-
-            var ctrl = new Controllers.ConfigController(
-                _configService,
-                _appService,
-                _userService
-                );
-            ctrl.ControllerContext.HttpContext = HttpContext;
-
-            var result = (await ctrl.Rollback(historyId, env)) as JsonResult;
-
-            dynamic obj = result.Value;
-            if (obj.success == true)
-            {
-                return Ok();
-            }
-
-            Response.StatusCode = 400;
-            return Json(new
-            {
-                obj.message
-            });
-        }
-
-        private (bool, string) CheckRequired(ConfigVM model)
+        private (bool, string) CheckRequired(ApiConfigVM model)
         {
             if (string.IsNullOrEmpty(model.Key))
             {

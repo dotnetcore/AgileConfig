@@ -5,6 +5,10 @@ using System.Text;
 
 namespace AgileConfig.Server.Data.Entity
 {
+    /// <summary>
+     ///   Online = 1,
+     ///   Offline = 0,
+    /// </summary>
     public enum NodeStatus
     {
         Online = 1,

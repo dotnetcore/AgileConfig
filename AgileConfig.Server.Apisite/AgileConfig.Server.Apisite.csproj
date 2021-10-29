@@ -7,6 +7,10 @@
     <Version>1.5.1.1</Version>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>D:\workspace\AgileConfig\AgileConfig.Server.Apisite\AgileConfig.Server.Apisite.xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="agile_config.db" />
   </ItemGroup>
@@ -18,6 +22,8 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.1" />
     <PackageReference Include="NLog" Version="4.6.8" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="4.9.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.2.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.2.3" />
   </ItemGroup>
 
   <ItemGroup>

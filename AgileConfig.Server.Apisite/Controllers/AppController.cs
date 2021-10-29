@@ -254,14 +254,18 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var app = await _appService.GetAsync(id);
+
             var vm = new AppVM();
-            vm.Id = app.Id;
-            vm.Name = app.Name;
-            vm.Secret = app.Secret;
-            vm.Inheritanced = app.Type == AppType.Inheritance;
-            vm.Enabled = app.Enabled;
-            vm.AppAdmin = app.AppAdmin;
-            vm.inheritancedApps = (await _appService.GetInheritancedAppsAsync(id)).Select(x => x.Id).ToList();
+            if (app != null)
+            {
+                vm.Id = app.Id;
+                vm.Name = app.Name;
+                vm.Secret = app.Secret;
+                vm.Inheritanced = app.Type == AppType.Inheritance;
+                vm.Enabled = app.Enabled;
+                vm.AppAdmin = app.AppAdmin;
+                vm.inheritancedApps = (await _appService.GetInheritancedAppsAsync(id)).Select(x => x.Id).ToList();
+            }
 
             return Json(new
             {

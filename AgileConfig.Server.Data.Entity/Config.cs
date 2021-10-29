@@ -3,12 +3,22 @@ using System;
 
 namespace AgileConfig.Server.Data.Entity
 {
+    /// <summary>
+    ///    Deleted = 0,
+    ///    Enabled = 1,
+    /// </summary>
     public enum ConfigStatus
     {
         Deleted = 0,
         Enabled = 1,
     }
 
+    /// <summary>
+    ///    Add = 0,
+    /// Edit = 1,
+     ///   Deleted = 2,
+     ///   Commit = 10
+    /// </summary>
     public enum EditStatus
     {
         Add = 0,
@@ -17,6 +27,10 @@ namespace AgileConfig.Server.Data.Entity
         Commit = 10
     }
 
+    /// <summary>
+    ///   WaitPublish = 0,
+    /// Online = 1,
+    /// </summary>
     public enum OnlineStatus
     {
         WaitPublish = 0,
