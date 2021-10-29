@@ -81,7 +81,17 @@ namespace AgileConfig.Server.Apisite.Filters
                         var detail = configService.GetPublishDetailByPublishTimelineIdAsync(timelineId, env).GetAwaiter().GetResult();
                         return detail.FirstOrDefault()?.AppId;
                     }
-            },
+            }
+             ,
+             {
+                "Config.Rollback_API", (args, premission, configService) =>  {
+                        var timelineId = args.ActionArguments["historyId"] as string;
+                        var env = args.ActionArguments["env"] as string;
+                        var detail = configService.GetPublishDetailByPublishTimelineIdAsync(timelineId, env).GetAwaiter().GetResult();
+                        return detail.FirstOrDefault()?.AppId;
+                    }
+            }
+            ,
              {
                 "App.Add", (args, premission, configService) =>  {
                     return  "";

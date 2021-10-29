@@ -514,7 +514,7 @@ const configs: React.FC = (props: any) => {
             </Button>
           </AuthorizedEle>
           ,
-          <AuthorizedEle key="5" judgeKey={functionKeys.Config_Edit} appId={appId} >
+          <AuthorizedEle key="5" judgeKey={functionKeys.Config_Publish} appId={appId} >
             {
               selectedRowsState.filter(x=>x.editStatus !== 10).length > 0 ?
               <Button key="button"  type="primary" icon={<RollbackOutlined />}

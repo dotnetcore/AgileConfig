@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Apisite.Models;
+using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
@@ -286,6 +288,35 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             });
 
             return Json(vms);
+        }
+
+        [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
+        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Rollback_API", Functions.Config_Publish })]
+        [HttpPost("rollback")]
+        public async Task<IActionResult> Rollback(string historyId, string env)
+        {
+            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+
+            var ctrl = new Controllers.ConfigController(
+                _configService,
+                _appService,
+                _userService
+                );
+            ctrl.ControllerContext.HttpContext = HttpContext;
+
+            var result = (await ctrl.Rollback(historyId, env)) as JsonResult;
+
+            dynamic obj = result.Value;
+            if (obj.success == true)
+            {
+                return Ok();
+            }
+
+            Response.StatusCode = 400;
+            return Json(new
+            {
+                obj.message
+            });
         }
 
         private (bool, string) CheckRequired(ConfigVM model)

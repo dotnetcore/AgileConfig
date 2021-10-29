@@ -483,7 +483,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
 
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Rollback", Functions.Config_Edit })]
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Rollback", Functions.Config_Publish })]
         [HttpPost]
         public async Task<IActionResult> Rollback(string publishTimelineId, string env)
         {

@@ -688,6 +688,15 @@ namespace AgileConfig.Server.Service
             var publishNode = await dbcontext.PublishTimeline.Where(x => x.Id == publishTimelineId && x.Env == env).ToOneAsync();
             var version = publishNode.Version;
             var appId = publishNode.AppId;
+
+            var latest = await dbcontext.PublishTimeline.Where(x => x.AppId == appId && x.Env == env).OrderByDescending(x=>x.Version).ToOneAsync();
+
+            if (latest.Id == publishTimelineId)
+            {
+                //当前版本直接返回true
+                return true;
+            }
+
             var publishedConfigs = await dbcontext.ConfigPublished.Where(x => x.AppId == appId && x.Version == version && x.Env == env).ToListAsync();
             var currentConfigs = await dbcontext.Configs.Where(x => x.AppId == appId && x.Status == ConfigStatus.Enabled && x.Env == env).ToListAsync();
 
