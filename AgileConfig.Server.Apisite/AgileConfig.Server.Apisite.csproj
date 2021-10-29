@@ -3,12 +3,13 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
-    <AssemblyVersion>1.5.1.1</AssemblyVersion>
-    <Version>1.5.1.1</Version>
+    <AssemblyVersion>1.5.1.2</AssemblyVersion>
+    <Version>1.5.1.2</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DocumentationFile>D:\workspace\AgileConfig\AgileConfig.Server.Apisite\AgileConfig.Server.Apisite.xml</DocumentationFile>
+    <NoWarn>1701;1702;1591;1573</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

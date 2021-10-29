@@ -543,7 +543,6 @@ namespace AgileConfig.Server.Apisite.Controllers
         /// <summary>
         /// 发布所有待发布的配置项
         /// </summary>
-        /// <param name="appId">应用id</param>
         /// <returns></returns>
         [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Publish", Functions.Config_Publish })]
         [HttpPost]

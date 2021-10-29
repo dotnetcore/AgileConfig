@@ -8,6 +8,7 @@ namespace AgileConfig.Server.Apisite
 {
     public class Appsettings
     {
+        /// <summary>
         /// 是否演示模式
         /// </summary>
         public static bool IsPreviewMode => "true".Equals(Global.Config["preview_mode"], StringComparison.CurrentCultureIgnoreCase);

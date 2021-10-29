@@ -4,7 +4,11 @@
         <name>AgileConfig.Server.Apisite</name>
     </assembly>
     <members>
-        <!-- Badly formed XML comment ignored for member "P:AgileConfig.Server.Apisite.Appsettings.IsPreviewMode" -->
+        <member name="P:AgileConfig.Server.Apisite.Appsettings.IsPreviewMode">
+            <summary>
+            是否演示模式
+            </summary>
+        </member>
         <member name="P:AgileConfig.Server.Apisite.Appsettings.IsAdminConsoleMode">
             <summary>
             是否控制台模式
@@ -345,7 +349,6 @@
             <summary>
             发布所有待发布的配置项
             </summary>
-            <param name="appId">应用id</param>
             <returns></returns>
         </member>
         <member name="M:AgileConfig.Server.Apisite.Controllers.ConfigController.PreViewJsonFile">
