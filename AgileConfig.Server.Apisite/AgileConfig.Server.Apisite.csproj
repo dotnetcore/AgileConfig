@@ -12,6 +12,10 @@
     <NoWarn>1701;1702;1591;1573</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>D:\workspace\AgileConfig\AgileConfig.Server.Apisite\AgileConfig.Server.Apisite.xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="agile_config.db" />
   </ItemGroup>
