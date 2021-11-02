@@ -29,7 +29,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             _premissionService = premissionService;
         }
 
-        public async Task<IActionResult> Search(string name, string id, int current = 1, int pageSize = 20)
+        public async Task<IActionResult> Search(string name, string id, string sortField, string ascOrDesc, int current = 1, int pageSize = 20)
         {
             if (current < 1)
             {
@@ -51,7 +51,42 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var count = all.Count;
-            var pageList = all.OrderBy(x => x.CreateTime).ToList().Skip((current - 1) * pageSize).Take(pageSize);
+
+            if (sortField == "createTime")
+            {
+                if (ascOrDesc.StartsWith("asc"))
+                {
+                    all = all.OrderBy(x => x.CreateTime).ToList();
+                }
+                else
+                {
+                    all = all.OrderByDescending(x => x.CreateTime).ToList();
+                }
+            }
+            if (sortField == "id")
+            {
+                if (ascOrDesc.StartsWith("asc"))
+                {
+                    all = all.OrderBy(x => x.Id).ToList();
+                }
+                else
+                {
+                    all = all.OrderByDescending(x => x.Id).ToList();
+                }
+            }
+            if (sortField == "name")
+            {
+                if (ascOrDesc.StartsWith("asc"))
+                {
+                    all = all.OrderBy(x => x.Name).ToList();
+                }
+                else
+                {
+                    all = all.OrderByDescending(x => x.Name).ToList();
+                }
+            }
+
+            var pageList = all.ToList().Skip((current - 1) * pageSize).Take(pageSize);
             var vms = new List<AppListVM>();
             foreach (var item in pageList)
             {
