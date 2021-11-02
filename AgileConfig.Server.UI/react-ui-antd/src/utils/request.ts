@@ -3,7 +3,6 @@ import { extend, RequestOptionsInit } from 'umi-request';
 import { notification } from 'antd';
 import { getToken } from './authority';
 import { history } from 'umi';
-import { stringify } from 'querystring';
 
 const codeMessage = {
   200: '服务器成功返回请求的数据。',
@@ -62,8 +61,8 @@ const authHeaderInterceptor = (url: string, options: RequestOptionsInit) => {
 let requestPrefix = '';
 const { NODE_ENV } = process.env;
 if (NODE_ENV === 'development') {
-  requestPrefix = 'http://localhost:5000';
-  //requestPrefix = 'http://agileconfig_server.xbaby.xyz';
+  //requestPrefix = 'http://localhost:5000';
+  requestPrefix = 'http://agileconfig_server.xbaby.xyz';
 }
 /** 配置request请求时的默认参数 */
 const request = extend({

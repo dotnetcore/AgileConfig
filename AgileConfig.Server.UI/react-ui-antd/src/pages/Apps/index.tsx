@@ -183,6 +183,7 @@ const appList: React.FC = (props) => {
         id:'pages.app.table.cols.appname'
       }),
       dataIndex: 'name',
+      sorter: true,
     },
     {
       title: intl.formatMessage({
@@ -190,6 +191,7 @@ const appList: React.FC = (props) => {
       }),
       dataIndex: 'id',
       copyable: true,
+      sorter: true,
     },
     {
       title: intl.formatMessage({
@@ -206,7 +208,8 @@ const appList: React.FC = (props) => {
       }),
       dataIndex: 'createTime',
       valueType: 'dateTime',
-      hideInSearch: true
+      hideInSearch: true,
+      sorter: true,
     },
     {
       title: '管理员',
@@ -355,7 +358,19 @@ const appList: React.FC = (props) => {
         
         rowKey={row=>row.id}
         columns={columns}
-        request={(params, sorter, filter) => handleQuery(params)}
+        request={(params, sorter, filter) => {
+          let sortField = 'createTime';
+          let ascOrDesc = 'descend';
+          for (const key in sorter) {
+            sortField = key;
+            const val = sorter[key];
+            if (val) {
+              ascOrDesc = val;
+            }
+          }
+          console.log(sortField, ascOrDesc);
+          return handleQuery({ sortField, ascOrDesc, ...params })
+        } }
         toolBarRender={() => {
           return [
             <AuthorizedEle key="0" judgeKey={functionKeys.App_Add} > 

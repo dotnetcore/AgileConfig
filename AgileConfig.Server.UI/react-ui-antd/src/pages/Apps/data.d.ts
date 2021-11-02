@@ -17,6 +17,8 @@ export type AppListParams = {
   name?: string;
   pageSize?: number;
   current?: number;
+  sortField: string;
+  ascOrDesc: string;
 };
 
 export type AppListResult = {
