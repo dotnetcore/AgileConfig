@@ -72,8 +72,10 @@ namespace AgileConfig.Server.Service
         public async Task<bool> UpdateAsync(List<Config> configs, string env)
         {
             using var dbcontext = FreeSqlDbContextFactory.Create(env);
-
-            await dbcontext.UpdateRangeAsync(configs);
+            foreach (var item in configs)
+            {
+                await dbcontext.UpdateAsync(item);
+            }
             var x = await dbcontext.SaveChangesAsync();
 
             var result = x > 0;
