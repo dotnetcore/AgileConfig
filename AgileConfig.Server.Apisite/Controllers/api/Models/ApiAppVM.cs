@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AgileConfig.Server.Apisite.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,7 +9,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api.Models
     /// <summary>
     /// restful api 返回的 app  模型
     /// </summary>
-    public class ApiAppVM
+    public class ApiAppVM : IAppModel
     {
         /// <summary>
         /// 是否可继承

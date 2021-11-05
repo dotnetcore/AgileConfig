@@ -7,7 +7,11 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.Apisite.Models
 {
-    public class AppVM
+    public interface IAppModel
+    {
+        string Id { get; set; }
+    }
+    public class AppVM : IAppModel
     {
         [Required(ErrorMessage ="应用Id不能为空")]
         [MaxLength(36, ErrorMessage = "应用Id长度不能超过36位")]
