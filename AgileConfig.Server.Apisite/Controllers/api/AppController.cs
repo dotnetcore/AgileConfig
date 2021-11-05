@@ -233,7 +233,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <param name="env">环境</param>
         /// <returns></returns>
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
-        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Publish", Functions.Config_Publish })]
+        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Publish_API", Functions.Config_Publish })]
         [HttpPost("publish")]
         public async Task<IActionResult> Publish(string appId, string env)
         {

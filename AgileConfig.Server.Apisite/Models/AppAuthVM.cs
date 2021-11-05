@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.Apisite.Models
 {
-    public class AppAuthVM
+    public class AppAuthVM: IAppIdModel
     {
         public List<string> EditConfigPermissionUsers { get; set; }
 
