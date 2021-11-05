@@ -1,4 +1,5 @@
-﻿using AgileConfig.Server.Data.Entity;
+﻿using AgileConfig.Server.Apisite.Models;
+using AgileConfig.Server.Data.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.Apisite.Controllers.api.Models
 {
-    public class ApiConfigVM
+    public class ApiConfigVM : IAppIdModel
     {
         /// <summary>
         /// id
