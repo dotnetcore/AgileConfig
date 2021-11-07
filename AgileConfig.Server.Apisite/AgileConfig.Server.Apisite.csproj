@@ -3,8 +3,9 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
-    <AssemblyVersion>1.5.1.4</AssemblyVersion>
-    <Version>1.5.1.4</Version>
+    <AssemblyVersion>1.5.2</AssemblyVersion>
+    <Version>1.5.2</Version>
+    <PackageVersion>1.5.2</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
