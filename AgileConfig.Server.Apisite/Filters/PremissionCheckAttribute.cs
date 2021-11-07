@@ -40,6 +40,9 @@ namespace AgileConfig.Server.Apisite.Filters
              {
                 "Config.AddRange",(args, premission, config)=> { var model = args.ActionArguments["model"];  return (model as List<ConfigVM>)?.FirstOrDefault()?.AppId; }
             },
+             {
+                 "Config.EnvSync",(args, premission, config)=> { var appId = args.ActionArguments["appId"];  return appId?.ToString(); }
+             },
             {
                 "Config.Edit",(args, premission, config)=> { var model = args.ActionArguments["model"];  return (model as IAppIdModel)?.AppId; }
             },

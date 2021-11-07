@@ -738,5 +738,40 @@ namespace AgileConfig.Server.Service
 
             return await dbcontext.SaveChangesAsync() > 0;
         }
+
+        public async Task<bool> EnvSync(string appId, string currentEnv, List<string> toEnvs)
+        {
+            var currentEnvConfigs = await this.GetByAppIdAsync(appId, currentEnv);
+
+            foreach (var env in toEnvs)
+            {
+                var envConfigs = await this.GetByAppIdAsync(appId, env);
+                var addRanges = new List<Config>();
+                foreach (var currentEnvConfig in currentEnvConfigs)
+                {
+                    var envConfig = envConfigs.FirstOrDefault(x => x.Group == currentEnvConfig.Group && x.Key == currentEnvConfig.Key);          
+                    if (envConfig == null)
+                    {
+                        //没有相同的配置，则添加
+                        currentEnvConfig.Id = Guid.NewGuid().ToString("N");
+                        currentEnvConfig.Env = env;
+                        currentEnvConfig.CreateTime = DateTime.Now;
+                        currentEnvConfig.UpdateTime = DateTime.Now;
+                        currentEnvConfig.Status = ConfigStatus.Enabled;
+                        currentEnvConfig.EditStatus = EditStatus.Add;
+                        currentEnvConfig.OnlineStatus = OnlineStatus.WaitPublish;//全部设置为待发布状态
+                        addRanges.Add(currentEnvConfig);
+                    }
+                }
+
+                if (addRanges.Count > 0)
+                {
+                   await this.AddRangeAsync(addRanges, env);
+                }
+            }
+
+            return true;
+        }
+        
     }
 }
