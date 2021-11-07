@@ -155,3 +155,13 @@ export async function exportJson(appId: string, env:string) {
     responseType: "blob"
   });
 }
+
+export async function envSync(appId: string, currentEnv:string, toEnvs:string[]) {
+  return request('/config/syncenv?currentEnv=' + currentEnv, {
+    method: 'POST',
+    params:{
+      appId: appId
+    },
+    data: toEnvs
+  });
+}

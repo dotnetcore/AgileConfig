@@ -169,5 +169,14 @@ namespace AgileConfig.Server.IService
         /// <param name="publishTimelineId"></param>
         /// <returns></returns>
         Task<bool> RollbackAsync(string publishTimelineId, string env);
+
+        /// <summary>
+        /// 同步到环境
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <param name="currentEnv"></param>
+        /// <param name="toEnvs"></param>
+        /// <returns></returns>
+        Task<bool> EnvSync(string appId, string currentEnv, List<string> toEnvs);
     }
 }
