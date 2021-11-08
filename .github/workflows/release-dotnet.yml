@@ -26,8 +26,12 @@ jobs:
       with:
         name: agileconfig-server
         path: AgileConfig.Server.Apisite/bin/Release/netcoreapp3.1/publish/
+    - uses: papeloto/action-zip@v1
+      with:
+        files: AgileConfig.Server.Apisite/bin/Release/netcoreapp3.1/publish/
+        dest: agileconfig_server.zip
     - name: create release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: AgileConfig.Server.Apisite/bin/Release/netcoreapp3.1/publish/
+        artifacts: agileconfig_server.zip
         token: ${{ secrets.GITHUB_TOKEN }}
