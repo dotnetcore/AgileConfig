@@ -21,8 +21,9 @@ jobs:
     - name: Install dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet publish "AgileConfig.Server.Apisite.csproj" -c Release -o /app/publish
     - name: create release
       uses: ncipollo/release-action@v1
       with:
+        artifacts: /app/publish
         token: ${{ secrets.GITHUB_TOKEN }}
