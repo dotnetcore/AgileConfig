@@ -1,4 +1,4 @@
-name: release-xxx ci workflow
+name: v-xxx ci workflow , it will build dockerimage-v.xxx and create a release package
 
 on:
   push:
@@ -54,11 +54,11 @@ jobs:
     - uses: papeloto/action-zip@v1
       with:
         files: AgileConfig.Server.Apisite/bin/Release/netcoreapp3.1/publish/
-        dest: agileconfig_server.zip
+        dest: agileconfig_server_deploy.zip
     - name: create release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: agileconfig_server.zip
+        artifacts: agileconfig_server_deploy.zip
         token: ${{ secrets.GITHUB_TOKEN }}
     - name: Push to Docker hub release -xxx
       uses: docker/build-push-action@v1
