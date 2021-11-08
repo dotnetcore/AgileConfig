@@ -92,7 +92,7 @@ sudo docker run \
 2. db:provider 配置程序的数据库类型。目前程序支持：sqlserver，mysql，sqlite, PostgreSql，Oracle 五种数据库。
 3. db:conn 配置数据库连接串    
    
-> 注意：如果通过IIS部署，请自行下载publish分支源码进行编译。请先编译react-ui-antd项目把dist内的产物复制到apisite项目的wwwroot/ui目录下。
+> 注意：如果通过IIS或者别的方式部署，请自行下载github主页上的[releases](https://github.com/dotnetcore/AgileConfig/releases)下面下载最新的部署包。如果自己使用源码编译，请先编译react-ui-antd项目把dist内的产物复制到apisite项目的wwwroot/ui目录下。
 ### 初始化管理员密码
 第一次运行程序需要初始化超级管理员密码，超管用户名固定为 admin    
 ![](https://ftp.bmp.ovh/imgs/2021/04/44242b327230c5e6.png)
