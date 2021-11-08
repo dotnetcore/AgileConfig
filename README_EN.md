@@ -18,7 +18,7 @@
     
 
 
-# [English](https://github.com/kklldog/AgileConfig/blob/master/README.md) | [中文](https://github.com/kklldog/AgileConfig/blob/master/README_CN.md)
+# [English](https://github.com/kklldog/AgileConfig/blob/master/README_EN.md) | [中文](https://github.com/kklldog/AgileConfig/blob/master/README.md)
 
 This is a lightweight configuration center based on .net core . It is easy to deploy , easy to learn , easy to use .
 ## Features
@@ -92,7 +92,8 @@ add a agileconfig section in appsettings.json：
     "secret": "xxx",
     "nodes": "http://localhost:5000,http://localhost:5001",
     "name": "client_name",
-    "tag": "tag1"
+    "tag": "tag1",
+    "env": "dev"
   }
 }
 
