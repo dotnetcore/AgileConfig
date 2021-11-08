@@ -49,6 +49,17 @@ jobs:
       with:
         name: agileconfig-ui
         path: AgileConfig.Server.Apisite/wwwroot/ui
+    - name: build server release xxx
+      run: dotnet publish AgileConfig.Server.Apisite/AgileConfig.Server.Apisite.csproj -c Release
+    - uses: papeloto/action-zip@v1
+      with:
+        files: AgileConfig.Server.Apisite/bin/Release/netcoreapp3.1/publish/
+        dest: agileconfig_server.zip
+    - name: create release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: agileconfig_server.zip
+        token: ${{ secrets.GITHUB_TOKEN }}
     - name: Push to Docker hub release -xxx
       uses: docker/build-push-action@v1
       with:
@@ -56,9 +67,3 @@ jobs:
         password: ${{ secrets.DOCKER_HUB_PASSWORD }}
         repository: kklldog/agile_config
         tag_with_ref: true
-    - name: create release
-      uses: ncipollo/release-action@v1
-      with:
-        artifacts: ""
-        bodyFile: ""
-        token: ${{ secrets.GITHUB_TOKEN }}
