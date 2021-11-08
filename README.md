@@ -24,10 +24,11 @@ This is a lightweight configuration center based on .net core . It is easy to de
 ## Features
 1. easy to deploy (docker or IIS)
 2. support distributed deploy
-3. configuration changes takes effect in real time
-4. support IConfiguration , IOptions patten to read configurations
-5. restful api
-6. version management
+3. multiple environments support
+4. configuration changes takes effect in real time
+5. support IConfiguration , IOptions patten to read configurations
+6. restful api
+7. version management
     
 Demo Project ：[AgileConfig Server Demo](http://agileconfig_server.xbaby.xyz)   username ：admin password ：123456   
 client project ：[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
