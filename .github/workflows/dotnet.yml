@@ -56,3 +56,9 @@ jobs:
         password: ${{ secrets.DOCKER_HUB_PASSWORD }}
         repository: kklldog/agile_config
         tag_with_ref: true
+    - name: create release
+    - uses: ncipollo/release-action@v1
+      with:
+        artifacts: ""
+        bodyFile: ""
+        token: ${{ secrets.GITHUB_TOKEN }}
