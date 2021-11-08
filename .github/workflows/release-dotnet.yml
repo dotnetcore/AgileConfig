@@ -25,5 +25,5 @@ jobs:
     - name: create release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: /app/publish
+        artifacts: AgileConfig/AgileConfig/AgileConfig.Server.Apisite/bin/Release/netcoreapp3.1/publish/
         token: ${{ secrets.GITHUB_TOKEN }}
