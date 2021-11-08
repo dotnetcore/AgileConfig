@@ -1,12 +1,12 @@
-name: Releases
-
-on: 
+name: release
+on:
   push:
-    tags:
-    - 'rel-*'
-
+    paths-ignore: 
+      - '**/*.md'
+      - '**/*.yml'
+    tags:        
+      - 'v-*'
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
