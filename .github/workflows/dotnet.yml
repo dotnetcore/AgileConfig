@@ -57,7 +57,7 @@ jobs:
         repository: kklldog/agile_config
         tag_with_ref: true
     - name: create release
-    - uses: ncipollo/release-action@v1
+      uses: ncipollo/release-action@v1
       with:
         artifacts: ""
         bodyFile: ""
