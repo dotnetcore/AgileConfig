@@ -21,7 +21,7 @@ jobs:
     - name: Install dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet publish "/src/AgileConfig.Server.Apisite/AgileConfig.Server.Apisite.csproj" -c Release -o /app/publish
+      run: dotnet publish "/AgileConfig.Server.Apisite/AgileConfig.Server.Apisite.csproj" -c Release -o /app/publish
     - name: create release
       uses: ncipollo/release-action@v1
       with:
