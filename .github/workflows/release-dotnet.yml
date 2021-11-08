@@ -1,0 +1,17 @@
+name: Releases
+
+on: 
+  push:
+    tags:
+    - 'rel-*'
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ncipollo/release-action@v1
+      with:
+        artifacts: "appsettings.json"
+        token: ${{ secrets.GITHUB_TOKEN }}
