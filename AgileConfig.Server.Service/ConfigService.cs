@@ -738,5 +738,60 @@ namespace AgileConfig.Server.Service
 
             return await dbcontext.SaveChangesAsync() > 0;
         }
+
+        public async Task<bool> EnvSync(string appId, string currentEnv, List<string> toEnvs)
+        {
+            var currentEnvConfigs = await this.GetByAppIdAsync(appId, currentEnv);
+
+            foreach (var env in toEnvs)
+            {
+                var envConfigs = await this.GetByAppIdAsync(appId, env);
+                var addRanges = new List<Config>();
+                var updateRanges = new List<Config>();
+                foreach (var currentEnvConfig in currentEnvConfigs)
+                {
+                    var envConfig = envConfigs.FirstOrDefault(x => GenerateKey(x) == GenerateKey(currentEnvConfig));          
+                    if (envConfig == null)
+                    {
+                        //没有相同的配置，则添加
+                        currentEnvConfig.Id = Guid.NewGuid().ToString("N");
+                        currentEnvConfig.Env = env;
+                        currentEnvConfig.CreateTime = DateTime.Now;
+                        currentEnvConfig.UpdateTime = DateTime.Now;
+                        currentEnvConfig.Status = ConfigStatus.Enabled;
+                        currentEnvConfig.EditStatus = EditStatus.Add;
+                        currentEnvConfig.OnlineStatus = OnlineStatus.WaitPublish;//全部设置为待发布状态
+                        addRanges.Add(currentEnvConfig);
+                    }
+                    else
+                    {
+                        // 如果有了相同的键，如果值不同，则更新
+                        if (envConfig.Value != currentEnvConfig.Value)
+                        {
+                            envConfig.UpdateTime = DateTime.Now;
+                            envConfig.Value = currentEnvConfig.Value;
+                            if (envConfig.EditStatus == EditStatus.Commit)
+                            {
+                                envConfig.EditStatus = EditStatus.Edit;
+                            }
+                            envConfig.OnlineStatus = OnlineStatus.WaitPublish;
+                            updateRanges.Add(envConfig);
+                        }
+                    }
+                }
+
+                if (addRanges.Count > 0)
+                {
+                   await this.AddRangeAsync(addRanges, env);
+                }
+                if (updateRanges.Count > 0)
+                {
+                    await this.UpdateAsync(updateRanges, env);
+                }
+            }
+
+            return true;
+        }
+        
     }
 }

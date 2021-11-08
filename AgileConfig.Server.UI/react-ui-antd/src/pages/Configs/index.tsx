@@ -1,10 +1,9 @@
-import { CiCircleOutlined, DeleteOutlined, PlusOutlined, RollbackOutlined, VerticalAlignTopOutlined } from '@ant-design/icons';
+import {  DeleteOutlined, PlusOutlined, RollbackOutlined, VerticalAlignTopOutlined } from '@ant-design/icons';
 import { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns, TableDropdown } from '@ant-design/pro-table';
 import { Badge, Button, Drawer, FormInstance, Input, List, message, Modal, Radio, Space, Tag } from 'antd';
 import React, { useState, useRef, useEffect } from 'react';
-import { queryApps } from '../Apps/service';
 import UpdateForm from './comps/updateForm';
 import { ConfigListItem, PublishDetialConfig } from './data';
 import { queryConfigs, delConfig,delConfigs, addConfig, editConfig, queryConfigPublishedHistory, getWaitPublishStatus, publish, cancelEdit, exportJson, cancelSomeEdit } from './service';
@@ -18,6 +17,7 @@ import AuthorizedEle from '@/components/Authorized/AuthorizedElement';
 import functionKeys from '@/models/functionKeys';
 import VersionHistory from './comps/versionHistory';
 import { getEnvList } from '@/utils/authority';
+import EnvSync from './comps/EnvSync';
 
 const { TextArea } = Input;
 const { confirm } = Modal;
@@ -181,12 +181,12 @@ const handleExportJson = async (appId: string, env:string) => {
 const configs: React.FC = (props: any) => {
   const appId = props.match.params.app_id;
   const appName = props.match.params.app_name;
-  const [appEnums, setAppEnums] = useState<any>();
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [updateModalVisible, setUpdateModalVisible] = useState<boolean>(false);
   const [modifyLogsModalVisible, setmodifyLogsModalVisible] = useState<boolean>(false);
   const [jsonImportFormModalVisible, setjsonImportFormModalVisible] = useState<boolean>(false);
   const [versionHistoryFormModalVisible, setVersionHistoryFormModalVisible] = useState<boolean>(false);
+  const [EnvSyncModalVisible, setEnvSyncModalVisible] = useState<boolean>(false);
   const [currentRow, setCurrentRow] = useState<ConfigListItem>();
   const [selectedRowsState, setSelectedRows] = useState<ConfigListItem[]>([]);
   const [configPublishedHistory, setModifyLogs] = useState<PublishDetialConfig[]>([]);
@@ -206,23 +206,6 @@ const configs: React.FC = (props: any) => {
   const addFormRef = useRef<FormInstance>();
   let _publishLog:string = '';
   const intl = useIntl();
-  const getAppEnums = async () => {
-    const result = await queryApps({})
-    const obj = {};
-    result.data.forEach((x) => {
-      obj[x.id] = {
-        text: x.name
-      }
-    });
-
-    return obj;
-  }
-  useEffect(() => {
-    getAppEnums().then(x => {
-      console.log('app enums ', x);
-      setAppEnums({ ...x });
-    });
-  }, []);
   useEffect(() => {
     getWaitPublishStatus(appId, currentEnv).then(x => {
       console.log('WaitPublishStatus ', x);
@@ -547,7 +530,7 @@ const configs: React.FC = (props: any) => {
         <AuthorizedEle key="6" judgeKey={functionKeys.Config_Edit} appId={appId} >
           {
             selectedRowsState.length > 0 ?
-            <Button key="button"  type="primary" icon={<DeleteOutlined />}
+            <Button  type="primary" icon={<DeleteOutlined />}
                     className="danger"
                     onClick={
                       ()=>{
@@ -572,13 +555,19 @@ const configs: React.FC = (props: any) => {
         </AuthorizedEle>
         ,
           <AuthorizedEle key="1" judgeKey={functionKeys.Config_Publish} appId={appId}>
-            <Button key="button"  onClick={()=>{ setVersionHistoryFormModalVisible(true) }}>
+            <Button  onClick={()=>{ setVersionHistoryFormModalVisible(true) }}>
               {
                 '历史版本'
               }
             </Button>
           </AuthorizedEle>
           ,
+          <AuthorizedEle key="5" judgeKey={functionKeys.Config_Add} appId={appId} >
+          <Button onClick={()=>{ setEnvSyncModalVisible(true) }}>
+            同步环境
+          </Button>
+        </AuthorizedEle>
+        ,
         <AuthorizedEle key="3" judgeKey={functionKeys.Config_Add} appId={appId}>
           <Button onClick={()=>{ setjsonImportFormModalVisible(true) }}>
             {
@@ -650,6 +639,24 @@ const configs: React.FC = (props: any) => {
           appName={appName}
           versionHistoryModalVisible ={versionHistoryFormModalVisible}> 
         </VersionHistory>
+      }
+      {
+        EnvSyncModalVisible&&
+        <EnvSync currentEnv={currentEnv}
+                appId={appId} 
+                ModalVisible={EnvSyncModalVisible}
+                onSaveSuccess={
+                  ()=>{
+                    setEnvSyncModalVisible(false);
+                    actionRef.current?.reload();
+                  }
+                }
+                onCancel={
+                  ()=>{
+                    setEnvSyncModalVisible(false);
+                  }
+                } >
+        </EnvSync>
       }
       <ModalForm
         formRef={addFormRef}
