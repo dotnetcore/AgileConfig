@@ -1,4 +1,4 @@
-name: v-xxx ci workflow , it will build dockerimage-v.xxx and create a release package
+name: v-xxx ci
 
 on:
   push:
