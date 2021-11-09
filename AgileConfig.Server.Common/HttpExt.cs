@@ -61,7 +61,7 @@ namespace AgileConfig.Server.Common
 
         public static string GetUserNameFromClaim(this HttpContext httpContext)
         {
-            var name = httpContext.User?.FindFirst("name")?.Value;
+            var name = httpContext.User?.FindFirst("username")?.Value;
 
             return name;
         }
