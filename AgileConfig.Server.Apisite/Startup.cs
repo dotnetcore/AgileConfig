@@ -20,7 +20,6 @@ namespace AgileConfig.Server.Apisite
 {
     public class Startup
     {
-        //test docker file
         public Startup(IConfiguration configuration, ILoggerFactory loggerFactory)
         {
             Configuration = configuration;
