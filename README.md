@@ -189,6 +189,7 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
         });
 ```
 
+> 注意：☢️☢️☢️如果你的程序是Framework的程序请使用AgileConfig.Client4FR这个专门为Framework打造的client。使用当前版本有可能死锁造成cpu100% 的风险。☢️☢️☢️
 > 注意：如果节点使用nginx反代的话，需要对nginx进行配置，使其支持websocket协议，不然客户端跟节点的长连接没法建立。
 
 ## 读取配置
