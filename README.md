@@ -295,9 +295,9 @@ public class HomeController : Controller
 有什么问题可以mail我：minj.zhou@gmail.com   
 也可以加qq群：1022985150
 ## 如果觉得这个项目对你有帮助可以给作者早餐加个蛋🍳🍳🍳
- <img src="https://ftp.bmp.ovh/imgs/2021/07/c0146fa995e8074d.jpg" width="300">
+ <img src="https://static.xbaby.xyz/alipay_qr.jpg|w30" width="300">
      
-  <img src="https://ftp.bmp.ovh/imgs/2021/07/1c8748c5732b8fbe.jpg" width="300">
+ <img src="https://static.xbaby.xyz/wechatpay_qr.jpg|w30" width="300">
 
 
         
