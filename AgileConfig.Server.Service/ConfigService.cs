@@ -249,7 +249,7 @@ namespace AgileConfig.Server.Service
         {
             using var dbcontext = FreeSqlDbContextFactory.Create(env);
             //这里计算所有的配置
-            var q = await dbcontext.Configs.Where(c => c.Status == ConfigStatus.Enabled).CountAsync();
+            var q = await dbcontext.Configs.Where(c => c.Status == ConfigStatus.Enabled && c.Env == env).CountAsync();
 
             return (int)q;
         }
