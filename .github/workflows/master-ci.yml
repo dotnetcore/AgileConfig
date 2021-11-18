@@ -1,13 +1,14 @@
-name: release-xxx ci workflow
+name: master ci workflow
 
 on:
   push:
+    branches: [ master ]
     paths-ignore: 
       - '**/*.md'
       - '**/*.yml'
-    tags:        
-      - 'release-*'
-    
+  pull_request:
+    branches: [ master ]
+
 jobs:
   build-reactapp:
     runs-on: ubuntu-latest
@@ -40,7 +41,7 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.301
+        dotnet-version: 6.0.100
     - name: Install dependencies
       run: dotnet restore
     - name: Build
@@ -49,10 +50,10 @@ jobs:
       with:
         name: agileconfig-ui
         path: AgileConfig.Server.Apisite/wwwroot/ui
-    - name: Push to Docker hub release -xxx
+    - name: Push to Docker Hub
       uses: docker/build-push-action@v1
       with:
         username: ${{ secrets.DOCKER_HUB_NAME }}
         password: ${{ secrets.DOCKER_HUB_PASSWORD }}
         repository: kklldog/agile_config
-        tag_with_ref: true
+        tags: test

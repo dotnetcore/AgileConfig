@@ -54,7 +54,7 @@ const EnvSync : React.FC<EnvSyncFormProps> = (props)=>{
             }
           }
           >
-          奖当前环境 {props.currentEnv} 的配置同步到：
+          将当前 {props.currentEnv} 环境的配置同步到：
           <div style={{marginTop:20}}>
             <CheckboxGroup options={envList.filter(x=> x !== props.currentEnv)} value={checkedList} onChange={onChange}  />
           </div>

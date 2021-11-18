@@ -5,13 +5,10 @@ using AgileConfig.Server.Apisite.UIExtension;
 using AgileConfig.Server.Apisite.Websocket;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Freesql;
-using AgileConfig.Server.IService;
 using AgileConfig.Server.Service;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -49,7 +46,7 @@ namespace AgileConfig.Server.Apisite
                           };
                       });
             services.AddCors();
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0).AddRazorRuntimeCompilation();
+            services.AddMvc().AddRazorRuntimeCompilation();
 
             if (Appsettings.IsPreviewMode)
             {
@@ -88,7 +85,6 @@ namespace AgileConfig.Server.Apisite
             app.UseWebSockets(new WebSocketOptions()
             {
                 KeepAliveInterval = TimeSpan.FromSeconds(60),
-                ReceiveBufferSize = 2 * 1024
             });
             app.UseMiddleware<WebsocketHandlerMiddleware>();
             app.UseStaticFiles();

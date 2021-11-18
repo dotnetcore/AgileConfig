@@ -72,8 +72,10 @@ namespace AgileConfig.Server.Service
         public async Task<bool> UpdateAsync(List<Config> configs, string env)
         {
             using var dbcontext = FreeSqlDbContextFactory.Create(env);
-
-            await dbcontext.UpdateRangeAsync(configs);
+            foreach (var item in configs)
+            {
+                await dbcontext.UpdateAsync(item);
+            }
             var x = await dbcontext.SaveChangesAsync();
 
             var result = x > 0;
@@ -247,7 +249,7 @@ namespace AgileConfig.Server.Service
         {
             using var dbcontext = FreeSqlDbContextFactory.Create(env);
             //这里计算所有的配置
-            var q = await dbcontext.Configs.Where(c => c.Status == ConfigStatus.Enabled).CountAsync();
+            var q = await dbcontext.Configs.Where(c => c.Status == ConfigStatus.Enabled && c.Env == env).CountAsync();
 
             return (int)q;
         }
@@ -745,9 +747,10 @@ namespace AgileConfig.Server.Service
             {
                 var envConfigs = await this.GetByAppIdAsync(appId, env);
                 var addRanges = new List<Config>();
+                var updateRanges = new List<Config>();
                 foreach (var currentEnvConfig in currentEnvConfigs)
                 {
-                    var envConfig = envConfigs.FirstOrDefault(x => x.Group == currentEnvConfig.Group && x.Key == currentEnvConfig.Key);          
+                    var envConfig = envConfigs.FirstOrDefault(x => GenerateKey(x) == GenerateKey(currentEnvConfig));          
                     if (envConfig == null)
                     {
                         //没有相同的配置，则添加
@@ -760,11 +763,30 @@ namespace AgileConfig.Server.Service
                         currentEnvConfig.OnlineStatus = OnlineStatus.WaitPublish;//全部设置为待发布状态
                         addRanges.Add(currentEnvConfig);
                     }
+                    else
+                    {
+                        // 如果有了相同的键，如果值不同，则更新
+                        if (envConfig.Value != currentEnvConfig.Value)
+                        {
+                            envConfig.UpdateTime = DateTime.Now;
+                            envConfig.Value = currentEnvConfig.Value;
+                            if (envConfig.EditStatus == EditStatus.Commit)
+                            {
+                                envConfig.EditStatus = EditStatus.Edit;
+                            }
+                            envConfig.OnlineStatus = OnlineStatus.WaitPublish;
+                            updateRanges.Add(envConfig);
+                        }
+                    }
                 }
 
                 if (addRanges.Count > 0)
                 {
                    await this.AddRangeAsync(addRanges, env);
+                }
+                if (updateRanges.Count > 0)
+                {
+                    await this.UpdateAsync(updateRanges, env);
                 }
             }
 
