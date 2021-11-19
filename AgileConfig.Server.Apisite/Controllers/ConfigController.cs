@@ -774,5 +774,40 @@ namespace AgileConfig.Server.Apisite.Controllers
                 success = true
             });
         }
+        
+        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.EvnSync", Functions.Config_Add })]
+        [HttpPost]
+        public async Task<IActionResult> SyncEnv([FromBody]List<string> toEnvs,[FromQuery]string appId, [FromQuery]string currentEnv)
+        {
+            if (toEnvs == null)
+            {
+                throw new ArgumentNullException("toEnvs");
+            }
+            if (string.IsNullOrEmpty(appId))
+            {
+                throw new ArgumentNullException("appId");
+            }
+            if (string.IsNullOrEmpty(currentEnv))
+            {
+                throw new ArgumentNullException("currentEnv");
+            }
+
+            var app = await _appService.GetAsync(appId);
+            if (app == null)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = $"应用（{appId}）不存在。"
+                });
+            }
+
+            var result = await _configService.EnvSync(appId, currentEnv, toEnvs);
+            
+            return Json(new
+            {
+                success = result
+            });
+        }
     }
 }

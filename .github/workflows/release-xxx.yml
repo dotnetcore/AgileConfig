@@ -1,11 +1,12 @@
-name: publish ci workflow
+name: v-xxx ci
 
 on:
   push:
-    branches: [ publish ]
     paths-ignore: 
       - '**/*.md'
       - '**/*.yml'
+    tags:        
+      - 'v-*'
     
 jobs:
   build-reactapp:
@@ -39,7 +40,7 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.301
+        dotnet-version: 6.0.100
     - name: Install dependencies
       run: dotnet restore
     - name: Build
@@ -48,10 +49,21 @@ jobs:
       with:
         name: agileconfig-ui
         path: AgileConfig.Server.Apisite/wwwroot/ui
-    - name: Push to Docker Hub
+    - name: build server release xxx
+      run: dotnet publish AgileConfig.Server.Apisite/AgileConfig.Server.Apisite.csproj -c Release
+    - uses: papeloto/action-zip@v1
+      with:
+        files: AgileConfig.Server.Apisite/bin/Release/net6.0/publish/
+        dest: agileconfig_server_deploy.zip
+    - name: create release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: agileconfig_server_deploy.zip
+        token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Push to Docker hub release -xxx
       uses: docker/build-push-action@v1
       with:
         username: ${{ secrets.DOCKER_HUB_NAME }}
         password: ${{ secrets.DOCKER_HUB_PASSWORD }}
         repository: kklldog/agile_config
-        tags: latest
+        tag_with_ref: true

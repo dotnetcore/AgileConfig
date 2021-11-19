@@ -17,5 +17,11 @@ namespace AgileConfig.Server.IService
         Task<bool> UpdateAsync(ServerNode node);
 
         Task<List<ServerNode>> GetAllNodesAsync();
+        
+        /// <summary>
+        /// 根据appsettings里的nodes配置初始化服务器节点
+        /// </summary>
+        /// <returns></returns>
+        Task<bool> InitWatchNodeAsync();
     }
 }

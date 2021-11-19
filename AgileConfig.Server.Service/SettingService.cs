@@ -143,7 +143,6 @@ namespace AgileConfig.Server.Service
 
         public async Task<string[]> GetEnvironmentList()
         {
-            await InitDefaultEnvironment();
             var env = await _dbContext.Settings.Where(x => x.Id == DefaultEnvironmentKey).FirstAsync();
 
             return env.Value.ToUpper().Split(',');
