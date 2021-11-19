@@ -11,6 +11,7 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - adminConsole=true
+      - nodes=agile_config_admin:5000,agile_config_node1:5000,agile_config_node2:5000
       - db:provider=mysql
       - db:conn= database=configcenter;data source=192.168.0.115;User Id=root;password=mdsd;port=3306
   agile_config_node1:
