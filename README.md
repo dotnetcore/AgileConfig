@@ -93,6 +93,56 @@ sudo docker run \
 3. db:conn 配置数据库连接串    
    
 > 注意：如果通过IIS或者别的方式部署，请自行从主页上的[releases](https://github.com/dotnetcore/AgileConfig/releases)页面下载最新的部署包。如果自己使用源码编译，请先编译react-ui-antd项目把dist内的产物复制到apisite项目的wwwroot/ui目录下。
+
+使用 docker-compose 运行
+```
+version: '3'
+services:
+  agile_config_admin:
+    image: "kklldog/agile_config"
+    ports:
+      - "15000:5000"
+    networks:
+      - net0
+    volumes:
+      - /etc/localtime:/etc/localtime
+    environment:
+      - TZ=Asia/Shanghai
+      - adminConsole=true
+      - nodes=agile_config_admin:5000,agile_config_node1:5000,agile_config_node2:5000
+      - db:provider=mysql
+      - db:conn= database=configcenter;data source=192.168.0.115;User Id=root;password=mdsd;port=3306
+  agile_config_node1:
+    image: "kklldog/agile_config"
+    ports:
+      - "15001:5000"
+    networks:
+      - net0
+    volumes:
+      - /etc/localtime:/etc/localtime
+    environment:
+      - TZ=Asia/Shanghai
+      - db:provider=mysql
+      - db:conn= database=configcenter;data source=192.168.0.115;User Id=root;password=mdsd;port=3306
+    depends_on:
+      - agile_config_admin
+  agile_config_node2:
+    image: "kklldog/agile_config"
+    ports:
+      - "15002:5000"
+    networks:
+      - net0
+    volumes:
+      - /etc/localtime:/etc/localtime
+    environment:
+      - TZ=Asia/Shanghai
+      - db:provider=mysql
+      - db:conn= database=configcenter;data source=192.168.0.115;User Id=root;password=mdsd;port=3306
+    depends_on:
+      - agile_config_admin
+networks:
+  net0:
+```
 ### 初始化管理员密码
 第一次运行程序需要初始化超级管理员密码，超管用户名固定为 admin    
 ![](https://ftp.bmp.ovh/imgs/2021/04/44242b327230c5e6.png)
