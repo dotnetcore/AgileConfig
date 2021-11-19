@@ -165,3 +165,21 @@ export async function envSync(appId: string, currentEnv:string, toEnvs:string[])
     data: toEnvs
   });
 }
+
+export async function getConfigsKvList(appId: string, env:string) {
+  return request('/config/getKvList?env=' + env, {
+    method: 'GET',
+    params:{
+      appId: appId
+    }
+  });
+}
+
+export async function getConfigJson(appId: string, env:string) {
+  return request('/config/getjson?env=' + env, {
+    method: 'GET',
+    params:{
+      appId: appId
+    }
+  });
+}

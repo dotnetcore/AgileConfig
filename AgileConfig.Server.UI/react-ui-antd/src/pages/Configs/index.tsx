@@ -18,6 +18,8 @@ import functionKeys from '@/models/functionKeys';
 import VersionHistory from './comps/versionHistory';
 import { getEnvList } from '@/utils/authority';
 import EnvSync from './comps/EnvSync';
+import JsonEditor from './comps/JosnEditor';
+import TextEditor from './comps/TextEditor';
 
 const { TextArea } = Input;
 const { confirm } = Modal;
@@ -186,6 +188,8 @@ const configs: React.FC = (props: any) => {
   const [modifyLogsModalVisible, setmodifyLogsModalVisible] = useState<boolean>(false);
   const [jsonImportFormModalVisible, setjsonImportFormModalVisible] = useState<boolean>(false);
   const [versionHistoryFormModalVisible, setVersionHistoryFormModalVisible] = useState<boolean>(false);
+  const [jsonEditorVisible, setJsonEditorVisible] = useState<boolean>(false);
+  const [textEditorVisible, setTextEditorVisible] = useState<boolean>(false);
   const [EnvSyncModalVisible, setEnvSyncModalVisible] = useState<boolean>(false);
   const [currentRow, setCurrentRow] = useState<ConfigListItem>();
   const [selectedRowsState, setSelectedRows] = useState<ConfigListItem[]>([]);
@@ -556,15 +560,13 @@ const configs: React.FC = (props: any) => {
         ,
           <AuthorizedEle key="1" judgeKey={functionKeys.Config_Publish} appId={appId}>
             <Button  onClick={()=>{ setVersionHistoryFormModalVisible(true) }}>
-              {
-                '历史版本'
-              }
+              历史
             </Button>
           </AuthorizedEle>
           ,
           <AuthorizedEle key="5" judgeKey={functionKeys.Config_Add} appId={appId} >
           <Button onClick={()=>{ setEnvSyncModalVisible(true) }}>
-            同步环境
+            同步
           </Button>
         </AuthorizedEle>
         ,
@@ -582,6 +584,18 @@ const configs: React.FC = (props: any) => {
             handleExportJson(appId, currentEnv)
           }}>
             导出
+          </Button>
+          ,
+          <Button key="5" onClick={()=>{
+            setJsonEditorVisible(true);
+          }}>
+            按 json 编辑
+          </Button>
+          ,
+          <Button key="6" onClick={()=>{
+            setTextEditorVisible(true);
+          }}>
+            按 text 编辑
           </Button>
         ]}
         rowSelection={{
@@ -767,6 +781,44 @@ const configs: React.FC = (props: any) => {
               addFormRef.current?.resetFields();
             }
           } />
+      }
+      {
+        jsonEditorVisible && 
+        <JsonEditor 
+        appId={appId}
+        appName={appName}
+        env={currentEnv}
+        ModalVisible={jsonEditorVisible}
+        onCancel={
+          () => {
+            setJsonEditorVisible(false)
+          }
+        }
+        onSaveSuccess={
+          async () => {
+          }
+        }
+        >
+        </JsonEditor>
+      }
+      {
+        textEditorVisible && 
+        <TextEditor 
+        appId={appId}
+        appName={appName}
+        env={currentEnv}
+        ModalVisible={textEditorVisible}
+        onCancel={
+          () => {
+            setTextEditorVisible(false)
+          }
+        }
+        onSaveSuccess={
+          async () => {
+          }
+        }
+        >
+        </TextEditor>
       }
 
       <Drawer title={intl.formatMessage({id:'pages.config.history.title'})} visible={modifyLogsModalVisible} width="400" onClose={() => { setmodifyLogsModalVisible(false); setModifyLogs([]); }} >

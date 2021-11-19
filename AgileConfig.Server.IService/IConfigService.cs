@@ -178,5 +178,13 @@ namespace AgileConfig.Server.IService
         /// <param name="toEnvs"></param>
         /// <returns></returns>
         Task<bool> EnvSync(string appId, string currentEnv, List<string> toEnvs);
+
+        /// <summary>
+        /// 获取配置的 键值对 列表
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <param name="env"></param>
+        /// <returns></returns>
+        Task<List<KeyValuePair<string, string>>> GetKvListAsync(string appId, string env);
     }
 }

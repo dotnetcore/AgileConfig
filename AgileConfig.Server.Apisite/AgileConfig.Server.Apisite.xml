@@ -378,6 +378,13 @@
             <param name="appId"></param>
             <returns></returns>
         </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.ConfigController.GetJson(System.String,System.String)">
+            <summary>
+            获取json格式的配置
+            </summary>
+            <param name="appId">应用id</param>
+            <returns></returns>
+        </member>
         <member name="T:AgileConfig.Server.Apisite.Controllers.RemoteOPController">
             <summary>
             这个Controller用来接受控制台节点发送过来的命令

@@ -114,12 +114,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var oldDict = new Dictionary<string, string>();
             configs.ForEach(item =>
             {
-                var newkey = item.Key;
-                if (!string.IsNullOrEmpty(item.Group))
-                {
-                    newkey = $"{item.Group}:{item.Key}";
-                }
-                oldDict.Add(newkey, item.Value);
+                oldDict.Add(_configService.GenerateKey(item), item.Value);
             });
 
             var addConfigs = new List<Config>();
@@ -807,6 +802,54 @@ namespace AgileConfig.Server.Apisite.Controllers
             return Json(new
             {
                 success = result
+            });
+        }
+        
+        public async Task<IActionResult> GetKvList(string appId, string env)
+        {
+            if (string.IsNullOrEmpty(appId))
+            {
+                throw new ArgumentNullException("appId");
+            }
+            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+
+            var result = await _configService.GetKvListAsync(appId, env);
+            result = result.OrderBy(x => x.Key).ToList();
+            return Json(new
+            {
+                success = true,
+                data = result
+            });
+        }
+        
+        /// <summary>
+        /// 获取json格式的配置
+        /// </summary>
+        /// <param name="appId">应用id</param>
+        /// <returns></returns>
+        public async Task<IActionResult> GetJson(string appId, string env)
+        {
+            if (string.IsNullOrEmpty(appId))
+            {
+                throw new ArgumentNullException("appId");
+            }
+            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+
+            var configs = await _configService.GetByAppIdAsync(appId, env);
+
+            var dict = new Dictionary<string, string>();
+            configs.ForEach(x =>
+            {
+                var key = _configService.GenerateKey(x);
+                dict.Add(key, x.Value);
+            });
+
+            var json = DictionaryConvertToJson.ToJson(dict);
+
+            return Json(new
+            {
+                success = true,
+                data = json
             });
         }
     }

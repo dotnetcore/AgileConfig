@@ -793,5 +793,16 @@ namespace AgileConfig.Server.Service
             return true;
         }
         
+        public async Task<List<KeyValuePair<string,string>>> GetKvListAsync(string appId, string env)
+        {
+            var configs = await GetByAppIdAsync(appId, env);
+            var kvList = new List<KeyValuePair<string,string>>();
+            foreach (var config in configs)
+            {
+                kvList.Add(new KeyValuePair<string,string>(GenerateKey(config), config.Value));
+            }
+            return kvList;
+        }
+
     }
 }
