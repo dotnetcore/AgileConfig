@@ -5,7 +5,7 @@
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
     <AssemblyVersion>1.5.3.1</AssemblyVersion>
     <Version>1.5.2</Version>
-    <PackageVersion>1.5.3.1</PackageVersion>
+    <PackageVersion>1.5.3.2</PackageVersion>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 

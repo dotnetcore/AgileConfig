@@ -33,7 +33,7 @@ namespace AgileConfig.Server.Service
             }
         }
 
-        private IServerNodeService GetGerverNodeService()
+        private IServerNodeService GetServerNodeService()
         {
             return new ServerNodeService(new FreeSqlContext(FreeSQL.Instance));
         }
@@ -222,7 +222,7 @@ namespace AgileConfig.Server.Service
 
         public async Task TestEchoAsync(string address)
         {
-            using var service = GetGerverNodeService();
+            using var service = GetServerNodeService();
             var node = await service.GetAsync(address);
             try
             {
@@ -251,7 +251,7 @@ namespace AgileConfig.Server.Service
             {
                 while (true)
                 {
-                    using var service = GetGerverNodeService();
+                    using var service = GetServerNodeService();
                     var nodes = await service.GetAllNodesAsync();
 
                     foreach (var node in nodes)
