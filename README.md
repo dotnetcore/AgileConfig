@@ -76,6 +76,7 @@ npgsql = PostgreSql
 oracle = Oracle   
 ## 使用服务端
 ### 运行服务端
+使用 docker 运行
 ``` shell
 sudo docker run \
 --name agile_config \
