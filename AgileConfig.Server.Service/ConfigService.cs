@@ -2,8 +2,10 @@
 using AgileConfig.Server.IService;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Text;
 using Microsoft.Extensions.Caching.Memory;
 using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.Common;
@@ -802,6 +804,122 @@ namespace AgileConfig.Server.Service
                 kvList.Add(new KeyValuePair<string,string>(GenerateKey(config), config.Value));
             }
             return kvList;
+        }
+        
+        public async Task<bool> SaveJsonAsync(string json, string appId, string env)
+        {
+            if (string.IsNullOrEmpty(json))
+            {
+                throw new ArgumentNullException("json");
+            }
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
+            byte[] byteArray = Encoding.UTF8.GetBytes( json );
+            using var stream = new MemoryStream( byteArray );
+            var dict = JsonConfigurationFileParser.Parse(stream);
+
+            var currentConfigs = await dbcontext.Configs.Where(x=>x.AppId == appId && x.Env == env && x.Status == ConfigStatus.Enabled).ToListAsync();
+            var addConfigs = new List<Config>();
+            var updateConfigs = new List<Config>();
+            var deleteConfigs = new List<Config>();
+            
+            foreach (var kv in dict)
+            {
+                var key = kv.Key;
+                var value = kv.Value;
+                var config = currentConfigs.FirstOrDefault(x => GenerateKey(x) == key);
+                if (config == null)
+                {
+                    var gk = SplitJsonKey(key);
+                    addConfigs.Add(new Config
+                    {
+                        Id = Guid.NewGuid().ToString("N"),
+                        AppId = appId,
+                        Env = env,
+                        Key = gk.Item2,
+                        Group = gk.Item1,
+                        Value = value,
+                        CreateTime = DateTime.Now,
+                        Status = ConfigStatus.Enabled,
+                        EditStatus = EditStatus.Add,
+                        OnlineStatus = OnlineStatus.WaitPublish
+                    });
+                }
+                else if (config.Value != kv.Value)
+                {
+                    config.Value = value;
+                    config.UpdateTime = DateTime.Now;
+                    if (config.OnlineStatus == OnlineStatus.Online)
+                    {
+                        config.EditStatus = EditStatus.Edit;
+                        config.OnlineStatus = OnlineStatus.WaitPublish;
+                    }
+                    else
+                    {
+                        if (config.EditStatus == EditStatus.Add)
+                        {
+                            //do nothing
+                        }
+                        if (config.EditStatus == EditStatus.Edit)
+                        {
+                            //do nothing
+                        }
+                        if (config.EditStatus == EditStatus.Deleted)
+                        {
+                            //上一次是删除状态，现在恢复为编辑状态
+                            config.EditStatus = EditStatus.Edit;
+                        }
+                    }
+                    
+                    updateConfigs.Add(config);
+                }
+            }
+
+            foreach (var item in currentConfigs)
+            {
+                var key = GenerateKey(item);
+                if (!dict.ContainsKey(key))
+                {
+                    item.EditStatus = EditStatus.Deleted;
+                    item.OnlineStatus = OnlineStatus.WaitPublish;
+                    deleteConfigs.Add(item);
+                }
+            }
+
+            if (addConfigs.Count > 0)
+            {
+                await dbcontext.Configs.AddRangeAsync(addConfigs);
+            }
+            if (updateConfigs.Count > 0)
+            {
+                await dbcontext.Configs.UpdateRangeAsync(updateConfigs);
+            }
+            if (deleteConfigs.Count > 0)
+            {
+                await dbcontext.Configs.UpdateRangeAsync(deleteConfigs);
+            }
+            var result = await dbcontext.SaveChangesAsync();
+
+            return result > 0;
+        }
+
+        private (string, string) SplitJsonKey(string key)
+        {
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+            
+            var index = key.LastIndexOf(':');
+            if (index >= 0)
+            {
+                var group = key.Substring(0, index);
+                var newkey = key.Substring(index + 1, key.Length - index -1);
+                
+                return (group, newkey);
+            }
+
+            return ("", key);
         }
 
     }

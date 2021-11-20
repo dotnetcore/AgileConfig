@@ -18,7 +18,7 @@ import functionKeys from '@/models/functionKeys';
 import VersionHistory from './comps/versionHistory';
 import { getEnvList } from '@/utils/authority';
 import EnvSync from './comps/EnvSync';
-import JsonEditor from './comps/JosnEditor';
+import JsonEditor from './comps/JsonEditor';
 import TextEditor from './comps/TextEditor';
 
 const { TextArea } = Input;
@@ -589,13 +589,13 @@ const configs: React.FC = (props: any) => {
           <Button key="5" onClick={()=>{
             setJsonEditorVisible(true);
           }}>
-            按 json 编辑
+            编辑 JSON
           </Button>
           ,
           <Button key="6" onClick={()=>{
             setTextEditorVisible(true);
           }}>
-            按 text 编辑
+            编辑 TEXT
           </Button>
         ]}
         rowSelection={{
@@ -796,6 +796,10 @@ const configs: React.FC = (props: any) => {
         }
         onSaveSuccess={
           async () => {
+            setJsonEditorVisible(false)
+            if (actionRef.current) {
+              actionRef.current.reload();
+            }
           }
         }
         >

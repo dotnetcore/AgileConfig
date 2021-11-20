@@ -2,6 +2,6 @@
 {
     public class SaveJsonVM
     {
-        
+        public string json { get; set; }
     }
 }

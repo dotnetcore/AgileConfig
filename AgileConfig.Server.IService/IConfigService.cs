@@ -186,5 +186,15 @@ namespace AgileConfig.Server.IService
         /// <param name="env"></param>
         /// <returns></returns>
         Task<List<KeyValuePair<string, string>>> GetKvListAsync(string appId, string env);
+        
+        /// <summary>
+        /// 把json字符串格式的配置转换为标准的config然后保存到数据库。
+        /// 跟原来的配置比较，标记出新增，删除，更新
+        /// </summary>
+        /// <param name="json"></param>
+        /// <param name="appId"></param>
+        /// <param name="env"></param>
+        /// <returns></returns>
+        Task<bool> SaveJsonAsync(string json, string appId, string env);
     }
 }

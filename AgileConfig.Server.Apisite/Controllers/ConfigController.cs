@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using AgileConfig.Server.Common;
 using System.Text;
 using System.Dynamic;
+using System.IO;
 using AgileConfig.Server.Apisite.Utilites;
 
 namespace AgileConfig.Server.Apisite.Controllers
@@ -596,7 +597,6 @@ namespace AgileConfig.Server.Apisite.Controllers
                 var dict = JsonConfigurationFileParser.Parse(stream);
 
                 var addConfigs = new List<Config>();
-                //judge if json key already in configs
                 foreach (var key in dict.Keys)
                 {
                     var newKey = key;
@@ -836,7 +836,8 @@ namespace AgileConfig.Server.Apisite.Controllers
             env = await _configService.IfEnvEmptySetDefaultAsync(env);
 
             var configs = await _configService.GetByAppIdAsync(appId, env);
-
+            // json 格式展示的时候不需要删除的配置
+            configs = configs.Where(x => x.EditStatus != EditStatus.Deleted).ToList();
             var dict = new Dictionary<string, string>();
             configs.ForEach(x =>
             {
@@ -852,5 +853,23 @@ namespace AgileConfig.Server.Apisite.Controllers
                 data = json
             });
         }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveJson([FromBody]SaveJsonVM data, string appId, string env)
+        {
+            if (string.IsNullOrEmpty(data.json))
+            {
+                throw new ArgumentNullException("json");
+            }
+
+            var result = await _configService.SaveJsonAsync(data.json, appId, env);
+            
+            return Json(new
+            {
+                success = result
+            });
+        }
+        
+
     }
 }

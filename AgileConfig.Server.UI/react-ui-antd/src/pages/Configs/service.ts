@@ -183,3 +183,15 @@ export async function getConfigJson(appId: string, env:string) {
     }
   });
 }
+
+export async function saveJson(appId: string, env:string, json:string) {
+  return request('/config/saveJson?env=' + env, {
+    method: 'POST',
+    params:{
+      appId: appId
+    },
+    data: {
+      json: json
+    }
+  });
+}

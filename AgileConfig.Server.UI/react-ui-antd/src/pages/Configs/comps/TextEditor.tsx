@@ -27,7 +27,7 @@ const TextEditor : React.FC<TextEditorProps> = (props)=>{
 
     return (
         <Modal 
-          title="按 text 视图编辑"
+          title="按 TEXT 视图编辑"
           okText="保存"
           width={1000} 
           visible={props.ModalVisible}
@@ -42,11 +42,12 @@ const TextEditor : React.FC<TextEditorProps> = (props)=>{
             }
           }
           >
-        <Editor
-              height="400px"
+         <Editor
+              height="600px"
               defaultLanguage="text"
               defaultValue=''
               value={kvText}
+              options= { {minimap: { enabled:false } }}
             />
         </Modal>
     );
