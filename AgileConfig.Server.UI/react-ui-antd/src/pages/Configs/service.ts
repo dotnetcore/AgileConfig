@@ -195,3 +195,13 @@ export async function saveJson(appId: string, env:string, json:string) {
     }
   });
 }
+
+export async function saveKvList(appId: string, env:string, kvs:{key:string;value:string}[]) {
+  return request('/config/saveKvList?env=' + env, {
+    method: 'POST',
+    params:{
+      appId: appId
+    },
+    data: kvs
+  });
+}

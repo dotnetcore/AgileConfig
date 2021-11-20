@@ -49,7 +49,7 @@ const JsonEditor : React.FC<JsonEditorProps> = (props)=>{
         <Modal 
           title="按 JSON 视图编辑"
           okText="保存"
-          width={1000} 
+          width={800} 
           visible={props.ModalVisible}
           onCancel={
             ()=>{
@@ -63,12 +63,14 @@ const JsonEditor : React.FC<JsonEditorProps> = (props)=>{
                 if (saveResult) {
                   props.onSaveSuccess();
                 }
+              }else{
+                message.error('json 文本不能为空。');
               }
             }
           }
           >
             <Editor
-              height="600px"
+              height="500px"
               defaultLanguage="json"
               defaultValue=''
               value={json}

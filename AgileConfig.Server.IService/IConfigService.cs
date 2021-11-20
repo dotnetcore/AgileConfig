@@ -196,5 +196,14 @@ namespace AgileConfig.Server.IService
         /// <param name="env"></param>
         /// <returns></returns>
         Task<bool> SaveJsonAsync(string json, string appId, string env);
+        
+        /// <summary>
+        /// 把键值对方式的配置列表保存到数据库
+        /// </summary>
+        /// <param name="kvList"></param>
+        /// <param name="appId"></param>
+        /// <param name="env"></param>
+        /// <returns></returns>
+        Task<bool> SaveKvListAsync(List<KeyValuePair<string,string>> kvList, string appId, string env);
     }
 }

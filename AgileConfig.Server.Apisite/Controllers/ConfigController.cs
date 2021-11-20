@@ -813,12 +813,19 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
             env = await _configService.IfEnvEmptySetDefaultAsync(env);
 
-            var result = await _configService.GetKvListAsync(appId, env);
-            result = result.OrderBy(x => x.Key).ToList();
+            var configs = await _configService.GetByAppIdAsync(appId, env);
+            // text 格式展示的时候不需要删除的配置
+            configs = configs.Where(x => x.EditStatus != EditStatus.Deleted).ToList();
+            var kvList = new List<KeyValuePair<string,string>>();
+            foreach (var config in configs)
+            {
+                kvList.Add(new KeyValuePair<string,string>(_configService.GenerateKey(config), config.Value));
+            }
+            kvList = kvList.OrderBy(x => x.Key).ToList();
             return Json(new
             {
                 success = true,
-                data = result
+                data = kvList
             });
         }
         
@@ -857,6 +864,10 @@ namespace AgileConfig.Server.Apisite.Controllers
         [HttpPost]
         public async Task<IActionResult> SaveJson([FromBody]SaveJsonVM data, string appId, string env)
         {
+            if (string.IsNullOrEmpty(appId))
+            {
+                throw new ArgumentNullException(nameof(appId));
+            }
             if (string.IsNullOrEmpty(data.json))
             {
                 throw new ArgumentNullException("json");
@@ -870,6 +881,35 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
         
+        [HttpPost]
+        public async Task<IActionResult> SaveKvList([FromBody]List<KeyValuePair<string,string>> data, string appId, string env)
+        {
+            if (string.IsNullOrEmpty(appId))
+            {
+                throw new ArgumentNullException(nameof(appId));
+            }
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+
+            var gCount = data.GroupBy(x => x.Key).Count();
+            if (data.Count > gCount)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "配置项不能重复。"
+                });
+            }
+            
+            var result = await _configService.SaveKvListAsync(data, appId, env);
+            
+            return Json(new
+            {
+                success = result
+            });
+        }
 
     }
 }

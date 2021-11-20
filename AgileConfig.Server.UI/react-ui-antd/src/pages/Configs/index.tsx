@@ -1,8 +1,8 @@
-import {  DeleteOutlined, PlusOutlined, RollbackOutlined, VerticalAlignTopOutlined } from '@ant-design/icons';
+import {  DeleteOutlined, DownOutlined, PlusOutlined, RollbackOutlined, VerticalAlignTopOutlined } from '@ant-design/icons';
 import { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns, TableDropdown } from '@ant-design/pro-table';
-import { Badge, Button, Drawer, FormInstance, Input, List, message, Modal, Radio, Space, Tag } from 'antd';
+import { Badge, Button, Drawer, Dropdown, FormInstance, Input, List, Menu, message, Modal, Radio, Space, Tag } from 'antd';
 import React, { useState, useRef, useEffect } from 'react';
 import UpdateForm from './comps/updateForm';
 import { ConfigListItem, PublishDetialConfig } from './data';
@@ -558,45 +558,38 @@ const configs: React.FC = (props: any) => {
           }
         </AuthorizedEle>
         ,
-          <AuthorizedEle key="1" judgeKey={functionKeys.Config_Publish} appId={appId}>
-            <Button  onClick={()=>{ setVersionHistoryFormModalVisible(true) }}>
-              历史
-            </Button>
-          </AuthorizedEle>
-          ,
-          <AuthorizedEle key="5" judgeKey={functionKeys.Config_Add} appId={appId} >
-          <Button onClick={()=>{ setEnvSyncModalVisible(true) }}>
-            同步
-          </Button>
-        </AuthorizedEle>
-        ,
-        <AuthorizedEle key="3" judgeKey={functionKeys.Config_Add} appId={appId}>
-          <Button onClick={()=>{ setjsonImportFormModalVisible(true) }}>
-            {
-              intl.formatMessage({
-                id: 'pages.configs.table.cols.action.importfromjosnfile'
-              })
-            }
-          </Button>
-        </AuthorizedEle>
-         ,
-          <Button key="4" onClick={()=>{
-            handleExportJson(appId, currentEnv)
-          }}>
-            导出
-          </Button>
-          ,
           <Button key="5" onClick={()=>{
             setJsonEditorVisible(true);
           }}>
             编辑 JSON
           </Button>
           ,
-          <Button key="6" onClick={()=>{
-            setTextEditorVisible(true);
-          }}>
-            编辑 TEXT
+          <Dropdown overlay={
+            <Menu >
+              <Menu.Item key="history" onClick={()=>{ setVersionHistoryFormModalVisible(true) }}>
+               历史版本
+              </Menu.Item>
+              <Menu.Item key="syncEnv" onClick={()=>{ setEnvSyncModalVisible(true) }}>
+                环境同步
+              </Menu.Item>
+              <Menu.Item key="import" onClick={()=>{ setjsonImportFormModalVisible(true) }}>
+                导入
+              </Menu.Item>
+              <Menu.Item key="export" onClick={()=>{handleExportJson(appId, currentEnv)}}>
+                导出
+              </Menu.Item>
+            </Menu>
+          }>
+          <Button>
+            更多 <DownOutlined />
           </Button>
+        </Dropdown>
+
+          // <Button key="6" onClick={()=>{
+          //   setTextEditorVisible(true);
+          // }}>
+          //   编辑 TEXT
+          // </Button>
         ]}
         rowSelection={{
           onChange: (_, selectedRows) => {
@@ -819,6 +812,10 @@ const configs: React.FC = (props: any) => {
         }
         onSaveSuccess={
           async () => {
+            setTextEditorVisible(false)
+            if (actionRef.current) {
+              actionRef.current.reload();
+            }
           }
         }
         >
