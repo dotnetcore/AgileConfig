@@ -13,10 +13,10 @@ import styles from './index.less';
 import JsonImport from './comps/JsonImport';
 import { useIntl } from 'react-intl';
 import { getIntl, getLocale } from '@/.umi/plugin-locale/localeExports';
-import AuthorizedEle from '@/components/Authorized/AuthorizedElement';
+import AuthorizedEle, { checkUserPermission } from '@/components/Authorized/AuthorizedElement';
 import functionKeys from '@/models/functionKeys';
 import VersionHistory from './comps/versionHistory';
-import { getEnvList } from '@/utils/authority';
+import { getEnvList, getFunctions } from '@/utils/authority';
 import EnvSync from './comps/EnvSync';
 import JsonEditor from './comps/JsonEditor';
 import TextEditor from './comps/TextEditor';
@@ -558,21 +558,23 @@ const configs: React.FC = (props: any) => {
           }
         </AuthorizedEle>
         ,
-          <Button key="5" onClick={()=>{
-            setJsonEditorVisible(true);
-          }}>
-            编辑 JSON
-          </Button>
+         <AuthorizedEle key="5" judgeKey={functionKeys.Config_Edit} appId={appId} >
+          <Button  onClick={()=>{
+              setJsonEditorVisible(true);
+            }}>
+              编辑 JSON
+            </Button>
+          </AuthorizedEle>
           ,
           <Dropdown overlay={
             <Menu >
-              <Menu.Item key="history" onClick={()=>{ setVersionHistoryFormModalVisible(true) }}>
+              <Menu.Item hidden={!checkUserPermission(getFunctions(),functionKeys.Config_Publish,appId)} key="history" onClick={()=>{ setVersionHistoryFormModalVisible(true) }}>
                历史版本
               </Menu.Item>
-              <Menu.Item key="syncEnv" onClick={()=>{ setEnvSyncModalVisible(true) }}>
+              <Menu.Item hidden={!checkUserPermission(getFunctions(),functionKeys.Config_Add,appId)} key="syncEnv" onClick={()=>{ setEnvSyncModalVisible(true) }}>
                 环境同步
               </Menu.Item>
-              <Menu.Item key="import" onClick={()=>{ setjsonImportFormModalVisible(true) }}>
+              <Menu.Item hidden={!checkUserPermission(getFunctions(),functionKeys.Config_Add,appId)} key="import" onClick={()=>{ setjsonImportFormModalVisible(true) }}>
                 导入
               </Menu.Item>
               <Menu.Item key="export" onClick={()=>{handleExportJson(appId, currentEnv)}}>
