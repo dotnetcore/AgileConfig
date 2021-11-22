@@ -81,24 +81,25 @@ namespace AgileConfig.Server.Common
                 }
                 else
                 {
-                    var newDict = new SortedDictionary<string, object>();
-                    foreach (var kv in dict)
+                    var keys = dict.Keys.Select(x => x).ToList();
+                    foreach (var key in keys)
                     {
-                        newDict[kv.Key] = RebuildDict(kv.Value);
+                        var val = dict[key];
+                        dict[key] = RebuildDict(val);
                     }
-                    return newDict;
+                    return dict;
                 }
             }
             
-            var array2 = dictOrArray as object[];
-            if (array2 != null)
+            var jsonArray = dictOrArray as object[];
+            if (jsonArray != null)
             {
-                for (int i = 0; i < array2.Length; i++)
+                for (int i = 0; i < jsonArray.Length; i++)
                 {
-                    array2[i] = RebuildDict(array2[i]);
+                    jsonArray[i] = RebuildDict(jsonArray[i]);
                 }
 
-                return array2;
+                return jsonArray;
             }
 
             return dictOrArray;
@@ -138,17 +139,15 @@ namespace AgileConfig.Server.Common
                 }
                 else
                 {
-                    var son = new Dictionary<string, object>();
+                    var son = new SortedDictionary<string, object>();
                     Generate(otherKeys, value, son);
                     parent.Add(sonKey, son);
                 }
-
             }
             else
             {
                 parent.Add(key, value);
             }
-
         }
     }
 }
