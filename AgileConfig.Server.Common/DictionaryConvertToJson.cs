@@ -10,7 +10,12 @@ namespace AgileConfig.Server.Common
     {
         public static string ToJson(IDictionary<string, string> dict)
         {
-            Dictionary<string, object> root = new Dictionary<string, object>();
+            if (dict.Count == 0)
+            {
+                return "{}";
+            }
+            
+            var root = new SortedDictionary<string, object>();
             foreach (var kv in dict)
             {
                 Generate(kv.Key, kv.Value, root);

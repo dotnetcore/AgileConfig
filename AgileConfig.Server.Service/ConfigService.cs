@@ -853,6 +853,8 @@ namespace AgileConfig.Server.Service
             var updateConfigs = new List<Config>();
             var deleteConfigs = new List<Config>();
 
+            var now = DateTime.Now;
+            
             foreach (var kv in dict)
             {
                 var key = kv.Key;
@@ -869,7 +871,7 @@ namespace AgileConfig.Server.Service
                         Key = gk.Item2,
                         Group = gk.Item1,
                         Value = value,
-                        CreateTime = DateTime.Now,
+                        CreateTime = now,
                         Status = ConfigStatus.Enabled,
                         EditStatus = EditStatus.Add,
                         OnlineStatus = OnlineStatus.WaitPublish
@@ -878,7 +880,7 @@ namespace AgileConfig.Server.Service
                 else if (config.Value != kv.Value)
                 {
                     config.Value = value;
-                    config.UpdateTime = DateTime.Now;
+                    config.UpdateTime = now;
                     if (config.OnlineStatus == OnlineStatus.Online)
                     {
                         config.EditStatus = EditStatus.Edit;
