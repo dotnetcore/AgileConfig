@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace AgileConfig.Server.Common
@@ -15,12 +16,85 @@ namespace AgileConfig.Server.Common
                 Generate(kv.Key, kv.Value, root);
             }
 
-            return DictToJsonString(root);
+            var newDict = RebuildDict(root);
+            
+            return JsonConvert.SerializeObject(newDict, Formatting.Indented);
         }
 
-        private static string DictToJsonString(Dictionary<string, object> dict)
+        /// <summary>
+        /// 判断字典是否符合json数组的格式
+        /// </summary>
+        /// <param name="dict"></param>
+        /// <returns></returns>
+        private static bool JudgeDictIsJsonArray(IDictionary<string, object> dict)
         {
-            return JsonConvert.SerializeObject(dict, Formatting.Indented);
+            //从0号index开始测试这个字典的key值是否存在
+            //如果全部存在那么就是数组
+            var keys = dict.Keys;
+            for (int i = 0; i < keys.Count; i++)
+            {
+                var key = i.ToString();
+                if (!dict.ContainsKey(key))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        
+        /// <summary>
+        /// 把字典转成Array
+        /// </summary>
+        /// <param name="dict"></param>
+        /// <returns></returns>
+        private static object[] ConvertDictToJsonArray(IDictionary<string, object> dict)
+        {
+            var keys = dict.Keys;
+            var array = new object[keys.Count()];
+            for (int i = 0; i < keys.Count(); i++)
+            {
+                var key = i.ToString();
+                array[i] = dict[key];
+            }
+
+            return array;
+        }
+
+        /// <summary>
+        /// 重构字典，如果有字典的值对应的是json的数组，那么就把这个数组转成Array
+        /// </summary>
+        /// <param name="dictOrArray"></param>
+        /// <returns></returns>
+        private static object RebuildDict(object dictOrArray)
+        {
+            var dict = dictOrArray as IDictionary<string,object>;
+            if (dict != null)
+            {
+                if (JudgeDictIsJsonArray(dict))
+                {
+                    object array = ConvertDictToJsonArray(dict);
+
+                    array = RebuildDict(array);
+                    
+                    return array;
+                }
+
+                return dict;
+            }
+            
+            var array2 = dictOrArray as object[];
+            if (array2 != null)
+            {
+                for (int i = 0; i < array2.Length; i++)
+                {
+                    array2[i] = RebuildDict(array2[i]);
+                }
+
+                return array2;
+            }
+
+            return dictOrArray;
         }
 
         /// <summary>
