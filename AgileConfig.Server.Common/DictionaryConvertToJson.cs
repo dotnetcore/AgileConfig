@@ -79,8 +79,15 @@ namespace AgileConfig.Server.Common
                     
                     return array;
                 }
-
-                return dict;
+                else
+                {
+                    var newDict = new SortedDictionary<string, object>();
+                    foreach (var kv in dict)
+                    {
+                        newDict[kv.Key] = RebuildDict(kv.Value);
+                    }
+                    return newDict;
+                }
             }
             
             var array2 = dictOrArray as object[];
@@ -103,7 +110,7 @@ namespace AgileConfig.Server.Common
         /// <param name="key"></param>
         /// <param name="value"></param>
         /// <param name="parent"></param>
-        private static void Generate(string key, string value, Dictionary<string, object> parent)
+        private static void Generate(string key, string value, IDictionary<string, object> parent)
         {
             if (string.IsNullOrWhiteSpace(key))
             {
@@ -123,7 +130,7 @@ namespace AgileConfig.Server.Common
                 if (parent.ContainsKey(sonKey))
                 {
                     //如果已经有子字典
-                    var son = parent[sonKey] as Dictionary<string, object>;
+                    var son = parent[sonKey] as IDictionary<string, object>;
                     if (son != null)
                     {
                         Generate(otherKeys, value, son);
