@@ -34,6 +34,7 @@ export type JsonEditorProps = {
 
 const JsonEditor : React.FC<JsonEditorProps> = (props)=>{
     const [json, setJson] = useState<string>();
+    const [jsonValidateSuccess, setJsonValidateSuccess] = useState<boolean>(true);
     useEffect(()=>{
       getConfigJson(props.appId, props.env).then(res=>{
         if (res.success) {
@@ -47,26 +48,40 @@ const JsonEditor : React.FC<JsonEditorProps> = (props)=>{
     },[])
     return (
         <Modal 
-          title="按 JSON 视图编辑"
+          title="按JSON视图编辑"
           okText="保存"
           width={800} 
           visible={props.ModalVisible}
           onCancel={
-            ()=>{
-              props.onCancel();
-            }
+            props.onCancel
           }
-          onOk={
-            async ()=> {
-              if(json) {
-                const saveResult = await handleSave(json, props.appId, props.env);
-                if (saveResult) {
-                  props.onSaveSuccess();
+          footer={
+            <div style={{display:'flex', justifyContent:'space-between'}}>
+              <div>
+                {
+                jsonValidateSuccess? <></> : <span style={{color:'red'}}>JSON 格式非法</span>
                 }
-              }else{
-                message.error('json 文本不能为空。');
-              }
-            }
+              </div>
+              <div>
+                <Button onClick={ 
+                  ()=>{
+                    props.onCancel();
+                  }
+                }>取消</Button>
+                <Button type="primary" onClick={
+                  async ()=> {
+                    if(json && jsonValidateSuccess) {
+                      const saveResult = await handleSave(json, props.appId, props.env);
+                      if (saveResult) {
+                        props.onSaveSuccess();
+                      }
+                    }else{
+                      message.error('JSON 格式非法');
+                    }
+                  }
+                }>保存</Button>
+              </div>
+            </div>
           }
           >
             <Editor
@@ -78,6 +93,11 @@ const JsonEditor : React.FC<JsonEditorProps> = (props)=>{
               onChange= { (v, e)=> {
                 setJson(v);
               }}
+              onValidate = {
+                (markers)=>{
+                  setJsonValidateSuccess(markers.length == 0);
+                }
+              }
             />
         </Modal>
     );
