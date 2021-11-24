@@ -26,9 +26,9 @@ namespace AgileConfig.Server.Apisite.Controllers
         private readonly IUserService _userService;
 
         public ConfigController(
-                                IConfigService configService,
-                                 IAppService appService,
-                                 IUserService userService)
+            IConfigService configService,
+            IAppService appService,
+            IUserService userService)
         {
             _configService = configService;
             _appService = appService;
@@ -37,7 +37,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
         [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Add", Functions.Config_Add })]
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] ConfigVM model, [FromQuery]string env)
+        public async Task<IActionResult> Add([FromBody] ConfigVM model, [FromQuery] string env)
         {
             if (model == null)
             {
@@ -59,7 +59,6 @@ namespace AgileConfig.Server.Apisite.Controllers
             var oldConfig = await _configService.GetByAppIdKeyEnv(model.AppId, model.Group, model.Key, env);
             if (oldConfig != null)
             {
-
                 return Json(new
                 {
                     success = false,
@@ -99,9 +98,10 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.AddRange", Functions.Config_Add })]
+        [TypeFilter(typeof(PremissionCheckAttribute),
+            Arguments = new object[] { "Config.AddRange", Functions.Config_Add })]
         [HttpPost]
-        public async Task<IActionResult> AddRange([FromBody] List<ConfigVM> model, [FromQuery]string env)
+        public async Task<IActionResult> AddRange([FromBody] List<ConfigVM> model, [FromQuery] string env)
         {
             if (model == null || model.Count == 0)
             {
@@ -113,10 +113,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var configs = await _configService.GetByAppIdAsync(model.First().AppId, env);
 
             var oldDict = new Dictionary<string, string>();
-            configs.ForEach(item =>
-            {
-                oldDict.Add(_configService.GenerateKey(item), item.Value);
-            });
+            configs.ForEach(item => { oldDict.Add(_configService.GenerateKey(item), item.Value); });
 
             var addConfigs = new List<Config>();
             //judge if json key already in configs
@@ -127,6 +124,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 {
                     newkey = $"{item.Group}:{item.Key}";
                 }
+
                 if (oldDict.ContainsKey(newkey))
                 {
                     return Json(new
@@ -174,9 +172,10 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Edit", Functions.Config_Edit })]
+        [TypeFilter(typeof(PremissionCheckAttribute),
+            Arguments = new object[] { "Config.Edit", Functions.Config_Edit })]
         [HttpPost]
-        public async Task<IActionResult> Edit([FromBody] ConfigVM model, [FromQuery]  string env)
+        public async Task<IActionResult> Edit([FromBody] ConfigVM model, [FromQuery] string env)
         {
             if (model == null)
             {
@@ -245,6 +244,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     //如果没有发布，说明是新增的，一直维持新增状态
                     config.EditStatus = EditStatus.Add;
                 }
+
                 config.OnlineStatus = OnlineStatus.WaitPublish;
             }
 
@@ -274,7 +274,8 @@ namespace AgileConfig.Server.Apisite.Controllers
         /// <returns></returns>
         private bool IsOnlyUpdateDescription(Config newConfig, Config oldConfig)
         {
-            return newConfig.Key == oldConfig.Key && newConfig.Group == oldConfig.Group && newConfig.Value == oldConfig.Value;
+            return newConfig.Key == oldConfig.Key && newConfig.Group == oldConfig.Group &&
+                   newConfig.Value == oldConfig.Value;
         }
 
         [HttpGet]
@@ -302,12 +303,14 @@ namespace AgileConfig.Server.Apisite.Controllers
         /// <param name="current">当前页</param>
         /// <returns></returns>
         [HttpGet]
-        public async Task<IActionResult> Search(string appId, string group, string key, OnlineStatus? onlineStatus, string sortField, string ascOrDesc,string env, int pageSize = 20, int current = 1)
+        public async Task<IActionResult> Search(string appId, string group, string key, OnlineStatus? onlineStatus,
+            string sortField, string ascOrDesc, string env, int pageSize = 20, int current = 1)
         {
             if (pageSize <= 0)
             {
                 throw new ArgumentException("pageSize can not less then 1 .");
             }
+
             if (current <= 0)
             {
                 throw new ArgumentException("pageIndex can not less then 1 .");
@@ -333,6 +336,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     configs = configs.OrderByDescending(x => x.CreateTime).ToList();
                 }
             }
+
             if (sortField == "group")
             {
                 if (ascOrDesc.StartsWith("asc"))
@@ -378,7 +382,8 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Delete", Functions.Config_Delete })]
+        [TypeFilter(typeof(PremissionCheckAttribute),
+            Arguments = new object[] { "Config.Delete", Functions.Config_Delete })]
         [HttpPost]
         public async Task<IActionResult> Delete(string id, string env)
         {
@@ -425,14 +430,16 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.DeleteSome", Functions.Config_Delete })]
+        [TypeFilter(typeof(PremissionCheckAttribute),
+            Arguments = new object[] { "Config.DeleteSome", Functions.Config_Delete })]
         [HttpPost]
-        public async Task<IActionResult> DeleteSome([FromBody]List<string> ids, string env)
+        public async Task<IActionResult> DeleteSome([FromBody] List<string> ids, string env)
         {
             if (ids == null)
             {
                 throw new ArgumentNullException("ids");
             }
+
             env = await _configService.IfEnvEmptySetDefaultAsync(env);
 
             List<Config> deleteConfigs = new List<Config>();
@@ -471,6 +478,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 param.env = env;
                 TinyEventBus.Instance.Fire(EventKeys.DELETE_CONFIG_SOME_SUCCESS, param);
             }
+
             return Json(new
             {
                 success = result,
@@ -479,7 +487,8 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
 
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Rollback", Functions.Config_Publish })]
+        [TypeFilter(typeof(PremissionCheckAttribute),
+            Arguments = new object[] { "Config.Rollback", Functions.Config_Publish })]
         [HttpPost]
         public async Task<IActionResult> Rollback(string publishTimelineId, string env)
         {
@@ -487,6 +496,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 throw new ArgumentNullException("publishTimelineId");
             }
+
             env = await _configService.IfEnvEmptySetDefaultAsync(env);
 
             var result = await _configService.RollbackAsync(publishTimelineId, env);
@@ -514,14 +524,16 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 throw new ArgumentNullException("configId");
             }
+
             env = await _configService.IfEnvEmptySetDefaultAsync(env);
 
             var configPublishedHistory = await _configService.GetConfigPublishedHistory(configId, env);
             var result = new List<object>();
 
-            foreach (var publishDetail in configPublishedHistory.OrderByDescending(x=>x.Version))
+            foreach (var publishDetail in configPublishedHistory.OrderByDescending(x => x.Version))
             {
-                var timelineNode = await _configService.GetPublishTimeLineNodeAsync(publishDetail.PublishTimelineId, env);
+                var timelineNode =
+                    await _configService.GetPublishTimeLineNodeAsync(publishDetail.PublishTimelineId, env);
                 result.Add(new
                 {
                     timelineNode,
@@ -533,25 +545,29 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 success = true,
                 data = result
-            }); ;
+            });
+            ;
         }
 
         /// <summary>
         /// 发布所有待发布的配置项
         /// </summary>
         /// <returns></returns>
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Publish", Functions.Config_Publish })]
+        [TypeFilter(typeof(PremissionCheckAttribute),
+            Arguments = new object[] { "Config.Publish", Functions.Config_Publish })]
         [HttpPost]
-        public async Task<IActionResult> Publish([FromBody]PublishLogVM model, string env)
+        public async Task<IActionResult> Publish([FromBody] PublishLogVM model, string env)
         {
             if (model == null)
             {
                 throw new ArgumentNullException("model");
             }
+
             if (string.IsNullOrEmpty(model.AppId))
             {
                 throw new ArgumentNullException("appId");
             }
+
             env = await _configService.IfEnvEmptySetDefaultAsync(env);
 
             var appId = model.AppId;
@@ -637,6 +653,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 throw new ArgumentNullException("appId");
             }
+
             env = await _configService.IfEnvEmptySetDefaultAsync(env);
 
             var configs = await _configService.GetByAppIdAsync(appId, env);
@@ -664,10 +681,12 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 throw new ArgumentNullException("appId");
             }
+
             env = await _configService.IfEnvEmptySetDefaultAsync(env);
 
             var configs = await _configService.Search(appId, "", "", env);
-            configs = configs.Where(x => x.Status == ConfigStatus.Enabled && x.EditStatus != EditStatus.Commit).ToList();
+            configs = configs.Where(x => x.Status == ConfigStatus.Enabled && x.EditStatus != EditStatus.Commit)
+                .ToList();
 
             var addCount = configs.Count(x => x.EditStatus == EditStatus.Add);
             var editCount = configs.Count(x => x.EditStatus == EditStatus.Edit);
@@ -676,7 +695,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             return Json(new
             {
                 success = true,
-                data = new 
+                data = new
                 {
                     addCount,
                     editCount,
@@ -696,18 +715,20 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 throw new ArgumentNullException("appId");
             }
+
             env = await _configService.IfEnvEmptySetDefaultAsync(env);
 
             var history = await _configService.GetPublishDetailListAsync(appId, env);
 
             var result = new List<object>();
-            foreach (var publishDetails in history.GroupBy(x => x.Version).OrderByDescending( g=>g.Key))
+            foreach (var publishDetails in history.GroupBy(x => x.Version).OrderByDescending(g => g.Key))
             {
                 var data = publishDetails.ToList();
                 result.Add(new
                 {
                     key = publishDetails.Key,
-                    timelineNode = await _configService.GetPublishTimeLineNodeAsync(data.FirstOrDefault()?.PublishTimelineId, env),
+                    timelineNode =
+                        await _configService.GetPublishTimeLineNodeAsync(data.FirstOrDefault()?.PublishTimelineId, env),
                     list = data
                 });
             }
@@ -725,9 +746,10 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 throw new ArgumentNullException("configId");
             }
+
             env = await _configService.IfEnvEmptySetDefaultAsync(env);
 
-            var result = await _configService.CancelEdit(new List<string>() {configId}, env);
+            var result = await _configService.CancelEdit(new List<string>() { configId }, env);
 
             if (result)
             {
@@ -744,12 +766,13 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
-        public async Task<IActionResult> CancelSomeEdit([FromBody]List<string> ids, string env)
+        public async Task<IActionResult> CancelSomeEdit([FromBody] List<string> ids, string env)
         {
             if (ids == null)
             {
                 throw new ArgumentNullException("ids");
             }
+
             env = await _configService.IfEnvEmptySetDefaultAsync(env);
 
             var result = await _configService.CancelEdit(ids, env);
@@ -769,19 +792,23 @@ namespace AgileConfig.Server.Apisite.Controllers
                 success = true
             });
         }
-        
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.EvnSync", Functions.Config_Add })]
+
+        [TypeFilter(typeof(PremissionCheckAttribute),
+            Arguments = new object[] { "Config.EvnSync", Functions.Config_Add })]
         [HttpPost]
-        public async Task<IActionResult> SyncEnv([FromBody]List<string> toEnvs,[FromQuery]string appId, [FromQuery]string currentEnv)
+        public async Task<IActionResult> SyncEnv([FromBody] List<string> toEnvs, [FromQuery] string appId,
+            [FromQuery] string currentEnv)
         {
             if (toEnvs == null)
             {
                 throw new ArgumentNullException("toEnvs");
             }
+
             if (string.IsNullOrEmpty(appId))
             {
                 throw new ArgumentNullException("appId");
             }
+
             if (string.IsNullOrEmpty(currentEnv))
             {
                 throw new ArgumentNullException("currentEnv");
@@ -798,29 +825,31 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var result = await _configService.EnvSync(appId, currentEnv, toEnvs);
-            
+
             return Json(new
             {
                 success = result
             });
         }
-        
+
         public async Task<IActionResult> GetKvList(string appId, string env)
         {
             if (string.IsNullOrEmpty(appId))
             {
                 throw new ArgumentNullException("appId");
             }
+
             env = await _configService.IfEnvEmptySetDefaultAsync(env);
 
             var configs = await _configService.GetByAppIdAsync(appId, env);
             // text 格式展示的时候不需要删除的配置
             configs = configs.Where(x => x.EditStatus != EditStatus.Deleted).ToList();
-            var kvList = new List<KeyValuePair<string,string>>();
+            var kvList = new List<KeyValuePair<string, string>>();
             foreach (var config in configs)
             {
-                kvList.Add(new KeyValuePair<string,string>(_configService.GenerateKey(config), config.Value));
+                kvList.Add(new KeyValuePair<string, string>(_configService.GenerateKey(config), config.Value));
             }
+
             kvList = kvList.OrderBy(x => x.Key).ToList();
             return Json(new
             {
@@ -828,7 +857,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 data = kvList
             });
         }
-        
+
         /// <summary>
         /// 获取json格式的配置
         /// </summary>
@@ -840,6 +869,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 throw new ArgumentNullException("appId");
             }
+
             env = await _configService.IfEnvEmptySetDefaultAsync(env);
 
             var configs = await _configService.GetByAppIdAsync(appId, env);
@@ -862,54 +892,60 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SaveJson([FromBody]SaveJsonVM data, string appId, string env)
+        public async Task<IActionResult> SaveJson([FromBody] SaveJsonVM data, string appId, string env)
         {
             if (string.IsNullOrEmpty(appId))
             {
                 throw new ArgumentNullException(nameof(appId));
-            }
-            if (string.IsNullOrEmpty(data.json))
-            {
-                throw new ArgumentNullException("json");
             }
 
-            var result = await _configService.SaveJsonAsync(data.json, appId, env);
-            
-            return Json(new
-            {
-                success = result
-            });
-        }
-        
-        [HttpPost]
-        public async Task<IActionResult> SaveKvList([FromBody]List<KeyValuePair<string,string>> data, string appId, string env)
-        {
-            if (string.IsNullOrEmpty(appId))
-            {
-                throw new ArgumentNullException(nameof(appId));
-            }
             if (data == null)
             {
                 throw new ArgumentNullException(nameof(data));
             }
 
-            var gCount = data.GroupBy(x => x.Key).Count();
-            if (data.Count > gCount)
+            if (string.IsNullOrEmpty(data.json))
             {
-                return Json(new
-                {
-                    success = false,
-                    message = "配置项不能重复。"
-                });
+                throw new ArgumentNullException("data.json");
             }
-            
-            var result = await _configService.SaveKvListAsync(data, appId, env);
-            
+
+            var result = await _configService.SaveJsonAsync(data.json, appId, env);
+
             return Json(new
             {
                 success = result
             });
         }
 
+        [HttpPost]
+        public async Task<IActionResult> SaveKvList([FromBody] SaveKVListVM data, string appId, string env)
+        {
+            if (string.IsNullOrEmpty(appId))
+            {
+                throw new ArgumentNullException(nameof(appId));
+            }
+
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+
+            var validateResult = _configService.ValidateKvString(data.str);
+            if (!validateResult.Item1)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = validateResult.Item2
+                });
+            }
+
+            var result = await _configService.SaveKvListAsync(data.str, appId, env);
+
+            return Json(new
+            {
+                success = result
+            });
+        }
     }
 }

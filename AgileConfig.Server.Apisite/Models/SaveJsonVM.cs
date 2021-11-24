@@ -4,4 +4,9 @@
     {
         public string json { get; set; }
     }
+    
+    public class SaveKVListVM
+    {
+        public string str { get; set; }
+    }
 }

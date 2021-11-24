@@ -200,10 +200,17 @@ namespace AgileConfig.Server.IService
         /// <summary>
         /// 把键值对方式的配置列表保存到数据库
         /// </summary>
-        /// <param name="kvList"></param>
+        /// <param name="kvString"></param>
         /// <param name="appId"></param>
         /// <param name="env"></param>
         /// <returns></returns>
-        Task<bool> SaveKvListAsync(List<KeyValuePair<string,string>> kvList, string appId, string env);
+        Task<bool> SaveKvListAsync(string kvString, string appId, string env);
+
+        /// <summary>
+        /// 校验键值对的文本是否合法
+        /// </summary>
+        /// <param name="kvStr"></param>
+        /// <returns></returns>
+        (bool, string) ValidateKvString(string kvStr);
     }
 }

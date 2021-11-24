@@ -48,7 +48,7 @@ const JsonEditor : React.FC<JsonEditorProps> = (props)=>{
     },[])
     return (
         <Modal 
-          title="按JSON视图编辑"
+          title="按 JSON 视图编辑"
           okText="保存"
           width={800} 
           visible={props.ModalVisible}

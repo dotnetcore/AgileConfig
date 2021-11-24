@@ -566,6 +566,14 @@ const configs: React.FC = (props: any) => {
             </Button>
           </AuthorizedEle>
           ,
+         <AuthorizedEle key="6" judgeKey={functionKeys.Config_Edit} appId={appId} >
+          <Button  onClick={()=>{
+              setTextEditorVisible(true);
+            }}>
+              编辑 TEXT
+            </Button>
+          </AuthorizedEle>
+          ,
           <Dropdown overlay={
             <Menu >
               <Menu.Item hidden={!checkUserPermission(getFunctions(),functionKeys.Config_Publish,appId)} key="history" onClick={()=>{ setVersionHistoryFormModalVisible(true) }}>

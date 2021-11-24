@@ -962,17 +962,62 @@ namespace AgileConfig.Server.Service
             return await SaveFromDictAsync(dict, appId, env);
         }
 
-        public async Task<bool> SaveKvListAsync(List<KeyValuePair<string, string>> kvList, string appId, string env)
+        public (bool, string) ValidateKvString(string kvStr)
         {
-            if (kvList == null)
+            StringReader sr = new StringReader(kvStr);
+            int row = 0;
+            var dict = new Dictionary<string, string>();
+            while (true)
             {
-                throw new ArgumentNullException(nameof(kvList));
+                var line = sr.ReadLine();
+                if (line == null)
+                {
+                    break;
+                }
+                row++;
+                //必须要有=号
+                if (line.IndexOf('=') < 0)
+                {
+                    return (false, $"第 {row} 行缺少等号。");
+                }
+                var index = line.IndexOf('=');
+                var key = line.Substring(0, index);
+                if (dict.ContainsKey(key))
+                {
+                    return (false, $"键 {key} 重复。");
+                }
+                dict.Add(key, "");
             }
 
-            var dict = new Dictionary<string, string>() { };
-            foreach (var kv in kvList)
+            return (true, "");
+        }
+        
+        public async Task<bool> SaveKvListAsync(string kvString, string appId, string env)
+        {
+            if (kvString == null)
             {
-                dict.Add(kv.Key, kv.Value);
+                throw new ArgumentNullException(nameof(kvString));
+            }
+            
+            StringReader sr = new StringReader(kvString);
+            var dict = new Dictionary<string, string>();
+            while (true)
+            {
+                var line = sr.ReadLine();
+                if (line == null)
+                {
+                    break;
+                }
+                var index = line.IndexOf('=');
+                if (index < 0)
+                {
+                    continue;
+                }
+
+                var key = line.Substring(0, index);
+                var val = line.Substring(index + 1, line.Length - index - 1);
+                
+                dict.Add(key, val);
             }
 
             return await SaveFromDictAsync(dict, appId, env);

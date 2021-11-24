@@ -11,30 +11,16 @@ export type TextEditorProps = {
     onCancel: () => void;
     onSaveSuccess: ()=> void;
   };
-  const handleSave = async (kvText: string, appId:string, env:string) => {
+  const handleSave = async (kvText: string|undefined, appId:string, env:string) => {
     const hide = message.loading('正在保存...');
     try {
-
-      const lines = kvText.split('\r\n');
-      const kvs = [];
-      for (const line of lines) {
-        const arr = line.split('=');
-        if (arr.length < 2) {
-          continue;
-        }
-        kvs.push({
-          key : arr[0],
-          value : arr[1]
-        });
-      }
-
-      const result = await saveKvList(appId, env, kvs);
+      const result = await saveKvList(appId, env, kvText?kvText:"");
       hide();
       const success = result.success;
       if (success) {
         message.success('保存成功！');
       } else {
-        message.error('保存失败！');
+        message.error(result.message? result.message: '保存失败！');
       }
       return success;
     } catch (error) {
@@ -67,17 +53,30 @@ const TextEditor : React.FC<TextEditorProps> = (props)=>{
               props.onCancel();
             }
           }
-          onOk={
-            async ()=> {
-              if(kvText) {
-                const saveResult = await handleSave(kvText, props.appId, props.env);
-                if (saveResult) {
-                  props.onSaveSuccess();
-                }
-              }else{
-                message.error('键值对文本不能为空。');
-              }
-            }
+          footer={
+            <div style={{display:'flex', justifyContent:'space-between'}}>
+              <div style={{
+                color:'#999',
+                fontSize:'12px',
+              }}>
+                严格按照 KEY=VALUE 格式编辑，每行一个配置
+              </div>
+              <div>
+              <Button onClick={ 
+                  ()=>{
+                    props.onCancel();
+                  }
+                }>取消</Button>
+                <Button type="primary" onClick={
+                  async ()=> {
+                    const saveResult = await handleSave(kvText, props.appId, props.env);
+                    if (saveResult) {
+                      props.onSaveSuccess();
+                    }
+                  }
+                }>保存</Button>
+              </div>
+            </div>
           }
           >
          <Editor
