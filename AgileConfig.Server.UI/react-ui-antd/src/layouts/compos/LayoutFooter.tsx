@@ -1,4 +1,4 @@
-import { getAppVer } from "@/utils/authority";
+import { getAppVer } from "@/utils/system";
 import { GithubOutlined } from "@ant-design/icons"
 import React from "react"
 

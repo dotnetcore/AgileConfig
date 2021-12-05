@@ -1,8 +1,9 @@
 import type { Effect, Reducer } from 'umi';
 
 import { current, query as queryUsers } from '@/services/user';
-import { setAuthority, setFunctions, setSysInfo, setUserInfo } from '@/utils/authority';
+import { setAuthority, setFunctions, setUserInfo } from '@/utils/authority';
 import { sys } from '@/services/system';
+import { setSysInfo } from '@/utils/system';
 
 export type CurrentUser = {
   avatar?: string;

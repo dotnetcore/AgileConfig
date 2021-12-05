@@ -1,4 +1,4 @@
-import { getEnvList } from "@/utils/authority";
+import { getEnvList } from "@/utils/system";
 import { Button, message, Modal, Space, Table, Upload, Checkbox } from "antd";
 import { CheckboxValueType } from "antd/lib/checkbox/Group";
 import React, { useState } from 'react';
