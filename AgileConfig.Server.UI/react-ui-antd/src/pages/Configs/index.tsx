@@ -16,10 +16,12 @@ import { getIntl, getLocale } from '@/.umi/plugin-locale/localeExports';
 import AuthorizedEle, { checkUserPermission } from '@/components/Authorized/AuthorizedElement';
 import functionKeys from '@/models/functionKeys';
 import VersionHistory from './comps/versionHistory';
-import { getEnvList, getFunctions } from '@/utils/authority';
+import { getFunctions } from '@/utils/authority';
 import EnvSync from './comps/EnvSync';
 import JsonEditor from './comps/JsonEditor';
 import TextEditor from './comps/TextEditor';
+import { getEnvList } from '@/utils/system';
+import { saveVisitApp } from '@/utils/latestVisitApps';
 
 const { TextArea } = Input;
 const { confirm } = Modal;
@@ -183,6 +185,9 @@ const handleExportJson = async (appId: string, env:string) => {
 const configs: React.FC = (props: any) => {
   const appId = props.match.params.app_id;
   const appName = props.match.params.app_name;
+  useEffect(()=>{
+    saveVisitApp(appId,appName);
+  },[]);
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [updateModalVisible, setUpdateModalVisible] = useState<boolean>(false);
   const [modifyLogsModalVisible, setmodifyLogsModalVisible] = useState<boolean>(false);

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { queryAppcount, queryConfigcount } from "../service";
 import ItemInfo from "./itemInfo";
 import styles from '../index.less';
+import { Col, Row } from "antd";
 
 export type summaryProps = {
     clientCount?: number,
@@ -23,12 +24,20 @@ export type summaryProps = {
   
     return (
       <div className={styles.panel}>
-        <div className={styles.summary}>
+   <Row gutter={16} className={styles.summary}>
+          <Col  span={6}>
         <ItemInfo count={props.nodeOnCount + '/' + props.nodeCount} type="node" link="/node" icon={<DatabaseOutlined ></DatabaseOutlined>}></ItemInfo>
+          </Col>
+          <Col span={6}>
         <ItemInfo count={appCount + ''} type="app" link="/app" icon={<AppstoreOutlined ></AppstoreOutlined>}></ItemInfo>
+          </Col>
+          <Col span={6}>
         <ItemInfo count={configCount + ''} type="config" link="/app" icon={<TableOutlined ></TableOutlined>}></ItemInfo>
+          </Col>
+          <Col span={6}>
         <ItemInfo count={props.clientCount + ''} type="client" link="/client" icon={<ShrinkOutlined ></ShrinkOutlined>}></ItemInfo>
-        </div>
+          </Col>
+      </Row>
       </div>
     );
   }

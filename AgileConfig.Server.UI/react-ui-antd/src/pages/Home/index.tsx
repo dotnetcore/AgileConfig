@@ -7,6 +7,8 @@ import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { NodeItem } from './../Nodes/data';
 import { message, Modal } from 'antd';
 import { getIntl, getLocale } from 'umi';
+import { getVisitApps } from '@/utils/latestVisitApps';
+import LatestVisitApps from './comps/latestVisitApps';
 const { confirm } = Modal;
 
 const handleAdd = async (fields: NodeItem) => {
@@ -106,7 +108,7 @@ const home: React.FC = () => {
   return (
     <PageContainer pageHeaderRender={false}>
       <Summary clientCount={serverNodeStatus.clientCount} nodeCount={serverNodeStatus.nodeCount} nodeOnCount={serverNodeStatus.nodeOnCount}></Summary>
-      {/* { serverNodeStatus.nodeStatiInfo?.chartCategorys.length>1&&<NodeStatiCharts  nodeStatiInfo= { serverNodeStatus.nodeStatiInfo }></NodeStatiCharts>} */}
+      <LatestVisitApps/>
     </PageContainer>
   );
 }
