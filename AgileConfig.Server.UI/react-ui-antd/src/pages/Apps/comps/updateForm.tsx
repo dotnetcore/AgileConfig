@@ -1,9 +1,11 @@
 import { useIntl } from "@/.umi/plugin-locale/localeExports";
 import {  ModalForm, ProFormDependency, ProFormSelect, ProFormSwitch, ProFormText } from "@ant-design/pro-form";
-import React from 'react';
+import React, { useState } from 'react';
 import { AppListItem } from "../data";
 import { inheritancedApps } from "../service";
 import { adminUsers } from '@/pages/User/service';
+import { Divider, Input } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
 
 export type UpdateFormProps = {
     onSubmit: (values: AppListItem) => Promise<void>;
@@ -14,7 +16,8 @@ export type UpdateFormProps = {
   };
 const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
     const intl = useIntl();
-
+    const [appGroups, setAppGroups] = useState<{label:string, value:string}[]>([{label:'1', value:'1'}]);
+    const [newAppGroupName, setNewAppGroupName] = useState<string>('');
     return (
     <ModalForm 
     title={
@@ -71,6 +74,37 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
       }
       name="secret"
     />
+          <ProFormSelect
+                placeholder="应用所属的组，方便分类"
+                  label="应用组"
+                  name="group"
+                  options={appGroups}
+                  fieldProps={{
+                    dropdownRender: (menu) => (
+                      <div>
+                      {menu}
+                      <Divider style={{ margin: '4px 0' }} />
+                        <div style={{ display: 'flex', flexWrap: 'nowrap', padding: 8 }}>
+                          <Input placeholder="输入组名" style={{ flex: 'auto' }} value={newAppGroupName} onChange={(e)=>{ setNewAppGroupName(e.target.value) }} />
+                          <a
+                            style={{ flex: 'none', padding: '8px', display: 'block', cursor: 'pointer' }}
+                            onClick={()=>{
+                              if(newAppGroupName){
+                                setAppGroups([...appGroups, {
+                                  label: newAppGroupName,
+                                  value: newAppGroupName
+                                }]);
+                                setNewAppGroupName('');
+                              }
+                            }}
+                          >
+                            <PlusOutlined /> 
+                          </a>
+                        </div>
+                      </div>
+                    )
+                  }}
+        ></ProFormSelect>
     <ProFormSwitch 
       tooltip="公共应用可以被其他应用关联"
       label={

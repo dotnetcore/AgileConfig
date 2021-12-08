@@ -29,7 +29,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             _premissionService = premissionService;
         }
 
-        public async Task<IActionResult> Search(string name, string id, string sortField, string ascOrDesc, int current = 1, int pageSize = 20)
+        public async Task<IActionResult> Search(string name, string id, string group, string sortField, string ascOrDesc, int current = 1, int pageSize = 20)
         {
             if (current < 1)
             {
@@ -40,53 +40,68 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentException("pageSize cant less then 1 .");
             }
 
-            var all = await _appService.GetAllAppsAsync();
+            var query = await _appService.GetAllAppsAsync();
             if (!string.IsNullOrWhiteSpace(name))
             {
-                all = all.Where(x => x.Name.Contains(name)).ToList();
+                query = query.Where(x => x.Name.Contains(name)).ToList();
             }
             if (!string.IsNullOrWhiteSpace(id))
             {
-                all = all.Where(x => x.Id.Contains(id)).ToList();
+                query = query.Where(x => x.Id.Contains(id)).ToList();
             }
-
-            var count = all.Count;
+            if (!string.IsNullOrWhiteSpace(group))
+            {
+                query = query.Where(x => x.Group.Contains(group)).ToList();
+            }
+            
+            var count = query.Count;
 
             if (sortField == "createTime")
             {
                 if (ascOrDesc.StartsWith("asc"))
                 {
-                    all = all.OrderBy(x => x.CreateTime).ToList();
+                    query = query.OrderBy(x => x.CreateTime).ToList();
                 }
                 else
                 {
-                    all = all.OrderByDescending(x => x.CreateTime).ToList();
+                    query = query.OrderByDescending(x => x.CreateTime).ToList();
                 }
             }
             if (sortField == "id")
             {
                 if (ascOrDesc.StartsWith("asc"))
                 {
-                    all = all.OrderBy(x => x.Id).ToList();
+                    query = query.OrderBy(x => x.Id).ToList();
                 }
                 else
                 {
-                    all = all.OrderByDescending(x => x.Id).ToList();
+                    query = query.OrderByDescending(x => x.Id).ToList();
                 }
             }
             if (sortField == "name")
             {
                 if (ascOrDesc.StartsWith("asc"))
                 {
-                    all = all.OrderBy(x => x.Name).ToList();
+                    query = query.OrderBy(x => x.Name).ToList();
                 }
                 else
                 {
-                    all = all.OrderByDescending(x => x.Name).ToList();
+                    query = query.OrderByDescending(x => x.Name).ToList();
                 }
             }
-
-            var pageList = all.ToList().Skip((current - 1) * pageSize).Take(pageSize);
+            if (sortField == "group")
+            {
+                if (ascOrDesc.StartsWith("asc"))
+                {
+                    query = query.OrderBy(x => x.Group).ToList();
+                }
+                else
+                {
+                    query = query.OrderByDescending(x => x.Group).ToList();
+                }
+            }
+            
+            var pageList = query.ToList().Skip((current - 1) * pageSize).Take(pageSize);
             var vms = new List<AppListVM>();
             foreach (var item in pageList)
             {
@@ -95,6 +110,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 {
                     Id = item.Id,
                     Name = item.Name,
+                    Group = item.Group,
                     Secret = item.Secret,
                     Inheritanced = item.Type == AppType.Inheritance,
                     Enabled = item.Enabled,
@@ -150,6 +166,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             app.UpdateTime = null;
             app.Type = model.Inheritanced ? AppType.Inheritance : AppType.PRIVATE;
             app.AppAdmin = model.AppAdmin;
+            app.Group = model.Group;
 
             var inheritanceApps = new List<AppInheritanced>();
             if (!model.Inheritanced && model.inheritancedApps != null)
@@ -218,7 +235,8 @@ namespace AgileConfig.Server.Apisite.Controllers
             app.UpdateTime = DateTime.Now;
             app.Type = model.Inheritanced ? AppType.Inheritance : AppType.PRIVATE;
             app.AppAdmin = model.AppAdmin;
-
+            app.Group = model.Group;
+            
             var inheritanceApps = new List<AppInheritanced>();
             if (!model.Inheritanced && model.inheritancedApps != null)
             {

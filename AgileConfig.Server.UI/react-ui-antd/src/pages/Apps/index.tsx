@@ -2,7 +2,7 @@ import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { ModalForm,  ProFormDependency, ProFormSelect, ProFormSwitch, ProFormText } from '@ant-design/pro-form';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
-import { Button, FormInstance, message, Modal, Space, Switch, Tag } from 'antd';
+import { Button, Divider, FormInstance, Input, message, Modal, Space, Switch, Tag } from 'antd';
 import React, { useState, useRef } from 'react';
 import { getIntl, getLocale, Link, useIntl} from 'umi';
 import UpdateForm from './comps/updateForm';
@@ -142,6 +142,8 @@ const appList: React.FC = (props) => {
   const [userAuthModalVisible, setUserAuthModalVisible] = useState<boolean>(false);
   const [currentRow, setCurrentRow] = useState<AppListItem>();
   const [dataSource, setDataSource] = useState<AppListResult>();
+  const [appGroups, setAppGroups] = useState<{label:string, value:string}[]>([{label:'1', value:'1'}]);
+  const [newAppGroupName, setNewAppGroupName] = useState<string>('');
 
   const handleQuery = async (params: AppListParams) => {
     const result = await queryApps(params);
@@ -446,6 +448,37 @@ const appList: React.FC = (props) => {
           }
           name="secret"
         />
+        <ProFormSelect
+                placeholder="应用所属的组，方便分类"
+                  label="应用组"
+                  name="group"
+                  options={appGroups}
+                  fieldProps={{
+                    dropdownRender: (menu) => (
+                      <div>
+                      {menu}
+                      <Divider style={{ margin: '4px 0' }} />
+                        <div style={{ display: 'flex', flexWrap: 'nowrap', padding: 8 }}>
+                          <Input placeholder="输入组名" style={{ flex: 'auto' }} value={newAppGroupName} onChange={(e)=>{ setNewAppGroupName(e.target.value) }} />
+                          <a
+                            style={{ flex: 'none', padding: '8px', display: 'block', cursor: 'pointer' }}
+                            onClick={()=>{
+                              if(newAppGroupName){
+                                setAppGroups([...appGroups, {
+                                  label: newAppGroupName,
+                                  value: newAppGroupName
+                                }]);
+                                setNewAppGroupName('');
+                              }
+                            }}
+                          >
+                            <PlusOutlined /> 
+                          </a>
+                        </div>
+                      </div>
+                    )
+                  }}
+        ></ProFormSelect>
         <ProFormSwitch tooltip={
           intl.formatMessage({
             id: 'pages.app.form.public.tooltip'
@@ -503,6 +536,7 @@ const appList: React.FC = (props) => {
                     });
                   }}
         ></ProFormSelect>
+        
         <ProFormSwitch label={
           intl.formatMessage({
             id: 'pages.app.form.enabled'

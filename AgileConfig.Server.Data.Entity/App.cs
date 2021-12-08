@@ -20,6 +20,9 @@ namespace AgileConfig.Server.Data.Entity
         [Column(Name = "name" , StringLength = 50)]
         public string Name { get; set; }
 
+        [Column(Name = "group" , StringLength = 50)]
+        public string Group { get; set; }
+
         [Column(Name = "secret", StringLength = 36)]
         public string Secret { get; set; }
 
