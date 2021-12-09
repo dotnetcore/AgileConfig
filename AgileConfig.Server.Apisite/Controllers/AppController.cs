@@ -29,7 +29,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             _premissionService = premissionService;
         }
 
-        public async Task<IActionResult> Search(string name, string id, string group, string sortField, string ascOrDesc, int current = 1, int pageSize = 20)
+        public async Task<IActionResult> Search(string name, string id, string group, string sortField, string ascOrDesc, bool tableGrouped, int current = 1, int pageSize = 20)
         {
             if (current < 1)
             {
@@ -56,87 +56,143 @@ namespace AgileConfig.Server.Apisite.Controllers
             
             var count = query.Count;
 
+            IList<IAppModel> apps = query.Select(x=> x as IAppModel).ToList();
+            if (tableGrouped)
+            {
+                var appGroups = apps.GroupBy(x => x.Group);
+                var appGroupList = new List<AppListVM>();
+                foreach (var appGroup in appGroups)
+                {
+                    var first = appGroup.First() as App;
+                    var children = new List<AppListVM>();
+                    if (apps.Count() > 1)
+                    {
+                        foreach (var appItem in appGroup)
+                        {
+                            if (first.Id != appItem.Id)
+                            {
+                                children.Add(await AppToListVM(appItem as App));
+                            }
+                        }
+                    }
+                    var gp = new AppListVM();
+                    gp.Group = appGroup.Key;
+                    gp.Id = first.Id;
+                    gp.Name = first.Name;
+                    gp.Secret = first.Secret;
+                    gp.Enabled = first.Enabled;
+                    gp.UpdateTime = first.UpdateTime;
+                    gp.CreateTime = first.CreateTime;
+                    gp.AppAdmin = first.AppAdmin;
+                    if (children.Count>0)
+                    {
+                        gp.children = children;
+                    }
+                    appGroupList.Add(gp);
+                }
+
+                apps = appGroupList.Select(x=> x as IAppModel).ToList();
+            }
+            
             if (sortField == "createTime")
             {
                 if (ascOrDesc.StartsWith("asc"))
                 {
-                    query = query.OrderBy(x => x.CreateTime).ToList();
+                    apps = apps.OrderBy(x => x.CreateTime).ToList();
                 }
                 else
                 {
-                    query = query.OrderByDescending(x => x.CreateTime).ToList();
+                    apps = apps.OrderByDescending(x => x.CreateTime).ToList();
                 }
             }
             if (sortField == "id")
             {
                 if (ascOrDesc.StartsWith("asc"))
                 {
-                    query = query.OrderBy(x => x.Id).ToList();
+                    apps = apps.OrderBy(x => x.Id).ToList();
                 }
                 else
                 {
-                    query = query.OrderByDescending(x => x.Id).ToList();
+                    apps = apps.OrderByDescending(x => x.Id).ToList();
                 }
             }
             if (sortField == "name")
             {
                 if (ascOrDesc.StartsWith("asc"))
                 {
-                    query = query.OrderBy(x => x.Name).ToList();
+                    apps = apps.OrderBy(x => x.Name).ToList();
                 }
                 else
                 {
-                    query = query.OrderByDescending(x => x.Name).ToList();
+                    apps = apps.OrderByDescending(x => x.Name).ToList();
                 }
             }
             if (sortField == "group")
             {
                 if (ascOrDesc.StartsWith("asc"))
                 {
-                    query = query.OrderBy(x => x.Group).ToList();
+                    apps = apps.OrderBy(x => x.Group).ToList();
                 }
                 else
                 {
-                    query = query.OrderByDescending(x => x.Group).ToList();
+                    apps = apps.OrderByDescending(x => x.Group).ToList();
                 }
             }
             
-            var pageList = query.ToList().Skip((current - 1) * pageSize).Take(pageSize);
-            var vms = new List<AppListVM>();
-            foreach (var item in pageList)
+            var pageList = apps.ToList().Skip((current - 1) * pageSize).Take(pageSize).ToList();
+
+            if (!tableGrouped)
             {
-                var inheritancedApps = await _appService.GetInheritancedAppsAsync(item.Id);
-                vms.Add(new AppListVM
+                var vms = new List<AppListVM>();
+                foreach (var appModel in pageList)
                 {
-                    Id = item.Id,
-                    Name = item.Name,
-                    Group = item.Group,
-                    Secret = item.Secret,
-                    Inheritanced = item.Type == AppType.Inheritance,
-                    Enabled = item.Enabled,
-                    UpdateTime = item.UpdateTime,
-                    CreateTime = item.CreateTime,
-                    inheritancedApps = item.Type == AppType.Inheritance ? 
-                                                                            new List<string>() : 
-                                                                            (inheritancedApps).Select(ia => ia.Id).ToList(),
-                    inheritancedAppNames = item.Type == AppType.Inheritance ?
-                                                                            new List<string>() :
-                                                                            (inheritancedApps).Select(ia => ia.Name).ToList(),
-                    AppAdmin = item.AppAdmin,
-                    AppAdminName = (await _userService.GetUserAsync(item.AppAdmin))?.UserName
+                    vms.Add(await AppToListVM(appModel as App));
+                }
+                return Json(new
+                {
+                    current,
+                    pageSize,
+                    success = true,
+                    total = count,
+                    data = vms
                 });
             }
-
+            
             return Json(new
             {
                 current,
                 pageSize,
                 success = true,
                 total = count,
-                data = vms
+                data = pageList.Select(x=>x as AppListVM)
             });
-        }
+        } 
 
+        private async Task<AppListVM> AppToListVM(App item)
+        {
+            var inheritancedApps = await _appService.GetInheritancedAppsAsync(item.Id);
+
+            return new AppListVM
+            {
+                Id = item.Id,
+                Name = item.Name,
+                Group = item.Group,
+                Secret = item.Secret,
+                Inheritanced = item.Type == AppType.Inheritance,
+                Enabled = item.Enabled,
+                UpdateTime = item.UpdateTime,
+                CreateTime = item.CreateTime,
+                inheritancedApps = item.Type == AppType.Inheritance
+                    ? new List<string>()
+                    : (inheritancedApps).Select(ia => ia.Id).ToList(),
+                inheritancedAppNames = item.Type == AppType.Inheritance
+                    ? new List<string>()
+                    : (inheritancedApps).Select(ia => ia.Name).ToList(),
+                AppAdmin = item.AppAdmin,
+                AppAdminName = (await _userService.GetUserAsync(item.AppAdmin))?.UserName
+            };
+        }
+        
         [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "App.Add", Functions.App_Add })]
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] AppVM model)
@@ -480,6 +536,16 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 success = true,
                 data = result
+            });
+        }
+
+        [HttpGet]
+        public IActionResult GetAppGroups()
+        {
+            return Json(new
+            {
+                success = true,
+                data = _appService.GetAppGroups().OrderBy(x=>x)
             });
         }
     }

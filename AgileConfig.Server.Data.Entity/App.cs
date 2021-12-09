@@ -5,6 +5,19 @@ using System.Text;
 
 namespace AgileConfig.Server.Data.Entity
 {
+    
+    public interface IAppModel
+    {
+        string Id { get; set; }
+        
+        string Name { get; set; }
+        
+        string Group { get; set; }
+        
+        DateTime CreateTime { get; set; }
+    }
+
+    
     public enum AppType
     {
         PRIVATE,
@@ -12,7 +25,7 @@ namespace AgileConfig.Server.Data.Entity
     }
 
     [Table(Name = "agc_app")]
-    public class App
+    public class App: IAppModel
     {
         [Column(Name= "id" , StringLength = 36)]
         public string Id { get; set; }

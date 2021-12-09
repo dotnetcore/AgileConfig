@@ -1,8 +1,8 @@
 import { useIntl } from "@/.umi/plugin-locale/localeExports";
 import {  ModalForm, ProFormDependency, ProFormSelect, ProFormSwitch, ProFormText } from "@ant-design/pro-form";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AppListItem } from "../data";
-import { inheritancedApps } from "../service";
+import { getAppGroups, inheritancedApps } from "../service";
 import { adminUsers } from '@/pages/User/service';
 import { Divider, Input } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
@@ -16,8 +16,22 @@ export type UpdateFormProps = {
   };
 const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
     const intl = useIntl();
-    const [appGroups, setAppGroups] = useState<{label:string, value:string}[]>([{label:'1', value:'1'}]);
+    const [appGroups, setAppGroups] = useState<{label:string, value:string}[]>([]);
     const [newAppGroupName, setNewAppGroupName] = useState<string>('');
+    useEffect(()=>{
+      getAppGroups().then(x=>{
+        if (x.success) {
+          const groups:{label:string, value:string}[] = [];
+          x.data.forEach((i: any)=>{
+            groups.push({
+              label:i,
+              value: i
+            });
+          })
+          setAppGroups(groups);
+        } 
+      })
+    },[]);
     return (
     <ModalForm 
     title={
@@ -75,7 +89,7 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
       name="secret"
     />
           <ProFormSelect
-                placeholder="应用所属的组，方便分类"
+                placeholder="应用所属的组"
                   label="应用组"
                   name="group"
                   options={appGroups}

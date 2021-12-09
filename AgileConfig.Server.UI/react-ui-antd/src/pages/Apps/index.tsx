@@ -2,12 +2,12 @@ import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { ModalForm,  ProFormDependency, ProFormSelect, ProFormSwitch, ProFormText } from '@ant-design/pro-form';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
-import { Button, Divider, FormInstance, Input, message, Modal, Space, Switch, Tag } from 'antd';
-import React, { useState, useRef } from 'react';
+import { Button, Checkbox, Divider, FormInstance, Input, message, Modal, Space, Switch, Tag } from 'antd';
+import React, { useState, useRef, useEffect } from 'react';
 import { getIntl, getLocale, Link, useIntl} from 'umi';
 import UpdateForm from './comps/updateForm';
 import { AppListItem, AppListParams, AppListResult, UserAppAuth } from './data';
-import { addApp, editApp, delApp, queryApps, inheritancedApps,enableOrdisableApp, saveAppAuth } from './service';
+import { addApp, editApp, delApp, queryApps, inheritancedApps,enableOrdisableApp, saveAppAuth, getAppGroups } from './service';
 import { adminUsers } from '@/pages/User/service';
 import UserAuth from './comps/userAuth';
 import AuthorizedEle from '@/components/Authorized/AuthorizedElement';
@@ -142,8 +142,28 @@ const appList: React.FC = (props) => {
   const [userAuthModalVisible, setUserAuthModalVisible] = useState<boolean>(false);
   const [currentRow, setCurrentRow] = useState<AppListItem>();
   const [dataSource, setDataSource] = useState<AppListResult>();
-  const [appGroups, setAppGroups] = useState<{label:string, value:string}[]>([{label:'1', value:'1'}]);
+  const [appGroups, setAppGroups] = useState<{label:string, value:string}[]>([]);
   const [newAppGroupName, setNewAppGroupName] = useState<string>('');
+  const [appGroupsEnums, setAppGroupsEnums] = useState<{}>({});
+  const [tableGrouped, setTableGrouped] = useState<boolean>(false);
+
+  useEffect(()=>{
+    getAppGroups().then(x=>{
+      if (x.success) {
+        const groups:{label:string, value:string}[] = [];
+        const groupEnums = {};
+        x.data.forEach((i: any)=>{
+          groups.push({
+            label:i,
+            value: i
+          });
+          groupEnums[i]={text:i};
+        })
+        setAppGroups(groups);
+        setAppGroupsEnums(groupEnums);
+      } 
+    })
+  },[]);
 
   const handleQuery = async (params: AppListParams) => {
     const result = await queryApps(params);
@@ -203,6 +223,24 @@ const appList: React.FC = (props) => {
       valueType: 'password',
       hideInSearch: true,
       copyable: true,
+    },
+    {
+      title: '应用组',
+      sorter: true,
+      valueType: 'select',
+      dataIndex: 'group',
+      valueEnum: appGroupsEnums
+      // request:async ()=>{
+      //   const groups = await getAppGroups();
+      //   const arr:{label:string, value:string}[] = [];
+      //   groups.data.forEach( (x: string)=>{
+      //     arr.push({
+      //       value: x,
+      //       label: x,
+      //     });
+      //   });
+      //   return arr;
+      // }
     },
     {
       title: intl.formatMessage({
@@ -371,8 +409,14 @@ const appList: React.FC = (props) => {
             }
           }
           console.log(sortField, ascOrDesc);
-          return handleQuery({ sortField, ascOrDesc, ...params })
+          return handleQuery({ tableGrouped, sortField, ascOrDesc, ...params })
         } }
+        headerTitle = {
+          <Checkbox onChange={(e)=>{ 
+            setTableGrouped(e.target.checked);
+            actionRef.current?.reload();
+          }}>分组聚合</Checkbox>
+        }
         toolBarRender={() => {
           return [
             <AuthorizedEle key="0" judgeKey={functionKeys.App_Add} > 
@@ -449,7 +493,7 @@ const appList: React.FC = (props) => {
           name="secret"
         />
         <ProFormSelect
-                placeholder="应用所属的组，方便分类"
+                placeholder="应用所属的组"
                   label="应用组"
                   name="group"
                   options={appGroups}

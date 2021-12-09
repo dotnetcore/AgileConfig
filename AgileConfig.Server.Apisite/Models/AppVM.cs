@@ -7,10 +7,6 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.Apisite.Models
 {
-    public interface IAppModel
-    {
-        string Id { get; set; }
-    }
 
     public class AppVM : IAppModel
     {
@@ -38,12 +34,16 @@ namespace AgileConfig.Server.Apisite.Models
         public string AppAdmin { get; set; }
 
         public string AppAdminName { get; set; }
+        
+        public DateTime CreateTime { get; set; }
+
     }
 
     public class AppListVM : AppVM
     {
-        public DateTime CreateTime { get; set; }
 
         public DateTime? UpdateTime { get; set; }
+        
+        public List<AppListVM> children { get; set; }
     }
 }

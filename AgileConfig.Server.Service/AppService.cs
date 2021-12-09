@@ -213,5 +213,11 @@ namespace AgileConfig.Server.Service
 
             return users;
         }
+
+        public List<string> GetAppGroups()
+        {
+            return _dbContext.Apps.Select.GroupBy(x => x.Group).Select(x => x.Key)
+                ;
+        }
     }
 }

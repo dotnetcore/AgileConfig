@@ -19,6 +19,7 @@ export type AppListParams = {
   current?: number;
   sortField: string;
   ascOrDesc: string;
+  tableGrouped: boolean;
 };
 
 export type AppListResult = {
