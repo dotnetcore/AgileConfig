@@ -216,8 +216,9 @@ namespace AgileConfig.Server.Service
 
         public List<string> GetAppGroups()
         {
-            return _dbContext.Apps.Select.GroupBy(x => x.Group).Select(x => x.Key)
+            var groups = _dbContext.Apps.Select.GroupBy(x => x.Group).Select(x => x.Key)
                 ;
+            return groups.Where(x => !string.IsNullOrEmpty(x)).ToList();
         }
     }
 }
