@@ -54,125 +54,116 @@ namespace AgileConfig.Server.Apisite.Controllers
                 query = query.Where(x => x.Group.Contains(group)).ToList();
             }
             
-            var count = query.Count;
-
-            IList<IAppModel> apps = query.Select(x=> x as IAppModel).ToList();
+            var appvms = new List<AppListVM>();
+            foreach (var app in query)
+            {
+                appvms.Add(await AppToListVM(app, false));
+            }
             if (tableGrouped)
             {
-                var appGroups = apps.GroupBy(x => x.Group);
+                var appGroups = appvms.GroupBy(x => x.Group);
                 var appGroupList = new List<AppListVM>();
                 foreach (var appGroup in appGroups)
                 {
-                    var first = appGroup.First() as App;
+                    var first = appGroup.First();
                     var children = new List<AppListVM>();
-                    if (apps.Count() > 1)
+                    if (appGroup.Count() > 1)
                     {
-                        foreach (var appItem in appGroup)
+                        foreach (var item in appGroup)
                         {
-                            if (first.Id != appItem.Id)
+                            if (first.Id != item.Id)
                             {
-                                children.Add(await AppToListVM(appItem as App));
+                                children.Add(item);
                             }
                         }
                     }
-                    var gp = new AppListVM();
-                    gp.Group = appGroup.Key;
-                    gp.Id = first.Id;
-                    gp.Name = first.Name;
-                    gp.Secret = first.Secret;
-                    gp.Enabled = first.Enabled;
-                    gp.UpdateTime = first.UpdateTime;
-                    gp.CreateTime = first.CreateTime;
-                    gp.AppAdmin = first.AppAdmin;
+
                     if (children.Count>0)
                     {
-                        gp.children = children;
+                        first.children = children;
                     }
-                    appGroupList.Add(gp);
+                    appGroupList.Add(first);
                 }
 
-                apps = appGroupList.Select(x=> x as IAppModel).ToList();
+                appvms = appGroupList;
             }
             
-            if (sortField == "createTime")
+            if (tableGrouped)
             {
-                if (ascOrDesc.StartsWith("asc"))
+                if ( sortField == "group" && ascOrDesc.StartsWith("desc"))
                 {
-                    apps = apps.OrderBy(x => x.CreateTime).ToList();
+                    appvms = appvms.OrderByDescending(x => x.Group).ToList();
                 }
                 else
                 {
-                    apps = apps.OrderByDescending(x => x.CreateTime).ToList();
+                    appvms = appvms.OrderBy(x => x.Group).ToList();
                 }
             }
-            if (sortField == "id")
+            else
             {
-                if (ascOrDesc.StartsWith("asc"))
+                if (sortField == "createTime")
                 {
-                    apps = apps.OrderBy(x => x.Id).ToList();
+                    if (ascOrDesc.StartsWith("asc"))
+                    {
+                        appvms = appvms.OrderBy(x => x.CreateTime).ToList();
+                    }
+                    else
+                    {
+                        appvms = appvms.OrderByDescending(x => x.CreateTime).ToList();
+                    }
                 }
-                else
+                if (sortField == "id")
                 {
-                    apps = apps.OrderByDescending(x => x.Id).ToList();
+                    if (ascOrDesc.StartsWith("asc"))
+                    {
+                        appvms = appvms.OrderBy(x => x.Id).ToList();
+                    }
+                    else
+                    {
+                        appvms = appvms.OrderByDescending(x => x.Id).ToList();
+                    }
                 }
-            }
-            if (sortField == "name")
-            {
-                if (ascOrDesc.StartsWith("asc"))
+                if (sortField == "name")
                 {
-                    apps = apps.OrderBy(x => x.Name).ToList();
+                    if (ascOrDesc.StartsWith("asc"))
+                    {
+                        appvms = appvms.OrderBy(x => x.Name).ToList();
+                    }
+                    else
+                    {
+                        appvms = appvms.OrderByDescending(x => x.Name).ToList();
+                    }
                 }
-                else
+                if (sortField == "group")
                 {
-                    apps = apps.OrderByDescending(x => x.Name).ToList();
-                }
-            }
-            if (sortField == "group")
-            {
-                if (ascOrDesc.StartsWith("asc"))
-                {
-                    apps = apps.OrderBy(x => x.Group).ToList();
-                }
-                else
-                {
-                    apps = apps.OrderByDescending(x => x.Group).ToList();
+                    if (ascOrDesc.StartsWith("asc"))
+                    {
+                        appvms = appvms.OrderBy(x => x.Group).ToList();
+                    }
+                    else
+                    {
+                        appvms = appvms.OrderByDescending(x => x.Group).ToList();
+                    }
                 }
             }
             
-            var pageList = apps.ToList().Skip((current - 1) * pageSize).Take(pageSize).ToList();
-
-            if (!tableGrouped)
-            {
-                var vms = new List<AppListVM>();
-                foreach (var appModel in pageList)
-                {
-                    vms.Add(await AppToListVM(appModel as App));
-                }
-                return Json(new
-                {
-                    current,
-                    pageSize,
-                    success = true,
-                    total = count,
-                    data = vms
-                });
-            }
-            
+            var count = appvms.Count;
+            var pageList = appvms.ToList().Skip((current - 1) * pageSize).Take(pageSize).ToList();
+            await AppendInheritancedInfo(pageList);
             return Json(new
             {
                 current,
                 pageSize,
                 success = true,
                 total = count,
-                data = pageList.Select(x=>x as AppListVM)
+                data = pageList
             });
         } 
 
-        private async Task<AppListVM> AppToListVM(App item)
+        private async Task<AppListVM> AppToListVM(App item, bool appendInheritancedInfo)
         {
-            var inheritancedApps = await _appService.GetInheritancedAppsAsync(item.Id);
 
-            return new AppListVM
+            var vm = new AppListVM
             {
                 Id = item.Id,
                 Name = item.Name,
@@ -182,15 +173,41 @@ namespace AgileConfig.Server.Apisite.Controllers
                 Enabled = item.Enabled,
                 UpdateTime = item.UpdateTime,
                 CreateTime = item.CreateTime,
-                inheritancedApps = item.Type == AppType.Inheritance
-                    ? new List<string>()
-                    : (inheritancedApps).Select(ia => ia.Id).ToList(),
-                inheritancedAppNames = item.Type == AppType.Inheritance
-                    ? new List<string>()
-                    : (inheritancedApps).Select(ia => ia.Name).ToList(),
                 AppAdmin = item.AppAdmin,
-                AppAdminName = (await _userService.GetUserAsync(item.AppAdmin))?.UserName
             };
+
+            if (appendInheritancedInfo)
+            {
+                var inheritancedApps = await _appService.GetInheritancedAppsAsync(item.Id);
+                vm.inheritancedApps = item.Type == AppType.Inheritance
+                    ? new List<string>()
+                    : (inheritancedApps).Select(ia => ia.Id).ToList();
+                vm.inheritancedAppNames = item.Type == AppType.Inheritance
+                    ? new List<string>()
+                    : (inheritancedApps).Select(ia => ia.Name).ToList();
+                vm.AppAdminName = (await _userService.GetUserAsync(item.AppAdmin))?.UserName;
+            }
+
+            return vm;
+        }
+
+        private async Task AppendInheritancedInfo(List<AppListVM> list)
+        {
+            foreach (var appListVm in list)
+            {
+                var inheritancedApps = await _appService.GetInheritancedAppsAsync(appListVm.Id);
+                appListVm.inheritancedApps = appListVm.Inheritanced
+                    ? new List<string>()
+                    : (inheritancedApps).Select(ia => ia.Id).ToList();
+                appListVm.inheritancedAppNames = appListVm.Inheritanced
+                    ? new List<string>()
+                    : (inheritancedApps).Select(ia => ia.Name).ToList();
+                appListVm.AppAdminName = (await _userService.GetUserAsync(appListVm.AppAdmin))?.UserName;
+                if (appListVm.children!=null)
+                {
+                    await AppendInheritancedInfo(appListVm.children);
+                }
+            }
         }
         
         [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "App.Add", Functions.App_Add })]

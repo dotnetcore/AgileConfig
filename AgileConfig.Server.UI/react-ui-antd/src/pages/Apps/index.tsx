@@ -163,7 +163,7 @@ const appList: React.FC = (props) => {
         setAppGroupsEnums(groupEnums);
       } 
     })
-  },[]);
+  },[dataSource]);
 
   const handleQuery = async (params: AppListParams) => {
     const result = await queryApps(params);
