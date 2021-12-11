@@ -12,6 +12,8 @@
     <PackageReference Include="FreeSql.Provider.PostgreSQL" Version="2.5.200" />
     <PackageReference Include="FreeSql.Provider.Sqlite" Version="2.5.200" />
     <PackageReference Include="FreeSql.Provider.SqlServer" Version="2.5.200" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="4.0.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient.SNI.runtime" Version="4.0.0" />
   </ItemGroup>
 
   <ItemGroup>
