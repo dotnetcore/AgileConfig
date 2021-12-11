@@ -51,7 +51,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
             if (!string.IsNullOrWhiteSpace(group))
             {
-                query = query.Where(x => x.Group.Contains(group)).ToList();
+                query = query.Where(x => x.Group == group).ToList();
             }
             
             var appvms = new List<AppListVM>();
