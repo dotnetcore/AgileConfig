@@ -34,7 +34,7 @@ namespace AgileConfig.Server.Service
             return new ServerNodeService(new FreeSqlContext(FreeSQL.Instance));
         }
 
-        private IRemoteServerNodeProxy _remoteServerNodeProxy;
+        private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
         public EventRegister(IRemoteServerNodeProxy remoteServerNodeProxy)
         {
             _remoteServerNodeProxy = remoteServerNodeProxy;
@@ -56,29 +56,36 @@ namespace AgileConfig.Server.Service
                {
                    Task.Run(async () =>
                    {
-                       using (var configService = NewConfigService())
+                       using (var serverNodeService = NewServerNodeService())
                        {
-                           using (var serverNodeService = NewServerNodeService())
+                           var nodes = await serverNodeService.GetAllNodesAsync();
+                           var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(timelineNode.AppId);
+                           noticeApps.Add(timelineNode.AppId, new WebsocketAction { Action = ActionConst.Reload });
+
+                           foreach (var node in nodes)
                            {
-                               var nodes = await serverNodeService.GetAllNodesAsync();
-                               var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(timelineNode.AppId);
-                               noticeApps.Add(timelineNode.AppId, new WebsocketAction { Action = ActionConst.Reload });
-
-                               foreach (var node in nodes)
+                               if (node.Status == NodeStatus.Offline)
                                {
-                                   if (node.Status == NodeStatus.Offline)
-                                   {
-                                       continue;
-                                   }
+                                   continue;
+                               }
+                               //all server cache
+                               await _remoteServerNodeProxy.ClearCache(node.Address);
+                           }
+                           
+                           foreach (var node in nodes)
+                           {
+                               if (node.Status == NodeStatus.Offline)
+                               {
+                                   continue;
+                               }
 
-                                   foreach (var item in noticeApps)
-                                   {
-                                       await _remoteServerNodeProxy.AppClientsDoActionAsync(
-                                           node.Address,
-                                           item.Key,
-                                           timelineNode.Env,
-                                           item.Value);
-                                   }
+                               foreach (var item in noticeApps)
+                               {
+                                   await _remoteServerNodeProxy.AppClientsDoActionAsync(
+                                       node.Address,
+                                       item.Key,
+                                       timelineNode.Env,
+                                       item.Value);
                                }
                            }
                        }

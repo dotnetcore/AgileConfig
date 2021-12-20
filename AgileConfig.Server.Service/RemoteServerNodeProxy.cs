@@ -263,5 +263,17 @@ namespace AgileConfig.Server.Service
                 }
             });
         }
+
+        public async Task ClearCache(string address)
+        {
+            try
+            { 
+                await (address + "/RemoteOP/ClearCache").AsHttp("POST").SendAsync();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Try to clear node {0}'s cache , but fail .", address);
+            }
+        }
     }
 }

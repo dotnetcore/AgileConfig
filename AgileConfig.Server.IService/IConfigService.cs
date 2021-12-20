@@ -212,5 +212,10 @@ namespace AgileConfig.Server.IService
         /// <param name="kvStr"></param>
         /// <returns></returns>
         (bool, string) ValidateKvString(string kvStr);
+
+        /// <summary>
+        /// clear all cache
+        /// </summary>
+        void ClearCache();
     }
 }

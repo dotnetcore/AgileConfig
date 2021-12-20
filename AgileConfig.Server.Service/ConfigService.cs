@@ -854,7 +854,7 @@ namespace AgileConfig.Server.Service
             var deleteConfigs = new List<Config>();
 
             var now = DateTime.Now;
-            
+
             foreach (var kv in dict)
             {
                 var key = kv.Key;
@@ -974,31 +974,42 @@ namespace AgileConfig.Server.Service
                 {
                     break;
                 }
+
                 row++;
                 //必须要有=号
                 if (line.IndexOf('=') < 0)
                 {
                     return (false, $"第 {row} 行缺少等号。");
                 }
+
                 var index = line.IndexOf('=');
                 var key = line.Substring(0, index);
                 if (dict.ContainsKey(key))
                 {
                     return (false, $"键 {key} 重复。");
                 }
+
                 dict.Add(key, "");
             }
 
             return (true, "");
         }
-        
+
+        public void ClearCache()
+        {
+            if (_memoryCache != null && _memoryCache is MemoryCache memCache)
+            {
+                memCache.Compact(1.0);
+            }
+        }
+
         public async Task<bool> SaveKvListAsync(string kvString, string appId, string env)
         {
             if (kvString == null)
             {
                 throw new ArgumentNullException(nameof(kvString));
             }
-            
+
             StringReader sr = new StringReader(kvString);
             var dict = new Dictionary<string, string>();
             while (true)
@@ -1008,6 +1019,7 @@ namespace AgileConfig.Server.Service
                 {
                     break;
                 }
+
                 var index = line.IndexOf('=');
                 if (index < 0)
                 {
@@ -1016,7 +1028,7 @@ namespace AgileConfig.Server.Service
 
                 var key = line.Substring(0, index);
                 var val = line.Substring(index + 1, line.Length - index - 1);
-                
+
                 dict.Add(key, val);
             }
 

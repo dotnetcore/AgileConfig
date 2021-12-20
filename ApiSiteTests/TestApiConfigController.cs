@@ -8,6 +8,7 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace ApiSiteTests
 {
@@ -53,6 +54,7 @@ namespace ApiSiteTests
             configService.Setup(s => s.GetPublishedConfigsByAppIdWithInheritanced("001", ""))
                 .ReturnsAsync(newConfigs);
 
+            var memoryCache = new Mock<IMemoryCache>();
             var remoteNodeProxy = new Mock<IRemoteServerNodeProxy>();
             var serverNodeService = new Mock<IServerNodeService>();
             var sysLogService = new Mock<ISysLogService>();
@@ -62,10 +64,8 @@ namespace ApiSiteTests
             var ctrl = new ConfigController(
                 configService.Object,
                 appService.Object,
-                remoteNodeProxy.Object,
-                serverNodeService.Object,
-                appBasicAuthService.Object,
-                userSErvice.Object);
+                userSErvice.Object,
+                memoryCache.Object);
             var act = await ctrl.GetAppConfig("001", "");
 
             Assert.IsNotNull(act);
@@ -86,10 +86,8 @@ namespace ApiSiteTests
             ctrl = new ConfigController(
                 configService.Object,
                 appService.Object,
-                remoteNodeProxy.Object,
-                serverNodeService.Object,
-                appBasicAuthService.Object,
-                userSErvice.Object);
+                userSErvice.Object,
+                memoryCache.Object);
             act = await ctrl.GetAppConfig("001", "");
 
             Assert.IsNotNull(act);

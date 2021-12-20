@@ -77,5 +77,12 @@ namespace AgileConfig.Server.IService
         /// <param name="address"></param>
         /// <returns></returns>
         Task TestEchoAsync(string address);
+
+        /// <summary>
+        /// 清除1个节点的缓存
+        /// </summary>
+        /// <param name="address"></param>
+        /// <returns></returns>
+        Task ClearCache(string address);
     }
 }

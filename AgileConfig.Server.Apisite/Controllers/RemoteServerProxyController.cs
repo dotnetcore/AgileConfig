@@ -20,10 +20,9 @@ namespace AgileConfig.Server.Apisite.Controllers
         private readonly ILogger _logger;
 
         public RemoteServerProxyController(
-            IServerNodeService serverNodeService,
             IRemoteServerNodeProxy remoteServerNodeProxy,
-            ILoggerFactory loggerFactory,
-            ISysLogService sysLogService)
+            ILoggerFactory loggerFactory
+            )
         {
             _remoteServerNodeProxy = remoteServerNodeProxy;
             _logger = loggerFactory.CreateLogger<RemoteServerProxyController>();

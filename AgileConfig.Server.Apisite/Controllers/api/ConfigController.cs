@@ -8,6 +8,7 @@ using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -18,25 +19,19 @@ namespace AgileConfig.Server.Apisite.Controllers.api
     {
         private readonly IConfigService _configService;
         private readonly IAppService _appService;
-        private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
-        private readonly IServerNodeService _serverNodeService;
-        private readonly IAppBasicAuthService _appBasicAuthService;
         private readonly IUserService _userService;
+        private readonly IMemoryCache _cacheMemory;
 
         public ConfigController(
             IConfigService configService,
             IAppService appService,
-              IRemoteServerNodeProxy remoteServerNodeProxy,
-                                IServerNodeService serverNodeService,
-                                IAppBasicAuthService appBasicAuthService,
-                                IUserService userService)
+            IUserService userService,
+            IMemoryCache cacheMemory)
         {
             _configService = configService;
             _appService = appService;
-            _remoteServerNodeProxy = remoteServerNodeProxy;
-            _serverNodeService = serverNodeService;
-            _appBasicAuthService = appBasicAuthService;
             _userService = userService;
+            _cacheMemory = cacheMemory;
         }
 
         /// <summary>
@@ -62,9 +57,15 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 return NotFound();
             }
 
-            var configs = await _configService.GetPublishedConfigsByAppIdWithInheritanced(appId, env);
-
-            var vms = configs.Select(c =>
+            var cacheKey = $"ConfigController_APPCONFIG_{appId}_{env}";
+            _cacheMemory.TryGetValue(cacheKey, out List<ApiConfigVM> configs);
+            if (configs != null)
+            {
+                return configs;
+            }
+            
+            var appConfigs = await _configService.GetPublishedConfigsByAppIdWithInheritanced(appId, env);
+            var vms = appConfigs.Select(c =>
             {
                 return new ApiConfigVM()
                 {
@@ -77,9 +78,14 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                     OnlineStatus = c.OnlineStatus,
                     EditStatus = c.EditStatus
                 };
-            });
-
-            return vms.ToList();
+            }).ToList();
+            
+            //增加5s的缓存，防止同一个app同时启动造成db的压力过大
+            var cacheOp = new MemoryCacheEntryOptions()
+                .SetAbsoluteExpiration(TimeSpan.FromSeconds(5));
+            _cacheMemory.Set(cacheKey, vms, cacheOp);
+            
+            return vms;
         }
 
         /// <summary>

@@ -2,7 +2,9 @@
 using System.Threading.Tasks;
 using Agile.Config.Protocol;
 using AgileConfig.Server.Apisite.Websocket;
+using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -11,6 +13,14 @@ namespace AgileConfig.Server.Apisite.Controllers
     /// </summary>
     public class RemoteOPController : Controller
     {
+        private readonly IConfigService _configService;
+        private readonly ILogger _logger;
+        public RemoteOPController(IConfigService configService, ILoggerFactory loggerFactory)
+        {
+            _configService = configService;
+            _logger = loggerFactory.CreateLogger<RemoteServerProxyController>();
+        }
+        
         [HttpPost]
         public IActionResult AllClientsDoActionAsync([FromBody]WebsocketAction action)
         {
@@ -66,6 +76,19 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             await WebsocketCollection.Instance.SendActionToOne(client, action);
 
+            return Json(new
+            {
+                success = true,
+            });
+        }
+
+        [HttpPost]
+        public IActionResult ClearCache()
+        {
+            _configService.ClearCache();
+
+            _logger.LogInformation("Server clear all config's cache .");
+            
             return Json(new
             {
                 success = true,
