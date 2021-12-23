@@ -5,6 +5,7 @@ using System.ComponentModel;
 namespace AgileConfig.Server.Data.Entity
 {
     [Table(Name = "agc_user_role")]
+    [OraclePrimaryKeyName("agc_user_role_pk")]
     public class UserRole
     {
         [Column(Name = "id", StringLength = 36)]

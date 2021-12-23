@@ -25,6 +25,7 @@ namespace AgileConfig.Server.Data.Entity
     }
 
     [Table(Name = "agc_app")]
+    [OraclePrimaryKeyName("agc_app_pk")]
     public class App: IAppModel
     {
         [Column(Name= "id" , StringLength = 36)]

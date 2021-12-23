@@ -6,6 +6,7 @@ using System.Text;
 namespace AgileConfig.Server.Data.Entity
 {
     [Table(Name = "agc_setting")]
+    [OraclePrimaryKeyName("agc_setting_pk")]
     public class Setting
     {
         [Column(Name = "id", StringLength = 36)]

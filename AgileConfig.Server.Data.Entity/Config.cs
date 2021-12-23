@@ -38,6 +38,7 @@ namespace AgileConfig.Server.Data.Entity
     }
 
     [Table(Name = "agc_config")]
+    [OraclePrimaryKeyName("agc_config_pk")]
     public class Config
     {
         [Column(Name = "id", StringLength = 36)]

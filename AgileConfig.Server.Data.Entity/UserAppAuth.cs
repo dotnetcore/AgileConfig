@@ -6,6 +6,7 @@ using System.Text;
 namespace AgileConfig.Server.Data.Entity
 {
     [Table(Name = "agc_user_app_auth")]
+    [OraclePrimaryKeyName("agc_user_app_auth_pk")]
     public class UserAppAuth
     {
         [Column(Name = "id", StringLength = 36)]

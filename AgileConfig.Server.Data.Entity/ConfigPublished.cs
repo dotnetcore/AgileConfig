@@ -4,6 +4,7 @@ using System;
 namespace AgileConfig.Server.Data.Entity
 {
     [Table(Name = "agc_config_published")]
+    [OraclePrimaryKeyName("agc_config_published_pk")]
     public class ConfigPublished
     {
         [Column(Name = "id", StringLength = 36)]

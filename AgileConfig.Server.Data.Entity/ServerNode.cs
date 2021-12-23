@@ -16,6 +16,7 @@ namespace AgileConfig.Server.Data.Entity
     }
 
     [Table(Name = "agc_server_node")]
+    [OraclePrimaryKeyName("agc_server_node_pk")]
     public class ServerNode
     {
         [Column(Name = "address", StringLength = 100, IsPrimary = true)]

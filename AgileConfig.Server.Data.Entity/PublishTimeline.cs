@@ -4,6 +4,7 @@ using System;
 namespace AgileConfig.Server.Data.Entity
 {
     [Table(Name = "agc_publish_timeline")]
+    [OraclePrimaryKeyName("agc_publish_timeline_pk")]
     public class PublishTimeline
     {
         [Column(Name = "id", StringLength = 36)]

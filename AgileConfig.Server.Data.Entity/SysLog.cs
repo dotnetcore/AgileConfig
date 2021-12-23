@@ -12,6 +12,7 @@ namespace AgileConfig.Server.Data.Entity
     }
 
     [Table(Name = "agc_sys_log")]
+    [OraclePrimaryKeyName("agc_sys_log_pk")]
     public class SysLog
     {
         [Column(Name = "id", IsIdentity = true)]

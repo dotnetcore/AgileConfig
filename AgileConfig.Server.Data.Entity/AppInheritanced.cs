@@ -9,6 +9,7 @@ namespace AgileConfig.Server.Data.Entity
     /// app继承关系
     /// </summary>
     [Table(Name = "agc_appInheritanced")]
+    [OraclePrimaryKeyName("agc_appInheritanced_pk")]
     public class AppInheritanced
     {
         [Column(Name = "id", StringLength = 36)]
