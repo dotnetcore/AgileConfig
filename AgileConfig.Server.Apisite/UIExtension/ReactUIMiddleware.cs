@@ -53,7 +53,8 @@ namespace AgileConfig.Server.Apisite.UIExtension
                 if (refererValues.Any())
                 {
                     var refererValue = refererValues.First();
-                    if (refererValue.EndsWith("/ui", StringComparison.OrdinalIgnoreCase))
+                    if (refererValue.EndsWith("/ui", StringComparison.OrdinalIgnoreCase) 
+                        || refererValue.Contains("/monaco-editor/", StringComparison.OrdinalIgnoreCase))
                     {
                         return true;
                     }
