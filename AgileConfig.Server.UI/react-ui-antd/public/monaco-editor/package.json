@@ -1,0 +1,91 @@
+{
+  "_from": "monaco-editor",
+  "_id": "monaco-editor@0.31.1",
+  "_inBundle": false,
+  "_integrity": "sha512-FYPwxGZAeP6mRRyrr5XTGHD9gRXVjy7GUzF4IPChnyt3fS5WrNxIkS8DNujWf6EQy0Zlzpxw8oTVE+mWI2/D1Q==",
+  "_location": "/monaco-editor",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "monaco-editor",
+    "name": "monaco-editor",
+    "escapedName": "monaco-editor",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/monaco-editor/-/monaco-editor-0.31.1.tgz",
+  "_shasum": "67f597b3e45679d1f551237e12a3a42c4438b97b",
+  "_spec": "monaco-editor",
+  "_where": "D:\\workspace\\AgileConfig\\AgileConfig.Server.UI\\react-ui-antd",
+  "author": {
+    "name": "Microsoft Corporation"
+  },
+  "bugs": {
+    "url": "https://github.com/microsoft/monaco-editor/issues"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "description": "A browser based code editor",
+  "devDependencies": {
+    "@types/mocha": "^9.0.0",
+    "@typescript/vfs": "^1.3.5",
+    "chai": "^4.3.4",
+    "clean-css": "^5.2.2",
+    "esbuild": "^0.13.13",
+    "esbuild-plugin-alias": "^0.2.1",
+    "glob": "^7.2.0",
+    "husky": "^7.0.4",
+    "jsdom": "^18.1.0",
+    "jsonc-parser": "^3.0.0",
+    "mocha": "^9.1.3",
+    "monaco-editor-core": "0.31.1",
+    "playwright": "^1.16.3",
+    "prettier": "^2.4.1",
+    "pretty-quick": "^3.1.1",
+    "requirejs": "^2.3.6",
+    "terser": "^5.10.0",
+    "typedoc": "^0.22.9",
+    "typescript": "4.4.4",
+    "vscode-css-languageservice": "^5.1.8",
+    "vscode-html-languageservice": "^4.1.1",
+    "vscode-json-languageservice": "4.1.10",
+    "vscode-languageserver-textdocument": "^1.0.2",
+    "vscode-languageserver-types": "3.16.0",
+    "vscode-uri": "3.0.2",
+    "yaserver": "^0.4.0"
+  },
+  "homepage": "https://github.com/microsoft/monaco-editor#readme",
+  "license": "MIT",
+  "module": "./esm/vs/editor/editor.main.js",
+  "name": "monaco-editor",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/microsoft/monaco-editor.git"
+  },
+  "scripts": {
+    "build-website": "node ./build/website.js && npm run typedoc",
+    "import-typescript": "node ./build/importTypescript.js",
+    "playwright-install": "node ./node_modules/playwright/install.js",
+    "playwright-install-deps": "playwright install-deps",
+    "prettier": "prettier --write .",
+    "prettier-check": "prettier --check .",
+    "pretty-quick": "pretty-quick --staged",
+    "release": "node ./build/build.js && node ./build/release.js",
+    "simpleserver": "node ./build/simpleserver",
+    "smoketest": "node ./test/smoke/runner.js",
+    "smoketest-debug": "node ./test/smoke/runner.js --debug-tests",
+    "test": "mocha test/unit/all.js",
+    "typedoc": "cd website/typedoc && \"../../node_modules/.bin/typedoc\" --options ./typedoc.json",
+    "watch": "tsc -w -p ./src"
+  },
+  "typings": "./esm/vs/editor/editor.api.d.ts",
+  "version": "0.31.1",
+  "vscode": "5a1b4999493d49c857497ad481d73a737439f305"
+}
