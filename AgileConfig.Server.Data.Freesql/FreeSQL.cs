@@ -68,7 +68,7 @@ namespace AgileConfig.Server.Data.Freesql
         
         private static FreeSql.DataType ProviderToFreesqlDbType(string provider)
         {
-            switch (provider)
+            switch (provider.ToLower())
             {
                 case "sqlite":
                     return FreeSql.DataType.Sqlite;
@@ -77,6 +77,8 @@ namespace AgileConfig.Server.Data.Freesql
                 case "sqlserver":
                     return FreeSql.DataType.SqlServer;
                 case "npgsql":
+                    return FreeSql.DataType.PostgreSQL;
+                case "postgresql":
                     return FreeSql.DataType.PostgreSQL;
                 case "oracle":
                     return FreeSql.DataType.Oracle;
