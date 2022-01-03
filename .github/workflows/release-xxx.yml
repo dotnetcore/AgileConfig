@@ -1,4 +1,4 @@
-name: v-xxx ci
+name: package workflow
 
 on:
   push:
