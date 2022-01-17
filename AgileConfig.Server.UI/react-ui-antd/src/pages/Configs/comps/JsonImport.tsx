@@ -15,6 +15,11 @@ export type JsonImportFormProps = {
     onSaveSuccess: ()=> void;
   };
   const handleSave = async ( items: JsonImportItem[], env: string) => {
+    if (items.length === 0) {
+      message.warning('没有需要导入的配置项！');
+      return;
+    }
+
     const hide = message.loading('正在导入');
     try {
       const result = await addRangeConfig(items, env);
