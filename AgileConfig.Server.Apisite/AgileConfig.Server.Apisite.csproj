@@ -11,8 +11,12 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>..\AgileConfig.Server.Apisite\AgileConfig.Server.Apisite.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\AgileConfig.Server.Apisite.xml</DocumentationFile>
     <NoWarn>1701;1702;1591;1573</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DocumentationFile>bin\Release\AgileConfig.Server.Apisite.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
