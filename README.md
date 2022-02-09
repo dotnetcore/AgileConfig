@@ -210,18 +210,6 @@ Install-Package AgileConfig.Client
 ```
 在appsettings.json文件配置agileconfig的配置信息。
 ``` c#
-public static IHostBuilder CreateHostBuilder(string[] args) =>
-    Host.CreateDefaultBuilder(args)
-        .ConfigureAppConfiguration((context, config) =>
-        {
-            //default appsettings.json
-            config.AddAgileConfig(arg => Console.WriteLine($"config changed , action:{arg.Action} key:{arg.Key}"));
-        })
-        .ConfigureWebHostDefaults(webBuilder =>
-        {
-            webBuilder.UseStartup<Startup>();
-        });
-  ------or UseAgileConfig -------
      public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .UseAgileConfig(e => Console.WriteLine($"configs {e.Action}"))
@@ -230,22 +218,17 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
                     webBuilder.UseStartup<Startup>();
                 });
 ```
-根据环境变量读取appsettings.{env}.json配置信息。
+使用 UseAgileConfig 扩展方法配置一个配置源。
 ``` c#
-public static IHostBuilder CreateHostBuilder(string[] args) =>
-    Host.CreateDefaultBuilder(args)
-        .ConfigureAppConfiguration((context, config) =>
-        {
-            var envName = context.HostingEnvironment.EnvironmentName;
-            var configClient = new ConfigClient($"appsettings.{envName}.json");
-            config.AddAgileConfig(configClient, arg => Console.WriteLine($"config changed , action:{arg.Action} key:{arg.Key}"));
-        })
-        .ConfigureWebHostDefaults(webBuilder =>
-        {
-            webBuilder.UseStartup<Startup>();
-        });
+     public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .UseAgileConfig(new ConfigClient($"appsettings.{context.HostingEnvironment.EnvironmentName}.json"), e => Console.WriteLine($"configs {e.Action}"))
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
 ```
-
+根据环境变量读取appsettings.{env}.json配置信息。
 > 注意：☢️☢️☢️如果你的程序是Framework的程序请使用[AgileConfig.Client4FR](https://github.com/kklldog/AgileConfig.Client4FR)这个专门为Framework打造的client。使用当前版本有可能死锁造成cpu100% 的风险。
 
 > 注意：如果节点使用nginx反代的话，需要对nginx进行配置，使其支持websocket协议，不然客户端跟节点的长连接没法建立。
