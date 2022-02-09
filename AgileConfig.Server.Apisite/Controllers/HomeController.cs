@@ -35,10 +35,10 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (!await _settingService.HasSuperAdmin())
             {
-                return Redirect("/ui#/user/initpassword");
+                return Redirect(Request.PathBase + "/ui#/user/initpassword");
             }
 
-            return Redirect("/ui");
+            return Redirect(Request.PathBase + "/ui");
         }
 
         public async Task<IActionResult> Current()
