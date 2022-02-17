@@ -72,6 +72,7 @@ namespace AgileConfig.Server.Data.Freesql
                     instance.CodeFirst.SyncStructure<ConfigPublished>();
                     instance.CodeFirst.SyncStructure<PublishTimeline>();
                     instance.CodeFirst.SyncStructure<PublishDetail>();
+                    instance.CodeFirst.SyncStructure<ServiceInfo>();
                 }
                 catch (Exception ex)
                 {
