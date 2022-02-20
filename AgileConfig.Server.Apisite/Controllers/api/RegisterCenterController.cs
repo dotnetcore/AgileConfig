@@ -1,12 +1,8 @@
 ﻿using AgileConfig.Server.Apisite.Controllers.api.Models;
-using AgileConfig.Server.Apisite.Filters;
-using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace AgileConfig.Server.Apisite.Controllers.api
@@ -18,28 +14,39 @@ namespace AgileConfig.Server.Apisite.Controllers.api
     [ApiController]
     public class RegisterCenterController : Controller
     {
-        private readonly IAppService _appService;
-        public RegisterCenterController(IAppService appService)
+        private readonly IRegisterCenterService _registerCenterService;
+
+        public RegisterCenterController(IRegisterCenterService registerCenterService)
         {
-            _appService = appService;
+            _registerCenterService = registerCenterService;
         }
        
         [HttpPost]
-        public object Register([FromBody]RegisterServiceInfoVM model)
+        public async Task<RegisterResultVM> Register([FromBody]RegisterServiceInfoVM model)
         {
-            return new
+            var entity = new ServiceInfo();
+            entity.ServiceId = model.ServiceId;
+            entity.ServiceName = model.ServiceName;
+            entity.Ip = model.Ip;
+            entity.Port = model.Port;
+
+            var id = await _registerCenterService.RegisterAsync(entity);
+
+            return new RegisterResultVM
             {
-                uniqueId = Guid.NewGuid(),
+                UniqueId = id
             };
         }
 
 
         [HttpDelete("{id}")]
-        public object UnRegister(string id)
+        public async Task<RegisterResultVM> UnRegister(string id)
         {
-            return new
+            await _registerCenterService.UnRegisterAsync(id);
+
+            return new RegisterResultVM
             {
-                uniqueId = id,
+                UniqueId = id,
             };
         }
     }

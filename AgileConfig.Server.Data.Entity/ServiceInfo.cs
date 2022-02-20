@@ -15,8 +15,8 @@ namespace AgileConfig.Server.Data.Entity
     [OraclePrimaryKeyName("agc_sys_servieinfo_pk")]
     public class ServiceInfo
     {
-        [Column(Name = "id", IsIdentity = true)]
-        public int Id { get; set; }
+        [Column(Name = "id", StringLength = 36)]
+        public string Id { get; set; }
 
         [Column(Name = "service_id", StringLength = 100)]
         public string ServiceId { get; set; }
@@ -35,6 +35,10 @@ namespace AgileConfig.Server.Data.Entity
 
         [Column(Name = "alive")]
         public ServiceAlive Alive { get; set; }
+
+        [Column(Name = "register_time")]
+
+        public DateTime? RegisterTime { get; set; }
     }
   
 }

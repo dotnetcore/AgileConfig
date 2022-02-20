@@ -40,6 +40,7 @@ namespace AgileConfig.Server.Data.Freesql
         public DbSet<ConfigPublished> ConfigPublished { get; set; }
         public DbSet<PublishDetail> PublishDetail { get; set; }
         public DbSet<PublishTimeline> PublishTimeline { get; set; }
+        public DbSet<ServiceInfo> ServiceInfo { get; set; }
 
     }
 }

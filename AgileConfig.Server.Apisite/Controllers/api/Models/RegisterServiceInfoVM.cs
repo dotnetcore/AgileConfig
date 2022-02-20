@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace AgileConfig.Server.Apisite.Models
+namespace AgileConfig.Server.Apisite.Controllers.api.Models
 {
     public class RegisterServiceInfoVM
     {
@@ -10,7 +10,7 @@ namespace AgileConfig.Server.Apisite.Models
 
         public string Ip { get; set; } = "";
 
-        public int? Port { get; set; }
+        public int Port { get; set; }
 
         public List<string> MetaData { get; set; } = new List<string>();
 
