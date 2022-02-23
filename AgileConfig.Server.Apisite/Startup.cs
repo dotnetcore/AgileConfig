@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Text;
 using AgileConfig.Server.Apisite.UIExtension;
 using AgileConfig.Server.Apisite.Websocket;
@@ -24,6 +25,17 @@ namespace AgileConfig.Server.Apisite
         {
             Configuration = configuration;
             Global.LoggerFactory = loggerFactory;
+
+            TrustSSL(configuration);
+        }
+        
+        private void TrustSSL(IConfiguration configuration)
+        {
+            var alwaysTrustSsl = configuration["alwaysTrustSsl"];
+            if (!string.IsNullOrEmpty(alwaysTrustSsl) && alwaysTrustSsl.ToLower() == "true")
+            {
+                ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+            }
         }
 
         public IConfiguration Configuration

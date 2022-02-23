@@ -15,6 +15,7 @@ namespace AgileConfig.Server.Apisite
         private readonly IEventRegister _eventRegister;
         private readonly ISettingService _settingService;
         private readonly IServerNodeService _serverNodeService;
+        private readonly IServiceHealthCheckService _serviceHealthCheckService;
         public InitService(IServiceScopeFactory serviceScopeFactory)
         {
             using (var scope = serviceScopeFactory.CreateScope())
@@ -23,7 +24,9 @@ namespace AgileConfig.Server.Apisite
                 _eventRegister = scope.ServiceProvider.GetService<IEventRegister>();
                 _settingService = scope.ServiceProvider.GetService<ISettingService>();
                 _serverNodeService = scope.ServiceProvider.GetService<IServerNodeService>();
-            }
+                _serverNodeService = scope.ServiceProvider.GetService<IServerNodeService>();
+                _serviceHealthCheckService = scope.ServiceProvider.GetService<IServiceHealthCheckService>();
+            }   
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -33,6 +36,7 @@ namespace AgileConfig.Server.Apisite
                 _serverNodeService.InitWatchNodeAsync();
                 _settingService.InitDefaultEnvironment();
                 _remoteServerNodeProxy.TestEchoAsync();
+                _serviceHealthCheckService.StartCheckAsync();
                 _eventRegister.Init();
             }
 

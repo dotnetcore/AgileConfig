@@ -19,6 +19,7 @@ namespace AgileConfig.Server.Service
             sc.AddScoped<IUserService, UserService>();
             sc.AddScoped<IPremissionService, PermissionService>();
             sc.AddScoped<IRegisterCenterService, RegisterCenterService>();
+            sc.AddSingleton<IServiceHealthCheckService, ServiceHealthCheckService>();
         }
     }
 }

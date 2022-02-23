@@ -14,5 +14,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api.Models
 
         public List<string> MetaData { get; set; } = new List<string>();
 
+        public string CheckUrl { get; set; } = "";
+        
+        public string HeartBeatMode { get; set; }
+
     }
 }

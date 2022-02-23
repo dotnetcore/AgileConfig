@@ -12,7 +12,7 @@ namespace AgileConfig.Server.Data.Entity
     }
 
     [Table(Name = "agc_service_info")]
-    [OraclePrimaryKeyName("agc_sys_servieinfo_pk")]
+    [OraclePrimaryKeyName("agc_serviceinfo_pk")]
     public class ServiceInfo
     {
         [Column(Name = "id", StringLength = 36)]
@@ -39,6 +39,16 @@ namespace AgileConfig.Server.Data.Entity
         [Column(Name = "register_time")]
 
         public DateTime? RegisterTime { get; set; }
+
+        [Column(Name = "last_heart_beat")]
+
+        public DateTime? LastHeartBeat { get; set; }
+
+        [Column(Name = "heart_beat_mode")]
+        public string HeartBeatMode { get; set; }
+
+        [Column(Name = "check_url", StringLength = 2000)]
+        public string CheckUrl { get; set; }
     }
   
 }
