@@ -68,6 +68,12 @@
                 component: './Clients',
               },
               {
+                name: 'list.service-list',
+                icon: 'Cloud',
+                path: '/service',
+                component: './Services',
+              },
+              {
                 name: 'list.logs-list',
                 icon: 'Bars',
                 path: '/logs',

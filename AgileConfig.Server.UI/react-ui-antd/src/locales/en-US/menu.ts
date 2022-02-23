@@ -54,6 +54,7 @@ export default {
   'menu.list.node-list': 'Node',
   'menu.list.app-list': 'App',
   'menu.list.client-list': 'Client',
+  'menu.list.service-list': 'Services',
   'menu.list.config-list': 'Configurations',
   'menu.list.user-list': 'User',
   'menu.list.logs-list': 'Log',

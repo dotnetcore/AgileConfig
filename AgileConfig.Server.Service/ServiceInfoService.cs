@@ -10,81 +10,25 @@ using Microsoft.Extensions.Logging;
 
 namespace AgileConfig.Server.Service
 {
-    public class RegisterCenterService : IRegisterCenterService
+    public class ServiceInfoService : IServiceInfoService
     {
         private FreeSqlContext _dbContext;
-        private ILogger<RegisterCenterService> _logger;
-        public RegisterCenterService(FreeSqlContext freeSql, ILogger<RegisterCenterService> logger)
+
+        public ServiceInfoService(FreeSqlContext freeSql)
         {
             _dbContext = freeSql;
-            _logger = logger;
-        }
-        public async Task<string> RegisterAsync(ServiceInfo serviceInfo)
-        {
-            if (serviceInfo == null)
-            {
-                throw new ArgumentNullException(nameof(serviceInfo));
-            }
-
-            _logger.LogInformation("try to register service {0} {1}", serviceInfo.ServiceId, serviceInfo.ServiceName);
-            
-            //if exist
-            var oldEntity = await _dbContext.ServiceInfo.Where(x=>x.ServiceId == serviceInfo.ServiceId).FirstAsync();
-            if (oldEntity != null)
-            {
-                oldEntity.RegisterTime = DateTime.Now;
-                oldEntity.Alive = ServiceAlive.Online;
-                oldEntity.LastHeartBeat = DateTime.Now;
-                oldEntity.ServiceName = serviceInfo.ServiceName;
-                oldEntity.Ip = serviceInfo.Ip;
-                oldEntity.Port = serviceInfo.Port;
-                oldEntity.MetaData = serviceInfo.MetaData;
-                oldEntity.HeartBeatMode = serviceInfo.HeartBeatMode;
-                oldEntity.CheckUrl = serviceInfo.CheckUrl;
-                await _dbContext.ServiceInfo.UpdateAsync(oldEntity);
-                var rows = await _dbContext.SaveChangesAsync();
-
-                _logger.LogInformation("registered service {0} {1} successful .", serviceInfo.ServiceId, serviceInfo.ServiceName);
-                
-                return oldEntity.Id;
-            }
-
-            serviceInfo.RegisterTime = DateTime.Now;
-            serviceInfo.LastHeartBeat = DateTime.Now;
-            serviceInfo.Alive = ServiceAlive.Online;
-            serviceInfo.Id = Guid.NewGuid().ToString("n");
-
-            _dbContext.ServiceInfo.Add(serviceInfo);
-            await _dbContext.SaveChangesAsync();
-
-            _logger.LogInformation("registered service {0} {1} successful .", serviceInfo.ServiceId, serviceInfo.ServiceName);
-            
-            return serviceInfo.Id;
         }
 
-        public async Task<bool> UnRegisterAsync(string serviceUniqueId)
+        public async Task<List<ServiceInfo>> GetAllServiceInfoAsync()
         {
-            _logger.LogInformation("try to unregister service {0}", serviceUniqueId);
+            var services = await _dbContext.ServiceInfo.Where(x => 1 == 1).ToListAsync();
 
-            if (string.IsNullOrEmpty(serviceUniqueId))
-            {
-                throw new ArgumentNullException(nameof(serviceUniqueId));
-            }
+            return services;
+        }
 
-            var oldEntity = await _dbContext.ServiceInfo.Where(x => x.Id == serviceUniqueId).FirstAsync();
-            if(oldEntity == null)
-            {
-                //if not exist
-                _logger.LogInformation("not find the service {0} .", serviceUniqueId);
-                return false;
-            }
-
-            _dbContext.ServiceInfo.Remove(oldEntity);
-            await _dbContext.SaveChangesAsync();
-            
-            _logger.LogInformation("unregister service {0} {1} successful .", oldEntity.ServiceId, oldEntity.ServiceName);
-
-            return true;
+        public void Dispose()
+        {
+            _dbContext.Dispose();
         }
     }
 }

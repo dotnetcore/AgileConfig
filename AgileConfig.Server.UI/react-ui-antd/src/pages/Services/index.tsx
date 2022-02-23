@@ -1,7 +1,4 @@
 import { getIntl, getLocale } from '@/.umi/plugin-locale/localeExports';
-import AuthorizedEle from '@/components/Authorized/AuthorizedElement';
-import functionKeys from '@/models/functionKeys';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
 import { Button, message, Modal } from 'antd';
@@ -9,7 +6,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useIntl } from 'react-intl';
 import { queryApps } from '../Apps/service';
 import { queryNodes } from '../Nodes/service';
-import { queryClients, reloadClientConfigs, clientOffline } from './service';
+import { queryService, reloadClientConfigs, clientOffline } from './service';
 const { confirm } = Modal;
 
 const handleClientReload = async (client: any) => {
@@ -91,101 +88,65 @@ const services: React.FC = () => {
   }, []);
   const columns: ProColumns[] = [
     {
-      title: intl.formatMessage({
-        id: 'pages.client.table.cols.id'
-      }),
+      title:'唯一ID',
       dataIndex: 'id',
       hideInSearch: true,
     },
     {
-      title: intl.formatMessage({
-        id: 'pages.client.table.cols.node'
-      }),
-      dataIndex: 'address',
-      valueType: 'select',
-      request: getNodesForSelect
+      title: '服务ID',
+      dataIndex: 'serviceId',
     },
     {
-      title: intl.formatMessage({
-        id: 'pages.client.table.cols.appid'
-      }),
-      dataIndex: 'appId',
-      hideInSearch: true,
+      title: '服务名',
+      dataIndex: 'serviceName',
+      sorter: true,
     },
     {
-      title: '环境',
-      dataIndex: 'env',
-      hideInSearch: true,
-    },
-    {
-      title: intl.formatMessage({
-        id: 'pages.client.table.cols.ip'
-      }),
+      title: 'IP',
       dataIndex: 'ip',
       hideInSearch: true,
     },
     {
-      title: intl.formatMessage({
-        id: 'pages.client.table.cols.name'
-      }),
-      dataIndex: 'name',
-      hideInSearch: true,
-    }, {
-      title: intl.formatMessage({
-        id: 'pages.client.table.cols.tag'
-      }),
-      dataIndex: 'tag',
+      title: '端口',
+      dataIndex: 'port',
       hideInSearch: true,
     },
     {
-      title: intl.formatMessage({
-        id: 'pages.client.table.cols.action'
-      }),
-      valueType: 'option',
-      render: (text, record) => [
-        <a
-          onClick={() => {
-            handleClientReload(record);
-          }}
-        >
-          {
-            intl.formatMessage({
-              id: 'pages.client.table.cols.action.refresh'
-            })
-          }
-        </a>,
-        <AuthorizedEle judgeKey={functionKeys.Client_Disconnect}>
-          <Button type="link" danger onClick={
-            () => {
-              const msg = intl.formatMessage({
-                id: 'pages.client.disconnect_message'
-              }) + `【${record.id}】`;
-              confirm({
-                icon: <ExclamationCircleOutlined />,
-                content: msg,
-                async onOk() {
-                  console.log('disconnect client ' + record.id);
-                  const success = await handleClientOffline(record);
-                  if (success) {
-                    actionRef.current?.reload();
-                  }
-                },
-                onCancel() {
-                },
-              });
-            }}>
-            {
-              intl.formatMessage({
-                id: 'pages.client.table.cols.action.disconnect'
-              })
-            }
-          </Button>
-        </AuthorizedEle>
-      ]
+      title: '元数据',
+      dataIndex: 'metaData',
+      hideInSearch: true,
+    },
+    {
+      title: '注册时间',
+      dataIndex: 'registerTime',
+      hideInSearch: true,
+      valueType: 'dateTime',
+      sorter: true,
+    },
+    {
+      title: '最后响应时间',
+      dataIndex: 'lastHeartBeat',
+      hideInSearch: true,
+      valueType: 'dateTime',
+    },
+    {
+      title: '状态',
+      dataIndex: 'alive',
+      valueEnum: {
+        0: {
+          text: '离线',
+          status: 'Default'
+        },
+        1: {
+          text: '在线',
+          status: 'Processing'
+        }
+      },
+      width: 120
     }
   ];
   return (
-    <PageContainer header={{ title: intl.formatMessage({ id: 'pages.client.header.title' }) }}>
+    <PageContainer>
       <ProTable
         search={{
           labelWidth: 'auto',
@@ -196,7 +157,19 @@ const services: React.FC = () => {
         }
         rowKey="id"
         columns={columns}
-        request={(params, sorter, filter) => queryClients(params)}
+        request={(params, sorter, filter) => {
+          let sortField = 'registerTime';
+          let ascOrDesc = 'descend';
+          for (const key in sorter) {
+            sortField = key;
+            const val = sorter[key];
+            if (val) {
+              ascOrDesc = val;
+            }
+          }
+          console.log(sortField, ascOrDesc);
+          return queryService({ sortField, ascOrDesc, ...params })
+        }}
       />
     </PageContainer>
   );
