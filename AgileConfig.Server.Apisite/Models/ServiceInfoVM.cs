@@ -23,4 +23,5 @@ public class ServiceInfoVM
 
     public DateTime? LastHeartBeat { get; set; }
 
+    public string HeartBeatMode { get; set; }
 }

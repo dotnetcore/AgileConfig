@@ -86,5 +86,23 @@ namespace AgileConfig.Server.Service
 
             return true;
         }
+
+        public async Task<bool> ReceiveHeartbeatAsync(string serviceUniqueId)
+        {
+            var entity = await _dbContext.ServiceInfo.Where(x => x.Id == serviceUniqueId).FirstAsync();
+            if (entity == null)
+            {
+                return false;
+            }
+            _logger.LogInformation("receive service {0} {1} heartbeat .", entity.ServiceId, entity.ServiceName);
+
+            entity.Alive = ServiceAlive.Online;
+            entity.LastHeartBeat = DateTime.Now;
+            await _dbContext.UpdateAsync(entity);
+
+            await _dbContext.SaveChangesAsync();
+
+            return true;
+        }
     }
 }

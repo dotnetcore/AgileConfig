@@ -88,7 +88,8 @@ namespace AgileConfig.Server.Apisite.Controllers
                     Port = service.Port,
                     LastHeartBeat = service.LastHeartBeat,
                     MetaData = service.MetaData,
-                    RegisterTime = service.RegisterTime
+                    RegisterTime = service.RegisterTime,
+                    HeartBeatMode = service.HeartBeatMode
                 });
             }
 

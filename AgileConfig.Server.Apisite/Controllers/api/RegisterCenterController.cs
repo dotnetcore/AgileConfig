@@ -53,5 +53,13 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 UniqueId = id,
             };
         }
+
+        [HttpPost("heartbeat/{id}")]
+        public async Task<string> Heartbeat(string id)
+        {
+            await _registerCenterService.ReceiveHeartbeatAsync(id);
+
+            return "ok";
+        }
     }
 }

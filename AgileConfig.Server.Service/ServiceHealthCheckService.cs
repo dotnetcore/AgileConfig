@@ -52,10 +52,13 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
                         {
                             lstHeartBeat = DateTime.Now;
                         }
-                        if ((DateTime.Now - lstHeartBeat.Value).TotalMinutes > 10)
+                        if ((DateTime.Now - lstHeartBeat.Value).TotalMinutes > 1)
                         {
-                            //客户端主动心跳模式：超过10分钟没有心跳，则认为服务不可用
-                            await UpdateServiceStatus(service.Id, ServiceAlive.Offline);
+                            //客户端主动心跳模式：超过1分钟没有心跳，则认为服务不可用
+                            if (service.Alive == ServiceAlive.Online)
+                            {
+                                await UpdateServiceStatus(service.Id, ServiceAlive.Offline);
+                            }
                         }
                         continue;
                     }
