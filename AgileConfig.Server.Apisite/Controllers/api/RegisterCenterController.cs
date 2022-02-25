@@ -3,6 +3,7 @@ using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
@@ -16,10 +17,13 @@ namespace AgileConfig.Server.Apisite.Controllers.api
     public class RegisterCenterController : Controller
     {
         private readonly IRegisterCenterService _registerCenterService;
+        private readonly IServiceInfoService _serviceInfoService;
 
-        public RegisterCenterController(IRegisterCenterService registerCenterService)
+        public RegisterCenterController(IRegisterCenterService registerCenterService
+            ,IServiceInfoService serviceInfoService)
         {
             _registerCenterService = registerCenterService;
+            _serviceInfoService = serviceInfoService;
         }
        
         [HttpPost]
@@ -54,12 +58,103 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             };
         }
 
-        [HttpPost("heartbeat/{id}")]
-        public async Task<string> Heartbeat(string id)
+        [HttpPost("heartbeat")]
+        public async Task<HeartbeatResultVM> Heartbeat([FromBody]HeartbeatParam param)
         {
-            await _registerCenterService.ReceiveHeartbeatAsync(id);
+            if (param == null)
+            {
+                throw  new ArgumentNullException(nameof(param));
+            }
 
-            return "ok";
+            bool serviceHeartbeatResult = false;
+            if (!string.IsNullOrEmpty(param.UniqueId))
+            {
+                serviceHeartbeatResult = await _registerCenterService.ReceiveHeartbeatAsync(param.UniqueId);
+            }
+
+            return new HeartbeatResultVM
+            {
+                Success = serviceHeartbeatResult,
+                DataVersion = "x"
+            };
+        }
+        
+        [HttpGet("services")]
+        public async Task<QueryServiceInfoResultVM> AllServices()
+        {
+            var services = await _serviceInfoService.GetAllServiceInfoAsync();
+            var vms = new List<ServiceInfoVM>();
+            foreach (var serviceInfo in services)
+            {
+                var vm = new ServiceInfoVM
+                {
+                    ServiceId = serviceInfo.ServiceId,
+                    ServiceName = serviceInfo.ServiceName,
+                    Ip = serviceInfo.Ip,
+                    Port = serviceInfo.Port,
+                    MetaData = JsonConvert.DeserializeObject<List<string>>(serviceInfo.MetaData),
+                    Status = serviceInfo.Alive
+                };
+                vms.Add(vm);
+            }
+
+            return new QueryServiceInfoResultVM()
+            {
+                Data = vms,
+                DataVersion = "x"
+            };
+        }
+        
+        [HttpGet("services/online")]
+        public async Task<QueryServiceInfoResultVM> OnlineServices()
+        {
+            var services = await _serviceInfoService.GetOnlineServiceInfoAsync();
+            var vms = new List<ServiceInfoVM>();
+            foreach (var serviceInfo in services)
+            {
+                var vm = new ServiceInfoVM
+                {
+                    ServiceId = serviceInfo.ServiceId,
+                    ServiceName = serviceInfo.ServiceName,
+                    Ip = serviceInfo.Ip,
+                    Port = serviceInfo.Port,
+                    MetaData = JsonConvert.DeserializeObject<List<string>>(serviceInfo.MetaData),
+                    Status = serviceInfo.Alive
+                };
+                vms.Add(vm);
+            }
+
+            return new QueryServiceInfoResultVM()
+            {
+                Data = vms,
+                DataVersion = "x"
+            };
+        }
+        
+        [HttpGet("services/offline")]
+        public async Task<QueryServiceInfoResultVM> OfflineServices()
+        {
+            var services = await _serviceInfoService.GetOfflineServiceInfoAsync();
+            var vms = new List<ServiceInfoVM>();
+            foreach (var serviceInfo in services)
+            {
+                var vm = new ServiceInfoVM
+                {
+                    ServiceId = serviceInfo.ServiceId,
+                    ServiceName = serviceInfo.ServiceName,
+                    Ip = serviceInfo.Ip,
+                    Port = serviceInfo.Port,
+                    MetaData = JsonConvert.DeserializeObject<List<string>>(serviceInfo.MetaData),
+                    Status = serviceInfo.Alive
+                };
+                vms.Add(vm);
+            }
+
+            return new QueryServiceInfoResultVM()
+            {
+                Data = vms,
+                DataVersion = "x"
+            };
         }
     }
 }

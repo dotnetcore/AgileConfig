@@ -96,11 +96,18 @@ namespace AgileConfig.Server.Service
             }
             _logger.LogInformation("receive service {0} {1} heartbeat .", entity.ServiceId, entity.ServiceName);
 
-            entity.Alive = ServiceAlive.Online;
-            entity.LastHeartBeat = DateTime.Now;
-            await _dbContext.UpdateAsync(entity);
+            if (entity.HeartBeatMode == "server")
+            {
+                //如果是server模式，则不作为服务是否在线的判断依据        
+            }
+            else
+            {
+                entity.Alive = ServiceAlive.Online;
+                entity.LastHeartBeat = DateTime.Now;
+                await _dbContext.UpdateAsync(entity);
 
-            await _dbContext.SaveChangesAsync();
+                await _dbContext.SaveChangesAsync();
+            }
 
             return true;
         }

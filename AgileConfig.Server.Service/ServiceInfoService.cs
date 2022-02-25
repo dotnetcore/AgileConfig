@@ -26,6 +26,21 @@ namespace AgileConfig.Server.Service
             return services;
         }
 
+        public async Task<List<ServiceInfo>> GetOnlineServiceInfoAsync()
+        {
+            var services = await _dbContext.ServiceInfo.Where(x => x.Alive == ServiceAlive.Online).ToListAsync();
+            
+            return services;
+
+        }
+
+        public async Task<List<ServiceInfo>> GetOfflineServiceInfoAsync()
+        {
+            var services = await _dbContext.ServiceInfo.Where(x => x.Alive == ServiceAlive.Offline).ToListAsync();
+            
+            return services;
+        }
+
         public void Dispose()
         {
             _dbContext.Dispose();

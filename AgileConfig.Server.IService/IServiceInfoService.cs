@@ -8,5 +8,10 @@ namespace AgileConfig.Server.IService
     public interface IServiceInfoService: IDisposable
     {
         Task<List<ServiceInfo>> GetAllServiceInfoAsync();
+        
+        Task<List<ServiceInfo>> GetOnlineServiceInfoAsync();
+
+        Task<List<ServiceInfo>> GetOfflineServiceInfoAsync();
+
     }
 }
