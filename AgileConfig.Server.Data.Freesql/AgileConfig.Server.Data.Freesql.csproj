@@ -1,17 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FreeSql" Version="1.8.1" />
-    <PackageReference Include="FreeSql.DbContext" Version="1.8.1" />
-    <PackageReference Include="FreeSql.Provider.MySql" Version="1.8.1" />
-    <PackageReference Include="FreeSql.Provider.Oracle" Version="1.8.1" />
-    <PackageReference Include="FreeSql.Provider.PostgreSQL" Version="1.8.1" />
-    <PackageReference Include="FreeSql.Provider.Sqlite" Version="1.8.1" />
-    <PackageReference Include="FreeSql.Provider.SqlServer" Version="1.8.1" />
+    <PackageReference Include="FreeSql" Version="2.5.200" />
+    <PackageReference Include="FreeSql.DbContext" Version="2.5.200" />
+    <PackageReference Include="FreeSql.Provider.MySql" Version="2.5.200" />
+    <PackageReference Include="FreeSql.Provider.Oracle" Version="2.5.200" />
+    <PackageReference Include="FreeSql.Provider.PostgreSQL" Version="2.5.200" />
+    <PackageReference Include="FreeSql.Provider.Sqlite" Version="2.5.200" />
+    <PackageReference Include="FreeSql.Provider.SqlServer" Version="2.5.200" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="4.0.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient.SNI.runtime" Version="4.0.0" />
   </ItemGroup>
 
   <ItemGroup>

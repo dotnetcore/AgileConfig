@@ -28,6 +28,7 @@ export default {
   'menu.list.config-list': '配置项',
   'menu.list.user-list': '用户',
   'menu.list.client-list': '客户端',
+  'menu.list.service-list': '服务',
   'menu.list.logs-list': '日志',
   'menu.list.basic-list': '标准列表',
   'menu.list.card-list': '卡片列表',

@@ -3,12 +3,34 @@ using System;
 
 namespace AgileConfig.Server.Data.Entity
 {
+    /// <summary>
+    ///    Deleted = 0,
+    ///    Enabled = 1,
+    /// </summary>
     public enum ConfigStatus
     {
         Deleted = 0,
         Enabled = 1,
     }
 
+    /// <summary>
+    ///    Add = 0,
+    /// Edit = 1,
+     ///   Deleted = 2,
+     ///   Commit = 10
+    /// </summary>
+    public enum EditStatus
+    {
+        Add = 0,
+        Edit = 1,
+        Deleted = 2,
+        Commit = 10
+    }
+
+    /// <summary>
+    ///   WaitPublish = 0,
+    /// Online = 1,
+    /// </summary>
     public enum OnlineStatus
     {
         WaitPublish = 0,
@@ -16,6 +38,7 @@ namespace AgileConfig.Server.Data.Entity
     }
 
     [Table(Name = "agc_config")]
+    [OraclePrimaryKeyName("agc_config_pk")]
     public class Config
     {
         [Column(Name = "id", StringLength = 36)]
@@ -46,5 +69,11 @@ namespace AgileConfig.Server.Data.Entity
 
         [Column(Name = "online_status")]
         public OnlineStatus OnlineStatus { get; set; }
+
+        [Column(Name = "edit_status")]
+        public EditStatus EditStatus { get; set; }
+
+        [Column(Name = "env", StringLength = 50)]
+        public string Env { get; set; }
     }
 }

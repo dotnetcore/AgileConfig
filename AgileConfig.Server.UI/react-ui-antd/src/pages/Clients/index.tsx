@@ -64,7 +64,8 @@ const clients:React.FC = () => {
     const arr:any[] = [];
     result.data.forEach((x:{address:string})=>{
        arr.push({
-         value: x.address
+         value: x.address,
+         label: x.address,
        });
     });
 
@@ -111,6 +112,11 @@ const clients:React.FC = () => {
         id: 'pages.client.table.cols.appid'
       }),
       dataIndex: 'appId',
+      hideInSearch: true,
+    },
+    {
+      title: '环境',
+      dataIndex: 'env',
       hideInSearch: true,
     },
     {

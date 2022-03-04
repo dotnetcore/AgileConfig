@@ -31,5 +31,7 @@ namespace AgileConfig.Server.IService
         Task<bool> SaveUserAppAuth(string appId, List<string> userIds, string permission);
 
         Task<List<User>> GetUserAppAuth(string appId, string permission);
+
+        List<string> GetAppGroups();
     }
 }

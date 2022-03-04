@@ -4,24 +4,42 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AgileConfig.Server.IService;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace AgileConfig.Server.Apisite
 {
     public class InitService: IHostedService
     {
-        private IRemoteServerNodeProxy _remoteServerNodeProxy;
-        private IEventRegister _eventRegister;
-        public InitService(IRemoteServerNodeProxy proxy, IEventRegister eventRegister)
+        private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
+        private readonly IEventRegister _eventRegister;
+        private readonly ISettingService _settingService;
+        private readonly IServerNodeService _serverNodeService;
+        private readonly IServiceHealthCheckService _serviceHealthCheckService;
+        public InitService(IServiceScopeFactory serviceScopeFactory)
         {
-            _remoteServerNodeProxy = proxy;
-            _eventRegister = eventRegister;
+            using (var scope = serviceScopeFactory.CreateScope())
+            {
+                _remoteServerNodeProxy = scope.ServiceProvider.GetService<IRemoteServerNodeProxy>();
+                _eventRegister = scope.ServiceProvider.GetService<IEventRegister>();
+                _settingService = scope.ServiceProvider.GetService<ISettingService>();
+                _serverNodeService = scope.ServiceProvider.GetService<IServerNodeService>();
+                _serverNodeService = scope.ServiceProvider.GetService<IServerNodeService>();
+                _serviceHealthCheckService = scope.ServiceProvider.GetService<IServiceHealthCheckService>();
+            }   
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _remoteServerNodeProxy.TestEchoAsync();
-            _eventRegister.Init();
+            if (Appsettings.IsAdminConsoleMode)
+            {
+                _serverNodeService.InitWatchNodeAsync();
+                _settingService.InitDefaultEnvironment();
+                _remoteServerNodeProxy.TestEchoAsync();
+                _serviceHealthCheckService.StartCheckAsync();
+                _eventRegister.Init();
+            }
+
             return  Task.CompletedTask;
         }
 

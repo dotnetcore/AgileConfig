@@ -10,7 +10,6 @@ namespace AgileConfig.Server.Service
             sc.AddScoped<IAppService, AppService>();
             sc.AddScoped<IConfigService, ConfigService>();
             sc.AddScoped<IServerNodeService, ServerNodeService>();
-            sc.AddScoped<IModifyLogService, ModifyLogService>();
             sc.AddScoped<ISettingService, SettingService>();
             sc.AddSingleton<IRemoteServerNodeProxy, RemoteServerNodeProxy>();
             sc.AddScoped<ISysLogService, SysLogService>();
@@ -19,6 +18,9 @@ namespace AgileConfig.Server.Service
             sc.AddSingleton<IEventRegister, EventRegister>();
             sc.AddScoped<IUserService, UserService>();
             sc.AddScoped<IPremissionService, PermissionService>();
+            sc.AddScoped<IRegisterCenterService, RegisterCenterService>();
+            sc.AddSingleton<IServiceHealthCheckService, ServiceHealthCheckService>();
+            sc.AddScoped<IServiceInfoService, ServiceInfoService>();
         }
     }
 }

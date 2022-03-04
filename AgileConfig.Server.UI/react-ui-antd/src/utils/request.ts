@@ -3,7 +3,6 @@ import { extend, RequestOptionsInit } from 'umi-request';
 import { notification } from 'antd';
 import { getToken } from './authority';
 import { history } from 'umi';
-import { stringify } from 'querystring';
 
 const codeMessage = {
   200: '服务器成功返回请求的数据。',

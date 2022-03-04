@@ -35,5 +35,16 @@ namespace AgileConfig.Server.IService
         /// <returns></returns>
         Task<bool> SetSuperAdminPassword(string password);
 
+        /// <summary>
+        /// 初始化环境列表
+        /// </summary>
+        /// <returns></returns>
+        Task<bool> InitDefaultEnvironment();
+
+        /// <summary>
+        /// 获取环境列表
+        /// </summary>
+        /// <returns></returns>
+        Task<string[]> GetEnvironmentList();
     }
 }

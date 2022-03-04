@@ -1,0 +1,498 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>AgileConfig.Server.Apisite</name>
+    </assembly>
+    <members>
+        <member name="P:AgileConfig.Server.Apisite.Appsettings.IsPreviewMode">
+            <summary>
+            是否演示模式
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Appsettings.IsAdminConsoleMode">
+            <summary>
+            是否控制台模式
+            </summary>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.AdminController.PasswordInited">
+            <summary>
+            is password inited ?
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.AdminController.InitPassword(AgileConfig.Server.Apisite.Models.InitPasswordVM)">
+            <summary>
+            初始化密码
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:AgileConfig.Server.Apisite.Controllers.api.AppController">
+            <summary>
+            应用操作接口
+            </summary>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.api.AppController.GetAll">
+            <summary>
+            获取所有应用
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.api.AppController.GetById(System.String)">
+            <summary>
+            根据id获取应用
+            </summary>
+            <param name="id">应用id</param>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.api.AppController.Add(AgileConfig.Server.Apisite.Controllers.api.Models.ApiAppVM)">
+            <summary>
+            添加应用
+            </summary>
+            <param name="model">应用模型</param>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.api.AppController.Edit(System.String,AgileConfig.Server.Apisite.Controllers.api.Models.ApiAppVM)">
+            <summary>
+            编辑应用
+            </summary>
+            <param name="id">应用id</param>
+            <param name="model">编辑后的应用模型</param>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.api.AppController.Delete(System.String)">
+            <summary>
+            删除应用
+            </summary>
+            <param name="id">应用id</param>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.api.AppController.Publish(System.String,System.String)">
+            <summary>
+            发布某个应用的待发布配置项
+            </summary>
+            <param name="appId">应用id</param>
+            <param name="env">环境</param>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.api.AppController.PublishHistory(System.String,System.String)">
+            <summary>
+            查询某个应用的发布历史
+            </summary>
+            <param name="appId">应用id</param>
+            <param name="env">环境</param>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.api.AppController.Rollback(System.String,System.String)">
+            <summary>
+            回滚某个应用的发布版本，回滚到 historyId 指定的时刻
+            </summary>
+            <param name="historyId">发布历史</param>
+            <param name="env">环境</param>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.api.ConfigController.GetAppConfig(System.String,System.String)">
+            <summary>
+            根据appid查所有发布的配置项 , 包括继承过来的配置项.
+            注意： 这个接口用的不是用户名密码的认证，用的是appid + secret的认证
+            </summary>
+            <param name="appId">应用id</param>
+            <param name="env">环境</param>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.api.ConfigController.GetConfigs(System.String,System.String)">
+            <summary>
+            根据应用id查找配置，这些配置有可能是未发布的配置 。请跟 config/app/{appId} 接口加以区分。
+            </summary>
+            <param name="appId">应用id</param>
+            <param name="env">环境</param>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.api.ConfigController.GetConfig(System.String,System.String)">
+            <summary>
+            根据编号获取配置项的详情
+            </summary>
+            <param name="id">配置id</param>
+            <param name="env">环境</param>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.api.ConfigController.Add(AgileConfig.Server.Apisite.Controllers.api.Models.ApiConfigVM,System.String)">
+            <summary>
+            添加一个配置项
+            </summary>
+            <param name="model">配置模型</param>
+            <param name="env">环境</param>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.api.ConfigController.Edit(System.String,AgileConfig.Server.Apisite.Controllers.api.Models.ApiConfigVM,System.String)">
+            <summary>
+            编辑一个配置
+            </summary>
+            <param name="id">编号</param>
+            <param name="model">模型</param>
+            <param name="env">环境</param>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.api.ConfigController.Delete(System.String,System.String)">
+            <summary>
+            删除一个配置
+            </summary>
+            <param name="id">配置id</param>
+            <param name="env">环境</param>
+            <returns></returns>
+        </member>
+        <member name="T:AgileConfig.Server.Apisite.Controllers.api.Models.ApiAppVM">
+            <summary>
+            restful api 返回的 app  模型
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiAppVM.Inheritanced">
+            <summary>
+            是否可继承
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiAppVM.Id">
+            <summary>
+            id
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiAppVM.Name">
+            <summary>
+            name
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiAppVM.Secret">
+            <summary>
+            密钥
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiAppVM.Enabled">
+            <summary>
+            是否启用
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiAppVM.InheritancedApps">
+            <summary>
+            关联的app
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiAppVM.AppAdmin">
+            <summary>
+            管理员
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiConfigVM.Id">
+            <summary>
+            id
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiConfigVM.AppId">
+            <summary>
+            应用
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiConfigVM.Group">
+            <summary>
+            组
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiConfigVM.Key">
+            <summary>
+            键
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiConfigVM.Value">
+            <summary>
+            值
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiConfigVM.Status">
+            <summary>
+            状态 
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiConfigVM.OnlineStatus">
+            <summary>
+            在线状态
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiConfigVM.EditStatus">
+            <summary>
+            编辑状态
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiConfigVM.Description">
+            <summary>
+            描述
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiNodeVM.Address">
+            <summary>
+            节点地址
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiNodeVM.Remark">
+            <summary>
+            备注
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiNodeVM.Status">
+            <summary>
+            状态
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiNodeVM.LastEchoTime">
+            <summary>
+            最后响应时间
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiPublishTimelineVM.Id">
+            <summary>
+            编号
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiPublishTimelineVM.AppId">
+            <summary>
+            应用id
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiPublishTimelineVM.PublishTime">
+            <summary>
+            发布时间
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiPublishTimelineVM.PublishUserId">
+            <summary>
+            发布者
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiPublishTimelineVM.Version">
+            <summary>
+            发布版本序号
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiPublishTimelineVM.Log">
+            <summary>
+            发布日志
+            </summary>
+        </member>
+        <member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiPublishTimelineVM.Env">
+            <summary>
+            环境
+            </summary>
+        </member>
+        <member name="T:AgileConfig.Server.Apisite.Controllers.api.NodeController">
+            <summary>
+            节点操作接口
+            </summary>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.api.NodeController.GetAll">
+            <summary>
+            获取所有节点
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.api.NodeController.Add(AgileConfig.Server.Apisite.Controllers.api.Models.ApiNodeVM)">
+            <summary>
+            添加节点
+            </summary>
+            <param name="model">节点模型</param>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.api.NodeController.Delete(System.String)">
+            <summary>
+            删除节点
+            </summary>
+            <param name="address">节点地址</param>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.AppController.DisableOrEanble(System.String)">
+            <summary>
+            在启动跟禁用之间进行切换
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.AppController.InheritancedApps(System.String)">
+            <summary>
+            获取所有可以继承的app
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.AppController.SaveAppAuth(AgileConfig.Server.Apisite.Models.AppAuthVM)">
+            <summary>
+            保存app的授权信息
+            </summary>
+            <param name="model"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.ConfigController.IsOnlyUpdateDescription(AgileConfig.Server.Data.Entity.Config,AgileConfig.Server.Data.Entity.Config)">
+            <summary>
+            是否只是修改了描述信息
+            </summary>
+            <param name="newConfig"></param>
+            <param name="oldConfig"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.ConfigController.Search(System.String,System.String,System.String,System.Nullable{AgileConfig.Server.Data.Entity.OnlineStatus},System.String,System.String,System.String,System.Int32,System.Int32)">
+            <summary>
+            按多条件进行搜索
+            </summary>
+            <param name="appId">应用id</param>
+            <param name="group">分组</param>
+            <param name="key">键</param>
+            <param name="onlineStatus">在线状态</param>
+            <param name="pageSize">分页大小</param>
+            <param name="current">当前页</param>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.ConfigController.Publish(AgileConfig.Server.Apisite.Models.PublishLogVM,System.String)">
+            <summary>
+            发布所有待发布的配置项
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.ConfigController.PreViewJsonFile">
+            <summary>
+            预览上传的json文件
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.ConfigController.ExportJson(System.String,System.String)">
+            <summary>
+            导出json文件
+            </summary>
+            <param name="appId">应用id</param>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.ConfigController.WaitPublishStatus(System.String,System.String)">
+            <summary>
+            获取待发布的明细
+            </summary>
+            <param name="appId">应用id</param>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.ConfigController.PublishHistory(System.String,System.String)">
+            <summary>
+            获取发布详情的历史
+            </summary>
+            <param name="appId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.ConfigController.GetJson(System.String,System.String)">
+            <summary>
+            获取json格式的配置
+            </summary>
+            <param name="appId">应用id</param>
+            <returns></returns>
+        </member>
+        <member name="T:AgileConfig.Server.Apisite.Controllers.RemoteOPController">
+            <summary>
+            这个Controller用来接受控制台节点发送过来的命令
+            </summary>
+        </member>
+        <member name="T:AgileConfig.Server.Apisite.Controllers.RemoteServerProxyController">
+            <summary>
+            这个Controller是控制台网页跟后台的接口，不要跟RemoteOp那个Controller混淆
+            </summary>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.RemoteServerProxyController.Client_Offline(System.String,System.String)">
+            <summary>
+            通知一个节点的某个客户端离线
+            </summary>
+            <param name="address"></param>
+            <param name="clientId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.RemoteServerProxyController.AllClients_Reload(System.String)">
+            <summary>
+            通知某个节点让所有的客户端刷新配置项
+            </summary>
+            <param name="address"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.RemoteServerProxyController.Client_Reload(System.String,System.String)">
+            <summary>
+            通知某个节点个某个客户端刷新配置项
+            </summary>
+            <param name="address"></param>
+            <param name="clientId"></param>
+            <returns></returns>
+        </member>
+        <member name="T:AgileConfig.Server.Apisite.Controllers.ReportController">
+            <summary>
+            这个Controller用来上报节点的一些情况，比如链接了多少客户端等信息
+            </summary>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.ReportController.Clients">
+            <summary>
+            获取本节点的客户端信息
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.ReportController.ServerNodeClients(System.String)">
+            <summary>
+            获取某个节点的客户端信息
+            </summary>
+            <param name="address"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.ReportController.AppCount">
+            <summary>
+            获取App数量
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.ReportController.ConfigCount">
+            <summary>
+            获取Config项目数量
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.ReportController.NodeCount">
+            <summary>
+            获取Config项目数量
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Controllers.ReportController.RemoteNodesStatus">
+            <summary>
+            获取所有节点的状态信息
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:AgileConfig.Server.Apisite.Filters.AdmBasicAuthenticationAttribute">
+            <summary>
+            对请求进行basic认证的filter
+            </summary>
+        </member>
+        <member name="T:AgileConfig.Server.Apisite.Filters.AppBasicAuthenticationAttribute">
+            <summary>
+            对请求进行basic认证的filter
+            </summary>
+        </member>
+        <member name="F:AgileConfig.Server.Apisite.Filters.PremissionCheckAttribute._getAppIdParamFuncs">
+            <summary>
+            因为 attribute 不能传递 func 参数，所有从 action 的参数内获取 appId 的操作只能提前内置在一个静态字典内。
+            </summary>
+        </member>
+        <member name="T:AgileConfig.Server.Apisite.Filters.PremissionCheckByBasicAttribute">
+            <summary>
+            权限判断，用户信息从basic认证的头部取
+            </summary>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Utilites.ControllerExt.GetCurrentUserName(Microsoft.AspNetCore.Mvc.Controller)">
+            <summary>
+            获取用户名，优先从Claim获取，没有从Basic认证的头部取
+            </summary>
+            <param name="ctrl"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AgileConfig.Server.Apisite.Utilites.ControllerExt.GetCurrentUserId(Microsoft.AspNetCore.Mvc.Controller,AgileConfig.Server.IService.IUserService)">
+            <summary>
+            获取用户Id，优先从Claim获取，没有从Basic认证的头部取用户名后从数据库查Id
+            </summary>
+            <param name="ctrl"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

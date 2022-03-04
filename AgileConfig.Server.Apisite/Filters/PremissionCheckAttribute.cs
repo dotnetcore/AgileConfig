@@ -1,5 +1,6 @@
 ﻿using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Apisite.Utilites;
+using AgileConfig.Server.Common;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -7,29 +8,59 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AgileConfig.Server.Data.Entity;
 
 namespace AgileConfig.Server.Apisite.Filters
 {
     public class PremissionCheckAttribute : ActionFilterAttribute
     {
+        private static string GetEnvFromArgs(IDictionary<string, object> args, IConfigService configService)
+        {
+            args.TryGetValue("env", out object env);
+            var envStr = "";
+            if (env == null)
+            {
+                envStr = configService.IfEnvEmptySetDefaultAsync(null).GetAwaiter().GetResult();
+            }
+            else
+            {
+                envStr = env.ToString();
+            }
+
+            return envStr;
+        }
+
         /// <summary>
         /// 因为 attribute 不能传递 func 参数，所有从 action 的参数内获取 appId 的操作只能提前内置在一个静态字典内。
         /// </summary>
         protected static Dictionary<string, Func<ActionExecutingContext, IPremissionService, IConfigService, string>> _getAppIdParamFuncs = new Dictionary<string, Func<ActionExecutingContext, IPremissionService, IConfigService, string>>
         {
             {
-                "Config.Add",(args, premission, config)=> { var model = args.ActionArguments["model"];  return (model as ConfigVM)?.AppId; }
+                "Config.Add",(args, premission, config)=> { var model = args.ActionArguments["model"];  return (model as IAppIdModel)?.AppId; }
             },
              {
                 "Config.AddRange",(args, premission, config)=> { var model = args.ActionArguments["model"];  return (model as List<ConfigVM>)?.FirstOrDefault()?.AppId; }
             },
+             {
+                 "Config.EnvSync",(args, premission, config)=> { var appId = args.ActionArguments["appId"];  return appId?.ToString(); }
+             },
             {
-                "Config.Edit",(args, premission, config)=> { var model = args.ActionArguments["model"];  return (model as ConfigVM)?.AppId; }
+                "Config.Edit",(args, premission, config)=> { var model = args.ActionArguments["model"];  return (model as IAppIdModel)?.AppId; }
             },
             {
                 "Config.Delete", (args, premission, configService) =>  {
                         var id = args.ActionArguments["id"];
-                        var config = configService.GetAsync(id.ToString()).GetAwaiter().GetResult();
+                        var env = GetEnvFromArgs(args.ActionArguments, configService);
+                        var config = configService.GetAsync(id.ToString(),env).GetAwaiter().GetResult();
+
+                        return config.AppId;
+                    }
+            },
+               {
+                "Config.DeleteSome", (args, premission, configService) =>  {
+                        var ids = args.ActionArguments["ids"] as List<string>;
+                        var env = GetEnvFromArgs(args.ActionArguments, configService);
+                        var config = configService.GetAsync(ids.FirstOrDefault(),env).GetAwaiter().GetResult();
 
                         return config.AppId;
                     }
@@ -37,7 +68,8 @@ namespace AgileConfig.Server.Apisite.Filters
             {
                 "Config.Offline", (args, premission, configService) =>  {
                         var id = args.ActionArguments["configId"] ;
-                        var config = configService.GetAsync(id.ToString()).GetAwaiter().GetResult();
+                        var env = GetEnvFromArgs(args.ActionArguments, configService);
+                        var config = configService.GetAsync(id.ToString(),env).GetAwaiter().GetResult();
 
                         return config.AppId;
                     }
@@ -47,7 +79,8 @@ namespace AgileConfig.Server.Apisite.Filters
                 "Config.OfflineSome", (args, premission, configService) =>  {
                         var ids = args.ActionArguments["configIds"] as List<string>;
                         var id = ids?.FirstOrDefault();
-                        var config = configService.GetAsync(id.ToString()).GetAwaiter().GetResult();
+                        var env = GetEnvFromArgs(args.ActionArguments, configService);
+                        var config = configService.GetAsync(ids.FirstOrDefault(),env).GetAwaiter().GetResult();
 
                         return config.AppId;
                     }
@@ -55,30 +88,38 @@ namespace AgileConfig.Server.Apisite.Filters
             ,
             {
                 "Config.Publish", (args, premission, configService) =>  {
-                        var id = args.ActionArguments["configId"] ;
-                        var config = configService.GetAsync(id.ToString()).GetAwaiter().GetResult();
+                        var model = args.ActionArguments["model"] as IAppIdModel;
 
-                        return config.AppId;
+                        return model?.AppId;
                     }
             }
             ,
             {
-                "Config.PublishSome", (args, premission, configService) =>  {
-                        var ids = args.ActionArguments["configIds"] as List<string>;
-                        var id = ids?.FirstOrDefault();
-                        var config = configService.GetAsync(id.ToString()).GetAwaiter().GetResult();
+                "Config.Publish_API", (args, premission, configService) =>  {
+                        var appId = args.ActionArguments["appId"];
 
-                        return config.AppId;
+                        return appId.ToString();
                     }
-            },
+            }
+            ,
              {
                 "Config.Rollback", (args, premission, configService) =>  {
-                        var id = args.ActionArguments["configId"] as string;
-                        var config = configService.GetAsync(id.ToString()).GetAwaiter().GetResult();
-
-                        return config.AppId;
+                        var timelineId = args.ActionArguments["publishTimelineId"] as string;
+                        var env =  GetEnvFromArgs(args.ActionArguments, configService);
+                        var detail = configService.GetPublishDetailByPublishTimelineIdAsync(timelineId, env).GetAwaiter().GetResult();
+                        return detail.FirstOrDefault()?.AppId;
                     }
-            },
+            }
+             ,
+             {
+                "Config.Rollback_API", (args, premission, configService) =>  {
+                        var timelineId = args.ActionArguments["historyId"] as string;
+                        var env =  GetEnvFromArgs(args.ActionArguments, configService);
+                        var detail = configService.GetPublishDetailByPublishTimelineIdAsync(timelineId, env).GetAwaiter().GetResult();
+                        return detail.FirstOrDefault()?.AppId;
+                    }
+            }
+            ,
              {
                 "App.Add", (args, premission, configService) =>  {
                     return  "";
@@ -86,7 +127,7 @@ namespace AgileConfig.Server.Apisite.Filters
             },
              {
                 "App.Edit", (args, premission, configService) =>  {
-                      var app = args.ActionArguments["model"] as AppVM;
+                      var app = args.ActionArguments["model"] as IAppModel;
                       return app.Id;
                 }
             },
@@ -104,7 +145,7 @@ namespace AgileConfig.Server.Apisite.Filters
             },
              {
                 "App.Auth", (args, premission, configService) =>  {
-                    var model = args.ActionArguments["model"] as AppAuthVM;
+                    var model = args.ActionArguments["model"] as IAppIdModel;
                     return model?.AppId;
                 }
             },
@@ -116,7 +157,7 @@ namespace AgileConfig.Server.Apisite.Filters
             },
              {
                 "Node.Delete", (args, premission, configService) =>  {
-                    var model = args.ActionArguments["model"] as AppAuthVM;
+                    var model = args.ActionArguments["model"] as IAppIdModel;
                     return model?.AppId;
                 }
             }
@@ -125,14 +166,16 @@ namespace AgileConfig.Server.Apisite.Filters
         protected const string GlobalMatchPatten = "GLOBAL_{0}";
         protected const string AppMatchPatten = "APP_{0}_{1}";
 
-        protected IPremissionService _premissionService;
-        protected IConfigService _configService;
-        protected string _actionName;
-        protected string _functionKey;
+        private IPremissionService _premissionService;
+        private IConfigService _configService;
+
+        private string _actionName;
+        private string _functionKey;
         public PremissionCheckAttribute(IPremissionService premissionService, IConfigService configService, string actionName, string functionKey)
         {
             _premissionService = premissionService;
             _configService = configService;
+
             _actionName = actionName;
             _functionKey = functionKey;
         }
@@ -140,6 +183,7 @@ namespace AgileConfig.Server.Apisite.Filters
         protected virtual Task<string> GetUserId(ActionExecutingContext context)
         {
             var userId = context.HttpContext.GetUserIdFromClaim();
+
             return Task.FromResult(userId);
         }
 

@@ -1,4 +1,5 @@
-﻿using AgileConfig.Server.IService;
+﻿using AgileConfig.Server.Common;
+using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
@@ -17,61 +18,15 @@ namespace AgileConfig.Server.Service
             _logger = lf.CreateLogger<AdmBasicAuthService>();
             _userService = userService;
         }
-  
-        /// <summary>
-        /// 从request中解析出username, password
-        /// </summary>
-        /// <param name="httpRequest"></param>
-        /// <returns></returns>
+
         public (string, string) GetUserNamePassword(HttpRequest httpRequest)
         {
-            var authorization = httpRequest.Headers["Authorization"];
-            if (string.IsNullOrEmpty(authorization))
-            {
-                return ("","");
-            }
-            var authStr = authorization.First();
-            //去掉basic_
-            if (!authStr.StartsWith("Basic "))
-            {
-                return ("", "");
-            }
-            authStr = authStr.Substring(6, authStr.Length - 6);
-            byte[] base64Decode = null;
-            try
-            {
-                base64Decode = Convert.FromBase64String(authStr);
-            }
-            catch
-            {
-                return ("", "");
-            }
-            var base64Str = Encoding.UTF8.GetString(base64Decode);
-
-            if (string.IsNullOrEmpty(base64Str))
-            {
-                return ("", "");
-            }
-
-            var userName = "";
-            var password = "";
-            var baseAuthArr = base64Str.Split(':');
-
-            if (baseAuthArr.Length > 0)
-            {
-                userName = baseAuthArr[0];
-            }          
-            if (baseAuthArr.Length > 1)
-            {
-                password = baseAuthArr[1];
-            }
-
-            return (userName, password);
+            return httpRequest.GetUserNamePasswordFromBasicAuthorization();
         }
 
         public async Task<bool> ValidAsync(HttpRequest httpRequest)
         {
-            var userPassword = GetUserNamePassword(httpRequest);
+            var userPassword = httpRequest.GetUserNamePasswordFromBasicAuthorization();
             if (string.IsNullOrEmpty(userPassword.Item1)||string.IsNullOrEmpty(userPassword.Item2))
             {
                 _logger.LogWarning("Basic auth header have no username or password .");

@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AgileConfig.Server.Common;
-using Microsoft.EntityFrameworkCore;
 using AgileConfig.Server.Data.Freesql;
 
 namespace AgileConfig.Server.Service
@@ -15,6 +14,9 @@ namespace AgileConfig.Server.Service
 
         public const string SuperAdminId = "super_admin";
         public const string SuperAdminUserName = "admin";
+
+        public const string DefaultEnvironment = "DEV,TEST,STAGING,PROD";
+        public const string DefaultEnvironmentKey = "environment";
 
         public SettingService(FreeSqlContext context)
         {
@@ -115,10 +117,35 @@ namespace AgileConfig.Server.Service
             return admin != null;
         }
 
+        public async Task<bool> InitDefaultEnvironment()
+        {
+            var env = await _dbContext.Settings.Where(x => x.Id == DefaultEnvironmentKey).FirstAsync();
+            if (env == null)
+            {
+                _dbContext.Settings.Add(new Setting
+                {
+                    Id = DefaultEnvironmentKey,
+                    Value = DefaultEnvironment,
+                    CreateTime = DateTime.Now
+                });
+                var result = await _dbContext.SaveChangesAsync();
+
+                return result > 0;
+            }
+
+            return true;
+        }
 
         public void Dispose()
         {
             _dbContext.Dispose();
+        }
+
+        public async Task<string[]> GetEnvironmentList()
+        {
+            var env = await _dbContext.Settings.Where(x => x.Id == DefaultEnvironmentKey).FirstAsync();
+
+            return env.Value.ToUpper().Split(',');
         }
     }
 }

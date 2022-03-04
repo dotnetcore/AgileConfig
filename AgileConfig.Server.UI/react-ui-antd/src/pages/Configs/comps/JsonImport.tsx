@@ -10,13 +10,19 @@ export type JsonImportFormProps = {
     appId: string,
     appName: string,
     jsonImportModalVisible: boolean;
+    env: string,
     onCancel: () => void;
     onSaveSuccess: ()=> void;
   };
-  const handleSave = async ( items: JsonImportItem[]) => {
+  const handleSave = async ( items: JsonImportItem[], env: string) => {
+    if (items.length === 0) {
+      message.warning('没有需要导入的配置项！');
+      return;
+    }
+
     const hide = message.loading('正在导入');
     try {
-      const result = await addRangeConfig(items);
+      const result = await addRangeConfig(items, env);
       hide();
       const success = result.success;
       if (success) {
@@ -107,7 +113,7 @@ const JsonImport : React.FC<JsonImportFormProps> = (props)=>{
           }
           onOk={
             async ()=> {
-              const result = await handleSave(datasource);
+              const result = await handleSave(datasource, props.env);
               if (result) {
                 props.onSaveSuccess();
               }

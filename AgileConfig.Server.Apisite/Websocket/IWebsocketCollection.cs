@@ -26,7 +26,7 @@ namespace AgileConfig.Server.Apisite.Websocket
 
         void RemoveAppClients(string appId, WebSocketCloseStatus? closeStatus, string closeDesc);
 
-        void SendActionToAppClients(string appId, WebsocketAction action);
+        void SendActionToAppClients(string appId,string env, WebsocketAction action);
 
         void SendActionToAll(WebsocketAction action);
 

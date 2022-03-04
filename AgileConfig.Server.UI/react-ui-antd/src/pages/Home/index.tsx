@@ -7,6 +7,8 @@ import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { NodeItem } from './../Nodes/data';
 import { message, Modal } from 'antd';
 import { getIntl, getLocale } from 'umi';
+import { getVisitApps } from '@/utils/latestVisitApps';
+import LatestVisitApps from './comps/latestVisitApps';
 const { confirm } = Modal;
 
 const handleAdd = async (fields: NodeItem) => {
@@ -40,10 +42,11 @@ const handleAdd = async (fields: NodeItem) => {
 const home: React.FC = () => {
   const [serverNodeStatus, setServerNodeStatus] = useState<summaryProps>({
     clientCount: 0,
-    nodeCount: 0
+    nodeCount: 0,
+    nodeOnCount: 0
   });
   const getServerNodeClientInfos = ()=>{
-    queryServerNodeStatus().then((x: {  n:{ address: string},server_status: { clientCount: number } }[]) => {
+    queryServerNodeStatus().then((x: {  n:{ address: string, status: number},server_status: { clientCount: number } }[]) => {
       let clientCount: number = 0;
       x?.forEach(item => {
         if (item.server_status) {
@@ -52,9 +55,13 @@ const home: React.FC = () => {
       });
       let nodeCount: number = 0;
       nodeCount = x.length;
+      let nodeOnCount: number = 0;
+      nodeOnCount = x.filter(n=> n.n.status === 1).length;
+      console.log('nodeOnCount' , nodeOnCount);
       setServerNodeStatus({
         clientCount: clientCount,
-        nodeCount: nodeCount
+        nodeCount: nodeCount,
+        nodeOnCount: nodeOnCount
       });
     });
   }
@@ -100,8 +107,8 @@ const home: React.FC = () => {
   }, []);
   return (
     <PageContainer pageHeaderRender={false}>
-      <Summary clientCount={serverNodeStatus.clientCount} nodeCount={serverNodeStatus.nodeCount}></Summary>
-      {/* { serverNodeStatus.nodeStatiInfo?.chartCategorys.length>1&&<NodeStatiCharts  nodeStatiInfo= { serverNodeStatus.nodeStatiInfo }></NodeStatiCharts>} */}
+      <Summary clientCount={serverNodeStatus.clientCount} nodeCount={serverNodeStatus.nodeCount} nodeOnCount={serverNodeStatus.nodeOnCount}></Summary>
+      <LatestVisitApps/>
     </PageContainer>
   );
 }

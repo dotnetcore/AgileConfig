@@ -64,3 +64,9 @@ export async function getUserAppAuth(appId:string) {
     }
   });
 }
+
+export async function getAppGroups() {
+  return request('/app/GetAppGroups', {
+    method: 'GET',
+  });
+}

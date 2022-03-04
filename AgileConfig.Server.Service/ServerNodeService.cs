@@ -76,5 +76,57 @@ namespace AgileConfig.Server.Service
 
             return result;
         }
+
+        
+        public async Task<bool> InitWatchNodeAsync()
+        {
+            var count = await _dbContext.ServerNodes.Select.CountAsync();
+            if (count > 0)
+            {
+                return false;
+            }
+            var nodes = Global.Config["nodes"];
+            var addresses = new List<string>();
+            if (!string.IsNullOrEmpty(nodes))
+            {
+                var arr = nodes.Split(',');
+                foreach (var item in arr)
+                {
+                    var address = "";
+                    if (item.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                    {
+                        address = item;
+                    }
+                    else
+                    {
+                        address = "http://" + item;
+                    }
+                    
+                    addresses.Add(address);
+                }
+            }
+            
+            foreach (var address in addresses)
+            {
+                var node = await _dbContext.ServerNodes.Where(n => n.Address == address).ToOneAsync();
+                if (node == null)
+                {
+                    node = new ServerNode()
+                    {
+                        Address = address,
+                        CreateTime = DateTime.Now,
+                    };
+                    await _dbContext.ServerNodes.AddAsync(node);
+                }
+            }
+
+            var result = 0;
+            if (addresses.Count > 0)
+            {
+                result = await _dbContext.SaveChangesAsync();
+            }
+
+            return result > 0;
+        }
     }
 }

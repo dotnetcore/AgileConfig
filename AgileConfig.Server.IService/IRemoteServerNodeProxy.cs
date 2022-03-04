@@ -20,6 +20,8 @@ namespace AgileConfig.Server.IService
 
         public string Ip { get; set; }
 
+        public string Env { get; set; }
+
         public DateTime LastHeartbeatTime { get; set; }
     }
 
@@ -54,7 +56,7 @@ namespace AgileConfig.Server.IService
         /// <param name="address"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        Task<bool> AppClientsDoActionAsync(string address, string appId, WebsocketAction action);
+        Task<bool> AppClientsDoActionAsync(string address, string appId, string env, WebsocketAction action);
 
         /// <summary>
         /// 获取某个节点的客户端连接信息
@@ -75,5 +77,12 @@ namespace AgileConfig.Server.IService
         /// <param name="address"></param>
         /// <returns></returns>
         Task TestEchoAsync(string address);
+
+        /// <summary>
+        /// 清除1个节点的缓存
+        /// </summary>
+        /// <param name="address"></param>
+        /// <returns></returns>
+        Task ClearCache(string address);
     }
 }

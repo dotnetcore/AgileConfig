@@ -1,13 +1,12 @@
-import { PlusOutlined } from '@ant-design/icons';
-import { ModalForm, ProFormSwitch, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
+import {  DeleteOutlined, DownOutlined, PlusOutlined, RollbackOutlined, VerticalAlignTopOutlined } from '@ant-design/icons';
+import { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns, TableDropdown } from '@ant-design/pro-table';
-import { Button, Drawer, FormInstance, List, message, Modal, Space, Tag } from 'antd';
+import { Badge, Button, Drawer, Dropdown, FormInstance, Input, List, Menu, message, Modal, Radio, Space, Tag } from 'antd';
 import React, { useState, useRef, useEffect } from 'react';
-import { queryApps } from '../Apps/service';
 import UpdateForm from './comps/updateForm';
-import { ConfigListItem, ConfigModifyLog } from './data';
-import { queryConfigs, onlineConfig, offlineConfig, delConfig, addConfig, editConfig, queryModifyLogs,rollback,onlineSomeConfigs,offlineSomeConfigs } from './service';
+import { ConfigListItem, PublishDetialConfig } from './data';
+import { queryConfigs, delConfig,delConfigs, addConfig, editConfig, queryConfigPublishedHistory, getWaitPublishStatus, publish, cancelEdit, exportJson, cancelSomeEdit } from './service';
 import Text from 'antd/lib/typography/Text';
 import moment from 'moment';
 import styles from './index.less';
@@ -16,95 +15,41 @@ import { useIntl } from 'react-intl';
 import { getIntl, getLocale } from '@/.umi/plugin-locale/localeExports';
 import AuthorizedEle, { checkUserPermission } from '@/components/Authorized/AuthorizedElement';
 import functionKeys from '@/models/functionKeys';
+import VersionHistory from './comps/versionHistory';
 import { getFunctions } from '@/utils/authority';
+import EnvSync from './comps/EnvSync';
+import JsonEditor from './comps/JsonEditor';
+import TextEditor from './comps/TextEditor';
+import { getEnvList } from '@/utils/system';
+import { saveVisitApp } from '@/utils/latestVisitApps';
 
+const { TextArea } = Input;
 const { confirm } = Modal;
 
-const handleOnline = async (fields: ConfigListItem) => {
-  const intl = getIntl(getLocale());
-  const hide = message.loading(intl.formatMessage({id:'publishing'}));
+const handlePublish = async (appId: string, log:string, env:string) => {
+  const hide = message.loading('正在发布');
   try {
-    const result = await onlineConfig({ ...fields });
+    const result = await publish(appId, log, env);
     hide();
     const success = result.success;
     if (success) {
-      message.success(intl.formatMessage({id:'publish_success'}));
+      message.success('发布成功！');
     } else {
-      message.error(intl.formatMessage({id:'publish_fail'}));
+      message.error('发布失败！');
     }
     return success;
   } catch (error) {
     hide();
-    message.error(intl.formatMessage({id:'publish_fail'}));
+    message.error('发布失败！');
     return false;
   }
 };
 
-const handleOnlineSome = async (configs: ConfigListItem[]) => {
-  const intl = getIntl(getLocale());
-  const hide = message.loading(intl.formatMessage({id:'publishing'}));
-  try {
-    const result = await onlineSomeConfigs(configs);
-    hide();
-    const success = result.success;
-    if (success) {
-      message.success(intl.formatMessage({id:'publish_success'}));
-    } else {
-      message.error(intl.formatMessage({id:'publish_fail'}));
-    }
-    return success;
-  } catch (error) {
-    hide();
-    message.error(intl.formatMessage({id:'publish_fail'}));
-    return false;
-  }
-};
-
-const handleOfflineSome = async (configs: ConfigListItem[]) => {
-  const intl = getIntl(getLocale());
-  const hide = message.loading(intl.formatMessage({id:'offlining'}));
-  try {
-    const result = await offlineSomeConfigs(configs);
-    hide();
-    const success = result.success;
-    if (success) {
-      message.success(intl.formatMessage({id:'offline_success'}));
-    } else {
-      message.error(intl.formatMessage({id:'offline_fail'}));
-    }
-    return success;
-  } catch (error) {
-    hide();
-    message.error(intl.formatMessage({id:'offline_fail'}));
-    return false;
-  }
-};
-
-const handleOffline = async (fields: ConfigListItem) => {
-  const intl = getIntl(getLocale());
-  const hide = message.loading(intl.formatMessage({id:'offlining'}));
-  try {
-    const result = await offlineConfig({ ...fields });
-    hide();
-    const success = result.success;
-    if (success) {
-      message.success(intl.formatMessage({id:'offline_success'}));
-    } else {
-      message.error(intl.formatMessage({id:'offline_fail'}));
-    }
-    return success;
-  } catch (error) {
-    hide();
-    message.error(intl.formatMessage({id:'offline_fail'}));
-    return false;
-  }
-};
-
-const handleDel = async (fields: ConfigListItem) => {
+const handleDel = async (fields: ConfigListItem, env:string) => {
   const intl = getIntl(getLocale());
   const hide = message.loading(intl.formatMessage({id:'deleting'}));
   try {
-    const result = await delConfig({ ...fields });
+    const result = await delConfig({ ...fields }, env);
     hide();
     const success = result.success;
     if (success) {
@@ -119,11 +64,48 @@ const handleDel = async (fields: ConfigListItem) => {
     return false;
   }
 };
-const handleAdd = async (fields: ConfigListItem) => {
+const handleDelSome = async (configs: ConfigListItem[], env: string):Promise<boolean> => {
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({id:'deleting'}));
+  try {
+    const result = await delConfigs(configs, env);
+    hide();
+    const success = result.success;
+    if (success) {
+      message.success(intl.formatMessage({id:'delete_success'}));
+    } else {
+      message.error(intl.formatMessage({id:'delete_fail'}));
+    }
+    return success;
+  } catch (error) {
+    hide();
+    message.error(intl.formatMessage({id:'delete_fail'}));
+    return false;
+  }
+};
+const handleCancelEditSome = async (configs: ConfigListItem[], env: string):Promise<boolean> => {
+  const hide = message.loading('正在撤销');
+  try {
+    const result = await cancelSomeEdit(configs.map(x=>x.id), env);
+    hide();
+    const success = result.success;
+    if (success) {
+      message.success('撤销成功');
+    } else {
+      message.error('撤销失败');
+    }
+    return success;
+  } catch (error) {
+    hide();
+    message.error('撤销失败');
+    return false;
+  }
+};
+const handleAdd = async (fields: ConfigListItem, env:string) => {
   const intl = getIntl(getLocale());
   const hide = message.loading(intl.formatMessage({id:'saving'}));
   try {
-    const result = await addConfig({ ...fields });
+    const result = await addConfig({ ...fields }, env);
     hide();
     const success = result.success;
     if (success) {
@@ -138,11 +120,11 @@ const handleAdd = async (fields: ConfigListItem) => {
     return false;
   }
 };
-const handleEdit = async (config: ConfigListItem) => {
+const handleEdit = async (config: ConfigListItem, env:string) => {
   const intl = getIntl(getLocale());
   const hide = message.loading(intl.formatMessage({id:'saving'}));
   try {
-    const result = await editConfig({ ...config });
+    const result = await editConfig({ ...config }, env);
     hide();
     const success = result.success;
     if (success) {
@@ -157,80 +139,111 @@ const handleEdit = async (config: ConfigListItem) => {
     return false;
   }
 };
-const handleRollback = async (config: ConfigModifyLog) => {
-  const intl = getIntl(getLocale());
-  const hide = message.loading(intl.formatMessage({id: 'rollbacking'}));
+
+
+const handleCancelEdit = async (id: string, env:string) => {
+  const hide = message.loading('正在撤销');
   try {
-    const result = await rollback({ ...config });
+    const result = await cancelEdit(id, env);
     hide();
     const success = result.success;
     if (success) {
-      message.success(intl.formatMessage({id: 'rollback_success'}));
+      message.success('撤销成功！');
     } else {
       message.error(result.message);
     }
     return success;
   } catch (error) {
     hide();
-    message.error(intl.formatMessage({id: 'rollback_fail'}));
+    message.error('撤销失败！');
     return false;
   }
-};
+}
+
+const handleExportJson = async (appId: string, env:string) => {
+  const hide = message.loading('正在导出');
+  try {
+    const file = await exportJson(appId, env);
+    hide();
+    var fileURL = URL.createObjectURL(file);
+    var a = document.createElement('a');
+    a.href = fileURL;
+    a.target = '_blank';
+    a.download = appId+'.json';
+    document.body.appendChild(a);
+    a.click();
+    URL.revokeObjectURL(a.href);
+    document.body.removeChild(a);
+    return true;
+  } catch (error) {
+    hide();
+    message.error('导出失败！');
+    return false;
+  }
+}
 
 const configs: React.FC = (props: any) => {
   const appId = props.match.params.app_id;
   const appName = props.match.params.app_name;
-  const [appEnums, setAppEnums] = useState<any>();
+  useEffect(()=>{
+    saveVisitApp(appId,appName);
+  },[]);
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [updateModalVisible, setUpdateModalVisible] = useState<boolean>(false);
   const [modifyLogsModalVisible, setmodifyLogsModalVisible] = useState<boolean>(false);
   const [jsonImportFormModalVisible, setjsonImportFormModalVisible] = useState<boolean>(false);
+  const [versionHistoryFormModalVisible, setVersionHistoryFormModalVisible] = useState<boolean>(false);
+  const [jsonEditorVisible, setJsonEditorVisible] = useState<boolean>(false);
+  const [textEditorVisible, setTextEditorVisible] = useState<boolean>(false);
+  const [EnvSyncModalVisible, setEnvSyncModalVisible] = useState<boolean>(false);
   const [currentRow, setCurrentRow] = useState<ConfigListItem>();
   const [selectedRowsState, setSelectedRows] = useState<ConfigListItem[]>([]);
-  const [modifyLogs, setModifyLogs] = useState<ConfigModifyLog[]>([]);
+  const [configPublishedHistory, setModifyLogs] = useState<PublishDetialConfig[]>([]);
+  const [waitPublishStatus, setWaitPublishStatus] = useState<{
+    addCount: number,
+    editCount: number,
+    deleteCount: number
+  }>({
+    addCount: 0,
+    editCount: 0,
+    deleteCount: 0
+  });
+  const envList = getEnvList();
+  const [currentEnv, setCurrentEnv] = useState<string>(envList[0]);
+  const [tableData, setTableData] = useState<ConfigListItem[]>([]);
   const actionRef = useRef<ActionType>();
   const addFormRef = useRef<FormInstance>();
+  let _publishLog:string = '';
   const intl = useIntl();
-  const getAppEnums = async () => {
-    const result = await queryApps({})
-    const obj = {};
-    result.data.forEach((x) => {
-      obj[x.id] = {
-        text: x.name
-      }
-    });
-
-    return obj;
-  }
   useEffect(() => {
-    getAppEnums().then(x => {
-      console.log('app enums ', x);
-      setAppEnums({ ...x });
-    });
-  }, []);
-  const online = (config: ConfigListItem) => {
-    const confirmMsg = intl.formatMessage({id:'pages.config.confirm_publish'});
+    getWaitPublishStatus(appId, currentEnv).then(x => {
+      console.log('WaitPublishStatus ', x);
+      if (x.success) {
+        setWaitPublishStatus(x.data);
+      }      
+    })
+  }, [tableData]);
+
+  const publish = (appId: string) => {
+    _publishLog = '';
     confirm({
-      content: confirmMsg + `【${config.key}】？`,
-      onOk: async () => {
-        const result = await handleOnline(config);
-        if (result) {
-          actionRef.current?.reload();
+      content: <div>
+        {
+          '确定发布当前所有待发布的配置项吗？'
         }
-      }
-    });
-  }
-  const onlineSome = (configs: ConfigListItem[]) => {
-    const warningMsg = intl.formatMessage({id:'pages.config.waitpublish_at_least_one'});
-    const waitPublishConfigs = configs.filter(x=>x.onlineStatus === 0);
-    if (!waitPublishConfigs.length) {
-      message.warning(warningMsg);
-      return;
-    }
-    confirm({
-      content: intl.formatMessage({id:'pages.config.confirm_publish_some'}),
+        <br />
+        <br />
+        <div>
+         <TextArea autoSize placeholder="请填写发布日志" maxLength={50} showCount={true}
+          onChange={(e)=>{
+            _publishLog = e.target.value;
+          }}
+         >
+         </TextArea>
+        </div>
+      </div>,
       onOk: async () => {
-        const result = await handleOnlineSome(configs);
+        const result = await handlePublish(appId, _publishLog, currentEnv);
         if (result && actionRef.current) {
           if (actionRef.current?.clearSelected){
             actionRef.current?.clearSelected();
@@ -240,68 +253,39 @@ const configs: React.FC = (props: any) => {
       }
     });
   }
-  const offlineSome = (configs: ConfigListItem[]) => {
-    const warningMsg = intl.formatMessage({id:'pages.config.online_at_least_one'});
-    const waitPublishConfigs = configs.filter(x=>x.onlineStatus === 1);
-    if (!waitPublishConfigs.length) {
-      message.warning(warningMsg);
-      return;
-    }
-    confirm({
-      content: intl.formatMessage({id:'pages.config.confirm_offline_some'}),
-      onOk: async () => {
-        const result = await handleOfflineSome(configs);
-        if (result && actionRef.current) {
-          if (actionRef.current?.clearSelected){
-            actionRef.current?.clearSelected();
-          }
-          actionRef.current?.reload();
-        }
-      }
-    });
-  }
-  const offline = (config: ConfigListItem) => {
-    const confirmMsg = intl.formatMessage({id:'pages.config.confirm_offline'});
-    confirm({
-      content: confirmMsg + `【${config.key}】？`,
-      onOk: async () => {
-        const result = await handleOffline(config);
-        if (result) {
-          actionRef.current?.reload();
-        }
-      }
-    });
-  }
+
   const delConfig = (config: ConfigListItem) => {
     const confirmMsg = intl.formatMessage({id:'pages.config.confirm_delete'});
     confirm({
       content: confirmMsg + `【${config.key}】？`,
       onOk: async () => {
-        const result = await handleDel(config);
+        const result = await handleDel(config, currentEnv);
         if (result) {
-          actionRef.current?.reload();
-        }
-      }
-    });
-  }
-  const rollback = (config: ConfigModifyLog) => {
-    const confirmMsg = intl.formatMessage({id:'pages.config.confirm_rollback'});
-    confirm({
-      content: confirmMsg + `【${moment(config.modifyTime).format('YYYY-MM-DD HH:mm:ss')}】？`,
-      onOk: async () => {
-        const result = await handleRollback(config);
-        if (result) {
-          setmodifyLogsModalVisible(false);
           actionRef.current?.reload();
         }
       }
     });
   }
 
+  const editStatusEnums = {
+    0: '新增',
+    1: '编辑',
+    2: '删除',
+    10: '已提交'
+  }
+  const editStatusColors = {
+    0: 'blue',
+    1: 'gold',
+    2: 'red',
+    10: ''
+  }
   const columns: ProColumns<ConfigListItem>[] = [
+ 
     {
       title: intl.formatMessage({id:'pages.configs.table.cols.g'}),
       dataIndex: 'group',
+      copyable: true,
+      sorter: true,
     },
     {
       title: intl.formatMessage({id:'pages.configs.table.cols.k'}),
@@ -327,10 +311,23 @@ const configs: React.FC = (props: any) => {
       dataIndex: 'createTime',
       hideInSearch: true,
       valueType: 'dateTime',
-      width: 150
+      width: 150,
+      sorter: true,
     },
     {
-      title: intl.formatMessage({id:'pages.configs.table.cols.status'}),
+      title: '编辑状态',
+      dataIndex: 'editStatus',
+      search: false,
+      render: (_, record) => (
+         <Tag color={editStatusColors[record.editStatus]}>
+           {
+              editStatusEnums[record.editStatus]
+           }
+         </Tag>
+      ),
+    },
+    {
+      title: '发布状态',
       dataIndex: 'onlineStatus',
       valueEnum: {
         0: {
@@ -349,24 +346,6 @@ const configs: React.FC = (props: any) => {
       width: 150,
       valueType: 'option',
       render: (text, record, _, action) => [
-        <AuthorizedEle key="0" judgeKey={functionKeys.Config_Publish} appId={record.appId}>
-          {
-            record.onlineStatus ? <a onClick={() => { offline(record) }}>
-            {
-              intl.formatMessage({
-                id: 'pages.configs.table.cols.action.offline'
-              })
-            }
-            </a> : <a onClick={() => { online(record) }}>
-              {
-                intl.formatMessage({
-                  id: 'pages.configs.table.cols.action.publish'
-                })
-              }
-            </a>
-          }
-        </AuthorizedEle>
-        ,
         <AuthorizedEle key="1" judgeKey={functionKeys.Config_Edit} appId={record.appId}>
           <a
             onClick={() => {
@@ -383,6 +362,20 @@ const configs: React.FC = (props: any) => {
         </AuthorizedEle>
         ,
         <AuthorizedEle key="2" judgeKey={functionKeys.Config_Delete} appId={record.appId}>
+          <a
+            onClick={() => {
+              delConfig(record);
+            }}
+          >
+            {
+              intl.formatMessage({
+                id: 'pages.configs.table.cols.action.delete'
+              })
+            }
+          </a>
+        </AuthorizedEle>
+        ,
+        <AuthorizedEle key="3" judgeKey={functionKeys.Config_Delete} appId={record.appId}>
           <TableDropdown
               key="actionGroup"
               onSelect={async (item) => 
@@ -390,31 +383,37 @@ const configs: React.FC = (props: any) => {
                   if (item == 'history') {
                     setCurrentRow(record);
                     setmodifyLogsModalVisible(true)
-                    const result = await queryModifyLogs(record)
+                    const result = await queryConfigPublishedHistory(record, currentEnv)
                     if (result.success) {
                       setModifyLogs(result.data);
                     }
                   }
 
-                  if (item == 'delete') {
-                    delConfig(record);
+                  if (item == 'cancelEdit') {
+                    confirm({
+                      content:`确定撤销对配置【${record.group?record.group:''}${record.group?':':''}${record.key}】的编辑吗？`,
+                      onOk: async ()=>{
+                        const result = await handleCancelEdit(record.id, currentEnv);
+                        if (result) {
+                          actionRef.current?.reload();
+                        }
+                      }
+                    })
                   }
                 }
               }
               menus={
-                checkUserPermission(getFunctions(),functionKeys.Config_Delete,appId)?
+                record.editStatus === 10 ?
                 [
                   { key: 'history', name: intl.formatMessage({
                     id: 'pages.configs.table.cols.action.history'
-                  }) },
-                  { key: 'delete', name: intl.formatMessage({
-                    id: 'pages.configs.table.cols.action.delete'
-                  }) },
+                  }) }
                 ]:
                 [
+                  { key: 'cancelEdit', name: '撤销编辑' },
                   { key: 'history', name: intl.formatMessage({
                     id: 'pages.configs.table.cols.action.history'
-                  }) },
+                  }) }
                 ]
               }
             />
@@ -423,7 +422,31 @@ const configs: React.FC = (props: any) => {
     },
   ];
   return (
-    <PageContainer header={{ title: appName }}>
+    <PageContainer pageHeaderRender={
+        ()=>{
+          return <div style={{padding:20, display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+            <span className="ant-page-header-heading-title">
+              {
+                appName
+              }
+            </span>
+            <div>
+            <Radio.Group defaultValue={currentEnv} buttonStyle="solid" size="small" onChange={
+              (e)=>{
+                console.log(e.target.value);
+                setCurrentEnv(e.target.value);
+                actionRef.current?.reload(true);
+              }}>
+                {
+                  envList.map(e=>{
+                    return <Radio.Button value={e} key={e}>{e}</Radio.Button>
+                  })
+                }
+            </Radio.Group>
+            </div>
+          </div>
+        }
+      }>
       <ProTable
         actionRef={actionRef}
         rowKey="id"
@@ -434,10 +457,35 @@ const configs: React.FC = (props: any) => {
         search={{
           labelWidth: 'auto',
         }}
-        request={(params, sorter, filter) => queryConfigs(appId,params)}
+        request={(params, sorter, filter) => {
+          let sortField = 'createTime';
+          let ascOrDesc = 'descend';
+          for (const key in sorter) {
+            sortField = key;
+            const val = sorter[key];
+            if (val) {
+              ascOrDesc = val;
+            }
+          }
+          console.log(sortField, ascOrDesc);
+          return queryConfigs(appId, currentEnv, { sortField, ascOrDesc, ...params })
+        }}
+        headerTitle= {
+          <Space size="middle">
+              <Badge count={waitPublishStatus.addCount} size="small" offset={[-5, 0]}>
+                <Tag color="blue" hidden={waitPublishStatus.addCount===0}>新增</Tag>
+              </Badge>
+              <Badge count={waitPublishStatus.editCount} size="small" offset={[-5, 0]}>
+                <Tag color="gold" hidden={waitPublishStatus.editCount===0}>编辑</Tag>
+              </Badge>
+              <Badge count={waitPublishStatus.deleteCount} size="small" offset={[-5, 0]}>
+                <Tag color="red" hidden={waitPublishStatus.deleteCount===0}>删除</Tag>
+              </Badge>
+          </Space>
+        }
         toolBarRender={() => [
           <AuthorizedEle key="0" judgeKey={functionKeys.Config_Add} appId={appId}>
-            <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { setCreateModalVisible(true); }}>
+            <Button key="button" type="primary" icon={<PlusOutlined />}  onClick={() => { setCreateModalVisible(true); }}>
             {
               intl.formatMessage({
                 id: 'pages.configs.table.cols.action.add'
@@ -446,8 +494,10 @@ const configs: React.FC = (props: any) => {
             </Button>
           </AuthorizedEle>
           ,
-          <AuthorizedEle key="1" judgeKey={functionKeys.Config_Publish} appId={appId}>
-            <Button key="button" type="primary" hidden={selectedRowsState.length == 0} onClick={()=>{onlineSome(selectedRowsState)}}>
+          <AuthorizedEle key="2" judgeKey={functionKeys.Config_Publish} appId={appId} >
+            <Button key="button" icon={<VerticalAlignTopOutlined />} type="primary" className="success"
+                    hidden={(waitPublishStatus.addCount + waitPublishStatus.editCount + waitPublishStatus.deleteCount) === 0} 
+                    onClick={()=>{publish(appId)}}>
                 {
                   intl.formatMessage({
                     id: 'pages.configs.table.cols.action.publish'
@@ -456,41 +506,117 @@ const configs: React.FC = (props: any) => {
             </Button>
           </AuthorizedEle>
           ,
-          <AuthorizedEle key="2" judgeKey={functionKeys.Config_Publish} appId={appId}>
-            <Button key="button" type="primary" danger hidden={selectedRowsState.length == 0} onClick={()=>{offlineSome(selectedRowsState)}}>
-              {
-                intl.formatMessage({
-                  id: 'pages.configs.table.cols.action.offline'
-                })
-              }
-        </Button>
+          <AuthorizedEle key="5" judgeKey={functionKeys.Config_Publish} appId={appId} >
+            {
+              selectedRowsState.filter(x=>x.editStatus !== 10).length > 0 ?
+              <Button key="button"  type="primary" icon={<RollbackOutlined />}
+                      className="warn"
+                      onClick={
+                        ()=>{
+                          confirm({
+                            content:`确定撤销选中配置项的编辑状态吗？`,
+                            onOk: async ()=>{
+                              const result = await handleCancelEditSome(selectedRowsState.filter(x=>x.editStatus !== 10), currentEnv)
+                              if (result) {
+                                if (actionRef.current?.clearSelected){
+                                  actionRef.current?.clearSelected();
+                                }
+                                actionRef.current?.reload();
+                              }
+                            }
+                          })
+                        }
+                      }
+                    >
+                撤销编辑
+              </Button>
+              :
+              <></>
+            }
+            
+          </AuthorizedEle>
+        ,
+        <AuthorizedEle key="6" judgeKey={functionKeys.Config_Edit} appId={appId} >
+          {
+            selectedRowsState.length > 0 ?
+            <Button  type="primary" icon={<DeleteOutlined />}
+                    className="danger"
+                    onClick={
+                      ()=>{
+                        confirm({
+                          content:`确定删除选中的配置项吗？`,
+                          onOk: async ()=>{
+                            const result = await handleDelSome(selectedRowsState, currentEnv)
+                            if (result) {
+                              if (actionRef.current?.clearSelected){
+                                actionRef.current?.clearSelected();
+                              }
+                              actionRef.current?.reload();
+                            }
+                          }
+                        })
+                      }
+                    }
+                    >
+                删除
+            </Button>:<></>
+          }
         </AuthorizedEle>
         ,
-        <AuthorizedEle key="3" judgeKey={functionKeys.Config_Add} appId={appId}>
-          <Button onClick={()=>{ setjsonImportFormModalVisible(true) }}>
-            {
-              intl.formatMessage({
-                id: 'pages.configs.table.cols.action.importfromjosnfile'
-              })
-            }
+         <AuthorizedEle key="5" judgeKey={functionKeys.Config_Edit} appId={appId} >
+          <Button  onClick={()=>{
+              setJsonEditorVisible(true);
+            }}>
+              编辑 JSON
+            </Button>
+          </AuthorizedEle>
+          ,
+         <AuthorizedEle key="6" judgeKey={functionKeys.Config_Edit} appId={appId} >
+          <Button  onClick={()=>{
+              setTextEditorVisible(true);
+            }}>
+              编辑 TEXT
+            </Button>
+          </AuthorizedEle>
+          ,
+          <Dropdown overlay={
+            <Menu >
+              <Menu.Item hidden={!checkUserPermission(getFunctions(),functionKeys.Config_Publish,appId)} key="history" onClick={()=>{ setVersionHistoryFormModalVisible(true) }}>
+               历史版本
+              </Menu.Item>
+              <Menu.Item hidden={!checkUserPermission(getFunctions(),functionKeys.Config_Add,appId)} key="syncEnv" onClick={()=>{ setEnvSyncModalVisible(true) }}>
+                环境同步
+              </Menu.Item>
+              <Menu.Item hidden={!checkUserPermission(getFunctions(),functionKeys.Config_Add,appId)} key="import" onClick={()=>{ setjsonImportFormModalVisible(true) }}>
+                导入
+              </Menu.Item>
+              <Menu.Item key="export" onClick={()=>{handleExportJson(appId, currentEnv)}}>
+                导出
+              </Menu.Item>
+            </Menu>
+          }>
+          <Button>
+            更多 <DownOutlined />
           </Button>
-        </AuthorizedEle>
-         ,
-          <Button key="4">
-            <a href={'/config/exportjson?appId=' + appId} target="_blank">
-              {
-                 intl.formatMessage({
-                  id: 'pages.configs.table.cols.action.exportJson'
-                })
-              }
-            </a>
-          </Button>
+        </Dropdown>
+
+          // <Button key="6" onClick={()=>{
+          //   setTextEditorVisible(true);
+          // }}>
+          //   编辑 TEXT
+          // </Button>
         ]}
         rowSelection={{
           onChange: (_, selectedRows) => {
             setSelectedRows(selectedRows);
           },
         }}
+        postData={
+          (data:ConfigListItem[])=>{
+            setTableData(data);
+            return data;
+          }
+        }
       />
       {
         jsonImportFormModalVisible&&
@@ -508,11 +634,52 @@ const configs: React.FC = (props: any) => {
         }
           appId={appId}
           appName={appName}
-          jsonImportModalVisible={jsonImportFormModalVisible}> 
-          
+          jsonImportModalVisible={jsonImportFormModalVisible}
+          env={currentEnv}
+          > 
         </JsonImport>
       }
-     
+      {
+        versionHistoryFormModalVisible&&
+        <VersionHistory
+          onSaveSuccess={
+            ()=>{
+              setVersionHistoryFormModalVisible(false);
+              actionRef.current?.reload();
+            }
+          }
+        onCancel={
+          (reload)=>{
+            setVersionHistoryFormModalVisible(false);
+            if (reload) {
+              actionRef.current?.reload();
+            }
+          }
+        }
+          env={currentEnv}
+          appId={appId}
+          appName={appName}
+          versionHistoryModalVisible ={versionHistoryFormModalVisible}> 
+        </VersionHistory>
+      }
+      {
+        EnvSyncModalVisible&&
+        <EnvSync currentEnv={currentEnv}
+                appId={appId} 
+                ModalVisible={EnvSyncModalVisible}
+                onSaveSuccess={
+                  ()=>{
+                    setEnvSyncModalVisible(false);
+                    actionRef.current?.reload();
+                  }
+                }
+                onCancel={
+                  ()=>{
+                    setEnvSyncModalVisible(false);
+                  }
+                } >
+        </EnvSync>
+      }
       <ModalForm
         formRef={addFormRef}
         title={intl.formatMessage({id:'pages.configs.from.add.title'})}
@@ -520,7 +687,7 @@ const configs: React.FC = (props: any) => {
         onVisibleChange={setCreateModalVisible}
         onFinish={
           async (value) => {
-            const success = await handleAdd(value as ConfigListItem);
+            const success = await handleAdd(value as ConfigListItem, currentEnv);
             if (success) {
               setCreateModalVisible(false);
               if (actionRef.current) {
@@ -612,7 +779,7 @@ const configs: React.FC = (props: any) => {
           onSubmit={
             async (value) => {
               setCurrentRow(undefined);
-              const success = await handleEdit(value);
+              const success = await handleEdit(value, currentEnv);
               if (success) {
                 setUpdateModalVisible(false);
                 if (actionRef.current) {
@@ -623,36 +790,66 @@ const configs: React.FC = (props: any) => {
             }
           } />
       }
+      {
+        jsonEditorVisible && 
+        <JsonEditor 
+        appId={appId}
+        appName={appName}
+        env={currentEnv}
+        ModalVisible={jsonEditorVisible}
+        onCancel={
+          () => {
+            setJsonEditorVisible(false)
+          }
+        }
+        onSaveSuccess={
+          async () => {
+            setJsonEditorVisible(false)
+            if (actionRef.current) {
+              actionRef.current.reload();
+            }
+          }
+        }
+        >
+        </JsonEditor>
+      }
+      {
+        textEditorVisible && 
+        <TextEditor 
+        appId={appId}
+        appName={appName}
+        env={currentEnv}
+        ModalVisible={textEditorVisible}
+        onCancel={
+          () => {
+            setTextEditorVisible(false)
+          }
+        }
+        onSaveSuccess={
+          async () => {
+            setTextEditorVisible(false)
+            if (actionRef.current) {
+              actionRef.current.reload();
+            }
+          }
+        }
+        >
+        </TextEditor>
+      }
 
       <Drawer title={intl.formatMessage({id:'pages.config.history.title'})} visible={modifyLogsModalVisible} width="400" onClose={() => { setmodifyLogsModalVisible(false); setModifyLogs([]); }} >
         <List
           className={styles.history}
           header={false}
           itemLayout="horizontal"
-          dataSource={modifyLogs}
+          dataSource={configPublishedHistory}
           renderItem={(item, index) => (
-            <List.Item className={styles.listitem} actions={index ? [
-                <AuthorizedEle key="0" judgeKey={functionKeys.Config_Edit} appId={appId}>
-                  <a className={styles.rollback} onClick={ ()=>{rollback(item)} }>
-                  {
-                    intl.formatMessage({id:'pages.config.history.rollback'})
-                  }
-                </a>
-                </AuthorizedEle>
-              ] : []} >
+            <List.Item className={styles.listitem}  >
               <List.Item.Meta
                 title={
 
                   <div>
-                    <Text style={{marginRight:'20px'}}>{moment(item.modifyTime).format('YYYY-MM-DD HH:mm:ss')}</Text>
-                  &nbsp;
-                    {
-                       index ? null : <Tag color="blue">
-                         {
-                          intl.formatMessage({id:'pages.config.history.current'})
-                         }
-                       </Tag>
-                    }
+                    <Text style={{marginRight:'20px'}}>{moment(item.timelineNode?.publishTime).format('YYYY-MM-DD HH:mm:ss')}</Text>
                   </div>
                 }
                 description={
@@ -661,16 +858,16 @@ const configs: React.FC = (props: any) => {
                       {
                           intl.formatMessage({id:'pages.configs.table.cols.g'})
                       }
-                      ：{item.group}</div>
+                      ：{item.config.group}</div>
                     <div>
                       {
                           intl.formatMessage({id:'pages.configs.table.cols.k'})
                       }
-                      ：{item.key}</div>
+                      ：{item.config.key}</div>
                     <div>
                       {
                           intl.formatMessage({id:'pages.configs.table.cols.v'})
-                      }：{item.value}</div>
+                      }：{item.config.value}</div>
                   </div>
                 }
               />

@@ -29,11 +29,11 @@ namespace AgileConfig.Server.Common
                     result = func();
                     break;
                 }
-                catch (Exception ex)
+                catch
                 {
                     if (i == (tryCount - 1))
                     {
-                        throw ex;
+                        throw;
                     }
                 }
             }
@@ -63,11 +63,11 @@ namespace AgileConfig.Server.Common
                     result = await func();
                     break;
                 }
-                catch (Exception ex)
+                catch 
                 {
                     if (i == (tryCount - 1))
                     {
-                        throw ex;
+                        throw;
                     }
                 }
             }
@@ -97,7 +97,7 @@ namespace AgileConfig.Server.Common
                     result = await func();
                     break;
                 }
-                catch (Exception ex)
+                catch 
                 {
                 }
             }
@@ -126,11 +126,11 @@ namespace AgileConfig.Server.Common
                     act();
                     break;
                 }
-                catch (Exception ex)
+                catch 
                 {
                     if (i == (tryCount - 1))
                     {
-                        throw ex;
+                        throw;
                     }
                 }
             }

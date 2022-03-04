@@ -43,7 +43,7 @@ namespace AgileConfig.Server.Apisite
             {
     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
     new Claim("id", userId, ClaimValueTypes.String), // 用户id
-    new Claim("name", userName), // 用户名
+    new Claim("username", userName, ClaimValueTypes.String), // 用户名
     new Claim("admin", isAdmin.ToString() ,ClaimValueTypes.Boolean) // 是否是管理员
             };
             var key = Encoding.UTF8.GetBytes(JwtSetting.Instance.SecurityKey);

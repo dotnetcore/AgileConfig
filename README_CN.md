@@ -24,12 +24,13 @@ Gitee 镜像：[https://gitee.com/kklldog/AgileConfig](https://gitee.com/kklldog
 1. 部署简单，最少只需要一个数据节点，支持docker部署
 2. 支持多节点分布式部署来保证高可用
 3. 配置支持按应用隔离，应用内配置支持分组隔离
-4. 应用支持继承，可以把公共配置提取到一个应用然后其它应用继承它
-5. 使用长连接技术，配置信息实时推送至客户端
-6. 支持IConfiguration，IOptions模式读取配置，原程序几乎可以不用改造
-7. 配置修改支持版本记录，随时回滚配置
-8. 如果所有节点都故障，客户端支持从本地缓存读取配置
-9. 支持Restful API维护配置
+4. 支持多环境
+5. 应用支持继承，可以把公共配置提取到一个应用然后其它应用继承它
+6. 使用长连接技术，配置信息实时推送至客户端
+7. 支持IConfiguration，IOptions模式读取配置，原程序几乎可以不用改造
+8. 配置修改支持版本记录，随时回滚配置
+9. 如果所有节点都故障，客户端支持从本地缓存读取配置
+10. 支持Restful API维护配置
     
 演示地址：[AgileConfig Server Demo](http://agileconfig_server.xbaby.xyz)   用户名：admin 密码：123456   
 客户端项目：[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
@@ -39,6 +40,7 @@ Gitee 镜像：[https://gitee.com/kklldog/AgileConfig](https://gitee.com/kklldog
 [AgileConfig ConsoleSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigConsoleSample)    
 [教程 - 如何使用AgileConfig.Client读取配置](https://www.cnblogs.com/kklldog/p/how-to-use-agileconfigclient.html)    
 👉🏻👉🏻[常见问题，必看！！！](https://github.com/kklldog/AgileConfig/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%EF%BC%8C%E5%BF%85%E7%9C%8B%EF%BC%81%EF%BC%81%EF%BC%81)👈🏻👈🏻   
+[关于多环境的部署说明](https://github.com/dotnetcore/AgileConfig/wiki/%E5%85%B3%E4%BA%8E-1.5-%E7%89%88%E6%9C%AC%E6%94%AF%E6%8C%81%E5%A4%9A%E7%8E%AF%E5%A2%83%E7%9A%84%E8%AF%B4%E6%98%8E)   
 API:   
 [restful api](https://github.com/kklldog/AgileConfig/wiki/Restful-API)
 ## ChangeLog
@@ -78,7 +80,7 @@ sudo docker run \
 --name agile_config \
 -e adminConsole=true \
 -e db:provider=sqlite \
--e db:conn="Data Source=db\agile_config.db" \
+-e db:conn="Data Source=agile_config.db" \
 -p 5000:5000 \
 -v /etc/localtime:/etc/localtime \
 #-v /your_host_dir:/app/db \
@@ -160,6 +162,14 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
         {
             webBuilder.UseStartup<Startup>();
         });
+  ------or UseAgileConfig -------
+     public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .UseAgileConfig(e => Console.WriteLine($"configs {e.Action}"))
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
 ```
 根据环境变量读取appsettings.{env}.json配置信息。
 ``` c#
@@ -288,4 +298,4 @@ public class HomeController : Controller
 
         
 ### 感谢💖💖💖
-大鹏￥66.66 , 瘦草￥6.66 , ziana￥10.0
+大鹏￥66.66 , 瘦草￥6.66 + 88 , ziana￥10.0 , Nullable￥9.99 , *三 ￥6.66 , HHM ￥6.66 , *。 ￥6.66

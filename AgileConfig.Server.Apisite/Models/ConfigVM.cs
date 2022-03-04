@@ -7,7 +7,12 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.Apisite.Models
 {
-    public class ConfigVM
+    public interface IAppIdModel
+    {
+        string AppId { get; set; }
+    }
+
+    public class ConfigVM: IAppIdModel
     {
         public string Id { get; set; }
 

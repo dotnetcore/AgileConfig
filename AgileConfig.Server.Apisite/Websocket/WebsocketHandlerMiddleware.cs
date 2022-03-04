@@ -49,6 +49,16 @@ namespace AgileConfig.Server.Apisite.Websocket
                         var appIdSecret = appBasicAuth.GetAppIdSecret(context.Request);
                         appId = appIdSecret.Item1;
                     }
+                    var env = context.Request.Headers["env"];
+                    if (!string.IsNullOrEmpty(env))
+                    {
+                        env = HttpUtility.UrlDecode(env);
+                    }
+                    else
+                    {
+                        env = "DEV";
+                        _logger.LogInformation("Websocket client request No ENV property , set default DEV ");
+                    }
                     context.Request.Query.TryGetValue("client_name", out StringValues name);
                     if (!string.IsNullOrEmpty(name))
                     {
@@ -78,7 +88,8 @@ namespace AgileConfig.Server.Apisite.Websocket
                         LastHeartbeatTime = DateTime.Now,
                         Name = name,
                         Tag = tag,
-                        Ip = clientIp.ToString()
+                        Ip = clientIp.ToString(),
+                        Env = env
                     };
                     _websocketCollection.AddClient(client);
                     _logger.LogInformation("Websocket client {0} Added ", client.Id);
@@ -137,7 +148,9 @@ namespace AgileConfig.Server.Apisite.Websocket
                 {
                     //如果是ping，回复本地数据的md5版本
                     var appId = context.Request.Headers["appid"];
-                    var md5 = await configService.AppPublishedConfigsMd5CacheWithInheritanced(appId);
+                    var env = context.Request.Headers["env"];
+                    env = await configService.IfEnvEmptySetDefaultAsync(env);
+                    var md5 = await configService.AppPublishedConfigsMd5CacheWithInheritanced(appId, env);
                     await SendMessage(socketClient.Client, $"V:{md5}");
                 }
                 else

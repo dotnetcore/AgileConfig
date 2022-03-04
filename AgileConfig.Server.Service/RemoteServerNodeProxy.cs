@@ -33,7 +33,7 @@ namespace AgileConfig.Server.Service
             }
         }
 
-        private IServerNodeService GetGerverNodeService()
+        private IServerNodeService GetServerNodeService()
         {
             return new ServerNodeService(new FreeSqlContext(FreeSQL.Instance));
         }
@@ -89,11 +89,11 @@ namespace AgileConfig.Server.Service
             return result;
         }
 
-        public async Task<bool> AppClientsDoActionAsync(string address, string appId, WebsocketAction action)
+        public async Task<bool> AppClientsDoActionAsync(string address, string appId, string env, WebsocketAction action)
         {
             var result = await FunctionUtil.TRYAsync(async () =>
             {
-                using (var resp = await (address + "/RemoteOP/AppClientsDoAction".AppendQueryString("appId", appId))
+                using (var resp = await (address + "/RemoteOP/AppClientsDoAction".AppendQueryString("appId", appId).AppendQueryString("env", env))
                     .AsHttp("POST", action)
                     .Config(new RequestOptions { ContentType = "application/json" })
                     .SendAsync())
@@ -141,7 +141,7 @@ namespace AgileConfig.Server.Service
 
                         if ((bool)result.success)
                         {
-                            if (action.Action == ActionConst.Offline || action.Action == ActionConst.Remove)
+                            if (action.Action == ActionConst.Offline)
                             {
                                 if (_serverNodeClientReports.ContainsKey(address))
                                 {
@@ -222,7 +222,7 @@ namespace AgileConfig.Server.Service
 
         public async Task TestEchoAsync(string address)
         {
-            using var service = GetGerverNodeService();
+            using var service = GetServerNodeService();
             var node = await service.GetAsync(address);
             try
             {
@@ -251,7 +251,7 @@ namespace AgileConfig.Server.Service
             {
                 while (true)
                 {
-                    using var service = GetGerverNodeService();
+                    using var service = GetServerNodeService();
                     var nodes = await service.GetAllNodesAsync();
 
                     foreach (var node in nodes)
@@ -262,6 +262,18 @@ namespace AgileConfig.Server.Service
                     await Task.Delay(5000 * 1);
                 }
             });
+        }
+
+        public async Task ClearCache(string address)
+        {
+            try
+            { 
+                await (address + "/RemoteOP/ClearCache").AsHttp("POST").SendAsync();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Try to clear node {0}'s cache , but fail .", address);
+            }
         }
     }
 }

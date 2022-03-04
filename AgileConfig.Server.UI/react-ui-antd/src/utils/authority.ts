@@ -75,6 +75,7 @@ export function setUserInfo(user:{name:string, userid:string}) {
   const json = JSON.stringify(user);
   localStorage.setItem('userinfo', json);
 }
+
 export function getUserInfo():{name:string, userid:string} {
   const json = localStorage.getItem('userinfo');
   if (json){

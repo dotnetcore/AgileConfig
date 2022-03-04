@@ -8,6 +8,7 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace ApiSiteTests
 {
@@ -48,25 +49,24 @@ namespace ApiSiteTests
                 return list;
             }
             var configService = new Mock<IConfigService>();
-            configService.Setup(s => s.GetPublishedConfigsByAppId("001"))
-                .ReturnsAsync(newConfigs);
-            configService.Setup(s => s.GetPublishedConfigsByAppIdWithInheritanced("001"))
+            //configService.Setup(s => s.GetPublishedConfigsAsync("001"))
+            //    .ReturnsAsync(newConfigs);
+            configService.Setup(s => s.GetPublishedConfigsByAppIdWithInheritanced("001", ""))
                 .ReturnsAsync(newConfigs);
 
-            var modifyLogService = new Mock<IModifyLogService>();
+            var memoryCache = new Mock<IMemoryCache>();
             var remoteNodeProxy = new Mock<IRemoteServerNodeProxy>();
             var serverNodeService = new Mock<IServerNodeService>();
             var sysLogService = new Mock<ISysLogService>();
             var appBasicAuthService = new Mock<IAppBasicAuthService>();
+            var userSErvice = new Mock<IUserService>();
 
             var ctrl = new ConfigController(
                 configService.Object,
                 appService.Object,
-                modifyLogService.Object, 
-                remoteNodeProxy.Object,
-                serverNodeService.Object,
-                appBasicAuthService.Object);
-            var act = await ctrl.GetAppConfig("001");
+                userSErvice.Object,
+                memoryCache.Object);
+            var act = await ctrl.GetAppConfig("001", "");
 
             Assert.IsNotNull(act);
             Assert.IsNotNull(act.Value);
@@ -86,11 +86,9 @@ namespace ApiSiteTests
             ctrl = new ConfigController(
                 configService.Object,
                 appService.Object,
-                modifyLogService.Object,
-                remoteNodeProxy.Object,
-                serverNodeService.Object,
-                appBasicAuthService.Object);
-            act = await ctrl.GetAppConfig("001");
+                userSErvice.Object,
+                memoryCache.Object);
+            act = await ctrl.GetAppConfig("001", "");
 
             Assert.IsNotNull(act);
             Assert.IsNull(act.Value);

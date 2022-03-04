@@ -2,12 +2,12 @@ import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { ModalForm,  ProFormDependency, ProFormSelect, ProFormSwitch, ProFormText } from '@ant-design/pro-form';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
-import { Button, FormInstance, message, Modal, Space, Switch, Tag } from 'antd';
-import React, { useState, useRef } from 'react';
-import {CurrentUser, getIntl, getLocale, Link, useIntl} from 'umi';
+import { Button, Checkbox, Divider, FormInstance, Input, message, Modal, Space, Switch, Tag } from 'antd';
+import React, { useState, useRef, useEffect } from 'react';
+import { getIntl, getLocale, Link, useIntl} from 'umi';
 import UpdateForm from './comps/updateForm';
 import { AppListItem, AppListParams, AppListResult, UserAppAuth } from './data';
-import { addApp, editApp, delApp, queryApps, inheritancedApps,enableOrdisableApp, saveAppAuth } from './service';
+import { addApp, editApp, delApp, queryApps, inheritancedApps,enableOrdisableApp, saveAppAuth, getAppGroups } from './service';
 import { adminUsers } from '@/pages/User/service';
 import UserAuth from './comps/userAuth';
 import AuthorizedEle from '@/components/Authorized/AuthorizedElement';
@@ -142,6 +142,28 @@ const appList: React.FC = (props) => {
   const [userAuthModalVisible, setUserAuthModalVisible] = useState<boolean>(false);
   const [currentRow, setCurrentRow] = useState<AppListItem>();
   const [dataSource, setDataSource] = useState<AppListResult>();
+  const [appGroups, setAppGroups] = useState<{label:string, value:string}[]>([]);
+  const [newAppGroupName, setNewAppGroupName] = useState<string>('');
+  const [appGroupsEnums, setAppGroupsEnums] = useState<{}>({});
+  const [tableGrouped, setTableGrouped] = useState<boolean>(false);
+
+  useEffect(()=>{
+    getAppGroups().then(x=>{
+      if (x.success) {
+        const groups:{label:string, value:string}[] = [];
+        const groupEnums = {};
+        x.data.forEach((i: any)=>{
+          groups.push({
+            label:i,
+            value: i
+          });
+          groupEnums[i]={text:i};
+        })
+        setAppGroups(groups);
+        setAppGroupsEnums(groupEnums);
+      } 
+    })
+  },[dataSource]);
 
   const handleQuery = async (params: AppListParams) => {
     const result = await queryApps(params);
@@ -183,6 +205,7 @@ const appList: React.FC = (props) => {
         id:'pages.app.table.cols.appname'
       }),
       dataIndex: 'name',
+      sorter: true,
     },
     {
       title: intl.formatMessage({
@@ -190,6 +213,7 @@ const appList: React.FC = (props) => {
       }),
       dataIndex: 'id',
       copyable: true,
+      sorter: true,
     },
     {
       title: intl.formatMessage({
@@ -201,12 +225,31 @@ const appList: React.FC = (props) => {
       copyable: true,
     },
     {
+      title: '应用组',
+      sorter: true,
+      valueType: 'select',
+      dataIndex: 'group',
+      valueEnum: appGroupsEnums
+      // request:async ()=>{
+      //   const groups = await getAppGroups();
+      //   const arr:{label:string, value:string}[] = [];
+      //   groups.data.forEach( (x: string)=>{
+      //     arr.push({
+      //       value: x,
+      //       label: x,
+      //     });
+      //   });
+      //   return arr;
+      // }
+    },
+    {
       title: intl.formatMessage({
         id:'pages.app.table.cols.create_time'
       }),
       dataIndex: 'createTime',
       valueType: 'dateTime',
-      hideInSearch: true
+      hideInSearch: true,
+      sorter: true,
     },
     {
       title: '管理员',
@@ -355,7 +398,25 @@ const appList: React.FC = (props) => {
         
         rowKey={row=>row.id}
         columns={columns}
-        request={(params, sorter, filter) => handleQuery(params)}
+        request={(params, sorter, filter) => {
+          let sortField = 'createTime';
+          let ascOrDesc = 'descend';
+          for (const key in sorter) {
+            sortField = key;
+            const val = sorter[key];
+            if (val) {
+              ascOrDesc = val;
+            }
+          }
+          console.log(sortField, ascOrDesc);
+          return handleQuery({ tableGrouped, sortField, ascOrDesc, ...params })
+        } }
+        headerTitle = {
+          <Checkbox onChange={(e)=>{ 
+            setTableGrouped(e.target.checked);
+            actionRef.current?.reload();
+          }}>分组聚合</Checkbox>
+        }
         toolBarRender={() => {
           return [
             <AuthorizedEle key="0" judgeKey={functionKeys.App_Add} > 
@@ -431,6 +492,37 @@ const appList: React.FC = (props) => {
           }
           name="secret"
         />
+        <ProFormSelect
+                placeholder="应用所属的组"
+                  label="应用组"
+                  name="group"
+                  options={appGroups}
+                  fieldProps={{
+                    dropdownRender: (menu) => (
+                      <div>
+                      {menu}
+                      <Divider style={{ margin: '4px 0' }} />
+                        <div style={{ display: 'flex', flexWrap: 'nowrap', padding: 8 }}>
+                          <Input placeholder="输入组名" style={{ flex: 'auto' }} value={newAppGroupName} onChange={(e)=>{ setNewAppGroupName(e.target.value) }} />
+                          <a
+                            style={{ flex: 'none', padding: '8px', display: 'block', cursor: 'pointer' }}
+                            onClick={()=>{
+                              if(newAppGroupName){
+                                setAppGroups([...appGroups, {
+                                  label: newAppGroupName,
+                                  value: newAppGroupName
+                                }]);
+                                setNewAppGroupName('');
+                              }
+                            }}
+                          >
+                            <PlusOutlined /> 
+                          </a>
+                        </div>
+                      </div>
+                    )
+                  }}
+        ></ProFormSelect>
         <ProFormSwitch tooltip={
           intl.formatMessage({
             id: 'pages.app.form.public.tooltip'
@@ -464,7 +556,7 @@ const appList: React.FC = (props) => {
                     const result = await inheritancedApps('');
                     return result.data.map( (x: { name: string, id: string })=> {
                       console.log(x);
-                      return { label:(x.name + x.id), value:x.id};
+                      return { label:x.name, value:x.id};
                     });
                   }}
                 ></ProFormSelect> : null
@@ -488,6 +580,7 @@ const appList: React.FC = (props) => {
                     });
                   }}
         ></ProFormSelect>
+        
         <ProFormSwitch label={
           intl.formatMessage({
             id: 'pages.app.form.enabled'

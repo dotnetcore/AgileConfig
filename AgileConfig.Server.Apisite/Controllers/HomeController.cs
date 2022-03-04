@@ -35,13 +35,41 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (!await _settingService.HasSuperAdmin())
             {
-                return Redirect("/ui#/user/initpassword");
+                return Redirect(Request.PathBase + "/ui#/user/initpassword");
             }
 
-            return Redirect("/ui");
+            return Redirect(Request.PathBase + "/ui");
         }
 
         public async Task<IActionResult> Current()
+        {
+            string userName = this.GetCurrentUserName();
+            if (string.IsNullOrEmpty(userName))
+            {
+                return Json(new
+                {
+                    currentUser =new { 
+                    }
+                });
+            }
+
+            string userId = await this.GetCurrentUserId(_userService);
+            var userRoles = await _userService.GetUserRolesAsync(userId);
+            var userFunctions = await _permissionService.GetUserPermission(userId);
+
+            return Json(new { 
+                currentUser = new
+                {
+                    userId = userId,
+                    userName,
+                    currentAuthority = userRoles.Select(r => r.ToString()),
+                    currentFunctions = userFunctions
+                }
+            });
+        }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> Sys()
         {
             string appVer = System.Reflection.Assembly.GetAssembly(typeof(AgileConfig.Server.Apisite.Program)).GetName().Version.ToString();
             string userName = this.GetCurrentUserName();
@@ -50,25 +78,15 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     appVer,
-                    currentUser =new { 
-                    }
                 });
             }
 
-            string userId = this.GetCurrentUserId();
-            var userRoles = await _userService.GetUserRolesAsync(userId);
-            var userFunctions = await _permissionService.GetUserPermission(userId);
-
-            return Json(new { 
+            var envList = await _settingService.GetEnvironmentList();
+            return Json(new
+            {
                 appVer,
-                passwordInited=await _settingService.HasSuperAdmin(),
-                currentUser = new
-                {
-                    userId = userId,
-                    userName,
-                    currentAuthority = userRoles.Select(r => r.ToString()),
-                    currentFunctions = userFunctions
-                }
+                passwordInited = await _settingService.HasSuperAdmin(),
+                envList
             });
         }
 
