@@ -23,15 +23,18 @@ namespace AgileConfig.Server.Apisite.Websocket
         public WebsocketHandlerMiddleware(
             RequestDelegate next,
             ILoggerFactory loggerFactory
-            )
+        )
         {
             _next = next;
-            _logger = loggerFactory.
-                CreateLogger<WebsocketHandlerMiddleware>();
+            _logger = loggerFactory.CreateLogger<WebsocketHandlerMiddleware>();
             _websocketCollection = WebsocketCollection.Instance;
         }
 
-        public async Task Invoke(HttpContext context, IAppBasicAuthService appBasicAuth, IConfigService configService)
+        public async Task Invoke(
+            HttpContext context, 
+            IAppBasicAuthService appBasicAuth, 
+            IConfigService configService,
+            IRegisterCenterService registerCenterService)
         {
             if (context.Request.Path == "/ws")
             {
@@ -43,12 +46,14 @@ namespace AgileConfig.Server.Apisite.Websocket
                         await context.Response.WriteAsync("basic auth failed .");
                         return;
                     }
+
                     var appId = context.Request.Headers["appid"];
                     if (string.IsNullOrEmpty(appId))
                     {
                         var appIdSecret = appBasicAuth.GetAppIdSecret(context.Request);
                         appId = appIdSecret.Item1;
                     }
+
                     var env = context.Request.Headers["env"];
                     if (!string.IsNullOrEmpty(env))
                     {
@@ -59,6 +64,7 @@ namespace AgileConfig.Server.Apisite.Websocket
                         env = "DEV";
                         _logger.LogInformation("Websocket client request No ENV property , set default DEV ");
                     }
+
                     context.Request.Query.TryGetValue("client_name", out StringValues name);
                     if (!string.IsNullOrEmpty(name))
                     {
@@ -68,6 +74,7 @@ namespace AgileConfig.Server.Apisite.Websocket
                     {
                         _logger.LogInformation("Websocket client request No Name property ");
                     }
+
                     context.Request.Query.TryGetValue("client_tag", out StringValues tag);
                     if (!string.IsNullOrEmpty(tag))
                     {
@@ -77,8 +84,9 @@ namespace AgileConfig.Server.Apisite.Websocket
                     {
                         _logger.LogInformation("Websocket client request No TAG property ");
                     }
+
                     WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
-                   
+
                     var clientIp = GetRemoteIp(context.Request);
                     var client = new WebsocketClient()
                     {
@@ -96,7 +104,7 @@ namespace AgileConfig.Server.Apisite.Websocket
 
                     try
                     {
-                        await Handle(context, client, configService);
+                        await Handle(context, client, configService, registerCenterService);
                     }
                     catch (Exception ex)
                     {
@@ -135,7 +143,11 @@ namespace AgileConfig.Server.Apisite.Websocket
             return ip;
         }
 
-        private async Task Handle(HttpContext context, WebsocketClient socketClient, IConfigService configService)
+        private async Task Handle(
+            HttpContext context, 
+            WebsocketClient socketClient, 
+            IConfigService configService,
+            IRegisterCenterService registerCenterService)
         {
             var buffer = new byte[1024 * 2];
             WebSocketReceiveResult result = null;
@@ -153,21 +165,33 @@ namespace AgileConfig.Server.Apisite.Websocket
                     var md5 = await configService.AppPublishedConfigsMd5CacheWithInheritanced(appId, env);
                     await SendMessage(socketClient.Client, $"V:{md5}");
                 }
+                else if (!string.IsNullOrEmpty(message) && message.StartsWith("S:"))
+                {
+                    //如果是注册中心client的心跳，则更新client的心跳时间
+                    var id = message.Substring(2, message.Length - 2);
+                    var heartBeatResult = await registerCenterService.ReceiveHeartbeatAsync(id);
+                    if (heartBeatResult)
+                    {
+                        await SendMessage(socketClient.Client, $"S:X");
+                    }
+                }
                 else
                 {
                     //如果不是心跳消息，回复0
                     await SendMessage(socketClient.Client, "0");
                 }
-            }
-            while (!result.CloseStatus.HasValue);
-            _logger.LogInformation($"Websocket close , closeStatus:{result.CloseStatus} closeDesc:{result.CloseStatusDescription}");
+            } while (!result.CloseStatus.HasValue);
+
+            _logger.LogInformation(
+                $"Websocket close , closeStatus:{result.CloseStatus} closeDesc:{result.CloseStatusDescription}");
             await _websocketCollection.RemoveClient(socketClient, result.CloseStatus, result.CloseStatusDescription);
         }
 
         private async Task SendMessage(WebSocket webSocket, string message)
         {
             var data = Encoding.UTF8.GetBytes(message);
-            await webSocket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+            await webSocket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
+                CancellationToken.None);
         }
 
         private async Task<string> ReadWebsocketMessage(WebSocketReceiveResult result, ArraySegment<Byte> buffer)

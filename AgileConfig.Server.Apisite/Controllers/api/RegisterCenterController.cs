@@ -59,7 +59,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         [HttpPost("heartbeat")]
-        public async Task<HeartbeatResultVM> Heartbeat([FromBody]HeartbeatParam param)
+        public async Task<string> Heartbeat([FromBody]HeartbeatParam param)
         {
             if (param == null)
             {
@@ -72,11 +72,12 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 serviceHeartbeatResult = await _registerCenterService.ReceiveHeartbeatAsync(param.UniqueId);
             }
 
-            return new HeartbeatResultVM
+            if (serviceHeartbeatResult)
             {
-                Success = serviceHeartbeatResult,
-                DataVersion = "x"
-            };
+                return $"S:X";
+            }
+
+            return "";
         }
         
         [HttpGet("services")]
