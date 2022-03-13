@@ -87,6 +87,31 @@ namespace AgileConfig.Server.Service
             return true;
         }
 
+        public async Task<bool> UnRegisterByServiceIdAsync(string serviceId)
+        {
+            _logger.LogInformation("try to unregister service {0}", serviceId);
+
+            if (string.IsNullOrEmpty(serviceId))
+            {
+                throw new ArgumentNullException(nameof(serviceId));
+            }
+
+            var oldEntity = await _dbContext.ServiceInfo.Where(x => x.ServiceId == serviceId).FirstAsync();
+            if(oldEntity == null)
+            {
+                //if not exist
+                _logger.LogInformation("not find the service {0} .", serviceId);
+                return false;
+            }
+
+            _dbContext.ServiceInfo.Remove(oldEntity);
+            await _dbContext.SaveChangesAsync();
+            
+            _logger.LogInformation("unregister service {0} {1} successful .", oldEntity.ServiceId, oldEntity.ServiceName);
+
+            return true;
+        }
+
         public async Task<bool> ReceiveHeartbeatAsync(string serviceUniqueId)
         {
             var entity = await _dbContext.ServiceInfo.Where(x => x.Id == serviceUniqueId).FirstAsync();

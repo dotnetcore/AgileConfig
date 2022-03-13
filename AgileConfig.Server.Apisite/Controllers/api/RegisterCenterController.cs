@@ -48,10 +48,17 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
 
         [HttpDelete("{id}")]
-        public async Task<RegisterResultVM> UnRegister(string id)
+        public async Task<RegisterResultVM> UnRegister(string id, [FromBody]RegisterServiceInfoVM vm)
         {
-            await _registerCenterService.UnRegisterAsync(id);
-
+            var result = await _registerCenterService.UnRegisterAsync(id);
+            if (!result)
+            {
+                if (!string.IsNullOrEmpty(vm?.ServiceId))
+                { 
+                    await _registerCenterService.UnRegisterByServiceIdAsync(vm.ServiceId);
+                }
+            }
+            
             return new RegisterResultVM
             {
                 UniqueId = id,
