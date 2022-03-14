@@ -49,12 +49,19 @@ namespace AgileConfig.Server.Data.Freesql.Tests
         public void ExistTableMysqlTest()
         {
             //SqlServer
-            string conn = "Database=agile_config_test;Data Source=localhost;User Id=root;Password=dev@123;port=3306";
+            string conn = "Database=agile_config_test;Data Source=192.168.0.125;User Id=root;Password=mimi756310;port=13306";
             var mysql_fsq = new FreeSqlBuilder()
                           .UseConnectionString(FreeSql.DataType.MySql, conn)
                           .Build();
             FluentApi.Config(mysql_fsq);
-            mysql_fsq.Ado.ExecuteNonQuery("drop table agc_app");
+            try
+            {
+                mysql_fsq.Ado.ExecuteNonQuery("drop table agc_app");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
             var ex = EnsureTables.ExistTable(mysql_fsq);
             Assert.IsFalse(ex);
             mysql_fsq.CodeFirst.SyncStructure<App>();
