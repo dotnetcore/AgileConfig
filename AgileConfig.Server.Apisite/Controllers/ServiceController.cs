@@ -89,7 +89,8 @@ namespace AgileConfig.Server.Apisite.Controllers
                     LastHeartBeat = service.LastHeartBeat,
                     MetaData = service.MetaData,
                     RegisterTime = service.RegisterTime,
-                    HeartBeatMode = service.HeartBeatMode
+                    HeartBeatMode = service.HeartBeatMode,
+                    CheckUrl = service.CheckUrl
                 });
             }
 

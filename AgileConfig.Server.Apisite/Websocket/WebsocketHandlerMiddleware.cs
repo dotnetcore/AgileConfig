@@ -143,6 +143,16 @@ namespace AgileConfig.Server.Apisite.Websocket
             return ip;
         }
 
+        /// <summary>
+        /// 对client的消息进行处理
+        /// ，如果是ping是老版client的心跳消息
+        /// ，如果是c:打头的消息代表是配置中心的client的消息
+        /// ，如果是s:打头的消息代表是服务中心的client的消息
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="socketClient"></param>
+        /// <param name="configService"></param>
+        /// <param name="registerCenterService"></param>
         private async Task Handle(
             HttpContext context, 
             WebsocketClient socketClient, 
@@ -156,28 +166,33 @@ namespace AgileConfig.Server.Apisite.Websocket
                 result = await socketClient.Client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
                 socketClient.LastHeartbeatTime = DateTime.Now;
                 var message = await ReadWebsocketMessage(result, buffer);
+                if (message == null)
+                {
+                    message = "";
+                }
                 if (message == "ping")
                 {
-                    //如果是ping，回复本地数据的md5版本
+                    //兼容旧版client
+                    //如果是ping，回复本地数据的md5版本 
                     var appId = context.Request.Headers["appid"];
                     var env = context.Request.Headers["env"];
                     env = await configService.IfEnvEmptySetDefaultAsync(env);
                     var md5 = await configService.AppPublishedConfigsMd5CacheWithInheritanced(appId, env);
                     await SendMessage(socketClient.Client, $"V:{md5}");
                 }
-                else if (!string.IsNullOrEmpty(message) && message.StartsWith("S:"))
+                else if (message.StartsWith("s:ping:"))
                 {
                     //如果是注册中心client的心跳，则更新client的心跳时间
-                    var id = message.Substring(2, message.Length - 2);
+                    var id = message.Substring(7, message.Length - 7);
                     var heartBeatResult = await registerCenterService.ReceiveHeartbeatAsync(id);
                     if (heartBeatResult)
                     {
-                        await SendMessage(socketClient.Client, $"S:X");
+                        await SendMessage(socketClient.Client, $"s:ping:x");
                     }
                 }
                 else
                 {
-                    //如果不是心跳消息，回复0
+                    //如果无法处理，回复0
                     await SendMessage(socketClient.Client, "0");
                 }
             } while (!result.CloseStatus.HasValue);

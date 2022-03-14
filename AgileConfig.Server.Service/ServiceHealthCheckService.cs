@@ -19,20 +19,32 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
         _logger = logger;
     }
 
+    private int _interval;
+
     private int Interval
     {
         get
         {
-            var interval = Global.Config["serviceHealthCheckInterval"];
-            if (int.TryParse(interval,out int i))
+            if (_interval > 0)
             {
-                return i;
+                return _interval;
             }
 
-            return 30;
+            var interval = Global.Config["serviceHealthCheckInterval"];
+            if (int.TryParse(interval, out int i))
+            {
+                if (i <= 0)
+                {
+                    throw new ArgumentException("serviceHealthCheckInterval must be greater than 0");
+                }
+
+                _interval = i;
+            }
+
+            return _interval;
         }
     }
-    
+
     public Task StartCheckAsync()
     {
         _logger.LogInformation("start to service health check");
@@ -42,7 +54,8 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
             while (true)
             {
                 //没有填写心跳模式，则不做检查
-                var services = await FreeSQL.Instance.Select<ServiceInfo>().Where(x=> x.HeartBeatMode != null && x.HeartBeatMode != "").ToListAsync();
+                var services = await FreeSQL.Instance.Select<ServiceInfo>()
+                    .Where(x => x.HeartBeatMode != null && x.HeartBeatMode != "").ToListAsync();
                 foreach (var service in services)
                 {
                     var lstHeartBeat = service.LastHeartBeat;
@@ -50,12 +63,14 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
                     {
                         lstHeartBeat = service.RegisterTime ?? DateTime.MinValue;
                     }
+
                     if ((DateTime.Now - lstHeartBeat.Value).TotalMinutes > 10)
                     {
                         //超过10分钟没有心跳，则直接删除服务
                         await RemoveService(service.Id);
                         continue;
                     }
+
                     //service.HeartBeatMode 不为空，且不等于server 则认为是客户端主动心跳，不做http健康检查
                     if (!string.IsNullOrWhiteSpace(service.HeartBeatMode) && service.HeartBeatMode != "server")
                     {
@@ -67,6 +82,7 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
                                 await UpdateServiceStatus(service.Id, ServiceAlive.Offline);
                             }
                         }
+
                         continue;
                     }
 
@@ -109,13 +125,21 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
             {
                 throw resp.Exception;
             }
-            var result = resp.StatusCode == HttpStatusCode.OK;
-            _logger.LogInformation("check service health {0} {1} {2} result：{3}", service.CheckUrl, service.ServiceId, service.ServiceName, result ? "up" : "down");
+
+            var result = false;
+            if (resp.StatusCode.HasValue)
+            {
+                int istatus = ((int)resp.StatusCode - 200);
+                result = istatus >= 0 && istatus < 100; // 200 段都认为是正常的
+            }
+            _logger.LogInformation("check service health {0} {1} {2} result：{3}", service.CheckUrl, service.ServiceId,
+                service.ServiceName, result ? "up" : "down");
             return result;
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "check service health {0} {1} {2} error",service.CheckUrl, service.ServiceId, service.ServiceName );
+            _logger.LogError(e, "check service health {0} {1} {2} error", service.CheckUrl, service.ServiceId,
+                service.ServiceName);
             return false;
         }
     }
