@@ -49,7 +49,7 @@ namespace AgileConfig.Server.Data.Freesql.Tests
         public void ExistTableMysqlTest()
         {
             //SqlServer
-            string conn = "Database=agile_config_test;Data Source=192.168.0.125;User Id=root;Password=mimi756310;port=13306";
+            string conn = "Database=agile_config_test;Data Source=192.168.0.125;User Id=root;Password=x;port=13306";
             var mysql_fsq = new FreeSqlBuilder()
                           .UseConnectionString(FreeSql.DataType.MySql, conn)
                           .Build();
