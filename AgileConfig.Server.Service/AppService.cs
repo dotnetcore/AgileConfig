@@ -50,6 +50,15 @@ namespace AgileConfig.Server.Service
                     item.Status = ConfigStatus.Deleted;
                     await _dbContext.UpdateAsync(item);
                 }
+                //删除发布的配置项
+                var publishedConfigs = await _dbContext.ConfigPublished
+                    .Where(x => x.AppId == app.Id && x.Status == ConfigStatus.Enabled)
+                    .ToListAsync();
+                foreach (var item in publishedConfigs)
+                {
+                    item.Status = ConfigStatus.Deleted;
+                    await _dbContext.UpdateAsync(item);
+                }
             }
             int x = await _dbContext.SaveChangesAsync();
             var result = x > 0;
