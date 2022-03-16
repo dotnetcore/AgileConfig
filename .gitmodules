@@ -1,0 +1,3 @@
+[submodule "AgileConfig.Client"]
+	path = AgileConfig.Client
+	url = https://github.com/kklldog/AgileConfig_Client.git
