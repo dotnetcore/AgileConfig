@@ -31,10 +31,11 @@ namespace AgileConfig.Server.Apisite.Websocket
         }
 
         public async Task Invoke(
-            HttpContext context, 
-            IAppBasicAuthService appBasicAuth, 
+            HttpContext context,
+            IAppBasicAuthService appBasicAuth,
             IConfigService configService,
-            IRegisterCenterService registerCenterService)
+            IRegisterCenterService registerCenterService,
+            IServiceInfoService serviceInfoService)
         {
             if (context.Request.Path == "/ws")
             {
@@ -104,7 +105,7 @@ namespace AgileConfig.Server.Apisite.Websocket
 
                     try
                     {
-                        await Handle(context, client, configService, registerCenterService);
+                        await Handle(context, client, configService, registerCenterService, serviceInfoService);
                     }
                     catch (Exception ex)
                     {
@@ -154,10 +155,11 @@ namespace AgileConfig.Server.Apisite.Websocket
         /// <param name="configService"></param>
         /// <param name="registerCenterService"></param>
         private async Task Handle(
-            HttpContext context, 
-            WebsocketClient socketClient, 
+            HttpContext context,
+            WebsocketClient socketClient,
             IConfigService configService,
-            IRegisterCenterService registerCenterService)
+            IRegisterCenterService registerCenterService,
+            IServiceInfoService serviceInfoService)
         {
             var buffer = new byte[1024 * 2];
             WebSocketReceiveResult result = null;
@@ -170,6 +172,7 @@ namespace AgileConfig.Server.Apisite.Websocket
                 {
                     message = "";
                 }
+
                 if (message == "ping")
                 {
                     //兼容旧版client
@@ -187,7 +190,8 @@ namespace AgileConfig.Server.Apisite.Websocket
                     var heartBeatResult = await registerCenterService.ReceiveHeartbeatAsync(id);
                     if (heartBeatResult)
                     {
-                        await SendMessage(socketClient.Client, $"s:ping:x");
+                        var version = await serviceInfoService.ServicesMD5Cache();
+                        await SendMessage(socketClient.Client, $"s:ping:{version}");
                     }
                 }
                 else

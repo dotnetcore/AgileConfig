@@ -20,8 +20,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api.Models
     
     public class QueryServiceInfoResultVM
     {
-        public string DataVersion { get; set; }
-
         public List<ServiceInfoVM> Data { get; set; }
     }
 }

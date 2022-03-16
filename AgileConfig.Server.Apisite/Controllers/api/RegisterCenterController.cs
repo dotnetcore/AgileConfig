@@ -81,14 +81,15 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
             if (serviceHeartbeatResult)
             {
-                return $"S:X";
+                var md5 = await _serviceInfoService.ServicesMD5Cache();
+                return $"s:ping:{md5}";
             }
 
             return "";
         }
         
         [HttpGet("services")]
-        public async Task<QueryServiceInfoResultVM> AllServices()
+        public async Task<List<ServiceInfoVM>> AllServices()
         {
             var services = await _serviceInfoService.GetAllServiceInfoAsync();
             var vms = new List<ServiceInfoVM>();
@@ -106,15 +107,11 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 vms.Add(vm);
             }
 
-            return new QueryServiceInfoResultVM()
-            {
-                Data = vms,
-                DataVersion = "x"
-            };
+            return vms;
         }
         
         [HttpGet("services/online")]
-        public async Task<QueryServiceInfoResultVM> OnlineServices()
+        public async Task<List<ServiceInfoVM>> OnlineServices()
         {
             var services = await _serviceInfoService.GetOnlineServiceInfoAsync();
             var vms = new List<ServiceInfoVM>();
@@ -132,15 +129,11 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 vms.Add(vm);
             }
 
-            return new QueryServiceInfoResultVM()
-            {
-                Data = vms,
-                DataVersion = "x"
-            };
+            return vms;
         }
         
         [HttpGet("services/offline")]
-        public async Task<QueryServiceInfoResultVM> OfflineServices()
+        public async Task<List<ServiceInfoVM>> OfflineServices()
         {
             var services = await _serviceInfoService.GetOfflineServiceInfoAsync();
             var vms = new List<ServiceInfoVM>();
@@ -158,11 +151,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 vms.Add(vm);
             }
 
-            return new QueryServiceInfoResultVM()
-            {
-                Data = vms,
-                DataVersion = "x"
-            };
+            return vms;
         }
     }
 }

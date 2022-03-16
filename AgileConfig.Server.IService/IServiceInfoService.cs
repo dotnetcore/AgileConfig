@@ -13,5 +13,8 @@ namespace AgileConfig.Server.IService
 
         Task<List<ServiceInfo>> GetOfflineServiceInfoAsync();
 
+        Task<string> ServicesMD5();
+
+        Task<string> ServicesMD5Cache();
     }
 }

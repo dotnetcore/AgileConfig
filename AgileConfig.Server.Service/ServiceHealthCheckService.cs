@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net;
 using System.Threading.Tasks;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Entity;
@@ -12,9 +11,10 @@ namespace AgileConfig.Server.Service;
 
 public class ServiceHealthCheckService : IServiceHealthCheckService
 {
-    private ILogger _logger;
+    private readonly ILogger _logger;
 
-    public ServiceHealthCheckService(ILogger<ServiceHealthCheckService> logger)
+    public ServiceHealthCheckService(
+        ILogger<ServiceHealthCheckService> logger)
     {
         _logger = logger;
     }
@@ -64,12 +64,12 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
                         lstHeartBeat = service.RegisterTime ?? DateTime.MinValue;
                     }
 
-                    if ((DateTime.Now - lstHeartBeat.Value).TotalMinutes > 10)
-                    {
-                        //超过10分钟没有心跳，则直接删除服务
-                        await RemoveService(service.Id);
-                        continue;
-                    }
+                    // if ((DateTime.Now - lstHeartBeat.Value).TotalMinutes > 10)
+                    // {
+                    //     //超过10分钟没有心跳，则直接删除服务
+                    //     await RemoveService(service.Id);
+                    //     continue;
+                    // }
 
                     //service.HeartBeatMode 不为空，且不等于server 则认为是客户端主动心跳，不做http健康检查
                     if (!string.IsNullOrWhiteSpace(service.HeartBeatMode) && service.HeartBeatMode != "server")
@@ -132,6 +132,7 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
                 int istatus = ((int)resp.StatusCode - 200);
                 result = istatus >= 0 && istatus < 100; // 200 段都认为是正常的
             }
+
             _logger.LogInformation("check service health {0} {1} {2} result：{3}", service.CheckUrl, service.ServiceId,
                 service.ServiceName, result ? "up" : "down");
             return result;
