@@ -37,7 +37,7 @@ namespace AgileConfig.Server.Apisite
                 _settingService.InitDefaultEnvironment();
                 _remoteServerNodeProxy.TestEchoAsync();
                 _serviceHealthCheckService.StartCheckAsync();
-                _eventRegister.Init();
+                _eventRegister.Register();
             }
 
             return  Task.CompletedTask;

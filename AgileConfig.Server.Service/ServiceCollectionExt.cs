@@ -1,4 +1,5 @@
 ﻿using AgileConfig.Server.IService;
+using AgileConfig.Server.Service.EventRegisterService;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AgileConfig.Server.Service

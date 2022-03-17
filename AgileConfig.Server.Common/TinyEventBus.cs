@@ -15,7 +15,7 @@ namespace AgileConfig.Server.Common
         /// </summary>
         /// <param name="eventKey"></param>
         /// <param name="action"></param>
-        void Regist(string eventKey, Action<object> action);
+        void Register(string eventKey, Action<object> action);
         /// <summary>
         /// 移除这个eventkey对应的所有事件
         /// </summary>
@@ -46,7 +46,7 @@ namespace AgileConfig.Server.Common
             _events = new ConcurrentDictionary<string, List<Action<object>>>();
         }
 
-        public void Regist(string eventKey, Action<object> action)
+        public void Register(string eventKey, Action<object> action)
         {
             if (!_events.TryGetValue(eventKey, out List<Action<object>> actions))
             {

@@ -6,7 +6,7 @@ namespace AgileConfig.Server.IService
 {
     public interface IEventRegister
     {
-        void Init();
+        void Register();
     }
 
     public class EventKeys
