@@ -16,5 +16,7 @@ namespace AgileConfig.Server.IService
         Task<string> ServicesMD5();
 
         Task<string> ServicesMD5Cache();
+
+        void ClearCache();
     }
 }

@@ -12,10 +12,13 @@ namespace AgileConfig.Server.Service;
 public class ServiceHealthCheckService : IServiceHealthCheckService
 {
     private readonly ILogger _logger;
+    private readonly IServiceInfoService _serviceInfoService;
 
     public ServiceHealthCheckService(
+        IServiceInfoService serviceInfoService,
         ILogger<ServiceHealthCheckService> logger)
     {
+        _serviceInfoService = serviceInfoService;
         _logger = logger;
     }
 
@@ -79,7 +82,7 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
                             //客户端主动心跳模式：超过1分钟没有心跳，则认为服务不可用
                             if (service.Alive == ServiceAlive.Online)
                             {
-                                await UpdateServiceStatus(service.Id, ServiceAlive.Offline);
+                                await UpdateServiceStatus(service, ServiceAlive.Offline);
                             }
                         }
 
@@ -92,7 +95,7 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
                         if (string.IsNullOrWhiteSpace(service.CheckUrl))
                         {
                             //CheckUrl不填，直接认为下线
-                            await UpdateServiceStatus(service.Id, ServiceAlive.Offline);
+                            await UpdateServiceStatus(service, ServiceAlive.Offline);
                             continue;
                         }
 
@@ -102,7 +105,7 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
 #pragma warning restore CS4014
                         {
                             var result = await CheckAService(service);
-                            await UpdateServiceStatus(service.Id, result ? ServiceAlive.Online : ServiceAlive.Offline);
+                            await UpdateServiceStatus(service, result ? ServiceAlive.Online : ServiceAlive.Offline);
                         });
                     }
                 }
@@ -145,8 +148,11 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
         }
     }
 
-    private async Task UpdateServiceStatus(string id, ServiceAlive status)
+    private async Task UpdateServiceStatus(ServiceInfo service, ServiceAlive status)
     {
+        var id = service.Id;
+        var oldStatus = service.Alive;
+
         if (status == ServiceAlive.Offline)
         {
             await FreeSQL.Instance.Update<ServiceInfo>()
@@ -162,11 +168,10 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
                 .Where(x => x.Id == id)
                 .ExecuteAffrowsAsync();
         }
-    }
 
-    private async Task RemoveService(string id)
-    {
-        await FreeSQL.Instance.Delete<ServiceInfo>().Where(x => x.Id == id)
-            .ExecuteAffrowsAsync();
+        if (oldStatus != status)
+        {
+            _serviceInfoService.ClearCache();
+        }
     }
 }

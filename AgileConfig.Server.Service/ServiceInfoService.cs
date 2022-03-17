@@ -8,43 +8,39 @@ using System.Text;
 using System.Threading.Tasks;
 using AgileConfig.Server.Common;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace AgileConfig.Server.Service
 {
     public class ServiceInfoService : IServiceInfoService
     {
-        private readonly FreeSqlContext _dbContext;
         private readonly IMemoryCache _memoryCache;
 
-        public ServiceInfoService(FreeSqlContext freeSql,
-            IMemoryCache memoryCache
-            )
+        public ServiceInfoService(IMemoryCache memoryCache)
         {
             _memoryCache = memoryCache;
-            _dbContext = freeSql;
         }
 
         public async Task<List<ServiceInfo>> GetAllServiceInfoAsync()
         {
-            var services = await _dbContext.ServiceInfo.Where(x => 1 == 1).ToListAsync();
+            var services = await FreeSQL.Instance.Select<ServiceInfo>().Where(x => 1 == 1).ToListAsync();
 
             return services;
         }
 
         public async Task<List<ServiceInfo>> GetOnlineServiceInfoAsync()
         {
-            var services = await _dbContext.ServiceInfo.Where(x => x.Alive == ServiceAlive.Online).ToListAsync();
-            
-            return services;
+            var services = await FreeSQL.Instance.Select<ServiceInfo>().Where(x => x.Alive == ServiceAlive.Online)
+                .ToListAsync();
 
+            return services;
         }
 
         public async Task<List<ServiceInfo>> GetOfflineServiceInfoAsync()
         {
-            var services = await _dbContext.ServiceInfo.Where(x => x.Alive == ServiceAlive.Offline).ToListAsync();
-            
+            var services = await FreeSQL.Instance.Select<ServiceInfo>().Where(x => x.Alive == ServiceAlive.Offline)
+                .ToListAsync();
+
             return services;
         }
 
@@ -55,7 +51,7 @@ namespace AgileConfig.Server.Service
             {
                 return md5;
             }
-            
+
             md5 = await ServicesMD5();
             var cacheOp = new MemoryCacheEntryOptions()
                 .SetAbsoluteExpiration(TimeSpan.FromSeconds(60));
@@ -63,18 +59,18 @@ namespace AgileConfig.Server.Service
 
             return md5;
         }
-        
+
         public async Task<string> ServicesMD5()
         {
             var services = await GetAllServiceInfoAsync();
             var md5 = GenerateMD5(services);
-            
+
             return md5;
         }
 
         private string GenerateMD5(List<ServiceInfo> services)
         {
-            var sb = new StringBuilder(); 
+            var sb = new StringBuilder();
             foreach (var serviceInfo in services.OrderBy(x => x.ServiceId))
             {
                 var metaDataStr = "";
@@ -83,19 +79,28 @@ namespace AgileConfig.Server.Service
                     var metaData = JsonConvert.DeserializeObject<List<string>>(serviceInfo.MetaData);
                     if (metaData != null)
                     {
-                        metaDataStr = string.Join(",", metaData.OrderBy(x=>x));
+                        metaDataStr = string.Join(",", metaData.OrderBy(x => x));
                     }
                 }
-                sb.Append($"{serviceInfo.ServiceId}&{serviceInfo.ServiceName}&{serviceInfo.Ip}&{serviceInfo.Port}&{(int)serviceInfo.Alive}&{metaDataStr}&");
+
+                sb.Append(
+                    $"{serviceInfo.ServiceId}&{serviceInfo.ServiceName}&{serviceInfo.Ip}&{serviceInfo.Port}&{(int)serviceInfo.Alive}&{metaDataStr}&");
             }
 
             var txt = sb.ToString();
             return Encrypt.Md5(txt);
         }
 
+        public void ClearCache()
+        {
+            if (_memoryCache != null && _memoryCache is MemoryCache memCache)
+            {
+                memCache.Compact(1.0);
+            }
+        }
+
         public void Dispose()
         {
-            _dbContext.Dispose();
         }
     }
 }
