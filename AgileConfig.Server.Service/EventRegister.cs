@@ -69,7 +69,7 @@ namespace AgileConfig.Server.Service
                                    continue;
                                }
                                //all server cache
-                               await _remoteServerNodeProxy.ClearCache(node.Address);
+                               await _remoteServerNodeProxy.ClearConfigServiceCache(node.Address);
                            }
                            
                            foreach (var node in nodes)

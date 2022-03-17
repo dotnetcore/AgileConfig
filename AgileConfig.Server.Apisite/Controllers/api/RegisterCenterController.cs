@@ -4,7 +4,9 @@ using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Threading.Tasks;
+using AgileConfig.Server.Common;
 using Newtonsoft.Json;
 
 namespace AgileConfig.Server.Apisite.Controllers.api
@@ -40,6 +42,13 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             
             var id = await _registerCenterService.RegisterAsync(entity);
 
+            //send a message to notify other services
+            dynamic param = new ExpandoObject();
+            param.ServiceId = model.ServiceId;
+            param.ServiceName = model.ServiceName;
+            param.ServiceId = id;
+            TinyEventBus.Instance.Fire(EventKeys.REGISTER_A_SERVICE,param);
+            
             return new RegisterResultVM
             {
                 UniqueId = id
@@ -55,8 +64,19 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             {
                 if (!string.IsNullOrEmpty(vm?.ServiceId))
                 { 
-                    await _registerCenterService.UnRegisterByServiceIdAsync(vm.ServiceId);
+                    result = await _registerCenterService.UnRegisterByServiceIdAsync(vm.ServiceId);
                 }
+            }
+
+            if (result)
+            {
+                //send a message to notify other services
+                var entity = await _serviceInfoService.GetByUniqueIdAsync(id);
+                dynamic param = new ExpandoObject();
+                param.ServiceId = entity.ServiceId;
+                param.ServiceName = entity.ServiceName;
+                param.ServiceId = id;
+                TinyEventBus.Instance.Fire(EventKeys.UNREGISTER_A_SERVICE,param);
             }
             
             return new RegisterResultVM

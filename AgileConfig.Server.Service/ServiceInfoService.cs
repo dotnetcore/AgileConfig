@@ -21,6 +21,13 @@ namespace AgileConfig.Server.Service
             _memoryCache = memoryCache;
         }
 
+        public async Task<ServiceInfo> GetByUniqueIdAsync(string id)
+        {
+            var entity = await FreeSQL.Instance.Select<ServiceInfo>().Where(x => x.Id == id).FirstAsync();
+
+            return entity;
+        }
+
         public async Task<List<ServiceInfo>> GetAllServiceInfoAsync()
         {
             var services = await FreeSQL.Instance.Select<ServiceInfo>().Where(x => 1 == 1).ToListAsync();
@@ -96,6 +103,33 @@ namespace AgileConfig.Server.Service
             if (_memoryCache != null && _memoryCache is MemoryCache memCache)
             {
                 memCache.Compact(1.0);
+            }
+        }
+
+        public async Task UpdateServiceStatus(ServiceInfo service, ServiceAlive status)
+        {
+            var id = service.Id;
+            var oldStatus = service.Alive;
+
+            if (status == ServiceAlive.Offline)
+            {
+                await FreeSQL.Instance.Update<ServiceInfo>()
+                    .Set(x => x.Alive, status)
+                    .Where(x => x.Id == id)
+                    .ExecuteAffrowsAsync();
+            }
+            else
+            {
+                await FreeSQL.Instance.Update<ServiceInfo>()
+                    .Set(x => x.Alive, status)
+                    .Set(x => x.LastHeartBeat, DateTime.Now)
+                    .Where(x => x.Id == id)
+                    .ExecuteAffrowsAsync();
+            }
+
+            if (oldStatus != status)
+            {
+                ClearCache();
             }
         }
 

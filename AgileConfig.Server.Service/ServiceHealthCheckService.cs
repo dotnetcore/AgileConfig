@@ -82,7 +82,7 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
                             //客户端主动心跳模式：超过1分钟没有心跳，则认为服务不可用
                             if (service.Alive == ServiceAlive.Online)
                             {
-                                await UpdateServiceStatus(service, ServiceAlive.Offline);
+                                await _serviceInfoService.UpdateServiceStatus(service, ServiceAlive.Offline);
                             }
                         }
 
@@ -95,7 +95,7 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
                         if (string.IsNullOrWhiteSpace(service.CheckUrl))
                         {
                             //CheckUrl不填，直接认为下线
-                            await UpdateServiceStatus(service, ServiceAlive.Offline);
+                            await _serviceInfoService.UpdateServiceStatus(service, ServiceAlive.Offline);
                             continue;
                         }
 
@@ -105,7 +105,7 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
 #pragma warning restore CS4014
                         {
                             var result = await CheckAService(service);
-                            await UpdateServiceStatus(service, result ? ServiceAlive.Online : ServiceAlive.Offline);
+                            await _serviceInfoService.UpdateServiceStatus(service, result ? ServiceAlive.Online : ServiceAlive.Offline);
                         });
                     }
                 }
@@ -145,33 +145,6 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
             _logger.LogError(e, "check service health {0} {1} {2} error", service.CheckUrl, service.ServiceId,
                 service.ServiceName);
             return false;
-        }
-    }
-
-    private async Task UpdateServiceStatus(ServiceInfo service, ServiceAlive status)
-    {
-        var id = service.Id;
-        var oldStatus = service.Alive;
-
-        if (status == ServiceAlive.Offline)
-        {
-            await FreeSQL.Instance.Update<ServiceInfo>()
-                .Set(x => x.Alive, status)
-                .Where(x => x.Id == id)
-                .ExecuteAffrowsAsync();
-        }
-        else
-        {
-            await FreeSQL.Instance.Update<ServiceInfo>()
-                .Set(x => x.Alive, status)
-                .Set(x => x.LastHeartBeat, DateTime.Now)
-                .Where(x => x.Id == id)
-                .ExecuteAffrowsAsync();
-        }
-
-        if (oldStatus != status)
-        {
-            _serviceInfoService.ClearCache();
         }
     }
 }

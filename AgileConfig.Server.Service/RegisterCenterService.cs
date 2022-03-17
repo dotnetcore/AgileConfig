@@ -49,6 +49,8 @@ namespace AgileConfig.Server.Service
                 await _dbContext.ServiceInfo.UpdateAsync(oldEntity);
                 var rows = await _dbContext.SaveChangesAsync();
 
+                _serviceInfoService.ClearCache();
+
                 _logger.LogInformation("registered service {0} {1} successful .", serviceInfo.ServiceId, serviceInfo.ServiceName);
                 
                 return oldEntity.Id;
