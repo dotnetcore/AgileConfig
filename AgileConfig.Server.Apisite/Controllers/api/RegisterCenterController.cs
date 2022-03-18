@@ -46,7 +46,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             dynamic param = new ExpandoObject();
             param.ServiceId = model.ServiceId;
             param.ServiceName = model.ServiceName;
-            param.ServiceId = id;
+            param.UniqueId = id;
             TinyEventBus.Instance.Fire(EventKeys.REGISTER_A_SERVICE,param);
             
             return new RegisterResultVM
@@ -75,7 +75,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 dynamic param = new ExpandoObject();
                 param.ServiceId = entity.ServiceId;
                 param.ServiceName = entity.ServiceName;
-                param.ServiceId = id;
+                param.UniqueId = id;
                 TinyEventBus.Instance.Fire(EventKeys.UNREGISTER_A_SERVICE,param);
             }
             

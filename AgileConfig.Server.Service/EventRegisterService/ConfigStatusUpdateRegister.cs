@@ -8,11 +8,11 @@ using AgileConfig.Server.IService;
 
 namespace AgileConfig.Server.Service.EventRegisterService;
 
-internal class ConfigWebsoketActionRegister : IEventRegister
+internal class ConfigStatusUpdateRegister : IEventRegister
 {
     private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
 
-    public ConfigWebsoketActionRegister(IRemoteServerNodeProxy remoteServerNodeProxy)
+    public ConfigStatusUpdateRegister(IRemoteServerNodeProxy remoteServerNodeProxy)
     {
         _remoteServerNodeProxy = remoteServerNodeProxy;
     }

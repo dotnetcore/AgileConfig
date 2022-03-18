@@ -513,5 +513,41 @@ internal class SysLogRegister : IEventRegister
                 }
             });
         });
+
+        //service info envets
+        TinyEventBus.Instance.Register(EventKeys.REGISTER_A_SERVICE, (param) =>
+        {
+            dynamic param_dy = param;
+            string serviceId = param_dy.ServiceId;
+            string serviceName = param_dy.ServiceName;
+            var log = new SysLog
+            {
+                LogTime = DateTime.Now,
+                LogType = SysLogType.Normal,
+                LogText = $"服务：【{serviceId}】【{serviceName}】 注册成功"
+            };
+            Task.Run(async () =>
+            {
+                using var syslogService = NewSysLogService();
+                await syslogService.AddSysLogAsync(log);
+            });
+        });
+        TinyEventBus.Instance.Register(EventKeys.UNREGISTER_A_SERVICE, (param) =>
+        {
+            dynamic param_dy = param;
+            string serviceId = param_dy.ServiceId;
+            string serviceName = param_dy.ServiceName;
+            var log = new SysLog
+            {
+                LogTime = DateTime.Now,
+                LogType = SysLogType.Normal,
+                LogText = $"服务：【{serviceId}】【{serviceName}】 卸载成功"
+            };
+            Task.Run(async () =>
+            {
+                using var syslogService = NewSysLogService();
+                await syslogService.AddSysLogAsync(log);
+            });
+        });
     }
 }
