@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Net.Http.Json;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Agile.Config.Protocol;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 
 namespace AgileConfig.Server.Apisite.Websocket.MessageHandlers;
 
@@ -57,13 +60,17 @@ internal class MessageHandler : IMessageHandler
 
         if (message == "ping")
         {
-            //兼容旧版client
             //如果是ping，回复本地数据的md5版本 
             var appId = request.Headers["appid"];
             var env = request.Headers["env"];
             env = await _configService.IfEnvEmptySetDefaultAsync(env);
             var md5 = await _configService.AppPublishedConfigsMd5CacheWithInheritanced(appId, env);
-            await SendMessage(client, $"V:{md5}");
+            await SendMessage(client, JsonConvert.SerializeObject(new WebsocketAction()
+            {
+                Action = ActionConst.Ping,
+                Module = ActionModule.ConfigCenter,
+                Data = md5
+            }));
         }
         else if (message.StartsWith("s:ping:"))
         {
@@ -73,7 +80,12 @@ internal class MessageHandler : IMessageHandler
             if (heartBeatResult)
             {
                 var version = await _serviceInfoService.ServicesMD5Cache();
-                await SendMessage(client, $"s:ping:{version}");
+                await SendMessage(client, JsonConvert.SerializeObject(new WebsocketAction()
+                {
+                    Action = ActionConst.Ping,
+                    Module = ActionModule.RegisterCenter,
+                    Data = version
+                }));
             }
         }
         else

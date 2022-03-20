@@ -47,7 +47,8 @@ internal class ConfigStatusUpdateRegister : IEventRegister
                     {
                         var nodes = await serverNodeService.GetAllNodesAsync();
                         var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(timelineNode.AppId);
-                        noticeApps.Add(timelineNode.AppId, new WebsocketAction { Action = ActionConst.Reload });
+                        noticeApps.Add(timelineNode.AppId,
+                            new WebsocketAction { Action = ActionConst.Reload, Module = ActionModule.ConfigCenter });
 
                         foreach (var node in nodes)
                         {
@@ -95,7 +96,9 @@ internal class ConfigStatusUpdateRegister : IEventRegister
                         {
                             var nodes = await serverNodeService.GetAllNodesAsync();
                             var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(timelineNode.AppId);
-                            noticeApps.Add(timelineNode.AppId, new WebsocketAction { Action = ActionConst.Reload });
+                            noticeApps.Add(timelineNode.AppId,
+                                new WebsocketAction
+                                    { Action = ActionConst.Reload, Module = ActionModule.ConfigCenter });
 
                             foreach (var node in nodes)
                             {
@@ -137,7 +140,7 @@ internal class ConfigStatusUpdateRegister : IEventRegister
                 {
                     needNoticeAppsActions.Add(x.Id, new WebsocketAction
                     {
-                        Action = ActionConst.Reload
+                        Action = ActionConst.Reload, Module = ActionModule.ConfigCenter
                     });
                 });
             }
