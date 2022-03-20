@@ -32,7 +32,7 @@ const services: React.FC = () => {
       hideInSearch: true,
     },
     {
-      title: '心跳模式',
+      title: '健康检测模式',
       dataIndex: 'heartBeatMode',
       hideInSearch: true,
     },

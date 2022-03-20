@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using AgileConfig.Server.Apisite.Websocket.MessageHandlers;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -161,6 +162,8 @@ namespace AgileConfig.Server.Apisite.Websocket
             IRegisterCenterService registerCenterService,
             IServiceInfoService serviceInfoService)
         {
+            var messageHandlers =
+                new WebsocketMessageHandlers(configService, registerCenterService, serviceInfoService);
             var buffer = new byte[1024 * 2];
             WebSocketReceiveResult result = null;
             do
@@ -168,49 +171,19 @@ namespace AgileConfig.Server.Apisite.Websocket
                 result = await socketClient.Client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
                 socketClient.LastHeartbeatTime = DateTime.Now;
                 var message = await ReadWebsocketMessage(result, buffer);
-                if (message == null)
-                {
-                    message = "";
-                }
 
-                if (message == "ping")
+                foreach (var messageHandlersMessageHandler in messageHandlers.MessageHandlers)
                 {
-                    //兼容旧版client
-                    //如果是ping，回复本地数据的md5版本 
-                    var appId = context.Request.Headers["appid"];
-                    var env = context.Request.Headers["env"];
-                    env = await configService.IfEnvEmptySetDefaultAsync(env);
-                    var md5 = await configService.AppPublishedConfigsMd5CacheWithInheritanced(appId, env);
-                    await SendMessage(socketClient.Client, $"V:{md5}");
-                }
-                else if (message.StartsWith("s:ping:"))
-                {
-                    //如果是注册中心client的心跳，则更新client的心跳时间
-                    var id = message.Substring(7, message.Length - 7);
-                    var heartBeatResult = await registerCenterService.ReceiveHeartbeatAsync(id);
-                    if (heartBeatResult)
+                    if (messageHandlersMessageHandler.Hit(context.Request))
                     {
-                        var version = await serviceInfoService.ServicesMD5Cache();
-                        await SendMessage(socketClient.Client, $"s:ping:{version}");
+                        await messageHandlersMessageHandler.Handle(message, context.Request, socketClient.Client);
                     }
-                }
-                else
-                {
-                    //如果无法处理，回复0
-                    await SendMessage(socketClient.Client, "0");
                 }
             } while (!result.CloseStatus.HasValue);
 
             _logger.LogInformation(
                 $"Websocket close , closeStatus:{result.CloseStatus} closeDesc:{result.CloseStatusDescription}");
             await _websocketCollection.RemoveClient(socketClient, result.CloseStatus, result.CloseStatusDescription);
-        }
-
-        private async Task SendMessage(WebSocket webSocket, string message)
-        {
-            var data = Encoding.UTF8.GetBytes(message);
-            await webSocket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
-                CancellationToken.None);
         }
 
         private async Task<string> ReadWebsocketMessage(WebSocketReceiveResult result, ArraySegment<Byte> buffer)
