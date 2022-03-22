@@ -6,7 +6,7 @@ namespace AgileConfig.Server.IService
 {
     public interface IEventRegister
     {
-        void Init();
+        void Register();
     }
 
     public class EventKeys
@@ -41,6 +41,10 @@ namespace AgileConfig.Server.IService
         public const string RESET_USER_PASSWORD_SUCCESS = "RESET_USER_PASSWORD_SUCCESS";
 
         public const string DISCONNECT_CLIENT_SUCCESS = "DISCONNECT_CLIENT_SUCCESS";
+        
+        public const string REGISTER_A_SERVICE = "REGISTER_A_SERVICE";
+        public const string UNREGISTER_A_SERVICE = "UNREGISTER_A_SERVICE";
+        public const string UPDATE_SERVICE_STATUS = "UPDATE_SERVICE_STATUS";
 
     }
 }

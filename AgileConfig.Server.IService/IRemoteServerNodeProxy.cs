@@ -79,10 +79,17 @@ namespace AgileConfig.Server.IService
         Task TestEchoAsync(string address);
 
         /// <summary>
-        /// 清除1个节点的缓存
+        /// 清除1个节点的配置信息缓存
         /// </summary>
         /// <param name="address"></param>
         /// <returns></returns>
-        Task ClearCache(string address);
+        Task ClearConfigServiceCache(string address);
+
+        /// <summary>
+        /// 删除某个节点的服务注册信息的缓存
+        /// </summary>
+        /// <param name="address"></param>
+        /// <returns></returns>
+        Task ClearServiceInfoCache(string address);
     }
 }

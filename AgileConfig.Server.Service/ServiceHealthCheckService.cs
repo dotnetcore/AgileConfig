@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net;
 using System.Threading.Tasks;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Entity;
@@ -12,27 +11,43 @@ namespace AgileConfig.Server.Service;
 
 public class ServiceHealthCheckService : IServiceHealthCheckService
 {
-    private ILogger _logger;
+    private readonly ILogger _logger;
+    private readonly IServiceInfoService _serviceInfoService;
 
-    public ServiceHealthCheckService(ILogger<ServiceHealthCheckService> logger)
+    public ServiceHealthCheckService(
+        IServiceInfoService serviceInfoService,
+        ILogger<ServiceHealthCheckService> logger)
     {
+        _serviceInfoService = serviceInfoService;
         _logger = logger;
     }
+
+    private int _interval;
 
     private int Interval
     {
         get
         {
-            var interval = Global.Config["serviceHealthCheckInterval"];
-            if (int.TryParse(interval,out int i))
+            if (_interval > 0)
             {
-                return i;
+                return _interval;
             }
 
-            return 30;
+            var interval = Global.Config["serviceHealthCheckInterval"];
+            if (int.TryParse(interval, out int i))
+            {
+                if (i <= 0)
+                {
+                    throw new ArgumentException("serviceHealthCheckInterval must be greater than 0");
+                }
+
+                _interval = i;
+            }
+
+            return _interval;
         }
     }
-    
+
     public Task StartCheckAsync()
     {
         _logger.LogInformation("start to service health check");
@@ -41,41 +56,58 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
         {
             while (true)
             {
-                var services = await FreeSQL.Instance.Select<ServiceInfo>().Where(x=>x.CheckUrl != null).ToListAsync();
+                //没有填写心跳模式，则不做检查
+                var services = await FreeSQL.Instance.Select<ServiceInfo>()
+                    .Where(x => x.HeartBeatMode != null && x.HeartBeatMode != "").ToListAsync();
                 foreach (var service in services)
                 {
+                    var lstHeartBeat = service.LastHeartBeat;
+                    if (!lstHeartBeat.HasValue)
+                    {
+                        lstHeartBeat = service.RegisterTime ?? DateTime.MinValue;
+                    }
+
+                    // if ((DateTime.Now - lstHeartBeat.Value).TotalMinutes > 10)
+                    // {
+                    //     //超过10分钟没有心跳，则直接删除服务
+                    //     await RemoveService(service.Id);
+                    //     continue;
+                    // }
+
                     //service.HeartBeatMode 不为空，且不等于server 则认为是客户端主动心跳，不做http健康检查
                     if (!string.IsNullOrWhiteSpace(service.HeartBeatMode) && service.HeartBeatMode != "server")
                     {
-                        var lstHeartBeat = service.LastHeartBeat;
-                        if (lstHeartBeat == null)
-                        {
-                            lstHeartBeat = DateTime.Now;
-                        }
                         if ((DateTime.Now - lstHeartBeat.Value).TotalMinutes > 1)
                         {
                             //客户端主动心跳模式：超过1分钟没有心跳，则认为服务不可用
                             if (service.Alive == ServiceAlive.Online)
                             {
-                                await UpdateServiceStatus(service.Id, ServiceAlive.Offline);
+                                await _serviceInfoService.UpdateServiceStatus(service, ServiceAlive.Offline);
                             }
                         }
+
                         continue;
                     }
 
-                    if (string.IsNullOrWhiteSpace(service.CheckUrl))
+                    //service.HeartBeatMode 不为空，且 = server
+                    if (!string.IsNullOrWhiteSpace(service.HeartBeatMode) && service.HeartBeatMode == "server")
                     {
-                        continue;
-                    }
+                        if (string.IsNullOrWhiteSpace(service.CheckUrl))
+                        {
+                            //CheckUrl不填，直接认为下线
+                            await _serviceInfoService.UpdateServiceStatus(service, ServiceAlive.Offline);
+                            continue;
+                        }
 
-                    //这个 task 没必要等待，没必要等待上一个service检测结束开始下一个。
+                        //这个 task 没必要等待，没必要等待上一个service检测结束开始下一个。
 #pragma warning disable CS4014
-                    Task.Run(async () =>
+                        Task.Run(async () =>
 #pragma warning restore CS4014
-                    {
-                        var result = await CheckAService(service);
-                        await UpdateServiceStatus(service.Id, result ? ServiceAlive.Online : ServiceAlive.Offline);
-                    });
+                        {
+                            var result = await CheckAService(service);
+                            await _serviceInfoService.UpdateServiceStatus(service, result ? ServiceAlive.Online : ServiceAlive.Offline);
+                        });
+                    }
                 }
 
                 await Task.Delay(Interval * 1000);
@@ -96,33 +128,23 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
             {
                 throw resp.Exception;
             }
-            var result = resp.StatusCode == HttpStatusCode.OK;
-            _logger.LogInformation("check service health {0} {1} {2} result：{3}", service.CheckUrl, service.ServiceId, service.ServiceName, result ? "up" : "down");
+
+            var result = false;
+            if (resp.StatusCode.HasValue)
+            {
+                int istatus = ((int)resp.StatusCode - 200);
+                result = istatus >= 0 && istatus < 100; // 200 段都认为是正常的
+            }
+
+            _logger.LogInformation("check service health {0} {1} {2} result：{3}", service.CheckUrl, service.ServiceId,
+                service.ServiceName, result ? "up" : "down");
             return result;
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "check service health {0} {1} {2} error",service.CheckUrl, service.ServiceId, service.ServiceName );
+            _logger.LogError(e, "check service health {0} {1} {2} error", service.CheckUrl, service.ServiceId,
+                service.ServiceName);
             return false;
-        }
-    }
-
-    private async Task UpdateServiceStatus(string id, ServiceAlive status)
-    {
-        if (status == ServiceAlive.Offline)
-        {
-            await FreeSQL.Instance.Update<ServiceInfo>()
-                .Set(x => x.Alive, status)
-                .Where(x => x.Id == id)
-                .ExecuteAffrowsAsync();
-        }
-        else
-        {
-            await FreeSQL.Instance.Update<ServiceInfo>()
-                .Set(x => x.Alive, status)
-                .Set(x => x.LastHeartBeat, DateTime.Now)
-                .Where(x => x.Id == id)
-                .ExecuteAffrowsAsync();
         }
     }
 }

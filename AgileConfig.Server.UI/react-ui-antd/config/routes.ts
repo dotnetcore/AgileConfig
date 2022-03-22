@@ -74,19 +74,18 @@
                 component: './Services',
               },
               {
-                name: 'list.logs-list',
-                icon: 'Bars',
-                path: '/logs',
-                component: './Logs',
-              },
-              {
                 name: 'list.user-list',
                 icon: 'User',
                 path: '/users',
                 component: './User',
                 authority: ['Admin'],
-              }
-              ,
+              },
+              {
+                name: 'list.logs-list',
+                icon: 'Bars',
+                path: '/logs',
+                component: './Logs',
+              },
               {
                 component: './404',
               },
