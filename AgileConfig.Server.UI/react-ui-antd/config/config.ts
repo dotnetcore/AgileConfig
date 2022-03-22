@@ -8,7 +8,7 @@ import routes from './routes';
 const { REACT_APP_ENV } = process.env;
 let iisPrefix = '/config_ui';
 //if (REACT_APP_ENV === 'development'){
-//  iisPrefix = '';
+iisPrefix = '';
 //}
 console.log("REACT_APP_ENV=" + REACT_APP_ENV + ", iisPrefix=" + iisPrefix);
 
