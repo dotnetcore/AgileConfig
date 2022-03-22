@@ -20,6 +20,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="logs\**" />
+    <Compile Remove="Views\**" />
+    <Content Remove="logs\**" />
+    <Content Remove="Views\**" />
+    <EmbeddedResource Remove="logs\**" />
+    <EmbeddedResource Remove="Views\**" />
+    <None Remove="logs\**" />
+    <None Remove="Views\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="agile_config.db" />
   </ItemGroup>
 
@@ -49,8 +60,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="logs\" />
-    <Folder Include="Views\Shared" />
     <Folder Include="wwwroot\ui\" />
   </ItemGroup>
 

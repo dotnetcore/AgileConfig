@@ -56,7 +56,10 @@ namespace AgileConfig.Server.Apisite.Controllers
                 });
             }
 
-            var oldConfig = await _configService.GetByAppIdKeyEnv(model.AppId, model.Group, model.Key, env);
+            //string newAppId = model.AppId?.Trim();
+            string newGroup = model.Group?.Trim();
+            string newKey = model.Key?.Trim();
+            var oldConfig = await _configService.GetByAppIdKeyEnv(model.AppId, newGroup, newKey, env);
             if (oldConfig != null)
             {
                 return Json(new
@@ -68,11 +71,11 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             var config = new Config();
             config.Id = string.IsNullOrEmpty(config.Id) ? Guid.NewGuid().ToString("N") : config.Id;
-            config.Key = model.Key;
+            config.Key = newKey;
             config.AppId = model.AppId;
-            config.Description = model.Description;
-            config.Value = model.Value;
-            config.Group = model.Group;
+            config.Description = model.Description?.Trim();
+            config.Value = model.Value?.Trim();
+            config.Group = newGroup;
             config.Status = ConfigStatus.Enabled;
             config.CreateTime = DateTime.Now;
             config.UpdateTime = null;
@@ -119,13 +122,13 @@ namespace AgileConfig.Server.Apisite.Controllers
             //judge if json key already in configs
             foreach (var item in model)
             {
-                var newkey = item.Key;
-                if (!string.IsNullOrEmpty(item.Group))
+                var newkey = item.Key.Trim();
+                if (!String.IsNullOrWhiteSpace(item.Group))
                 {
                     newkey = $"{item.Group}:{item.Key}";
                 }
 
-                if (oldDict.ContainsKey(newkey))
+                if(oldDict.Keys.Any(u=>String.Equals(u,newkey, StringComparison.OrdinalIgnoreCase)))
                 {
                     return Json(new
                     {
@@ -136,11 +139,11 @@ namespace AgileConfig.Server.Apisite.Controllers
 
                 var config = new Config();
                 config.Id = Guid.NewGuid().ToString("N");
-                config.Key = item.Key;
+                config.Key = item.Key.Trim();
                 config.AppId = item.AppId;
-                config.Description = item.Description;
-                config.Value = item.Value;
-                config.Group = item.Group;
+                config.Description = item.Description.Trim();
+                config.Value = item.Value.Trim();
+                config.Group = item.Group.Trim();
                 config.Status = ConfigStatus.Enabled;
                 config.CreateTime = DateTime.Now;
                 config.UpdateTime = null;
@@ -218,15 +221,15 @@ namespace AgileConfig.Server.Apisite.Controllers
                     return Json(new
                     {
                         success = false,
-                        message = "配置键已存在，请重新输入。"
+                        message = "配置键不存在，请重新输入。"
                     });
                 }
             }
 
             config.AppId = model.AppId;
-            config.Description = model.Description;
+            config.Description = model.Description.Trim();
             config.Key = model.Key;
-            config.Value = model.Value;
+            config.Value = model.Value.Trim();
             config.Group = model.Group;
             config.UpdateTime = DateTime.Now;
             config.Env = env;
@@ -793,6 +796,14 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
+        /// <summary>
+        /// 同步到环境
+        /// </summary>
+        /// <param name="toEnvs"></param>
+        /// <param name="appId"></param>
+        /// <param name="currentEnv"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
         [TypeFilter(typeof(PremissionCheckAttribute),
             Arguments = new object[] { "Config.EvnSync", Functions.Config_Add })]
         [HttpPost]
@@ -844,13 +855,15 @@ namespace AgileConfig.Server.Apisite.Controllers
             var configs = await _configService.GetByAppIdAsync(appId, env);
             // text 格式展示的时候不需要删除的配置
             configs = configs.Where(x => x.EditStatus != EditStatus.Deleted).ToList();
-            var kvList = new List<KeyValuePair<string, string>>();
+            //var kvList = new List<KeyValuePair<string, string>>();
+            List<Data.Entity.KvComment> kvList = new List<KvComment>();
             foreach (var config in configs)
             {
-                kvList.Add(new KeyValuePair<string, string>(_configService.GenerateKey(config), config.Value));
+                //kvList.Add(new KeyValuePair<string, string>(_configService.GenerateKey(config), config.Value));
+                kvList.Add(new KvComment { key = _configService.GenerateKey(config), value = config.Value, comment = config.Description });
             }
 
-            kvList = kvList.OrderBy(x => x.Key).ToList();
+            kvList = kvList.OrderBy(x => x.key).ToList();
             return Json(new
             {
                 success = true,
