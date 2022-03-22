@@ -8,8 +8,8 @@ let requestPrefix = 'http://127.0.0.1/config_api';
 const { NODE_ENV } = process.env;
 if (NODE_ENV === 'development') {
   //console.log("NODE_ENV="+NODE_ENV);
-  //requestPrefix = 'http://localhost:5000';
-  requestPrefix = 'http://localhost:54550';
+  requestPrefix = 'http://localhost:5000';
+  //requestPrefix = 'http://localhost:54550';
   iisPrefix = "";
   //requestPrefix = 'http://agileconfig_server.xbaby.xyz';
 }
