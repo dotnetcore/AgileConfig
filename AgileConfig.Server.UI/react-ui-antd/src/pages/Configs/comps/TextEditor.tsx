@@ -36,7 +36,8 @@ const TextEditor : React.FC<TextEditorProps> = (props)=>{
     useEffect(()=>{
       getConfigsKvList(props.appId, props.env).then(res=>{
         if (res.success) {
-          const list = res.data.map((x: { value: string; key: string; }) =>  x.key + '=' + x.value);
+          const list = res.data.map((x: { value: string; key: string; comment: string }) =>  x.key + '=' + x.value
+            +((x.comment==undefined||x.comment==null||x.comment.length<=0)?"":(" //"+x.comment))); //注释前有个空格
           setkvText(list.join('\n'));
         }
       });
@@ -59,7 +60,7 @@ const TextEditor : React.FC<TextEditorProps> = (props)=>{
                 color:'#999',
                 fontSize:'12px',
               }}>
-                严格按照 KEY=VALUE 格式编辑，每行一个配置
+                严格按照 KEY=VALUE 格式编辑，每行一个配置，如果需要注释，则在//前加一个空格
               </div>
               <div>
               <Button onClick={ 

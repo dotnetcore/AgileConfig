@@ -3,8 +3,14 @@ import { defineConfig } from 'umi';
 import defaultSettings from './defaultSettings';
 import proxy from './proxy';
 import routes from './routes';
+//import { getIISUrl } from '@/utils/requestUrl';
 
 const { REACT_APP_ENV } = process.env;
+let iisPrefix = '/config_ui';
+//if (REACT_APP_ENV === 'development'){
+//  iisPrefix = '';
+//}
+console.log("REACT_APP_ENV=" + REACT_APP_ENV + ", iisPrefix=" + iisPrefix);
 
 export default defineConfig({
   hash: true,
@@ -40,5 +46,8 @@ export default defineConfig({
   manifest: {
     basePath: '/a/',
   },
-  esbuild: {}
+  esbuild: {},
+  //getIISUrl打包引用不到模块
+  base: iisPrefix + '/',
+  publicPath: iisPrefix + '/'
 });

@@ -857,9 +857,9 @@ namespace AgileConfig.Server.Service
 
             foreach (var kv in dict)
             {
-                var key = kv.Key;
-                var value = kv.Value;
-                var config = currentConfigs.FirstOrDefault(x => GenerateKey(x) == key);
+                var key = kv.Key.Trim();
+                var value = kv.Value.Trim();
+                var config = currentConfigs.FirstOrDefault(x => String.Equals(GenerateKey(x), key, StringComparison.OrdinalIgnoreCase));
                 if (config == null)
                 {
                     var gk = SplitJsonKey(key);
@@ -912,7 +912,106 @@ namespace AgileConfig.Server.Service
             foreach (var item in currentConfigs)
             {
                 var key = GenerateKey(item);
-                if (!dict.ContainsKey(key))
+                if (dict.Keys.All(u => !String.Equals(u, key, StringComparison.OrdinalIgnoreCase)))
+                {
+                    item.EditStatus = EditStatus.Deleted;
+                    item.OnlineStatus = OnlineStatus.WaitPublish;
+                    deleteConfigs.Add(item);
+                }
+            }
+
+            if (addConfigs.Count > 0)
+            {
+                await dbcontext.Configs.AddRangeAsync(addConfigs);
+            }
+
+            if (updateConfigs.Count > 0)
+            {
+                await dbcontext.Configs.UpdateRangeAsync(updateConfigs);
+            }
+
+            if (deleteConfigs.Count > 0)
+            {
+                await dbcontext.Configs.UpdateRangeAsync(deleteConfigs);
+            }
+
+            await dbcontext.SaveChangesAsync();
+
+            return true;
+        }
+
+        private async Task<bool> SaveFromListAsync(List<KvComment> kvList, string appId, string env)
+        {
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
+            var currentConfigs = await dbcontext.Configs
+                .Where(x => x.AppId == appId && x.Env == env && x.Status == ConfigStatus.Enabled).ToListAsync();
+            var addConfigs = new List<Config>();
+            var updateConfigs = new List<Config>();
+            var deleteConfigs = new List<Config>();
+
+            var now = DateTime.Now;
+
+            foreach (var kv in kvList)
+            {
+                var key = kv.key;
+                var value = kv.value;
+                var config = currentConfigs.FirstOrDefault(x => String.Equals(GenerateKey(x), key, StringComparison.OrdinalIgnoreCase));
+                if (config == null)
+                {
+                    var gk = SplitJsonKey(key);
+                    addConfigs.Add(new Config
+                    {
+                        Id = Guid.NewGuid().ToString("N"),
+                        AppId = appId,
+                        Env = env,
+                        Key = gk.Item2,
+                        Group = gk.Item1,
+                        Value = value,
+                        CreateTime = now,
+                        Status = ConfigStatus.Enabled,
+                        EditStatus = EditStatus.Add,
+                        OnlineStatus = OnlineStatus.WaitPublish,
+                        Description = kv.comment
+                    });
+                }
+                else if (config.Value != value)
+                {
+                    config.Value = value;
+                    config.UpdateTime = now;
+                    config.Description = kv.comment;
+                    if (config.OnlineStatus == OnlineStatus.Online)
+                    {
+                        config.EditStatus = EditStatus.Edit;
+                        config.OnlineStatus = OnlineStatus.WaitPublish;
+                    }
+                    else
+                    {
+                        if (config.EditStatus == EditStatus.Add)
+                        {
+                            //do nothing
+                        }
+
+                        if (config.EditStatus == EditStatus.Edit)
+                        {
+                            //do nothing
+                        }
+
+                        if (config.EditStatus == EditStatus.Deleted)
+                        {
+                            //上一次是删除状态，现在恢复为编辑状态
+                            config.EditStatus = EditStatus.Edit;
+                        }
+                    }
+
+                    updateConfigs.Add(config);
+                }
+            }
+
+            foreach (var item in currentConfigs)
+            {
+                var key = GenerateKey(item);
+                if (kvList.All(u => !String.Equals(u.key, key, StringComparison.OrdinalIgnoreCase)))
                 {
                     item.EditStatus = EditStatus.Deleted;
                     item.OnlineStatus = OnlineStatus.WaitPublish;
@@ -962,11 +1061,17 @@ namespace AgileConfig.Server.Service
             return await SaveFromDictAsync(dict, appId, env);
         }
 
+        /// <summary>
+        /// 验证text编辑字符串，key不区分大小写
+        /// </summary>
+        /// <param name="kvStr"></param>
+        /// <returns></returns>
         public (bool, string) ValidateKvString(string kvStr)
         {
             StringReader sr = new StringReader(kvStr);
             int row = 0;
-            var dict = new Dictionary<string, string>();
+            //var dict = new Dictionary<string, string>();
+            List<string> keys = new List<string>();
             while (true)
             {
                 var line = sr.ReadLine();
@@ -983,13 +1088,18 @@ namespace AgileConfig.Server.Service
                 }
 
                 var index = line.IndexOf('=');
-                var key = line.Substring(0, index);
-                if (dict.ContainsKey(key))
+                var key = line.Substring(0, index).Trim();
+                if (String.IsNullOrWhiteSpace(key))
                 {
-                    return (false, $"键 {key} 重复。");
+                    return (false, $"第 {row} 行缺少键值。");
+                }
+                //if (dict.ContainsKey(key))
+                if (keys.Any(u => String.Equals(u, key, StringComparison.OrdinalIgnoreCase)))
+                {
+                    return (false, $"第 {row} 行键 {key} 重复。");
                 }
 
-                dict.Add(key, "");
+                keys.Add(key);
             }
 
             return (true, "");
@@ -1011,7 +1121,8 @@ namespace AgileConfig.Server.Service
             }
 
             StringReader sr = new StringReader(kvString);
-            var dict = new Dictionary<string, string>();
+            //var dict = new Dictionary<string, string>();
+            var kvList = new List<KvComment>();
             while (true)
             {
                 var line = sr.ReadLine();
@@ -1026,13 +1137,30 @@ namespace AgileConfig.Server.Service
                     continue;
                 }
 
-                var key = line.Substring(0, index);
-                var val = line.Substring(index + 1, line.Length - index - 1);
+                var key = line.Substring(0, index).Trim();
+                if (String.IsNullOrWhiteSpace(key))
+                {
+                    continue;
+                }
+                //var val = line.Substring(index + 1, line.Length - index - 1);
+                string value = "";
+                string comment = "";
+                string valueAndComment = line.Substring(index + 1);
+                int commentIndex = valueAndComment.IndexOf(" //");
+                if (commentIndex < 0)
+                {
+                    value = valueAndComment.Trim();
+                }
+                else
+                {
+                    value = valueAndComment.Substring(0, commentIndex).Trim();
+                    comment = valueAndComment.Substring(commentIndex + 3).Trim();
+                }
 
-                dict.Add(key, val);
+                kvList.Add(new KvComment { key = key, value = value, comment = comment });
             }
 
-            return await SaveFromDictAsync(dict, appId, env);
+            return await SaveFromListAsync(kvList, appId, env);
         }
 
         private (string, string) SplitJsonKey(string key)

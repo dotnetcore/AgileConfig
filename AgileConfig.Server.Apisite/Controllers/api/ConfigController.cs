@@ -35,7 +35,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         /// <summary>
-        /// 根据appid查所有发布的配置项 , 包括继承过来的配置项.
+        /// client客户端获取所有配置，根据appid查所有发布的配置项 , 包括继承过来的配置项.
         /// 注意： 这个接口用的不是用户名密码的认证，用的是appid + secret的认证
         /// </summary>
         /// <param name="appId">应用id</param>

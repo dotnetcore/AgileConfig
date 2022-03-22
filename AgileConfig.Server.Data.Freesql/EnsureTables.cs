@@ -18,32 +18,33 @@ namespace AgileConfig.Server.Data.Freesql
         public static bool ExistTable(IFreeSql instance)
         {
             //sqlite exist table?
-            string sql = "";
-            switch (instance.Ado.DataType)
-            {
-                case FreeSql.DataType.Sqlite:
-                    sql = Sqlite_ExistTableSql;
-                    break;
-                case FreeSql.DataType.MySql:
-                    sql = Mysql_ExistTableSql;
-                    break;
-                case FreeSql.DataType.SqlServer:
-                    sql = SqlServer_ExistTableSql;
-                    break;
-                case FreeSql.DataType.Oracle:
-                    sql = Oracle_ExistTableSql;
-                    break;
-                case FreeSql.DataType.PostgreSQL:
-                    sql = PostgreSql_ExistTableSql;
-                    break;
-                default:
-                    sql = Sqlite_ExistTableSql;
-                    break;
-            }
+            return instance.DbFirst.ExistsTable("agc_app");
 
-            dynamic count = instance.Ado.ExecuteScalar(sql);
-
-            return count > 0;
+            //string sql = "";
+            //switch (instance.Ado.DataType)
+            //{
+            //    case FreeSql.DataType.Sqlite:
+            //        sql = Sqlite_ExistTableSql;
+            //        break;
+            //    case FreeSql.DataType.MySql:
+            //        sql = Mysql_ExistTableSql;
+            //        break;
+            //    case FreeSql.DataType.SqlServer:
+            //        sql = SqlServer_ExistTableSql;
+            //        break;
+            //    case FreeSql.DataType.Oracle:
+            //        sql = Oracle_ExistTableSql;
+            //        break;
+            //    case FreeSql.DataType.PostgreSQL:
+            //        sql = PostgreSql_ExistTableSql;
+            //        break;
+            //    default:
+            //        sql = Sqlite_ExistTableSql;
+            //        break;
+            //}
+            
+            //dynamic count = instance.Ado.ExecuteScalar(sql);
+            //return count > 0;
         }
 
         /// <summary>

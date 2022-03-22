@@ -18,6 +18,7 @@ const proSettings: DefaultSettings ={
     "locale": true
   },
   "headerHeight": 48
+  //"iisPrefix": "" //import { getIISUrl } from '@/utils/requestUrl'   
 }
 
 export type { DefaultSettings };

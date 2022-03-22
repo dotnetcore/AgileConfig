@@ -8,6 +8,7 @@ import type { CurrentUser } from '@/models/user';
 import HeaderDropdown from '../HeaderDropdown';
 import styles from './index.less';
 import Changepassword from '../ChangePassword/changePassword';
+import { getIISUrl } from '@/utils/requestUrl';
 
 export type GlobalHeaderRightProps = {
   currentUser?: CurrentUser;
@@ -114,7 +115,7 @@ class AvatarDropdown extends React.Component<GlobalHeaderRightProps,{changePassw
                 width:30
               }
             }
-                 src="/icons/avatar.png"></img>
+                 src={getIISUrl()+"/icons/avatar.png"}></img>
                  {
                    currentUser?.name
                  }
