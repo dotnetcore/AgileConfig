@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using AgileConfig.Server.Apisite.Websocket.MessageHandlers;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -23,15 +24,19 @@ namespace AgileConfig.Server.Apisite.Websocket
         public WebsocketHandlerMiddleware(
             RequestDelegate next,
             ILoggerFactory loggerFactory
-            )
+        )
         {
             _next = next;
-            _logger = loggerFactory.
-                CreateLogger<WebsocketHandlerMiddleware>();
+            _logger = loggerFactory.CreateLogger<WebsocketHandlerMiddleware>();
             _websocketCollection = WebsocketCollection.Instance;
         }
 
-        public async Task Invoke(HttpContext context, IAppBasicAuthService appBasicAuth, IConfigService configService)
+        public async Task Invoke(
+            HttpContext context,
+            IAppBasicAuthService appBasicAuth,
+            IConfigService configService,
+            IRegisterCenterService registerCenterService,
+            IServiceInfoService serviceInfoService)
         {
             if (context.Request.Path == "/ws")
             {
@@ -43,12 +48,14 @@ namespace AgileConfig.Server.Apisite.Websocket
                         await context.Response.WriteAsync("basic auth failed .");
                         return;
                     }
+
                     var appId = context.Request.Headers["appid"];
                     if (string.IsNullOrEmpty(appId))
                     {
                         var appIdSecret = appBasicAuth.GetAppIdSecret(context.Request);
                         appId = appIdSecret.Item1;
                     }
+
                     var env = context.Request.Headers["env"];
                     if (!string.IsNullOrEmpty(env))
                     {
@@ -59,6 +66,7 @@ namespace AgileConfig.Server.Apisite.Websocket
                         env = "DEV";
                         _logger.LogInformation("Websocket client request No ENV property , set default DEV ");
                     }
+
                     context.Request.Query.TryGetValue("client_name", out StringValues name);
                     if (!string.IsNullOrEmpty(name))
                     {
@@ -68,6 +76,7 @@ namespace AgileConfig.Server.Apisite.Websocket
                     {
                         _logger.LogInformation("Websocket client request No Name property ");
                     }
+
                     context.Request.Query.TryGetValue("client_tag", out StringValues tag);
                     if (!string.IsNullOrEmpty(tag))
                     {
@@ -77,8 +86,9 @@ namespace AgileConfig.Server.Apisite.Websocket
                     {
                         _logger.LogInformation("Websocket client request No TAG property ");
                     }
+
                     WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
-                   
+
                     var clientIp = GetRemoteIp(context.Request);
                     var client = new WebsocketClient()
                     {
@@ -96,7 +106,7 @@ namespace AgileConfig.Server.Apisite.Websocket
 
                     try
                     {
-                        await Handle(context, client, configService);
+                        await Handle(context, client, configService, registerCenterService, serviceInfoService);
                     }
                     catch (Exception ex)
                     {
@@ -135,8 +145,25 @@ namespace AgileConfig.Server.Apisite.Websocket
             return ip;
         }
 
-        private async Task Handle(HttpContext context, WebsocketClient socketClient, IConfigService configService)
+        /// <summary>
+        /// 对client的消息进行处理
+        /// ，如果是ping是老版client的心跳消息
+        /// ，如果是c:打头的消息代表是配置中心的client的消息
+        /// ，如果是s:打头的消息代表是服务中心的client的消息
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="socketClient"></param>
+        /// <param name="configService"></param>
+        /// <param name="registerCenterService"></param>
+        private async Task Handle(
+            HttpContext context,
+            WebsocketClient socketClient,
+            IConfigService configService,
+            IRegisterCenterService registerCenterService,
+            IServiceInfoService serviceInfoService)
         {
+            var messageHandlers =
+                new WebsocketMessageHandlers(configService, registerCenterService, serviceInfoService);
             var buffer = new byte[1024 * 2];
             WebSocketReceiveResult result = null;
             do
@@ -144,30 +171,19 @@ namespace AgileConfig.Server.Apisite.Websocket
                 result = await socketClient.Client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
                 socketClient.LastHeartbeatTime = DateTime.Now;
                 var message = await ReadWebsocketMessage(result, buffer);
-                if (message == "ping")
-                {
-                    //如果是ping，回复本地数据的md5版本
-                    var appId = context.Request.Headers["appid"];
-                    var env = context.Request.Headers["env"];
-                    env = await configService.IfEnvEmptySetDefaultAsync(env);
-                    var md5 = await configService.AppPublishedConfigsMd5CacheWithInheritanced(appId, env);
-                    await SendMessage(socketClient.Client, $"V:{md5}");
-                }
-                else
-                {
-                    //如果不是心跳消息，回复0
-                    await SendMessage(socketClient.Client, "0");
-                }
-            }
-            while (!result.CloseStatus.HasValue);
-            _logger.LogInformation($"Websocket close , closeStatus:{result.CloseStatus} closeDesc:{result.CloseStatusDescription}");
-            await _websocketCollection.RemoveClient(socketClient, result.CloseStatus, result.CloseStatusDescription);
-        }
 
-        private async Task SendMessage(WebSocket webSocket, string message)
-        {
-            var data = Encoding.UTF8.GetBytes(message);
-            await webSocket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+                foreach (var messageHandlersMessageHandler in messageHandlers.MessageHandlers)
+                {
+                    if (messageHandlersMessageHandler.Hit(context.Request))
+                    {
+                        await messageHandlersMessageHandler.Handle(message, context.Request, socketClient.Client);
+                    }
+                }
+            } while (!result.CloseStatus.HasValue);
+
+            _logger.LogInformation(
+                $"Websocket close , closeStatus:{result.CloseStatus} closeDesc:{result.CloseStatusDescription}");
+            await _websocketCollection.RemoveClient(socketClient, result.CloseStatus, result.CloseStatusDescription);
         }
 
         private async Task<string> ReadWebsocketMessage(WebSocketReceiveResult result, ArraySegment<Byte> buffer)

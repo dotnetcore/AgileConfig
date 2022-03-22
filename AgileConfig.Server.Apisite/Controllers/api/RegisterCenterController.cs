@@ -4,7 +4,9 @@ using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Threading.Tasks;
+using AgileConfig.Server.Common;
 using Newtonsoft.Json;
 
 namespace AgileConfig.Server.Apisite.Controllers.api
@@ -40,6 +42,13 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             
             var id = await _registerCenterService.RegisterAsync(entity);
 
+            //send a message to notify other services
+            dynamic param = new ExpandoObject();
+            param.ServiceId = model.ServiceId;
+            param.ServiceName = model.ServiceName;
+            param.UniqueId = id;
+            TinyEventBus.Instance.Fire(EventKeys.REGISTER_A_SERVICE,param);
+            
             return new RegisterResultVM
             {
                 UniqueId = id
@@ -48,10 +57,28 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
 
         [HttpDelete("{id}")]
-        public async Task<RegisterResultVM> UnRegister(string id)
+        public async Task<RegisterResultVM> UnRegister(string id, [FromBody]RegisterServiceInfoVM vm)
         {
-            await _registerCenterService.UnRegisterAsync(id);
+            var result = await _registerCenterService.UnRegisterAsync(id);
+            if (!result)
+            {
+                if (!string.IsNullOrEmpty(vm?.ServiceId))
+                { 
+                    result = await _registerCenterService.UnRegisterByServiceIdAsync(vm.ServiceId);
+                }
+            }
 
+            if (result)
+            {
+                //send a message to notify other services
+                var entity = await _serviceInfoService.GetByUniqueIdAsync(id);
+                dynamic param = new ExpandoObject();
+                param.ServiceId = entity.ServiceId;
+                param.ServiceName = entity.ServiceName;
+                param.UniqueId = id;
+                TinyEventBus.Instance.Fire(EventKeys.UNREGISTER_A_SERVICE,param);
+            }
+            
             return new RegisterResultVM
             {
                 UniqueId = id,
@@ -59,7 +86,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         [HttpPost("heartbeat")]
-        public async Task<HeartbeatResultVM> Heartbeat([FromBody]HeartbeatParam param)
+        public async Task<string> Heartbeat([FromBody]HeartbeatParam param)
         {
             if (param == null)
             {
@@ -72,15 +99,17 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 serviceHeartbeatResult = await _registerCenterService.ReceiveHeartbeatAsync(param.UniqueId);
             }
 
-            return new HeartbeatResultVM
+            if (serviceHeartbeatResult)
             {
-                Success = serviceHeartbeatResult,
-                DataVersion = "x"
-            };
+                var md5 = await _serviceInfoService.ServicesMD5Cache();
+                return $"s:ping:{md5}";
+            }
+
+            return "";
         }
         
         [HttpGet("services")]
-        public async Task<QueryServiceInfoResultVM> AllServices()
+        public async Task<List<ServiceInfoVM>> AllServices()
         {
             var services = await _serviceInfoService.GetAllServiceInfoAsync();
             var vms = new List<ServiceInfoVM>();
@@ -98,15 +127,11 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 vms.Add(vm);
             }
 
-            return new QueryServiceInfoResultVM()
-            {
-                Data = vms,
-                DataVersion = "x"
-            };
+            return vms;
         }
         
         [HttpGet("services/online")]
-        public async Task<QueryServiceInfoResultVM> OnlineServices()
+        public async Task<List<ServiceInfoVM>> OnlineServices()
         {
             var services = await _serviceInfoService.GetOnlineServiceInfoAsync();
             var vms = new List<ServiceInfoVM>();
@@ -124,15 +149,11 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 vms.Add(vm);
             }
 
-            return new QueryServiceInfoResultVM()
-            {
-                Data = vms,
-                DataVersion = "x"
-            };
+            return vms;
         }
         
         [HttpGet("services/offline")]
-        public async Task<QueryServiceInfoResultVM> OfflineServices()
+        public async Task<List<ServiceInfoVM>> OfflineServices()
         {
             var services = await _serviceInfoService.GetOfflineServiceInfoAsync();
             var vms = new List<ServiceInfoVM>();
@@ -150,11 +171,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 vms.Add(vm);
             }
 
-            return new QueryServiceInfoResultVM()
-            {
-                Data = vms,
-                DataVersion = "x"
-            };
+            return vms;
         }
     }
 }

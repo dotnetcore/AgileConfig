@@ -12,6 +12,8 @@ namespace AgileConfig.Server.IService
         Task<string> RegisterAsync(ServiceInfo serviceInfo);
 
         Task<bool> UnRegisterAsync(string serviceUniqueId);
+        
+        Task<bool> UnRegisterByServiceIdAsync(string serviceId);
 
         Task<bool> ReceiveHeartbeatAsync(string serviceUniqueId);
     }

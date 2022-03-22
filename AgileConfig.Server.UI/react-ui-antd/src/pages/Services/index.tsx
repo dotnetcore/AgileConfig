@@ -8,11 +8,6 @@ const services: React.FC = () => {
   const actionRef = useRef<ActionType>();
   const columns: ProColumns[] = [
     {
-      title:'唯一ID',
-      dataIndex: 'id',
-      hideInSearch: true,
-    },
-    {
       title: '服务ID',
       dataIndex: 'serviceId',
     },
@@ -37,9 +32,15 @@ const services: React.FC = () => {
       hideInSearch: true,
     },
     {
-      title: '心跳模式',
+      title: '健康检测模式',
       dataIndex: 'heartBeatMode',
       hideInSearch: true,
+    },
+    {
+      title: '检测URL',
+      dataIndex: 'checkUrl',
+      hideInSearch: true,
+      ellipsis: true,
     },
     {
       title: '注册时间',

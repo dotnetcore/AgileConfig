@@ -264,15 +264,27 @@ namespace AgileConfig.Server.Service
             });
         }
 
-        public async Task ClearCache(string address)
+        public async Task ClearConfigServiceCache(string address)
         {
             try
             { 
-                await (address + "/RemoteOP/ClearCache").AsHttp("POST").SendAsync();
+                await (address + "/RemoteOP/ClearConfigServiceCache").AsHttp("POST").SendAsync();
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Try to clear node {0}'s cache , but fail .", address);
+                _logger.LogError(e, "Try to clear node {0}'s config cache , but fail .", address);
+            }
+        }
+        
+        public async Task ClearServiceInfoCache(string address)
+        {
+            try
+            { 
+                await (address + "/RemoteOP/ClearServiceInfoCache").AsHttp("POST").SendAsync();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Try to clear node {0}'s servicesinfo cache , but fail .", address);
             }
         }
     }

@@ -22,7 +22,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         public RemoteServerProxyController(
             IRemoteServerNodeProxy remoteServerNodeProxy,
             ILoggerFactory loggerFactory
-            )
+        )
         {
             _remoteServerNodeProxy = remoteServerNodeProxy;
             _logger = loggerFactory.CreateLogger<RemoteServerProxyController>();
@@ -46,7 +46,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 });
             }
 
-            var action = new WebsocketAction { Action = "offline" };
+            var action = new WebsocketAction { Action = ActionConst.Offline, Module = ActionModule.ConfigCenter };
             var result = await _remoteServerNodeProxy.OneClientDoActionAsync(address, clientId, action);
             if (result)
             {
@@ -56,13 +56,15 @@ namespace AgileConfig.Server.Apisite.Controllers
                 TinyEventBus.Instance.Fire(EventKeys.DISCONNECT_CLIENT_SUCCESS, param);
             }
 
-            _logger.LogInformation("Request remote node {0} 's action OneClientDoAction {1} .", address, result ? "success" : "fail");
+            _logger.LogInformation("Request remote node {0} 's action OneClientDoAction {1} .", address,
+                result ? "success" : "fail");
 
             return Json(new
             {
                 success = true,
             });
         }
+
         /// <summary>
         /// 通知某个节点让所有的客户端刷新配置项
         /// </summary>
@@ -71,10 +73,11 @@ namespace AgileConfig.Server.Apisite.Controllers
         [HttpPost]
         public async Task<IActionResult> AllClients_Reload(string address)
         {
-            var action = new WebsocketAction { Action = "reload" };
+            var action = new WebsocketAction { Action = ActionConst.Reload, Module = ActionModule.ConfigCenter };
             var result = await _remoteServerNodeProxy.AllClientsDoActionAsync(address, action);
 
-            _logger.LogInformation("Request remote node {0} 's action AllClientsDoAction {1} .", address, result ? "success" : "fail");
+            _logger.LogInformation("Request remote node {0} 's action AllClientsDoAction {1} .", address,
+                result ? "success" : "fail");
 
             return Json(new
             {
@@ -91,10 +94,11 @@ namespace AgileConfig.Server.Apisite.Controllers
         [HttpPost]
         public async Task<IActionResult> Client_Reload(string address, string clientId)
         {
-            var action = new WebsocketAction { Action = "reload" };
+            var action = new WebsocketAction { Action = ActionConst.Reload, Module = ActionModule.ConfigCenter };
             var result = await _remoteServerNodeProxy.OneClientDoActionAsync(address, clientId, action);
 
-            _logger.LogInformation("Request remote node {0} 's action OneClientDoAction {1} .", address, result ? "success" : "fail");
+            _logger.LogInformation("Request remote node {0} 's action OneClientDoAction {1} .", address,
+                result ? "success" : "fail");
 
             return Json(new
             {
