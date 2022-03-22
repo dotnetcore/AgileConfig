@@ -1,4 +1,4 @@
-﻿using AgileConfig.Server.Common;
+using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Entity;
 using Microsoft.Extensions.Logging;
 using System;
@@ -9,42 +9,49 @@ namespace AgileConfig.Server.Data.Freesql
 {
     public class EnsureTables
     {
-        private const string Sqlite_ExistTableSql = "SELECT count(1) FROM sqlite_master WHERE type='table' AND name = 'agc_app'";
-        private const string Mysql_ExistTableSql = " SELECT count(1) FROM information_schema.TABLES WHERE table_name ='agc_app'";
-        private const string SqlServer_ExistTableSql = "SELECT COUNT(1) FROM dbo.SYSOBJECTS WHERE ID = object_id(N'[dbo].[agc_app]') and OBJECTPROPERTY(id, N'IsUserTable') = 1";
+        private const string Sqlite_ExistTableSql =
+            "SELECT count(1) FROM sqlite_master WHERE type='table' AND name = 'agc_app'";
+
+        private const string Mysql_ExistTableSql =
+            " SELECT count(1) FROM information_schema.TABLES WHERE table_schema=?schema AND table_name ='agc_app'";
+
+        private const string SqlServer_ExistTableSql =
+            "SELECT COUNT(1) FROM dbo.SYSOBJECTS WHERE ID = object_id(N'[dbo].[agc_app]') and OBJECTPROPERTY(id, N'IsUserTable') = 1";
+
         private const string Oracle_ExistTableSql = "select count(1) from user_tables where table_name = 'agc_app'";
         private const string PostgreSql_ExistTableSql = "select count(1) from pg_class where relname = 'agc_app'";
 
         public static bool ExistTable(IFreeSql instance)
         {
             //sqlite exist table?
-            return instance.DbFirst.ExistsTable("agc_app");
+            string sql = "";
+            string schema = "";
+            switch (instance.Ado.DataType)
+            {
+                case FreeSql.DataType.Sqlite:
+                    sql = Sqlite_ExistTableSql;
+                    break;
+                case FreeSql.DataType.MySql:
+                    sql = Mysql_ExistTableSql;
+                    schema = instance.Ado.MasterPool.Get().Value.Database;
+                    break;
+                case FreeSql.DataType.SqlServer:
+                    sql = SqlServer_ExistTableSql;
+                    break;
+                case FreeSql.DataType.Oracle:
+                    sql = Oracle_ExistTableSql;
+                    break;
+                case FreeSql.DataType.PostgreSQL:
+                    sql = PostgreSql_ExistTableSql;
+                    break;
+                default:
+                    sql = Sqlite_ExistTableSql;
+                    break;
+            }
 
-            //string sql = "";
-            //switch (instance.Ado.DataType)
-            //{
-            //    case FreeSql.DataType.Sqlite:
-            //        sql = Sqlite_ExistTableSql;
-            //        break;
-            //    case FreeSql.DataType.MySql:
-            //        sql = Mysql_ExistTableSql;
-            //        break;
-            //    case FreeSql.DataType.SqlServer:
-            //        sql = SqlServer_ExistTableSql;
-            //        break;
-            //    case FreeSql.DataType.Oracle:
-            //        sql = Oracle_ExistTableSql;
-            //        break;
-            //    case FreeSql.DataType.PostgreSQL:
-            //        sql = PostgreSql_ExistTableSql;
-            //        break;
-            //    default:
-            //        sql = Sqlite_ExistTableSql;
-            //        break;
-            //}
-            
-            //dynamic count = instance.Ado.ExecuteScalar(sql);
-            //return count > 0;
+            dynamic count = instance.Ado.ExecuteScalar(sql, new { schema });
+
+            return count > 0;
         }
 
         /// <summary>
@@ -59,6 +66,7 @@ namespace AgileConfig.Server.Data.Freesql
                 {
                     instance.CodeFirst.IsSyncStructureToUpper = true;
                 }
+
                 try
                 {
                     instance.CodeFirst.SyncStructure<App>();
