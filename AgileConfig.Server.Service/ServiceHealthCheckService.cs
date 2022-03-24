@@ -22,15 +22,20 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
         _logger = logger;
     }
 
-    private int _interval;
+    private int _checkInterval;
+    private int _unhealthInterval;
 
-    private int Interval
+    /// <summary>
+    /// 健康检测的间隔
+    /// </summary>
+    /// <exception cref="ArgumentException"></exception>
+    private int CheckInterval
     {
         get
         {
-            if (_interval > 0)
+            if (_checkInterval > 0)
             {
-                return _interval;
+                return _checkInterval;
             }
 
             var interval = Global.Config["serviceHealthCheckInterval"];
@@ -41,10 +46,38 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
                     throw new ArgumentException("serviceHealthCheckInterval must be greater than 0");
                 }
 
-                _interval = i;
+                _checkInterval = i;
             }
 
-            return _interval;
+            return _checkInterval;
+        }
+    }
+    
+    /// <summary>
+    /// 判断一个服务是否健康的标准时间，操作这个时间没有收到响应，则认为不健康
+    /// </summary>
+    /// <exception cref="ArgumentException"></exception>
+    private int UnhealthInterval
+    {
+        get
+        {
+            if (_unhealthInterval > 0)
+            {
+                return _unhealthInterval;
+            }
+
+            var interval = Global.Config["serviceUnhealthInterval"];
+            if (int.TryParse(interval, out int i))
+            {
+                if (i <= 0)
+                {
+                    throw new ArgumentException("serviceUnhealthInterval must be greater than 0");
+                }
+
+                _unhealthInterval = i;
+            }
+
+            return _unhealthInterval;
         }
     }
 
@@ -77,9 +110,9 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
                     //service.HeartBeatMode 不为空，且不等于server 则认为是客户端主动心跳，不做http健康检查
                     if (!string.IsNullOrWhiteSpace(service.HeartBeatMode) && service.HeartBeatMode != "server")
                     {
-                        if ((DateTime.Now - lstHeartBeat.Value).TotalMinutes > 1)
+                        if ((DateTime.Now - lstHeartBeat.Value).TotalSeconds > UnhealthInterval)
                         {
-                            //客户端主动心跳模式：超过1分钟没有心跳，则认为服务不可用
+                            //客户端主动心跳模式：超过 UnhealthInterval 没有心跳，则认为服务不可用
                             if (service.Alive == ServiceAlive.Online)
                             {
                                 await _serviceInfoService.UpdateServiceStatus(service, ServiceAlive.Offline);
@@ -110,7 +143,7 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
                     }
                 }
 
-                await Task.Delay(Interval * 1000);
+                await Task.Delay(CheckInterval * 1000);
             }
         }, TaskCreationOptions.LongRunning);
 
