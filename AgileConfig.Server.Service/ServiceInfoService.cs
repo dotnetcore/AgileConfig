@@ -3,6 +3,7 @@ using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.IService;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -130,6 +131,11 @@ namespace AgileConfig.Server.Service
             if (oldStatus != status)
             {
                 ClearCache();
+                dynamic param = new ExpandoObject();
+                param.ServiceId = service.ServiceId;
+                param.ServiceName = service.ServiceName;
+                param.UniqueId = service.Id;
+                TinyEventBus.Instance.Fire(EventKeys.UPDATE_SERVICE_STATUS, param);
             }
         }
 
