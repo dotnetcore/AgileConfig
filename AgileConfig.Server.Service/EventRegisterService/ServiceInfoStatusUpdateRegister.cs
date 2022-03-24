@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using Agile.Config.Protocol;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.Data.Freesql;
@@ -31,7 +32,15 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
                 var serverNodes = await serverNodeService.GetAllNodesAsync();
                 foreach (var serverNode in serverNodes.Where(x => x.Status == NodeStatus.Online))
                 {
+                    //clear cache
                     _ = _remoteServerNodeProxy.ClearServiceInfoCache(serverNode.Address);
+                    //send ws action
+                    var act = new WebsocketAction()
+                    {
+                        Module = ActionModule.RegisterCenter,
+                        Action = ActionConst.Reload
+                    };
+                    _ = _remoteServerNodeProxy.AllClientsDoActionAsync(serverNode.Address, act);
                 }
             });
         });
@@ -43,7 +52,15 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
                 var serverNodes = await serverNodeService.GetAllNodesAsync();
                 foreach (var serverNode in serverNodes.Where(x => x.Status == NodeStatus.Online))
                 {
+                    //clear cache
                     _ = _remoteServerNodeProxy.ClearServiceInfoCache(serverNode.Address);
+                    //send ws action
+                    var act = new WebsocketAction()
+                    {
+                        Module = ActionModule.RegisterCenter,
+                        Action = ActionConst.Reload
+                    };
+                    _ = _remoteServerNodeProxy.AllClientsDoActionAsync(serverNode.Address, act);
                 }
             });
         });
@@ -55,7 +72,15 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
                 var serverNodes = await serverNodeService.GetAllNodesAsync();
                 foreach (var serverNode in serverNodes.Where(x => x.Status == NodeStatus.Online))
                 {
+                    //clear cache
                     _ = _remoteServerNodeProxy.ClearServiceInfoCache(serverNode.Address);
+                    //send ws action
+                    var act = new WebsocketAction()
+                    {
+                        Module = ActionModule.RegisterCenter,
+                        Action = ActionConst.Reload
+                    };
+                    _ = _remoteServerNodeProxy.AllClientsDoActionAsync(serverNode.Address, act);
                 }
             });
         });
