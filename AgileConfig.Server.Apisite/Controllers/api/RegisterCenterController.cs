@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Threading.Tasks;
+using Agile.Config.Protocol;
 using AgileConfig.Server.Common;
 using Newtonsoft.Json;
 
@@ -86,7 +87,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         [HttpPost("heartbeat")]
-        public async Task<string> Heartbeat([FromBody]HeartbeatParam param)
+        public async Task<ActionResult<HeartbeatResultVM>> Heartbeat([FromBody]HeartbeatParam param)
         {
             if (param == null)
             {
@@ -102,10 +103,15 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             if (serviceHeartbeatResult)
             {
                 var md5 = await _serviceInfoService.ServicesMD5Cache();
-                return $"s:ping:{md5}";
+                return new HeartbeatResultVM()
+                {
+                    Action = ActionConst.Ping,
+                    Data = md5,
+                    Module = ActionModule.RegisterCenter
+                };
             }
 
-            return "";
+            return NotFound();
         }
         
         [HttpGet("services")]

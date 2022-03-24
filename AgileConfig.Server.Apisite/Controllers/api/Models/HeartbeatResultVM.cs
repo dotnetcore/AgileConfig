@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
+using Agile.Config.Protocol;
 
 namespace AgileConfig.Server.Apisite.Controllers.api.Models
 {
-    public class HeartbeatResultVM
+    public class HeartbeatResultVM: WebsocketAction
     {
-        public bool Success { get; set; }
-        public string DataVersion { get; set; }
     }
 }
