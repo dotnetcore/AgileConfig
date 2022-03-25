@@ -43,6 +43,12 @@ const services: React.FC = () => {
       ellipsis: true,
     },
     {
+      title: '告警URL',
+      dataIndex: 'alarmUrl',
+      hideInSearch: true,
+      ellipsis: true,
+    },
+    {
       title: '注册时间',
       dataIndex: 'registerTime',
       hideInSearch: true,

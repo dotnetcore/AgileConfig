@@ -26,4 +26,6 @@ public class ServiceInfoVM
     public string HeartBeatMode { get; set; }
     
     public string CheckUrl { get; set; }
+    
+    public string AlarmUrl { get; set; }
 }

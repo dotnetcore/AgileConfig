@@ -8,7 +8,7 @@ namespace AgileConfig.Server.Data.Freesql
     public static class FreeSQL
     {
         private static IFreeSql _freesql;
-        private static Dictionary<string, IFreeSql> _envFreesqls = new Dictionary<string, IFreeSql>();
+        private static Dictionary<string, IFreeSql> _envFreesqls = new ();
         private static object _lock = new object();
 
         static FreeSQL()

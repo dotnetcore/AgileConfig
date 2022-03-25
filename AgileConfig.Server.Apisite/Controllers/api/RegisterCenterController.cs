@@ -38,6 +38,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             entity.Ip = model.Ip;
             entity.Port = model.Port;
             entity.CheckUrl = model.CheckUrl;
+            entity.AlarmUrl = model.AlarmUrl;
             entity.HeartBeatMode = model.HeartBeatMode;
             entity.MetaData = JsonConvert.SerializeObject(model.MetaData);
             

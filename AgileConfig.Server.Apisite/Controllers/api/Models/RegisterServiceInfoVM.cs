@@ -16,7 +16,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api.Models
 
         public string CheckUrl { get; set; } = "";
         
-        public string HeartBeatMode { get; set; }
+        public string AlarmUrl { get; set; } = "";
 
+        public string HeartBeatMode { get; set; }
     }
 }
