@@ -1,25 +1,35 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Agile.Config.Protocol;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.IService;
+using AgileHttp;
+using Microsoft.Extensions.Logging;
 
 namespace AgileConfig.Server.Service.EventRegisterService;
 
 internal class ServiceInfoStatusUpdateRegister : IEventRegister
 {
     private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
+    private ILogger _logger;
 
-    public ServiceInfoStatusUpdateRegister(IRemoteServerNodeProxy remoteServerNodeProxy)
+    public ServiceInfoStatusUpdateRegister(IRemoteServerNodeProxy remoteServerNodeProxy, ILoggerFactory loggerFactory)
     {
         _remoteServerNodeProxy = remoteServerNodeProxy;
+        _logger = loggerFactory.CreateLogger<ServiceInfoStatusUpdateRegister>();
     }
 
     private IServerNodeService NewServerNodeService()
     {
         return new ServerNodeService(new FreeSqlContext(FreeSQL.Instance));
+    }
+
+    private IServiceInfoService NewServiceInfoService()
+    {
+        return new ServiceInfoService(null);
     }
 
     public void Register()
@@ -84,5 +94,46 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
                 }
             });
         });
+        TinyEventBus.Instance.Register(EventKeys.UPDATE_SERVICE_STATUS, (param) =>
+        {
+            Task.Run(async () =>
+            {
+                dynamic paramObj = param;
+                string id = paramObj.UniqueId;
+                using var serviceInfoService = NewServiceInfoService();
+                var service = await serviceInfoService.GetByUniqueIdAsync(id);
+                if (service != null && !string.IsNullOrWhiteSpace(service.AlarmUrl) &&
+                    service.Alive == ServiceAlive.Offline)
+                {
+                    //如果是下线发送通知
+                    SendServiceOfflineMessage(service);
+                }
+            });
+        });
+    }
+
+    private void SendServiceOfflineMessage(ServiceInfo service)
+    {
+        var msg = new
+        {
+            UniqueId = service.Id,
+            service.ServiceId,
+            service.ServiceName,
+            Time = DateTime.Now,
+            Status = ServiceAlive.Offline.ToString(),
+            Message = "服务已经下线"
+        };
+
+        try
+        {
+            FunctionUtil.TRYAsync(() => service.AlarmUrl.AsHttp("POST", msg).Config(new RequestOptions()
+            {
+                ContentType = "application/json"
+            }).SendAsync(), 5);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, $"try to send message to alarm url {service.AlarmUrl} failed");
+        }
     }
 }
