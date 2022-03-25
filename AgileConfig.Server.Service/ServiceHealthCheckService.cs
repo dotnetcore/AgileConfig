@@ -24,6 +24,7 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
 
     private int _checkInterval;
     private int _unhealthInterval;
+    private int _removeServiceInterval;
 
     /// <summary>
     /// 健康检测的间隔
@@ -52,7 +53,7 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
             return _checkInterval;
         }
     }
-    
+
     /// <summary>
     /// 判断一个服务是否健康的标准时间，操作这个时间没有收到响应，则认为不健康
     /// </summary>
@@ -81,6 +82,32 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
         }
     }
 
+    private int RemoveServiceInterval
+    {
+        get
+        {
+            if (_removeServiceInterval > 0)
+            {
+                return _removeServiceInterval;
+            }
+
+            var interval = Global.Config["removeServiceInterval"];
+            if (int.TryParse(interval, out int i))
+            {
+                if (i <= 0)
+                {
+                    _removeServiceInterval = 0;
+                }
+                else
+                {
+                    _removeServiceInterval = i;
+                }
+            }
+
+            return _removeServiceInterval;
+        }
+    }
+
     public Task StartCheckAsync()
     {
         _logger.LogInformation("start to service health check");
@@ -100,46 +127,49 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
                         lstHeartBeat = service.RegisterTime ?? DateTime.MinValue;
                     }
 
-                    // if ((DateTime.Now - lstHeartBeat.Value).TotalMinutes > 10)
-                    // {
-                    //     //超过10分钟没有心跳，则直接删除服务
-                    //     await RemoveService(service.Id);
-                    //     continue;
-                    // }
-
-                    //service.HeartBeatMode 不为空，且不等于server 则认为是客户端主动心跳，不做http健康检查
-                    if (!string.IsNullOrWhiteSpace(service.HeartBeatMode) && service.HeartBeatMode != "server")
+                    //service.HeartBeatMode 不为空
+                    if (!string.IsNullOrWhiteSpace(service.HeartBeatMode))
                     {
-                        if ((DateTime.Now - lstHeartBeat.Value).TotalSeconds > UnhealthInterval)
+                        if (RemoveServiceInterval > 0 &&
+                            (DateTime.Now - lstHeartBeat.Value).TotalSeconds > RemoveServiceInterval)
                         {
-                            //客户端主动心跳模式：超过 UnhealthInterval 没有心跳，则认为服务不可用
-                            if (service.Alive == ServiceAlive.Online)
-                            {
-                                await _serviceInfoService.UpdateServiceStatus(service, ServiceAlive.Offline);
-                            }
-                        }
-
-                        continue;
-                    }
-
-                    //service.HeartBeatMode 不为空，且 = server
-                    if (!string.IsNullOrWhiteSpace(service.HeartBeatMode) && service.HeartBeatMode == "server")
-                    {
-                        if (string.IsNullOrWhiteSpace(service.CheckUrl))
-                        {
-                            //CheckUrl不填，直接认为下线
-                            await _serviceInfoService.UpdateServiceStatus(service, ServiceAlive.Offline);
+                            //超过设定时间，则直接删除服务
+                            await _serviceInfoService.RemoveAsync(service.Id);
                             continue;
                         }
 
-                        //这个 task 没必要等待，没必要等待上一个service检测结束开始下一个。
-#pragma warning disable CS4014
-                        Task.Run(async () =>
-#pragma warning restore CS4014
+                        //是客户端主动心跳，不做http健康检查
+                        if (service.HeartBeatMode == "client")
                         {
-                            var result = await CheckAService(service);
-                            await _serviceInfoService.UpdateServiceStatus(service, result ? ServiceAlive.Online : ServiceAlive.Offline);
-                        });
+                            if ((DateTime.Now - lstHeartBeat.Value).TotalSeconds > UnhealthInterval)
+                            {
+                                //客户端主动心跳模式：超过 UnhealthInterval 没有心跳，则认为服务不可用
+                                if (service.Alive == ServiceAlive.Online)
+                                {
+                                    await _serviceInfoService.UpdateServiceStatus(service, ServiceAlive.Offline);
+                                }
+                            }
+
+                            continue;
+                        }
+
+                        //等于server 主动http健康检查
+                        if (service.HeartBeatMode == "server")
+                        {
+                            if (string.IsNullOrWhiteSpace(service.CheckUrl))
+                            {
+                                //CheckUrl不填，直接认为下线
+                                await _serviceInfoService.UpdateServiceStatus(service, ServiceAlive.Offline);
+                                continue;
+                            }
+
+                            _ = Task.Run(async () =>
+                            {
+                                var result = await CheckAService(service);
+                                await _serviceInfoService.UpdateServiceStatus(service,
+                                    result ? ServiceAlive.Online : ServiceAlive.Offline);
+                            });
+                        }
                     }
                 }
 

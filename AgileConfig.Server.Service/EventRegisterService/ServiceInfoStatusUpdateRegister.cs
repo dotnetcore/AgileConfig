@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Agile.Config.Protocol;
 using AgileConfig.Server.Common;
@@ -106,13 +107,13 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
                     service.Alive == ServiceAlive.Offline)
                 {
                     //如果是下线发送通知
-                    SendServiceOfflineMessage(service);
+                    _ = SendServiceOfflineMessageAsync(service);
                 }
             });
         });
     }
 
-    private void SendServiceOfflineMessage(ServiceInfo service)
+    private async Task SendServiceOfflineMessageAsync(ServiceInfo service)
     {
         var msg = new
         {
@@ -126,10 +127,19 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
 
         try
         {
-            FunctionUtil.TRYAsync(() => service.AlarmUrl.AsHttp("POST", msg).Config(new RequestOptions()
+            await FunctionUtil.TRYAsync(async () =>
             {
-                ContentType = "application/json"
-            }).SendAsync(), 5);
+                var resp = await service.AlarmUrl.AsHttp("POST", msg).Config(new RequestOptions()
+                {
+                    ContentType = "application/json"
+                }).SendAsync();
+                if (resp.Exception != null)
+                {
+                    throw resp.Exception;
+                }
+
+                return resp.StatusCode == HttpStatusCode.OK;
+            }, 5);
         }
         catch (Exception e)
         {
