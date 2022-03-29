@@ -283,16 +283,7 @@ public class HomeController : Controller
 }
 ```
 
-在Startup内使用AddAgileConfig配置注入，然后其他地方就可以通过IConfigClient来获取这个实例。
-``` c#
-public class Startup
-{
-    public void ConfigureServices(IServiceCollection services)
-    {
-        services.AddAgileConfig();
-    }
-}
-```
+也可以通过IConfigClient来获取这个实例
 
 ``` c#
 public class HomeController : Controller
