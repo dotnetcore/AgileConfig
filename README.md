@@ -222,13 +222,13 @@ Install-Package AgileConfig.Client
 ``` c#
      public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .UseAgileConfig(new ConfigClient($"appsettings.{context.HostingEnvironment.EnvironmentName}.json"), e => Console.WriteLine($"configs {e.Action}"))
+                .UseAgileConfig(new ConfigClient($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json"), e => Console.WriteLine($"configs {e.Action}"))
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
                 });
 ```
-根据环境变量读取appsettings.{env}.json配置信息。
+如果需要根据环境变量读取appsettings.{env}.json配置信息，可以通过Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")来获取。   
 > 注意：☢️☢️☢️如果你的程序是Framework的程序请使用[AgileConfig.Client4FR](https://github.com/kklldog/AgileConfig.Client4FR)这个专门为Framework打造的client。使用当前版本有可能死锁造成cpu100% 的风险。
 
 > 注意：如果节点使用nginx反代的话，需要对nginx进行配置，使其支持websocket协议，不然客户端跟节点的长连接没法建立。
