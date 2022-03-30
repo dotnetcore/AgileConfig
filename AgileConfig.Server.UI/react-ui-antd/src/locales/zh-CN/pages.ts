@@ -77,6 +77,7 @@ export default {
   'pages.home.summary.app': '应用',
   'pages.home.summary.config': '配置',
   'pages.home.summary.client': '客户端',
+  'pages.home.summary.service': '服务',
 
   'pages.node.action.add': '添加',
   'pages.node.action.delete': '删除',

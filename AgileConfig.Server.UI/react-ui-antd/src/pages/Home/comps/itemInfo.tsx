@@ -24,7 +24,9 @@ const ItemInfo: React.FC<itemInfoProps> = (props) => {
       if (props.type == 'client') {
         return '#52c41a';
       }
-  
+      if (props.type == 'service') {
+        return '#722ed1'
+      }
       return '';
     }
     const itemName = () => {

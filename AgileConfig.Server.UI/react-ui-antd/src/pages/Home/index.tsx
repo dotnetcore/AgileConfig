@@ -1,13 +1,12 @@
 import { PageContainer } from '@ant-design/pro-layout';
 import React, { useEffect, useState } from 'react';
-import {  queryServerNodeStatus } from './service';
+import { queryServerNodeStatus } from './service';
 import Summary, { summaryProps } from './comps/summary';
 import { queryNodes, addNode } from './../Nodes/service'
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { NodeItem } from './../Nodes/data';
 import { message, Modal } from 'antd';
 import { getIntl, getLocale } from 'umi';
-import { getVisitApps } from '@/utils/latestVisitApps';
 import LatestVisitApps from './comps/latestVisitApps';
 const { confirm } = Modal;
 
@@ -45,8 +44,8 @@ const home: React.FC = () => {
     nodeCount: 0,
     nodeOnCount: 0
   });
-  const getServerNodeClientInfos = ()=>{
-    queryServerNodeStatus().then((x: {  n:{ address: string, status: number},server_status: { clientCount: number } }[]) => {
+  const getServerNodeClientInfos = () => {
+    queryServerNodeStatus().then((x: { n: { address: string, status: number }, server_status: { clientCount: number } }[]) => {
       let clientCount: number = 0;
       x?.forEach(item => {
         if (item.server_status) {
@@ -56,8 +55,8 @@ const home: React.FC = () => {
       let nodeCount: number = 0;
       nodeCount = x.length;
       let nodeOnCount: number = 0;
-      nodeOnCount = x.filter(n=> n.n.status === 1).length;
-      console.log('nodeOnCount' , nodeOnCount);
+      nodeOnCount = x.filter(n => n.n.status === 1).length;
+      console.log('nodeOnCount', nodeOnCount);
       setServerNodeStatus({
         clientCount: clientCount,
         nodeCount: nodeCount,
@@ -68,14 +67,14 @@ const home: React.FC = () => {
 
   const anyServerNode = async () => {
     const nodes = await queryNodes();
-    return nodes.data.length > 0 ;
+    return nodes.data.length > 0;
   }
 
-  useEffect(()=>{
-    anyServerNode().then(data=>{
-      if(!data) {
+  useEffect(() => {
+    anyServerNode().then(data => {
+      if (!data) {
         console.log('No nodes plz add one !');
-        let confirmMsg =`节点列表为空，是否添加当前节点【${window.location.origin}】到节点列表？`;
+        let confirmMsg = `节点列表为空，是否添加当前节点【${window.location.origin}】到节点列表？`;
         confirm({
           icon: <ExclamationCircleOutlined />,
           content: confirmMsg,
@@ -98,17 +97,15 @@ const home: React.FC = () => {
   }, []);
   useEffect(() => {
     getServerNodeClientInfos();
-  }, []);
-  useEffect(() => {
-    const id = setInterval(()=>{
+    const id = setInterval(() => {
       getServerNodeClientInfos();
     }, 5000);
-    return ()=> clearInterval(id);
+    return () => clearInterval(id);
   }, []);
   return (
     <PageContainer pageHeaderRender={false}>
       <Summary clientCount={serverNodeStatus.clientCount} nodeCount={serverNodeStatus.nodeCount} nodeOnCount={serverNodeStatus.nodeOnCount}></Summary>
-      <LatestVisitApps/>
+      <LatestVisitApps />
     </PageContainer>
   );
 }

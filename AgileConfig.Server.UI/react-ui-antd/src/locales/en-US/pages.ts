@@ -79,6 +79,7 @@ export default {
   'pages.home.summary.app': 'App',
   'pages.home.summary.config': 'Configuration',
   'pages.home.summary.client': 'Client',
+  'pages.home.summary.service': 'Service',
 
   'pages.node.action.add': 'Add',
   'pages.node.action.delete': 'Delete',

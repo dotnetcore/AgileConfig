@@ -20,13 +20,20 @@ namespace AgileConfig.Server.Apisite.Controllers
         private readonly IAppService _appService;
         private readonly IServerNodeService _serverNodeService;
         private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
+        private readonly IServiceInfoService _serviceInfoService;
 
-        public ReportController(IConfigService configService, IAppService appService, IServerNodeService serverNodeService, IRemoteServerNodeProxy remoteServerNodeProxy)
+        public ReportController(
+            IConfigService configService, 
+            IAppService appService, 
+            IServerNodeService serverNodeService, 
+            IRemoteServerNodeProxy remoteServerNodeProxy,
+            IServiceInfoService serviceInfoService)
         {
             _appService = appService;
             _configService = configService;
             _serverNodeService = serverNodeService;
             _remoteServerNodeProxy = remoteServerNodeProxy;
+            _serviceInfoService = serviceInfoService;
         }
 
         /// <summary>
@@ -160,6 +167,18 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             return Json(result);
+        }
+        
+        public async Task<IActionResult> ServiceCount()
+        {
+            var services = await _serviceInfoService.GetAllServiceInfoAsync();
+            var serviceCount = services.Count;
+            var serviceOnCount = services.Count(x => x.Alive == ServiceAlive.Online);
+            return Json(new
+            {
+                serviceCount,
+                serviceOnCount
+            });
         }
     }
 }

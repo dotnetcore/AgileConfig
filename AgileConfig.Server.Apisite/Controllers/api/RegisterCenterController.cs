@@ -59,8 +59,14 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
 
         [HttpDelete("{id}")]
-        public async Task<RegisterResultVM> UnRegister(string id, [FromBody]RegisterServiceInfoVM vm)
+        public async Task<ActionResult<RegisterResultVM>> UnRegister(string id, [FromBody]RegisterServiceInfoVM vm)
         {
+            var entity = await _serviceInfoService.GetByUniqueIdAsync(id);
+            if (entity == null)
+            {
+                return NotFound();
+            }
+            
             var result = await _registerCenterService.UnRegisterAsync(id);
             if (!result)
             {
@@ -73,7 +79,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             if (result)
             {
                 //send a message to notify other services
-                var entity = await _serviceInfoService.GetByUniqueIdAsync(id);
                 dynamic param = new ExpandoObject();
                 param.ServiceId = entity.ServiceId;
                 param.ServiceName = entity.ServiceName;
