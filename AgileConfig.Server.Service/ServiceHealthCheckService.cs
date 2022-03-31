@@ -121,6 +121,11 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
                     .Where(x => x.HeartBeatMode != null && x.HeartBeatMode != "").ToListAsync();
                 foreach (var service in services)
                 {
+                    if (service.HeartBeatMode == HeartBeatModes.none.ToString())
+                    {
+                        continue;
+                    }
+                    
                     var lstHeartBeat = service.LastHeartBeat;
                     if (!lstHeartBeat.HasValue)
                     {
@@ -139,7 +144,7 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
                         }
 
                         //是客户端主动心跳，不做http健康检查
-                        if (service.HeartBeatMode == "client")
+                        if (service.HeartBeatMode == HeartBeatModes.client.ToString())
                         {
                             if ((DateTime.Now - lstHeartBeat.Value).TotalSeconds > UnhealthInterval)
                             {
@@ -154,7 +159,7 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
                         }
 
                         //等于server 主动http健康检查
-                        if (service.HeartBeatMode == "server")
+                        if (service.HeartBeatMode == HeartBeatModes.server.ToString())
                         {
                             if (string.IsNullOrWhiteSpace(service.CheckUrl))
                             {

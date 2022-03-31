@@ -51,6 +51,7 @@ namespace AgileConfig.Server.Service
                 oldEntity.HeartBeatMode = serviceInfo.HeartBeatMode;
                 oldEntity.CheckUrl = serviceInfo.CheckUrl;
                 oldEntity.AlarmUrl = serviceInfo.AlarmUrl;
+                oldEntity.RegisterWay = serviceInfo.RegisterWay;
                 await _dbContext.ServiceInfo.UpdateAsync(oldEntity);
                 var rows = await _dbContext.SaveChangesAsync();
 

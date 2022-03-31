@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Collections.Generic;
+using System.Dynamic;
+using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Entity;
 
 namespace AgileConfig.Server.Apisite.Controllers
@@ -16,11 +18,46 @@ namespace AgileConfig.Server.Apisite.Controllers
     public class ServiceController : Controller
     {
         private readonly IServiceInfoService _serviceInfoService;
-        public ServiceController(IServiceInfoService serviceInfoService)
+        private readonly IRegisterCenterService _registerCenterService;
+        public ServiceController(IServiceInfoService serviceInfoService,IRegisterCenterService registerCenterService)
         {
             _serviceInfoService = serviceInfoService;
+            _registerCenterService = registerCenterService;
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Add([FromBody] ServiceInfoVM model)
+        {
+            if (model == null)
+            {
+                throw new ArgumentNullException("model");
+            }
+
+            var service = new ServiceInfo();
+            service.Ip = model.Ip;
+            service.Port = model.Port;
+            service.AlarmUrl = model.AlarmUrl;
+            service.CheckUrl = model.CheckUrl;
+            service.MetaData = model.MetaData;
+            service.ServiceId = model.ServiceId;
+            service.ServiceName = model.ServiceName;
+            service.RegisterWay = RegisterWay.Manual;
+            service.HeartBeatMode = model.HeartBeatMode;
+            var uniqueId = await _registerCenterService.RegisterAsync(service);
+
+            //send a message to notify other services
+            dynamic param = new ExpandoObject();
+            param.ServiceId = model.ServiceId;
+            param.ServiceName = model.ServiceName;
+            param.UniqueId = uniqueId;
+            TinyEventBus.Instance.Fire(EventKeys.REGISTER_A_SERVICE,param);
+            
+            return Json(new
+            {
+                success = true
+            });
+        }
+        
         public async Task<IActionResult> Search(string serviceName, string serviceId, ServiceAlive? alive, 
             string sortField, string ascOrDesc,
             int current = 1, int pageSize = 20)

@@ -41,6 +41,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             entity.AlarmUrl = model.AlarmUrl;
             entity.HeartBeatMode = model.HeartBeatMode;
             entity.MetaData = JsonConvert.SerializeObject(model.MetaData);
+            entity.RegisterWay = RegisterWay.Auto;
             
             var id = await _registerCenterService.RegisterAsync(entity);
 
