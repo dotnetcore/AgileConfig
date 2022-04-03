@@ -33,6 +33,15 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException("model");
             }
 
+            if ((await _serviceInfoService.GetByServiceIdAsync(model.ServiceId)) != null)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "该服务已存在"
+                });
+            }
+            
             var service = new ServiceInfo();
             service.Ip = model.Ip;
             service.Port = model.Port;

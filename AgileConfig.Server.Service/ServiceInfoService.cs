@@ -29,6 +29,13 @@ namespace AgileConfig.Server.Service
             return entity;
         }
 
+        public async Task<ServiceInfo> GetByServiceIdAsync(string serviceId)
+        {
+            var entity = await FreeSQL.Instance.Select<ServiceInfo>().Where(x => x.ServiceId == serviceId).FirstAsync();
+
+            return entity;
+        }
+
         public async Task<bool> RemoveAsync(string id)
         {
             var aff = await FreeSQL.Instance.Delete<ServiceInfo>().Where(x => x.Id == id)

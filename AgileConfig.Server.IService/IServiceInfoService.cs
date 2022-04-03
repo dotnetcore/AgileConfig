@@ -8,7 +8,8 @@ namespace AgileConfig.Server.IService
     public interface IServiceInfoService: IDisposable
     {
         Task<ServiceInfo> GetByUniqueIdAsync(string id);
-        
+        Task<ServiceInfo> GetByServiceIdAsync(string serviceId);
+
         Task<bool> RemoveAsync(string id);
         
         Task UpdateServiceStatus(ServiceInfo service, ServiceAlive status);

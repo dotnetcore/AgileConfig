@@ -55,7 +55,7 @@ namespace AgileConfig.Server.Data.Entity
         [Column(Name = "last_heart_beat")] 
         public DateTime? LastHeartBeat { get; set; }
 
-        [Column(Name = "heart_beat_mode")] 
+        [Column(Name = "heart_beat_mode",StringLength = 10)] 
         public string HeartBeatMode { get; set; }
 
         [Column(Name = "check_url", StringLength = 2000)]

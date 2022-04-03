@@ -1,4 +1,5 @@
 import request from '@/utils/request';
+import { ServiceItem } from './data';
 
 export async function queryService(params: any) {
   return request('/service/search', {
@@ -21,6 +22,15 @@ export async function clientOffline(address: string, clientId: string) {
     params:{
       address,
       clientId
+    }
+  });
+}
+
+export async function addService(service: ServiceItem) {
+  return request('/service/add', {
+    method: 'POST',
+    data:{
+      ...service
     }
   });
 }
