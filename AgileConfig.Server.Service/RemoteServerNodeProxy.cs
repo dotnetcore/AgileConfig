@@ -79,11 +79,11 @@ namespace AgileConfig.Server.Service
             using (var service = GetSysLogService())
             {
                 var module = "";
-                if (action.Module == "R")
+                if (action.Module == "r")
                 {
                     module = "注册中心";
                 }
-                if (action.Module == "C")
+                if (action.Module == "c")
                 {
                     module = "配置中心";
                 }
@@ -124,11 +124,11 @@ namespace AgileConfig.Server.Service
             using (var service = GetSysLogService())
             {
                 var module = "";
-                if (action.Module == "R")
+                if (action.Module == "r")
                 {
                     module = "注册中心";
                 }
-                if (action.Module == "C")
+                if (action.Module == "c")
                 {
                     module = "配置中心";
                 }
@@ -183,11 +183,11 @@ namespace AgileConfig.Server.Service
             using (var service = GetSysLogService())
             {
                 var module = "";
-                if (action.Module == "R")
+                if (action.Module == "r")
                 {
                     module = "注册中心";
                 }
-                if (action.Module == "C")
+                if (action.Module == "c")
                 {
                     module = "配置中心";
                 }
