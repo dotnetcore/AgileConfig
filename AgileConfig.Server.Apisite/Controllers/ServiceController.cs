@@ -67,7 +67,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
         
-        public async Task<IActionResult> Search(string serviceName, string serviceId, ServiceAlive? alive, 
+        public async Task<IActionResult> Search(string serviceName, string serviceId, ServiceStatus? status, 
             string sortField, string ascOrDesc,
             int current = 1, int pageSize = 20)
         {
@@ -89,9 +89,9 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 query = query.Where(x => x.ServiceId.Contains(serviceId)).ToList();
             }
-            if (alive.HasValue)
+            if (status.HasValue)
             {
-                query = query.Where(x => x.Alive == alive).ToList();
+                query = query.Where(x => x.Status == status).ToList();
             }
 
             query = query.OrderByDescending(x => x.RegisterTime).ToList();
@@ -127,7 +127,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 serviceVMs.Add(new ServiceInfoVM()
                 {
                     Id = service.Id,
-                    Alive = service.Alive,
+                    Status = service.Status,
                     ServiceId = service.ServiceId,
                     ServiceName = service.ServiceName,
                     Ip = service.Ip,

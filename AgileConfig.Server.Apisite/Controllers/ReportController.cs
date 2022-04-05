@@ -173,7 +173,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         {
             var services = await _serviceInfoService.GetAllServiceInfoAsync();
             var serviceCount = services.Count;
-            var serviceOnCount = services.Count(x => x.Alive == ServiceAlive.Online);
+            var serviceOnCount = services.Count(x => x.Status == ServiceStatus.Healthy);
             return Json(new
             {
                 serviceCount,

@@ -23,7 +23,7 @@ public class ServiceInfoVM
 
     public string MetaData { get; set; }
 
-    public ServiceAlive Alive { get; set; }
+    public ServiceStatus Status { get; set; }
 
     public DateTime? RegisterTime { get; set; }
 

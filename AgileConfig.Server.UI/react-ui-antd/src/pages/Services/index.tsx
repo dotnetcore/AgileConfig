@@ -97,7 +97,7 @@ const services: React.FC = () => {
     },
     {
       title: '状态',
-      dataIndex: 'alive',
+      dataIndex: 'status',
       valueEnum: {
         0: {
           text: '异常',
@@ -148,14 +148,14 @@ const services: React.FC = () => {
         toolBarRender={()=>
           [
             <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { setCreateModalVisible(true) }}>
-              手工注册
+              注册
             </Button>
           ]
         }
       />
       <ModalForm
         formRef={addFormRef}
-        title='手工注册服务'
+        title='注册服务'
         visible={createModalVisible}
         onVisibleChange={setCreateModalVisible}
         onFinish={

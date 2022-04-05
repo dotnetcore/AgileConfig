@@ -12,7 +12,7 @@ namespace AgileConfig.Server.IService
 
         Task<bool> RemoveAsync(string id);
         
-        Task UpdateServiceStatus(ServiceInfo service, ServiceAlive status);
+        Task UpdateServiceStatus(ServiceInfo service, ServiceStatus status);
         Task<List<ServiceInfo>> GetAllServiceInfoAsync();
         
         Task<List<ServiceInfo>> GetOnlineServiceInfoAsync();

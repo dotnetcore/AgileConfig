@@ -104,7 +104,7 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
                 using var serviceInfoService = NewServiceInfoService();
                 var service = await serviceInfoService.GetByUniqueIdAsync(id);
                 if (service != null && !string.IsNullOrWhiteSpace(service.AlarmUrl) &&
-                    service.Alive == ServiceAlive.Offline)
+                    service.Status == ServiceStatus.Unhealthy)
                 {
                     //如果是下线发送通知
                     _ = SendServiceOfflineMessageAsync(service);
@@ -121,7 +121,7 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
             service.ServiceId,
             service.ServiceName,
             Time = DateTime.Now,
-            Status = ServiceAlive.Offline.ToString(),
+            Status = ServiceStatus.Unhealthy.ToString(),
             Message = "服务已经下线"
         };
 

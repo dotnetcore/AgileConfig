@@ -5,10 +5,10 @@ using System.Text;
 
 namespace AgileConfig.Server.Data.Entity
 {
-    public enum ServiceAlive
+    public enum ServiceStatus
     {
-        Offline = 0,
-        Online = 1
+        Unhealthy = 0,
+        Healthy = 1
     }
     
     public enum RegisterWay
@@ -46,8 +46,8 @@ namespace AgileConfig.Server.Data.Entity
         [Column(Name = "meta_data", StringLength = 2000)]
         public string MetaData { get; set; }
 
-        [Column(Name = "alive")] 
-        public ServiceAlive Alive { get; set; }
+        [Column(Name = "status")] 
+        public ServiceStatus Status { get; set; }
 
         [Column(Name = "register_time")] 
         public DateTime? RegisterTime { get; set; }

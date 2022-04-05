@@ -15,7 +15,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api.Models
 
         public List<string> MetaData { get; set; } = new List<string>();
 
-        public ServiceAlive Status { get; set; }
+        public ServiceStatus Status { get; set; }
     }
     
     public class QueryServiceInfoResultVM

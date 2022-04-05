@@ -135,7 +135,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                     Ip = serviceInfo.Ip,
                     Port = serviceInfo.Port,
                     MetaData = JsonConvert.DeserializeObject<List<string>>(serviceInfo.MetaData),
-                    Status = serviceInfo.Alive
+                    Status = serviceInfo.Status
                 };
                 vms.Add(vm);
             }
@@ -157,7 +157,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                     Ip = serviceInfo.Ip,
                     Port = serviceInfo.Port,
                     MetaData = JsonConvert.DeserializeObject<List<string>>(serviceInfo.MetaData),
-                    Status = serviceInfo.Alive
+                    Status = serviceInfo.Status
                 };
                 vms.Add(vm);
             }
@@ -179,7 +179,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                     Ip = serviceInfo.Ip,
                     Port = serviceInfo.Port,
                     MetaData = JsonConvert.DeserializeObject<List<string>>(serviceInfo.MetaData),
-                    Status = serviceInfo.Alive
+                    Status = serviceInfo.Status
                 };
                 vms.Add(vm);
             }

@@ -53,7 +53,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<List<ServiceInfo>> GetOnlineServiceInfoAsync()
         {
-            var services = await FreeSQL.Instance.Select<ServiceInfo>().Where(x => x.Alive == ServiceAlive.Online)
+            var services = await FreeSQL.Instance.Select<ServiceInfo>().Where(x => x.Status == ServiceStatus.Healthy)
                 .ToListAsync();
 
             return services;
@@ -61,7 +61,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<List<ServiceInfo>> GetOfflineServiceInfoAsync()
         {
-            var services = await FreeSQL.Instance.Select<ServiceInfo>().Where(x => x.Alive == ServiceAlive.Offline)
+            var services = await FreeSQL.Instance.Select<ServiceInfo>().Where(x => x.Status == ServiceStatus.Unhealthy)
                 .ToListAsync();
 
             return services;
@@ -107,7 +107,7 @@ namespace AgileConfig.Server.Service
                 }
 
                 sb.Append(
-                    $"{serviceInfo.ServiceId}&{serviceInfo.ServiceName}&{serviceInfo.Ip}&{serviceInfo.Port}&{(int)serviceInfo.Alive}&{metaDataStr}&");
+                    $"{serviceInfo.ServiceId}&{serviceInfo.ServiceName}&{serviceInfo.Ip}&{serviceInfo.Port}&{(int)serviceInfo.Status}&{metaDataStr}&");
             }
 
             var txt = sb.ToString();
@@ -122,22 +122,22 @@ namespace AgileConfig.Server.Service
             }
         }
 
-        public async Task UpdateServiceStatus(ServiceInfo service, ServiceAlive status)
+        public async Task UpdateServiceStatus(ServiceInfo service, ServiceStatus status)
         {
             var id = service.Id;
-            var oldStatus = service.Alive;
+            var oldStatus = service.Status;
 
-            if (status == ServiceAlive.Offline)
+            if (status == ServiceStatus.Unhealthy)
             {
                 await FreeSQL.Instance.Update<ServiceInfo>()
-                    .Set(x => x.Alive, status)
+                    .Set(x => x.Status, status)
                     .Where(x => x.Id == id)
                     .ExecuteAffrowsAsync();
             }
             else
             {
                 await FreeSQL.Instance.Update<ServiceInfo>()
-                    .Set(x => x.Alive, status)
+                    .Set(x => x.Status, status)
                     .Set(x => x.LastHeartBeat, DateTime.Now)
                     .Where(x => x.Id == id)
                     .ExecuteAffrowsAsync();

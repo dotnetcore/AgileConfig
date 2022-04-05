@@ -42,7 +42,7 @@ namespace AgileConfig.Server.Service
             if (oldEntity != null)
             {
                 oldEntity.RegisterTime = DateTime.Now;
-                oldEntity.Alive = ServiceAlive.Online;
+                oldEntity.Status = ServiceStatus.Healthy;
                 oldEntity.LastHeartBeat = DateTime.Now;
                 oldEntity.ServiceName = serviceInfo.ServiceName;
                 oldEntity.Ip = serviceInfo.Ip;
@@ -65,7 +65,7 @@ namespace AgileConfig.Server.Service
 
             serviceInfo.RegisterTime = DateTime.Now;
             serviceInfo.LastHeartBeat = DateTime.Now;
-            serviceInfo.Alive = ServiceAlive.Online;
+            serviceInfo.Status = ServiceStatus.Healthy;
             serviceInfo.Id = Guid.NewGuid().ToString("n");
 
             _dbContext.ServiceInfo.Add(serviceInfo);
@@ -151,14 +151,14 @@ namespace AgileConfig.Server.Service
             }
             else
             {
-                var oldStatus = entity.Alive;
-                entity.Alive = ServiceAlive.Online;
+                var oldStatus = entity.Status;
+                entity.Status = ServiceStatus.Healthy;
                 entity.LastHeartBeat = DateTime.Now;
                 await _dbContext.UpdateAsync(entity);
 
                 await _dbContext.SaveChangesAsync();
 
-                if (oldStatus != ServiceAlive.Online)
+                if (oldStatus != ServiceStatus.Healthy)
                 {
                     _serviceInfoService.ClearCache();
                     dynamic param = new ExpandoObject();

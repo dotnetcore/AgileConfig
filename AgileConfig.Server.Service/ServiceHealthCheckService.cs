@@ -149,9 +149,9 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
                             if ((DateTime.Now - lstHeartBeat.Value).TotalSeconds > UnhealthInterval)
                             {
                                 //客户端主动心跳模式：超过 UnhealthInterval 没有心跳，则认为服务不可用
-                                if (service.Alive == ServiceAlive.Online)
+                                if (service.Status == ServiceStatus.Healthy)
                                 {
-                                    await _serviceInfoService.UpdateServiceStatus(service, ServiceAlive.Offline);
+                                    await _serviceInfoService.UpdateServiceStatus(service, ServiceStatus.Unhealthy);
                                 }
                             }
 
@@ -164,7 +164,7 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
                             if (string.IsNullOrWhiteSpace(service.CheckUrl))
                             {
                                 //CheckUrl不填，直接认为下线
-                                await _serviceInfoService.UpdateServiceStatus(service, ServiceAlive.Offline);
+                                await _serviceInfoService.UpdateServiceStatus(service, ServiceStatus.Unhealthy);
                                 continue;
                             }
 
@@ -172,7 +172,7 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
                             {
                                 var result = await CheckAService(service);
                                 await _serviceInfoService.UpdateServiceStatus(service,
-                                    result ? ServiceAlive.Online : ServiceAlive.Offline);
+                                    result ? ServiceStatus.Healthy : ServiceStatus.Unhealthy);
                             });
                         }
                     }
