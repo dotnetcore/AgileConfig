@@ -2,12 +2,13 @@ import { PlusOutlined } from '@ant-design/icons';
 import { FormInstance, ModalForm, ProFormDependency, ProFormSelect, ProFormText } from '@ant-design/pro-form';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
-import { Button, message } from 'antd';
+import { Button, message, Modal } from 'antd';
 import React, {  useRef, useState } from 'react';
 import { getIntl, getLocale } from 'umi';
 import { ServiceItem } from './data';
-import { addService, queryService } from './service';
+import { addService, queryService, removeService } from './service';
 import styles from './index.less';
+const { confirm } = Modal;
 
 const handleAdd = async (fields: ServiceItem) => {
   const intl = getIntl(getLocale());
@@ -31,6 +32,25 @@ const handleAdd = async (fields: ServiceItem) => {
     message.error(intl.formatMessage({
       id:'save_fail'
     }));
+    return false;
+  }
+};
+const handleDelSome = async (service: ServiceItem):Promise<boolean> => {
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({id:'deleting'}));
+  try {
+    const result = await removeService(service);
+    hide();
+    const success = result.success;
+    if (success) {
+      message.success(intl.formatMessage({id:'delete_success'}));
+    } else {
+      message.error(intl.formatMessage({id:'delete_fail'}));
+    }
+    return success;
+  } catch (error) {
+    hide();
+    message.error(intl.formatMessage({id:'delete_fail'}));
     return false;
   }
 };
@@ -114,7 +134,21 @@ const services: React.FC = () => {
       title: '操作',
       valueType: 'option',
       render: (text, record, _, action) => [
-        <a className={styles.linkDanger}>
+        <a className={styles.linkDanger}
+          onClick={
+            ()=>{
+              confirm({
+                content:`确定删除选中的服务吗？`,
+                onOk: async ()=>{
+                  const result = await handleDelSome(record)
+                  if (result) {
+                    actionRef.current?.reload();
+                  }
+                }
+              })
+            }
+          }
+        >
           删除
         </a>
       ]

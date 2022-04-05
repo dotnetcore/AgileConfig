@@ -66,7 +66,40 @@ namespace AgileConfig.Server.Apisite.Controllers
                 success = true
             });
         }
-        
+
+        [HttpPost]
+        public async Task<IActionResult> Remove(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                throw new ArgumentNullException("id");
+            }
+
+            var service = await _serviceInfoService.GetByUniqueIdAsync(id);
+            if (service == null)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "该服务不存在"
+                });
+            }
+
+            await _registerCenterService.UnRegisterAsync(id);
+
+            //send a message to notify other services
+            dynamic param = new ExpandoObject();
+            param.ServiceId = service.ServiceId;
+            param.ServiceName = service.ServiceName;
+            param.UniqueId = service.Id;
+            TinyEventBus.Instance.Fire(EventKeys.UNREGISTER_A_SERVICE,param);
+
+            return Json(new
+            {
+                success = true
+            });
+        }
+ 
         public async Task<IActionResult> Search(string serviceName, string serviceId, ServiceStatus? status, 
             string sortField, string ascOrDesc,
             int current = 1, int pageSize = 20)

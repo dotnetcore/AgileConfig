@@ -78,11 +78,20 @@ namespace AgileConfig.Server.Service
 
             using (var service = GetSysLogService())
             {
+                var module = "";
+                if (action.Module == "R")
+                {
+                    module = "注册中心";
+                }
+                if (action.Module == "C")
+                {
+                    module = "配置中心";
+                }
                 await service.AddSysLogAsync(new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = result ? SysLogType.Normal : SysLogType.Warn,
-                    LogText = $"通知节点【{address}】所有客户端：【{action.Module}】【{action.Action}】 响应：{(result ? "成功" : "失败")}"
+                    LogText = $"通知节点【{address}】所有客户端：【{module}】【{action.Action}】 响应：{(result ? "成功" : "失败")}"
                 });
             }
 
@@ -114,12 +123,21 @@ namespace AgileConfig.Server.Service
 
             using (var service = GetSysLogService())
             {
+                var module = "";
+                if (action.Module == "R")
+                {
+                    module = "注册中心";
+                }
+                if (action.Module == "C")
+                {
+                    module = "配置中心";
+                }
                 await service.AddSysLogAsync(new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = result ? SysLogType.Normal : SysLogType.Warn,
                     AppId = appId,
-                    LogText = $"通知节点【{address}】应用【{appId}】的客户端：【{action.Module}】【{action.Action}】 响应：{(result ? "成功" : "失败")}"
+                    LogText = $"通知节点【{address}】应用【{appId}】的客户端：【{module}】【{action.Action}】 响应：{(result ? "成功" : "失败")}"
                 });
             }
 
@@ -164,11 +182,20 @@ namespace AgileConfig.Server.Service
 
             using (var service = GetSysLogService())
             {
+                var module = "";
+                if (action.Module == "R")
+                {
+                    module = "注册中心";
+                }
+                if (action.Module == "C")
+                {
+                    module = "配置中心";
+                }
                 await service.AddSysLogAsync(new SysLog
                 {
                     LogTime = DateTime.Now,
                     LogType = result ? SysLogType.Normal : SysLogType.Warn,
-                    LogText = $"通知节点【{address}】的客户端【{clientId}】：【{action.Module}】【{action.Action}】 响应：{(result ? "成功" : "失败")}"
+                    LogText = $"通知节点【{address}】的客户端【{clientId}】：【{module}】【{action.Action}】 响应：{(result ? "成功" : "失败")}"
                 });
             }
 

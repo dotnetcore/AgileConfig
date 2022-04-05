@@ -34,3 +34,12 @@ export async function addService(service: ServiceItem) {
     }
   });
 }
+
+export async function removeService(service: ServiceItem) {
+  return request('/service/remove', {
+    method: 'POST',
+    params:{
+      id: service.id
+    }
+  });
+}
