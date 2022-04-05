@@ -7,6 +7,7 @@ import React, {  useRef, useState } from 'react';
 import { getIntl, getLocale } from 'umi';
 import { ServiceItem } from './data';
 import { addService, queryService } from './service';
+import styles from './index.less';
 
 const handleAdd = async (fields: ServiceItem) => {
   const intl = getIntl(getLocale());
@@ -99,15 +100,24 @@ const services: React.FC = () => {
       dataIndex: 'alive',
       valueEnum: {
         0: {
-          text: '离线',
+          text: '异常',
           status: 'Default'
         },
         1: {
-          text: '在线',
-          status: 'Processing'
+          text: '健康',
+          status: 'Success'
         }
       },
       width: 120
+    },
+    {
+      title: '操作',
+      valueType: 'option',
+      render: (text, record, _, action) => [
+        <a className={styles.linkDanger}>
+          删除
+        </a>
+      ]
     }
   ];
   return (
