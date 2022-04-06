@@ -32,8 +32,8 @@ Gitee 镜像：[https://gitee.com/kklldog/AgileConfig](https://gitee.com/kklldog
 8. 配置修改支持版本记录，随时回滚配置
 9. 如果所有节点都故障，客户端支持从本地缓存读取配置
 10. 支持Restful API维护配置
-    
-⭐️ 🌟 ✨ 最新体验版支持【服务注册发现】功能。服务端拉取 agile_config:test 镜像， 客户端使用 1.6.0-preview 版本。⭐️ 🌟 ✨    
+11. v-1.6.0 以上已支持服务注册与发现
+
 演示地址：[AgileConfig Server Demo](http://agileconfig_server.xbaby.xyz)   用户名：admin 密码：123456   
 客户端项目：[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
 示例项目：    
