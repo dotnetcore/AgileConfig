@@ -122,7 +122,7 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
             service.ServiceName,
             Time = DateTime.Now,
             Status = ServiceStatus.Unhealthy.ToString(),
-            Message = "服务已经下线"
+            Message = "服务不健康"
         };
 
         try
