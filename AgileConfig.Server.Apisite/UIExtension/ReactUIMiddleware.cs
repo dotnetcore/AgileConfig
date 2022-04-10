@@ -103,6 +103,7 @@ namespace AgileConfig.Server.Apisite.UIExtension
                         LastModified = lastModified,
                         ExtType = extType
                     };
+                    
                     StaticFilesCache.TryAdd(filePath, uiFile);
                 }
                 

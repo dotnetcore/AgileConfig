@@ -6,7 +6,7 @@ namespace AgileConfig.Server.Apisite.UIExtension;
 
 internal class UIFileBag
 {
-    private static Dictionary<string, string> _contentTypesMap = new Dictionary<string, string>
+    private static Dictionary<string, string> _contentTypesMap = new()
     {
         {".html", "text/html; charset=utf-8"},
         {".css", "text/css; charset=utf-8"},
@@ -16,12 +16,12 @@ internal class UIFileBag
         { ".json","application/json;charset=utf-8"},
         { ".ico","image/x-icon"}
     };
-    public string FilePath { get; set; }
-    public byte[] Data { get; set; }
+    public string FilePath { get; init; }
+    public byte[] Data { get; init; }
     
-    public string ExtType { get; set; }
+    public string ExtType { get; init; }
 
     public string ContentType => _contentTypesMap[ExtType];
 
-    public DateTime LastModified { get; set; }
+    public DateTime LastModified { get; init; }
 }
