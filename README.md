@@ -32,8 +32,8 @@ Gitee 镜像：[https://gitee.com/kklldog/AgileConfig](https://gitee.com/kklldog
 8. 配置修改支持版本记录，随时回滚配置
 9. 如果所有节点都故障，客户端支持从本地缓存读取配置
 10. 支持Restful API维护配置
-    
-⭐️ 🌟 ✨ 最新体验版支持【服务注册发现】功能。服务端拉取 agile_config:test 镜像， 客户端使用 1.6.0-preview 版本。⭐️ 🌟 ✨    
+11. v-1.6.0 以上已支持服务注册与发现
+
 演示地址：[AgileConfig Server Demo](http://agileconfig_server.xbaby.xyz)   用户名：admin 密码：123456   
 客户端项目：[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
 示例项目：    
@@ -41,6 +41,7 @@ Gitee 镜像：[https://gitee.com/kklldog/AgileConfig](https://gitee.com/kklldog
 [AgileConfig WPFSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigWPFSample)    
 [AgileConfig ConsoleSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigConsoleSample)    
 [教程 - 如何使用AgileConfig.Client读取配置](https://www.cnblogs.com/kklldog/p/how-to-use-agileconfigclient.html)    
+[教程- 如果使用服务注册与发现](https://www.cnblogs.com/kklldog/p/agileconfig-160.html)   
 👉🏻👉🏻[常见问题，必看！！！](https://github.com/kklldog/AgileConfig/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%EF%BC%8C%E5%BF%85%E7%9C%8B%EF%BC%81%EF%BC%81%EF%BC%81)👈🏻👈🏻   
 [关于多环境的部署说明](https://github.com/dotnetcore/AgileConfig/wiki/%E5%85%B3%E4%BA%8E-1.5-%E7%89%88%E6%9C%AC%E6%94%AF%E6%8C%81%E5%A4%9A%E7%8E%AF%E5%A2%83%E7%9A%84%E8%AF%B4%E6%98%8E)   
    
