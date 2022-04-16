@@ -8,6 +8,7 @@ using System.Dynamic;
 using System.Threading.Tasks;
 using Agile.Config.Protocol;
 using AgileConfig.Server.Common;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace AgileConfig.Server.Apisite.Controllers.api
@@ -21,12 +22,16 @@ namespace AgileConfig.Server.Apisite.Controllers.api
     {
         private readonly IRegisterCenterService _registerCenterService;
         private readonly IServiceInfoService _serviceInfoService;
+        private readonly ILogger<RegisterCenterController> _logger;
 
         public RegisterCenterController(IRegisterCenterService registerCenterService
-            ,IServiceInfoService serviceInfoService)
+            ,IServiceInfoService serviceInfoService,
+            ILoggerFactory loggerFactory
+            )
         {
             _registerCenterService = registerCenterService;
             _serviceInfoService = serviceInfoService;
+            _logger = loggerFactory.CreateLogger<RegisterCenterController>();
         }
        
         [HttpPost]
@@ -40,7 +45,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             entity.CheckUrl = model.CheckUrl;
             entity.AlarmUrl = model.AlarmUrl;
             entity.HeartBeatMode = model.HeartBeatMode;
-            entity.MetaData = JsonConvert.SerializeObject(model.MetaData);
+            entity.MetaData = model.MetaData is null ? "[]" : JsonConvert.SerializeObject(model.MetaData);
             entity.RegisterWay = RegisterWay.Auto;
             
             var id = await _registerCenterService.RegisterAsync(entity);
@@ -134,9 +139,17 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                     ServiceName = serviceInfo.ServiceName,
                     Ip = serviceInfo.Ip,
                     Port = serviceInfo.Port,
-                    MetaData = JsonConvert.DeserializeObject<List<string>>(serviceInfo.MetaData),
+                    MetaData = new List<string>(),
                     Status = serviceInfo.Status
                 };
+                try
+                {
+                    vm.MetaData = JsonConvert.DeserializeObject<List<string>>(serviceInfo.MetaData);
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, $"deserialize meta data error, serviceId:{serviceInfo.ServiceId}");
+                }
                 vms.Add(vm);
             }
 
@@ -156,9 +169,17 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                     ServiceName = serviceInfo.ServiceName,
                     Ip = serviceInfo.Ip,
                     Port = serviceInfo.Port,
-                    MetaData = JsonConvert.DeserializeObject<List<string>>(serviceInfo.MetaData),
+                    MetaData = new List<string>(),
                     Status = serviceInfo.Status
                 };
+                try
+                {
+                    vm.MetaData = JsonConvert.DeserializeObject<List<string>>(serviceInfo.MetaData);
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, $"deserialize meta data error, serviceId:{serviceInfo.ServiceId}");
+                }
                 vms.Add(vm);
             }
 
@@ -178,9 +199,17 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                     ServiceName = serviceInfo.ServiceName,
                     Ip = serviceInfo.Ip,
                     Port = serviceInfo.Port,
-                    MetaData = JsonConvert.DeserializeObject<List<string>>(serviceInfo.MetaData),
+                    MetaData = new List<string>(),
                     Status = serviceInfo.Status
                 };
+                try
+                {
+                    vm.MetaData = JsonConvert.DeserializeObject<List<string>>(serviceInfo.MetaData);
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, $"deserialize meta data error, serviceId:{serviceInfo.ServiceId}");
+                }
                 vms.Add(vm);
             }
 
