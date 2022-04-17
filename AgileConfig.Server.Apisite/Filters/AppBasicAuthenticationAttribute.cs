@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 namespace AgileConfig.Server.Apisite.Filters
 {
     /// <summary>
-    /// 对请求进行basic认证的filter
+    /// client客户端获取所有配置，对请求进行basic认证的filter
     /// </summary>
     public class AppBasicAuthenticationAttribute : ActionFilterAttribute
     {

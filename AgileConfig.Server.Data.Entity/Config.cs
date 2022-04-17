@@ -76,4 +76,15 @@ namespace AgileConfig.Server.Data.Entity
         [Column(Name = "env", StringLength = 50)]
         public string Env { get; set; }
     }
+
+
+    /// <summary>
+    /// key=value //comment
+    /// </summary>
+    public class KvComment
+    {
+        public string key { get; set; } = "";
+        public string value { get; set; } = "";
+        public string comment { get; set; } = "";
+    }
 }
