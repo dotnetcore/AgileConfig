@@ -80,6 +80,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             config.EditStatus = EditStatus.Add;
             config.Env = env;
 
+            _configService.ConfigTrim(config);
             var result = await _configService.AddAsync(config, env);
 
             if (result)
@@ -112,20 +113,22 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             var configs = await _configService.GetByAppIdAsync(model.First().AppId, env);
 
-            var oldDict = new Dictionary<string, string>();
-            configs.ForEach(item => { oldDict.Add(_configService.GenerateKey(item), item.Value); });
+            //var oldDict = new Dictionary<string, string>();
+            var oldKeys=new List<string>();
+            configs.ForEach(item => { oldKeys.Add(_configService.GenerateKey(item)); });
 
             var addConfigs = new List<Config>();
             //judge if json key already in configs
             foreach (var item in model)
             {
-                var newkey = item.Key;
-                if (!string.IsNullOrEmpty(item.Group))
+                var newkey = item.Key.Trim();
+                if (!string.IsNullOrWhiteSpace(item.Group))
                 {
-                    newkey = $"{item.Group}:{item.Key}";
+                    newkey = $"{item.Group.Trim()}:{item.Key.Trim()}";
                 }
 
-                if (oldDict.ContainsKey(newkey))
+                //if (oldDict.ContainsKey(newkey))
+                if(oldKeys.Any(u=>String.Equals(u,newkey,StringComparison.OrdinalIgnoreCase)))
                 {
                     return Json(new
                     {
@@ -148,6 +151,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 config.EditStatus = EditStatus.Add;
                 config.Env = env;
 
+                _configService.ConfigTrim(config);
                 addConfigs.Add(config);
             }
 
@@ -248,6 +252,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 config.OnlineStatus = OnlineStatus.WaitPublish;
             }
 
+            _configService.ConfigTrim(config);
             var result = await _configService.UpdateAsync(config, env);
 
             if (result)
@@ -631,6 +636,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     config.Value = dict[key];
                     config.Group = group;
                     config.Id = Guid.NewGuid().ToString();
+                    
                     addConfigs.Add(config);
                 }
 
@@ -844,13 +850,15 @@ namespace AgileConfig.Server.Apisite.Controllers
             var configs = await _configService.GetByAppIdAsync(appId, env);
             // text 格式展示的时候不需要删除的配置
             configs = configs.Where(x => x.EditStatus != EditStatus.Deleted).ToList();
-            var kvList = new List<KeyValuePair<string, string>>();
+            //var kvList = new List<KeyValuePair<string, string>>();
+            List<KvComment> kvList = new List<KvComment>();
             foreach (var config in configs)
             {
-                kvList.Add(new KeyValuePair<string, string>(_configService.GenerateKey(config), config.Value));
+                //kvList.Add(new KeyValuePair<string, string>(_configService.GenerateKey(config), config.Value));
+                kvList.Add(new KvComment { key = _configService.GenerateKey(config), value = config.Value, comment = config.Description });
             }
 
-            kvList = kvList.OrderBy(x => x.Key).ToList();
+            kvList = kvList.OrderBy(x => x.key).ToList();
             return Json(new
             {
                 success = true,

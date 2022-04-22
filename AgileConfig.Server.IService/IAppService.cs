@@ -8,6 +8,13 @@ namespace AgileConfig.Server.IService
     public interface IAppService : IDisposable
     {
         Task<App> GetAsync(string id);
+        
+        /// <summary>
+        /// 去除应用前后空格
+        /// </summary>
+        /// <param name="config"></param>
+        void AppTrim(App app);
+
         Task<bool> AddAsync(App app);
         Task<bool> AddAsync(App app, List<AppInheritanced> appInheritanceds);
 

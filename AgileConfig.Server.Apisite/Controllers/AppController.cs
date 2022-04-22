@@ -162,7 +162,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
         private async Task<AppListVM> AppToListVM(App item, bool appendInheritancedInfo)
         {
-
+            _appService.AppTrim(item);
             var vm = new AppListVM
             {
                 Id = item.Id,
@@ -256,7 +256,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     });
                 });
             }
-
+            _appService.AppTrim(app);
             var result = await _appService.AddAsync(app, inheritanceApps);
             if (result)
             {
@@ -325,7 +325,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     });
                 });
             }
-
+            _appService.AppTrim(app);
             var result = await _appService.UpdateAsync(app, inheritanceApps);
             if (result)
             {

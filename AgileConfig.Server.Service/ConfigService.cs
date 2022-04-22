@@ -37,9 +37,9 @@ namespace AgileConfig.Server.Service
 
         public async Task<string> IfEnvEmptySetDefaultAsync(string env)
         {
-            if (!string.IsNullOrEmpty(env))
+            if (!string.IsNullOrWhiteSpace(env))
             {
-                return env;
+                return env.Trim();
             }
 
             var envList = await _settingService.GetEnvironmentList();
@@ -51,10 +51,27 @@ namespace AgileConfig.Server.Service
             return envList[0];
         }
 
+        /// <summary>
+        /// 去除配置项key前后空格
+        /// </summary>
+        /// <param name="config"></param>
+        public void ConfigTrim(Config config)
+        {
+            if (config != null)
+            {
+                config.AppId = config.AppId?.Trim();
+                config.Group = config.Group?.Trim();
+                config.Key = config.Key?.Trim();
+                config.Value = config.Value?.Trim();
+                config.Description = config.Description?.Trim();
+                config.Env = config.Env?.Trim();
+            }
+        }
+
         public async Task<bool> AddAsync(Config config, string env)
         {
             using var dbcontext = FreeSqlDbContextFactory.Create(env);
-
+            this.ConfigTrim(config);
             await dbcontext.Configs.AddAsync(config);
             int x = await dbcontext.SaveChangesAsync();
 
@@ -65,6 +82,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> UpdateAsync(Config config, string env)
         {
+            this.ConfigTrim(config);
             using var dbcontext = FreeSqlDbContextFactory.Create(env);
             await dbcontext.UpdateAsync(config);
             var x = await dbcontext.SaveChangesAsync();
@@ -79,6 +97,7 @@ namespace AgileConfig.Server.Service
             using var dbcontext = FreeSqlDbContextFactory.Create(env);
             foreach (var item in configs)
             {
+                this.ConfigTrim(item);
                 await dbcontext.UpdateAsync(item);
             }
 
@@ -195,18 +214,18 @@ namespace AgileConfig.Server.Service
             using var dbcontext = FreeSqlDbContextFactory.Create(env);
 
             var q = dbcontext.Configs.Where(c =>
-                c.AppId == appId &&
-                c.Key == key &&
-                c.Env == env &&
+                String.Equals(c.AppId, appId, StringComparison.OrdinalIgnoreCase) &&
+                String.Equals(c.Key, key, StringComparison.OrdinalIgnoreCase) &&
+                String.Equals(c.Env, env, StringComparison.OrdinalIgnoreCase) &&
                 c.Status == ConfigStatus.Enabled
             );
-            if (string.IsNullOrEmpty(group))
+            if (string.IsNullOrWhiteSpace(group))
             {
                 q = q.Where(c => c.Group == "" || c.Group == null);
             }
             else
             {
-                q = q.Where(c => c.Group == group);
+                q = q.Where(c => String.Equals(c.Group, group, StringComparison.OrdinalIgnoreCase));
             }
 
             return await q.FirstAsync();
@@ -217,7 +236,9 @@ namespace AgileConfig.Server.Service
             using var dbcontext = FreeSqlDbContextFactory.Create(env);
 
             return await dbcontext.Configs.Where(c =>
-                c.AppId == appId && c.Status == ConfigStatus.Enabled && c.Env == env
+                String.Equals(c.AppId, appId, StringComparison.OrdinalIgnoreCase)
+                && c.Status == ConfigStatus.Enabled 
+                && String.Equals(c.Env, env, StringComparison.OrdinalIgnoreCase)
             ).ToListAsync();
         }
 
@@ -225,20 +246,20 @@ namespace AgileConfig.Server.Service
         {
             using var dbcontext = FreeSqlDbContextFactory.Create(env);
 
-            var q = dbcontext.Configs.Where(c => c.Status == ConfigStatus.Enabled && c.Env == env);
-            if (!string.IsNullOrEmpty(appId))
+            var q = dbcontext.Configs.Where(c => c.Status == ConfigStatus.Enabled && String.Equals(c.Env, env, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrWhiteSpace(appId))
             {
-                q = q.Where(c => c.AppId == appId);
+                q = q.Where(c => String.Equals(c.AppId, appId, StringComparison.OrdinalIgnoreCase));
             }
 
-            if (!string.IsNullOrEmpty(group))
+            if (!string.IsNullOrWhiteSpace(group))
             {
-                q = q.Where(c => c.Group.Contains(group));
+                q = q.Where(c => c.Group.Contains(group, StringComparison.OrdinalIgnoreCase));
             }
 
-            if (!string.IsNullOrEmpty(key))
+            if (!string.IsNullOrWhiteSpace(key))
             {
-                q = q.Where(c => c.Key.Contains(key));
+                q = q.Where(c => c.Key.Contains(key, StringComparison.OrdinalIgnoreCase));
             }
 
             return await q.ToListAsync();
@@ -260,14 +281,15 @@ namespace AgileConfig.Server.Service
         {
             using var dbcontext = FreeSqlDbContextFactory.Create(env);
             //这里计算所有的配置
-            var q = await dbcontext.Configs.Where(c => c.Status == ConfigStatus.Enabled && c.Env == env).CountAsync();
+            var q = await dbcontext.Configs.Where(c => c.Status == ConfigStatus.Enabled && String.Equals(c.Env, env, StringComparison.OrdinalIgnoreCase)).CountAsync();
 
             return (int)q;
         }
 
         public string GenerateKey(Config config)
         {
-            if (string.IsNullOrEmpty(config.Group))
+            this.ConfigTrim(config);
+            if (string.IsNullOrWhiteSpace(config.Group))
             {
                 return config.Key;
             }
@@ -277,12 +299,12 @@ namespace AgileConfig.Server.Service
 
         public string GenerateKey(ConfigPublished config)
         {
-            if (string.IsNullOrEmpty(config.Group))
+            if (string.IsNullOrWhiteSpace(config.Group))
             {
-                return config.Key;
+                return config.Key.Trim();
             }
 
-            return $"{config.Group}:{config.Key}";
+            return $"{config.Group.Trim()}:{config.Key.Trim()}";
         }
 
         /// <summary>
@@ -295,8 +317,9 @@ namespace AgileConfig.Server.Service
             using var dbcontext = FreeSqlDbContextFactory.Create(env);
 
             var configs = await dbcontext.ConfigPublished.Where(c =>
-                c.AppId == appId && c.Status == ConfigStatus.Enabled
-                                 && c.Env == env
+                String.Equals(c.AppId, appId, StringComparison.OrdinalIgnoreCase)
+                && c.Status == ConfigStatus.Enabled
+                && String.Equals(c.Env, env, StringComparison.OrdinalIgnoreCase)
             ).ToListAsync();
 
             var keyStr = string.Join('&', configs.Select(c => GenerateKey(c)).ToArray().OrderBy(k => k));
@@ -330,12 +353,12 @@ namespace AgileConfig.Server.Service
 
         private string AppPublishedConfigsMd5CacheKey(string appId, string env)
         {
-            return $"ConfigService_AppPublishedConfigsMd5Cache_{appId}_{env}";
+            return $"ConfigService_AppPublishedConfigsMd5Cache_{appId.Trim()}_{env.Trim()}";
         }
 
         private string AppPublishedConfigsMd5CacheKeyWithInheritanced(string appId, string env)
         {
-            return $"ConfigService_AppPublishedConfigsMd5CacheWithInheritanced_{appId}_{env}";
+            return $"ConfigService_AppPublishedConfigsMd5CacheWithInheritanced_{appId.Trim()}_{env.Trim()}";
         }
 
         private void ClearAppPublishedConfigsMd5Cache(string appId, string env)
@@ -353,7 +376,10 @@ namespace AgileConfig.Server.Service
         public async Task<bool> AddRangeAsync(List<Config> configs, string env)
         {
             using var dbcontext = FreeSqlDbContextFactory.Create(env);
-
+            foreach (var item in configs)
+            {
+                this.ConfigTrim(item);
+            }
             await dbcontext.Configs.AddRangeAsync(configs);
             int x = await dbcontext.SaveChangesAsync();
 
@@ -480,12 +506,12 @@ namespace AgileConfig.Server.Service
                 using var dbcontext = FreeSqlDbContextFactory.Create(env);
 
                 var waitPublishConfigs = dbcontext.Configs.Where(x =>
-                    x.AppId == appId &&
-                    x.Env == env &&
+                    String.Equals(x.AppId, appId, StringComparison.OrdinalIgnoreCase) &&
+                    String.Equals(x.Env, env, StringComparison.OrdinalIgnoreCase) &&
                     x.Status == ConfigStatus.Enabled &&
                     x.EditStatus != EditStatus.Commit).ToList();
-                //这里默认admin console 实例只部署一个，如果部署多个同步操作，高并发的时候这个version会有问题
-                var versionMax = dbcontext.PublishTimeline.Select.Where(x => x.AppId == appId).Max(x => x.Version);
+                //todo:这里默认admin console 实例只部署一个，如果部署多个同步操作，高并发的时候这个version会有问题
+                var versionMax = dbcontext.PublishTimeline.Select.Where(x => String.Equals(x.AppId, appId, StringComparison.OrdinalIgnoreCase)).Max(x => x.Version);
 
                 var user = _userService.GetUser(operatorr);
 
@@ -534,7 +560,10 @@ namespace AgileConfig.Server.Service
 
                 //当前发布的配置
                 var publishedConfigs = dbcontext.ConfigPublished
-                    .Where(x => x.Status == ConfigStatus.Enabled && x.AppId == appId && x.Env == env).ToList();
+                    .Where(x => x.Status == ConfigStatus.Enabled
+                        && String.Equals(x.AppId, appId, StringComparison.OrdinalIgnoreCase)
+                        && String.Equals(x.Env, env, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
                 //复制一份新版本，最后插入发布表
                 var publishedConfigsCopy = new List<ConfigPublished>();
                 publishedConfigs.ForEach(x =>
@@ -630,7 +659,7 @@ namespace AgileConfig.Server.Service
 
             var any = await dbcontext.ConfigPublished.Select.AnyAsync(
                 x => x.ConfigId == configId
-                     && x.Env == env
+                     && String.Equals(x.Env, env, StringComparison.OrdinalIgnoreCase)
                      && x.Status == ConfigStatus.Enabled);
 
             return any;
@@ -642,7 +671,7 @@ namespace AgileConfig.Server.Service
             using var dbcontext = FreeSqlDbContextFactory.Create(env);
 
             var list = await dbcontext.PublishDetail
-                .Where(x => x.PublishTimelineId == publishTimelineId && x.Env == env).ToListAsync();
+                .Where(x => x.PublishTimelineId == publishTimelineId && String.Equals(x.Env, env, StringComparison.OrdinalIgnoreCase)).ToListAsync();
 
             return list;
         }
@@ -651,7 +680,7 @@ namespace AgileConfig.Server.Service
         {
             using var dbcontext = FreeSqlDbContextFactory.Create(env);
 
-            var one = await dbcontext.PublishTimeline.Where(x => x.Id == publishTimelineId && x.Env == env)
+            var one = await dbcontext.PublishTimeline.Where(x => x.Id == publishTimelineId && String.Equals(x.Env, env, StringComparison.OrdinalIgnoreCase))
                 .FirstAsync();
 
             return one;
@@ -661,7 +690,9 @@ namespace AgileConfig.Server.Service
         {
             using var dbcontext = FreeSqlDbContextFactory.Create(env);
 
-            var list = await dbcontext.PublishTimeline.Where(x => x.AppId == appId && x.Env == env).ToListAsync();
+            var list = await dbcontext.PublishTimeline.Where(x => String.Equals(x.AppId, appId, StringComparison.OrdinalIgnoreCase) 
+                                                          && String.Equals(x.Env, env, StringComparison.OrdinalIgnoreCase))
+                                                      .ToListAsync();
 
             return list;
         }
@@ -670,7 +701,9 @@ namespace AgileConfig.Server.Service
         {
             using var dbcontext = FreeSqlDbContextFactory.Create(env);
 
-            var list = await dbcontext.PublishDetail.Where(x => x.AppId == appId && x.Env == env).ToListAsync();
+            var list = await dbcontext.PublishDetail.Where(x => String.Equals(x.AppId, appId, StringComparison.OrdinalIgnoreCase) 
+                                                        && String.Equals(x.Env, env, StringComparison.OrdinalIgnoreCase))
+                                                    .ToListAsync();
 
             return list;
         }
@@ -679,7 +712,9 @@ namespace AgileConfig.Server.Service
         {
             using var dbcontext = FreeSqlDbContextFactory.Create(env);
 
-            var list = await dbcontext.PublishDetail.Where(x => x.ConfigId == configId && x.Env == env).ToListAsync();
+            var list = await dbcontext.PublishDetail.Where(x => x.ConfigId == configId 
+                                                        && String.Equals(x.Env, env, StringComparison.OrdinalIgnoreCase))
+                                                    .ToListAsync();
 
             return list;
         }
@@ -689,7 +724,10 @@ namespace AgileConfig.Server.Service
             using var dbcontext = FreeSqlDbContextFactory.Create(env);
 
             var list = await dbcontext.ConfigPublished
-                .Where(x => x.AppId == appId && x.Status == ConfigStatus.Enabled && x.Env == env).ToListAsync();
+                .Where(x => String.Equals(x.AppId, appId, StringComparison.OrdinalIgnoreCase) 
+                    && x.Status == ConfigStatus.Enabled 
+                    && String.Equals(x.Env, env, StringComparison.OrdinalIgnoreCase))
+                .ToListAsync();
 
             return list;
         }
@@ -700,7 +738,7 @@ namespace AgileConfig.Server.Service
 
             var one = await dbcontext.ConfigPublished.Where(x => x.ConfigId == configId
                                                                  && x.Status == ConfigStatus.Enabled
-                                                                 && x.Env == env
+                                                                 && String.Equals(x.Env, env, StringComparison.OrdinalIgnoreCase)
             ).ToOneAsync();
 
             return one;
@@ -710,12 +748,13 @@ namespace AgileConfig.Server.Service
         {
             using var dbcontext = FreeSqlDbContextFactory.Create(env);
 
-            var publishNode = await dbcontext.PublishTimeline.Where(x => x.Id == publishTimelineId && x.Env == env)
+            var publishNode = await dbcontext.PublishTimeline.Where(x => x.Id == publishTimelineId && String.Equals(x.Env, env, StringComparison.OrdinalIgnoreCase))
                 .ToOneAsync();
             var version = publishNode.Version;
             var appId = publishNode.AppId;
 
-            var latest = await dbcontext.PublishTimeline.Where(x => x.AppId == appId && x.Env == env)
+            var latest = await dbcontext.PublishTimeline.Where(x => String.Equals(x.AppId, appId, StringComparison.OrdinalIgnoreCase) 
+                                                                && String.Equals(x.Env, env, StringComparison.OrdinalIgnoreCase))
                 .OrderByDescending(x => x.Version).ToOneAsync();
 
             if (latest.Id == publishTimelineId)
@@ -725,9 +764,15 @@ namespace AgileConfig.Server.Service
             }
 
             var publishedConfigs = await dbcontext.ConfigPublished
-                .Where(x => x.AppId == appId && x.Version == version && x.Env == env).ToListAsync();
+                .Where(x => String.Equals(x.AppId, appId, StringComparison.OrdinalIgnoreCase) 
+                    && x.Version == version 
+                    && String.Equals(x.Env, env, StringComparison.OrdinalIgnoreCase))
+                .ToListAsync();
             var currentConfigs = await dbcontext.Configs
-                .Where(x => x.AppId == appId && x.Status == ConfigStatus.Enabled && x.Env == env).ToListAsync();
+                .Where(x => String.Equals(x.AppId, appId, StringComparison.OrdinalIgnoreCase) 
+                    && x.Status == ConfigStatus.Enabled 
+                    && String.Equals(x.Env, env, StringComparison.OrdinalIgnoreCase))
+                .ToListAsync();
 
             //把当前的全部软删除
             foreach (var item in currentConfigs)
@@ -740,7 +785,7 @@ namespace AgileConfig.Server.Service
             var now = DateTime.Now;
             foreach (var item in publishedConfigs)
             {
-                var config = await dbcontext.Configs.Where(x => x.AppId == appId && x.Id == item.ConfigId).ToOneAsync();
+                var config = await dbcontext.Configs.Where(x => String.Equals(x.AppId, appId, StringComparison.OrdinalIgnoreCase) && x.Id == item.ConfigId).ToOneAsync();
                 config.Status = ConfigStatus.Enabled;
                 config.Value = item.Value;
                 config.UpdateTime = now;
@@ -751,7 +796,7 @@ namespace AgileConfig.Server.Service
             }
 
             //删除version之后的版本
-            await dbcontext.ConfigPublished.RemoveAsync(x => x.AppId == appId && x.Env == env && x.Version > version);
+            await dbcontext.ConfigPublished.RemoveAsync(x => String.Equals(x.AppId, appId, StringComparison.OrdinalIgnoreCase) && String.Equals(x.Env, env, StringComparison.OrdinalIgnoreCase) && x.Version > version);
             //设置为发布状态
             foreach (var item in publishedConfigs)
             {
@@ -760,8 +805,8 @@ namespace AgileConfig.Server.Service
             }
 
             //删除发布时间轴version之后的版本
-            await dbcontext.PublishTimeline.RemoveAsync(x => x.AppId == appId && x.Env == env && x.Version > version);
-            await dbcontext.PublishDetail.RemoveAsync(x => x.AppId == appId && x.Env == env && x.Version > version);
+            await dbcontext.PublishTimeline.RemoveAsync(x => String.Equals(x.AppId, appId, StringComparison.OrdinalIgnoreCase) && String.Equals(x.Env, env, StringComparison.OrdinalIgnoreCase) && x.Version > version);
+            await dbcontext.PublishDetail.RemoveAsync(x => String.Equals(x.AppId, appId, StringComparison.OrdinalIgnoreCase) && String.Equals(x.Env, env, StringComparison.OrdinalIgnoreCase) && x.Version > version);
 
             ClearAppPublishedConfigsMd5Cache(appId, env);
             ClearAppPublishedConfigsMd5CacheWithInheritanced(appId, env);
@@ -857,9 +902,9 @@ namespace AgileConfig.Server.Service
 
             foreach (var kv in dict)
             {
-                var key = kv.Key;
-                var value = kv.Value;
-                var config = currentConfigs.FirstOrDefault(x => GenerateKey(x) == key);
+                var key = kv.Key.Trim();
+                var value = kv.Value.Trim();
+                var config = currentConfigs.FirstOrDefault(x => String.Equals(GenerateKey(x), key, StringComparison.OrdinalIgnoreCase));
                 if (config == null)
                 {
                     var gk = SplitJsonKey(key);
@@ -877,7 +922,7 @@ namespace AgileConfig.Server.Service
                         OnlineStatus = OnlineStatus.WaitPublish
                     });
                 }
-                else if (config.Value != kv.Value)
+                else if (config.Value != value)
                 {
                     config.Value = value;
                     config.UpdateTime = now;
@@ -940,6 +985,105 @@ namespace AgileConfig.Server.Service
             return true;
         }
 
+        private async Task<bool> SaveFromListAsync(List<KvComment> kvList, string appId, string env)
+        {
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
+            var currentConfigs = await dbcontext.Configs
+                .Where(x => x.AppId == appId && x.Env == env && x.Status == ConfigStatus.Enabled).ToListAsync();
+            var addConfigs = new List<Config>();
+            var updateConfigs = new List<Config>();
+            var deleteConfigs = new List<Config>();
+
+            var now = DateTime.Now;
+
+            foreach (var kv in kvList)
+            {
+                var key = kv.key.Trim();
+                var value = kv.value.Trim();
+                var config = currentConfigs.FirstOrDefault(x => String.Equals(GenerateKey(x), key, StringComparison.OrdinalIgnoreCase));
+                if (config == null)
+                {
+                    var gk = SplitJsonKey(key);
+                    addConfigs.Add(new Config
+                    {
+                        Id = Guid.NewGuid().ToString("N"),
+                        AppId = appId,
+                        Env = env,
+                        Key = gk.Item2,
+                        Group = gk.Item1,
+                        Value = value,
+                        CreateTime = now,
+                        Status = ConfigStatus.Enabled,
+                        EditStatus = EditStatus.Add,
+                        OnlineStatus = OnlineStatus.WaitPublish,
+                        Description = kv.comment
+                    });
+                }
+                else if (config.Value != value)
+                {
+                    config.Value = value;
+                    config.UpdateTime = now;
+                    config.Description = kv.comment;
+                    if (config.OnlineStatus == OnlineStatus.Online)
+                    {
+                        config.EditStatus = EditStatus.Edit;
+                        config.OnlineStatus = OnlineStatus.WaitPublish;
+                    }
+                    else
+                    {
+                        if (config.EditStatus == EditStatus.Add)
+                        {
+                            //do nothing
+                        }
+
+                        if (config.EditStatus == EditStatus.Edit)
+                        {
+                            //do nothing
+                        }
+
+                        if (config.EditStatus == EditStatus.Deleted)
+                        {
+                            //上一次是删除状态，现在恢复为编辑状态
+                            config.EditStatus = EditStatus.Edit;
+                        }
+                    }
+
+                    updateConfigs.Add(config);
+                }
+            }
+
+            foreach (var item in currentConfigs)
+            {
+                var key = GenerateKey(item);
+                if (kvList.All(u => !String.Equals(u.key, key, StringComparison.OrdinalIgnoreCase)))
+                {
+                    item.EditStatus = EditStatus.Deleted;
+                    item.OnlineStatus = OnlineStatus.WaitPublish;
+                    deleteConfigs.Add(item);
+                }
+            }
+
+            if (addConfigs.Count > 0)
+            {
+                await dbcontext.Configs.AddRangeAsync(addConfigs);
+            }
+
+            if (updateConfigs.Count > 0)
+            {
+                await dbcontext.Configs.UpdateRangeAsync(updateConfigs);
+            }
+
+            if (deleteConfigs.Count > 0)
+            {
+                await dbcontext.Configs.UpdateRangeAsync(deleteConfigs);
+            }
+
+            await dbcontext.SaveChangesAsync();
+
+            return true;
+        }
+
         /// <summary>
         /// 保存json字符串为配置项
         /// </summary>
@@ -950,7 +1094,7 @@ namespace AgileConfig.Server.Service
         /// <exception cref="ArgumentNullException"></exception>
         public async Task<bool> SaveJsonAsync(string json, string appId, string env)
         {
-            if (string.IsNullOrEmpty(json))
+            if (string.IsNullOrWhiteSpace(json))
             {
                 throw new ArgumentNullException("json");
             }
@@ -966,7 +1110,8 @@ namespace AgileConfig.Server.Service
         {
             StringReader sr = new StringReader(kvStr);
             int row = 0;
-            var dict = new Dictionary<string, string>();
+            //var dict = new Dictionary<string, string>();
+            List<string> keys = new List<string>();
             while (true)
             {
                 var line = sr.ReadLine();
@@ -983,13 +1128,18 @@ namespace AgileConfig.Server.Service
                 }
 
                 var index = line.IndexOf('=');
-                var key = line.Substring(0, index);
-                if (dict.ContainsKey(key))
+                var key = line.Substring(0, index).Trim();
+                if (String.IsNullOrWhiteSpace(key))
                 {
-                    return (false, $"键 {key} 重复。");
+                    return (false, $"第 {row} 行缺少键值。");
+                }
+                //if (dict.ContainsKey(key))
+                if (keys.Any(u => String.Equals(u, key, StringComparison.OrdinalIgnoreCase)))
+                {
+                    return (false, $"第 {row} 行键 {key} 重复。");
                 }
 
-                dict.Add(key, "");
+                keys.Add(key);
             }
 
             return (true, "");
@@ -1011,7 +1161,8 @@ namespace AgileConfig.Server.Service
             }
 
             StringReader sr = new StringReader(kvString);
-            var dict = new Dictionary<string, string>();
+            //var dict = new Dictionary<string, string>();
+            var kvList = new List<KvComment>();
             while (true)
             {
                 var line = sr.ReadLine();
@@ -1026,18 +1177,37 @@ namespace AgileConfig.Server.Service
                     continue;
                 }
 
-                var key = line.Substring(0, index);
-                var val = line.Substring(index + 1, line.Length - index - 1);
+                //var key = line.Substring(0, index);
+                //var val = line.Substring(index + 1, line.Length - index - 1);
+                //dict.Add(key, val);
+                var key = line.Substring(0, index).Trim();
+                if (String.IsNullOrWhiteSpace(key))
+                {
+                    continue;
+                }
+                string value = "";
+                string comment = "";
+                string valueAndComment = line.Substring(index + 1);
+                int commentIndex = valueAndComment.IndexOf(" //");
+                if (commentIndex < 0)
+                {
+                    value = valueAndComment.Trim();
+                }
+                else
+                {
+                    value = valueAndComment.Substring(0, commentIndex).Trim();
+                    comment = valueAndComment.Substring(commentIndex + 3).Trim();
+                }
 
-                dict.Add(key, val);
+                kvList.Add(new KvComment { key = key, value = value, comment = comment });
             }
 
-            return await SaveFromDictAsync(dict, appId, env);
+            return await SaveFromListAsync(kvList, appId, env);
         }
 
         private (string, string) SplitJsonKey(string key)
         {
-            if (string.IsNullOrEmpty(key))
+            if (string.IsNullOrWhiteSpace(key))
             {
                 throw new ArgumentNullException(nameof(key));
             }
@@ -1048,10 +1218,10 @@ namespace AgileConfig.Server.Service
                 var group = key.Substring(0, index);
                 var newkey = key.Substring(index + 1, key.Length - index - 1);
 
-                return (group, newkey);
+                return (group.Trim(), newkey.Trim());
             }
 
-            return ("", key);
+            return ("", key.Trim());
         }
     }
 }

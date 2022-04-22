@@ -17,8 +17,20 @@ namespace AgileConfig.Server.Service
             _dbContext = context;
         }
 
+        public void AppTrim(App app)
+        {
+            if (app != null)
+            {
+                app.Id = app.Id?.Trim();
+                app.Name = app.Name?.Trim();
+                app.Secret = app.Secret?.Trim();
+                app.Group = app.Group?.Trim();
+            }
+        }
+
         public async Task<bool> AddAsync(App app)
         {
+            this.AppTrim(app);
             await _dbContext.Apps.AddAsync(app);
             int x = await _dbContext.SaveChangesAsync();
             var result = x > 0;
@@ -27,6 +39,7 @@ namespace AgileConfig.Server.Service
         }
         public async Task<bool> AddAsync(App app, List<AppInheritanced> appInheritanceds)
         {
+            this.AppTrim(app);
             await _dbContext.Apps.AddAsync(app);
             if (appInheritanceds != null)
             {
@@ -91,6 +104,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> UpdateAsync(App app)
         {
+            this.AppTrim(app);
             _dbContext.Update(app);
             var x = await _dbContext.SaveChangesAsync();
 
@@ -162,6 +176,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> UpdateAsync(App app, List<AppInheritanced> appInheritanceds)
         {
+            this.AppTrim(app);
             _dbContext.Update(app);
             var oldInheritancedApps = await _dbContext.AppInheritanceds.Where(a => a.AppId == app.Id).ToListAsync();
             _dbContext.RemoveRange(oldInheritancedApps);

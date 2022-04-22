@@ -119,7 +119,13 @@ namespace AgileConfig.Server.Apisite
         {
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Config API", Version = "v1" });
+                //注释信息
+                string modelXmlPath = Path.Combine(AppContext.BaseDirectory, "AgileConfig.Server.Data.Entity.xml");
+                if (File.Exists(modelXmlPath))
+                {
+                    c.IncludeXmlComments(modelXmlPath);
+                }
                 var basePath = Path.GetDirectoryName(typeof(Program).Assembly.Location);
                 var xmlPath = Path.Combine(basePath, "AgileConfig.Server.Apisite.xml");
                 c.IncludeXmlComments(xmlPath);
@@ -131,7 +137,7 @@ namespace AgileConfig.Server.Apisite
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("v1/swagger.json", "My API V1");
+                c.SwaggerEndpoint("v1/swagger.json", "Config API V1");
             });
         }
     }

@@ -14,7 +14,7 @@ namespace AgileConfig.Server.Data.Freesql
         /// <returns></returns>
         public static FreeSqlContext Create(string env)
         {
-            if (string.IsNullOrEmpty(env))
+            if (string.IsNullOrWhiteSpace(env))
             {
                 //如果没有环境，使用默认连接
                 return new FreeSqlContext(FreeSQL.Instance);
@@ -22,7 +22,7 @@ namespace AgileConfig.Server.Data.Freesql
 
             //是否配置的环境的连接
             var envDbProvider = Global.Config[$"db:env:{env}:provider"];
-            if (string.IsNullOrEmpty(envDbProvider))
+            if (string.IsNullOrWhiteSpace(envDbProvider))
             {
                 //如果没有配置对应环境的连接，使用默认连接
                 return new FreeSqlContext(FreeSQL.Instance);

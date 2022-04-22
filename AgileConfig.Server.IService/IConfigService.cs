@@ -49,6 +49,13 @@ namespace AgileConfig.Server.IService
         /// <param name="appId"></param>
         /// <returns></returns>
         Task<Dictionary<string, Config>> GetPublishedConfigsByAppIdWithInheritanced_Dictionary(string appId, string env);
+        
+        /// <summary>
+        /// 去除配置项前后空格
+        /// </summary>
+        /// <param name="config"></param>
+        void ConfigTrim(Config config);
+
         Task<bool> AddAsync(Config config, string env);
 
         Task<bool> AddRangeAsync(List<Config> configs, string env);

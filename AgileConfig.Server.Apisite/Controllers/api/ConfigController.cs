@@ -296,15 +296,15 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
         private (bool, string) CheckRequired(ApiConfigVM model)
         {
-            if (string.IsNullOrEmpty(model.Key))
+            if (string.IsNullOrWhiteSpace(model.Key))
             {
                 return (false, "Key不能为空");
             }
-            if (string.IsNullOrEmpty(model.Value))
+            if (string.IsNullOrWhiteSpace(model.Value))
             {
                 return (false, "Value不能为空");
             }
-            if (string.IsNullOrEmpty(model.AppId))
+            if (string.IsNullOrWhiteSpace(model.AppId))
             {
                 return (false, "AppId不能为空");
             }
