@@ -5,6 +5,7 @@ import proxy from './proxy';
 import routes from './routes';
 
 const { REACT_APP_ENV } = process.env;
+let iisPrefix='/config/';
 
 export default defineConfig({
   hash: true,
@@ -40,5 +41,8 @@ export default defineConfig({
   manifest: {
     basePath: '/a/',
   },
-  esbuild: {}
+  esbuild: {},
+  //getIISUrl打包引用不到模块
+  base: iisPrefix,
+  publicPath: iisPrefix
 });

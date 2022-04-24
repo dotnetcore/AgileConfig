@@ -6,6 +6,8 @@ import { useIntl } from "react-intl";
 import { JsonImportItem } from "../data";
 import { addRangeConfig } from "../service";
 import styles from './jsonImport.less';
+import { getRootUrl } from "@/utils/requestUrl";
+
 export type JsonImportFormProps = {
     appId: string,
     appName: string,
@@ -76,7 +78,7 @@ const JsonImport : React.FC<JsonImportFormProps> = (props)=>{
       ];
       const fileUploadProps = {
         name: 'file',
-        action: '/config/PreViewJsonFile',
+        action: getRootUrl() + '/config/PreViewJsonFile',
         headers: {
           Authorization:  'Bearer ' + getToken(),
         },
