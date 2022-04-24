@@ -1,4 +1,5 @@
 ﻿using Agile.Config.Protocol;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -62,8 +63,9 @@ namespace AgileConfig.Server.IService
         /// 获取某个节点的客户端连接信息
         /// </summary>
         /// <param name="address"></param>
+        /// <param name="context"></param>
         /// <returns></returns>
-        Task<ClientInfos> GetClientsReportAsync(string address);
+        Task<ClientInfos> GetClientsReportAsync(string address, HttpContext context);
 
         /// <summary>
         /// 探测所有个节点是否在线

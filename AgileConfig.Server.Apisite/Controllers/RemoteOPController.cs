@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Agile.Config.Protocol;
 using AgileConfig.Server.Apisite.Websocket;
 using AgileConfig.Server.IService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -11,6 +12,7 @@ namespace AgileConfig.Server.Apisite.Controllers
     /// <summary>
     /// 这个Controller用来接受其它节点发送过来的命令
     /// </summary>
+    //[Authorize]
     public class RemoteOPController : Controller
     {
         private readonly IConfigService _configService;

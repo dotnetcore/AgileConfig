@@ -16,5 +16,9 @@ namespace AgileConfig.Server.Apisite
         /// 是否控制台模式
         /// </summary>
         public static bool IsAdminConsoleMode => "true".Equals(Global.Config["adminConsole"], StringComparison.CurrentCultureIgnoreCase);
+        /// <summary>
+        /// 是否开通API接口，AdmBasicAuthenticationAttribute
+        /// </summary>
+        public static bool IsEnableAPI => "true".Equals(Global.Config["isEnableAPI"], StringComparison.CurrentCultureIgnoreCase);
     }
 }

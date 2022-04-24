@@ -7,6 +7,8 @@ using AgileConfig.Server.Apisite.Websocket;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AgileConfig.Server.Apisite.Controllers
@@ -14,6 +16,7 @@ namespace AgileConfig.Server.Apisite.Controllers
     /// <summary>
     /// 这个Controller用来上报节点的一些情况，比如链接了多少客户端等信息
     /// </summary>
+    [Authorize]
     public class ReportController : Controller
     {
         private readonly IConfigService _configService;
@@ -21,19 +24,22 @@ namespace AgileConfig.Server.Apisite.Controllers
         private readonly IServerNodeService _serverNodeService;
         private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
         private readonly IServiceInfoService _serviceInfoService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public ReportController(
             IConfigService configService, 
             IAppService appService, 
             IServerNodeService serverNodeService, 
             IRemoteServerNodeProxy remoteServerNodeProxy,
-            IServiceInfoService serviceInfoService)
+            IServiceInfoService serviceInfoService,
+            IHttpContextAccessor httpContextAccessor)
         {
             _appService = appService;
             _configService = configService;
             _serverNodeService = serverNodeService;
             _remoteServerNodeProxy = remoteServerNodeProxy;
             _serviceInfoService = serviceInfoService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         /// <summary>
@@ -54,7 +60,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         /// <returns></returns>
         public IActionResult ServerNodeClients(string address)
         {
-            var report = _remoteServerNodeProxy.GetClientsReportAsync(address);
+            var report = _remoteServerNodeProxy.GetClientsReportAsync(address, _httpContextAccessor.HttpContext);
 
             return Json(report);
         }
@@ -86,7 +92,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var clients = new List<ClientInfo>();
             foreach (var addr in addressess)
             {
-                var report = await _remoteServerNodeProxy.GetClientsReportAsync(addr);
+                var report = await _remoteServerNodeProxy.GetClientsReportAsync(addr, _httpContextAccessor.HttpContext);
                 if (report != null && report.Infos != null)
                 {
                     clients.AddRange(report.Infos);
@@ -162,7 +168,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 result.Add(new
                 {
                     n = serverNode,
-                    server_status = await _remoteServerNodeProxy.GetClientsReportAsync(serverNode.Address)
+                    server_status = await _remoteServerNodeProxy.GetClientsReportAsync(serverNode.Address, _httpContextAccessor.HttpContext)
                 });
             }
 

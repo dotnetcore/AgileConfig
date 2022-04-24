@@ -5,6 +5,7 @@ using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.IService;
 using AgileHttp;
 using AgileHttp.serialize;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -202,7 +203,7 @@ namespace AgileConfig.Server.Service
             return result;
         }
 
-        public async Task<ClientInfos> GetClientsReportAsync(string address)
+        public async Task<ClientInfos> GetClientsReportAsync(string address, HttpContext context)
         {
             if (string.IsNullOrEmpty(address))
             {
@@ -215,8 +216,14 @@ namespace AgileConfig.Server.Service
 
             try
             {
+                RequestOptions requestOptions = new RequestOptions(new SerializeProvider());
+                if (requestOptions.Headers == null && context?.Request?.Headers!=null)
+                {
+                    requestOptions.Headers = new Dictionary<string, string>();
+                    requestOptions.Headers["Authorization"] = context.Request.Headers["Authorization"];
+                }
                 using (var resp = await (address + "/report/Clients").AsHttp()
-               .Config(new RequestOptions(new SerializeProvider())).SendAsync())
+               .Config(requestOptions).SendAsync())
                 {
                     if (resp.StatusCode == System.Net.HttpStatusCode.OK)
                     {

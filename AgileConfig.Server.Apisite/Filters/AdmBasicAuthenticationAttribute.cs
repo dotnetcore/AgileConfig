@@ -24,7 +24,7 @@ namespace AgileConfig.Server.Apisite.Filters
 
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            if (!await Valid(context.HttpContext.Request))
+            if (!Appsettings.IsEnableAPI || !await Valid(context.HttpContext.Request))
             {
                 context.HttpContext.Response.StatusCode = 403;
                 context.Result = new ContentResult();

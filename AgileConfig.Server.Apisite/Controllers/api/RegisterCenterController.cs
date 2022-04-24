@@ -10,12 +10,14 @@ using Agile.Config.Protocol;
 using AgileConfig.Server.Common;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using AgileConfig.Server.Apisite.Filters;
 
 namespace AgileConfig.Server.Apisite.Controllers.api
 {
     /// <summary>
     /// 注册中心接口
     /// </summary>
+    [TypeFilter(typeof(AppBasicAuthenticationAttribute))]
     [Route("api/[controller]")]
     [ApiController]
     public class RegisterCenterController : Controller
