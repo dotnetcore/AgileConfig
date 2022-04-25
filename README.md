@@ -36,7 +36,7 @@ Gitee 镜像：[https://gitee.com/kklldog/AgileConfig](https://gitee.com/kklldog
 
 演示地址：[AgileConfig Server Demo](http://agileconfig_server.xbaby.xyz)   用户名：admin 密码：123456   
 .NET 客户端项目：[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
-Nodejs 客户端: [node-agile-client](https://github.com/kklldog/node-agile-client)    
+Nodejs 客户端: [node-agile-client](https://github.com/LetTTGACO/node-agile-client)    
 示例项目：    
 [AgileConfigMVCSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigMVCSample)   
 [AgileConfig WPFSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigWPFSample)    
