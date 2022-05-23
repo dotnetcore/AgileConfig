@@ -100,7 +100,7 @@ namespace AgileConfig.Server.Apisite.Websocket
                     {
                         await Handle(context, client, configService, registerCenterService, serviceInfoService);
                     }
-                    catch (WebSocketException ex)
+                    catch (WebSocketException)
                     {
                         _logger.LogInformation("client {0} closed the websocket connection directly .", client.Id);
                         await _websocketCollection.RemoveClient(client, WebSocketCloseStatus.Empty, null);
