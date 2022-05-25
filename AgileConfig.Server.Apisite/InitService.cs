@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AgileConfig.Server.Apisite.Utilites;
 using AgileConfig.Server.IService;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace AgileConfig.Server.Apisite
 {
@@ -16,8 +18,10 @@ namespace AgileConfig.Server.Apisite
         private readonly ISettingService _settingService;
         private readonly IServerNodeService _serverNodeService;
         private readonly IServiceHealthCheckService _serviceHealthCheckService;
-        public InitService(IServiceScopeFactory serviceScopeFactory)
+        private readonly ILogger _logger;
+        public InitService(IServiceScopeFactory serviceScopeFactory, ILogger<InitService> logger)
         {
+            _logger = logger;
             using (var scope = serviceScopeFactory.CreateScope())
             {
                 _remoteServerNodeProxy = scope.ServiceProvider.GetService<IRemoteServerNodeProxy>();
@@ -39,6 +43,9 @@ namespace AgileConfig.Server.Apisite
                 _serviceHealthCheckService.StartCheckAsync();
                 _eventRegister.Register();
             }
+
+            var myips = IPExt.GetEndpointIp();
+            _logger.LogInformation("AgileConfig node's IP " + String.Join(',', myips));
 
             return  Task.CompletedTask;
         }
