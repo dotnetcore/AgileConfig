@@ -47,6 +47,13 @@ namespace AgileConfig.Server.Apisite
             var myips = IPExt.GetEndpointIp();
             _logger.LogInformation("AgileConfig node's IP " + String.Join(',', myips));
 
+            if (Appsettings.Cluster)
+            {
+                var desc = Appsettings.IsAdminConsoleMode ? "控制台节点" : "";
+                _serverNodeService.JoinAsync(myips.First(),5000, desc);
+                _logger.LogInformation($"AgileConfig node http://{myips.First()}:5000 joined .");
+            }
+
             return  Task.CompletedTask;
         }
 
