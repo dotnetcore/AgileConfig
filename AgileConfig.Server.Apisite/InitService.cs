@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace AgileConfig.Server.Apisite
 {
-    public class InitService: IHostedService
+    public class InitService : IHostedService
     {
         private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
         private readonly IEventRegister _eventRegister;
@@ -30,7 +30,7 @@ namespace AgileConfig.Server.Apisite
                 _serverNodeService = scope.ServiceProvider.GetService<IServerNodeService>();
                 _serverNodeService = scope.ServiceProvider.GetService<IServerNodeService>();
                 _serviceHealthCheckService = scope.ServiceProvider.GetService<IServiceHealthCheckService>();
-            }   
+            }
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -44,22 +44,50 @@ namespace AgileConfig.Server.Apisite
                 _eventRegister.Register();
             }
 
-            var myips = IPExt.GetEndpointIp();
-            _logger.LogInformation("AgileConfig node's IP " + String.Join(',', myips));
+
 
             if (Appsettings.Cluster)
             {
-                var desc = Appsettings.IsAdminConsoleMode ? "控制台节点" : "";
-                _serverNodeService.JoinAsync(myips.First(),5000, desc);
-                _logger.LogInformation($"AgileConfig node http://{myips.First()}:5000 joined .");
+                var ip = GetIp();
+                if (!string.IsNullOrEmpty(ip))
+                {
+                    var desc = Appsettings.IsAdminConsoleMode ? "控制台节点" : "";
+                    _serverNodeService.JoinAsync(ip, 5000, desc);
+                    _logger.LogInformation($"AgileConfig node http://{ip}:5000 joined .");
+                }
             }
 
-            return  Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
-            return Task.CompletedTask;
+            if (Appsettings.Cluster)
+            {
+                var ip = GetIp();
+                if (!string.IsNullOrEmpty(ip))
+                {
+                    await _serverNodeService.DeleteAsync($"http://{ip}:{5000}");
+                    _logger.LogInformation($"AgileConfig node http://{ip}:5000 removed .");
+                }
+            }
+        }
+
+        private string GetIp()
+        {
+            try
+            {
+                var myips = IPExt.GetEndpointIp();
+                _logger.LogInformation("AgileConfig node's IP " + String.Join(',', myips));
+
+                return myips.FirstOrDefault();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Try get node's IP error .");
+            }
+
+            return "";
         }
     }
 }
