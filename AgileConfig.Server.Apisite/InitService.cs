@@ -37,14 +37,11 @@ namespace AgileConfig.Server.Apisite
         {
             if (Appsettings.IsAdminConsoleMode)
             {
-                _serverNodeService.InitWatchNodeAsync();
                 _settingService.InitDefaultEnvironment();
                 _remoteServerNodeProxy.TestEchoAsync();
                 _serviceHealthCheckService.StartCheckAsync();
                 _eventRegister.Register();
             }
-
-
 
             if (Appsettings.Cluster)
             {
