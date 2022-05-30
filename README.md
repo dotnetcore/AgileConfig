@@ -20,7 +20,35 @@
     
 这是一个基于.net core开发的轻量级配置中心。说起配置中心很容易让人跟微服务联系起来，如果你选择微服务架构，那么几乎逃不了需要一个配置中心。事实上我这里并不是要蹭微服务的热度。这个世界上有很多分布式程序但它并不是微服务。比如有很多传统的SOA的应用他们分布式部署，但并不是完整的微服务架构。这些程序由于分散在多个服务器上所以更改配置很困难。又或者某些程序即使不是分布式部署的，但是他们采用了容器化部署，他们修改配置同样很费劲。所以我开发AgileConfig并不是为了什么微服务，我更多的是为了那些分布式、容器化部署的应用能够更加简单的读取、修改配置。    
 AgileConfig秉承轻量化的特点，部署简单、配置简单、使用简单、学习简单，它只提取了必要的一些功能，并没有像Apollo那样复杂且庞大。但是它的功能也已经足够你替换webconfig，appsettings.json这些文件了。如果你不想用微服务全家桶，不想为了部署一个配置中心而需要看N篇教程跟几台服务器那么你可以试试AgileConfig  ：）   
+    
 Gitee 镜像：[https://gitee.com/kklldog/AgileConfig](https://gitee.com/kklldog/AgileConfig)    
+
+演示地址：[AgileConfig Server Demo](http://agileconfig_server.xbaby.xyz)   用户名：admin 密码：123456   
+.NET 客户端项目：[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
+
+示例项目：    
+[AgileConfig MVCSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigMVCSample)   
+[AgileConfig WPFSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigWPFSample)    
+[AgileConfig ConsoleSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigConsoleSample)    
+[教程 - 如何使用AgileConfig.Client读取配置](https://www.cnblogs.com/kklldog/p/how-to-use-agileconfigclient.html)    
+[教程- 如何使用服务注册与发现](https://www.cnblogs.com/kklldog/p/agileconfig-160.html)   
+💥💥[常见问题，必看！！！](https://github.com/kklldog/AgileConfig/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%EF%BC%8C%E5%BF%85%E7%9C%8B%EF%BC%81%EF%BC%81%EF%BC%81)  
+[关于多环境的部署说明](https://github.com/dotnetcore/AgileConfig/wiki/%E5%85%B3%E4%BA%8E-1.5-%E7%89%88%E6%9C%AC%E6%94%AF%E6%8C%81%E5%A4%9A%E7%8E%AF%E5%A2%83%E7%9A%84%E8%AF%B4%E6%98%8E)   
+    
+社区资源：   
+🌷 基于 Nodejs 实现的客户端: [node-agile-client](https://github.com/LetTTGACO/node-agile-client)    
+🌷 基于 Blazor 实现的管理界面：[AgileConfigBlazorUI](https://github.com/EzrealJ/AgileConfigBlazorUI)   
+   
+Restful API:   
+[✈️ restful api](https://github.com/kklldog/AgileConfig/wiki/Restful-API)
+   
+## ChangeLog
+[📝 Changelog](https://github.com/kklldog/AgileConfig/blob/master/CHANGELOG.md)   
+   
+## 联系作者
+[📧 联系](#联系我)
+## 打赏
+[❤️❤️❤️ 打赏](#如果觉得这个项目对你有帮助可以给作者早餐加个蛋)
 ## 特点
 1. 部署简单，最少只需要一个数据节点，支持docker部署
 2. 支持多节点分布式部署来保证高可用
@@ -34,26 +62,8 @@ Gitee 镜像：[https://gitee.com/kklldog/AgileConfig](https://gitee.com/kklldog
 10. 支持Restful API维护配置
 11. v-1.6.0 以上已支持服务注册与发现
 
-演示地址：[AgileConfig Server Demo](http://agileconfig_server.xbaby.xyz)   用户名：admin 密码：123456   
-客户端项目：[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
-示例项目：    
-[AgileConfigMVCSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigMVCSample)   
-[AgileConfig WPFSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigWPFSample)    
-[AgileConfig ConsoleSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigConsoleSample)    
-[教程 - 如何使用AgileConfig.Client读取配置](https://www.cnblogs.com/kklldog/p/how-to-use-agileconfigclient.html)    
-[教程- 如何使用服务注册与发现](https://www.cnblogs.com/kklldog/p/agileconfig-160.html)   
-👉🏻👉🏻[常见问题，必看！！！](https://github.com/kklldog/AgileConfig/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%EF%BC%8C%E5%BF%85%E7%9C%8B%EF%BC%81%EF%BC%81%EF%BC%81)👈🏻👈🏻   
-[关于多环境的部署说明](https://github.com/dotnetcore/AgileConfig/wiki/%E5%85%B3%E4%BA%8E-1.5-%E7%89%88%E6%9C%AC%E6%94%AF%E6%8C%81%E5%A4%9A%E7%8E%AF%E5%A2%83%E7%9A%84%E8%AF%B4%E6%98%8E)   
-   
-其它教程：    
-[博客园-.Net Core&Agile Config配置中心](https://www.cnblogs.com/CKExp/p/15738149.html)
-   
-API:   
-[restful api](https://github.com/kklldog/AgileConfig/wiki/Restful-API)
-## ChangeLog
-[Changelog](https://github.com/kklldog/AgileConfig/blob/master/CHANGELOG.md)   
-## 联系作者
-[联系](#联系我)
+    
+## 💥 务必在使用 AgileConfig 之前仔细阅读以下文档
 ## 架构
 ![](https://s1.ax1x.com/2020/06/29/NRz1gO.png)
 AgileConfig的架构比较简单，主要是分3块：
@@ -63,7 +73,6 @@ AgileConfig的架构比较简单，主要是分3块：
 节点是使用asp.net core开发的一个服务。为了部署简单，直接把管理程序跟节点服务合二为一了。任何一个节点都可以在启动的时候配置环境变量开启管理程序功能。
 ### 数据库
 使用数据库来存储数据，目前支持Sqlserver, Mysql, Sqlite, PostgreSql,Oracle 五种数据库。最新版本已经切换为Freesql为数据访问组件。Freesql对多数据库的支持更加强劲，特别是对国产数据库的支持。但是因为没有国产数据库的测试环境，本项目并未支持，如果有需要我可是开分支尝试支持，但是测试工作就要靠用户啦。
-> 注意：如果使用<=1.0.4之前版本的用户请不要更新，因为EFCore跟Freesql自动建的库可能存在稍许差异，保险起见不要更新吧。
 ### 关于高可用
 AgileConfig的节点都是无状态的，所以可以横向部署多个节点来防止单点故障。在客户端配置多个节点地址后，客户端会随机连接至某个节点。
 | 问题 | 影响 | 说明 |   
@@ -101,7 +110,7 @@ sudo docker run \
 2. db:provider 配置程序的数据库类型。目前程序支持：sqlserver，mysql，sqlite, PostgreSql，Oracle 五种数据库。
 3. db:conn 配置数据库连接串    
    
-> 注意：如果通过IIS或者别的方式部署，请自行从主页上的[releases](https://github.com/dotnetcore/AgileConfig/releases)页面下载最新的部署包。如果自己使用源码编译，请先编译react-ui-antd项目把dist内的产物复制到apisite项目的wwwroot/ui目录下。
+> 💥注意：如果通过IIS或者别的方式部署，请自行从主页上的[releases](https://github.com/dotnetcore/AgileConfig/releases)页面下载最新的部署包。如果自己使用源码编译，请先编译react-ui-antd项目把dist内的产物复制到apisite项目的wwwroot/ui目录下。
 
 使用 docker-compose 运行
 ```
@@ -157,7 +166,7 @@ networks:
 ![](https://ftp.bmp.ovh/imgs/2021/04/44242b327230c5e6.png)
 ### 节点
 AgileConfig支持多节点部署，所有的节点都是平行的。为了简化部署，AgileConfig并没有单独的控制台程序，请直接使用任意一个节点作为控制台。当环境变量adminConsole=true时，该节点同时兼备数据节点跟控制台功能。为了控制台能够管理节点，所以需要在控制台配置节点的信息。
-> 注意：即使是作为控制台的数据节点同样需要添加到管理程序，以便管理它。
+> 💥注意：即使是作为控制台的数据节点同样需要添加到管理程序，以便管理它。
     
 ![](https://ftp.bmp.ovh/imgs/2021/04/7e93011590c55d12.png)
 ### 应用
@@ -231,9 +240,9 @@ Install-Package AgileConfig.Client
                 });
 ```
 如果需要根据环境变量读取appsettings.{env}.json配置信息，可以通过Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")来获取。   
-> 注意：☢️☢️☢️如果你的程序是Framework的程序请使用[AgileConfig.Client4FR](https://github.com/kklldog/AgileConfig.Client4FR)这个专门为Framework打造的client。使用当前版本有可能死锁造成cpu100% 的风险。
+> 💥注意：如果你的程序是Framework的程序请使用[AgileConfig.Client4FR](https://github.com/kklldog/AgileConfig.Client4FR)这个专门为Framework打造的client。使用当前版本有可能死锁造成cpu100% 的风险。
 
-> 注意：如果节点使用nginx反代的话，需要对nginx进行配置，使其支持websocket协议，不然客户端跟节点的长连接没法建立。
+> 💥注意：如果节点使用nginx反代的话，需要对nginx进行配置，使其支持websocket协议，不然客户端跟节点的长连接没法建立。
 
 ## 读取配置
 AgileConfig支持asp.net core 标准的IConfiguration，跟IOptions模式读取配置。
@@ -335,4 +344,4 @@ public class HomeController : Controller
 
         
 ### 感谢💖💖💖
-大鹏￥66.66 , 瘦草￥6.66 + 88 , ziana￥10.0 , Nullable￥9.99 , *三 ￥6.66 , HHM ￥6.66 , 微笑刺客 ￥6.66 , 飞鸟与鱼 ￥38.88
+大鹏￥66.66 , 瘦草￥6.66 + 88 , ziana￥10.0 , Nullable￥9.99 , *三 ￥6.66 , HHM ￥6.66 , 微笑刺客 ￥6.66 , 飞鸟与鱼 ￥38.88, *航 ￥9.9, *啦 ￥6.66

@@ -257,19 +257,30 @@ namespace AgileConfig.Server.Service
                 if (resp.StatusCode == System.Net.HttpStatusCode.OK && (await resp.GetResponseContentAsync()) == "ok")
                 {
                     node.LastEchoTime = DateTime.Now;
-                    node.Status = Data.Entity.NodeStatus.Online;
+                    node.Status = NodeStatus.Online;
                 }
                 else
                 {
-                    node.Status = Data.Entity.NodeStatus.Offline;
+                    node.Status = NodeStatus.Offline;
                 }
-
-                await service.UpdateAsync(node);
             }
             catch (Exception e)
             {
+                node.Status = NodeStatus.Offline;
                 _logger.LogInformation(e, "Try test node {0} echo , but fail .", node.Address);
             }
+            
+            if (node.Status == NodeStatus.Offline)
+            {
+                if (node.LastEchoTime.HasValue && (DateTime.Now - node.LastEchoTime.Value).TotalMinutes >= 30)
+                {
+                    // 超过 30 分钟没有回应，则移除节点
+                    await service.DeleteAsync(address);
+                    return;
+                }
+            }
+            
+            await service.UpdateAsync(node);
         }
 
         public Task TestEchoAsync()

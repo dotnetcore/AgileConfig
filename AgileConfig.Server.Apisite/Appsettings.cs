@@ -16,5 +16,11 @@ namespace AgileConfig.Server.Apisite
         /// 是否控制台模式
         /// </summary>
         public static bool IsAdminConsoleMode => "true".Equals(Global.Config["adminConsole"], StringComparison.CurrentCultureIgnoreCase);
+
+        /// <summary>
+        /// 是否自动加入节点列表
+        /// </summary>
+        public static bool Cluster => "true".Equals(Global.Config["cluster"], StringComparison.CurrentCultureIgnoreCase);
+
     }
 }

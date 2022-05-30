@@ -54,19 +54,19 @@ namespace AgileConfig.Server.Apisite.UIExtension
             return false;
         }
 
+        private static readonly string UiDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "wwwroot/ui");
         public async Task Invoke(HttpContext context)
         {
-            const string uiDirectory = "wwwroot/ui";
             //handle /ui request
             var filePath = "";
             if (ShouldHandleUIRequest(context))
             {
-                filePath = uiDirectory + "/index.html";
+                filePath = UiDirectory + "/index.html";
             }
             //handle static files that Referer = xxx/ui
             if (ShouldHandleUIStaticFilesRequest(context))
             {
-                filePath = uiDirectory + context.Request.Path;
+                filePath = UiDirectory + context.Request.Path;
             }
 
             if (string.IsNullOrEmpty(filePath))
