@@ -17,8 +17,10 @@ namespace AgileConfig.Server.Apisite
 
         public static void Main(string[] args)
         {
+            var basePath = AppDomain.CurrentDomain.BaseDirectory;
+            Console.WriteLine("current dir path: " + basePath);
             var builder = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory());
+            .SetBasePath(basePath);
 #if DEBUG
             Global.Config = 
                  builder

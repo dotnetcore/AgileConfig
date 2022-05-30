@@ -72,19 +72,11 @@ namespace AgileConfig.Server.Apisite.Websocket
                     {
                         name = HttpUtility.UrlDecode(name);
                     }
-                    else
-                    {
-                        _logger.LogInformation("Websocket client request No Name property ");
-                    }
 
                     context.Request.Query.TryGetValue("client_tag", out StringValues tag);
                     if (!string.IsNullOrEmpty(tag))
                     {
                         tag = HttpUtility.UrlDecode(tag);
-                    }
-                    else
-                    {
-                        _logger.LogInformation("Websocket client request No TAG property ");
                     }
 
                     WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
@@ -108,10 +100,16 @@ namespace AgileConfig.Server.Apisite.Websocket
                     {
                         await Handle(context, client, configService, registerCenterService, serviceInfoService);
                     }
+                    catch (WebSocketException)
+                    {
+                        _logger.LogInformation("client {0} closed the websocket connection directly .", client.Id);
+                        await _websocketCollection.RemoveClient(client, WebSocketCloseStatus.Empty, null);
+                        await context.Response.WriteAsync("500 closed");
+                    }
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, "Handle websocket client {0} err .", client.Id);
-                        await _websocketCollection.RemoveClient(client, WebSocketCloseStatus.Empty, ex.Message);
+                        await _websocketCollection.RemoveClient(client, WebSocketCloseStatus.Empty, null);
                         await context.Response.WriteAsync("500 closed");
                     }
                 }
@@ -169,6 +167,10 @@ namespace AgileConfig.Server.Apisite.Websocket
             do
             {
                 result = await socketClient.Client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                if (result.CloseStatus.HasValue)
+                {
+                    break;
+                }
                 socketClient.LastHeartbeatTime = DateTime.Now;
                 var message = await ReadWebsocketMessage(result, buffer);
 

@@ -128,5 +128,32 @@ namespace AgileConfig.Server.Service
 
             return result > 0;
         }
+
+        public async Task<bool> JoinAsync(string ip, int port, string desc)
+        {
+            var address = $"http://{ip}:{port}";
+            var nodes = await _dbContext.ServerNodes.Where(x => x.Address == address).ToListAsync();
+            if (nodes.Count > 0)
+            {
+                nodes.ForEach(n => {
+                    n.Address = address;
+                    n.Remark = desc;
+                    n.Status = NodeStatus.Online;
+                });
+            }
+            else
+            {
+                await _dbContext.ServerNodes.AddAsync(new ServerNode { 
+                    Address = address,
+                    CreateTime = DateTime.Now,
+                    Remark = desc,
+                    Status = NodeStatus.Online,
+                    LastEchoTime = DateTime.Now
+                });
+            }
+
+            var effRows = await _dbContext.SaveChangesAsync();
+            return effRows > 0;
+        }
     }
 }

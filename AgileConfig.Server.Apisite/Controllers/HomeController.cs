@@ -96,5 +96,11 @@ namespace AgileConfig.Server.Apisite.Controllers
             return Content("ok");
         }
 
+
+        [AllowAnonymous]
+        public IActionResult GetIP()
+        {
+            return Content(String.Join(',', IPExt.GetEndpointIp()));
+        }
     }
 }

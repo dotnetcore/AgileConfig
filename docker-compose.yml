@@ -1,7 +1,7 @@
 version: '3'
 services:
   agile_config_admin:
-    image: "kklldog/agile_config"
+    image: "kklldog/agile_config:test"
     ports:
       - "15000:5000"
     networks:
@@ -11,11 +11,11 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - adminConsole=true
-      - nodes=agile_config_admin:5000,agile_config_node1:5000,agile_config_node2:5000
+      - cluster=true
       - db:provider=mysql
-      - db:conn= database=configcenter;data source=192.168.0.115;User Id=root;password=mdsd;port=3306
+      - db:conn= database=configcenter;data source=192.168.0.125;User Id=root;password=1;port=13306
   agile_config_node1:
-    image: "kklldog/agile_config"
+    image: "kklldog/agile_config:test"
     ports:
       - "15001:5000"
     networks:
@@ -24,12 +24,13 @@ services:
       - /etc/localtime:/etc/localtime
     environment:
       - TZ=Asia/Shanghai
+      - cluster=true
       - db:provider=mysql
-      - db:conn= database=configcenter;data source=192.168.0.115;User Id=root;password=mdsd;port=3306
+      - db:conn= database=configcenter;data source=192.168.0.125;User Id=root;password=1;port=13306
     depends_on:
       - agile_config_admin
   agile_config_node2:
-    image: "kklldog/agile_config"
+    image: "kklldog/agile_config:test"
     ports:
       - "15002:5000"
     networks:
@@ -38,8 +39,9 @@ services:
       - /etc/localtime:/etc/localtime
     environment:
       - TZ=Asia/Shanghai
+      - cluster=true
       - db:provider=mysql
-      - db:conn= database=configcenter;data source=192.168.0.115;User Id=root;password=mdsd;port=3306
+      - db:conn= database=configcenter;data source=192.168.0.125;User Id=root;password=1;port=13306
     depends_on:
       - agile_config_admin
 networks:

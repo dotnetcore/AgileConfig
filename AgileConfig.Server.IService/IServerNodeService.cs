@@ -10,6 +10,8 @@ namespace AgileConfig.Server.IService
         Task<ServerNode> GetAsync(string id);
         Task<bool> AddAsync(ServerNode node);
 
+        Task<bool> JoinAsync(string ip, int port, string desc);
+
         Task<bool> DeleteAsync(ServerNode node);
 
         Task<bool> DeleteAsync(string nodeId);
@@ -22,6 +24,7 @@ namespace AgileConfig.Server.IService
         /// 根据appsettings里的nodes配置初始化服务器节点
         /// </summary>
         /// <returns></returns>
+        [Obsolete]
         Task<bool> InitWatchNodeAsync();
     }
 }

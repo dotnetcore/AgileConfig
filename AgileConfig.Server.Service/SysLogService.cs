@@ -21,15 +21,13 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> AddRangeAsync(IEnumerable<SysLog> logs)
         {
-            await _dbContext.SysLogs.AddRangeAsync(logs);
-            int x = await _dbContext.SaveChangesAsync();
+            int x = await _dbContext.Freesql.Insert(logs).ExecuteAffrowsAsync();
             return x > 0;
         }
 
         public async Task<bool> AddSysLogAsync(SysLog log)
         {
-            await _dbContext.SysLogs.AddAsync(log);
-            int x = await _dbContext.SaveChangesAsync();
+            int x =  await _dbContext.Freesql.Insert(log).ExecuteAffrowsAsync();;
             return x > 0;
         }
 

@@ -113,6 +113,11 @@ namespace AgileConfig.Server.Apisite.Controllers
                 success = true,
             });
         }
-        
+
+        [HttpPost]
+        public IActionResult RegisterNode()
+        {
+            return Content("ok");
+        }
     }
 }
