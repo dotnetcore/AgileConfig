@@ -112,7 +112,7 @@ sudo docker run \
    
 > 💥注意：如果通过IIS或者别的方式部署，请自行从主页上的[releases](https://github.com/dotnetcore/AgileConfig/releases)页面下载最新的部署包。如果自己使用源码编译，请先编译react-ui-antd项目把dist内的产物复制到apisite项目的wwwroot/ui目录下。
 
-使用 docker-compose 运行
+使用 docker-compose 运行多节点集群, 环境变量 cluster=true 会尝试获取容器的 IP ，主动注册到节点列表：   
 ```
 version: '3'
 services:
@@ -127,7 +127,7 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - adminConsole=true
-      - nodes=agile_config_admin:5000,agile_config_node1:5000,agile_config_node2:5000
+      - cluster=true
       - db:provider=mysql
       - db:conn= database=configcenter;data source=192.168.0.115;User Id=root;password=mdsd;port=3306
   agile_config_node1:
@@ -140,6 +140,7 @@ services:
       - /etc/localtime:/etc/localtime
     environment:
       - TZ=Asia/Shanghai
+      - cluster=true
       - db:provider=mysql
       - db:conn= database=configcenter;data source=192.168.0.115;User Id=root;password=mdsd;port=3306
     depends_on:
@@ -154,6 +155,7 @@ services:
       - /etc/localtime:/etc/localtime
     environment:
       - TZ=Asia/Shanghai
+      - cluster=true
       - db:provider=mysql
       - db:conn= database=configcenter;data source=192.168.0.115;User Id=root;password=mdsd;port=3306
     depends_on:
