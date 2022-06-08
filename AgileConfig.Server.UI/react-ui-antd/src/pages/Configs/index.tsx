@@ -290,7 +290,8 @@ const configs: React.FC = (props: any) => {
     {
       title: intl.formatMessage({id:'pages.configs.table.cols.k'}),
       dataIndex: 'key',
-      copyable: true
+      copyable: true,
+      sorter: true,
     },
     {
       title: intl.formatMessage({id:'pages.configs.table.cols.v'}),
