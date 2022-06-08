@@ -1,9 +1,9 @@
 //const RouterConfig = require('../../config/config').default.routes;
 
 //IIS二级虚拟目录
-let iisPrefix = '/config';
+let iisPrefix = '/configui';
 //请求接口
-let requestPrefix = 'http://10.120.147.218:8012/co_config_api';
+let requestPrefix = 'http://10.120.147.218/configapi';
 
 const { NODE_ENV } = process.env;
 if (NODE_ENV === 'development') {

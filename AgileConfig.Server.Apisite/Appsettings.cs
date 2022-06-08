@@ -26,5 +26,9 @@ namespace AgileConfig.Server.Apisite
         /// 是否开通API接口，AdmBasicAuthenticationAttribute
         /// </summary>
         public static bool IsEnableAPI => "true".Equals(Global.Config["isEnableAPI"], StringComparison.CurrentCultureIgnoreCase);
+        /// <summary>
+        /// 是否启用Swagger
+        /// </summary>
+        public static bool IsEnableSwagger => "true".Equals(Global.Config["isEnableSwagger"], StringComparison.CurrentCultureIgnoreCase);
     }
 }

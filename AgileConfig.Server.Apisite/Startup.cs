@@ -60,7 +60,7 @@ namespace AgileConfig.Server.Apisite
             services.AddCors();
             services.AddMvc().AddRazorRuntimeCompilation();
 
-            if (Appsettings.IsPreviewMode)
+            if (Appsettings.IsEnableSwagger)
             {
                 AddSwaggerService(services);
             }
@@ -88,7 +88,7 @@ namespace AgileConfig.Server.Apisite
             {
                 app.UseMiddleware<ExceptionHandlerMiddleware>();
             }
-            if (Appsettings.IsPreviewMode)
+            if (Appsettings.IsEnableSwagger)
             {
                 AddSwaggerMiddleWare(app);
             }
