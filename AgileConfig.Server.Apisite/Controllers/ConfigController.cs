@@ -114,7 +114,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var configs = await _configService.GetByAppIdAsync(model.First().AppId, env);
 
             //var oldDict = new Dictionary<string, string>();
-            var oldKeys=new List<string>();
+            var oldKeys = new List<string>();
             configs.ForEach(item => { oldKeys.Add(_configService.GenerateKey(item)); });
 
             var addConfigs = new List<Config>();
@@ -128,7 +128,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 }
 
                 //if (oldDict.ContainsKey(newkey))
-                if(oldKeys.Any(u=>String.Equals(u,newkey,StringComparison.OrdinalIgnoreCase)))
+                if (oldKeys.Any(u => String.Equals(u, newkey, StringComparison.OrdinalIgnoreCase)))
                 {
                     return Json(new
                     {
@@ -341,7 +341,6 @@ namespace AgileConfig.Server.Apisite.Controllers
                     configs = configs.OrderByDescending(x => x.CreateTime).ToList();
                 }
             }
-
             if (sortField == "group")
             {
                 if (ascOrDesc.StartsWith("asc"))
@@ -351,6 +350,17 @@ namespace AgileConfig.Server.Apisite.Controllers
                 else
                 {
                     configs = configs.OrderByDescending(x => x.Group).ToList();
+                }
+            }
+            if (sortField == "key")
+            {
+                if (ascOrDesc.StartsWith("asc"))
+                {
+                    configs = configs.OrderBy(x => x.Key).ToList();
+                }
+                else
+                {
+                    configs = configs.OrderByDescending(x => x.Key).ToList();
                 }
             }
 
