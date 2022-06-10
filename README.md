@@ -110,7 +110,7 @@ sudo docker run \
 2. db:provider 配置程序的数据库类型。目前程序支持：sqlserver，mysql，sqlite, PostgreSql，Oracle 五种数据库。
 3. db:conn 配置数据库连接串    
    
-> 💥注意：如果通过IIS或者别的方式部署，请自行从主页上的[releases](https://github.com/dotnetcore/AgileConfig/releases)页面下载最新的部署包。如果自己使用源码编译，请先编译react-ui-antd项目把dist内的产物复制到apisite项目的wwwroot/ui目录下。
+> 💥注意：如果通过IIS或者别的方式部署，请自行从主页上的[releases](https://github.com/dotnetcore/AgileConfig/releases)页面下载最新的部署包。如果自己使用源码编译，请先编译react-ui-antd项目把dist内的产物复制到apisite项目的wwwroot/ui目录下。调试的时候需要复制到bin目录下。
 
 使用 docker-compose 运行多节点集群, 环境变量 cluster=true 会尝试获取容器的 IP ，主动注册到节点列表：   
 ```
