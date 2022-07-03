@@ -1,4 +1,4 @@
-name: master ci workflow
+name: mysqlconnector ci workflow
 
 on:
   push:
