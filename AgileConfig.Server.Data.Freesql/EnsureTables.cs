@@ -13,7 +13,7 @@ namespace AgileConfig.Server.Data.Freesql
             "SELECT count(1) FROM sqlite_master WHERE type='table' AND name = 'agc_app'";
 
         private const string Mysql_ExistTableSql =
-            " SELECT count(1) FROM information_schema.TABLES WHERE table_schema= @schema AND table_name ='agc_app'";
+            " SELECT count(1) FROM information_schema.TABLES WHERE table_schema= @schema AND table_name ='agc_app';";
 
         private const string SqlServer_ExistTableSql =
             "SELECT COUNT(1) FROM dbo.SYSOBJECTS WHERE ID = object_id(N'[dbo].[agc_app]') and OBJECTPROPERTY(id, N'IsUserTable') = 1";
