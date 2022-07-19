@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <script>
+      window.resourceBaseUrl = '/'
+    </script>
     <title>AgileConfig</title>
-    <link rel="icon" href="<%= context.config.publicPath +'favicon.ico'%>" type="image/x-icon" />
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
   </head>
   <body>
     <noscript>Out-of-the-box mid-stage front/design solution!</noscript>
@@ -16,7 +19,7 @@
           padding: 0;
         }
         #root {
-          background-image: url('<%= context.config.publicPath +"home_bg.png"%>');
+          background-image: url("home_bg.png");
           background-repeat: no-repeat;
           background-size: 100% auto;
         }

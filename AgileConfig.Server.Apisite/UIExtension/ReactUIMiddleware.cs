@@ -93,6 +93,34 @@ namespace AgileConfig.Server.Apisite.UIExtension
                 }
                 else
                 {
+                    if (filePath.EndsWith("index.html"))
+                    {
+                        var rows = await File.ReadAllLinesAsync(filePath);
+                        for (int i = 0; i < rows.Length; i++)
+                        {
+                            var line = rows[i];
+                            if (line.Contains("window.resourceBaseUrl = \"/\""))
+                            {
+                                if (!string.IsNullOrWhiteSpace(Appsettings.PathBase))
+                                {
+                                    line = line.Replace("/", $"/{Appsettings.PathBase}/");
+                                    rows[i] = line;
+                                }
+                            }
+                            if (line.Contains("<link rel=\"stylesheet\" href=\"/umi."))
+                            {
+                                line = line.Replace("/umi.", "umi.");
+                                rows[i] = line;
+                            }
+                            if (line.Contains("<script src=\"/umi."))
+                            {
+                                line = line.Replace("/umi.", "umi.");
+                                rows[i] = line;
+                            }
+                        }
+                        await File.WriteAllLinesAsync(filePath, rows);
+                    }
+                    
                     var fileData = await File.ReadAllBytesAsync(filePath);  //read file bytes
                     var lastModified = File.GetLastWriteTime(filePath);
                     var extType = Path.GetExtension(filePath);

@@ -22,5 +22,9 @@ namespace AgileConfig.Server.Apisite
         /// </summary>
         public static bool Cluster => "true".Equals(Global.Config["cluster"], StringComparison.CurrentCultureIgnoreCase);
 
+        /// <summary>
+        /// path base
+        /// </summary>
+        public static string PathBase => Global.Config["pathBase"];
     }
 }
