@@ -76,7 +76,7 @@ const JsonImport : React.FC<JsonImportFormProps> = (props)=>{
       ];
       const fileUploadProps = {
         name: 'file',
-        action: '/config/PreViewJsonFile',
+        action: 'config/PreViewJsonFile',
         headers: {
           Authorization:  'Bearer ' + getToken(),
         },
