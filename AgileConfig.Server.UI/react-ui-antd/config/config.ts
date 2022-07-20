@@ -22,9 +22,7 @@ export default defineConfig({
     // default true, when it is true, will use `navigator.language` overwrite default
     baseNavigator: true,
   },
-  dynamicImport: {
-    loading: '@/components/PageLoading/index',
-  },
+  dynamicImport: false,
   targets: {
     ie: 11,
   },
@@ -40,5 +38,7 @@ export default defineConfig({
   manifest: {
     basePath: '/a/',
   },
-  esbuild: {}
+  esbuild: {},
+  publicPath: '/',
+  runtimePublicPath: true
 });
