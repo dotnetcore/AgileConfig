@@ -54,6 +54,40 @@ namespace AgileConfig.Server.Apisite.UIExtension
             return false;
         }
 
+        /// <summary>
+        /// 为了适配 pathbase ，index.html 注入的 js css ，需要使用相对路径，所以要去除 /
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        private async Task RewriteIndexHtml(string filePath)
+        {
+            var rows = await File.ReadAllLinesAsync(filePath);
+            for (int i = 0; i < rows.Length; i++)
+            {
+                var line = rows[i];
+                if (line.Contains("window.resourceBaseUrl = \"/\""))
+                {
+                    if (!string.IsNullOrWhiteSpace(Appsettings.PathBase))
+                    {
+                        line = line.Replace("/", $"{Appsettings.PathBase}/");
+                        rows[i] = line;
+                    }
+                }
+                if (line.Contains("<link rel=\"stylesheet\" href=\"/umi."))
+                {
+                    line = line.Replace("/umi.", "umi.");
+                    rows[i] = line;
+                }
+                if (line.Contains("<script src=\"/umi."))
+                {
+                    line = line.Replace("/umi.", "umi.");
+                    rows[i] = line;
+                }
+
+            }
+            await File.WriteAllLinesAsync(filePath, rows);
+        }
+
         private static readonly string UiDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "wwwroot/ui");
         public async Task Invoke(HttpContext context)
         {
@@ -93,6 +127,11 @@ namespace AgileConfig.Server.Apisite.UIExtension
                 }
                 else
                 {
+                    if (filePath.EndsWith("index.html"))
+                    {
+                        await RewriteIndexHtml(filePath);
+                    }
+                    
                     var fileData = await File.ReadAllBytesAsync(filePath);  //read file bytes
                     var lastModified = File.GetLastWriteTime(filePath);
                     var extType = Path.GetExtension(filePath);

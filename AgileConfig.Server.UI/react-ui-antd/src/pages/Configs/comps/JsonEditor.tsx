@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { getConfigJson, saveJson } from "../service";
 import Editor from "@monaco-editor/react";
 import { loader } from '@monaco-editor/react';
-loader.config({ paths: { vs: '/monaco-editor/min/vs' } });
+loader.config({ paths: { vs: 'monaco-editor/min/vs' } });
 
 const handleSave = async (json: string, appId:string, env:string) => {
   const hide = message.loading('正在保存...');
