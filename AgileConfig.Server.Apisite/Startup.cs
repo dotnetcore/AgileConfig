@@ -52,9 +52,9 @@ namespace AgileConfig.Server.Apisite
                       {
                           options.TokenValidationParameters = new TokenValidationParameters
                           {
-                              ValidIssuer = JwtSetting.Instance.Issuer,
-                              ValidAudience = JwtSetting.Instance.Audience,
-                              IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtSetting.Instance.SecurityKey)),
+                              ValidIssuer = JwtService.Issuer,
+                              ValidAudience = JwtService.Audience,
+                              IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtService.GetSecurityKey())),
                           };
                       });
             services.AddCors();
