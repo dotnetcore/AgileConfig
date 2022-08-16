@@ -168,9 +168,19 @@ namespace AgileConfig.Server.Service
                         Value = GenreateJwtSecretKey(),
                         CreateTime = DateTime.Now
                     });
-                    var result =  _dbContext.SaveChanges();
 
-                    return result > 0;
+                    try
+                    {
+                        var result =  _dbContext.SaveChanges();
+                        return result > 0;
+                    }
+                    catch (Exception e)
+                    {
+                        //处理异常，防止多个实例第一次启动的时候，并发生成key值，发生异常，导致服务起不来
+                        Console.WriteLine(e);
+                    }
+
+                    return false;
                 }
             }
             return true;
