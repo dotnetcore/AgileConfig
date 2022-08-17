@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AgileConfig.Server.Apisite.Utilites;
 using AgileConfig.Server.IService;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -37,14 +38,15 @@ namespace AgileConfig.Server.Apisite
         {
             if (Appsettings.IsAdminConsoleMode)
             {
-                _settingService.InitDefaultEnvironment();
-                _remoteServerNodeProxy.TestEchoAsync();
-                _serviceHealthCheckService.StartCheckAsync();
-                _eventRegister.Register();
+                _settingService.InitDefaultEnvironment();//初始化环境 DEV TEST STAGE PROD
+                _remoteServerNodeProxy.TestEchoAsync();//开启节点检测
+                _serviceHealthCheckService.StartCheckAsync();//开启服务健康检测
+                _eventRegister.Register();//注册 eventbus 的回调
             }
 
             if (Appsettings.Cluster)
             {
+                //如果开启集群模式，会自动获取本地的ip注册到节点表，只适合 docker-compose 环境
                 var ip = GetIp();
                 if (!string.IsNullOrEmpty(ip))
                 {

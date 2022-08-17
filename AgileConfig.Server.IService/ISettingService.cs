@@ -46,5 +46,17 @@ namespace AgileConfig.Server.IService
         /// </summary>
         /// <returns></returns>
         Task<string[]> GetEnvironmentList();
+
+        /// <summary>
+        ///  如果环境变量没有 JwtSetting:SecurityKey 则尝试生成一个key到数据库
+        /// </summary>
+        /// <returns></returns>
+        bool TryInitJwtSecret();
+
+        /// <summary>
+        /// 从配置表获取 jwt secret key
+        /// </summary>
+        /// <returns></returns>
+        string GetJwtTokenSecret();
     }
 }

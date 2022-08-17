@@ -131,7 +131,6 @@ namespace AgileConfig.Server.Apisite.UIExtension
                     {
                         await RewriteIndexHtml(filePath);
                     }
-                    
                     var fileData = await File.ReadAllBytesAsync(filePath);  //read file bytes
                     var lastModified = File.GetLastWriteTime(filePath);
                     var extType = Path.GetExtension(filePath);

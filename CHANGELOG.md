@@ -1,5 +1,8 @@
 # Change log
 ------------------------------
+[1.6.7] - 2022.07.20
+* 修复 react ui 不兼容 pathbase 的问题
+
 [1.6.6] - 2022.07.11
 * add monaco font content-type   
 

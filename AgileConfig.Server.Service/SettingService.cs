@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Freesql;
+using Microsoft.Extensions.Configuration;
 
 namespace AgileConfig.Server.Service
 {
@@ -17,6 +18,7 @@ namespace AgileConfig.Server.Service
 
         public const string DefaultEnvironment = "DEV,TEST,STAGING,PROD";
         public const string DefaultEnvironmentKey = "environment";
+        public const string DefaultJwtSecretKey = "jwtsecret";
 
         public SettingService(FreeSqlContext context)
         {
@@ -146,6 +148,60 @@ namespace AgileConfig.Server.Service
             var env = await _dbContext.Settings.Where(x => x.Id == DefaultEnvironmentKey).FirstAsync();
 
             return env.Value.ToUpper().Split(',');
+        }
+
+        /// <summary>
+        /// 如果 配置文件或者环境变量没配置 JwtSetting:SecurityKey 则生成一个存库
+        /// </summary>
+        /// <returns></returns>
+        public bool TryInitJwtSecret()
+        {
+            var jwtSecretFromConfig = Global.Config["JwtSetting:SecurityKey"];
+            if (string.IsNullOrEmpty(jwtSecretFromConfig))
+            {
+                var jwtSecretSetting = _dbContext.Settings.Where(x => x.Id == DefaultJwtSecretKey).First();
+                if (jwtSecretSetting == null)
+                {
+                    _dbContext.Settings.Add(new Setting
+                    {
+                        Id = DefaultJwtSecretKey,
+                        Value = GenreateJwtSecretKey(),
+                        CreateTime = DateTime.Now
+                    });
+
+                    try
+                    {
+                        var result =  _dbContext.SaveChanges();
+                        return result > 0;
+                    }
+                    catch (Exception e)
+                    {
+                        //处理异常，防止多个实例第一次启动的时候，并发生成key值，发生异常，导致服务起不来
+                        Console.WriteLine(e);
+                    }
+
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public string GetJwtTokenSecret()
+        {
+            var jwtSecretSetting =  _dbContext.Settings.Where(x => x.Id == DefaultJwtSecretKey).First();
+            return jwtSecretSetting?.Value;
+        }
+
+        /// <summary>
+        /// 生成一个 jwt 加密的 key ，38位
+        /// </summary>
+        /// <returns></returns>
+        private string GenreateJwtSecretKey()
+        {
+            var guid1 = Guid.NewGuid().ToString("n");
+            var guid2 =  Guid.NewGuid().ToString("n");
+
+            return guid1.Substring(0, 19) + guid2.Substring(0, 19);
         }
     }
 }
