@@ -11,6 +11,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Dynamic;
 using AgileConfig.Server.Apisite.Utilites;
+using AgileConfig.Server.Service;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -19,14 +20,17 @@ namespace AgileConfig.Server.Apisite.Controllers
         private readonly ISettingService _settingService;
         private readonly IUserService _userService;
         private readonly IPremissionService _permissionService;
+        private readonly IJwtService _jwtService;
         public AdminController(
             ISettingService settingService, 
             IUserService userService,
-            IPremissionService permissionService)
+            IPremissionService permissionService,
+            IJwtService jwtService)
         {
             _settingService = settingService;
             _userService = userService;
             _permissionService = permissionService;
+            _jwtService = jwtService;
         }
 
 
@@ -49,7 +53,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 var user = (await _userService.GetUsersByNameAsync(userName)).First();
                 var userRoles = await _userService.GetUserRolesAsync(user.Id);
-                var jwt = JWT.GetToken(user.Id, user.UserName, userRoles.Any(r => r == Role.Admin || r == Role.SuperAdmin));
+                var jwt = _jwtService.GetToken(user.Id, user.UserName, userRoles.Any(r => r == Role.Admin || r == Role.SuperAdmin));
                 var userFunctions = await _permissionService.GetUserPermission(user.Id);
 
                 dynamic param = new ExpandoObject();
