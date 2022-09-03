@@ -1,17 +1,4 @@
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
-
-# 安装所需依赖
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        wget \
-        gdb \
-        lldb
-
-# 安装 procdump
-RUN wget https://packages.microsoft.com/repos/microsoft-debian-buster-prod/pool/main/p/procdump/procdump_1.1.1-220_amd64.deb -O procdump.deb \
-    && dpkg -i procdump.deb \
-    && rm procdump.deb
-
 RUN sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=1/g' /etc/ssl/openssl.cnf
 RUN sed -i 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1/g' /etc/ssl/openssl.cnf
 RUN sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=1/g' /usr/lib/ssl/openssl.cnf
@@ -40,10 +27,4 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 
-RUN echo "#!/bin/bash \n\
-procdump -M 100 -w dotnet & \n\
-dotnet \$1 \n\
-" > ./start.sh
-RUN chmod +x ./start.sh
-
-ENTRYPOINT ["./start.sh", "AgileConfig.Server.Apisite.dll"]
+ENTRYPOINT ["dotnet", "AgileConfig.Server.Apisite.dll"]
