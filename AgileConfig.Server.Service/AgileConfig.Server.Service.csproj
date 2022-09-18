@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AgileConfig.Server.Common\AgileConfig.Server.Common.csproj" />
+    
     <ProjectReference Include="..\AgileConfig.Server.Data.Freesql\AgileConfig.Server.Data.Freesql.csproj" />
     <ProjectReference Include="..\AgileConfig.Server.IService\AgileConfig.Server.IService.csproj" />
   </ItemGroup>
