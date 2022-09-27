@@ -8,6 +8,8 @@ namespace AgileConfig.Server.Service
     {
         public static void AddBusinessServices(this IServiceCollection sc)
         {
+            sc.AddSingleton<IJwtService, JwtService>();
+
             sc.AddSingleton<IRemoteServerNodeProxy, RemoteServerNodeProxy>();
             sc.AddSingleton<IEventRegister, EventRegister>();
             sc.AddSingleton<IServiceHealthCheckService, ServiceHealthCheckService>();

@@ -46,15 +46,16 @@ namespace AgileConfig.Server.Apisite
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var jwtService = new JwtService();
             services.AddMemoryCache();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                       .AddJwtBearer(options =>
                       {
                           options.TokenValidationParameters = new TokenValidationParameters
                           {
-                              ValidIssuer = JwtSetting.Instance.Issuer,
-                              ValidAudience = JwtSetting.Instance.Audience,
-                              IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtSetting.Instance.SecurityKey)),
+                              ValidIssuer = jwtService.Issuer,
+                              ValidAudience = jwtService.Audience,
+                              IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtService.GetSecurityKey())),
                           };
                       });
             services.AddCors();
