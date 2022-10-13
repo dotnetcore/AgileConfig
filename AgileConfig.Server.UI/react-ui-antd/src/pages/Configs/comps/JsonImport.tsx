@@ -103,6 +103,7 @@ const JsonImport : React.FC<JsonImportFormProps> = (props)=>{
       };
     return (
         <Modal 
+          maskClosable={false}
           title={intl.formatMessage({id:'pages.configs.table.cols.action.pop.importfromjosnfile'})} 
           width={1000} 
           visible={props.jsonImportModalVisible}

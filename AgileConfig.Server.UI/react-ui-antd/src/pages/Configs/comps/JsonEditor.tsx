@@ -50,6 +50,7 @@ const JsonEditor : React.FC<JsonEditorProps> = (props)=>{
     },[])
     return (
         <Modal 
+          maskClosable={false}
           title="按 JSON 视图编辑"
           okText="保存"
           width={800} 
