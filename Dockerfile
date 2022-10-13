@@ -21,7 +21,7 @@ WORKDIR "/src/AgileConfig.Server.Apisite"
 RUN dotnet build "AgileConfig.Server.Apisite.csproj" -c Release -o /app/build -r linux-arm64
 
 FROM build AS publish
-RUN dotnet publish "AgileConfig.Server.Apisite.csproj" -c Release -o /app/publish -r linux-arm64
+RUN dotnet publish "AgileConfig.Server.Apisite.csproj" -c Release -o /app/publish -r linux-arm64 --self-contained false --no-restore
 
 FROM base AS final
 WORKDIR /app
