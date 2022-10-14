@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/aspnet:6.0-focal-arm64v8 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:6.0-focal-arm32v7 AS base
 WORKDIR /app
 EXPOSE 5000
 
@@ -14,10 +14,10 @@ COPY ["AgileConfig.Server.Common/AgileConfig.Server.Common.csproj", "AgileConfig
 RUN dotnet restore "AgileConfig.Server.Apisite/AgileConfig.Server.Apisite.csproj" -r linux-arm64
 COPY . .
 WORKDIR "/src/AgileConfig.Server.Apisite"
-RUN dotnet build "AgileConfig.Server.Apisite.csproj" -c Release -o /app/build -r linux-arm64
+RUN dotnet build "AgileConfig.Server.Apisite.csproj" -c Release -o /app/build -r linux-arm
 
 FROM build AS publish
-RUN dotnet publish "AgileConfig.Server.Apisite.csproj" -c Release -o /app/publish -r linux-arm64 --self-contained false --no-restore
+RUN dotnet publish "AgileConfig.Server.Apisite.csproj" -c Release -o /app/publish -r linux-arm --self-contained false --no-restore
 
 FROM base AS final
 WORKDIR /app
