@@ -13,8 +13,12 @@ internal class UIFileBag
         {".js", "application/javascript"},
         {".png", "image/png"},
         {".svg", "image/svg+xml"},
-        { ".json","application/json;charset=utf-8"},
-        { ".ico","image/x-icon"}
+        {".json","application/json;charset=utf-8"},
+        {".ico","image/x-icon"},
+        {".ttf","application/octet-stream"},
+        {".otf","font/otf"},
+        {".woff","font/x-woff"},
+        {".woff2","application/octet-stream"},
     };
     public string FilePath { get; init; }
     public byte[] Data { get; init; }

@@ -8,12 +8,9 @@ export type LoginParamsType = {
 };
 
 export async function accountLogin(params: LoginParamsType) {
-  return request('/admin/jwt/login', {
+  return request('admin/jwt/login', {
     method: 'POST',
     data: params,
   });
 }
 
-export async function getFakeCaptcha(mobile: string) {
-  return request(`/api/login/captcha?mobile=${mobile}`);
-}

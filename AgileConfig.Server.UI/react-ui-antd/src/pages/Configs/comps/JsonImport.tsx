@@ -78,7 +78,7 @@ const JsonImport : React.FC<JsonImportFormProps> = (props)=>{
       ];
       const fileUploadProps = {
         name: 'file',
-        action: getRootUrl() + '/config/PreViewJsonFile',
+        action: getRootUrl() + 'config/PreViewJsonFile',
         headers: {
           Authorization:  'Bearer ' + getToken(),
         },
@@ -105,6 +105,7 @@ const JsonImport : React.FC<JsonImportFormProps> = (props)=>{
       };
     return (
         <Modal 
+          maskClosable={false}
           title={intl.formatMessage({id:'pages.configs.table.cols.action.pop.importfromjosnfile'})} 
           width={1000} 
           visible={props.jsonImportModalVisible}

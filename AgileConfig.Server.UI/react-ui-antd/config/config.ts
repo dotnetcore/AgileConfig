@@ -24,7 +24,7 @@ export default defineConfig({
     baseNavigator: true,
   },
   dynamicImport: {
-    loading: '@/components/PageLoading/index',
+    loading: '@/components/PageLoading/index'
   },
   targets: {
     ie: 11,
@@ -44,5 +44,6 @@ export default defineConfig({
   esbuild: {},
   //getIISUrl打包引用不到模块
   base: iisPrefix,
-  publicPath: iisPrefix
+  publicPath: iisPrefix,
+  runtimePublicPath: true
 });

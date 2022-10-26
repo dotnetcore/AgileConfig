@@ -682,6 +682,11 @@ const configs: React.FC = (props: any) => {
         </EnvSync>
       }
       <ModalForm
+        modalProps= {
+          {
+            maskClosable:false
+          }
+        }
         formRef={addFormRef}
         title={intl.formatMessage({id:'pages.configs.from.add.title'})}
         visible={createModalVisible}

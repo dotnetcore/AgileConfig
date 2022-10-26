@@ -433,6 +433,11 @@ const appList: React.FC = (props) => {
         //dataSource={dataSource}
       />
       <ModalForm
+        modalProps= {
+          {
+            maskClosable:false
+          }
+        }
         formRef={addFormRef}
         title={
           intl.formatMessage({

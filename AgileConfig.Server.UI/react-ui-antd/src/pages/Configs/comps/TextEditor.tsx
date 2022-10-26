@@ -46,6 +46,7 @@ const TextEditor : React.FC<TextEditorProps> = (props)=>{
 
     return (
         <Modal 
+          maskClosable={false}
           title="按 TEXT 视图编辑"
           okText="保存"
           width={800} 

@@ -13,6 +13,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace AgileConfig.Server.Service
 {
@@ -279,7 +280,12 @@ namespace AgileConfig.Server.Service
             
             if (node.Status == NodeStatus.Offline)
             {
-                if (node.LastEchoTime.HasValue && (DateTime.Now - node.LastEchoTime.Value).TotalMinutes >= 30)
+                DateTime? time = node.LastEchoTime;
+                if (!time.HasValue)
+                {
+                    time = node.CreateTime;
+                }
+                if (time.HasValue && (DateTime.Now - time.Value).TotalMinutes >= 30)
                 {
                     // 超过 30 分钟没有回应，则移除节点
                     await service.DeleteAsync(address);
