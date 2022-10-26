@@ -221,6 +221,11 @@ const nodeList:React.FC = () => {
         ]}
       />
       <ModalForm 
+        modalProps={
+          {
+            maskClosable: false
+          }
+        }
         formRef={addFormRef}
         title={
           intl.formatMessage({

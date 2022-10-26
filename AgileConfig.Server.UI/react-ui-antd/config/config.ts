@@ -23,7 +23,7 @@ export default defineConfig({
     baseNavigator: true,
   },
   dynamicImport: {
-    loading: '@/components/PageLoading/index',
+    loading: '@/components/PageLoading/index'
   },
   targets: {
     ie: 11,
@@ -40,5 +40,7 @@ export default defineConfig({
   manifest: {
     basePath: '/a/',
   },
-  esbuild: {}
+  esbuild: {},
+  publicPath: '/',
+  runtimePublicPath: true
 });

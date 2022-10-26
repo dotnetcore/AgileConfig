@@ -24,7 +24,8 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
       {
         onCancel: ()=>{
           props.onCancel();
-        }
+        },
+        maskClosable:false
       }
     }
      onFinish={

@@ -1,12 +1,14 @@
-name: publish ci workflow
+name: mysqlconnector ci workflow
 
 on:
   push:
-    branches: [ publish ]
+    branches: [ mysqlconnector ]
     paths-ignore: 
       - '**/*.md'
       - '**/*.yml'
-    
+  pull_request:
+    branches: [ mysqlconnector ]
+
 jobs:
   build-reactapp:
     runs-on: ubuntu-latest
@@ -54,4 +56,4 @@ jobs:
         username: ${{ secrets.DOCKER_HUB_NAME }}
         password: ${{ secrets.DOCKER_HUB_PASSWORD }}
         repository: kklldog/agile_config
-        tags: latest
+        tags: mysqlconnector
