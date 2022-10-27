@@ -21,15 +21,13 @@ namespace AgileConfig.Server.Apisite
             Console.WriteLine("current dir path: " + basePath);
             var builder = new ConfigurationBuilder()
             .SetBasePath(basePath);
-#if DEBUG
+
             Global.Config = 
-                 builder
-                .AddJsonFile("appsettings.Development.json")
-                .AddEnvironmentVariables()
-                .Build();
-#else
-            Global.Config = builder.AddJsonFile("appsettings.json").AddEnvironmentVariables().Build();
-#endif
+                 builder.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                        .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true)
+                        .AddEnvironmentVariables()
+                        .Build();
+
             var host = CreateWebHostBuilder(args)
                 .Build();
 
