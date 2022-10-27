@@ -5,7 +5,8 @@ import proxy from './proxy';
 import routes from './routes';
 
 const { REACT_APP_ENV } = process.env;
-let iisPrefix='/configui/';
+//let iisPrefix='/configui/';
+let iisPrefix='/';
 
 export default defineConfig({
   hash: true,

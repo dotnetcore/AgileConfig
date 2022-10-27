@@ -3,7 +3,7 @@ import { extend, RequestOptionsInit } from 'umi-request';
 import { notification } from 'antd';
 import { getToken } from './authority';
 import { history } from 'umi';
-import { getRootUrl } from './requestUrl';
+//import { getRootUrl } from './requestUrl';
 
 const codeMessage = {
   200: '服务器成功返回请求的数据。',
@@ -59,15 +59,19 @@ const authHeaderInterceptor = (url: string, options: RequestOptionsInit) => {
   };
 };
 
-// let requestPrefix = '';
-// const { NODE_ENV } = process.env;
-// if (NODE_ENV === 'development') {
-//   requestPrefix = 'http://localhost:5000/';
-//   //requestPrefix = 'http://agileconfig_server.xbaby.xyz/';
-// }
+let requestPrefix = '';
+const { NODE_ENV } = process.env;
+if (NODE_ENV === 'development') {
+  requestPrefix = 'http://localhost:5000/';
+  //requestPrefix = 'http://agileconfig_server.xbaby.xyz/';
+} else {
+  requestPrefix = 'http://10.120.147.218/config/';
+}
+
 /** 配置request请求时的默认参数 */
 const request = extend({
-  prefix: getRootUrl(),
+  //prefix: getRootUrl(),
+  prefix: requestPrefix,
   errorHandler, // 默认错误处理
   credentials: 'same-origin', // 默认请求是否带上cookie,
 });

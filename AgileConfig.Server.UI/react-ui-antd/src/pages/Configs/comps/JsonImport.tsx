@@ -6,7 +6,7 @@ import { useIntl } from "react-intl";
 import { JsonImportItem } from "../data";
 import { addRangeConfig } from "../service";
 import styles from './jsonImport.less';
-import { getRootUrl } from "@/utils/requestUrl";
+//import { getRootUrl } from "@/utils/requestUrl";
 
 export type JsonImportFormProps = {
     appId: string,
@@ -78,7 +78,8 @@ const JsonImport : React.FC<JsonImportFormProps> = (props)=>{
       ];
       const fileUploadProps = {
         name: 'file',
-        action: getRootUrl() + 'config/PreViewJsonFile',
+        //action: getRootUrl() + 'config/PreViewJsonFile',
+        action: 'config/PreViewJsonFile',
         headers: {
           Authorization:  'Bearer ' + getToken(),
         },
@@ -104,10 +105,10 @@ const JsonImport : React.FC<JsonImportFormProps> = (props)=>{
         },
       };
     return (
-        <Modal 
+        <Modal
           maskClosable={false}
-          title={intl.formatMessage({id:'pages.configs.table.cols.action.pop.importfromjosnfile'})} 
-          width={1000} 
+          title={intl.formatMessage({id:'pages.configs.table.cols.action.pop.importfromjosnfile'})}
+          width={1000}
           visible={props.jsonImportModalVisible}
           onCancel={
             ()=>{
@@ -132,15 +133,15 @@ const JsonImport : React.FC<JsonImportFormProps> = (props)=>{
                 </Button>
               </Upload>
             </div>
-            <Table 
+            <Table
               rowKey="id"
               pagination={false}
-              dataSource={datasource} 
+              dataSource={datasource}
               columns={columns}
               scroll ={{
                 y: 500
               }}>
-              
+
             </Table>
         </Modal>
     );

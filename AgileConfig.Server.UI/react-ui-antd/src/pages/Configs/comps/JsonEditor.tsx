@@ -4,9 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { getConfigJson, saveJson } from "../service";
 import Editor from "@monaco-editor/react";
 import { loader } from '@monaco-editor/react';
-import { getIISUrl } from "@/utils/requestUrl";
+//import { getIISUrl } from "@/utils/requestUrl";
 
-loader.config({ paths: { vs: getIISUrl() + '/monaco-editor/min/vs' } });
+//loader.config({ paths: { vs: getIISUrl() + '/monaco-editor/min/vs' } });
+loader.config({ paths: { vs: '/monaco-editor/min/vs' } });
 
 const handleSave = async (json: string, appId:string, env:string) => {
   const hide = message.loading('正在保存...');
@@ -51,11 +52,11 @@ const JsonEditor : React.FC<JsonEditorProps> = (props)=>{
       });
     },[])
     return (
-        <Modal 
+        <Modal
           maskClosable={false}
           title="按 JSON 视图编辑"
           okText="保存"
-          width={800} 
+          width={800}
           visible={props.ModalVisible}
           onCancel={
             props.onCancel
@@ -68,7 +69,7 @@ const JsonEditor : React.FC<JsonEditorProps> = (props)=>{
                 }
               </div>
               <div>
-                <Button onClick={ 
+                <Button onClick={
                   ()=>{
                     props.onCancel();
                   }
