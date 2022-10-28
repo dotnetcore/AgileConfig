@@ -1022,36 +1022,48 @@ namespace AgileConfig.Server.Service
                         Description = kv.comment
                     });
                 }
-                else if (config.Value != value)
+                else 
                 {
-                    config.Value = value;
-                    config.UpdateTime = DateTime.Now;
-                    config.Description = kv.comment;
-                    if (config.OnlineStatus == OnlineStatus.Online)
+                    bool update = false;
+                    if (config.Description != kv.comment)
                     {
-                        config.EditStatus = EditStatus.Edit;
-                        config.OnlineStatus = OnlineStatus.WaitPublish;
+                        update = true;
+                        config.Description = kv.comment;
+                        config.UpdateTime = DateTime.Now;
                     }
-                    else
+                    if (config.Value != value)
                     {
-                        if (config.EditStatus == EditStatus.Add)
+                        update = true;
+                        config.Value = value;
+                        config.UpdateTime = DateTime.Now;
+                        if (config.OnlineStatus == OnlineStatus.Online)
                         {
-                            //do nothing
-                        }
-
-                        if (config.EditStatus == EditStatus.Edit)
-                        {
-                            //do nothing
-                        }
-
-                        if (config.EditStatus == EditStatus.Deleted)
-                        {
-                            //上一次是删除状态，现在恢复为编辑状态
                             config.EditStatus = EditStatus.Edit;
+                            config.OnlineStatus = OnlineStatus.WaitPublish;
+                        }
+                        else
+                        {
+                            if (config.EditStatus == EditStatus.Add)
+                            {
+                                //do nothing
+                            }
+
+                            if (config.EditStatus == EditStatus.Edit)
+                            {
+                                //do nothing
+                            }
+
+                            if (config.EditStatus == EditStatus.Deleted)
+                            {
+                                //上一次是删除状态，现在恢复为编辑状态
+                                config.EditStatus = EditStatus.Edit;
+                            }
                         }
                     }
-
-                    updateConfigs.Add(config);
+                    if (update)
+                    {
+                        updateConfigs.Add(config);
+                    }
                 }
             }
 
