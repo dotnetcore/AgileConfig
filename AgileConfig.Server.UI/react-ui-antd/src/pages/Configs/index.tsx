@@ -220,7 +220,7 @@ const configs: React.FC = (props: any) => {
       console.log('WaitPublishStatus ', x);
       if (x.success) {
         setWaitPublishStatus(x.data);
-      }      
+      }
     })
   }, [tableData]);
 
@@ -280,7 +280,7 @@ const configs: React.FC = (props: any) => {
     10: ''
   }
   const columns: ProColumns<ConfigListItem>[] = [
- 
+
     {
       title: intl.formatMessage({id:'pages.configs.table.cols.g'}),
       dataIndex: 'group',
@@ -379,7 +379,7 @@ const configs: React.FC = (props: any) => {
         <AuthorizedEle key="3" judgeKey={functionKeys.Config_Delete} appId={record.appId}>
           <TableDropdown
               key="actionGroup"
-              onSelect={async (item) => 
+              onSelect={async (item) =>
                 {
                   if (item == 'history') {
                     setCurrentRow(record);
@@ -497,7 +497,7 @@ const configs: React.FC = (props: any) => {
           ,
           <AuthorizedEle key="2" judgeKey={functionKeys.Config_Publish} appId={appId} >
             <Button key="button" icon={<VerticalAlignTopOutlined />} type="primary" className="success"
-                    hidden={(waitPublishStatus.addCount + waitPublishStatus.editCount + waitPublishStatus.deleteCount) === 0} 
+                    hidden={(waitPublishStatus.addCount + waitPublishStatus.editCount + waitPublishStatus.deleteCount) === 0}
                     onClick={()=>{publish(appId)}}>
                 {
                   intl.formatMessage({
@@ -534,7 +534,7 @@ const configs: React.FC = (props: any) => {
               :
               <></>
             }
-            
+
           </AuthorizedEle>
         ,
         <AuthorizedEle key="6" judgeKey={functionKeys.Config_Edit} appId={appId} >
@@ -637,7 +637,7 @@ const configs: React.FC = (props: any) => {
           appName={appName}
           jsonImportModalVisible={jsonImportFormModalVisible}
           env={currentEnv}
-          > 
+          >
         </JsonImport>
       }
       {
@@ -660,13 +660,13 @@ const configs: React.FC = (props: any) => {
           env={currentEnv}
           appId={appId}
           appName={appName}
-          versionHistoryModalVisible ={versionHistoryFormModalVisible}> 
+          versionHistoryModalVisible ={versionHistoryFormModalVisible}>
         </VersionHistory>
       }
       {
         EnvSyncModalVisible&&
         <EnvSync currentEnv={currentEnv}
-                appId={appId} 
+                appId={appId}
                 ModalVisible={EnvSyncModalVisible}
                 onSaveSuccess={
                   ()=>{
@@ -797,8 +797,8 @@ const configs: React.FC = (props: any) => {
           } />
       }
       {
-        jsonEditorVisible && 
-        <JsonEditor 
+        jsonEditorVisible &&
+        <JsonEditor
         appId={appId}
         appName={appName}
         env={currentEnv}
@@ -820,8 +820,8 @@ const configs: React.FC = (props: any) => {
         </JsonEditor>
       }
       {
-        textEditorVisible && 
-        <TextEditor 
+        textEditorVisible &&
+        <TextEditor
         appId={appId}
         appName={appName}
         env={currentEnv}

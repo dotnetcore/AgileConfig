@@ -3,7 +3,6 @@ import { extend, RequestOptionsInit } from 'umi-request';
 import { notification } from 'antd';
 import { getToken } from './authority';
 import { history } from 'umi';
-//import { getRootUrl } from './requestUrl';
 
 const codeMessage = {
   200: '服务器成功返回请求的数据。',
@@ -70,7 +69,6 @@ if (NODE_ENV === 'development') {
 
 /** 配置request请求时的默认参数 */
 const request = extend({
-  //prefix: getRootUrl(),
   prefix: requestPrefix,
   errorHandler, // 默认错误处理
   credentials: 'same-origin', // 默认请求是否带上cookie,

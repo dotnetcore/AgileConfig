@@ -45,11 +45,11 @@ const TextEditor : React.FC<TextEditorProps> = (props)=>{
     },[])
 
     return (
-        <Modal 
+        <Modal
           maskClosable={false}
           title="按 TEXT 视图编辑"
           okText="保存"
-          width={800} 
+          width={800}
           visible={props.ModalVisible}
           onCancel={
             ()=>{
@@ -65,7 +65,7 @@ const TextEditor : React.FC<TextEditorProps> = (props)=>{
                 严格按照 KEY=VALUE 格式编辑，每行一个配置，如果需要注释，则在//前加一个空格
               </div>
               <div>
-              <Button onClick={ 
+              <Button onClick={
                   ()=>{
                     props.onCancel();
                   }
