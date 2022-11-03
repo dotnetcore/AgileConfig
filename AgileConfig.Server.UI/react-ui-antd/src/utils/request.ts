@@ -64,7 +64,7 @@ if (NODE_ENV === 'development') {
   requestPrefix = 'http://localhost:5000/';
   //requestPrefix = 'http://agileconfig_server.xbaby.xyz/';
 } else {
-  requestPrefix = 'http://10.120.147.218/config/';
+  requestPrefix = 'http://config.lang.com/configapi/'; //配合API接口中的 pathBase 使用
 }
 
 /** 配置request请求时的默认参数 */

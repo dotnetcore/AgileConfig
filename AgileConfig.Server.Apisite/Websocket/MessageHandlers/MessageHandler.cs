@@ -58,7 +58,7 @@ internal class MessageHandler : IMessageHandler
             message = "";
         }
 
-        if (message == "ping")
+        if (message == "ping" || message.StartsWith("ping:"))
         {
             //如果是ping，回复本地数据的md5版本 
             var appId = request.Headers["appid"];

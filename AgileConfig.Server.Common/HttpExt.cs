@@ -70,5 +70,30 @@ namespace AgileConfig.Server.Common
         {
             return httpContext.User?.FindFirst("id")?.Value;
         }
+
+        /// <summary>
+        /// 获取客户端IP
+        /// </summary>
+        /// <param name="httpRequest"></param>
+        /// <returns></returns>
+        public static System.Net.IPAddress GetRemoteIp(HttpRequest httpRequest)
+        {
+            System.Net.IPAddress ip;
+            var headers = httpRequest.Headers.ToList();
+            if (headers.Exists((kvp) => kvp.Key == "X-Forwarded-For"))
+            {
+                // when running behind a load balancer you can expect this header
+                var header = headers.First((kvp) => kvp.Key == "X-Forwarded-For").Value.ToString();
+                System.Net.IPAddress.TryParse(header, out ip);
+            }
+            else
+            {
+                // this will always have a value (running locally in development won't have the header)
+                ip = httpRequest.HttpContext.Connection.RemoteIpAddress;
+            }
+
+            return ip;
+        }
+
     }
 }

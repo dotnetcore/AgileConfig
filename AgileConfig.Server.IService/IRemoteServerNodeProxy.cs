@@ -24,6 +24,11 @@ namespace AgileConfig.Server.IService
         public string Env { get; set; }
 
         public DateTime LastHeartbeatTime { get; set; }
+
+        /// <summary>
+        /// 客户端最后刷新配置数据的时间
+        /// </summary>
+        public DateTime LastRefreshTime { get; set; }
     }
 
     public class ClientInfos
