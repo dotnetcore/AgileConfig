@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AgileConfig.Server.Common;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
 
 namespace AgileConfig.Server.Service
 {
@@ -17,15 +18,18 @@ namespace AgileConfig.Server.Service
         private readonly FreeSqlContext _dbContext;
         private readonly ILogger<RegisterCenterService> _logger;
         private readonly IServiceInfoService _serviceInfoService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public RegisterCenterService(
             FreeSqlContext freeSql,
             IServiceInfoService serviceInfoService,
-            ILogger<RegisterCenterService> logger)
+            ILogger<RegisterCenterService> logger,
+            IHttpContextAccessor httpContextAccessor)
         {
             _dbContext = freeSql;
             _logger = logger;
             _serviceInfoService = serviceInfoService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<string> RegisterAsync(ServiceInfo serviceInfo)
@@ -45,7 +49,13 @@ namespace AgileConfig.Server.Service
                 oldEntity.Status = ServiceStatus.Healthy;
                 oldEntity.LastHeartBeat = DateTime.Now;
                 oldEntity.ServiceName = serviceInfo.ServiceName;
-                oldEntity.Ip = serviceInfo.Ip;
+                string ip = serviceInfo.Ip;
+                if (String.IsNullOrWhiteSpace(ip))
+                {
+                    var clientIp = Common.HttpExt.GetRemoteIp(_httpContextAccessor.HttpContext.Request);
+                    ip = clientIp.ToString();
+                }
+                oldEntity.Ip = ip;
                 oldEntity.Port = serviceInfo.Port;
                 oldEntity.MetaData = serviceInfo.MetaData;
                 oldEntity.HeartBeatMode = serviceInfo.HeartBeatMode;

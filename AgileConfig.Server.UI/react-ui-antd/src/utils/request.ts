@@ -58,7 +58,7 @@ const authHeaderInterceptor = (url: string, options: RequestOptionsInit) => {
   };
 };
 
-let requestPrefix = '';
+let requestPrefix = 'http://localhost:5000/';
 const { NODE_ENV } = process.env;
 if (NODE_ENV === 'development') {
   requestPrefix = 'http://localhost:5000/';

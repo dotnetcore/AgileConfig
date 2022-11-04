@@ -10,7 +10,13 @@ import { useIntl } from 'react-intl';
 import { queryApps } from '../Apps/service';
 import { queryNodes } from '../Nodes/service';
 import { queryClients, reloadClientConfigs, clientOffline } from './service';
+import moment from 'moment';  	// 这个moment方法。框架里本来就有引入就好
 const { confirm } = Modal;
+
+//时间格式化
+const formatterTime = (val) => {
+	return val ? moment(val).format('YYYY-MM-DD HH:mm:ss') : '';
+}
 
 const handleClientReload = async (client:any)=>{
   const intl = getIntl(getLocale());
@@ -132,12 +138,21 @@ const clients:React.FC = () => {
       }),
       dataIndex: 'name',
       hideInSearch: true,
-    },{
+    },
+    {
       title: intl.formatMessage({
         id: 'pages.client.table.cols.tag'
       }),
       dataIndex: 'tag',
       hideInSearch: true,
+    },
+    {
+      title: intl.formatMessage({
+        id: 'pages.client.table.cols.lastRefreshTime'
+      }),
+      dataIndex: 'lastRefreshTime',
+      hideInSearch: true,
+      render: formatterTime,
     },
     {
       title: intl.formatMessage({
@@ -188,14 +203,14 @@ const clients:React.FC = () => {
   ];
   return (
     <PageContainer header={{ title:intl.formatMessage({id:'pages.client.header.title'}) }}>
-      <ProTable     
+      <ProTable
       search={{
         labelWidth: 'auto',
       }}
-      actionRef={actionRef} 
+      actionRef={actionRef}
       options={
         false
-      }                                                                              
+      }
         rowKey="id"
         columns = {columns}
         request = { (params, sorter, filter) => queryClients(params) }

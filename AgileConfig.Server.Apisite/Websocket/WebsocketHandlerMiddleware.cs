@@ -7,11 +7,14 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using Agile.Config.Protocol;
 using AgileConfig.Server.Apisite.Websocket.MessageHandlers;
 using AgileConfig.Server.IService;
+using AgileConfig.Server.Service;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
+using Newtonsoft.Json;
 
 namespace AgileConfig.Server.Apisite.Websocket
 {
@@ -79,9 +82,17 @@ namespace AgileConfig.Server.Apisite.Websocket
                         tag = HttpUtility.UrlDecode(tag);
                     }
 
+                    DateTime lastRefreshTime = new DateTime(1970, 1, 1);
+                    //string strClientLastRefreshTime = context.Request.Headers["client_last_refresh_time"];
+                    //if (!String.IsNullOrWhiteSpace(strClientLastRefreshTime))
+                    //{
+                    //    strClientLastRefreshTime = HttpUtility.UrlDecode(strClientLastRefreshTime);
+                    //    DateTime.TryParse(strClientLastRefreshTime, out lastRefreshTime);
+                    //}
+
                     WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
 
-                    var clientIp = GetRemoteIp(context.Request);
+                    var clientIp = Common.HttpExt.GetRemoteIp(context.Request);
                     var client = new WebsocketClient()
                     {
                         Client = webSocket,
@@ -91,7 +102,8 @@ namespace AgileConfig.Server.Apisite.Websocket
                         Name = name,
                         Tag = tag,
                         Ip = clientIp.ToString(),
-                        Env = env
+                        Env = env,
+                        LastRefreshTime = lastRefreshTime,
                     };
                     _websocketCollection.AddClient(client);
                     _logger.LogInformation("Websocket client {0} Added ", client.Id);
@@ -124,25 +136,6 @@ namespace AgileConfig.Server.Apisite.Websocket
             }
         }
 
-        public IPAddress GetRemoteIp(HttpRequest httpRequest)
-        {
-            IPAddress ip;
-            var headers = httpRequest.Headers.ToList();
-            if (headers.Exists((kvp) => kvp.Key == "X-Forwarded-For"))
-            {
-                // when running behind a load balancer you can expect this header
-                var header = headers.First((kvp) => kvp.Key == "X-Forwarded-For").Value.ToString();
-                IPAddress.TryParse(header, out ip);
-            }
-            else
-            {
-                // this will always have a value (running locally in development won't have the header)
-                ip = httpRequest.HttpContext.Connection.RemoteIpAddress;
-            }
-
-            return ip;
-        }
-
         /// <summary>
         /// 对client的消息进行处理
         /// ，如果是ping是老版client的心跳消息
@@ -173,6 +166,28 @@ namespace AgileConfig.Server.Apisite.Websocket
                 }
                 socketClient.LastHeartbeatTime = DateTime.Now;
                 var message = await ReadWebsocketMessage(result, buffer);
+
+                //配置中心 ping 带参数
+                if (!String.IsNullOrWhiteSpace(message) && message.StartsWith("ping:"))
+                {
+                    string infoModel = message.Substring(5);
+                    if (!String.IsNullOrWhiteSpace(infoModel))
+                    {
+                        try
+                        {
+                            ClientInfo clientInfo = JsonConvert.DeserializeObject<ClientInfo>(infoModel);
+                            if (clientInfo != null)
+                            {
+                                socketClient.LastRefreshTime = clientInfo.LastRefreshTime;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex,
+                                $"解析配置中心客户端ping参数失败, message: {message}");
+                        }
+                    }
+                }
 
                 foreach (var messageHandlersMessageHandler in messageHandlers.MessageHandlers)
                 {

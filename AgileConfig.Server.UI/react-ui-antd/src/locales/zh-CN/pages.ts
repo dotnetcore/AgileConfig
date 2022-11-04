@@ -36,7 +36,7 @@ export default {
   'resetpassword.newpassword_ag': '重复新密码',
   'resetpassword.update_success': '修改密码成功,请使用新密码重新登录。',
   'resetpassword.update_fail': '修改密码失败。',
-  
+
   'pages.layouts.userLayout.title': 'AgileConfig - 轻量级配置中心',
   'pages.login.accountLogin.tab': '用户名密码登录',
   'pages.login.accountLogin.errorMessage': '错误的密码，请重新再试',
@@ -131,6 +131,7 @@ export default {
   'pages.client.table.cols.tag': '标签',
   'pages.client.table.cols.ip': 'IP',
   'pages.client.table.cols.appname': '应用名称',
+  'pages.client.table.cols.lastRefreshTime': '配置最后刷新时间',
   'pages.client.table.cols.action': '操作',
   'pages.client.table.cols.action.refresh': '刷新配置',
   'pages.client.table.cols.action.disconnect': '强制断开',
