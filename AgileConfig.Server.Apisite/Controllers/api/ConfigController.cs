@@ -257,7 +257,38 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 obj.message
             });
         }
+        /// <summary>
+        /// 合并修改配置
+        /// </summary>
+        /// <param name="data">模型</param>
+        /// <param name="appId" >配置id</param>
+        /// <param name="env">环境</param>
+        /// <returns></returns>
+        [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
+        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.MergeUpdate", Functions.Config_MergeUpdate })]
+        [HttpPost("/api/Config/MergeUpdate")]
+        public async Task<IActionResult> MergeUpdate([FromBody] SaveJsonVM data, string appId, string env)
+        {
+            if (string.IsNullOrEmpty(appId))
+            {
+                throw new ArgumentNullException(nameof(appId));
+            }
 
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+
+            if (string.IsNullOrEmpty(data.json))
+            {
+                throw new ArgumentNullException("data.json");
+            }
+            var result = await _configService.MergeUpdateJsonAsync(data.json, appId, env);
+            return Json(new
+            {
+                success = result
+            });
+        }
         /// <summary>
         /// 删除一个配置
         /// </summary>

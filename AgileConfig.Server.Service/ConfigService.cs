@@ -89,6 +89,101 @@ namespace AgileConfig.Server.Service
             return result;
         }
 
+        public async Task<bool> MergeUpdateJsonAsync(string json, string appId, string env)
+        {
+            if (string.IsNullOrEmpty(json))
+            {
+                throw new ArgumentNullException("json");
+            }
+
+
+            byte[] byteArray = Encoding.UTF8.GetBytes(json);
+            using var stream = new MemoryStream(byteArray);
+            var dict = JsonConfigurationFileParser.Parse(stream);
+            //2.比对数据库
+            //   如果key不存在,就创建
+            //   如果key存在,并且值不同,就覆盖
+            //   如果key存在,并且值相同,不做任何处理
+            using var dbcontext = FreeSqlDbContextFactory.Create(env);
+
+            var currentConfigs = await dbcontext.Configs
+                .Where(x => x.AppId == appId && x.Env == env && x.Status == ConfigStatus.Enabled).ToListAsync();
+            var addConfigs = new List<Config>();
+            var updateConfigs = new List<Config>();
+
+            var now = DateTime.Now;
+
+            foreach (var kv in dict)
+            {
+                var key = kv.Key;
+                var value = kv.Value;
+                var config = currentConfigs.FirstOrDefault(x => GenerateKey(x) == key);
+                if (config == null)
+                {
+                    var gk = SplitJsonKey(key);
+                    addConfigs.Add(new Config
+                    {
+                        Id = Guid.NewGuid().ToString("N"),
+                        AppId = appId,
+                        Env = env,
+                        Key = gk.Item2,
+                        Group = gk.Item1,
+                        Value = value,
+                        CreateTime = now,
+                        Status = ConfigStatus.Enabled,
+                        EditStatus = EditStatus.Add,
+                        OnlineStatus = OnlineStatus.WaitPublish
+                    });
+                }
+                else if (config.Value != kv.Value)
+                {
+                    config.Value = value;
+                    config.UpdateTime = now;
+                    if (config.OnlineStatus == OnlineStatus.Online)
+                    {
+                        config.EditStatus = EditStatus.Edit;
+                        config.OnlineStatus = OnlineStatus.WaitPublish;
+                    }
+                    else
+                    {
+                        if (config.EditStatus == EditStatus.Add)
+                        {
+                            //do nothing
+                        }
+
+                        if (config.EditStatus == EditStatus.Edit)
+                        {
+                            //do nothing
+                        }
+
+                        if (config.EditStatus == EditStatus.Deleted)
+                        {
+                            //上一次是删除状态，现在恢复为编辑状态
+                            config.EditStatus = EditStatus.Edit;
+                        }
+                    }
+
+                    updateConfigs.Add(config);
+                }
+            }
+
+
+            if (addConfigs.Count > 0)
+            {
+                await dbcontext.Configs.AddRangeAsync(addConfigs);
+            }
+
+            if (updateConfigs.Count > 0)
+            {
+                await dbcontext.Configs.UpdateRangeAsync(updateConfigs);
+            }
+
+            await dbcontext.SaveChangesAsync();
+
+            return true;
+        }
+
+
         public async Task<bool> CancelEdit(List<string> ids, string env)
         {
             using var dbcontext = FreeSqlDbContextFactory.Create(env);

@@ -60,6 +60,14 @@ namespace AgileConfig.Server.IService
         Task<bool> UpdateAsync(Config config, string env);
 
         Task<bool> UpdateAsync(List<Config> configs, string env);
+        /// <summary>
+        /// 合并更新配置
+        /// </summary>
+        /// <param name="json"></param>
+        /// <param name="appId"></param>
+        /// <param name="env"></param>
+        /// <returns></returns>
+        Task<bool> MergeUpdateJsonAsync(string json, string appId, string env);
 
         /// <summary>
         /// 撤销编辑状态

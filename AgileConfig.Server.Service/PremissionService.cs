@@ -25,6 +25,7 @@ namespace AgileConfig.Server.Service
             "GLOBAL_" + Functions.Config_Add,
             "GLOBAL_" + Functions.Config_Delete,
             "GLOBAL_" + Functions.Config_Edit,
+            "GLOBAL_" + Functions.Config_MergeUpdate,
             "GLOBAL_" + Functions.Config_Offline,
             "GLOBAL_" + Functions.Config_Publish,
 
@@ -56,6 +57,7 @@ namespace AgileConfig.Server.Service
             "APP_{0}_" + Functions.Config_Add,
             "APP_{0}_" + Functions.Config_Delete,
             "APP_{0}_" + Functions.Config_Edit,
+            "APP_{0}_" + Functions.Config_MergeUpdate,
             "APP_{0}_" + Functions.Config_Offline,
             "APP_{0}_" + Functions.Config_Publish,
         };
@@ -65,6 +67,7 @@ namespace AgileConfig.Server.Service
             "APP_{0}_" + Functions.Config_Add,
             "APP_{0}_" + Functions.Config_Delete,
             "APP_{0}_" + Functions.Config_Edit,
+            "APP_{0}_" + Functions.Config_MergeUpdate,
         };
 
         private static readonly List<string> Template_NormalUserPermissions_Publish = new List<string>

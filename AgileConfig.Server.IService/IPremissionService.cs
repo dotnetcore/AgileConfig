@@ -15,6 +15,7 @@ namespace AgileConfig.Server.IService
 
         public const string Config_Add = "CONFIG_ADD";
         public const string Config_Edit = "CONFIG_EDIT";
+        public const string Config_MergeUpdate = "CONFIG_MERGEUPDATE";
         public const string Config_Delete = "CONFIG_DELETE";
 
         public const string Config_Publish = "CONFIG_PUBLISH";
