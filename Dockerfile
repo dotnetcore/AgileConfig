@@ -1,8 +1,4 @@
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
-RUN sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=1/g' /etc/ssl/openssl.cnf
-RUN sed -i 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1/g' /etc/ssl/openssl.cnf
-RUN sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=1/g' /usr/lib/ssl/openssl.cnf
-RUN sed -i 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1/g' /usr/lib/ssl/openssl.cnf
+FROM mcr.microsoft.com/dotnet/aspnet:6.0-focal-arm64v8 AS base
 WORKDIR /app
 EXPOSE 5000
 
@@ -15,13 +11,13 @@ COPY ["AgileConfig.Server.Service/AgileConfig.Server.Service.csproj", "AgileConf
 COPY ["AgileConfig.Server.IService/AgileConfig.Server.IService.csproj", "AgileConfig.Server.IService/"]
 COPY ["AgileConfig.Server.Data.Freesql/AgileConfig.Server.Data.Freesql.csproj", "AgileConfig.Server.Data.Freesql/"]
 COPY ["AgileConfig.Server.Common/AgileConfig.Server.Common.csproj", "AgileConfig.Server.Common/"]
-RUN dotnet restore "AgileConfig.Server.Apisite/AgileConfig.Server.Apisite.csproj"
+RUN dotnet restore "AgileConfig.Server.Apisite/AgileConfig.Server.Apisite.csproj" -r linux-arm64
 COPY . .
 WORKDIR "/src/AgileConfig.Server.Apisite"
-RUN dotnet build "AgileConfig.Server.Apisite.csproj" -c Release -o /app/build
+RUN dotnet build "AgileConfig.Server.Apisite.csproj" -c Release -o /app/build -r linux-arm64
 
 FROM build AS publish
-RUN dotnet publish "AgileConfig.Server.Apisite.csproj" -c Release -o /app/publish
+RUN dotnet publish "AgileConfig.Server.Apisite.csproj" -c Release -o /app/publish -r linux-arm64 --self-contained false --no-restore
 
 FROM base AS final
 WORKDIR /app
