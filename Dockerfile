@@ -5,6 +5,7 @@ RUN sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=1/g' /usr/lib/ssl/openssl.cnf
 RUN sed -i 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1/g' /usr/lib/ssl/openssl.cnf
 WORKDIR /app
 EXPOSE 5000
+
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY ["AgileConfig.Server.Apisite/AgileConfig.Server.Apisite.csproj", "AgileConfig.Server.Apisite/"]
@@ -18,5 +19,12 @@ RUN dotnet restore "AgileConfig.Server.Apisite/AgileConfig.Server.Apisite.csproj
 COPY . .
 WORKDIR "/src/AgileConfig.Server.Apisite"
 RUN dotnet build "AgileConfig.Server.Apisite.csproj" -c Release -o /app/build
+
 FROM build AS publish
 RUN dotnet publish "AgileConfig.Server.Apisite.csproj" -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+
+ENTRYPOINT ["dotnet", "AgileConfig.Server.Apisite.dll"]
