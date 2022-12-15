@@ -134,6 +134,7 @@ export default {
   'pages.client.table.cols.action': '操作',
   'pages.client.table.cols.action.refresh': '刷新配置',
   'pages.client.table.cols.action.disconnect': '强制断开',
+  'pages.client.table.cols.lastRefreshTime': '最后刷新时间',
 
   'pages.client.header.title': '连接的客户端',
   'pages.client.disconnect_message': `是否确定断开与客户端的连接?`,

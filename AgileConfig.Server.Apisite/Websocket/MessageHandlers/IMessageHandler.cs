@@ -7,5 +7,5 @@ namespace AgileConfig.Server.Apisite.Websocket.MessageHandlers;
 public interface IMessageHandler
 {
     bool Hit(HttpRequest request);
-    Task Handle(string message, HttpRequest request, WebSocket client);
+    Task Handle(string message, HttpRequest request, WebsocketClient client);
 }

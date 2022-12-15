@@ -137,6 +137,7 @@ export default {
   'pages.client.table.cols.action': 'Action',
   'pages.client.table.cols.action.refresh': 'Refresh',
   'pages.client.table.cols.action.disconnect': 'Disconnect',
+  'pages.client.table.cols.lastRefreshTime': 'LastRefreshTime',
 
   'pages.client.header.title': 'Connected Clients',
   'pages.client.disconnect_message': `Are you sure to disconnect the client ?`,
