@@ -843,7 +843,7 @@ namespace AgileConfig.Server.Service
             return kvList;
         }
 
-        private async Task<bool> SaveFromDictAsync(IDictionary<string, string> dict, string appId, string env)
+        private async Task<bool> SaveFromDictAsync(IDictionary<string, string> dict, string appId, string env, bool isPatch)
         {
             using var dbcontext = FreeSqlDbContextFactory.Create(env);
 
@@ -909,28 +909,33 @@ namespace AgileConfig.Server.Service
                 }
             }
 
-            foreach (var item in currentConfigs)
+            if (!isPatch)//补丁模式不删除现有配置,只有全量模式才删除
             {
-                var key = GenerateKey(item);
-                if (!dict.ContainsKey(key))
+                foreach (var item in currentConfigs)
                 {
-                    item.EditStatus = EditStatus.Deleted;
-                    item.OnlineStatus = OnlineStatus.WaitPublish;
-                    deleteConfigs.Add(item);
+                    var key = GenerateKey(item);
+                    if (!dict.ContainsKey(key))
+                    {
+                        item.EditStatus = EditStatus.Deleted;
+                        item.OnlineStatus = OnlineStatus.WaitPublish;
+                        deleteConfigs.Add(item);
+                    }
                 }
             }
 
-            if (addConfigs.Count > 0)
+
+
+            if (addConfigs.Any())
             {
                 await dbcontext.Configs.AddRangeAsync(addConfigs);
             }
 
-            if (updateConfigs.Count > 0)
+            if (updateConfigs.Any())
             {
                 await dbcontext.Configs.UpdateRangeAsync(updateConfigs);
             }
 
-            if (deleteConfigs.Count > 0)
+            if (deleteConfigs.Any())
             {
                 await dbcontext.Configs.UpdateRangeAsync(deleteConfigs);
             }
@@ -946,9 +951,10 @@ namespace AgileConfig.Server.Service
         /// <param name="json"></param>
         /// <param name="appId"></param>
         /// <param name="env"></param>
+        /// <param name="isPatch"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public async Task<bool> SaveJsonAsync(string json, string appId, string env)
+        public async Task<bool> SaveJsonAsync(string json, string appId, string env, bool isPatch)
         {
             if (string.IsNullOrEmpty(json))
             {
@@ -959,7 +965,7 @@ namespace AgileConfig.Server.Service
             using var stream = new MemoryStream(byteArray);
             var dict = JsonConfigurationFileParser.Parse(stream);
 
-            return await SaveFromDictAsync(dict, appId, env);
+            return await SaveFromDictAsync(dict, appId, env, isPatch);
         }
 
         public (bool, string) ValidateKvString(string kvStr)
@@ -1003,7 +1009,7 @@ namespace AgileConfig.Server.Service
             }
         }
 
-        public async Task<bool> SaveKvListAsync(string kvString, string appId, string env)
+        public async Task<bool> SaveKvListAsync(string kvString, string appId, string env, bool isPatch)
         {
             if (kvString == null)
             {
@@ -1032,7 +1038,7 @@ namespace AgileConfig.Server.Service
                 dict.Add(key, val);
             }
 
-            return await SaveFromDictAsync(dict, appId, env);
+            return await SaveFromDictAsync(dict, appId, env, isPatch);
         }
 
         private (string, string) SplitJsonKey(string key)
