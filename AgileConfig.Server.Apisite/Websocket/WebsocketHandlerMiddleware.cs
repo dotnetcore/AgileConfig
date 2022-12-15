@@ -178,7 +178,7 @@ namespace AgileConfig.Server.Apisite.Websocket
                 {
                     if (messageHandlersMessageHandler.Hit(context.Request))
                     {
-                        await messageHandlersMessageHandler.Handle(message, context.Request, socketClient.Client);
+                        await messageHandlersMessageHandler.Handle(message, context.Request, socketClient);
                     }
                 }
             } while (!result.CloseStatus.HasValue);

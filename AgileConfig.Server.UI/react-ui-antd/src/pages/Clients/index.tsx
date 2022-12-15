@@ -98,6 +98,7 @@ const clients:React.FC = () => {
       }),
       dataIndex: 'id',
       hideInSearch: true,
+      ellipsis: true
     },
     {
       title: intl.formatMessage({
@@ -138,6 +139,15 @@ const clients:React.FC = () => {
       }),
       dataIndex: 'tag',
       hideInSearch: true,
+    },
+    {
+      title: intl.formatMessage({
+        id: 'pages.client.table.cols.lastRefreshTime'
+      }),
+      dataIndex: 'lastRefreshTime',
+      hideInSearch: true,
+      valueType: 'dateTime',
+      tip: '客户端从服务器最后一次全量拉取配置的时间'
     },
     {
       title: intl.formatMessage({

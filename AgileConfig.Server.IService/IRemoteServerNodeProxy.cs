@@ -23,6 +23,8 @@ namespace AgileConfig.Server.IService
         public string Env { get; set; }
 
         public DateTime LastHeartbeatTime { get; set; }
+
+        public DateTime? LastRefreshTime { get; set; }
     }
 
     public class ClientInfos
