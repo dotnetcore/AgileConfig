@@ -32,7 +32,7 @@ internal class OldMessageHandler : IMessageHandler
         await webSocket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
             CancellationToken.None);
     }
-    public async Task Handle(string message, HttpRequest request, WebSocket client)
+    public async Task Handle(string message, HttpRequest request, WebsocketClient client)
     {
         if (message == null)
         {
@@ -47,12 +47,12 @@ internal class OldMessageHandler : IMessageHandler
             var env = request.Headers["env"];
             env = await _configService.IfEnvEmptySetDefaultAsync(env);
             var md5 = await _configService.AppPublishedConfigsMd5CacheWithInheritanced(appId, env);
-            await SendMessage(client, $"V:{md5}");
+            await SendMessage(client.Client, $"V:{md5}");
         }
         else
         {
             //如果无法处理，回复0
-            await SendMessage(client, "0");
+            await SendMessage(client.Client, "0");
         }
     }
 }

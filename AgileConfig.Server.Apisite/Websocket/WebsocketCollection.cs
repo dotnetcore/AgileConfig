@@ -172,7 +172,8 @@ namespace AgileConfig.Server.Apisite.Websocket
                                       Tag = c.Tag, 
                                       Name = c.Name,
                                       Ip = c.Ip ,
-                                      Env = c.Env
+                                      Env = c.Env,
+                                      LastRefreshTime = c.LastRefreshTime
                                   })
                                   .OrderBy(c => c.AppId)
                                   .ThenByDescending(c => c.LastHeartbeatTime)
