@@ -5,9 +5,9 @@
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
     <AssemblyVersion>1.6.12</AssemblyVersion>
     <Version>1.6.12</Version>
-    <PackageVersion>1.6.10</PackageVersion>
+    <PackageVersion>1.6.12</PackageVersion>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <FileVersion>1.6.11</FileVersion>
+    <FileVersion>1.6.12</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
