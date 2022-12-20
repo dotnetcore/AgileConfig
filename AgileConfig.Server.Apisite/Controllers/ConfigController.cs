@@ -909,7 +909,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException("data.json");
             }
 
-            var result = await _configService.SaveJsonAsync(data.json, appId, env);
+            var result = await _configService.SaveJsonAsync(data.json, appId, env, data.isPatch);
 
             return Json(new
             {
@@ -940,7 +940,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 });
             }
 
-            var result = await _configService.SaveKvListAsync(data.str, appId, env);
+            var result = await _configService.SaveKvListAsync(data.str, appId, env, data.isPatch);
 
             return Json(new
             {
