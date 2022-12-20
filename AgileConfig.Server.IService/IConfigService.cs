@@ -186,25 +186,27 @@ namespace AgileConfig.Server.IService
         /// <param name="env"></param>
         /// <returns></returns>
         Task<List<KeyValuePair<string, string>>> GetKvListAsync(string appId, string env);
-        
+
         /// <summary>
         /// 把json字符串格式的配置转换为标准的config然后保存到数据库。
         /// 跟原来的配置比较，标记出新增，删除，更新
         /// </summary>
-        /// <param name="json"></param>
-        /// <param name="appId"></param>
-        /// <param name="env"></param>
+        /// <param name="json">配置对象的json字符串</param>
+        /// <param name="appId">appId</param>
+        /// <param name="env">环境名</param>
+        /// <param name="isPatch">指示是否为补丁模式更新</param>
         /// <returns></returns>
-        Task<bool> SaveJsonAsync(string json, string appId, string env);
-        
+        Task<bool> SaveJsonAsync(string json, string appId, string env, bool isPatch);
+
         /// <summary>
         /// 把键值对方式的配置列表保存到数据库
         /// </summary>
         /// <param name="kvString"></param>
         /// <param name="appId"></param>
         /// <param name="env"></param>
+        /// <param name="isPatch">指示是否为补丁模式更新</param>
         /// <returns></returns>
-        Task<bool> SaveKvListAsync(string kvString, string appId, string env);
+        Task<bool> SaveKvListAsync(string kvString, string appId, string env, bool isPatch);
 
         /// <summary>
         /// 校验键值对的文本是否合法
