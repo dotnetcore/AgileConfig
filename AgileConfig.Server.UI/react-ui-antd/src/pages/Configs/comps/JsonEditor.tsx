@@ -111,6 +111,13 @@ const JsonEditor: React.FC<JsonEditorProps> = (props) => {
         defaultValue=""
         value={json}
         options={{ minimap: { enabled: false } }}
+        beforeMount={(monaco) => {
+          monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+            validate: true,
+            allowComments: true,//是否允许json内容中带注释
+            schemaValidation: 'error',
+          });
+        }}
         onChange={(v, e) => {
           setJson(v);
         }}
