@@ -1,7 +1,10 @@
 # Change log
 ------------------------------
+[1.6.12]
+* json 视图与 kv 视图编辑的时候支持补丁模式（后台与提交过来的json进行对比，只对修改跟新增做出响应，忽略删除 [112](https://github.com/dotnetcore/AgileConfig/pull/112)
+
 [1.6.11]
-* 客户端列表支持显示最新刷新时间，需要 client 1.6.10 版本支持
+* 客户端列表支持显示最新刷新时间，需要 client 1.6.10 版本支持 [108](https://github.com/dotnetcore/AgileConfig/pull/108)
 
 [1.6.10]
 * 模态框加上 maskCloseable:false 防止误操作关闭    
