@@ -911,10 +911,11 @@ namespace AgileConfig.Server.Service
 
             if (!isPatch)//补丁模式不删除现有配置,只有全量模式才删除
             {
+                var keys = dict.Keys.ToList();
                 foreach (var item in currentConfigs)
                 {
                     var key = GenerateKey(item);
-                    if (!dict.ContainsKey(key))
+                    if (!keys.Contains(key))
                     {
                         item.EditStatus = EditStatus.Deleted;
                         item.OnlineStatus = OnlineStatus.WaitPublish;
