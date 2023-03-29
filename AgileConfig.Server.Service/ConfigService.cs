@@ -806,6 +806,7 @@ namespace AgileConfig.Server.Service
                             }
 
                             envConfig.OnlineStatus = OnlineStatus.WaitPublish;
+                            envConfig.Description = currentEnvConfig.Description;
                             updateRanges.Add(envConfig);
                         }
                     }
