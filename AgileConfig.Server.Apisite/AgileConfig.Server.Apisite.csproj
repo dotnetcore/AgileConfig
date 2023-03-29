@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
-    <AssemblyVersion>1.6.13</AssemblyVersion>
-    <Version>1.6.13</Version>
+    <AssemblyVersion>1.6.15</AssemblyVersion>
+    <Version>1.6.15</Version>
     <PackageVersion>1.6.12</PackageVersion>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <FileVersion>1.6.13</FileVersion>
