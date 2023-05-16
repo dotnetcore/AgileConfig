@@ -163,7 +163,7 @@ export default {
 
   'pages.configs.table.cols.action.edit': '编辑',
   'pages.configs.table.cols.action.delete': '删除',
-  'pages.configs.table.cols.action.publish': '发布',
+  'pages.configs.table.cols.action.publish': '发布全部',
   'pages.configs.table.cols.action.offline': '下线',
   'pages.configs.table.cols.action.history': '历史',
 

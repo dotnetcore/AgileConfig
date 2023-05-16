@@ -165,7 +165,7 @@ export default {
   'pages.configs.table.cols.action.exportJson': 'Export',
   'pages.configs.table.cols.action.edit': 'Edit',
   'pages.configs.table.cols.action.delete': 'Delete',
-  'pages.configs.table.cols.action.publish': 'Publish',
+  'pages.configs.table.cols.action.publish': 'Publish All',
   'pages.configs.table.cols.action.offline': 'Offline',
   'pages.configs.table.cols.action.history': 'History',
 
