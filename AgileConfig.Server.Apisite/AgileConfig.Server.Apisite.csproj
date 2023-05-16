@@ -7,7 +7,7 @@
     <Version>1.6.16</Version>
     <PackageVersion>1.6.15</PackageVersion>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <FileVersion>1.6.15</FileVersion>
+    <FileVersion>1.6.16</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
