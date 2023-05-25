@@ -428,8 +428,8 @@ namespace AgileConfig.Server.Service
         {
             var configs = await GetPublishedConfigsByAppIdWithInheritanced(appId, env);
 
-            var keyStr = string.Join('&', configs.Select(c => GenerateKey(c)).ToArray().OrderBy(k => k));
-            var valStr = string.Join('&', configs.Select(c => c.Value).ToArray().OrderBy(v => v));
+            var keyStr = string.Join('&', configs.Select(c => GenerateKey(c)).ToArray().OrderBy(k => k, StringUtil.StringComparerWithInvariantCulture));
+            var valStr = string.Join('&', configs.Select(c => c.Value).ToArray().OrderBy(v => v, StringUtil.StringComparerWithInvariantCulture));
             var txt = $"{keyStr}&{valStr}";
 
             return Encrypt.Md5(txt);
