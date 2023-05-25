@@ -1,5 +1,8 @@
 # Change log
 ------------------------------
+[1.6.17]
+* 客户端计算配置的MD5时，OrderBy更改为忽略区域文化、大小写的实现，避免服务端和客户端区域文化不一致导致的频繁reload问题。https://github.com/dotnetcore/AgileConfig/pull/131
+
 [1.6.16]
 * 支持选择部分项目发布 https://github.com/dotnetcore/AgileConfig/issues/128
 
