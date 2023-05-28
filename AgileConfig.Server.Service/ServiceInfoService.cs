@@ -94,7 +94,7 @@ namespace AgileConfig.Server.Service
         private string GenerateMD5(List<ServiceInfo> services)
         {
             var sb = new StringBuilder();
-            foreach (var serviceInfo in services.OrderBy(x => x.ServiceId))
+            foreach (var serviceInfo in services.OrderBy(x => x.ServiceId, StringComparer.Ordinal))
             {
                 var metaDataStr = "";
                 if (!string.IsNullOrEmpty(serviceInfo.MetaData))
@@ -102,7 +102,7 @@ namespace AgileConfig.Server.Service
                     var metaData = JsonConvert.DeserializeObject<List<string>>(serviceInfo.MetaData);
                     if (metaData != null)
                     {
-                        metaDataStr = string.Join(",", metaData.OrderBy(x => x));
+                        metaDataStr = string.Join(",", metaData.OrderBy(x => x, StringComparer.Ordinal));
                     }
                 }
 
