@@ -27,5 +27,15 @@ namespace AgileConfig.Server.Common
                 _loggerFactory = value;
             }
         }
+
+        private static string _uiDirectory;
+        public static string UiDirectory
+        {
+            get { return _uiDirectory; }
+            set
+            {
+                _uiDirectory = value;
+            }
+        }
     }
 }

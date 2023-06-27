@@ -88,7 +88,7 @@ namespace AgileConfig.Server.Apisite.UIExtension
             await File.WriteAllLinesAsync(filePath, rows);
         }
 
-        private static readonly string UiDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "wwwroot/ui");
+        private static readonly string UiDirectory = Global.UiDirectory;
         public async Task Invoke(HttpContext context)
         {
             //handle /ui request

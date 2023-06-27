@@ -75,6 +75,12 @@ namespace AgileConfig.Server.Apisite
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
+            Global.UiDirectory = Path.Combine(AppContext.BaseDirectory, "wwwroot/ui");
+            if (!Directory.Exists(Global.UiDirectory))
+            {
+                Global.UiDirectory = Path.Combine(env.WebRootPath, "ui");
+            }
+
             var basePath = Configuration["pathBase"];
             if (!string.IsNullOrWhiteSpace(basePath))
             {
