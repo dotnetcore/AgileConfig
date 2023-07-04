@@ -9,22 +9,35 @@ using System.Text;
 using Microsoft.Extensions.Primitives;
 using System.Collections.Concurrent;
 using AgileConfig.Server.Common;
+using Microsoft.AspNetCore.Hosting;
 
 namespace AgileConfig.Server.Apisite.UIExtension
 {
     public class ReactUIMiddleware
     {
-        private static readonly ConcurrentDictionary<string, UIFileBag> StaticFilesCache = new ();
+        private static string UiDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "wwwroot/ui");
+        private static readonly ConcurrentDictionary<string, UIFileBag> StaticFilesCache = new();
         private readonly RequestDelegate _next;
         private readonly ILogger _logger;
+        private readonly IWebHostEnvironment _environment;
         public ReactUIMiddleware(
            RequestDelegate next,
-           ILoggerFactory loggerFactory
+           ILoggerFactory loggerFactory,
+           IWebHostEnvironment environment
        )
         {
             _next = next;
             _logger = loggerFactory.
                 CreateLogger<ReactUIMiddleware>();
+            _environment = environment;
+#if DEBUG
+            //if debug mode, try to switch to project wwwwroot dir
+            var projectUIPath = Path.Combine(_environment.ContentRootPath, "wwwroot/ui");
+            if (Directory.Exists(projectUIPath))
+            {
+                UiDirectory = projectUIPath;
+            }
+#endif
         }
 
         private bool IsAdminConsoleMode => "true".Equals(Global.Config["adminConsole"], StringComparison.OrdinalIgnoreCase);
@@ -43,7 +56,7 @@ namespace AgileConfig.Server.Apisite.UIExtension
                 if (refererValues.Any())
                 {
                     var refererValue = refererValues.First();
-                    if (refererValue.EndsWith("/ui", StringComparison.OrdinalIgnoreCase) 
+                    if (refererValue.EndsWith("/ui", StringComparison.OrdinalIgnoreCase)
                         || refererValue.Contains("/monaco-editor/", StringComparison.OrdinalIgnoreCase))
                     {
                         return true;
@@ -88,7 +101,6 @@ namespace AgileConfig.Server.Apisite.UIExtension
             await File.WriteAllLinesAsync(filePath, rows);
         }
 
-        private static readonly string UiDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "wwwroot/ui");
         public async Task Invoke(HttpContext context)
         {
             //handle /ui request
@@ -120,7 +132,7 @@ namespace AgileConfig.Server.Apisite.UIExtension
                     context.Response.StatusCode = 404;
                     return;
                 }
-                
+
                 if (StaticFilesCache.TryGetValue(filePath, out var uiFile))
                 {
                     // cached
@@ -141,10 +153,10 @@ namespace AgileConfig.Server.Apisite.UIExtension
                         LastModified = lastModified,
                         ExtType = extType
                     };
-                    
+
                     StaticFilesCache.TryAdd(filePath, uiFile);
                 }
-                
+
                 //判断前端缓存的文件是否过期
                 if (context.Request.Headers.TryGetValue("If-Modified-Since", out StringValues values))
                 {
@@ -155,7 +167,7 @@ namespace AgileConfig.Server.Apisite.UIExtension
                         return;
                     }
                 }
-                
+
                 context.Response.OnStarting(() =>
                 {
                     context.Response.ContentType = uiFile.ContentType;
