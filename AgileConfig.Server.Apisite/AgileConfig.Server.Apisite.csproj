@@ -3,11 +3,11 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
-    <AssemblyVersion>1.6.18</AssemblyVersion>
-    <Version>1.6.18</Version>
-    <PackageVersion>1.6.15</PackageVersion>
+    <AssemblyVersion>1.6.19</AssemblyVersion>
+    <Version>1.6.19</Version>
+    <PackageVersion>1.6.19</PackageVersion>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <FileVersion>1.6.18</FileVersion>
+    <FileVersion>1.6.19</FileVersion>
     <Authors>kklldog</Authors>
     <Company>kklldog</Company>
   </PropertyGroup>
@@ -53,6 +53,7 @@
   <ItemGroup>
     <Folder Include="logs\" />
     <Folder Include="Views\Shared" />
+    <Folder Include="wwwroot\ui\" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
