@@ -111,12 +111,13 @@ export async function getWaitPublishStatus(appId: string, env: string) {
   });
 }
 
-export async function publish(appId: string, publistLog: string, env: string) {
+export async function publish(appId: string, ids:string[], publistLog: string, env: string) {
   return request('config/publish?env=' + env, {
     method: 'POST',
     data: {
       log: publistLog,
-      appId: appId
+      appId: appId,
+      ids: ids
     }
   });
 }

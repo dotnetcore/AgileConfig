@@ -1,5 +1,24 @@
 # Change log
 ------------------------------
+[1.6.19]
+* 调试模式的时候优先读取项目文件夹下的wwwroot/ui文件夹里的内容
+  https://github.com/dotnetcore/AgileConfig/pull/139
+
+[1.6.18]
+* 客户端计算配置的MD5时，OrderBy更改为 StringComparer.Ordinal 实现，避免服务端和客户端区域文化不一致导致的频繁reload问题。https://github.com/dotnetcore/AgileConfig/pull/132
+
+[1.6.16]
+* 支持选择部分项目发布 https://github.com/dotnetcore/AgileConfig/issues/128
+
+[1.6.15]
+* switch mysql driver to mysqlconnector
+
+[1.6.14]
+* 当同步环境配置的时候同步更新描述；
+
+[1.6.13]
+修复 json 编辑的时候 key 值修改大小写会多生产一个 key 的问题
+
 [1.6.12]
 * json 视图与 kv 视图编辑的时候支持补丁模式（后台与提交过来的json进行对比，只对修改跟新增做出响应，忽略删除 [112](https://github.com/dotnetcore/AgileConfig/pull/112)
 

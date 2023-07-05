@@ -299,8 +299,8 @@ namespace AgileConfig.Server.Service
                                  && c.Env == env
             ).ToListAsync();
 
-            var keyStr = string.Join('&', configs.Select(c => GenerateKey(c)).ToArray().OrderBy(k => k));
-            var valStr = string.Join('&', configs.Select(c => c.Value).ToArray().OrderBy(v => v));
+            var keyStr = string.Join('&', configs.Select(c => GenerateKey(c)).ToArray().OrderBy(k => k, StringComparer.Ordinal));
+            var valStr = string.Join('&', configs.Select(c => c.Value).ToArray().OrderBy(v => v, StringComparer.Ordinal));
             var txt = $"{keyStr}&{valStr}";
 
             return Encrypt.Md5(txt);
@@ -428,8 +428,8 @@ namespace AgileConfig.Server.Service
         {
             var configs = await GetPublishedConfigsByAppIdWithInheritanced(appId, env);
 
-            var keyStr = string.Join('&', configs.Select(c => GenerateKey(c)).ToArray().OrderBy(k => k));
-            var valStr = string.Join('&', configs.Select(c => c.Value).ToArray().OrderBy(v => v));
+            var keyStr = string.Join('&', configs.Select(c => GenerateKey(c)).ToArray().OrderBy(k => k, StringComparer.Ordinal));
+            var valStr = string.Join('&', configs.Select(c => c.Value).ToArray().OrderBy(v => v, StringComparer.Ordinal));
             var txt = $"{keyStr}&{valStr}";
 
             return Encrypt.Md5(txt);
@@ -470,10 +470,11 @@ namespace AgileConfig.Server.Service
         /// 发布当前待发布的配置项
         /// </summary>
         /// <param name="appId">应用id</param>
+        /// <param name="ids">待发布的id列表</param>
         /// <param name="log">发布日志</param>
         /// <param name="operatorr">操作员</param>
         /// <returns></returns>
-        public (bool result, string publishTimelineId) Publish(string appId, string log, string operatorr, string env)
+        public (bool result, string publishTimelineId) Publish(string appId, string[] ids, string log, string operatorr, string env)
         {
             lock (Lockobj)
             {
@@ -484,6 +485,11 @@ namespace AgileConfig.Server.Service
                     x.Env == env &&
                     x.Status == ConfigStatus.Enabled &&
                     x.EditStatus != EditStatus.Commit).ToList();
+                if (ids != null && ids.Any())
+                {
+                    //如果ids传值了，过滤一下
+                    waitPublishConfigs = waitPublishConfigs.Where(x => ids.Contains(x.Id)).ToList();
+                }
                 //这里默认admin console 实例只部署一个，如果部署多个同步操作，高并发的时候这个version会有问题
                 var versionMax = dbcontext.PublishTimeline.Select.Where(x => x.AppId == appId).Max(x => x.Version);
 
@@ -924,8 +930,6 @@ namespace AgileConfig.Server.Service
                     }
                 }
             }
-
-
 
             if (addConfigs.Any())
             {
