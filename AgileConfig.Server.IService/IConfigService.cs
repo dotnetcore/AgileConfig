@@ -15,13 +15,14 @@ namespace AgileConfig.Server.IService
         Task<string> IfEnvEmptySetDefaultAsync(string env);
 
         /// <summary>
-        /// 发布当前待发布的配置项
+        /// 发布当前待发布的配置项,如果传ids那么就是只发布这些项目，如果不传ids，那么就是全部发布
         /// </summary>
         /// <param name="appId"></param>
+        /// <param name="ids"></param>
         /// <param name="log"></param>
         /// <param name="operatorr"></param>
         /// <returns></returns>
-        (bool result, string publishTimelineId) Publish(string appId, string log, string operatorr, string env);
+        (bool result, string publishTimelineId) Publish(string appId,string[] ids, string log, string operatorr, string env);
 
         Task<Config> GetAsync(string id, string env);
 

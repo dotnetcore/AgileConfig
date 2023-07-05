@@ -26,10 +26,10 @@ import { saveVisitApp } from '@/utils/latestVisitApps';
 const { TextArea } = Input;
 const { confirm } = Modal;
 
-const handlePublish = async (appId: string, log:string, env:string) => {
+const handlePublish = async (appId: string, ids:string[], log:string, env:string) => {
   const hide = message.loading('正在发布');
   try {
-    const result = await publish(appId, log, env);
+    const result = await publish(appId, ids, log, env);
     hide();
     const success = result.success;
     if (success) {
@@ -225,11 +225,14 @@ const configs: React.FC = (props: any) => {
   }, [tableData]);
 
   const publish = (appId: string) => {
+    const rows = selectedRowsState.filter(x=>x.editStatus !== 10).map(x=>x.id);
+    const isPublishAll = rows.length === 0;
+    const msg = isPublishAll ? '所有' : '已选择';
     _publishLog = '';
     confirm({
       content: <div>
         {
-          '确定发布当前所有待发布的配置项吗？'
+          `确定发布当前【${msg}】的待发布配置项吗？`
         }
         <br />
         <br />
@@ -243,7 +246,8 @@ const configs: React.FC = (props: any) => {
         </div>
       </div>,
       onOk: async () => {
-        const result = await handlePublish(appId, _publishLog, currentEnv);
+
+        const result = await handlePublish(appId, rows, _publishLog, currentEnv);
         if (result && actionRef.current) {
           if (actionRef.current?.clearSelected){
             actionRef.current?.clearSelected();
@@ -499,9 +503,7 @@ const configs: React.FC = (props: any) => {
                     hidden={(waitPublishStatus.addCount + waitPublishStatus.editCount + waitPublishStatus.deleteCount) === 0} 
                     onClick={()=>{publish(appId)}}>
                 {
-                  intl.formatMessage({
-                    id: 'pages.configs.table.cols.action.publish'
-                  })
+                  selectedRowsState.filter(x=>x.editStatus !== 10).length > 0 ? '发布选择项' : '发布全部'
                 }
             </Button>
           </AuthorizedEle>
