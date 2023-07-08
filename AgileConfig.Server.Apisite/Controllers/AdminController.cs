@@ -12,6 +12,8 @@ using System.Linq.Expressions;
 using System.Dynamic;
 using AgileConfig.Server.Apisite.Utilites;
 using AgileConfig.Server.Service;
+using AgileConfig.Server.OIDC;
+using FreeSql.Internal.ObjectPool;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -51,23 +53,8 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _userService.ValidateUserPassword(userName, model.password);
             if (result)
             {
-                var user = (await _userService.GetUsersByNameAsync(userName)).First();
-                var userRoles = await _userService.GetUserRolesAsync(user.Id);
-                var jwt = _jwtService.GetToken(user.Id, user.UserName, userRoles.Any(r => r == Role.Admin || r == Role.SuperAdmin));
-                var userFunctions = await _permissionService.GetUserPermission(user.Id);
-
-                dynamic param = new ExpandoObject();
-                param.userName = user.UserName;
-                TinyEventBus.Instance.Fire(EventKeys.USER_LOGIN_SUCCESS, param);
-
-                return Json(new
-                {
-                    status = "ok",
-                    token = jwt,
-                    type = "Bearer",
-                    currentAuthority = userRoles.Select(r => r.ToString()),
-                    currentFunctions = userFunctions
-                });
+                var response =  await LoginSuccessful(userName);
+                return Json(response);
             }
 
             return Json(new
@@ -75,6 +62,69 @@ namespace AgileConfig.Server.Apisite.Controllers
                 status = "error",
                 message = "密码错误"
             });
+        }
+
+        private async Task<object> LoginSuccessful(string userName)
+        {
+            var user = (await _userService.GetUsersByNameAsync(userName)).First();
+            var userRoles = await _userService.GetUserRolesAsync(user.Id);
+            var jwt = _jwtService.GetToken(user.Id, user.UserName, userRoles.Any(r => r == Role.Admin || r == Role.SuperAdmin));
+            var userFunctions = await _permissionService.GetUserPermission(user.Id);
+
+            dynamic param = new ExpandoObject();
+            param.userName = user.UserName;
+            TinyEventBus.Instance.Fire(EventKeys.USER_LOGIN_SUCCESS, param);
+
+            return new
+            {
+                status = "ok",
+                token = jwt,
+                type = "Bearer",
+                currentAuthority = userRoles.Select(r => r.ToString()),
+                currentFunctions = userFunctions
+            };
+        }
+
+        [HttpGet("admin/oidc")]
+        public async Task<IActionResult> Oidc(string code)
+        {
+            var client = new OidcClient();
+
+            var tokens = client.Validate(code);
+
+            if (string.IsNullOrEmpty(tokens.IdToken))
+            {
+                return Json(new
+                {
+                    message = "Code validate failed",
+                    success = false
+                });
+            }
+
+            var userInfo = client.UnboxIdToken(tokens.IdToken);
+
+            if (string.IsNullOrEmpty(userInfo.UserName))
+            {
+                return Json(new
+                {
+                    message = "IdToken invalid",
+                    success = false
+                });
+            }
+
+            var user = (await _userService.GetUsersByNameAsync((string)userInfo.UserName)).FirstOrDefault();
+
+            if (user == null)
+            {
+                //user first login to system, should be inserted into the DB
+            }
+            else
+            {
+                var response = await LoginSuccessful(user.UserName);
+                return Json(response);
+            }
+
+            return Content("ok");
         }
 
         /// <summary>

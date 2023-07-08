@@ -41,6 +41,7 @@
     <ProjectReference Include="..\Agile.Config.Protocol\Agile.Config.Protocol.csproj" />
     <ProjectReference Include="..\AgileConfig.Server.Data.Entity\AgileConfig.Server.Data.Entity.csproj" />
     <ProjectReference Include="..\AgileConfig.Server.Data.Freesql\AgileConfig.Server.Data.Freesql.csproj" />
+    <ProjectReference Include="..\AgileConfig.Server.OIDC\AgileConfig.Server.OIDC.csproj" />
     <ProjectReference Include="..\AgileConfig.Server.Service\AgileConfig.Server.Service.csproj" />
   </ItemGroup>
 
