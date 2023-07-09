@@ -41,12 +41,6 @@ namespace AgileConfig.Server.Apisite.Controllers
             return Redirect(Request.PathBase + "/ui");
         }
 
-        [AllowAnonymous]
-        public async Task<IActionResult> OIDC(string code)
-        {
-            return Redirect("http://localhost:8000/ui/#/oidc/login?code=" + code);
-        }
-
         public async Task<IActionResult> Current()
         {
             string userName = this.GetCurrentUserName();
