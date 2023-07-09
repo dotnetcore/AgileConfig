@@ -58,7 +58,7 @@ export default {
   'pages.login.submit': '登录',
   'pages.login.loginWith': '其他登录方式 :',
   'pages.login.registerAccount': '注册账户',
-  'pages.login.loginfail': '密码错误！ 😢😢😢 ',
+  'pages.login.loginfail': '登录失败！ 😢😢😢 ',
   'pages.login.loginsuccess': '🎉 🎉 🎉  登录成功！ ',
   'pages.welcome.advancedComponent': '高级表格',
   'pages.welcome.link': '欢迎使用',

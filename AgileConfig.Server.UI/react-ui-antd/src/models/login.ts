@@ -1,7 +1,5 @@
-import { stringify } from 'querystring';
 import type { Reducer, Effect } from 'umi';
 import { getIntl, history, getLocale  } from 'umi';
-
 import { accountLogin } from '@/services/login';
 import { setAuthority, setFunctions, setToken, setUserInfo } from '@/utils/authority';
 import { getPageQuery } from '@/utils/utils';
@@ -35,7 +33,6 @@ const Model: LoginModelType = {
   effects: {
     *login({ payload }, { call, put }) {
       const intl = getIntl(getLocale());
-
       const response = yield call(accountLogin, payload);
       yield put({
         type: 'changeLoginStatus',
@@ -47,11 +44,11 @@ const Model: LoginModelType = {
         const params = getPageQuery();
         const msg = intl.formatMessage({
           id: 'pages.login.loginsuccess'
-        })
+        });
         message.success(msg);
-        let { redirect } = params as { redirect: string };
+        let { redirect } = params as { redirect: string; };
         if (redirect) {
-          console.log('redirect url ' , redirect);
+          console.log('redirect url ', redirect);
           const redirectUrlParams = new URL(redirect);
           if (redirectUrlParams.origin === urlParams.origin) {
             redirect = redirect.substr(urlParams.origin.length);
@@ -67,7 +64,7 @@ const Model: LoginModelType = {
       } else {
         const msg = intl.formatMessage({
           id: 'pages.login.loginfail'
-        })
+        });
         message.error(msg);
       }
     },
@@ -76,7 +73,7 @@ const Model: LoginModelType = {
       setToken('');
       setAuthority([]);
       setFunctions([]);
-      setUserInfo({name:'',userid:''})
+      setUserInfo({ name: '', userid: '' });
       const { redirect } = getPageQuery();
       // Note: There may be security issues, please note
       if (window.location.pathname !== '/user/login' && !redirect) {
@@ -85,6 +82,7 @@ const Model: LoginModelType = {
         });
       }
     },
+
   },
 
   reducers: {

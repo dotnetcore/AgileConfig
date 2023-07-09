@@ -14,3 +14,11 @@ export async function accountLogin(params: LoginParamsType) {
   });
 }
 
+export async function oidcLogin(code: string) {
+  return request('admin/oidc', {
+    method: 'GET',
+    params: {
+      code: code
+    }
+  });
+}

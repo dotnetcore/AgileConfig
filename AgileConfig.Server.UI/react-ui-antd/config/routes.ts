@@ -20,6 +20,17 @@
         ],
       },
       {
+        path: '/oidc',
+        component: '../layouts/BlankLayout',
+        routes: [
+          {
+            name: 'login',
+            path: '/oidc/login',
+            component: './OIDC',
+          },
+        ],
+      },
+      {
         path: '/',
         component: '../layouts/SecurityLayout',
         routes: [
@@ -96,6 +107,7 @@
           },
         ],
       },
+
     ],
   },
   {

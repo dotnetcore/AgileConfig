@@ -59,7 +59,7 @@ export default {
   'pages.login.submit': 'Login',
   'pages.login.loginWith': 'Login with :',
   'pages.login.registerAccount': 'Register Account',
-  'pages.login.loginfail': 'Password incorrect ! 😢😢😢 ',
+  'pages.login.loginfail': 'UserName or Password incorrect ! 😢😢😢 ',
   'pages.login.loginsuccess': '🎉 🎉 🎉  Login successful ! ',
   'pages.welcome.advancedComponent': 'Advanced Component',
   'pages.welcome.link': 'Welcome',

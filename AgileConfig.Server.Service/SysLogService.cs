@@ -3,9 +3,6 @@ using AgileConfig.Server.IService;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AgileConfig.Server.Common;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
 using AgileConfig.Server.Data.Freesql;
 
 namespace AgileConfig.Server.Service

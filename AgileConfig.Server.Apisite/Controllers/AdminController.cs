@@ -88,9 +88,10 @@ namespace AgileConfig.Server.Apisite.Controllers
         [HttpGet("admin/oidc")]
         public async Task<IActionResult> Oidc(string code)
         {
-            var client = new OidcClient();
+            var oidcSetting = new ConfigfileOidcSettingProvider().GetSetting();
+            var client = new OidcClient(oidcSetting);
 
-            var tokens = client.Validate(code);
+            var tokens = await client.Validate(code);
 
             if (string.IsNullOrEmpty(tokens.IdToken))
             {
@@ -103,7 +104,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             var userInfo = client.UnboxIdToken(tokens.IdToken);
 
-            if (string.IsNullOrEmpty(userInfo.UserName))
+            if (string.IsNullOrEmpty(userInfo.Id) || string.IsNullOrEmpty(userInfo.UserName))
             {
                 return Json(new
                 {
@@ -117,14 +118,20 @@ namespace AgileConfig.Server.Apisite.Controllers
             if (user == null)
             {
                 //user first login to system, should be inserted into the DB
-            }
-            else
-            {
-                var response = await LoginSuccessful(user.UserName);
-                return Json(response);
+                var newUser = new User()
+                {
+                    Id = userInfo.Id,
+                    UserName = userInfo.UserName,
+                    Password = "/",
+                    CreateTime = DateTime.Now,
+                    Status = UserStatus.Normal,
+                    Salt = ""
+                };
+                await _userService.AddAsync(newUser);
             }
 
-            return Content("ok");
+            var response = await LoginSuccessful(userInfo.UserName);
+            return Json(response);
         }
 
         /// <summary>

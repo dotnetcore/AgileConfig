@@ -1,5 +1,4 @@
 import {
-  ContactsTwoTone,
   LockTwoTone,
   UserOutlined,
 } from '@ant-design/icons';
