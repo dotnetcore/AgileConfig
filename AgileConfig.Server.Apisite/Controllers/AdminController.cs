@@ -8,12 +8,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Dynamic;
 using AgileConfig.Server.Apisite.Utilites;
-using AgileConfig.Server.Service;
 using AgileConfig.Server.OIDC;
-using FreeSql.Internal.ObjectPool;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -23,16 +20,19 @@ namespace AgileConfig.Server.Apisite.Controllers
         private readonly IUserService _userService;
         private readonly IPremissionService _permissionService;
         private readonly IJwtService _jwtService;
+        private readonly IOidcClient _oidcClient;
         public AdminController(
             ISettingService settingService, 
             IUserService userService,
             IPremissionService permissionService,
-            IJwtService jwtService)
+            IJwtService jwtService,
+            IOidcClient oidcClient)
         {
             _settingService = settingService;
             _userService = userService;
             _permissionService = permissionService;
             _jwtService = jwtService;
+            _oidcClient = oidcClient;
         }
 
 
@@ -85,13 +85,15 @@ namespace AgileConfig.Server.Apisite.Controllers
             };
         }
 
-        [HttpGet("admin/oidc")]
-        public async Task<IActionResult> Oidc(string code)
+        [HttpGet("admin/oidc/login")]
+        public async Task<IActionResult> OidcLoginByCode(string code)
         {
-            var oidcSetting = new ConfigfileOidcSettingProvider().GetSetting();
-            var client = new OidcClient(oidcSetting);
+            if (!Appsettings.SsoEnabled)
+            {
+                return BadRequest("SSO not enabled");
+            }
 
-            var tokens = await client.Validate(code);
+            var tokens = await _oidcClient.Validate(code);
 
             if (string.IsNullOrEmpty(tokens.IdToken))
             {
@@ -102,7 +104,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 });
             }
 
-            var userInfo = client.UnboxIdToken(tokens.IdToken);
+            var userInfo = _oidcClient.UnboxIdToken(tokens.IdToken);
 
             if (string.IsNullOrEmpty(userInfo.Id) || string.IsNullOrEmpty(userInfo.UserName))
             {

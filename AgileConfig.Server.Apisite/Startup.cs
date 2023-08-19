@@ -6,6 +6,7 @@ using AgileConfig.Server.Apisite.UIExtension;
 using AgileConfig.Server.Apisite.Websocket;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Freesql;
+using AgileConfig.Server.OIDC;
 using AgileConfig.Server.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -28,7 +29,7 @@ namespace AgileConfig.Server.Apisite
 
             TrustSSL(configuration);
         }
-        
+
         private void TrustSSL(IConfiguration configuration)
         {
             var alwaysTrustSsl = configuration["alwaysTrustSsl"];
@@ -70,6 +71,7 @@ namespace AgileConfig.Server.Apisite
             services.AddBusinessServices();
             services.AddHostedService<InitService>();
             services.AddAntiforgery(o => o.SuppressXFrameOptionsHeader = true);
+            services.AddOIDC();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -80,7 +82,7 @@ namespace AgileConfig.Server.Apisite
             {
                 app.UsePathBase(basePath);
             }
-            
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -96,7 +98,8 @@ namespace AgileConfig.Server.Apisite
 
             app.UseMiddleware<ReactUIMiddleware>();
 
-            app.UseCors(op=> {
+            app.UseCors(op =>
+            {
                 op.AllowAnyOrigin();
                 op.AllowAnyMethod();
                 op.AllowAnyHeader();
@@ -127,7 +130,7 @@ namespace AgileConfig.Server.Apisite
             });
         }
 
-        private void AddSwaggerMiddleWare(IApplicationBuilder app) 
+        private void AddSwaggerMiddleWare(IApplicationBuilder app)
         {
             app.UseSwagger();
             app.UseSwaggerUI(c =>

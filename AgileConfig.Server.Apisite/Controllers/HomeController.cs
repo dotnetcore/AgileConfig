@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System.Linq;
 using AgileConfig.Server.Apisite.Utilites;
+using AgileConfig.Server.OIDC;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -16,9 +17,11 @@ namespace AgileConfig.Server.Apisite.Controllers
         private readonly IPremissionService _permissionService;
 
         public HomeController(
-            ISettingService settingService, 
+            ISettingService settingService,
             IUserService userService,
-            IPremissionService permissionService)
+            IPremissionService permissionService,
+            IOidcClient oidcClient
+            )
         {
             _settingService = settingService;
             _userService = userService;
@@ -48,7 +51,8 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 return Json(new
                 {
-                    currentUser =new { 
+                    currentUser = new
+                    {
                     }
                 });
             }
@@ -57,7 +61,8 @@ namespace AgileConfig.Server.Apisite.Controllers
             var userRoles = await _userService.GetUserRolesAsync(userId);
             var userFunctions = await _permissionService.GetUserPermission(userId);
 
-            return Json(new { 
+            return Json(new
+            {
                 currentUser = new
                 {
                     userId = userId,
@@ -86,7 +91,9 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 appVer,
                 passwordInited = await _settingService.HasSuperAdmin(),
-                envList
+                envList,
+                ssoEnabled = Appsettings.SsoEnabled,
+                ssoButtonText = Appsettings.SsoButtonText
             });
         }
 

@@ -3,18 +3,32 @@ using System.IdentityModel.Tokens.Jwt;
 
 namespace AgileConfig.Server.OIDC
 {
-    public class OidcClient
+    public class OidcClient : IOidcClient
     {
+        private readonly IOidcSettingProvider _oidcSettingProvider;
         private readonly OidcSetting _oidcSetting;
 
-        public OidcClient(OidcSetting oidcSetting)
+        public OidcSetting OidcSetting => _oidcSetting;
+
+        public OidcClient(IOidcSettingProvider oidcSettingProvider)
         {
-            _oidcSetting = oidcSetting;
+            _oidcSettingProvider = oidcSettingProvider;
+            _oidcSetting = _oidcSettingProvider.GetSetting();
+        }
+
+        public string GetAuthorizeUrl()
+        {
+            var url = $"{_oidcSetting.AuthorizationEndpoint}?" +
+                $"client_id={_oidcSetting.ClientId}" +
+                $"&response_type=code" +
+                $"&scope={_oidcSetting.Scope}" +
+                $"&redirect_uri={_oidcSetting.RedirectUri}" +
+                $"&state={Guid.NewGuid()}";
+            return url;
         }
 
         public async Task<TokenModel> Validate(string code)
         {
-
             var httpclient = new HttpClient();
             var kvs = new List<KeyValuePair<string, string>>() {
                 new KeyValuePair<string, string>("code", code),
@@ -51,13 +65,13 @@ namespace AgileConfig.Server.OIDC
         public (string Id, string UserName) UnboxIdToken(string idToken)
         {
             var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(idToken);
-            var id = jwtToken.Claims.Where(x=>x.Type  == "sub").FirstOrDefault()?.Value;
-            var userName = jwtToken.Claims.Where(x => x.Type == "email").FirstOrDefault()?.Value;
+            var id = jwtToken.Claims.Where(x => x.Type == _oidcSetting.UserIdClaim).FirstOrDefault()?.Value;
+            var userName = jwtToken.Claims.Where(x => x.Type == _oidcSetting.UserNameClaim).FirstOrDefault()?.Value;
 
             return (id, userName);
         }
     }
-    
+
     public class TokenModel
     {
         public string IdToken { get; set;}

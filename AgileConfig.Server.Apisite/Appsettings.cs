@@ -26,5 +26,15 @@ namespace AgileConfig.Server.Apisite
         /// path base
         /// </summary>
         public static string PathBase => Global.Config["pathBase"];
+
+        /// <summary>
+        /// 是否开启SSO
+        /// </summary>
+        public static bool SsoEnabled => "true".Equals(Global.Config["SSO:enabled"], StringComparison.CurrentCultureIgnoreCase);
+
+        /// <summary>
+        /// SSO button text
+        /// </summary>
+        public static string SsoButtonText => Global.Config["SSO:loginButtonText"];
     }
 }

@@ -12,6 +12,7 @@ import type { LoginParamsType } from '@/services/login';
 import type { ConnectState } from '@/models/connect';
 import { PasswordInited } from './service'
 import styles from './index.less';
+import { Button } from 'antd';
 
 export type LoginProps = {
   dispatch: Dispatch;
@@ -126,6 +127,7 @@ const Login: React.FC<LoginProps> = (props) => {
         >
         </div>
       </ProForm>
+      <Button type="primary" size='large' style={{ width:'100%', marginTop:'20px' }} href='/oidc/login' >单点登录</Button>
     </div>
   );
 };
