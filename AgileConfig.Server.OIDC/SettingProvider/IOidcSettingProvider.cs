@@ -1,4 +1,4 @@
-﻿namespace AgileConfig.Server.OIDC
+﻿namespace AgileConfig.Server.OIDC.SettingProvider
 {
     public interface IOidcSettingProvider
     {

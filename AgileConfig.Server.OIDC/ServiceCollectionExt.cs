@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using AgileConfig.Server.OIDC.SettingProvider;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AgileConfig.Server.OIDC
 {

@@ -11,6 +11,7 @@ using System.Linq;
 using System.Dynamic;
 using AgileConfig.Server.Apisite.Utilites;
 using AgileConfig.Server.OIDC;
+using System.Collections.Generic;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -131,6 +132,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     Source = UserSource.SSO
                 };
                 await _userService.AddAsync(newUser);
+                await _userService.UpdateUserRolesAsync(newUser.Id, new List<Role> { Role.NormalUser });
             }
 
             var response = await LoginSuccessful(userInfo.UserName);

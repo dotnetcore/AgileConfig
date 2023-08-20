@@ -1,5 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using AgileConfig.Server.OIDC.SettingProvider;
+using AgileConfig.Server.OIDC.TokenEndpointAuthMethods;
+using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
 
 namespace AgileConfig.Server.OIDC
 {
@@ -27,39 +30,34 @@ namespace AgileConfig.Server.OIDC
             return url;
         }
 
-        public async Task<TokenModel> Validate(string code)
+        public async Task<(string IdToken, string accessToken)> Validate(string code)
         {
-            var httpclient = new HttpClient();
-            var kvs = new List<KeyValuePair<string, string>>() {
-                new KeyValuePair<string, string>("code", code),
-                new KeyValuePair<string, string>("grant_type", "authorization_code"),
-                new KeyValuePair<string, string>("redirect_uri", _oidcSetting.RedirectUri),
-                new KeyValuePair<string, string>("client_id", _oidcSetting.ClientId),
-                new KeyValuePair<string, string>("client_secret", _oidcSetting.ClientSecret),
-            };
-            var form = new FormUrlEncodedContent(kvs);
-            var response = await httpclient.PostAsync(_oidcSetting.TokenEndpoint, form);
+            var authMethod = TokenEndpointAuthMethodFactory.Create(_oidcSetting.TokenEndpointAuthMethod);
+            var httpContent = authMethod.GetAuthHttpContent(code, _oidcSetting);
+
+            using var httpclient = new HttpClient();
+            if (!string.IsNullOrEmpty(httpContent.BasicAuthorizationString))
+            {
+                httpclient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", httpContent.BasicAuthorizationString);
+            }
+            var response = await httpclient.PostAsync(_oidcSetting.TokenEndpoint, httpContent.HttpContent);
             response.EnsureSuccessStatusCode();
+
             var bodyJson = await response.Content.ReadAsStringAsync();
             if (string.IsNullOrWhiteSpace(bodyJson))
             {
-                throw new Exception("Can not validate the code. The token endpoint return the empty response.");
+                throw new Exception("Can not validate the code. Token endpoint return empty response.");
             }
 
-            dynamic responseObject = JsonConvert.DeserializeObject<dynamic>(bodyJson);
-            string access_token = responseObject.access_token;
+            var responseObject = JsonConvert.DeserializeObject<TokenEndpointResponseModel>(bodyJson);
             string id_token = responseObject.id_token;
 
-            if (string.IsNullOrWhiteSpace(access_token) || string.IsNullOrWhiteSpace(id_token))
+            if (string.IsNullOrWhiteSpace(id_token))
             {
-                throw new Exception("Can not validate the code. Access token or Id token missing.");
+                throw new Exception("Can not validate the code. Id token missing.");
             }
 
-            var obj = new TokenModel();
-            obj.IdToken = id_token;
-            obj.AccessToken = access_token;
-
-            return obj;
+            return (id_token, "");
         }
 
         public (string Id, string UserName) UnboxIdToken(string idToken)
@@ -72,10 +70,10 @@ namespace AgileConfig.Server.OIDC
         }
     }
 
-    public class TokenModel
+    internal class TokenEndpointResponseModel
     {
-        public string IdToken { get; set;}
+        public string id_token { get; set; }
 
-        public string AccessToken { get; set;}
+        public string access_token { get; set; }
     }
 }

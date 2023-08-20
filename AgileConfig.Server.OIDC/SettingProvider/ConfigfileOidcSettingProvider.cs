@@ -1,7 +1,7 @@
 ﻿using AgileConfig.Server.Common;
 using Microsoft.Extensions.Logging;
 
-namespace AgileConfig.Server.OIDC
+namespace AgileConfig.Server.OIDC.SettingProvider
 {
     public class ConfigfileOidcSettingProvider : IOidcSettingProvider
     {
@@ -17,14 +17,15 @@ namespace AgileConfig.Server.OIDC
             var userIdClaim = Global.Config["SSO:OIDC:userIdClaim"];
             var userNameClaim = Global.Config["SSO:OIDC:userNameClaim"];
             var scope = Global.Config["SSO:OIDC:scope"];
+            var tokenEndpointAuthMethod = Global.Config["SSO:OIDC:tokenEndpointAuthMethod"];
             var loginButtonText = Global.Config["SSO:loginButtonText"];
 
             _oidcSetting = new OidcSetting(
-                clientId, 
-                clientSecret, redirectUri, 
-                tokenEndpoint, authorizationEndpoint, 
-                userIdClaim, userNameClaim, 
-                scope);
+                clientId,
+                clientSecret, redirectUri,
+                tokenEndpoint, authorizationEndpoint,
+                userIdClaim, userNameClaim,
+                scope, tokenEndpointAuthMethod);
 
             logger.LogInformation($"OIDC Setting " +
                 $"clientId:{clientId} " +
@@ -34,7 +35,8 @@ namespace AgileConfig.Server.OIDC
                 $"userIdClaim:{userIdClaim} " +
                 $"userNameClaim:{userNameClaim} " +
                 $"scope:{scope} " +
-                $"loginButtonText:{loginButtonText} "
+                $"loginButtonText:{loginButtonText} " +
+                $"tokenEndpointAuthMethod:{tokenEndpointAuthMethod} "
                 );
         }
 

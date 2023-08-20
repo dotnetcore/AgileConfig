@@ -111,10 +111,10 @@ namespace AgileConfig.Server.Apisite.Controllers
             user.CreateTime = DateTime.Now;
             user.UserName = model.UserName;
 
-            var result = await _userService.AddAsync(user);
-            var reuslt1 = await _userService.UpdateUserRolesAsync(user.Id, model.UserRoles);
+            var addUserResult = await _userService.AddAsync(user);
+            var addUserRoleResult = await _userService.UpdateUserRolesAsync(user.Id, model.UserRoles);
 
-            if (result)
+            if (addUserResult)
             {
                 dynamic param = new ExpandoObject();
                 param.userName = this.GetCurrentUserName();
@@ -124,8 +124,8 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             return Json(new
             {
-                success = result && reuslt1,
-                message = !(result && reuslt1) ? "添加用户失败，请查看错误日志" : ""
+                success = addUserResult && addUserRoleResult,
+                message = !(addUserResult && addUserRoleResult) ? "添加用户失败，请查看错误日志" : ""
             });
         }
 

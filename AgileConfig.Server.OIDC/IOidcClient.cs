@@ -5,6 +5,6 @@
         OidcSetting OidcSetting { get; }
         string GetAuthorizeUrl();
         (string Id, string UserName) UnboxIdToken(string idToken);
-        Task<TokenModel> Validate(string code);
+        Task<(string IdToken, string accessToken)> Validate(string code);
     }
 }

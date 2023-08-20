@@ -27,9 +27,9 @@ namespace AgileConfig.Server.Data.Entity
         [Description("超级管理员")]
         SuperAdmin = 0,
         [Description("管理员")]
-        Admin,
+        Admin = 1,
         [Description("操作员")]
-        NormalUser, 
+        NormalUser = 2, 
     }
 
     public enum AppRole

@@ -10,7 +10,9 @@
             string authorizationEndpoint, 
             string userIdClaim, 
             string userNameClaim, 
-            string scope)
+            string scope,
+            string tokenEndpointAuthMethod
+            )
         {
             ClientId = clientId;
             ClientSecret = clientSecret;
@@ -20,6 +22,7 @@
             UserIdClaim = userIdClaim;
             UserNameClaim = userNameClaim;
             Scope = scope;
+            TokenEndpointAuthMethod = tokenEndpointAuthMethod;
         }
 
         public string ClientId { get; }
@@ -30,5 +33,6 @@
         public string UserIdClaim { get; }
         public string UserNameClaim { get; }
         public string Scope { get; }
+        public string TokenEndpointAuthMethod { get; set; }
     }
 }
