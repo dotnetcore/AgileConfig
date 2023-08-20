@@ -83,6 +83,9 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     appVer,
+                    passwordInited = await _settingService.HasSuperAdmin(),
+                    ssoEnabled = Appsettings.SsoEnabled,
+                    ssoButtonText = Appsettings.SsoButtonText
                 });
             }
 

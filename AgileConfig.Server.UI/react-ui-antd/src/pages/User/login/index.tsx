@@ -10,7 +10,6 @@ import { history } from 'umi';
 import type { StateType } from '@/models/login';
 import type { LoginParamsType } from '@/services/login';
 import type { ConnectState } from '@/models/connect';
-import { PasswordInited } from './service'
 import styles from './index.less';
 import { Button } from 'antd';
 
@@ -19,16 +18,24 @@ export type LoginProps = {
   userLogin: StateType;
   submitting?: boolean;
 };
+import { sys } from '@/services/system';
 
 const Login: React.FC<LoginProps> = (props) => {
-  const { userLogin = {}, submitting } = props;
-  const [type, setType] = useState<string>('account');
+  const { submitting } = props;
+  const [type] = useState<string>('account');
+  const [ssoEnabled, setSsoEnabled] = useState<boolean>(false);
+  const [ssoLoginButtonText, setSsoLoginButtonText] = useState<string>('SSO Login');
   const intl = useIntl();
 
   useEffect(()=>{
-    PasswordInited().then(resp=> {
-      if (!resp.data) {
+    sys().then(resp=> {
+      console.log(resp);
+      if (!resp.passwordInited) {
         history.replace('/user/initpassword');
+      }
+      setSsoEnabled(resp.ssoEnabled);
+      if(resp.ssoButtonText) {
+        setSsoLoginButtonText(resp.ssoButtonText);
       }
     })
   },[])
@@ -127,7 +134,7 @@ const Login: React.FC<LoginProps> = (props) => {
         >
         </div>
       </ProForm>
-      <Button type="primary" size='large' style={{ width:'100%', marginTop:'20px' }} href='/oidc/login' >单点登录</Button>
+      <Button hidden={!ssoEnabled} type="primary" size='large' style={{ width:'100%', marginTop:'20px' }} href='/sso/login' >{ ssoLoginButtonText }</Button>
     </div>
   );
 };

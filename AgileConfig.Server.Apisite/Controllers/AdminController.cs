@@ -127,7 +127,8 @@ namespace AgileConfig.Server.Apisite.Controllers
                     Password = "/",
                     CreateTime = DateTime.Now,
                     Status = UserStatus.Normal,
-                    Salt = ""
+                    Salt = "",
+                    Source = UserSource.SSO
                 };
                 await _userService.AddAsync(newUser);
             }

@@ -1,5 +1,6 @@
 ﻿using FreeSql.DataAnnotations;
 using System;
+using System.Diagnostics;
 
 namespace AgileConfig.Server.Data.Entity
 {
@@ -7,7 +8,7 @@ namespace AgileConfig.Server.Data.Entity
     [OraclePrimaryKeyName("agc_user_pk")]
     public class User
     {
-        [Column(Name = "id", StringLength = 36)]
+        [Column(Name = "id", StringLength = 50)]
         public string Id { get; set; }
 
         [Column(Name= "user_name" , StringLength = 50)]
@@ -30,11 +31,20 @@ namespace AgileConfig.Server.Data.Entity
 
         [Column(Name = "status")]
         public UserStatus Status { get; set; }
+
+        [Column(Name = "source")]
+        public UserSource Source { get; set; }
     }
 
     public enum UserStatus
     {
         Normal  = 0,
         Deleted = -1
+    }
+
+    public enum UserSource
+    {
+        Normal = 0,
+        SSO = 1
     }
 }

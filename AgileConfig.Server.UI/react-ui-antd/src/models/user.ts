@@ -31,7 +31,7 @@ export type UserModelType = {
     fetchCurrent: Effect;
   };
   reducers: {
-    saveCurrentUser: Reducer<UserModelState>;
+    saveCurrentSystemInfo: Reducer<UserModelState>;
     changeNotifyCount: Reducer<UserModelState>;
   };
 };
@@ -66,14 +66,14 @@ const UserModel: UserModelType = {
         currentFunctions: currentInfo.currentUser?.currentFunctions
       };
       yield put({
-        type: 'saveCurrentUser',
+        type: 'saveCurrentSystemInfo',
         payload: response,
       });
     },
   },
 
   reducers: {
-    saveCurrentUser(state, action) {
+    saveCurrentSystemInfo(state, action) {
       setAuthority(action.payload.currentAuthority);
       setFunctions(action.payload.currentFunctions);
       setUserInfo({name:action.payload.name, userid: action.payload.userid});

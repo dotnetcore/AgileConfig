@@ -1,4 +1,5 @@
 import { PageContainer } from '@ant-design/pro-layout';
+import React, { useEffect, useState } from 'react';
 import { Spin } from 'antd';
 import styles from './index.less';
 import { oidcLogin } from '@/services/login';
@@ -20,7 +21,10 @@ const logs:React.FC = (props: any) =>  {
           id: 'pages.login.loginsuccess'
         });
         message.success(msg);
-        loginModel.reducers.changeLoginStatus({}, {payload: response});
+        loginModel.reducers.changeLoginStatus({}, {
+          payload: response,
+          type: 'changeLoginStatus'
+        });
         history.replace('/');
       }
       else {

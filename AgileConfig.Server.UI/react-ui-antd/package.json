@@ -6,6 +6,7 @@
   "scripts": {
     "analyze": "cross-env ANALYZE=1 umi build",
     "build": "umi build",
+    "build:ssl-legacy": "set NODE_OPTIONS=--openssl-legacy-provider && umi build",
     "deploy": "npm run site && npm run gh-pages",
     "dev": "npm run start:dev",
     "fetch:blocks": "pro fetch-blocks && npm run prettier",
@@ -20,7 +21,8 @@
     "lint:style": "stylelint --fix \"src/**/*.less\" --syntax less",
     "precommit": "lint-staged",
     "prettier": "prettier -c --write \"src/**/*\"",
-    "start": "set NODE_OPTIONS=--openssl-legacy-provider && cross-env UMI_ENV=dev umi dev",
+    "start": "cross-env UMI_ENV=dev umi dev",
+    "start:ssl-legacy": "set NODE_OPTIONS=--openssl-legacy-provider && npm run start",
     "start:dev": "cross-env REACT_APP_ENV=dev MOCK=none UMI_ENV=dev umi dev",
     "start:no-mock": "cross-env MOCK=none UMI_ENV=dev umi dev",
     "start:no-ui": "cross-env UMI_UI=none UMI_ENV=dev umi dev",
