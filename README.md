@@ -62,7 +62,7 @@ Restful API:
 9. 如果所有节点都故障，客户端支持从本地缓存读取配置
 10. 支持Restful API维护配置
 11. v-1.6.0 以上已支持服务注册与发现
-12. tag:test 以上已支持 SSO/OIDC 🍭🍭🍭
+12. tag:test 已支持 SSO/OIDC 🍭🍭🍭
 
     
 ## 💥 务必在使用 AgileConfig 之前仔细阅读以下文档
