@@ -23,7 +23,7 @@ AgileConfig秉承轻量化的特点，部署简单、配置简单、使用简单
     
 Gitee 镜像：[https://gitee.com/kklldog/AgileConfig](https://gitee.com/kklldog/AgileConfig)    
 
-❤️❤️ 演示地址：[AgileConfig Server Demo](http://agileconfig_server.xbaby.xyz)   用户名：admin 密码：123456   
+❤️❤️ 演示地址：[AgileConfig Server Demo](https://agileconfig-server.xbaby.xyz)   用户名：admin 密码：123456   
 .NET 客户端项目：[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
 JAVA 客户端项目：[AgileConfig_JClient](https://github.com/kklldog/agileconfig-jclient)   
 
@@ -62,6 +62,7 @@ Restful API:
 9. 如果所有节点都故障，客户端支持从本地缓存读取配置
 10. 支持Restful API维护配置
 11. v-1.6.0 以上已支持服务注册与发现
+12. tag:test 以上已支持 SSO/OIDC 🍭🍭🍭
 
     
 ## 💥 务必在使用 AgileConfig 之前仔细阅读以下文档
