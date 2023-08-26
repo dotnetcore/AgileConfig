@@ -30,8 +30,6 @@ namespace AgileConfig.Server.Service.Tests.mysql
             freeSqlContext = new FreeSqlContext(fsq);
             service = new AppService(freeSqlContext);
             fsq.Delete<App>().Where("1=1");
-
-            Console.WriteLine("TestInitialize");
         }
         [TestMethod()]
         public async Task AddAsyncTest()
