@@ -1,5 +1,8 @@
 # Change log
 ------------------------------
+[1.7.0]
+* 支持 SSO 登录   
+
 [1.6.20]
 * 优化MD5性能   
   https://github.com/dotnetcore/AgileConfig/pull/140
