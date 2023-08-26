@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33801.468
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.Apisite", "AgileConfig.Server.Apisite\AgileConfig.Server.Apisite.csproj", "{55EE475A-6F4E-44AF-85C6-9CF6037BA6EE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.Apisite", "src\AgileConfig.Server.Apisite\AgileConfig.Server.Apisite.csproj", "{55EE475A-6F4E-44AF-85C6-9CF6037BA6EE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4E3E3A07-0DAA-4054-ADBB-18AD50AFB0EF}"
 	ProjectSection(SolutionItems) = preProject
@@ -12,31 +12,31 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		License.txt = License.txt
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.IService", "AgileConfig.Server.IService\AgileConfig.Server.IService.csproj", "{5BE6420C-5798-4E06-8119-A0E9889B32BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.IService", "src\AgileConfig.Server.IService\AgileConfig.Server.IService.csproj", "{5BE6420C-5798-4E06-8119-A0E9889B32BA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.Service", "AgileConfig.Server.Service\AgileConfig.Server.Service.csproj", "{10FE686F-AE1A-4FE6-9CC1-7AE2097FD165}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.Service", "src\AgileConfig.Server.Service\AgileConfig.Server.Service.csproj", "{10FE686F-AE1A-4FE6-9CC1-7AE2097FD165}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.Data.Entity", "AgileConfig.Server.Data.Entity\AgileConfig.Server.Data.Entity.csproj", "{DAEA55BA-B79B-44CE-BCB4-6A69B83D55CB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.Data.Entity", "src\AgileConfig.Server.Data.Entity\AgileConfig.Server.Data.Entity.csproj", "{DAEA55BA-B79B-44CE-BCB4-6A69B83D55CB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.Common", "AgileConfig.Server.Common\AgileConfig.Server.Common.csproj", "{52BFD5C6-B473-433C-A698-A2D3B6823B12}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.Common", "src\AgileConfig.Server.Common\AgileConfig.Server.Common.csproj", "{52BFD5C6-B473-433C-A698-A2D3B6823B12}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Server", "Server", "{1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "protocol", "protocol", "{1902AB89-1E27-44C0-8286-3147CC039FF6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agile.Config.Protocol", "Agile.Config.Protocol\Agile.Config.Protocol.csproj", "{1B01F2FF-0A07-45AD-BB8D-6DCAEF9381E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agile.Config.Protocol", "src\Agile.Config.Protocol\Agile.Config.Protocol.csproj", "{1B01F2FF-0A07-45AD-BB8D-6DCAEF9381E1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_test", "_test", "{F277EC27-8C0E-4490-9645-F5F3244F9246}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiSiteTests", "ApiSiteTests\ApiSiteTests.csproj", "{EA462A1A-03CB-4FF0-AA1E-0988021E8711}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiSiteTests", "test\ApiSiteTests\ApiSiteTests.csproj", "{EA462A1A-03CB-4FF0-AA1E-0988021E8711}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.Data.Freesql", "AgileConfig.Server.Data.Freesql\AgileConfig.Server.Data.Freesql.csproj", "{1EBE3129-A926-497A-801E-FDC29F998272}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.Data.Freesql", "src\AgileConfig.Server.Data.Freesql\AgileConfig.Server.Data.Freesql.csproj", "{1EBE3129-A926-497A-801E-FDC29F998272}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.ServiceTests", "AgileConfig.Server.ServiceTests\AgileConfig.Server.ServiceTests.csproj", "{8CE2DB53-3A35-4991-A419-0EC12B001F59}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.ServiceTests", "test\AgileConfig.Server.ServiceTests\AgileConfig.Server.ServiceTests.csproj", "{8CE2DB53-3A35-4991-A419-0EC12B001F59}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.CommonTests", "AgileConfig.Server.CommonTests\AgileConfig.Server.CommonTests.csproj", "{70724B0E-7D81-412C-BDA7-747F4845E990}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.CommonTests", "test\AgileConfig.Server.CommonTests\AgileConfig.Server.CommonTests.csproj", "{70724B0E-7D81-412C-BDA7-747F4845E990}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.OIDC", "AgileConfig.Server.OIDC\AgileConfig.Server.OIDC.csproj", "{E49A2006-6D07-4434-AEC1-27E356A767AE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.OIDC", "src\AgileConfig.Server.OIDC\AgileConfig.Server.OIDC.csproj", "{E49A2006-6D07-4434-AEC1-27E356A767AE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
