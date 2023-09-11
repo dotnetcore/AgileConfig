@@ -13,7 +13,7 @@ COPY ["src/AgileConfig.Server.Data.Freesql/AgileConfig.Server.Data.Freesql.cspro
 COPY ["src/AgileConfig.Server.Common/AgileConfig.Server.Common.csproj", "AgileConfig.Server.Common/"]
 COPY ["src/AgileConfig.Server.OIDC/AgileConfig.Server.OIDC.csproj", "AgileConfig.Server.OIDC/"]
 
-RUN dotnet restore "src/AgileConfig.Server.Apisite/AgileConfig.Server.Apisite.csproj" -r linux-arm64
+RUN dotnet restore "AgileConfig.Server.Apisite/AgileConfig.Server.Apisite.csproj" -r linux-arm64
 COPY src/. .
 WORKDIR "/src/AgileConfig.Server.Apisite"
 RUN dotnet build "AgileConfig.Server.Apisite.csproj" -c Release -o /app/build -r linux-arm64
