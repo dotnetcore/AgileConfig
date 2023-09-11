@@ -1,14 +1,23 @@
 # Change log
 ------------------------------
+[1.7.0]
+* 支持 SSO 登录   
+
+[1.6.20]
+* 优化MD5性能   
+  https://github.com/dotnetcore/AgileConfig/pull/140
+
 [1.6.19]
-* 调试模式的时候优先读取项目文件夹下的wwwroot/ui文件夹里的内容
+* 调试模式的时候优先读取项目文件夹下的wwwroot/ui文件夹里的内容   
   https://github.com/dotnetcore/AgileConfig/pull/139
 
 [1.6.18]
-* 客户端计算配置的MD5时，OrderBy更改为 StringComparer.Ordinal 实现，避免服务端和客户端区域文化不一致导致的频繁reload问题。https://github.com/dotnetcore/AgileConfig/pull/132
+* 客户端计算配置的MD5时，OrderBy更改为 StringComparer.Ordinal 实现，避免服务端和客户端区域文化不一致导致的频繁reload问题。
+https://github.com/dotnetcore/AgileConfig/pull/132
 
 [1.6.16]
-* 支持选择部分项目发布 https://github.com/dotnetcore/AgileConfig/issues/128
+* 支持选择部分项目发布   
+https://github.com/dotnetcore/AgileConfig/issues/128
 
 [1.6.15]
 * switch mysql driver to mysqlconnector

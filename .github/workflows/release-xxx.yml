@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: AgileConfig.Server.UI/react-ui-antd
+        working-directory: src/AgileConfig.Server.UI/react-ui-antd
     strategy:
       matrix:
         node-version: [16.x]
@@ -30,7 +30,7 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: agileconfig-ui
-        path: AgileConfig.Server.UI/react-ui-antd/dist/
+        path: src/AgileConfig.Server.UI/react-ui-antd/dist/
   build-dotnet:
     needs: build-reactapp
     runs-on: ubuntu-latest
@@ -48,7 +48,7 @@ jobs:
     - uses: actions/download-artifact@v2
       with:
         name: agileconfig-ui
-        path: AgileConfig.Server.Apisite/wwwroot/ui
+        path: src/AgileConfig.Server.Apisite/wwwroot/ui
     - name: build server release xxx
       run: dotnet publish AgileConfig.Server.Apisite/AgileConfig.Server.Apisite.csproj -c Release
     - uses: vimtor/action-zip@v1
