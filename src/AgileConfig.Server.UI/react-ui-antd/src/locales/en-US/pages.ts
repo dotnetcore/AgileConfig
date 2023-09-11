@@ -169,7 +169,8 @@ export default {
   'pages.configs.table.cols.action.offline': 'Offline',
   'pages.configs.table.cols.action.history': 'History',
 
-  'pages.configs.from.add.title': 'Create',
+  'pages.configs.from.title.add': 'Create',
+  'pages.configs.from.title.edit': 'Edit',
   'pages.configs.from.add.app': 'App',
   'pages.configs.from.importjson.selectfile': 'Select file',
 

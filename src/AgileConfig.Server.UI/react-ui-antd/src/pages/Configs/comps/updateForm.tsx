@@ -17,7 +17,7 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
 
     return (
     <ModalForm 
-    title={intl.formatMessage({id:'pages.configs.from.add.title'})}
+    title={intl.formatMessage({id:'pages.configs.from.title.edit'})}
     initialValues={props.value}
     visible={props.updateModalVisible}
     modalProps={
@@ -79,7 +79,7 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
         <ProFormTextArea
           rules={[
             {
-              required: true,
+              required: false,
             },
           ]}
           label={intl.formatMessage({id:'pages.configs.table.cols.v'})}

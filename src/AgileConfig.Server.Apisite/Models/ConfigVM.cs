@@ -27,7 +27,6 @@ namespace AgileConfig.Server.Apisite.Models
         [MaxLength(100, ErrorMessage = "配置键长度不能超过100位")]
         public string Key { get; set; }
 
-        [Required(ErrorMessage = "配置值不能为空")]
         [MaxLength(4000, ErrorMessage = "配置值长度不能超过4000位")]
         public string Value { get; set; }
 

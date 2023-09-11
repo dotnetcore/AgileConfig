@@ -53,6 +53,11 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> AddAsync(Config config, string env)
         {
+            if (config.Value == null)
+            {
+                config.Value = "";
+            }
+
             using var dbcontext = FreeSqlDbContextFactory.Create(env);
 
             await dbcontext.Configs.AddAsync(config);
@@ -352,6 +357,13 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> AddRangeAsync(List<Config> configs, string env)
         {
+            configs.ForEach(x => {
+                if (x.Value == null)
+                {
+                    x.Value = "";
+                }
+            });
+
             using var dbcontext = FreeSqlDbContextFactory.Create(env);
 
             await dbcontext.Configs.AddRangeAsync(configs);

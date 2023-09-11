@@ -689,7 +689,7 @@ const configs: React.FC = (props: any) => {
           }
         }
         formRef={addFormRef}
-        title={intl.formatMessage({id:'pages.configs.from.add.title'})}
+        title={intl.formatMessage({id:'pages.configs.from.title.add'})}
         visible={createModalVisible}
         onVisibleChange={setCreateModalVisible}
         onFinish={
@@ -746,7 +746,7 @@ const configs: React.FC = (props: any) => {
         <ProFormTextArea
           rules={[
             {
-              required: true,
+              required: false,
             },
           ]}
           label={intl.formatMessage({id:'pages.configs.table.cols.v'})}

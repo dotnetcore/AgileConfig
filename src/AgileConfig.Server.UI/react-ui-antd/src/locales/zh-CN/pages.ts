@@ -167,7 +167,8 @@ export default {
   'pages.configs.table.cols.action.offline': '下线',
   'pages.configs.table.cols.action.history': '历史',
 
-  'pages.configs.from.add.title': '新建配置',
+  'pages.configs.from.title.add': '新建配置',
+  'pages.configs.from.title.edit': '编辑配置',
   'pages.configs.from.add.app': '应用',
   'pages.configs.from.importjson.selectfile': '选择文件',
 
