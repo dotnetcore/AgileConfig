@@ -16,7 +16,7 @@ namespace AgileConfig.Server.Data.Freesql
             " SELECT count(1) FROM information_schema.TABLES WHERE table_schema= @schema AND table_name ='agc_app'";
 
         private const string SqlServer_ExistTableSql =
-            "SELECT COUNT(1) FROM dbo.SYSOBJECTS WHERE ID = object_id(N'[dbo].[agc_app]') and OBJECTPROPERTY(id, N'IsUserTable') = 1";
+            "SELECT COUNT(1) FROM dbo.sysobjects WHERE ID = object_id(N'[dbo].[agc_app]') and OBJECTPROPERTY(id, N'IsUserTable') = 1";
 
         private const string Oracle_ExistTableSql = "select count(1) from user_tables where table_name = 'agc_app'";
         private const string PostgreSql_ExistTableSql = "select count(1) from pg_class where relname = 'agc_app'";
