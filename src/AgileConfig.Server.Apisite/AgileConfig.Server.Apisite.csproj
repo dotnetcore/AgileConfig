@@ -3,11 +3,11 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
-    <AssemblyVersion>1.7.0</AssemblyVersion>
-    <Version>1.7.0-rc</Version>
+    <AssemblyVersion>1.7.1</AssemblyVersion>
+    <Version>1.7.1</Version>
     <PackageVersion>1.6.20</PackageVersion>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <FileVersion>1.7.0</FileVersion>
+    <FileVersion>1.7.1</FileVersion>
     <Authors>kklldog</Authors>
     <Company>kklldog</Company>
   </PropertyGroup>
