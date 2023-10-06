@@ -7,7 +7,7 @@
     <Version>1.7.2</Version>
     <PackageVersion>1.6.20</PackageVersion>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <FileVersion>1.7.1</FileVersion>
+    <FileVersion>1.7.2</FileVersion>
     <Authors>kklldog</Authors>
     <Company>kklldog</Company>
   </PropertyGroup>
