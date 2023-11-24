@@ -26,6 +26,7 @@ FROM build AS publish
 RUN dotnet publish "AgileConfig.Server.Apisite.csproj" -c Release -o /app/publish
 
 FROM base AS final
+ENV COMPlus_EnableDiagnostics=0
 WORKDIR /app
 COPY --from=publish /app/publish .
 
