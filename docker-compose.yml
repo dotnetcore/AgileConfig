@@ -6,6 +6,8 @@ services:
       - "15000:5000"
     networks:
       - net0
+    security_opt:
+      - seccomp=unconfined
     volumes:
       - /etc/localtime:/etc/localtime
     environment:
@@ -20,6 +22,8 @@ services:
       - "15001:5000"
     networks:
       - net0
+    security_opt:
+      - seccomp=unconfined
     volumes:
       - /etc/localtime:/etc/localtime
     environment:
@@ -35,6 +39,8 @@ services:
       - "15002:5000"
     networks:
       - net0
+    security_opt:
+      - seccomp=unconfined
     volumes:
       - /etc/localtime:/etc/localtime
     environment:
