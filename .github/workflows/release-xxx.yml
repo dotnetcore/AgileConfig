@@ -7,7 +7,7 @@ on:
       - '**/*.yml'
     tags:        
       - 'v-*'
-    
+  workflow_dispatch:  
 jobs:
   build-reactapp:
     runs-on: ubuntu-latest

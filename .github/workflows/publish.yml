@@ -6,7 +6,8 @@ on:
     paths-ignore: 
       - '**/*.md'
       - '**/*.yml'
-    
+  workflow_dispatch:
+
 jobs:
   build-reactapp:
     runs-on: ubuntu-latest
