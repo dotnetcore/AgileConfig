@@ -1,10 +1,12 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using AgileConfig.Server.Apisite.UIExtension;
 using AgileConfig.Server.Apisite.Websocket;
 using AgileConfig.Server.Common;
+using AgileConfig.Server.Common.RestClient;
 using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.OIDC;
 using AgileConfig.Server.Service;
@@ -27,13 +29,23 @@ namespace AgileConfig.Server.Apisite
             Configuration = configuration;
             Global.LoggerFactory = loggerFactory;
 
-            TrustSSL(configuration);
+            SetTrustSSL(configuration);
         }
 
-        private void TrustSSL(IConfiguration configuration)
+        private static bool IsTrustSSL(IConfiguration configuration)
         {
             var alwaysTrustSsl = configuration["alwaysTrustSsl"];
             if (!string.IsNullOrEmpty(alwaysTrustSsl) && alwaysTrustSsl.ToLower() == "true")
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private static void SetTrustSSL(IConfiguration configuration)
+        {
+            if (IsTrustSSL(configuration))
             {
                 ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
             }
@@ -47,6 +59,9 @@ namespace AgileConfig.Server.Apisite
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDefaultHttpClient(IsTrustSSL(Configuration));
+            services.AddRestClient();
+
             var jwtService = new JwtService();
             services.AddMemoryCache();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -71,6 +86,7 @@ namespace AgileConfig.Server.Apisite
             services.AddBusinessServices();
             services.AddHostedService<InitService>();
             services.AddAntiforgery(o => o.SuppressXFrameOptionsHeader = true);
+
             services.AddOIDC();
         }
 
@@ -138,5 +154,7 @@ namespace AgileConfig.Server.Apisite
                 c.SwaggerEndpoint("v1/swagger.json", "My API V1");
             });
         }
+
+
     }
 }

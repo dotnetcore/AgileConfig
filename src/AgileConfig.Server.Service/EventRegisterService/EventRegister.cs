@@ -1,4 +1,5 @@
-﻿using AgileConfig.Server.IService;
+﻿using AgileConfig.Server.Common.RestClient;
+using AgileConfig.Server.IService;
 using Microsoft.Extensions.Logging;
 
 namespace AgileConfig.Server.Service.EventRegisterService;
@@ -10,12 +11,12 @@ public class EventRegister : IEventRegister
     private readonly SysLogRegister _sysLogRegister;
     private readonly ServiceInfoStatusUpdateRegister _serviceInfoStatusUpdateRegister;
 
-    public EventRegister(IRemoteServerNodeProxy remoteServerNodeProxy, ILoggerFactory loggerFactory)
+    public EventRegister(IRemoteServerNodeProxy remoteServerNodeProxy, ILoggerFactory loggerFactory, IRestClient restClient)
     {
         _remoteServerNodeProxy = remoteServerNodeProxy;
         _configStatusUpdateRegister = new ConfigStatusUpdateRegister(_remoteServerNodeProxy);
         _sysLogRegister = new SysLogRegister();
-        _serviceInfoStatusUpdateRegister = new ServiceInfoStatusUpdateRegister(_remoteServerNodeProxy, loggerFactory);
+        _serviceInfoStatusUpdateRegister = new ServiceInfoStatusUpdateRegister(_remoteServerNodeProxy, loggerFactory, restClient);
     }
 
     public void Register()

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AgileConfig.Server.Common;
+using AgileConfig.Server.Common.RestClient;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.IService;
-using AgileHttp;
 using Microsoft.Extensions.Logging;
 
 namespace AgileConfig.Server.Service;
@@ -12,14 +12,18 @@ namespace AgileConfig.Server.Service;
 public class ServiceHealthCheckService : IServiceHealthCheckService
 {
     private readonly ILogger _logger;
+    private readonly IRestClient _restClient;
     private readonly IServiceInfoService _serviceInfoService;
 
     public ServiceHealthCheckService(
         IServiceInfoService serviceInfoService,
-        ILogger<ServiceHealthCheckService> logger)
+        ILogger<ServiceHealthCheckService> logger,
+        IRestClient restClient
+        )
     {
         _serviceInfoService = serviceInfoService;
         _logger = logger;
+        _restClient = restClient;
     }
 
     private int _checkInterval;
@@ -189,20 +193,11 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
     {
         try
         {
-            using var resp = await service.CheckUrl
-                .AsHttp()
-                .SendAsync();
-            if (resp.Exception != null)
-            {
-                throw resp.Exception;
-            }
+            using var resp = await _restClient.GetAsync(service.CheckUrl);
 
             var result = false;
-            if (resp.StatusCode.HasValue)
-            {
-                int istatus = ((int)resp.StatusCode - 200);
-                result = istatus >= 0 && istatus < 100; // 200 段都认为是正常的
-            }
+            int istatus = ((int)resp.StatusCode - 200);
+            result = istatus >= 0 && istatus < 100; // 200 段都认为是正常的
 
             _logger.LogInformation("check service health {0} {1} {2} result：{3}", service.CheckUrl, service.ServiceId,
                 service.ServiceName, result ? "up" : "down");
