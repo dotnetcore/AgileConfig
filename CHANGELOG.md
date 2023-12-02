@@ -1,5 +1,8 @@
 # Change log
 ------------------------------
+[1.8.1]
+* Use build-in HttpClient instead of AgileHttp client.
+
 [1.8.0]
 * 升级到 .NET8
 
