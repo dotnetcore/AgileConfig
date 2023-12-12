@@ -82,8 +82,15 @@ namespace AgileConfig.Server.Apisite
                 AddSwaggerService(services);
             }
 
-            services.AddFreeSqlDbContext();
-            services.AddBusinessServices();
+            if (string.Equals(Configuration["db:provider"], "mongodb", StringComparison.OrdinalIgnoreCase))
+            {
+                
+            }
+            else
+            {
+                services.AddFreeSqlDbContext();
+                services.AddBusinessServices();    
+            }
             services.AddHostedService<InitService>();
             services.AddAntiforgery(o => o.SuppressXFrameOptionsHeader = true);
 
