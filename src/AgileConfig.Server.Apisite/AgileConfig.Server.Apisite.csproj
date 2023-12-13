@@ -38,6 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AgileConfig.Server.Mongodb.Service\AgileConfig.Server.Mongodb.Service.csproj" />
     <ProjectReference Include="..\Agile.Config.Protocol\Agile.Config.Protocol.csproj" />
     <ProjectReference Include="..\AgileConfig.Server.Data.Entity\AgileConfig.Server.Data.Entity.csproj" />
     <ProjectReference Include="..\AgileConfig.Server.Data.Freesql\AgileConfig.Server.Data.Freesql.csproj" />

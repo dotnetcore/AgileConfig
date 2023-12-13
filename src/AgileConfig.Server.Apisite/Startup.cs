@@ -8,6 +8,7 @@ using AgileConfig.Server.Apisite.Websocket;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Common.RestClient;
 using AgileConfig.Server.Data.Freesql;
+using AgileConfig.Server.Mongodb.Service;
 using AgileConfig.Server.OIDC;
 using AgileConfig.Server.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -61,19 +62,9 @@ namespace AgileConfig.Server.Apisite
         {
             services.AddDefaultHttpClient(IsTrustSSL(Configuration));
             services.AddRestClient();
-
-            var jwtService = new JwtService();
+            
             services.AddMemoryCache();
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                      .AddJwtBearer(options =>
-                      {
-                          options.TokenValidationParameters = new TokenValidationParameters
-                          {
-                              ValidIssuer = jwtService.Issuer,
-                              ValidAudience = jwtService.Audience,
-                              IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtService.GetSecurityKey())),
-                          };
-                      });
+            
             services.AddCors();
             services.AddMvc().AddRazorRuntimeCompilation();
 
@@ -84,13 +75,18 @@ namespace AgileConfig.Server.Apisite
 
             if (string.Equals(Configuration["db:provider"], "mongodb", StringComparison.OrdinalIgnoreCase))
             {
-                
+                services.AddBusinessForMongoServices();
             }
             else
             {
                 services.AddFreeSqlDbContext();
                 services.AddBusinessServices();    
             }
+            
+            services.ConfigureOptions<ConfigureJwtBearerOptions>();
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer();
+            
             services.AddHostedService<InitService>();
             services.AddAntiforgery(o => o.SuppressXFrameOptionsHeader = true);
 

@@ -8,12 +8,13 @@
     
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.3" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\AgileConfig.Server.Data.Mongodb\AgileConfig.Server.Data.Mongodb.csproj" />
-      <ProjectReference Include="..\src\AgileConfig.Server.Common\AgileConfig.Server.Common.csproj" />
-      <ProjectReference Include="..\src\AgileConfig.Server.IService\AgileConfig.Server.IService.csproj" />
+      <ProjectReference Include="..\AgileConfig.Server.Common\AgileConfig.Server.Common.csproj" />
+      <ProjectReference Include="..\AgileConfig.Server.IService\AgileConfig.Server.IService.csproj" />
     </ItemGroup>
 
 </Project>

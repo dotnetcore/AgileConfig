@@ -38,9 +38,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.CommonTe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.OIDC", "src\AgileConfig.Server.OIDC\AgileConfig.Server.OIDC.csproj", "{E49A2006-6D07-4434-AEC1-27E356A767AE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.Data.Mongodb", "AgileConfig.Server.Data.Mongodb\AgileConfig.Server.Data.Mongodb.csproj", "{4803646E-8327-4F69-8BA5-2244CB58BBA2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.Data.Mongodb", "src\AgileConfig.Server.Data.Mongodb\AgileConfig.Server.Data.Mongodb.csproj", "{4803646E-8327-4F69-8BA5-2244CB58BBA2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.Mongodb.Service", "AgileConfig.Server.Mongodb.Service\AgileConfig.Server.Mongodb.Service.csproj", "{375B1F54-11CA-415D-ADCC-3B14684AE1DB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.Mongodb.Service", "src\AgileConfig.Server.Mongodb.Service\AgileConfig.Server.Mongodb.Service.csproj", "{375B1F54-11CA-415D-ADCC-3B14684AE1DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
