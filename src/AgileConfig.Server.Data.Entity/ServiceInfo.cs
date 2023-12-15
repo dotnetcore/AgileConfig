@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace AgileConfig.Server.Data.Entity
 {
@@ -50,9 +51,11 @@ namespace AgileConfig.Server.Data.Entity
         public ServiceStatus Status { get; set; }
 
         [Column(Name = "register_time")] 
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime? RegisterTime { get; set; }
 
         [Column(Name = "last_heart_beat")] 
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime? LastHeartBeat { get; set; }
 
         [Column(Name = "heart_beat_mode",StringLength = 10)] 

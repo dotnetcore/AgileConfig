@@ -1,5 +1,6 @@
 ﻿using FreeSql.DataAnnotations;
 using System;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace AgileConfig.Server.Data.Entity
 {
@@ -14,6 +15,7 @@ namespace AgileConfig.Server.Data.Entity
         public string AppId { get; set; }
 
         [Column(Name = "publish_time")]
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime? PublishTime { get; set; }
 
         [Column(Name = "publish_user_id", StringLength = 36)]

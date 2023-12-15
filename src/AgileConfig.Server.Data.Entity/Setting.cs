@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace AgileConfig.Server.Data.Entity
 {
@@ -16,6 +17,7 @@ namespace AgileConfig.Server.Data.Entity
         public string Value { get; set; }
 
         [Column(Name = "create_time")]
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime CreateTime { get; set; }
     }
 }

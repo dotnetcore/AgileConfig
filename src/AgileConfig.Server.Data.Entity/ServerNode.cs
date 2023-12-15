@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace AgileConfig.Server.Data.Entity
 {
@@ -29,9 +30,11 @@ namespace AgileConfig.Server.Data.Entity
         public NodeStatus Status { get; set; }
 
         [Column(Name = "last_echo_time")]
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime? LastEchoTime { get; set; }
 
         [Column(Name = "create_time")]
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime CreateTime { get; set; }
     }
 }

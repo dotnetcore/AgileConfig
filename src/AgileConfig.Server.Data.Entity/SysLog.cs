@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace AgileConfig.Server.Data.Entity
 {
@@ -25,6 +26,7 @@ namespace AgileConfig.Server.Data.Entity
         public SysLogType LogType { get; set; }
 
         [Column(Name = "log_time")]
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime? LogTime { get; set; }
 
         [Column(Name = "log_text", StringLength = 2000)]
