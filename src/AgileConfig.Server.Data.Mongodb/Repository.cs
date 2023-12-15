@@ -118,8 +118,8 @@ public class Repository<T>  : IRepository<T> where T :  new()
         var result = await Collection.UpdateManyAsync(predicate, update);
         return result;
     }
-
-    public async Task<ReplaceOneResult> UpdateAsync(T entity)
+    
+    private static FilterDefinition<T> GetIdPropertyFilter(T entity)
     {
         var idProperty = typeof(T).GetProperty("Id");
         if (idProperty == null)
@@ -147,64 +147,37 @@ public class Repository<T>  : IRepository<T> where T :  new()
                 throw new Exception($"Do not support {idTypeName} type!");
         }
 
+        return filter;
+    }
+
+    public async Task<ReplaceOneResult> UpdateAsync(T entity)
+    {
+        var filter = GetIdPropertyFilter(entity);
         var result = await Collection.ReplaceOneAsync(filter, entity);
         return result;
     }
 
-    public async Task<long> UpdateAsync(IReadOnlyCollection<T> collection)
+    public async Task<BulkWriteResult<T>> UpdateAsync(IEnumerable<T> entities)
     {
-        var rows = 0L;
-        foreach (var item in collection)
-        {
-            var result = await UpdateAsync(item);
-            rows += result.ModifiedCount;
-        }
-
-        return rows;
+        var writes = entities
+            .Select(x => new ReplaceOneModel<T>(GetIdPropertyFilter(x), x))
+            .ToList();
+        return await Collection.BulkWriteAsync(writes);
     }
 
     public ReplaceOneResult Update(T entity)
     {
-        var idProperty = typeof(T).GetProperty("Id");
-        if (idProperty == null)
-            throw new ArgumentException("In the entity no exists property 'id'.", nameof(entity));
-        var id = idProperty.GetValue(entity);
-        if (id == null)
-            throw new ArgumentException("The entity property 'id' value is null.", nameof(entity));
-        var idTypeName = idProperty.PropertyType.Name;
-        FilterDefinition<T> filter;
-        switch (idTypeName)
-        {
-            case "ObjectId":
-                var definitionObjectId = new StringFieldDefinition<T, ObjectId>("Id");
-                filter = Builders<T>.Filter.Eq(definitionObjectId, (ObjectId)id);
-                break;
-            case "Int32":
-                var definitionInt32 = new StringFieldDefinition<T, int>("Id");
-                filter = Builders<T>.Filter.Eq(definitionInt32, (int)id);
-                break;
-            case "String":
-                var definitionString = new StringFieldDefinition<T, string>("Id");
-                filter = Builders<T>.Filter.Eq(definitionString, (string)id);
-                break;
-            default:
-                throw new Exception($"Do not support {idTypeName} type!");
-        }
-
+        var filter = GetIdPropertyFilter(entity);
         var result = Collection.ReplaceOne(filter, entity);
         return result;
     }
 
-    public long Update(IReadOnlyCollection<T> collection)
+    public BulkWriteResult<T> Update(IEnumerable<T> entities)
     {
-        var rows = 0L;
-        foreach (var item in collection)
-        {
-            var result = Update(item);
-            rows += result.ModifiedCount;
-        }
-
-        return rows;
+        var writes = entities
+            .Select(x => new ReplaceOneModel<T>(GetIdPropertyFilter(x), x))
+            .ToList();
+        return Collection.BulkWrite(writes);
     }
     
     

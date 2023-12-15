@@ -110,9 +110,9 @@ public interface IRepository<T> : IRepository where T : new()
     /// <exception cref="ArgumentException">If the entity no exists property 'id',then will throw exception.</exception>
     Task<ReplaceOneResult> UpdateAsync(T entity);
 
-    Task<long> UpdateAsync(IReadOnlyCollection<T> collection);
+    Task<BulkWriteResult<T>> UpdateAsync(IEnumerable<T> entities);
     
     ReplaceOneResult Update(T entity);
     
-    long Update(IReadOnlyCollection<T> collection);
+    BulkWriteResult<T> Update(IEnumerable<T> entities);
 }

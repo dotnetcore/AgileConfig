@@ -18,7 +18,7 @@ public abstract class MongodbAccess
         if (string.IsNullOrEmpty(connectionString))
             throw new Exception("没有配置Mongodb连接字符串");
         _connectionString = connectionString;
-        if (LazyMongoClients is not { IsValueCreated: true } || LazyMongoClients.Value.ContainsKey(connectionString))
+        if (LazyMongoClients is not { IsValueCreated: true } || !LazyMongoClients.Value.ContainsKey(connectionString))
         {
             var url = MongoUrl.Create(connectionString);
             
@@ -40,7 +40,7 @@ public abstract class MongodbAccess
     public IMongoDatabase Database => Client.GetDatabase(LazyMongoClients.Value[_connectionString].DatabaseName);
 }
 
-public class MongodbAccess<T>(string? connectionString) : MongodbAccess(connectionString)
+public sealed class MongodbAccess<T>(string? connectionString) : MongodbAccess(connectionString)
     where T : new()
 {
     /// <summary>
