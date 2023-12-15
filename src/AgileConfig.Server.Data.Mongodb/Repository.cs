@@ -2,7 +2,6 @@
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
@@ -47,28 +46,30 @@ public class Repository<T>  : IRepository<T> where T :  new()
         }
     }
 
-    public T? Find(string id)
+    public T? Find(object id)
     {
-        var idProperty = typeof(T).GetProperty("Id");
-        if (idProperty != null && idProperty.PropertyType == typeof(string))
-        {
-            var definitionString = new StringFieldDefinition<T, string>("Id");
-            var filter = Builders<T>.Filter.Eq(definitionString, id);
-            return Collection.Find(filter).SingleOrDefault();
-        }
-        return default;
+        var filter = GetIdPropertyFilter(id);
+        return Collection.Find(filter).SingleOrDefault();
     }
 
-    public async Task<T?> FindAsync(string id)
+    public async Task<T?> FindAsync(object id)
     {
-        var idProperty = typeof(T).GetProperty("Id");
-        if (idProperty != null && idProperty.PropertyType == typeof(string))
-        {
-            var definitionString = new StringFieldDefinition<T, string>("Id");
-            var filter = Builders<T>.Filter.Eq(definitionString, id);
-            return await (await Collection.FindAsync(filter)).SingleOrDefaultAsync();
-        }
-        return default;
+        var filter = GetIdPropertyFilter(id);
+        return await (await Collection.FindAsync(filter)).SingleOrDefaultAsync();
+    }
+    
+    private static Expression<Func<T,bool>> GetIdPropertyFilter(object idValue)
+    {
+        var idProperty = GetIdProperty();
+        if (idValue == null)
+            throw new Exception($"The entity property '{idProperty.Name}' value is null.");
+        
+        var parameter = Expression.Parameter(typeof(T), "__q");
+        var memberExpress = Expression.Property(parameter, idProperty);
+        var expression =
+            Expression.Lambda<Func<T, bool>>(Expression.Equal(memberExpress, Expression.Constant(idValue)),parameter);
+
+        return expression;
     }
 
     public void Insert(params T[] source)
@@ -109,9 +110,7 @@ public class Repository<T>  : IRepository<T> where T :  new()
 
     public async Task<DeleteResult> DeleteAsync(string id)
     {
-        if (typeof(T).GetProperty("Id") == null)
-            throw new Exception($"type {typeof(T)} no exists property 'id'.");
-        var filter = Builders<T>.Filter.Eq(new StringFieldDefinition<T, string>("Id"), id);
+        var filter = GetIdPropertyFilter(id);
         return await Collection.DeleteOneAsync(filter);
     }
 
@@ -120,8 +119,8 @@ public class Repository<T>  : IRepository<T> where T :  new()
         var result = await Collection.UpdateManyAsync(predicate, update);
         return result;
     }
-    
-    private static FilterDefinition<T> GetIdPropertyFilter(T entity)
+
+    private static PropertyInfo GetIdProperty()
     {
         var idProperty = typeof(T).GetProperty("Id") ?? typeof(T).GetProperties().FirstOrDefault(x =>
         {
@@ -129,31 +128,23 @@ public class Repository<T>  : IRepository<T> where T :  new()
             return attribute != null;
         });
         if (idProperty == null)
-            throw new ArgumentException("In the entity no exists property 'id'.", nameof(entity));
-        var id = idProperty.GetValue(entity);
-        if (id == null)
+            throw new Exception("In the entity no exists property 'id'.");
+        return idProperty;
+    }
+    
+    private static Expression<Func<T,bool>> GetIdPropertyFilter(T entity)
+    {
+        var idProperty = GetIdProperty();
+        var idValue = idProperty.GetValue(entity);
+        if (idValue == null)
             throw new ArgumentException($"The entity property '{idProperty.Name}' value is null.", nameof(entity));
-        var idTypeName = idProperty.PropertyType.Name;
-        FilterDefinition<T> filter;
-        switch (idTypeName)
-        {
-            case "ObjectId":
-                var definitionObjectId = new StringFieldDefinition<T, ObjectId>(idProperty.Name);
-                filter = Builders<T>.Filter.Eq(definitionObjectId, (ObjectId)id);
-                break;
-            case "Int32":
-                var definitionInt32 = new StringFieldDefinition<T, int>(idProperty.Name);
-                filter = Builders<T>.Filter.Eq(definitionInt32, (int)id);
-                break;
-            case "String":
-                var definitionString = new StringFieldDefinition<T, string>(idProperty.Name);
-                filter = Builders<T>.Filter.Eq(definitionString, (string)id);
-                break;
-            default:
-                throw new Exception($"Do not support {idTypeName} type!");
-        }
+        
+        var parameter = Expression.Parameter(typeof(T), "__q");
+        var memberExpress = Expression.Property(parameter, idProperty);
+        var expression =
+            Expression.Lambda<Func<T, bool>>(Expression.Equal(memberExpress, Expression.Constant(idValue)));
 
-        return filter;
+        return expression;
     }
 
     public async Task<ReplaceOneResult> UpdateAsync(T entity)

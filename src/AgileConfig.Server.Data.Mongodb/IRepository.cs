@@ -46,14 +46,14 @@ public interface IRepository<T> : IRepository where T : new()
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    T? Find(string id);
+    T? Find(object id);
 
     /// <summary>
     /// 根据 Id 获取单条记录，不存在将会返回null
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    Task<T?> FindAsync(string id);
+    Task<T?> FindAsync(object id);
 
     void Insert(params T[] source);
     

@@ -10,14 +10,36 @@ public class SysLogService(IRepository<SysLog> repository) : ISysLogService
 {
     public async Task<bool> AddRangeAsync(IEnumerable<SysLog> logs)
     {
-        await repository.InsertAsync(logs.ToList());
+        var insertLogs = logs.ToList();
+        var newId = await GenerateIdAsync();
+        foreach (var item in insertLogs)
+        {
+            item.Id = newId;
+            newId++;
+        }
+        await repository.InsertAsync(insertLogs);
         return true;
     }
 
     public async Task<bool> AddSysLogAsync(SysLog log)
     {
+        if (log.Id <= 0)
+        {
+            log.Id = await GenerateIdAsync();
+        }
         await repository.InsertAsync(log);
         return true;
+    }
+
+    private async Task<int> GenerateIdAsync()
+    {
+        var count = await repository.MongodbQueryable.CountAsync();
+        if (count == 0)
+        {
+            return 1;
+        }
+        var log = await repository.MongodbQueryable.OrderByDescending(x => x.Id).FirstAsync();
+        return log.Id + 1;
     }
 
     public async Task<long> Count(string appId, SysLogType? logType, DateTime? startTime, DateTime? endTime)
@@ -75,6 +97,16 @@ public class SysLogService(IRepository<SysLog> repository) : ISysLogService
         if (logType.HasValue)
         {
             query = query.Where(x => x.LogType == logType);
+        }
+
+        if (pageIndex <= 0)
+        {
+            pageIndex = 1;
+        }
+
+        if (pageSize <= 0)
+        {
+            pageSize = 1;
         }
 
         query = query.OrderByDescending(x => x.Id).Skip((pageIndex - 1) * pageSize).Take(pageSize);
