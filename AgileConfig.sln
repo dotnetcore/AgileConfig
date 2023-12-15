@@ -42,6 +42,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.Data.Mon
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.Mongodb.Service", "src\AgileConfig.Server.Mongodb.Service\AgileConfig.Server.Mongodb.Service.csproj", "{375B1F54-11CA-415D-ADCC-3B14684AE1DB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.Mongodb.ServiceTest", "test\AgileConfig.Server.Mongodb.ServiceTest\AgileConfig.Server.Mongodb.ServiceTest.csproj", "{E35504A4-E032-4EEA-A53A-12C99B56680B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -100,6 +102,10 @@ Global
 		{375B1F54-11CA-415D-ADCC-3B14684AE1DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{375B1F54-11CA-415D-ADCC-3B14684AE1DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{375B1F54-11CA-415D-ADCC-3B14684AE1DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E35504A4-E032-4EEA-A53A-12C99B56680B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E35504A4-E032-4EEA-A53A-12C99B56680B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E35504A4-E032-4EEA-A53A-12C99B56680B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E35504A4-E032-4EEA-A53A-12C99B56680B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -118,6 +124,7 @@ Global
 		{E49A2006-6D07-4434-AEC1-27E356A767AE} = {1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}
 		{4803646E-8327-4F69-8BA5-2244CB58BBA2} = {1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}
 		{375B1F54-11CA-415D-ADCC-3B14684AE1DB} = {1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}
+		{E35504A4-E032-4EEA-A53A-12C99B56680B} = {F277EC27-8C0E-4490-9645-F5F3244F9246}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7F10DB58-5B6F-4EAC-994F-14E8046B306F}

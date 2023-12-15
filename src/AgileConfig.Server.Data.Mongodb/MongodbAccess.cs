@@ -16,7 +16,15 @@ public abstract class MongodbAccess
     internal MongodbAccess(string? connectionString)
     {
         if (string.IsNullOrEmpty(connectionString))
+        {
+            if (!LazyMongoClients.Value.IsEmpty)
+            {
+                _connectionString = LazyMongoClients.Value.First().Key;
+                return;
+            }
             throw new Exception("没有配置Mongodb连接字符串");
+        }
+
         _connectionString = connectionString;
         if (LazyMongoClients is not { IsValueCreated: true } || !LazyMongoClients.Value.ContainsKey(connectionString))
         {
