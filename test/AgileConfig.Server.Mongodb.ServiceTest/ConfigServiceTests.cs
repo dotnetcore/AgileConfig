@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace AgileConfig.Server.Mongodb.ServiceTest;
 
+[TestFixture]
 public class ConfigServiceTests : DatabaseFixture
 {
     private IConfigService service;

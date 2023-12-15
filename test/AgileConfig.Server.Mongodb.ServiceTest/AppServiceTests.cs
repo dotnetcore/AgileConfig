@@ -6,10 +6,11 @@ public class AppServiceTests : DatabaseFixture
     private IAppService service;
 
     [SetUp]
-    public void TestInitialize()
+    public async Task TestInitialize()
     {
         service = new AppService(AppRepository, AppInheritancedRepository, ConfigRepository, ConfigPublishedRepository,
             UserAppAuthRepository, UserRepository);
+        await AppRepository.DeleteAsync(x => true);
     }
     
     [Test]

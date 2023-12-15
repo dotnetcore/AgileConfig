@@ -23,4 +23,6 @@ public class DatabaseFixture
     protected IRepository<UserRole> UserRoleRepository => new Repository<UserRole>(ConnectionString);
 
     protected IRepository<ServerNode> ServerNodeRepository => new Repository<ServerNode>(ConnectionString);
+    
+    protected IRepository<SysLog> SysLogRepository => new Repository<SysLog>(ConnectionString);
 }
