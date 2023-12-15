@@ -20,6 +20,7 @@ namespace AgileConfig.Server.Data.Entity
     [OraclePrimaryKeyName("agc_server_node_pk")]
     public class ServerNode
     {
+        [BsonId]
         [Column(Name = "address", StringLength = 100, IsPrimary = true)]
         public string Address { get; set; }
 

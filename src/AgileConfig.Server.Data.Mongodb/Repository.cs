@@ -1,7 +1,9 @@
 ﻿using System.Linq.Expressions;
+using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
@@ -121,26 +123,30 @@ public class Repository<T>  : IRepository<T> where T :  new()
     
     private static FilterDefinition<T> GetIdPropertyFilter(T entity)
     {
-        var idProperty = typeof(T).GetProperty("Id");
+        var idProperty = typeof(T).GetProperty("Id") ?? typeof(T).GetProperties().FirstOrDefault(x =>
+        {
+            var attribute = x.GetCustomAttribute(typeof(BsonIdAttribute));
+            return attribute != null;
+        });
         if (idProperty == null)
             throw new ArgumentException("In the entity no exists property 'id'.", nameof(entity));
         var id = idProperty.GetValue(entity);
         if (id == null)
-            throw new ArgumentException("The entity property 'id' value is null.", nameof(entity));
+            throw new ArgumentException($"The entity property '{idProperty.Name}' value is null.", nameof(entity));
         var idTypeName = idProperty.PropertyType.Name;
         FilterDefinition<T> filter;
         switch (idTypeName)
         {
             case "ObjectId":
-                var definitionObjectId = new StringFieldDefinition<T, ObjectId>("Id");
+                var definitionObjectId = new StringFieldDefinition<T, ObjectId>(idProperty.Name);
                 filter = Builders<T>.Filter.Eq(definitionObjectId, (ObjectId)id);
                 break;
             case "Int32":
-                var definitionInt32 = new StringFieldDefinition<T, int>("Id");
+                var definitionInt32 = new StringFieldDefinition<T, int>(idProperty.Name);
                 filter = Builders<T>.Filter.Eq(definitionInt32, (int)id);
                 break;
             case "String":
-                var definitionString = new StringFieldDefinition<T, string>("Id");
+                var definitionString = new StringFieldDefinition<T, string>(idProperty.Name);
                 filter = Builders<T>.Filter.Eq(definitionString, (string)id);
                 break;
             default:
