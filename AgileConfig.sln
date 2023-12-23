@@ -48,6 +48,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.Data.Abs
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.Data.Repository.Freesql", "src\AgileConfig.Server.Data.Repository.Freesql\AgileConfig.Server.Data.Repository.Freesql.csproj", "{955F64CC-9EAC-4563-804D-6E2CF9547357}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.Data.Repository.Mongodb", "src\AgileConfig.Server.Data.Repository.Mongodb\AgileConfig.Server.Data.Repository.Mongodb.csproj", "{C6B7A5A6-7287-4A20-9336-EBE82A5256F1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -118,6 +120,10 @@ Global
 		{955F64CC-9EAC-4563-804D-6E2CF9547357}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{955F64CC-9EAC-4563-804D-6E2CF9547357}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{955F64CC-9EAC-4563-804D-6E2CF9547357}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6B7A5A6-7287-4A20-9336-EBE82A5256F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6B7A5A6-7287-4A20-9336-EBE82A5256F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6B7A5A6-7287-4A20-9336-EBE82A5256F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6B7A5A6-7287-4A20-9336-EBE82A5256F1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -139,6 +145,7 @@ Global
 		{E35504A4-E032-4EEA-A53A-12C99B56680B} = {F277EC27-8C0E-4490-9645-F5F3244F9246}
 		{E8101403-72C9-40FB-BCEE-16ED5C23A495} = {1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}
 		{955F64CC-9EAC-4563-804D-6E2CF9547357} = {1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}
+		{C6B7A5A6-7287-4A20-9336-EBE82A5256F1} = {1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7F10DB58-5B6F-4EAC-994F-14E8046B306F}
