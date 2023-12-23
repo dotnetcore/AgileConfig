@@ -6,4 +6,9 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\AgileConfig.Server.Data.Abstraction\AgileConfig.Server.Data.Abstraction.csproj" />
+      <ProjectReference Include="..\AgileConfig.Server.Data.Mongodb\AgileConfig.Server.Data.Mongodb.csproj" />
+    </ItemGroup>
+
 </Project>
