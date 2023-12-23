@@ -11,16 +11,23 @@ namespace AgileConfig.Server.Common
 
     public class EnvAccessor : IEnvAccessor
     {
+        private IHttpContextAccessor _httpContextAccessor;
         public EnvAccessor(IHttpContextAccessor httpContextAccessor)
         {
-            var env = httpContextAccessor.HttpContext.Request.Query["env"].FirstOrDefault();
-            if (string.IsNullOrEmpty(env))
-            {
-                env = "DEV";
-            }
-            Env = env;
+            _httpContextAccessor = httpContextAccessor;
         }
-        public string Env { get; }
+        public string Env
+        {
+            get
+            {
+                var env = _httpContextAccessor.HttpContext.Request.Query["env"].FirstOrDefault();
+                if (string.IsNullOrEmpty(env))
+                {
+                    env = "DEV";
+                }
+                return env;
+            }
+        }
     }
 
     public static class EnvAccessorServiceCollectionExtension
