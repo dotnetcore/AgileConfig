@@ -28,7 +28,10 @@ namespace AgileConfig.Server.Service.Tests.mysql
                           .UseAutoSyncStructure(true)
                           .Build();
             freeSqlContext = new FreeSqlContext(fsq);
-            service = new AppService(freeSqlContext);
+
+            // todo
+
+            //service = new AppService(freeSqlContext);
             fsq.Delete<App>().Where("1=1");
         }
         [TestMethod()]

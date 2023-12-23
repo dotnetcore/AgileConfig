@@ -27,7 +27,7 @@ public class SettingService(
 
     public async Task<bool> DeleteAsync(Setting setting)
     {
-        var result = await repository.DeleteAsync(setting.Id);
+        var result = await repository.DeleteAsync(setting.Id.ToString());
         return result.DeletedCount > 0;
     }
 

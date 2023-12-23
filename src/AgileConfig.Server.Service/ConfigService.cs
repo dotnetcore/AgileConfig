@@ -405,7 +405,7 @@ namespace AgileConfig.Server.Service
             {
                 if (inheritanceApps[i].Enabled)
                 {
-                    apps.Add(inheritanceApps[i].Id); //后继承的排在后面
+                    apps.Add(inheritanceApps[i].Id as string); //后继承的排在后面
                 }
             }
 

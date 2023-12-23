@@ -73,11 +73,11 @@ namespace AgileConfig.Server.Apisite.Controllers
             var nodes = await _serverNodeService.GetAllNodesAsync();
             if (string.IsNullOrEmpty(address))
             {
-                addressess.AddRange(nodes.Where(x=>x.Status == NodeStatus.Online).Select(n => n.Address));
+                addressess.AddRange(nodes.Where(x=>x.Status == NodeStatus.Online).Select(n => n.Id.ToString()));
             }
             else
             {
-                if (nodes.Any(x=>x.Status == NodeStatus.Online && x.Address.Equals(address, StringComparison.CurrentCultureIgnoreCase)))
+                if (nodes.Any(x=>x.Status == NodeStatus.Online && x.Id.ToString().Equals(address, StringComparison.CurrentCultureIgnoreCase)))
                 {
                     addressess.Add(address);
                 }
@@ -162,7 +162,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 result.Add(new
                 {
                     n = serverNode,
-                    server_status = await _remoteServerNodeProxy.GetClientsReportAsync(serverNode.Address)
+                    server_status = await _remoteServerNodeProxy.GetClientsReportAsync(serverNode.Id.ToString())
                 });
             }
 

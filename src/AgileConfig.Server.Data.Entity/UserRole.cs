@@ -2,12 +2,13 @@
 using System;
 using System.ComponentModel;
 using MongoDB.Bson.Serialization.Attributes;
+using AgileConfig.Server.Common;
 
 namespace AgileConfig.Server.Data.Entity
 {
     [Table(Name = "agc_user_role")]
     [OraclePrimaryKeyName("agc_user_role_pk")]
-    public class UserRole
+    public class UserRole: IEntity<string>
     {
         [Column(Name = "id", StringLength = 36)]
         public string Id { get; set; }

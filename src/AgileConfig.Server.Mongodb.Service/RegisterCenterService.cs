@@ -78,7 +78,7 @@ public class RegisterCenterService(
             return false;
         }
         
-        await serviceInfoRepository.DeleteAsync(oldEntity.Id);
+        await serviceInfoRepository.DeleteAsync(oldEntity.Id.ToString());
 
         serviceInfoService.ClearCache();
 
@@ -105,7 +105,7 @@ public class RegisterCenterService(
             return false;
         }
         
-        await serviceInfoRepository.DeleteAsync(oldEntity.Id);
+        await serviceInfoRepository.DeleteAsync(oldEntity.Id.ToString());
 
         serviceInfoService.ClearCache();
 

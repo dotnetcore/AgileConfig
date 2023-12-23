@@ -51,14 +51,14 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
                 foreach (var serverNode in serverNodes.Where(x => x.Status == NodeStatus.Online))
                 {
                     //clear cache
-                    _ = _remoteServerNodeProxy.ClearServiceInfoCache(serverNode.Address);
+                    _ = _remoteServerNodeProxy.ClearServiceInfoCache(serverNode.Id);
                     //send ws action
                     var act = new WebsocketAction()
                     {
                         Module = ActionModule.RegisterCenter,
                         Action = ActionConst.Reload
                     };
-                    _ = _remoteServerNodeProxy.AllClientsDoActionAsync(serverNode.Address, act);
+                    _ = _remoteServerNodeProxy.AllClientsDoActionAsync(serverNode.Id, act);
                 }
             });
         });
@@ -71,14 +71,14 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
                 foreach (var serverNode in serverNodes.Where(x => x.Status == NodeStatus.Online))
                 {
                     //clear cache
-                    _ = _remoteServerNodeProxy.ClearServiceInfoCache(serverNode.Address);
+                    _ = _remoteServerNodeProxy.ClearServiceInfoCache(serverNode.Id);
                     //send ws action
                     var act = new WebsocketAction()
                     {
                         Module = ActionModule.RegisterCenter,
                         Action = ActionConst.Reload
                     };
-                    _ = _remoteServerNodeProxy.AllClientsDoActionAsync(serverNode.Address, act);
+                    _ = _remoteServerNodeProxy.AllClientsDoActionAsync(serverNode.Id, act);
                 }
             });
         });
@@ -91,14 +91,14 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
                 foreach (var serverNode in serverNodes.Where(x => x.Status == NodeStatus.Online))
                 {
                     //clear cache
-                    _ = _remoteServerNodeProxy.ClearServiceInfoCache(serverNode.Address);
+                    _ = _remoteServerNodeProxy.ClearServiceInfoCache(serverNode.Id);
                     //send ws action
                     var act = new WebsocketAction()
                     {
                         Module = ActionModule.RegisterCenter,
                         Action = ActionConst.Reload
                     };
-                    _ = _remoteServerNodeProxy.AllClientsDoActionAsync(serverNode.Address, act);
+                    _ = _remoteServerNodeProxy.AllClientsDoActionAsync(serverNode.Id, act);
                 }
             });
         });

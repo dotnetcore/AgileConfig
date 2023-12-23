@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Agile.Config.Protocol;
 using AgileConfig.Server.Common;
@@ -24,7 +25,11 @@ internal class ConfigStatusUpdateRegister : IEventRegister
 
     private IAppService NewAppService()
     {
-        return new AppService(new FreeSqlContext(FreeSQL.Instance));
+        // todo
+
+        throw new NotImplementedException();
+        
+        //return new AppService(new FreeSqlContext(FreeSQL.Instance));
     }
 
     private IConfigService NewConfigService()
@@ -58,7 +63,7 @@ internal class ConfigStatusUpdateRegister : IEventRegister
                             }
 
                             //all server cache
-                            await _remoteServerNodeProxy.ClearConfigServiceCache(node.Address);
+                            await _remoteServerNodeProxy.ClearConfigServiceCache(node.Id);
                         }
 
                         foreach (var node in nodes)
@@ -71,7 +76,7 @@ internal class ConfigStatusUpdateRegister : IEventRegister
                             foreach (var item in noticeApps)
                             {
                                 await _remoteServerNodeProxy.AppClientsDoActionAsync(
-                                    node.Address,
+                                    node.Id,
                                     item.Key,
                                     timelineNode.Env,
                                     item.Value);
@@ -107,7 +112,7 @@ internal class ConfigStatusUpdateRegister : IEventRegister
 
                             foreach (var item in noticeApps)
                             {
-                                await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, item.Key,
+                                await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Id, item.Key,
                                     timelineNode.Env,
                                     item.Value);
                             }

@@ -49,7 +49,7 @@ namespace AgileConfig.Server.Service.Tests.sqlserver
             fsq.Delete<ServerNode>().Where("1=1").ExecuteAffrows();
 
             var source = new ServerNode();
-            source.Address = "1";
+            source.Id = "1";
             source.CreateTime = DateTime.Now;
             source.LastEchoTime = DateTime.Now;
             source.Remark = "2";
@@ -59,11 +59,11 @@ namespace AgileConfig.Server.Service.Tests.sqlserver
             Assert.IsTrue(result);
 
             var node = fsq.Select<ServerNode>(new {
-                Address = "1"
+                Id = "1"
             }).ToOne();
             Assert.IsNotNull(node);
 
-            Assert.AreEqual(source.Address,node.Address);
+            Assert.AreEqual(source.Id, node.Id);
            // Assert.AreEqual(source.CreateTime, node.CreateTime);
          //   Assert.AreEqual(source.LastEchoTime, node.LastEchoTime);
             Assert.AreEqual(source.Remark, node.Remark);
@@ -76,7 +76,7 @@ namespace AgileConfig.Server.Service.Tests.sqlserver
             fsq.Delete<ServerNode>().Where("1=1").ExecuteAffrows();
 
             var source = new ServerNode();
-            source.Address = "1";
+            source.Id = "1";
             source.CreateTime = DateTime.Now;
             source.LastEchoTime = DateTime.Now;
             source.Remark = "2";
@@ -90,7 +90,7 @@ namespace AgileConfig.Server.Service.Tests.sqlserver
 
             var node = fsq.Select<ServerNode>(new
             {
-                Address = "1"
+                Id = "1"
             }).ToOne();
             Assert.IsNull(node);
         }
@@ -101,7 +101,7 @@ namespace AgileConfig.Server.Service.Tests.sqlserver
             fsq.Delete<ServerNode>().Where("1=1").ExecuteAffrows();
 
             var source = new ServerNode();
-            source.Address = "1";
+            source.Id = "1";
             source.CreateTime = DateTime.Now;
             source.LastEchoTime = DateTime.Now;
             source.Remark = "2";
@@ -110,12 +110,12 @@ namespace AgileConfig.Server.Service.Tests.sqlserver
             var result = await service.AddAsync(source);
             Assert.IsTrue(result);
 
-            var result1 = await service.DeleteAsync(source.Address);
+            var result1 = await service.DeleteAsync(source.Id);
             Assert.IsTrue(result1);
 
             var node = fsq.Select<ServerNode>(new
             {
-                Address = "1"
+                Id = "1"
             }).ToOne();
             Assert.IsNull(node);
         }
@@ -126,7 +126,7 @@ namespace AgileConfig.Server.Service.Tests.sqlserver
             fsq.Delete<ServerNode>().Where("1=1").ExecuteAffrows();
 
             var source = new ServerNode();
-            source.Address = "1";
+            source.Id = "1";
             source.CreateTime = DateTime.Now;
             source.LastEchoTime = DateTime.Now;
             source.Remark = "2";
@@ -147,7 +147,7 @@ namespace AgileConfig.Server.Service.Tests.sqlserver
             fsq.Delete<ServerNode>().Where("1=1").ExecuteAffrows();
 
             var source = new ServerNode();
-            source.Address = "1";
+            source.Id = "1";
             source.CreateTime = DateTime.Now;
             source.LastEchoTime = DateTime.Now;
             source.Remark = "2";
@@ -155,10 +155,10 @@ namespace AgileConfig.Server.Service.Tests.sqlserver
             var result = await service.AddAsync(source);
             Assert.IsTrue(result);
 
-            var node = await service.GetAsync(source.Address);
+            var node = await service.GetAsync(source.Id);
             Assert.IsNotNull(node);
 
-            Assert.AreEqual(source.Address, node.Address);
+            Assert.AreEqual(source.Id, node.Id);
          //   Assert.AreEqual(source.CreateTime, node.CreateTime);
          //   Assert.AreEqual(source.LastEchoTime, node.LastEchoTime);
             Assert.AreEqual(source.Remark, node.Remark);
@@ -171,7 +171,7 @@ namespace AgileConfig.Server.Service.Tests.sqlserver
             fsq.Delete<ServerNode>().Where("1=1").ExecuteAffrows();
 
             var source = new ServerNode();
-            source.Address = "1";
+            source.Id = "1";
             source.CreateTime = DateTime.Now;
             source.LastEchoTime = DateTime.Now;
             source.Remark = "2";
@@ -186,10 +186,10 @@ namespace AgileConfig.Server.Service.Tests.sqlserver
             var result1 = await service.UpdateAsync(source);
             Assert.IsTrue(result);
 
-            var node = await service.GetAsync(source.Address);
+            var node = await service.GetAsync(source.Id);
             Assert.IsNotNull(node);
 
-            Assert.AreEqual(source.Address, node.Address);
+            Assert.AreEqual(source.Id, node.Id);
          //   Assert.AreEqual(source.CreateTime, node.CreateTime);
          //   Assert.AreEqual(source.LastEchoTime, node.LastEchoTime);
             Assert.AreEqual(source.Remark, node.Remark);

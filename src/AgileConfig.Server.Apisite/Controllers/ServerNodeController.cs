@@ -50,7 +50,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var node = new ServerNode();
-            node.Address = model.Address.TrimEnd('/');
+            node.Id = model.Address.TrimEnd('/');
             node.Remark = model.Remark;
             node.Status = NodeStatus.Offline;
             node.CreateTime = DateTime.Now;
@@ -62,7 +62,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 param.node = node;
                 param.userName = this.GetCurrentUserName();
                 TinyEventBus.Instance.Fire(EventKeys.ADD_NODE_SUCCESS, param);
-                await _remoteServerNodeProxy.TestEchoAsync(node.Address);
+                await _remoteServerNodeProxy.TestEchoAsync(node.Id);
             }
            
             return Json(new

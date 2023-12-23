@@ -34,7 +34,9 @@ namespace AgileConfig.Server.Service.Tests
             var cache = new Mock<IMemoryCache>();
             var config = new Config();
 
-            service = new ConfigService(cache.Object, new AppService(freeSqlContext), new SettingService(freeSqlContext), new UserService(freeSqlContext));
+            // todo
+
+            //service = new ConfigService(cache.Object, new AppService(freeSqlContext), new SettingService(freeSqlContext), new UserService(freeSqlContext));
             fsq.Delete<Config>().Where("1=1");
 
             Console.WriteLine("TestInitialize");

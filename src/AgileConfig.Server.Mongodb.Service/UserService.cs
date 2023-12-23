@@ -53,7 +53,7 @@ public class UserService(IRepository<User> repository, IRepository<UserRole> use
 
     public async Task<bool> DeleteAsync(User user)
     {
-        var result = await repository.DeleteAsync(user.Id);
+        var result = await repository.DeleteAsync(user.Id.ToString());
         return result.DeletedCount > 0;
     }
 

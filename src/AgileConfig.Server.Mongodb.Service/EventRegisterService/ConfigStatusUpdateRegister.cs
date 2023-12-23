@@ -44,7 +44,7 @@ internal class ConfigStatusUpdateRegister : IEventRegister
                         }
 
                         //all server cache
-                        await _remoteServerNodeProxy.ClearConfigServiceCache(node.Address);
+                        await _remoteServerNodeProxy.ClearConfigServiceCache(node.Id as string);
                     }
 
                     foreach (var node in nodes)
@@ -57,7 +57,7 @@ internal class ConfigStatusUpdateRegister : IEventRegister
                         foreach (var item in noticeApps)
                         {
                             await _remoteServerNodeProxy.AppClientsDoActionAsync(
-                                node.Address,
+                                node.Id as string,
                                 item.Key,
                                 timelineNode.Env,
                                 item.Value);
@@ -90,7 +90,7 @@ internal class ConfigStatusUpdateRegister : IEventRegister
 
                         foreach (var item in noticeApps)
                         {
-                            await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, item.Key,
+                            await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Id.ToString(), item.Key,
                                 timelineNode.Env,
                                 item.Value);
                         }
@@ -116,7 +116,7 @@ internal class ConfigStatusUpdateRegister : IEventRegister
             var inheritancedFromApps = await _appService.GetInheritancedFromAppsAsync(appId);
             inheritancedFromApps.ForEach(x =>
             {
-                needNoticeAppsActions.Add(x.Id, new WebsocketAction
+                needNoticeAppsActions.Add(x.Id as string, new WebsocketAction
                 {
                     Action = ActionConst.Reload, Module = ActionModule.ConfigCenter
                 });

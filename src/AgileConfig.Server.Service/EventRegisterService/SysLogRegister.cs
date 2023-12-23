@@ -398,7 +398,7 @@ internal class SysLogRegister : IEventRegister
             {
                 LogTime = DateTime.Now,
                 LogType = SysLogType.Normal,
-                LogText = $"用户：{userName} 添加节点：{node.Address}"
+                LogText = $"用户：{userName} 添加节点：{node.Id}"
             };
             Task.Run(async () =>
             {
@@ -419,7 +419,7 @@ internal class SysLogRegister : IEventRegister
             {
                 LogTime = DateTime.Now,
                 LogType = SysLogType.Warn,
-                LogText = $"用户：{userName} 删除节点：{node.Address}"
+                LogText = $"用户：{userName} 删除节点：{node.Id}"
             };
             Task.Run(async () =>
             {

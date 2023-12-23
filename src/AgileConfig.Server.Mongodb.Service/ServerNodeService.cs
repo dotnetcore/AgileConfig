@@ -17,13 +17,13 @@ public class ServerNodeService(IRepository<ServerNode> repository) : IServerNode
 
     public async Task<bool> DeleteAsync(ServerNode node)
     {
-        var result = await repository.DeleteAsync(x => x.Address == node.Address);
+        var result = await repository.DeleteAsync(x => x.Id == node.Id);
         return result.DeletedCount > 0;
     }
 
     public async Task<bool> DeleteAsync(string address)
     {
-        var result = await repository.DeleteAsync(x => x.Address == address);
+        var result = await repository.DeleteAsync(x => x.Id == address);
         return result.DeletedCount > 0;
     }
 
@@ -39,7 +39,7 @@ public class ServerNodeService(IRepository<ServerNode> repository) : IServerNode
 
     public Task<ServerNode> GetAsync(string address)
     {
-        return repository.SearchFor(n => n.Address == address).FirstOrDefaultAsync();
+        return repository.SearchFor(n => n.Id == address).FirstOrDefaultAsync();
     }
 
     public async Task<bool> UpdateAsync(ServerNode node)
@@ -78,10 +78,10 @@ public class ServerNodeService(IRepository<ServerNode> repository) : IServerNode
             }
         }
 
-        var existNodes = await repository.SearchFor(x => addresses.Contains(x.Address)).ToListAsync();
+        var existNodes = await repository.SearchFor(x => addresses.Contains(x.Id)).ToListAsync();
         var newNodes = addresses
-            .Where(x => existNodes.All(y => y.Address != x))
-            .Select(x => new ServerNode { Address = x, CreateTime = DateTime.Now })
+            .Where(x => existNodes.All(y => y.Id != x))
+            .Select(x => new ServerNode { Id = x, CreateTime = DateTime.Now })
             .ToList();
         await repository.InsertAsync(newNodes);
 
@@ -91,12 +91,12 @@ public class ServerNodeService(IRepository<ServerNode> repository) : IServerNode
     public async Task<bool> JoinAsync(string ip, int port, string desc)
     {
         var address = $"http://{ip}:{port}";
-        var nodes = await repository.SearchFor(x => x.Address == address).ToListAsync();
+        var nodes = await repository.SearchFor(x => x.Id == address).ToListAsync();
         if (nodes.Count > 0)
         {
             nodes.ForEach(n =>
             {
-                n.Address = address;
+                n.Id = address;
                 n.Remark = desc;
                 n.Status = NodeStatus.Online;
             });
@@ -105,7 +105,7 @@ public class ServerNodeService(IRepository<ServerNode> repository) : IServerNode
         {
             await repository.InsertAsync(new ServerNode
             {
-                Address = address,
+                Id = address,
                 CreateTime = DateTime.Now,
                 Remark = desc,
                 Status = NodeStatus.Online,

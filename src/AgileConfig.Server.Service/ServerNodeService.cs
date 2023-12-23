@@ -28,7 +28,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> DeleteAsync(ServerNode node)
         {
-            node = await _dbContext.ServerNodes.Where(n => n.Address == node.Address).ToOneAsync();
+            node = await _dbContext.ServerNodes.Where(n => n.Id == node.Id).ToOneAsync();
             if (node != null)
             {
                 _dbContext.ServerNodes.Remove(node);
@@ -41,7 +41,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> DeleteAsync(string address)
         {
-            var node = await _dbContext.ServerNodes.Where(n => n.Address == address).ToOneAsync();
+            var node = await _dbContext.ServerNodes.Where(n => n.Id == address).ToOneAsync();
             if (node != null)
             {
                 _dbContext.ServerNodes.Remove(node);
@@ -64,7 +64,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<ServerNode> GetAsync(string address)
         {
-           return await _dbContext.ServerNodes.Where(n => n.Address == address).ToOneAsync();
+           return await _dbContext.ServerNodes.Where(n => n.Id == address).ToOneAsync();
         }
 
         public async Task<bool> UpdateAsync(ServerNode node)
@@ -107,12 +107,12 @@ namespace AgileConfig.Server.Service
             
             foreach (var address in addresses)
             {
-                var node = await _dbContext.ServerNodes.Where(n => n.Address == address).ToOneAsync();
+                var node = await _dbContext.ServerNodes.Where(n => n.Id == address).ToOneAsync();
                 if (node == null)
                 {
                     node = new ServerNode()
                     {
-                        Address = address,
+                        Id = address,
                         CreateTime = DateTime.Now,
                     };
                     await _dbContext.ServerNodes.AddAsync(node);
@@ -131,11 +131,11 @@ namespace AgileConfig.Server.Service
         public async Task<bool> JoinAsync(string ip, int port, string desc)
         {
             var address = $"http://{ip}:{port}";
-            var nodes = await _dbContext.ServerNodes.Where(x => x.Address == address).ToListAsync();
+            var nodes = await _dbContext.ServerNodes.Where(x => x.Id == address).ToListAsync();
             if (nodes.Count > 0)
             {
                 nodes.ForEach(n => {
-                    n.Address = address;
+                    n.Id = address;
                     n.Remark = desc;
                     n.Status = NodeStatus.Online;
                 });
@@ -143,7 +143,7 @@ namespace AgileConfig.Server.Service
             else
             {
                 await _dbContext.ServerNodes.AddAsync(new ServerNode { 
-                    Address = address,
+                    Id = address,
                     CreateTime = DateTime.Now,
                     Remark = desc,
                     Status = NodeStatus.Online,

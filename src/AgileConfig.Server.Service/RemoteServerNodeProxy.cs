@@ -205,7 +205,7 @@ namespace AgileConfig.Server.Service
             var node = await service.GetAsync(address);
             try
             {
-                var url = node.Address + "/home/echo";
+                var url = node.Id + "/home/echo";
 
                 using var resp = await _restClient.GetAsync(url);
 
@@ -222,7 +222,7 @@ namespace AgileConfig.Server.Service
             catch (Exception e)
             {
                 node.Status = NodeStatus.Offline;
-                _logger.LogInformation(e, "Try test node {0} echo , but fail .", node.Address);
+                _logger.LogInformation(e, "Try test node {0} echo , but fail .", node.Id);
             }
             
             if (node.Status == NodeStatus.Offline)
@@ -254,7 +254,7 @@ namespace AgileConfig.Server.Service
 
                     foreach (var node in nodes)
                     {
-                        await TestEchoAsync(node.Address);
+                        await TestEchoAsync(node.Id);
                     }
 
                     await Task.Delay(5000 * 1);

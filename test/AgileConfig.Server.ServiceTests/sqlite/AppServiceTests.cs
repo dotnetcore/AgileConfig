@@ -28,7 +28,8 @@ namespace AgileConfig.Server.Service.Tests
                           .UseAutoSyncStructure(true)
                           .Build();
             freeSqlContext = new FreeSqlContext(fsq);
-            service = new AppService(freeSqlContext);
+            // todo
+            //service = new AppService(freeSqlContext);
             fsq.Delete<App>().Where("1=1");
 
             Console.WriteLine("TestInitialize");

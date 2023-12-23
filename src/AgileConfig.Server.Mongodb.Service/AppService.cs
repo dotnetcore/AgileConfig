@@ -165,9 +165,9 @@ public class AppService(
         return await userRepository.SearchFor(x => userIds.Contains(x.Id)).ToListAsync();
     }
 
-    public List<string> GetAppGroups()
+    public async Task<List<string>> GetAppGroups()
     {
         var groups = repository.SearchFor(x => true).GroupBy(x => x.Group).Select(x => x.Key);
-        return groups.Where(x => !string.IsNullOrEmpty(x)).ToList();
+        return await groups.Where(x => !string.IsNullOrEmpty(x)).ToListAsync();
     }
 }

@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AgileConfig.Server.Common\AgileConfig.Server.Common.csproj" />
+    <ProjectReference Include="..\AgileConfig.Server.Data.Abstraction\AgileConfig.Server.Data.Abstraction.csproj" />
     <ProjectReference Include="..\AgileConfig.Server.Data.Entity\AgileConfig.Server.Data.Entity.csproj" />
   </ItemGroup>
 

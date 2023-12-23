@@ -53,7 +53,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 query = query.Where(x => x.Group == group).ToList();
             }
-            
+
             var appvms = new List<AppListVM>();
             foreach (var app in query)
             {
@@ -78,7 +78,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                         }
                     }
 
-                    if (children.Count>0)
+                    if (children.Count > 0)
                     {
                         first.children = children;
                     }
@@ -87,10 +87,10 @@ namespace AgileConfig.Server.Apisite.Controllers
 
                 appvms = appGroupList;
             }
-            
+
             if (tableGrouped)
             {
-                if ( sortField == "group" && ascOrDesc.StartsWith("desc"))
+                if (sortField == "group" && ascOrDesc.StartsWith("desc"))
                 {
                     appvms = appvms.OrderByDescending(x => x.Group).ToList();
                 }
@@ -146,7 +146,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     }
                 }
             }
-            
+
             var count = appvms.Count;
             var pageList = appvms.ToList().Skip((current - 1) * pageSize).Take(pageSize).ToList();
             await AppendInheritancedInfo(pageList);
@@ -158,7 +158,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 total = count,
                 data = pageList
             });
-        } 
+        }
 
         private async Task<AppListVM> AppToListVM(App item, bool appendInheritancedInfo)
         {
@@ -203,13 +203,13 @@ namespace AgileConfig.Server.Apisite.Controllers
                     ? new List<string>()
                     : (inheritancedApps).Select(ia => ia.Name).ToList();
                 appListVm.AppAdminName = (await _userService.GetUserAsync(appListVm.AppAdmin))?.UserName;
-                if (appListVm.children!=null)
+                if (appListVm.children != null)
                 {
                     await AppendInheritancedInfo(appListVm.children);
                 }
             }
         }
-        
+
         [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "App.Add", Functions.App_Add })]
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] AppVM model)
@@ -309,7 +309,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             app.Type = model.Inheritanced ? AppType.Inheritance : AppType.PRIVATE;
             app.AppAdmin = model.AppAdmin;
             app.Group = model.Group;
-            
+
             var inheritanceApps = new List<AppInheritanced>();
             if (!model.Inheritanced && model.inheritancedApps != null)
             {
@@ -546,7 +546,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 AppId = appId
             };
-            result.EditConfigPermissionUsers = (await _appService.GetUserAppAuth(appId, _premissionService.EditConfigPermissionKey)).Select(x=>x.Id).ToList();
+            result.EditConfigPermissionUsers = (await _appService.GetUserAppAuth(appId, _premissionService.EditConfigPermissionKey)).Select(x => x.Id).ToList();
             result.PublishConfigPermissionUsers = (await _appService.GetUserAppAuth(appId, _premissionService.PublishConfigPermissionKey)).Select(x => x.Id).ToList();
 
             return Json(new
@@ -557,12 +557,13 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAppGroups()
+        public async Task<IActionResult> GetAppGroups()
         {
+            var groups = await _appService.GetAppGroups();
             return Json(new
             {
                 success = true,
-                data = _appService.GetAppGroups().OrderBy(x=>x)
+                data = groups.OrderBy(x => x)
             });
         }
     }

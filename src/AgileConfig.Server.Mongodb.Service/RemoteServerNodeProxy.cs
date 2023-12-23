@@ -190,7 +190,7 @@ public class RemoteServerNodeProxy(
         var node = await serverNodeService.GetAsync(address);
         try
         {
-            var url = node.Address + "/home/echo";
+            var url = node.Id + "/home/echo";
 
             using var resp = await restClient.GetAsync(url);
 
@@ -207,7 +207,7 @@ public class RemoteServerNodeProxy(
         catch (Exception e)
         {
             node.Status = NodeStatus.Offline;
-            _logger.LogInformation(e, "Try test node {Address} echo , but fail", node.Address);
+            _logger.LogInformation(e, "Try test node {Address} echo , but fail", node.Id);
         }
 
         if (node.Status == NodeStatus.Offline)
@@ -235,7 +235,7 @@ public class RemoteServerNodeProxy(
 
                 foreach (var node in nodes)
                 {
-                    await TestEchoAsync(node.Address);
+                    await TestEchoAsync(node.Id as string);
                 }
 
                 await Task.Delay(5000 * 1);

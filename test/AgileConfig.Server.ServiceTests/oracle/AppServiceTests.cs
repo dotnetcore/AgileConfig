@@ -29,7 +29,10 @@ namespace AgileConfig.Server.Service.Tests.oracle
                           .Build();
             FluentApi.Config(fsq);
             freeSqlContext = new FreeSqlContext(fsq);
-            service = new AppService(freeSqlContext);
+
+            // todo
+
+            //service = new AppService(freeSqlContext);
             fsq.Delete<App>().Where("1=1");
 
             Console.WriteLine("TestInitialize");

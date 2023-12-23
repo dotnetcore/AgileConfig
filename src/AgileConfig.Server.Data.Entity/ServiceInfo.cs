@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using MongoDB.Bson.Serialization.Attributes;
+using AgileConfig.Server.Common;
 
 namespace AgileConfig.Server.Data.Entity
 {
@@ -27,7 +28,7 @@ namespace AgileConfig.Server.Data.Entity
 
     [Table(Name = "agc_service_info")]
     [OraclePrimaryKeyName("agc_serviceinfo_pk")]
-    public class ServiceInfo
+    public class ServiceInfo : IEntity<string>
     {
         [Column(Name = "id", StringLength = 36)]
         public string Id { get; set; }

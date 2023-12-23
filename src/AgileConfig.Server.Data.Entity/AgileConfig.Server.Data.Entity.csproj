@@ -9,4 +9,8 @@
     <PackageReference Include="MongoDB.Bson" Version="2.23.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AgileConfig.Server.Common\AgileConfig.Server.Common.csproj" />
+  </ItemGroup>
+
 </Project>
