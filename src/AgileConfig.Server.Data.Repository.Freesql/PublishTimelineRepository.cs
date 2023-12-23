@@ -6,7 +6,7 @@ namespace AgileConfig.Server.Data.Repository.Freesql
 {
     public class PublishTimelineRepository : FreesqlRepository<PublishTimeline, string>, IPublishTimelineRepository
     {
-        public PublishTimelineRepository(IFreeSql freeSql) : base(freeSql)
+        public PublishTimelineRepository(IFreeSqlFactory freeSql) : base(freeSql)
         {
         }
     }

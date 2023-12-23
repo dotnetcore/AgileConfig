@@ -6,7 +6,7 @@ namespace AgileConfig.Server.Data.Repository.Freesql
 {
     public class SysLogRepository : FreesqlRepository<SysLog, int>, ISysLogRepository
     {
-        public SysLogRepository(IFreeSql freeSql) : base(freeSql)
+        public SysLogRepository(IFreeSqlFactory freeSql) : base(freeSql)
         {
         }
     }

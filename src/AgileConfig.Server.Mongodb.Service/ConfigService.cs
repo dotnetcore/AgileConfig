@@ -419,159 +419,163 @@ public class ConfigService(
     /// <param name="log">发布日志</param>
     /// <param name="operatorr">操作员</param>
     /// <returns></returns>
-    public (bool result, string publishTimelineId) Publish(string appId, string[] ids, string log, string operatorr,
+    public Task<(bool result, string publishTimelineId)> Publish(string appId, string[] ids, string log, string operatorr,
         string env)
     {
-        lock (Lockobj)
-        {
-            var waitPublishConfigs = GetRepository<Config>(env).SearchFor(x =>
-                x.AppId == appId &&
-                x.Env == env &&
-                x.Status == ConfigStatus.Enabled &&
-                x.EditStatus != EditStatus.Commit).ToList();
-            if (ids != null && ids.Any())
-            {
-                //如果ids传值了，过滤一下
-                waitPublishConfigs = waitPublishConfigs.Where(x => ids.Contains(x.Id)).ToList();
-            }
+        return null;
 
-            //这里默认admin console 实例只部署一个，如果部署多个同步操作，高并发的时候这个version会有问题
-            var versionMax = GetRepository<PublishTimeline>(env).SearchFor(x => x.AppId == appId).Max(x => x.Version);
+        // remove
 
-            var user = userService.GetUser(operatorr);
+        //lock (Lockobj)
+        //{
+        //    var waitPublishConfigs = GetRepository<Config>(env).SearchFor(x =>
+        //        x.AppId == appId &&
+        //        x.Env == env &&
+        //        x.Status == ConfigStatus.Enabled &&
+        //        x.EditStatus != EditStatus.Commit).ToList();
+        //    if (ids != null && ids.Any())
+        //    {
+        //        //如果ids传值了，过滤一下
+        //        waitPublishConfigs = waitPublishConfigs.Where(x => ids.Contains(x.Id)).ToList();
+        //    }
 
-            var publishTimelineNode = new PublishTimeline();
-            publishTimelineNode.AppId = appId;
-            publishTimelineNode.Id = Guid.NewGuid().ToString("N");
-            publishTimelineNode.PublishTime = DateTime.Now;
-            publishTimelineNode.PublishUserId = user.Id;
-            publishTimelineNode.PublishUserName = user.UserName;
-            publishTimelineNode.Version = versionMax + 1;
-            publishTimelineNode.Log = log;
-            publishTimelineNode.Env = env;
+        //    //这里默认admin console 实例只部署一个，如果部署多个同步操作，高并发的时候这个version会有问题
+        //    var versionMax = GetRepository<PublishTimeline>(env).SearchFor(x => x.AppId == appId).Max(x => x.Version);
 
-            var publishDetails = new List<PublishDetail>();
-            waitPublishConfigs.ForEach(x =>
-            {
-                publishDetails.Add(new PublishDetail()
-                {
-                    AppId = appId,
-                    ConfigId = x.Id,
-                    Description = x.Description,
-                    EditStatus = x.EditStatus,
-                    Group = x.Group,
-                    Id = Guid.NewGuid().ToString("N"),
-                    Key = x.Key,
-                    Value = x.Value,
-                    PublishTimelineId = publishTimelineNode.Id,
-                    Version = publishTimelineNode.Version,
-                    Env = env
-                });
+        //    var user = userService.GetUser(operatorr);
 
-                if (x.EditStatus == EditStatus.Deleted)
-                {
-                    x.OnlineStatus = OnlineStatus.WaitPublish;
-                    x.Status = ConfigStatus.Deleted;
-                }
-                else
-                {
-                    x.OnlineStatus = OnlineStatus.Online;
-                    x.Status = ConfigStatus.Enabled;
-                }
+        //    var publishTimelineNode = new PublishTimeline();
+        //    publishTimelineNode.AppId = appId;
+        //    publishTimelineNode.Id = Guid.NewGuid().ToString("N");
+        //    publishTimelineNode.PublishTime = DateTime.Now;
+        //    publishTimelineNode.PublishUserId = user.Id;
+        //    publishTimelineNode.PublishUserName = user.UserName;
+        //    publishTimelineNode.Version = versionMax + 1;
+        //    publishTimelineNode.Log = log;
+        //    publishTimelineNode.Env = env;
 
-                x.EditStatus = EditStatus.Commit;
-                x.OnlineStatus = OnlineStatus.Online;
-            });
+        //    var publishDetails = new List<PublishDetail>();
+        //    waitPublishConfigs.ForEach(x =>
+        //    {
+        //        publishDetails.Add(new PublishDetail()
+        //        {
+        //            AppId = appId,
+        //            ConfigId = x.Id,
+        //            Description = x.Description,
+        //            EditStatus = x.EditStatus,
+        //            Group = x.Group,
+        //            Id = Guid.NewGuid().ToString("N"),
+        //            Key = x.Key,
+        //            Value = x.Value,
+        //            PublishTimelineId = publishTimelineNode.Id,
+        //            Version = publishTimelineNode.Version,
+        //            Env = env
+        //        });
 
-            //当前发布的配置
-            var publishedConfigs = GetRepository<ConfigPublished>(env)
-                .SearchFor(x => x.Status == ConfigStatus.Enabled && x.AppId == appId && x.Env == env).ToList();
-            //复制一份新版本，最后插入发布表
-            var publishedConfigsCopy = new List<ConfigPublished>();
-            publishedConfigs.ForEach(x =>
-            {
-                publishedConfigsCopy.Add(new ConfigPublished()
-                {
-                    AppId = x.AppId,
-                    ConfigId = x.ConfigId,
-                    Group = x.Group,
-                    Id = Guid.NewGuid().ToString("N"),
-                    Key = x.Key,
-                    PublishTimelineId = publishTimelineNode.Id,
-                    PublishTime = publishTimelineNode.PublishTime,
-                    Status = ConfigStatus.Enabled,
-                    Version = publishTimelineNode.Version,
-                    Value = x.Value,
-                    Env = x.Env
-                });
-                x.Status = ConfigStatus.Deleted;
-            });
+        //        if (x.EditStatus == EditStatus.Deleted)
+        //        {
+        //            x.OnlineStatus = OnlineStatus.WaitPublish;
+        //            x.Status = ConfigStatus.Deleted;
+        //        }
+        //        else
+        //        {
+        //            x.OnlineStatus = OnlineStatus.Online;
+        //            x.Status = ConfigStatus.Enabled;
+        //        }
 
-            publishDetails.ForEach(x =>
-            {
-                if (x.EditStatus == EditStatus.Add)
-                {
-                    publishedConfigsCopy.Add(new ConfigPublished()
-                    {
-                        AppId = x.AppId,
-                        ConfigId = x.ConfigId,
-                        Group = x.Group,
-                        Id = Guid.NewGuid().ToString("N"),
-                        Key = x.Key,
-                        PublishTimelineId = publishTimelineNode.Id,
-                        PublishTime = publishTimelineNode.PublishTime,
-                        Status = ConfigStatus.Enabled,
-                        Value = x.Value,
-                        Version = publishTimelineNode.Version,
-                        Env = env
-                    });
-                }
+        //        x.EditStatus = EditStatus.Commit;
+        //        x.OnlineStatus = OnlineStatus.Online;
+        //    });
 
-                if (x.EditStatus == EditStatus.Edit)
-                {
-                    var oldEntity = publishedConfigsCopy.FirstOrDefault(c => c.ConfigId == x.ConfigId);
-                    if (oldEntity == null)
-                    {
-                        //do nothing
-                    }
-                    else
-                    {
-                        //edit
-                        oldEntity.Version = publishTimelineNode.Version;
-                        oldEntity.Group = x.Group;
-                        oldEntity.Key = x.Key;
-                        oldEntity.Value = x.Value;
-                        oldEntity.PublishTime = publishTimelineNode.PublishTime;
-                    }
-                }
+        //    //当前发布的配置
+        //    var publishedConfigs = GetRepository<ConfigPublished>(env)
+        //        .SearchFor(x => x.Status == ConfigStatus.Enabled && x.AppId == appId && x.Env == env).ToList();
+        //    //复制一份新版本，最后插入发布表
+        //    var publishedConfigsCopy = new List<ConfigPublished>();
+        //    publishedConfigs.ForEach(x =>
+        //    {
+        //        publishedConfigsCopy.Add(new ConfigPublished()
+        //        {
+        //            AppId = x.AppId,
+        //            ConfigId = x.ConfigId,
+        //            Group = x.Group,
+        //            Id = Guid.NewGuid().ToString("N"),
+        //            Key = x.Key,
+        //            PublishTimelineId = publishTimelineNode.Id,
+        //            PublishTime = publishTimelineNode.PublishTime,
+        //            Status = ConfigStatus.Enabled,
+        //            Version = publishTimelineNode.Version,
+        //            Value = x.Value,
+        //            Env = x.Env
+        //        });
+        //        x.Status = ConfigStatus.Deleted;
+        //    });
 
-                if (x.EditStatus == EditStatus.Deleted)
-                {
-                    var oldEntity = publishedConfigsCopy.FirstOrDefault(c => c.ConfigId == x.ConfigId);
-                    if (oldEntity == null)
-                    {
-                        //do nothing
-                    }
-                    else
-                    {
-                        //remove
-                        publishedConfigsCopy.Remove(oldEntity);
-                    }
-                }
-            });
+        //    publishDetails.ForEach(x =>
+        //    {
+        //        if (x.EditStatus == EditStatus.Add)
+        //        {
+        //            publishedConfigsCopy.Add(new ConfigPublished()
+        //            {
+        //                AppId = x.AppId,
+        //                ConfigId = x.ConfigId,
+        //                Group = x.Group,
+        //                Id = Guid.NewGuid().ToString("N"),
+        //                Key = x.Key,
+        //                PublishTimelineId = publishTimelineNode.Id,
+        //                PublishTime = publishTimelineNode.PublishTime,
+        //                Status = ConfigStatus.Enabled,
+        //                Value = x.Value,
+        //                Version = publishTimelineNode.Version,
+        //                Env = env
+        //            });
+        //        }
 
-            GetRepository<Config>(env).Update(waitPublishConfigs);
-            GetRepository<PublishTimeline>(env).Insert(publishTimelineNode);
-            GetRepository<PublishDetail>(env).Insert(publishDetails);
-            GetRepository<ConfigPublished>(env).Update(publishedConfigs);
-            GetRepository<ConfigPublished>(env).Insert(publishedConfigsCopy);
+        //        if (x.EditStatus == EditStatus.Edit)
+        //        {
+        //            var oldEntity = publishedConfigsCopy.FirstOrDefault(c => c.ConfigId == x.ConfigId);
+        //            if (oldEntity == null)
+        //            {
+        //                //do nothing
+        //            }
+        //            else
+        //            {
+        //                //edit
+        //                oldEntity.Version = publishTimelineNode.Version;
+        //                oldEntity.Group = x.Group;
+        //                oldEntity.Key = x.Key;
+        //                oldEntity.Value = x.Value;
+        //                oldEntity.PublishTime = publishTimelineNode.PublishTime;
+        //            }
+        //        }
+
+        //        if (x.EditStatus == EditStatus.Deleted)
+        //        {
+        //            var oldEntity = publishedConfigsCopy.FirstOrDefault(c => c.ConfigId == x.ConfigId);
+        //            if (oldEntity == null)
+        //            {
+        //                //do nothing
+        //            }
+        //            else
+        //            {
+        //                //remove
+        //                publishedConfigsCopy.Remove(oldEntity);
+        //            }
+        //        }
+        //    });
+
+        //    GetRepository<Config>(env).Update(waitPublishConfigs);
+        //    GetRepository<PublishTimeline>(env).Insert(publishTimelineNode);
+        //    GetRepository<PublishDetail>(env).Insert(publishDetails);
+        //    GetRepository<ConfigPublished>(env).Update(publishedConfigs);
+        //    GetRepository<ConfigPublished>(env).Insert(publishedConfigsCopy);
 
 
-            ClearAppPublishedConfigsMd5Cache(appId, env);
-            ClearAppPublishedConfigsMd5CacheWithInheritanced(appId, env);
+        //    ClearAppPublishedConfigsMd5Cache(appId, env);
+        //    ClearAppPublishedConfigsMd5CacheWithInheritanced(appId, env);
 
-            return (true, publishTimelineNode.Id);
-        }
+        //    return (true, publishTimelineNode.Id);
+        //}
     }
 
     public async Task<bool> IsPublishedAsync(string configId, string env)

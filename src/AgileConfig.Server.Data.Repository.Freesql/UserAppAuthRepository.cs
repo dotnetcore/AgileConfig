@@ -6,7 +6,7 @@ namespace AgileConfig.Server.Data.Repository.Freesql
 {
     public class UserAppAuthRepository : FreesqlRepository<UserAppAuth, string>, IUserAppAuthRepository
     {
-        public UserAppAuthRepository(IFreeSql freeSql) : base(freeSql)
+        public UserAppAuthRepository(IFreeSqlFactory freeSql) : base(freeSql)
         {
         }
     }

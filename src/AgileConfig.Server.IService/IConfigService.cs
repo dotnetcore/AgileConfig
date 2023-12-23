@@ -22,7 +22,7 @@ namespace AgileConfig.Server.IService
         /// <param name="log"></param>
         /// <param name="operatorr"></param>
         /// <returns></returns>
-        (bool result, string publishTimelineId) Publish(string appId,string[] ids, string log, string operatorr, string env);
+        Task<(bool result, string publishTimelineId)> Publish(string appId,string[] ids, string log, string operatorr, string env);
 
         Task<Config> GetAsync(string id, string env);
 

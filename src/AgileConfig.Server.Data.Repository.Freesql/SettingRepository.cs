@@ -6,7 +6,7 @@ namespace AgileConfig.Server.Data.Repository.Freesql
 {
     public class SettingRepository : FreesqlRepository<Setting, string>, ISettingRepository
     {
-        public SettingRepository(IFreeSql freeSql) : base(freeSql)
+        public SettingRepository(IFreeSqlFactory freeSql) : base(freeSql)
         {
         }
     }

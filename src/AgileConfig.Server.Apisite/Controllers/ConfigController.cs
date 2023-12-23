@@ -572,7 +572,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             var appId = model.AppId;
             var userId = await this.GetCurrentUserId(_userService);
-            var ret = _configService.Publish(appId, model.Ids, model.Log, userId, env);
+            var ret = await _configService.Publish(appId, model.Ids, model.Log, userId, env);
 
             if (ret.result)
             {
