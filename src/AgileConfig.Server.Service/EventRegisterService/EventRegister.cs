@@ -1,28 +1,18 @@
-﻿using AgileConfig.Server.Common.RestClient;
+﻿#nullable enable
 using AgileConfig.Server.IService;
-using Microsoft.Extensions.Logging;
 
 namespace AgileConfig.Server.Service.EventRegisterService;
 
-public class EventRegister : IEventRegister
+public class EventRegister(EventRegisterResolver eventRegisterResolver) : IEventRegister
 {
-    private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
-    private readonly ConfigStatusUpdateRegister _configStatusUpdateRegister;
-    private readonly SysLogRegister _sysLogRegister;
-    private readonly ServiceInfoStatusUpdateRegister _serviceInfoStatusUpdateRegister;
-
-    public EventRegister(IRemoteServerNodeProxy remoteServerNodeProxy, ILoggerFactory loggerFactory, IRestClient restClient)
-    {
-        _remoteServerNodeProxy = remoteServerNodeProxy;
-        _configStatusUpdateRegister = new ConfigStatusUpdateRegister(_remoteServerNodeProxy);
-        _sysLogRegister = new SysLogRegister();
-        _serviceInfoStatusUpdateRegister = new ServiceInfoStatusUpdateRegister(_remoteServerNodeProxy, loggerFactory, restClient);
-    }
+    private readonly IEventRegister? _configStatusUpdateRegister = eventRegisterResolver(nameof(ConfigStatusUpdateRegister));
+    private readonly IEventRegister? _sysLogRegister = eventRegisterResolver(nameof(SysLogRegister));
+    private readonly IEventRegister? _serviceInfoStatusUpdateRegister = eventRegisterResolver(nameof(ServiceInfoStatusUpdateRegister));
 
     public void Register()
     {
-        _configStatusUpdateRegister.Register();
-        _sysLogRegister.Register();
-        _serviceInfoStatusUpdateRegister.Register();
+        _configStatusUpdateRegister?.Register();
+        _sysLogRegister?.Register();
+        _serviceInfoStatusUpdateRegister?.Register();
     }
 }

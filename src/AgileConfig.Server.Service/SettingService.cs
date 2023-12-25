@@ -4,13 +4,16 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AgileConfig.Server.Common;
+using AgileConfig.Server.Data.Abstraction;
 using AgileConfig.Server.Data.Freesql;
 
 namespace AgileConfig.Server.Service
 {
     public class SettingService : ISettingService
     {
-        private FreeSqlContext _dbContext;
+        private readonly ISettingRepository _settingRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IUserRoleRepository _userRoleRepository;
 
         public const string SuperAdminId = "super_admin";
         public const string SuperAdminUserName = "admin";
@@ -19,56 +22,56 @@ namespace AgileConfig.Server.Service
         public const string DefaultEnvironmentKey = "environment";
         public const string DefaultJwtSecretKey = "jwtsecret";
 
-        public SettingService(FreeSqlContext context)
+        public SettingService(
+            ISettingRepository settingRepository,
+            IUserRepository userRepository,
+            IUserRoleRepository userRoleRepository)
         {
-            _dbContext = context;
+            _settingRepository = settingRepository;
+            _userRepository = userRepository;
+            _userRoleRepository = userRoleRepository;
         }
 
         public async Task<bool> AddAsync(Setting setting)
         {
-            await _dbContext.Settings.AddAsync(setting);
-            int x = await _dbContext.SaveChangesAsync();
-            return x > 0;
+            await _settingRepository.InsertAsync(setting);
+            return true;
         }
 
         public async Task<bool> DeleteAsync(Setting setting)
         {
-            setting = await _dbContext.Settings.Where(s => s.Id == setting.Id).ToOneAsync();
-            if (setting != null)
+            var setting2 = await _settingRepository.GetAsync(setting.Id);
+            if (setting2 != null)
             {
-                _dbContext.Settings.Remove(setting);
+                await _settingRepository.DeleteAsync(setting);
             }
-            int x = await _dbContext.SaveChangesAsync();
-            return x > 0;
+            return true;
         }
 
         public async Task<bool> DeleteAsync(string settingId)
         {
-            var setting = await _dbContext.Settings.Where(s => s.Id == settingId).ToOneAsync();
+            var setting = await _settingRepository.GetAsync(settingId);
             if (setting != null)
             {
-                _dbContext.Settings.Remove(setting);
+                await _settingRepository.DeleteAsync(setting);
             }
-            int x = await _dbContext.SaveChangesAsync();
-            return x > 0;
+            return true;
         }
 
         public async Task<Setting> GetAsync(string id)
         {
-            return await _dbContext.Settings.Where(s => s.Id == id).ToOneAsync();
+            return await _settingRepository.GetAsync(id);
         }
 
         public async Task<List<Setting>> GetAllSettingsAsync()
         {
-            return await _dbContext.Settings.Where(s => 1 == 1).ToListAsync();
+            return await _settingRepository.AllAsync();
         }
 
         public async Task<bool> UpdateAsync(Setting setting)
         {
-            _dbContext.Update(setting);
-            var x = await _dbContext.SaveChangesAsync();
-
-            return x > 0;
+            await _settingRepository.UpdateAsync(setting);
+            return true;
         }
 
         public async Task<bool> SetSuperAdminPassword(string password)
@@ -89,49 +92,50 @@ namespace AgileConfig.Server.Service
             su.Team = "";
             su.CreateTime = DateTime.Now;
             su.UserName = SuperAdminUserName;
-            _dbContext.Users.Add(su);
+            await _userRepository.InsertAsync(su);
 
+            var userRoles = new List<UserRole>();
             var ursa = new UserRole()
             {
                 Id = Guid.NewGuid().ToString("N"),
                 Role = Role.SuperAdmin,
                 UserId = SuperAdminId
             };
-            _dbContext.UserRoles.Add(ursa);
+            userRoles.Add(ursa);
             var ura = new UserRole()
             {
                 Id = Guid.NewGuid().ToString("N"),
                 Role = Role.Admin,
                 UserId = SuperAdminId
             };
-            _dbContext.UserRoles.Add(ura);
+            userRoles.Add(ura);
 
-            var result = await _dbContext.SaveChangesAsync();
+            await _userRoleRepository.InsertAsync(userRoles);
 
-            return result > 0;
+            return true;
         }
 
         public async Task<bool> HasSuperAdmin()
         {
-            var admin = await _dbContext.Users.Where(x => x.Id == SuperAdminId).FirstAsync();
+            var admin = await _userRepository.GetAsync(SuperAdminId);
 
             return admin != null;
         }
 
         public async Task<bool> InitDefaultEnvironment()
         {
-            var env = await _dbContext.Settings.Where(x => x.Id == DefaultEnvironmentKey).FirstAsync();
+            var env = await _settingRepository.GetAsync(DefaultEnvironmentKey);
             if (env == null)
             {
-                _dbContext.Settings.Add(new Setting
+                var setting = new Setting
                 {
                     Id = DefaultEnvironmentKey,
                     Value = DefaultEnvironment,
                     CreateTime = DateTime.Now
-                });
-                var result = await _dbContext.SaveChangesAsync();
+                };
+                await _settingRepository.InsertAsync(setting);
 
-                return result > 0;
+                return true;
             }
 
             return true;
@@ -139,14 +143,16 @@ namespace AgileConfig.Server.Service
 
         public void Dispose()
         {
-            _dbContext.Dispose();
+            _settingRepository.Dispose();
+            _userRepository.Dispose();
+            _userRoleRepository.Dispose();
         }
 
         public async Task<string[]> GetEnvironmentList()
         {
-            var env = await _dbContext.Settings.Where(x => x.Id == DefaultEnvironmentKey).FirstAsync();
+            var env = await _settingRepository.GetAsync(DefaultEnvironmentKey);
 
-            return env.Value.ToUpper().Split(',');
+            return env?.Value?.ToUpper().Split(',') ?? [];
         }
 
         /// <summary>
@@ -158,20 +164,20 @@ namespace AgileConfig.Server.Service
             var jwtSecretFromConfig = Global.Config["JwtSetting:SecurityKey"];
             if (string.IsNullOrEmpty(jwtSecretFromConfig))
             {
-                var jwtSecretSetting = _dbContext.Settings.Where(x => x.Id == DefaultJwtSecretKey).First();
+                var jwtSecretSetting = _settingRepository.GetAsync(DefaultEnvironmentKey).Result;
                 if (jwtSecretSetting == null)
                 {
-                    _dbContext.Settings.Add(new Setting
+                    var setting = new Setting
                     {
                         Id = DefaultJwtSecretKey,
                         Value = GenreateJwtSecretKey(),
                         CreateTime = DateTime.Now
-                    });
+                    };
 
                     try
                     {
-                        var result =  _dbContext.SaveChanges();
-                        return result > 0;
+                        _ = _settingRepository.InsertAsync(setting).Result;
+                        return true;
                     }
                     catch (Exception e)
                     {
@@ -187,7 +193,7 @@ namespace AgileConfig.Server.Service
 
         public string GetJwtTokenSecret()
         {
-            var jwtSecretSetting =  _dbContext.Settings.Where(x => x.Id == DefaultJwtSecretKey).First();
+            var jwtSecretSetting =  _settingRepository.GetAsync(DefaultEnvironmentKey).Result;
             return jwtSecretSetting?.Value;
         }
 

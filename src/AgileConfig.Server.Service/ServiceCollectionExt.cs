@@ -1,10 +1,15 @@
-﻿using AgileConfig.Server.Common.RestClient;
+﻿#nullable enable
+using AgileConfig.Server.Common.RestClient;
 using AgileConfig.Server.IService;
 using AgileConfig.Server.Service.EventRegisterService;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AgileConfig.Server.Service
 {
+    public delegate T? EventRegisterTransient<out T>();
+    
+    public delegate IEventRegister? EventRegisterResolver(string key);
+    
     public static class ServiceCollectionExt
     {
         public static void AddBusinessServices(this IServiceCollection sc)
@@ -26,6 +31,21 @@ namespace AgileConfig.Server.Service
             sc.AddScoped<IUserService, UserService>();
             sc.AddScoped<IPremissionService, PermissionService>();
             sc.AddScoped<IRegisterCenterService, RegisterCenterService>();
+            
+            sc.AddScoped<EventRegisterResolver>(x => key =>
+            {
+                return key switch
+                {
+                    nameof(ConfigStatusUpdateRegister) => x.GetService<ConfigStatusUpdateRegister>(),
+                    nameof(ServiceInfoStatusUpdateRegister) => x.GetService<ServiceInfoStatusUpdateRegister>(),
+                    nameof(SysLogRegister) => x.GetService<SysLogRegister>(),
+                    _ => null
+                };
+            });
+
+            sc.AddTransient<EventRegisterTransient<IConfigService>,EventRegisterTransient<ConfigService>>();
+            sc.AddTransient<EventRegisterTransient<IAppService>,EventRegisterTransient<AppService>>();
+            sc.AddTransient<EventRegisterTransient<IServerNodeService>,EventRegisterTransient<ServerNodeService>>();
         }
     }
 }
