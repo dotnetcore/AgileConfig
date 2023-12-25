@@ -3,6 +3,7 @@ using AgileConfig.Server.Data.Abstraction;
 using FreeSql;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
@@ -10,12 +11,10 @@ namespace AgileConfig.Server.Data.Freesql
 {
     public class FreesqlRepository<T, T1> : IRepository<T, T1> where T : class, IEntity<T1>
     {
-        private readonly IFreeSql _freeSql;
         private readonly IBaseRepository<T> _repository;
-        public FreesqlRepository(IFreeSql freeSql)
+        public FreesqlRepository(IFreeSqlFactory freeFactory)
         {
-            _freeSql = freeSql;
-            _repository = freeSql.GetRepository<T>();
+            _repository = freeFactory.Create().GetRepository<T>();
         }
 
         public Task<List<T>> AllAsync()

@@ -6,7 +6,7 @@ namespace AgileConfig.Server.Data.Repository.Freesql
 {
     public class PublishDetailRepository : FreesqlRepository<PublishDetail, string>, IPublishDetailRepository
     {
-        public PublishDetailRepository(IFreeSql freeSql) : base(freeSql)
+        public PublishDetailRepository(IFreeSqlFactory freeSql) : base(freeSql)
         {
         }
     }

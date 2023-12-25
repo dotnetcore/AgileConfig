@@ -6,7 +6,7 @@ namespace AgileConfig.Server.Data.Repository.Freesql
 {
     public class UserRoleRepository : FreesqlRepository<UserRole, string>, IUserRoleRepository
     {
-        public UserRoleRepository(IFreeSql freeSql) : base(freeSql)
+        public UserRoleRepository(IFreeSqlFactory freeSql) : base(freeSql)
         {
         }
     }

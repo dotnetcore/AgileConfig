@@ -34,8 +34,12 @@ internal class ConfigStatusUpdateRegister : IEventRegister
 
     private IConfigService NewConfigService()
     {
-        return new ConfigService(NewAppService(), new SettingService(new FreeSqlContext(FreeSQL.Instance)),
-            new UserService(new FreeSqlContext(FreeSQL.Instance)));
+        // todo
+
+        throw new NotImplementedException();
+
+        //return new ConfigService(null, NewAppService(), new SettingService(new FreeSqlContext(FreeSQL.Instance)),
+        //    new UserService(new FreeSqlContext(FreeSQL.Instance)));
     }
 
     public void Register()

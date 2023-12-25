@@ -6,7 +6,7 @@ namespace AgileConfig.Server.Data.Repository.Freesql
 {
     public class AppInheritancedRepository : FreesqlRepository<AppInheritanced, string>, IAppInheritancedRepository
     {
-        public AppInheritancedRepository(IFreeSql freeSql) : base(freeSql)
+        public AppInheritancedRepository(IFreeSqlFactory freeSql) : base(freeSql)
         {
         }
     }

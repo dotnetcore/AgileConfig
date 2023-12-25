@@ -20,6 +20,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using AgileConfig.Server.Data.Repository.Freesql;
 
 namespace AgileConfig.Server.Apisite
 {
@@ -62,9 +63,9 @@ namespace AgileConfig.Server.Apisite
         {
             services.AddDefaultHttpClient(IsTrustSSL(Configuration));
             services.AddRestClient();
-            
+
             services.AddMemoryCache();
-            
+
             services.AddCors();
             services.AddMvc().AddRazorRuntimeCompilation();
 
@@ -73,20 +74,17 @@ namespace AgileConfig.Server.Apisite
                 AddSwaggerService(services);
             }
 
-            if (string.Equals(Configuration["db:provider"], "mongodb", StringComparison.OrdinalIgnoreCase))
-            {
-                services.AddBusinessForMongoServices();
-            }
-            else
-            {
-                services.AddFreeSqlDbContext();
-                services.AddBusinessServices();    
-            }
-            
+            services.AddEnvAccessor();
+
+            // Add freesqlRepositories or other repositories
+            AddDataRepositories(services);
+
+            services.AddBusinessServices();
+
             services.ConfigureOptions<ConfigureJwtBearerOptions>();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer();
-            
+
             services.AddHostedService<InitService>();
             services.AddAntiforgery(o => o.SuppressXFrameOptionsHeader = true);
 
@@ -158,6 +156,21 @@ namespace AgileConfig.Server.Apisite
             });
         }
 
+
+        private void AddDataRepositories(IServiceCollection services)
+        {
+            if (string.Equals(Configuration["db:provider"], "mongodb", StringComparison.OrdinalIgnoreCase))
+            {
+                // todo
+
+                // services.AddMongoRepository();
+            }
+            else
+            {
+                services.AddFreeSqlFactory();
+                services.AddFreeSqlRepository();
+            }
+        }
 
     }
 }
