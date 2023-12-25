@@ -11,7 +11,7 @@ namespace AgileConfig.Server.Data.Freesql
         }
         public IFreeSql Create()
         {
-            return FreeSQL.GetInstance(_envAccessor.Env);
+            return FreeSQL.GetInstanceByEnv(_envAccessor.Env);
         }
     }
 }

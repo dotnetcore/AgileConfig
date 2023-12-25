@@ -21,10 +21,6 @@ namespace AgileConfig.Server.Common
             get
             {
                 var env = _httpContextAccessor.HttpContext.Request.Query["env"].FirstOrDefault();
-                if (string.IsNullOrEmpty(env))
-                {
-                    env = "DEV";
-                }
                 return env;
             }
         }

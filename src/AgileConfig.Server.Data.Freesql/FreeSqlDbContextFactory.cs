@@ -29,7 +29,7 @@ namespace AgileConfig.Server.Data.Freesql
             }
 
             Console.WriteLine("create env:{env} freesql dbcontext instance .");
-            return new FreeSqlContext(FreeSQL.GetInstance(env));
+            return new FreeSqlContext(FreeSQL.GetInstanceByEnv(env));
         }
     }
 }

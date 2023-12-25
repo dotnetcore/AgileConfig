@@ -9,7 +9,8 @@ namespace AgileConfig.Server.Data.Freesql
     {
         public static void AddFreeSqlFactory(this IServiceCollection sc)
         {
-            sc.AddSingleton<IFreeSqlFactory, EnvFreeSqlFactory>();
+            sc.AddKeyedSingleton<IFreeSqlFactory, DefaultFreeSqlFactory>("");
+            sc.AddKeyedSingleton<IFreeSqlFactory, EnvFreeSqlFactory>("Env");
         }
     }
 }

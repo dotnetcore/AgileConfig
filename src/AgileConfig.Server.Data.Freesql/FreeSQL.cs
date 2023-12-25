@@ -27,7 +27,7 @@ namespace AgileConfig.Server.Data.Freesql
         /// </summary>
         /// <param name="env"></param>
         /// <returns></returns>
-        public static IFreeSql GetInstance(string env)
+        public static IFreeSql GetInstanceByEnv(string env)
         {
             if (string.IsNullOrEmpty(env))
             {
