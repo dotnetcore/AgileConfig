@@ -16,6 +16,6 @@ public static class MongodbRepositoryExt
         services.AddScoped<ISysLogRepository, SysLogRepository>();
         services.AddScoped<IUserAppAuthRepository, UserAppAuthRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IUserRoleRepository, IUserRoleRepository>();
+        services.AddScoped<IUserRoleRepository, UserRoleRepository>();
     }
 }
