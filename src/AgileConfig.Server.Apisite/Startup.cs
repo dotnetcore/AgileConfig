@@ -1,14 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Net;
-using System.Net.Http;
-using System.Text;
 using AgileConfig.Server.Apisite.UIExtension;
 using AgileConfig.Server.Apisite.Websocket;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Common.RestClient;
 using AgileConfig.Server.Data.Freesql;
-using AgileConfig.Server.Mongodb.Service;
 using AgileConfig.Server.OIDC;
 using AgileConfig.Server.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -18,9 +15,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using AgileConfig.Server.Data.Repository.Freesql;
+using AgileConfig.Server.Data.Repository.Mongodb;
 
 namespace AgileConfig.Server.Apisite
 {
@@ -161,9 +158,7 @@ namespace AgileConfig.Server.Apisite
         {
             if (string.Equals(Configuration["db:provider"], "mongodb", StringComparison.OrdinalIgnoreCase))
             {
-                // todo
-
-                // services.AddMongoRepository();
+                services.AddMongodbRepository();
             }
             else
             {
