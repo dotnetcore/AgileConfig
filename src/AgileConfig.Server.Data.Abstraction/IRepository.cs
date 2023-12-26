@@ -6,7 +6,7 @@ namespace AgileConfig.Server.Data.Abstraction
     public interface IRepository<T, T1> : IDisposable where T : IEntity<T1>
     {
         Task<List<T>> AllAsync();
-        Task<T> GetAsync(T1 id);
+        Task<T?> GetAsync(T1 id);
 
         Task UpdateAsync(T entity);
         Task UpdateAsync(IList<T> entities);

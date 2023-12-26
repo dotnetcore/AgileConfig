@@ -8,6 +8,8 @@ using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.Data.Entity;
 using System.Threading.Tasks;
 using System.Linq;
+using AgileConfig.Server.IService;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AgileConfig.Server.Service.Tests.sqlserver
 {
@@ -16,7 +18,7 @@ namespace AgileConfig.Server.Service.Tests.sqlserver
     {
         IFreeSql fsq = null;
         FreeSqlContext freeSqlContext;
-        SettingService service = null;
+        ISettingService service = null;
 
         [TestInitialize]
         public void TestInitialize()
@@ -28,8 +30,13 @@ namespace AgileConfig.Server.Service.Tests.sqlserver
                           .Build();
             FluentApi.Config(fsq);
             freeSqlContext = new FreeSqlContext(fsq);
-
-            service = new SettingService(freeSqlContext);
+            
+            IServiceCollection services = new ServiceCollection();
+            services.AddBusinessServices();
+            
+            
+            var serviceProvider = services.BuildServiceProvider();
+            service = serviceProvider.GetService<ISettingService>();
             fsq.Delete<Setting>().Where("1=1");
 
             Console.WriteLine("TestInitialize");

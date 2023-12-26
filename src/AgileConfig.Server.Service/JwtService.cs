@@ -14,12 +14,19 @@ namespace AgileConfig.Server.Service;
 /// </summary>
 public class JwtService : IJwtService
 {
-    static JwtService()
+    private readonly ISettingService _settingService;
+    // static JwtService()
+    // {
+    //     // 则尝试生成一个key到数据库
+    //     using var settingService = new SettingService(new FreeSqlContext(FreeSQL.Instance));
+    //     settingService.TryInitJwtSecret();
+    // }
+
+    public JwtService(ISettingService settingService)
     {
-        // 则尝试生成一个key到数据库
-        using var settingService = new SettingService(new FreeSqlContext(FreeSQL.Instance));
-        settingService.TryInitJwtSecret();
+        _settingService = settingService;
     }
+    
     public  string Issuer => Global.Config["JwtSetting:Issuer"];
     public  string Audience => Global.Config["JwtSetting:Audience"];
     public  int ExpireSeconds => int.Parse(Global.Config["JwtSetting:ExpireSeconds"]);
@@ -38,8 +45,8 @@ public class JwtService : IJwtService
             return _secretKey;
         }
 
-        using var settingService = new SettingService(new FreeSqlContext(FreeSQL.Instance));
-        _secretKey = settingService.GetJwtTokenSecret();
+        //using var settingService = new SettingService(new FreeSqlContext(FreeSQL.Instance));
+        _secretKey = _settingService.GetJwtTokenSecret();
 
         if (string.IsNullOrEmpty(_secretKey))
         {
