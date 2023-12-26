@@ -3,7 +3,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using AgileConfig.Server.Common;
-using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.IService;
 using Microsoft.IdentityModel.Tokens;
 

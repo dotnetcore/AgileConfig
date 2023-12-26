@@ -2,85 +2,108 @@
 using AgileConfig.Server.IService;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
-using AgileConfig.Server.Data.Freesql;
+using AgileConfig.Server.Data.Abstraction;
 
 namespace AgileConfig.Server.Service
 {
     public class SysLogService : ISysLogService
     {
-        private FreeSqlContext _dbContext;
+        private readonly ISysLogRepository _sysLogRepository;
 
-        public SysLogService(FreeSqlContext context)
+        public SysLogService(ISysLogRepository sysLogRepository)
         {
-            _dbContext = context;
+            _sysLogRepository = sysLogRepository;
         }
 
         public async Task<bool> AddRangeAsync(IEnumerable<SysLog> logs)
         {
-            int x = await _dbContext.Freesql.Insert(logs).ExecuteAffrowsAsync();
-            return x > 0;
+            await _sysLogRepository.InsertAsync(logs.ToList());
+            return true;
         }
 
         public async Task<bool> AddSysLogAsync(SysLog log)
         {
-            int x =  await _dbContext.Freesql.Insert(log).ExecuteAffrowsAsync();;
-            return x > 0;
+            await _sysLogRepository.InsertAsync(log);
+            return true;
         }
 
         public async Task<long> Count(string appId, SysLogType? logType, DateTime? startTime, DateTime? endTime)
         {
-            var query = _dbContext.SysLogs.Where(s => 1 == 1);
+            var query = (Expression)Expression
+                .Constant(true);
+
             if (!string.IsNullOrEmpty(appId))
             {
-                query = query.Where(x => x.AppId == appId);
-            }
-            if (startTime.HasValue)
-            {
-                query = query.Where(x => x.LogTime >= startTime);
-            }
-            if (endTime.HasValue)
-            {
-                query = query.Where(x => x.LogTime < endTime);
-            }
-            if (logType.HasValue)
-            {
-                query = query.Where(x => x.LogType == logType);
+                Expression<Func<SysLog, bool>> expr = x => x.AppId == appId;
+                query = Expression.AndAlso(query, expr);
             }
 
-            var count = await query.CountAsync();
+            if (startTime.HasValue)
+            {
+                Expression<Func<SysLog, bool>> expr = (x => x.LogTime >= startTime);
+                query = Expression.AndAlso(query, expr);
+            }
+
+            if (endTime.HasValue)
+            {
+                Expression<Func<SysLog, bool>> expr = (x => x.LogTime < endTime);
+                query = Expression.AndAlso(query, expr);
+            }
+
+            if (logType.HasValue)
+            {
+                Expression<Func<SysLog, bool>> expr = (x => x.LogType == logType);
+                query = Expression.AndAlso(query, expr);
+            }
+
+            var exp = Expression.Lambda<Func<SysLog, bool>>(query);
+
+            var count = await _sysLogRepository.CountAsync(exp);
 
             return count;
         }
 
         public void Dispose()
         {
-            _dbContext.Dispose();
+            _sysLogRepository.Dispose();
         }
 
-        public Task<List<SysLog>> SearchPage(string appId, SysLogType? logType, DateTime? startTime, DateTime? endTime, int pageSize, int pageIndex)
+        public async Task<List<SysLog>> SearchPage(string appId, SysLogType? logType, DateTime? startTime, DateTime? endTime, int pageSize, int pageIndex)
         {
-            var query = _dbContext.SysLogs.Where(s => 1 == 1);
+            var query = (Expression)Expression
+                .Constant(true);
+
             if (!string.IsNullOrEmpty(appId))
             {
-                query = query.Where(x => x.AppId == appId);
+                Expression<Func<SysLog, bool>> expr = x => x.AppId == appId;
+                query = Expression.AndAlso(query, expr);
             }
+
             if (startTime.HasValue)
             {
-                query = query.Where(x => x.LogTime >= startTime);
+                Expression<Func<SysLog, bool>> expr = (x => x.LogTime >= startTime);
+                query = Expression.AndAlso(query, expr);
             }
+
             if (endTime.HasValue)
             {
-                query = query.Where(x => x.LogTime < endTime);
+                Expression<Func<SysLog, bool>> expr = (x => x.LogTime < endTime);
+                query = Expression.AndAlso(query, expr);
             }
+
             if (logType.HasValue)
             {
-                query = query.Where(x => x.LogType == logType);
+                Expression<Func<SysLog, bool>> expr = (x => x.LogType == logType);
+                query = Expression.AndAlso(query, expr);
             }
 
-            query = query.OrderByDescending(x => x.Id).Skip((pageIndex - 1) * pageSize).Take(pageSize);
+            var exp = Expression.Lambda<Func<SysLog, bool>>(query);
 
-            return query.ToListAsync();
+            var list = await _sysLogRepository.QueryPageAsync(exp, pageIndex, pageSize, defaultSortType: "DESC");
+            return list;
         }
     }
 }

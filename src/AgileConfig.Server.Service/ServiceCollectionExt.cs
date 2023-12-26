@@ -32,6 +32,9 @@ namespace AgileConfig.Server.Service
             sc.AddScoped<IPremissionService, PermissionService>();
             sc.AddScoped<IRegisterCenterService, RegisterCenterService>();
             
+            sc.AddScoped<ConfigStatusUpdateRegister>();
+            sc.AddScoped<ServiceInfoStatusUpdateRegister>();
+            sc.AddScoped<SysLogRegister>();
             sc.AddScoped<EventRegisterResolver>(x => key =>
             {
                 return key switch
@@ -46,6 +49,8 @@ namespace AgileConfig.Server.Service
             sc.AddTransient<EventRegisterTransient<IConfigService>,EventRegisterTransient<ConfigService>>();
             sc.AddTransient<EventRegisterTransient<IAppService>,EventRegisterTransient<AppService>>();
             sc.AddTransient<EventRegisterTransient<IServerNodeService>,EventRegisterTransient<ServerNodeService>>();
+            sc.AddTransient<EventRegisterTransient<IServiceInfoService>,EventRegisterTransient<ServiceInfoService>>();
+            sc.AddTransient<EventRegisterTransient<ISysLogService>,EventRegisterTransient<SysLogService>>();
         }
     }
 }

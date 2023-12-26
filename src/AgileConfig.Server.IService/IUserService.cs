@@ -10,7 +10,6 @@ namespace AgileConfig.Server.IService
     {
         Task<List<User>> GetAll();
         Task<User> GetUserAsync(string userId);
-        User GetUser(string userId);
 
         Task<List<User>> GetUsersByNameAsync(string userName);
         Task<List<Role>> GetUserRolesAsync(string userId);

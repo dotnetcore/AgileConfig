@@ -7,6 +7,9 @@ using AgileConfig.Server.Data.Freesql;
 using FreeSql;
 using AgileConfig.Server.Data.Entity;
 using System.Threading.Tasks;
+using AgileConfig.Server.Data.Repository.Freesql;
+using AgileConfig.Server.IService;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AgileConfig.Server.Service.Tests.PostgreSQL
 {
@@ -15,7 +18,7 @@ namespace AgileConfig.Server.Service.Tests.PostgreSQL
     {
         IFreeSql fsq = null;
         FreeSqlContext freeSqlContext;
-        ServerNodeService service = null;
+        IServerNodeService service = null;
 
         [TestInitialize]
         public void TestInitialize()
@@ -28,7 +31,14 @@ namespace AgileConfig.Server.Service.Tests.PostgreSQL
             FluentApi.Config(fsq);
             freeSqlContext = new FreeSqlContext(fsq);
 
-            service = new ServerNodeService(freeSqlContext);
+            IServiceCollection services = new ServiceCollection();
+            services.AddFreeSqlFactory();
+            services.AddFreeSqlRepository();
+            services.AddBusinessServices();
+            
+            
+            var serviceProvider = services.BuildServiceProvider();
+            service = serviceProvider.GetService<IServerNodeService>();
             fsq.Delete<ServerNode>().Where("1=1");
 
             Console.WriteLine("TestInitialize");
