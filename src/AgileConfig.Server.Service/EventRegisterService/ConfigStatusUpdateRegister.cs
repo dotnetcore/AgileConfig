@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Agile.Config.Protocol;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Entity;
-using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.IService;
 
 namespace AgileConfig.Server.Service.EventRegisterService;
@@ -23,30 +22,6 @@ internal class ConfigStatusUpdateRegister : IEventRegister
         _remoteServerNodeProxy = remoteServerNodeProxy;
         _serverNodeService = serverNodeService;
         _appService = appService;
-    }
-
-    // private IServerNodeService NewServerNodeService()
-    // {
-    //     return new ServerNodeService(new FreeSqlContext(FreeSQL.Instance));
-    // }
-
-    private IAppService NewAppService()
-    {
-        // todo
-
-        throw new NotImplementedException();
-        
-        //return new AppService(new FreeSqlContext(FreeSQL.Instance));
-    }
-
-    private IConfigService NewConfigService()
-    {
-        // todo
-
-        throw new NotImplementedException();
-
-        //return new ConfigService(null, NewAppService(), new SettingService(new FreeSqlContext(FreeSQL.Instance)),
-        //    new UserService(new FreeSqlContext(FreeSQL.Instance)));
     }
 
     public void Register()

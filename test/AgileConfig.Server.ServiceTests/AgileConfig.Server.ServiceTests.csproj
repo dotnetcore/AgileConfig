@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\AgileConfig.Server.Data.Repository.Freesql\AgileConfig.Server.Data.Repository.Freesql.csproj" />
     <ProjectReference Include="..\..\src\AgileConfig.Server.Service\AgileConfig.Server.Service.csproj" />
   </ItemGroup>
 

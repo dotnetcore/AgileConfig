@@ -60,6 +60,12 @@ public class MongodbRepository<TEntity, TId> : Abstraction.IRepository<TEntity, 
         await _access.Collection.BulkWriteAsync(writes);
     }
 
+    public async Task DeleteAsync(TId id)
+    {
+        var filter = Builders<TEntity>.Filter.Eq(x => x.Id, id);
+        await _access.Collection.DeleteOneAsync(filter);
+    }
+
     public async Task DeleteAsync(TEntity entity)
     {
         var filter = GetIdPropertyFilter(entity.Id);
@@ -87,5 +93,44 @@ public class MongodbRepository<TEntity, TId> : Abstraction.IRepository<TEntity, 
     public async Task<List<TEntity>> QueryAsync(Expression<Func<TEntity, bool>> exp)
     {
         return await _access.MongoQueryable.Where(exp).ToListAsync();
+    }
+
+    public async Task<List<TEntity>> QueryPageAsync(Expression<Func<TEntity, bool>> exp, int pageIndex, int pageSize, string defaultSortField = "Id",
+        string defaultSortType = "ASC")
+    {
+        var query = _access.MongoQueryable.Where(exp);
+        var sort = Sort(defaultSortField);
+        if (string.Equals(defaultSortField, "DESC", StringComparison.OrdinalIgnoreCase))
+        {
+            query.OrderByDescending(sort);
+        }
+        else
+        {
+            query.OrderBy(sort);
+        }
+        return await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToListAsync();
+    }
+
+    private Expression<Func<TEntity, object>> Sort(string defaultSortField)
+    {
+        Expression<Func<TEntity, object>> defaultSort = x => x.Id;
+        if (!string.IsNullOrEmpty(defaultSortField) &&
+            !defaultSortField.Equals("Id", StringComparison.OrdinalIgnoreCase))
+        {
+            var property = typeof(TEntity).GetProperty(defaultSortField);
+            if (property == null)
+            {
+                return defaultSort;
+            }
+            var parameter = Expression.Parameter(typeof(TEntity), "__q");
+            var memberExpress = Expression.Property(parameter, property);
+            return Expression.Lambda<Func<TEntity,object>>(memberExpress, parameter);
+        }
+        return defaultSort;
+    }
+
+    public async Task<long> CountAsync(Expression<Func<TEntity, bool>>? exp = null)
+    {
+        return await (exp == null ? _access.MongoQueryable.CountAsync() : _access.MongoQueryable.Where(exp).CountAsync());
     }
 }

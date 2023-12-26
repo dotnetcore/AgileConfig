@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Abstraction;
-using AgileConfig.Server.Data.Freesql;
 
 namespace AgileConfig.Server.Service
 {

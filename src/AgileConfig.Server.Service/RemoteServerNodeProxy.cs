@@ -2,7 +2,6 @@
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Common.RestClient;
 using AgileConfig.Server.Data.Entity;
-using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.IService;
 using Microsoft.Extensions.Logging;
 using System;
@@ -15,26 +14,35 @@ namespace AgileConfig.Server.Service
 {
     public class RemoteServerNodeProxy : IRemoteServerNodeProxy
     {
-        private IServerNodeService GetServerNodeService()
-        {
-            return new ServerNodeService(new FreeSqlContext(FreeSQL.Instance));
-        }
+        // private IServerNodeService GetServerNodeService()
+        // {
+        //     return new ServerNodeService(new FreeSqlContext(FreeSQL.Instance));
+        // }
+        //
+        // private ISysLogService GetSysLogService()
+        // {
+        //     return new SysLogService(new FreeSqlContext(FreeSQL.Instance));
+        // }
 
-        private ILogger _logger;
-
-        private ISysLogService GetSysLogService()
-        {
-            return new SysLogService(new FreeSqlContext(FreeSQL.Instance));
-        }
+        private readonly ILogger _logger;
+        private readonly IRestClient _restClient;
+        private readonly EventRegisterTransient<IServerNodeService> _serverNodeService;
+        private readonly EventRegisterTransient<ISysLogService> _sysLogService;
 
         private static ConcurrentDictionary<string, ClientInfos> _serverNodeClientReports =
             new ConcurrentDictionary<string, ClientInfos>();
-        private readonly IRestClient _restClient;
+        
 
-        public RemoteServerNodeProxy(ILoggerFactory loggerFactory, IRestClient restClient)
+        public RemoteServerNodeProxy(
+            ILoggerFactory loggerFactory, 
+            IRestClient restClient,
+            EventRegisterTransient<IServerNodeService> serverNodeService,
+            EventRegisterTransient<ISysLogService> sysLogService)
         {
             _logger = loggerFactory.CreateLogger<RemoteServerNodeProxy>();
             _restClient = restClient;
+            _serverNodeService = serverNodeService;
+            _sysLogService = sysLogService;
         }
 
         public async Task<bool> AllClientsDoActionAsync(string address, WebsocketAction action)
@@ -50,7 +58,7 @@ namespace AgileConfig.Server.Service
                 return false;
             }, 5);
 
-            using (var service = GetSysLogService())
+            using (var service = _sysLogService())
             {
                 var module = "";
                 if (action.Module == "r")
@@ -86,7 +94,7 @@ namespace AgileConfig.Server.Service
                 return false;
             }, 5);
 
-            using (var service = GetSysLogService())
+            using (var service = _sysLogService())
             {
                 var module = "";
                 if (action.Module == "r")
@@ -137,7 +145,7 @@ namespace AgileConfig.Server.Service
                 return false;
             }, 5);
 
-            using (var service = GetSysLogService())
+            using (var service = _sysLogService())
             {
                 var module = "";
                 if (action.Module == "r")
@@ -201,7 +209,7 @@ namespace AgileConfig.Server.Service
 
         public async Task TestEchoAsync(string address)
         {
-            using var service = GetServerNodeService();
+            using var service = _serverNodeService();
             var node = await service.GetAsync(address);
             try
             {
@@ -249,7 +257,7 @@ namespace AgileConfig.Server.Service
             {
                 while (true)
                 {
-                    using var service = GetServerNodeService();
+                    using var service = _serverNodeService();
                     var nodes = await service.GetAllNodesAsync();
 
                     foreach (var node in nodes)

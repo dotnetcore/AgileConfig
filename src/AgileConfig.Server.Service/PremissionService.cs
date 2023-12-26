@@ -1,18 +1,26 @@
 ﻿using AgileConfig.Server.Data.Entity;
-using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.IService;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
+using AgileConfig.Server.Data.Abstraction;
 
 namespace AgileConfig.Server.Service
 {
     public class PermissionService : IPremissionService
     {
-        private FreeSqlContext _dbContext;
-        public PermissionService(FreeSqlContext freeSql)
+        private readonly IUserRoleRepository _userRoleRepository;
+        private readonly IUserAppAuthRepository _userAppAuthRepository;
+        private readonly IAppRepository _appRepository;
+
+        public PermissionService(
+            IUserRoleRepository userRoleRepository,
+            IUserAppAuthRepository userAppAuthRepository,
+            IAppRepository appRepository)
         {
-            _dbContext = freeSql;
+            _userRoleRepository = userRoleRepository;
+            _userAppAuthRepository = userAppAuthRepository;
+            _appRepository = appRepository;
         }
 
         private static readonly List<string> Template_SuperAdminPermissions = new List<string>
@@ -177,7 +185,7 @@ namespace AgileConfig.Server.Service
         /// <returns></returns>
         public async Task<List<string>> GetUserPermission(string userId)
         {
-            var userRoles = await _dbContext.UserRoles.Where(x => x.UserId == userId).ToListAsync();
+            var userRoles = await _userRoleRepository.QueryAsync(x => x.UserId == userId);
             if (userRoles.Any(x=>x.Role == Role.SuperAdmin))
             {
                 return Template_SuperAdminPermissions;
@@ -206,10 +214,11 @@ namespace AgileConfig.Server.Service
         private async Task<List<App>> GetUserAuthApp(string userId, string authPermissionKey)
         {
             var apps = new List<App>();
-            var userAuths = await _dbContext.UserAppAuths.Where(x => x.UserId == userId && x.Permission == authPermissionKey).ToListAsync();
+            var userAuths =
+                await _userAppAuthRepository.QueryAsync(x => x.UserId == userId && x.Permission == authPermissionKey);
             foreach (var appAuth in userAuths)
             {
-                var app = await _dbContext.Apps.Where(x=>x.Id == appAuth.AppId).FirstAsync();
+                var app = await _appRepository.GetAsync(appAuth.AppId);
                 if (app!= null)
                 {
                     apps.Add(app);
@@ -226,7 +235,7 @@ namespace AgileConfig.Server.Service
         /// <returns></returns>
         private async Task<List<App>> GetUserAdminApps(string userId)
         {
-            return await _dbContext.Apps.Where(x => x.AppAdmin == userId).ToListAsync();
+            return await _appRepository.QueryAsync(x => x.AppAdmin == userId);
         }
 
         public string EditConfigPermissionKey => "EDIT_CONFIG";

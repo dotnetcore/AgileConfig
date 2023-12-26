@@ -7,7 +7,6 @@ using Agile.Config.Protocol;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Common.RestClient;
 using AgileConfig.Server.Data.Entity;
-using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.IService;
 using Microsoft.Extensions.Logging;
 
@@ -17,28 +16,25 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
 {
     private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
     private readonly IRestClient _restClient;
+    private readonly EventRegisterTransient<IServerNodeService> _serverNodeService;
+    private readonly EventRegisterTransient<IServiceInfoService> _serviceInfoService;
     private ILogger _logger;
 
     public ServiceInfoStatusUpdateRegister(
         IRemoteServerNodeProxy remoteServerNodeProxy,
         ILoggerFactory loggerFactory,
-        IRestClient restClient
+        IRestClient restClient,
+        EventRegisterTransient<IServerNodeService> serverNodeService,
+        EventRegisterTransient<IServiceInfoService> serviceInfoService
         )
     {
         _remoteServerNodeProxy = remoteServerNodeProxy;
         _restClient = restClient;
+        _serverNodeService = serverNodeService;
+        _serviceInfoService = serviceInfoService;
         _logger = loggerFactory.CreateLogger<ServiceInfoStatusUpdateRegister>();
     }
-
-    private IServerNodeService NewServerNodeService()
-    {
-        return new ServerNodeService(new FreeSqlContext(FreeSQL.Instance));
-    }
-
-    private IServiceInfoService NewServiceInfoService()
-    {
-        return new ServiceInfoService(null);
-    }
+    
 
     public void Register()
     {
@@ -46,7 +42,7 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
         {
             Task.Run(async () =>
             {
-                using var serverNodeService = NewServerNodeService();
+                using var serverNodeService = _serverNodeService();
                 var serverNodes = await serverNodeService.GetAllNodesAsync();
                 foreach (var serverNode in serverNodes.Where(x => x.Status == NodeStatus.Online))
                 {
@@ -66,7 +62,7 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
         {
             Task.Run(async () =>
             {
-                using var serverNodeService = NewServerNodeService();
+                using var serverNodeService = _serverNodeService();
                 var serverNodes = await serverNodeService.GetAllNodesAsync();
                 foreach (var serverNode in serverNodes.Where(x => x.Status == NodeStatus.Online))
                 {
@@ -86,7 +82,7 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
         {
             Task.Run(async () =>
             {
-                using var serverNodeService = NewServerNodeService();
+                using var serverNodeService = _serverNodeService();
                 var serverNodes = await serverNodeService.GetAllNodesAsync();
                 foreach (var serverNode in serverNodes.Where(x => x.Status == NodeStatus.Online))
                 {
@@ -108,7 +104,7 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
             {
                 dynamic paramObj = param;
                 string id = paramObj.UniqueId;
-                using var serviceInfoService = NewServiceInfoService();
+                using var serviceInfoService = _serviceInfoService();
                 var service = await serviceInfoService.GetByUniqueIdAsync(id);
                 if (service != null && !string.IsNullOrWhiteSpace(service.AlarmUrl) &&
                     service.Status == ServiceStatus.Unhealthy)

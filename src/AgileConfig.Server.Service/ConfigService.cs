@@ -468,7 +468,7 @@ namespace AgileConfig.Server.Service
                 //这里默认admin console 实例只部署一个，如果部署多个同步操作，高并发的时候这个version会有问题
                 var versionMax = (await _publishTimelineRepository.QueryAsync(x => x.AppId == appId)).Max(x => x.Version);
 
-                var user = _userService.GetUser(operatorr);
+                var user = await _userService.GetUserAsync(operatorr);
 
                 var publishTimelineNode = new PublishTimeline();
                 publishTimelineNode.AppId = appId;
