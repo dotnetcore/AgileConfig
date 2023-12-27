@@ -14,13 +14,6 @@ namespace AgileConfig.Server.Service
         private readonly IUserRepository _userRepository;
         private readonly IUserRoleRepository _userRoleRepository;
 
-        public const string SuperAdminId = "super_admin";
-        public const string SuperAdminUserName = "admin";
-
-        public const string DefaultEnvironment = "DEV,TEST,STAGING,PROD";
-        public const string DefaultEnvironmentKey = "environment";
-        public const string DefaultJwtSecretKey = "jwtsecret";
-
         public SettingService(
             ISettingRepository settingRepository,
             IUserRepository userRepository,
@@ -84,13 +77,13 @@ namespace AgileConfig.Server.Service
             password = Encrypt.Md5((password + newSalt));
 
             var su = new User();
-            su.Id = SuperAdminId;
+            su.Id = SystemSettings.SuperAdminId;
             su.Password = password;
             su.Salt = newSalt;
             su.Status = UserStatus.Normal;
             su.Team = "";
             su.CreateTime = DateTime.Now;
-            su.UserName = SuperAdminUserName;
+            su.UserName = SystemSettings.SuperAdminUserName;
             await _userRepository.InsertAsync(su);
 
             var userRoles = new List<UserRole>();
@@ -98,14 +91,14 @@ namespace AgileConfig.Server.Service
             {
                 Id = Guid.NewGuid().ToString("N"),
                 Role = Role.SuperAdmin,
-                UserId = SuperAdminId
+                UserId = SystemSettings.SuperAdminId
             };
             userRoles.Add(ursa);
             var ura = new UserRole()
             {
                 Id = Guid.NewGuid().ToString("N"),
                 Role = Role.Admin,
-                UserId = SuperAdminId
+                UserId = SystemSettings.SuperAdminId
             };
             userRoles.Add(ura);
 
@@ -116,20 +109,20 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> HasSuperAdmin()
         {
-            var admin = await _userRepository.GetAsync(SuperAdminId);
+            var admin = await _userRepository.GetAsync(SystemSettings.SuperAdminId);
 
             return admin != null;
         }
 
         public async Task<bool> InitDefaultEnvironment()
         {
-            var env = await _settingRepository.GetAsync(DefaultEnvironmentKey);
+            var env = await _settingRepository.GetAsync(SystemSettings.DefaultEnvironmentKey);
             if (env == null)
             {
                 var setting = new Setting
                 {
-                    Id = DefaultEnvironmentKey,
-                    Value = DefaultEnvironment,
+                    Id = SystemSettings.DefaultEnvironmentKey,
+                    Value = SystemSettings.DefaultEnvironment,
                     CreateTime = DateTime.Now
                 };
                 await _settingRepository.InsertAsync(setting);
@@ -149,63 +142,9 @@ namespace AgileConfig.Server.Service
 
         public async Task<string[]> GetEnvironmentList()
         {
-            var env = await _settingRepository.GetAsync(DefaultEnvironmentKey);
+            var env = await _settingRepository.GetAsync(SystemSettings.DefaultEnvironmentKey);
 
             return env?.Value?.ToUpper().Split(',') ?? [];
-        }
-
-        /// <summary>
-        /// 如果 配置文件或者环境变量没配置 JwtSetting:SecurityKey 则生成一个存库
-        /// </summary>
-        /// <returns></returns>
-        public bool TryInitJwtSecret()
-        {
-            var jwtSecretFromConfig = Global.Config["JwtSetting:SecurityKey"];
-            if (string.IsNullOrEmpty(jwtSecretFromConfig))
-            {
-                var jwtSecretSetting = _settingRepository.GetAsync(DefaultEnvironmentKey).Result;
-                if (jwtSecretSetting == null)
-                {
-                    var setting = new Setting
-                    {
-                        Id = DefaultJwtSecretKey,
-                        Value = GenreateJwtSecretKey(),
-                        CreateTime = DateTime.Now
-                    };
-
-                    try
-                    {
-                        _ = _settingRepository.InsertAsync(setting).Result;
-                        return true;
-                    }
-                    catch (Exception e)
-                    {
-                        //处理异常，防止多个实例第一次启动的时候，并发生成key值，发生异常，导致服务起不来
-                        Console.WriteLine(e);
-                    }
-
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        public string GetJwtTokenSecret()
-        {
-            var jwtSecretSetting =  _settingRepository.GetAsync(DefaultEnvironmentKey).Result;
-            return jwtSecretSetting?.Value;
-        }
-
-        /// <summary>
-        /// 生成一个 jwt 加密的 key ，38位
-        /// </summary>
-        /// <returns></returns>
-        private string GenreateJwtSecretKey()
-        {
-            var guid1 = Guid.NewGuid().ToString("n");
-            var guid2 =  Guid.NewGuid().ToString("n");
-
-            return guid1.Substring(0, 19) + guid2.Substring(0, 19);
         }
     }
 }

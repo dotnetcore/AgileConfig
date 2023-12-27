@@ -8,11 +8,11 @@ namespace AgileConfig.Server.Apisite;
 
 public class ConfigureJwtBearerOptions(
     IJwtService jwtService,
-    ISettingService settingService) : IConfigureNamedOptions<JwtBearerOptions>
+    ISystemInitializationService systemInitializationService) : IConfigureNamedOptions<JwtBearerOptions>
 {
     public void Configure(JwtBearerOptions options)
     {
-        settingService.TryInitJwtSecret();
+        systemInitializationService.TryInitJwtSecret();
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidIssuer = jwtService.Issuer,

@@ -8,6 +8,7 @@ using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.Data.Entity;
 using System.Threading.Tasks;
 using System.Linq;
+using AgileConfig.Server.Common;
 using AgileConfig.Server.IService;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -193,9 +194,9 @@ namespace AgileConfig.Server.Service.Tests.mysql
             Assert.IsNotNull(list);
             Assert.AreEqual(2, list.Count);
 
-            var pass = list.FirstOrDefault(s => s.Id == SettingService.SuperAdminUserName);
+            var pass = list.FirstOrDefault(s => s.Id == SystemSettings.SuperAdminUserName);
             Assert.IsNotNull(pass);
-            var salt = list.FirstOrDefault(s => s.Id == SettingService.SuperAdminId);
+            var salt = list.FirstOrDefault(s => s.Id == SystemSettings.SuperAdminId);
             Assert.IsNotNull(salt);
         }
 

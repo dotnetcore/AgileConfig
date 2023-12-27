@@ -36,11 +36,11 @@ public class MongodbRepository<TEntity, TId> : Abstraction.IRepository<TEntity, 
     
     private Expression<Func<TEntity,bool>> GetIdPropertyFilter(TId id)
     {
-        var expression = _access.MongoQueryable.Where(x => Equals(x.Id, id)).Expression;
-        return Expression.Lambda<Func<TEntity, bool>>(expression);
+        Expression<Func<TEntity, bool>> expression = x => Equals(x.Id, id);
+        return expression;
     }
 
-    public async Task<TEntity> GetAsync(TId id)
+    public async Task<TEntity?> GetAsync(TId id)
     {
         var filter = GetIdPropertyFilter(id);
         return await (await _access.Collection.FindAsync(filter)).SingleOrDefaultAsync();
