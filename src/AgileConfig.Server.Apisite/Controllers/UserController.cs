@@ -38,7 +38,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var users = await _userService.GetAll();
-            users = users.Where(x => x.Status == UserStatus.Normal && x.Id != SettingService.SuperAdminId).ToList();
+            users = users.Where(x => x.Status == UserStatus.Normal && x.Id != SystemSettings.SuperAdminId).ToList();
             if (!string.IsNullOrEmpty(userName))
             {
                 users = users.Where(x => x.UserName != null && x.UserName.Contains(userName)).ToList();
@@ -264,7 +264,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         public async Task<IActionResult> AllUsers()
         {
             var users = await _userService.GetAll();
-            users = users.Where(x => x.Status == UserStatus.Normal && x.Id != SettingService.SuperAdminId).ToList();
+            users = users.Where(x => x.Status == UserStatus.Normal && x.Id != SystemSettings.SuperAdminId).ToList();
 
             return Json(new
             {

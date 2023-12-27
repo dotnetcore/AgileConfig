@@ -14,6 +14,7 @@ namespace AgileConfig.Server.Service
     {
         public static void AddBusinessServices(this IServiceCollection sc)
         {
+            sc.AddSingleton<ISystemInitializationService, SystemInitializationService>();
             sc.AddSingleton<IJwtService, JwtService>();
 
             sc.AddScoped<IRemoteServerNodeProxy, RemoteServerNodeProxy>();
@@ -46,11 +47,11 @@ namespace AgileConfig.Server.Service
                 };
             });
 
-            sc.AddTransient<EventRegisterTransient<IConfigService>,EventRegisterTransient<ConfigService>>();
-            sc.AddTransient<EventRegisterTransient<IAppService>,EventRegisterTransient<AppService>>();
-            sc.AddTransient<EventRegisterTransient<IServerNodeService>,EventRegisterTransient<ServerNodeService>>();
-            sc.AddTransient<EventRegisterTransient<IServiceInfoService>,EventRegisterTransient<ServiceInfoService>>();
-            sc.AddTransient<EventRegisterTransient<ISysLogService>,EventRegisterTransient<SysLogService>>();
+            sc.AddTransient<EventRegisterTransient<IConfigService>>(x => x.GetService<IConfigService>);
+            sc.AddTransient<EventRegisterTransient<IAppService>>(x => x.GetService<IAppService>);
+            sc.AddTransient<EventRegisterTransient<IServerNodeService>>(x => x.GetService<IServerNodeService>);
+            sc.AddTransient<EventRegisterTransient<IServiceInfoService>>(x => x.GetService<IServiceInfoService>);
+            sc.AddTransient<EventRegisterTransient<ISysLogService>>(x => x.GetService<ISysLogService>);
         }
     }
 }
