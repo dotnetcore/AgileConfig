@@ -37,6 +37,11 @@ namespace AgileConfig.Server.Data.Freesql
             var provider = Global.Config[$"db:env:{env}:provider"];
             var conn = Global.Config[$"db:env:{env}:conn"];
 
+            if (string.IsNullOrEmpty(provider))
+            {
+                return Instance;
+            }
+
             var key = provider;
 
             if (_envFreesqls.ContainsKey(key))

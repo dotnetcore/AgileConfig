@@ -38,13 +38,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.CommonTe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.OIDC", "src\AgileConfig.Server.OIDC\AgileConfig.Server.OIDC.csproj", "{E49A2006-6D07-4434-AEC1-27E356A767AE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.Data.Mongodb", "src\AgileConfig.Server.Data.Mongodb\AgileConfig.Server.Data.Mongodb.csproj", "{4803646E-8327-4F69-8BA5-2244CB58BBA2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.Data.Mongodb", "src\AgileConfig.Server.Data.Mongodb\AgileConfig.Server.Data.Mongodb.csproj", "{4803646E-8327-4F69-8BA5-2244CB58BBA2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.Data.Abstraction", "src\AgileConfig.Server.Data.Abstraction\AgileConfig.Server.Data.Abstraction.csproj", "{E8101403-72C9-40FB-BCEE-16ED5C23A495}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.Data.Abstraction", "src\AgileConfig.Server.Data.Abstraction\AgileConfig.Server.Data.Abstraction.csproj", "{E8101403-72C9-40FB-BCEE-16ED5C23A495}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.Data.Repository.Freesql", "src\AgileConfig.Server.Data.Repository.Freesql\AgileConfig.Server.Data.Repository.Freesql.csproj", "{955F64CC-9EAC-4563-804D-6E2CF9547357}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.Data.Repository.Freesql", "src\AgileConfig.Server.Data.Repository.Freesql\AgileConfig.Server.Data.Repository.Freesql.csproj", "{955F64CC-9EAC-4563-804D-6E2CF9547357}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.Data.Repository.Mongodb", "src\AgileConfig.Server.Data.Repository.Mongodb\AgileConfig.Server.Data.Repository.Mongodb.csproj", "{C6B7A5A6-7287-4A20-9336-EBE82A5256F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.Data.Repository.Mongodb", "src\AgileConfig.Server.Data.Repository.Mongodb\AgileConfig.Server.Data.Repository.Mongodb.csproj", "{C6B7A5A6-7287-4A20-9336-EBE82A5256F1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.Data.Repository.Selector", "src\AgileConfig.Server.Data.Repository.Selector\AgileConfig.Server.Data.Repository.Selector.csproj", "{15089E5A-12E4-4953-BA35-0CBB2B1189C0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -112,6 +114,10 @@ Global
 		{C6B7A5A6-7287-4A20-9336-EBE82A5256F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C6B7A5A6-7287-4A20-9336-EBE82A5256F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C6B7A5A6-7287-4A20-9336-EBE82A5256F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15089E5A-12E4-4953-BA35-0CBB2B1189C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15089E5A-12E4-4953-BA35-0CBB2B1189C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15089E5A-12E4-4953-BA35-0CBB2B1189C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15089E5A-12E4-4953-BA35-0CBB2B1189C0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -132,6 +138,7 @@ Global
 		{E8101403-72C9-40FB-BCEE-16ED5C23A495} = {1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}
 		{955F64CC-9EAC-4563-804D-6E2CF9547357} = {1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}
 		{C6B7A5A6-7287-4A20-9336-EBE82A5256F1} = {1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}
+		{15089E5A-12E4-4953-BA35-0CBB2B1189C0} = {1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7F10DB58-5B6F-4EAC-994F-14E8046B306F}

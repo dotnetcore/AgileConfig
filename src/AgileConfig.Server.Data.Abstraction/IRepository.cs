@@ -12,7 +12,7 @@ namespace AgileConfig.Server.Data.Abstraction
         Task UpdateAsync(IList<T> entities);
 
         Task DeleteAsync(T1 id);
-        
+
         Task DeleteAsync(T entity);
 
         Task DeleteAsync(IList<T> entities);

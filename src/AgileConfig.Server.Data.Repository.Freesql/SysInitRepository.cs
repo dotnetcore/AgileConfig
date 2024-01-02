@@ -16,6 +16,6 @@ public class SysInitRepository : ISysInitRepository
 
     public void SaveInitSetting(Setting setting)
     {
-        FreeSQL.Instance.Insert(setting);
+        FreeSQL.Instance.Insert(setting).ExecuteAffrows();
     }
 }

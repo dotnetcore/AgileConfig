@@ -37,7 +37,7 @@ namespace AgileConfig.Server.Data.Freesql
             return _repository.DeleteAsync(entities);
         }
 
-        public Task<T> GetAsync(T1 id)
+        public Task<T?> GetAsync(T1 id)
         {
             return _repository.Where(x => x.Id.Equals(id)).ToOneAsync();
         }
@@ -91,7 +91,7 @@ namespace AgileConfig.Server.Data.Freesql
             return defaultSort;
         }
 
-        public async Task<long> CountAsync(Expression<Func<T, bool>> exp = null)
+        public async Task<long> CountAsync(Expression<Func<T, bool>>? exp = null)
         {
             return await (exp == null ? _repository.Select.CountAsync() : _repository.Select.Where(exp).CountAsync());
         }

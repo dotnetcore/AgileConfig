@@ -4,14 +4,15 @@ namespace AgileConfig.Server.Data.Freesql
 {
     public class EnvFreeSqlFactory : IFreeSqlFactory
     {
-        private readonly IEnvAccessor _envAccessor;
+        private readonly string _env;
         public EnvFreeSqlFactory(IEnvAccessor envAccessor)
         {
-            _envAccessor = envAccessor;
+            _env = envAccessor.Env;
         }
+
         public IFreeSql Create()
         {
-            return FreeSQL.GetInstanceByEnv(_envAccessor.Env);
+            return FreeSQL.GetInstanceByEnv(_env);
         }
     }
 }

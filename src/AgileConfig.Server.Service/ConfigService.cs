@@ -466,7 +466,8 @@ namespace AgileConfig.Server.Service
                     waitPublishConfigs = waitPublishConfigs.Where(x => ids.Contains(x.Id)).ToList();
                 }
                 //这里默认admin console 实例只部署一个，如果部署多个同步操作，高并发的时候这个version会有问题
-                var versionMax = (await _publishTimelineRepository.QueryAsync(x => x.AppId == appId)).Max(x => x.Version);
+                var publishList = await _publishTimelineRepository.QueryAsync(x => x.AppId == appId);
+                var versionMax = publishList.Any() ? publishList.Max(x => x.Version) : 0;
 
                 var user = await _userService.GetUserAsync(operatorr);
 
@@ -732,7 +733,7 @@ namespace AgileConfig.Server.Service
             //删除发布时间轴version之后的版本
             var deletePublishTimeLineItems = await _publishTimelineRepository.QueryAsync(x => x.AppId == appId && x.Env == env && x.Version > version);
             await _publishTimelineRepository.DeleteAsync(deletePublishTimeLineItems);
-            var deletePublishDetailItems = await _publishDetailRepository.QueryAsync(x => x.PublishTimelineId == publishTimelineId && x.Env == env);
+            var deletePublishDetailItems = await _publishDetailRepository.QueryAsync(x => x.AppId == appId && x.Env == env && x.Version > version);
             await _publishDetailRepository.DeleteAsync(deletePublishDetailItems);
 
             ClearAppPublishedConfigsMd5Cache(appId, env);

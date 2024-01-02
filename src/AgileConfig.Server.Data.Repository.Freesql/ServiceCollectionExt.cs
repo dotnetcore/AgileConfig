@@ -22,7 +22,7 @@ namespace AgileConfig.Server.Data.Repository.Freesql
             sc.AddScoped<ISysLogRepository, SysLogRepository>();
             sc.AddScoped<IUserAppAuthRepository, UserAppAuthRepository>();
             sc.AddScoped<IUserRepository, UserRepository>();
-            sc.AddScoped<IUserRoleRepository, IUserRoleRepository>();
+            sc.AddScoped<IUserRoleRepository, UserRoleRepository>();
             
             sc.AddSingleton<ISysInitRepository, SysInitRepository>();
         }
