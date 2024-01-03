@@ -68,9 +68,8 @@ namespace AgileConfig.Server.Data.Repository.Selector
                 }
                 else
                 {
-                    var envAccssor = new ManualEnvAccessor(env);
-                    var factory = new EnvFreeSqlFactory(envAccssor);
-                    return new Freesql.ConfigPublishedRepository(factory);
+                    var factory = sp.GetService<IFreeSqlFactory>();
+                    return new Freesql.ConfigPublishedRepository(factory.Create(env));
                 }
             });
 
@@ -84,9 +83,8 @@ namespace AgileConfig.Server.Data.Repository.Selector
                 }
                 else
                 {
-                    var envAccssor = new ManualEnvAccessor(env);
-                    var factory = new EnvFreeSqlFactory(envAccssor);
-                    return new Freesql.ConfigRepository(factory);
+                    var factory = sp.GetService<IFreeSqlFactory>();
+                    return new Freesql.ConfigRepository(factory.Create(env));
                 }
             });
 
@@ -100,9 +98,8 @@ namespace AgileConfig.Server.Data.Repository.Selector
                 }
                 else
                 {
-                    var envAccssor = new ManualEnvAccessor(env);
-                    var factory = new EnvFreeSqlFactory(envAccssor);
-                    return new Freesql.PublishDetailRepository(factory);
+                    var factory = sp.GetService<IFreeSqlFactory>();
+                    return new Freesql.PublishDetailRepository(factory.Create(env));
                 }
             });
 
@@ -116,9 +113,8 @@ namespace AgileConfig.Server.Data.Repository.Selector
                 }
                 else
                 {
-                    var envAccssor = new ManualEnvAccessor(env);
-                    var factory = new EnvFreeSqlFactory(envAccssor);
-                    return new Freesql.PublishTimelineRepository(factory);
+                    var factory = sp.GetService<IFreeSqlFactory>();
+                    return new Freesql.PublishTimelineRepository(factory.Create(env));
                 }
             }));
 
@@ -136,16 +132,6 @@ namespace AgileConfig.Server.Data.Repository.Selector
             }
 
             return envProvider;
-        }
-
-        class ManualEnvAccessor : IEnvAccessor
-        {
-            string _env;
-            public ManualEnvAccessor(string env)
-            {
-                _env = env;
-            }
-            public string Env => _env;
         }
     }
 }

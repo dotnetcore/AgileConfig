@@ -7,8 +7,12 @@ namespace AgileConfig.Server.Data.Repository.Freesql
 {
     public class UserRepository : FreesqlRepository<User, string>, IUserRepository
     {
-        public UserRepository([FromKeyedServices("")] IFreeSqlFactory freeSql) : base(freeSql)
+
+        private readonly IFreeSql freeSql;
+
+        public UserRepository(IFreeSql freeSql) : base(freeSql)
         {
+            this.freeSql = freeSql;
         }
     }
 }

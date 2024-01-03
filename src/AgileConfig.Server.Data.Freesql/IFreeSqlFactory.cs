@@ -2,6 +2,6 @@
 {
     public interface IFreeSqlFactory
     {
-        IFreeSql Create();
+        IFreeSql Create(string env);
     }
 }

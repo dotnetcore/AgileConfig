@@ -8,18 +8,13 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.Data.Freesql
 {
-    public class FreesqlRepository<T, T1> : IRepository<T, T1> where T : class, IEntity<T1>
+    public abstract class FreesqlRepository<T, T1> : IRepository<T, T1> where T : class, IEntity<T1>
     {
         private readonly IBaseRepository<T> _repository;
 
-        private readonly IFreeSqlFactory _freeSqlFactory;
-
-        protected IFreeSqlFactory FreeSqlFactory => _freeSqlFactory;
-
-        public FreesqlRepository(IFreeSqlFactory freeFactory)
+        public FreesqlRepository(IFreeSql freeSql)
         {
-            _freeSqlFactory = freeFactory;
-            _repository = freeFactory.Create().GetRepository<T>();
+            _repository = freeSql.GetRepository<T>();
         }
 
         public Task<List<T>> AllAsync()

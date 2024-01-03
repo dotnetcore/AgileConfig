@@ -1,7 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AgileConfig.Server.Data.Freesql
 {
@@ -9,8 +6,8 @@ namespace AgileConfig.Server.Data.Freesql
     {
         public static void AddFreeSqlFactory(this IServiceCollection sc)
         {
-            sc.AddKeyedSingleton<IFreeSqlFactory, DefaultFreeSqlFactory>("");
-            sc.AddKeyedSingleton<IFreeSqlFactory, EnvFreeSqlFactory>("Env");
+            sc.AddSingleton<IFreeSql>(FreeSQL.Instance);
+            sc.AddSingleton<IFreeSqlFactory, EnvFreeSqlFactory>();
         }
     }
 }
