@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Common.RestClient;
-using AgileConfig.Server.Data.Abstraction;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.Extensions.Logging;
@@ -13,20 +12,17 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
 {
     private readonly ILogger _logger;
     private readonly IRestClient _restClient;
-    private readonly IServiceInfoRepository _serviceInfoRepository;
     private readonly IServiceInfoService _serviceInfoService;
 
     public ServiceHealthCheckService(
         IServiceInfoService serviceInfoService,
         ILogger<ServiceHealthCheckService> logger,
-        IRestClient restClient,
-        IServiceInfoRepository serviceInfoRepository
+        IRestClient restClient
         )
     {
         _serviceInfoService = serviceInfoService;
         _logger = logger;
         _restClient = restClient;
-        _serviceInfoRepository = serviceInfoRepository;
     }
 
     private int _checkInterval;
@@ -124,7 +120,7 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
             while (true)
             {
                 //没有填写心跳模式，则不做检查
-                var services = await _serviceInfoRepository
+                var services = await _serviceInfoService
                     .QueryAsync(x => x.HeartBeatMode != null && x.HeartBeatMode != "");
                 foreach (var service in services)
                 {

@@ -1,6 +1,7 @@
 ﻿using AgileConfig.Server.Data.Entity;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace AgileConfig.Server.IService
@@ -22,6 +23,8 @@ namespace AgileConfig.Server.IService
         Task<string> ServicesMD5();
 
         Task<string> ServicesMD5Cache();
+
+        Task<List<ServiceInfo>> QueryAsync(Expression<Func<ServiceInfo, bool>> exp);
 
         void ClearCache();
     }

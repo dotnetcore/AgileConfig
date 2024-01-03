@@ -10,6 +10,7 @@ using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Abstraction;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
+using System.Linq.Expressions;
 
 namespace AgileConfig.Server.Service
 {
@@ -18,7 +19,7 @@ namespace AgileConfig.Server.Service
         private readonly IMemoryCache _memoryCache;
         private readonly IServiceInfoRepository _serviceInfoRepository;
 
-        public ServiceInfoService(IMemoryCache memoryCache,IServiceInfoRepository serviceInfoRepository)
+        public ServiceInfoService(IMemoryCache memoryCache, IServiceInfoRepository serviceInfoRepository)
         {
             _memoryCache = memoryCache;
             _serviceInfoRepository = serviceInfoRepository;
@@ -131,7 +132,7 @@ namespace AgileConfig.Server.Service
             service2.Status = status;
             if (status != ServiceStatus.Unhealthy)
             {
-                service2.LastHeartBeat =  DateTime.Now;
+                service2.LastHeartBeat = DateTime.Now;
             }
             await _serviceInfoRepository.UpdateAsync(service2);
 
@@ -149,6 +150,11 @@ namespace AgileConfig.Server.Service
         public void Dispose()
         {
             _serviceInfoRepository.Dispose();
+        }
+
+        public Task<List<ServiceInfo>> QueryAsync(Expression<Func<ServiceInfo, bool>> exp)
+        {
+            return _serviceInfoRepository.QueryAsync(exp);
         }
     }
 }

@@ -3,7 +3,6 @@ using AgileConfig.Server.Data.Abstraction;
 using FreeSql;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
@@ -12,8 +11,14 @@ namespace AgileConfig.Server.Data.Freesql
     public class FreesqlRepository<T, T1> : IRepository<T, T1> where T : class, IEntity<T1>
     {
         private readonly IBaseRepository<T> _repository;
+
+        private readonly IFreeSqlFactory _freeSqlFactory;
+
+        protected IFreeSqlFactory FreeSqlFactory => _freeSqlFactory;
+
         public FreesqlRepository(IFreeSqlFactory freeFactory)
         {
+            _freeSqlFactory = freeFactory;
             _repository = freeFactory.Create().GetRepository<T>();
         }
 
@@ -86,7 +91,7 @@ namespace AgileConfig.Server.Data.Freesql
                 }
                 var parameter = Expression.Parameter(typeof(T), "__q");
                 var memberExpress = Expression.Property(parameter, property);
-                return Expression.Lambda<Func<T,object>>(memberExpress, parameter);
+                return Expression.Lambda<Func<T, object>>(memberExpress, parameter);
             }
             return defaultSort;
         }
