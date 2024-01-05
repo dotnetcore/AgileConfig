@@ -53,10 +53,10 @@ namespace AgileConfig.Server.Data.Repository.Selector
             sc.AddScoped<Freesql.PublishDetailRepository>();
             sc.AddScoped<Freesql.PublishTimelineRepository>();
 
-            sc.AddScoped<Mongodb.ConfigPublishedRepository>();
-            sc.AddScoped<Mongodb.ConfigRepository>();
-            sc.AddScoped<Mongodb.PublishDetailRepository>();
-            sc.AddScoped<Mongodb.PublishTimelineRepository>();
+            // sc.AddScoped<Mongodb.ConfigPublishedRepository>();
+            // sc.AddScoped<Mongodb.ConfigRepository>();
+            // sc.AddScoped<Mongodb.PublishDetailRepository>();
+            // sc.AddScoped<Mongodb.PublishTimelineRepository>();
 
             sc.AddScoped<Func<string, IConfigPublishedRepository>>(sp => env =>
             {
@@ -64,7 +64,7 @@ namespace AgileConfig.Server.Data.Repository.Selector
 
                 if (envProvider.Equals("mongodb", StringComparison.OrdinalIgnoreCase))
                 {
-                    return sp.GetService<Mongodb.ConfigPublishedRepository>();
+                    return new Mongodb.ConfigPublishedRepository(GetConnectionString(env, config));
                 }
                 else
                 {
@@ -79,7 +79,7 @@ namespace AgileConfig.Server.Data.Repository.Selector
 
                 if (envProvider.Equals("mongodb", StringComparison.OrdinalIgnoreCase))
                 {
-                    return sp.GetService<Mongodb.ConfigRepository>();
+                    return new Mongodb.ConfigRepository(GetConnectionString(env, config));
                 }
                 else
                 {
@@ -94,7 +94,7 @@ namespace AgileConfig.Server.Data.Repository.Selector
 
                 if (envProvider.Equals("mongodb", StringComparison.OrdinalIgnoreCase))
                 {
-                    return sp.GetService<Mongodb.PublishDetailRepository>();
+                    return new Mongodb.PublishDetailRepository(GetConnectionString(env, config));
                 }
                 else
                 {
@@ -109,7 +109,7 @@ namespace AgileConfig.Server.Data.Repository.Selector
 
                 if (envProvider.Equals("mongodb", StringComparison.OrdinalIgnoreCase))
                 {
-                    return sp.GetService<Mongodb.PublishTimelineRepository>();
+                    return new Mongodb.PublishTimelineRepository(GetConnectionString(env,config));
                 }
                 else
                 {
@@ -132,6 +132,11 @@ namespace AgileConfig.Server.Data.Repository.Selector
             }
 
             return envProvider;
+        }
+
+        private static string? GetConnectionString(string env, IConfiguration config)
+        {
+            return string.IsNullOrEmpty(env) ? config["db:conn"] : config[$"db:env:{env}:conn"];
         }
     }
 }
