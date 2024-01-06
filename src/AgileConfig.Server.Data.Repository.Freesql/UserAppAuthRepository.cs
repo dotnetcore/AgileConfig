@@ -7,11 +7,11 @@ namespace AgileConfig.Server.Data.Repository.Freesql
     public class UserAppAuthRepository : FreesqlRepository<UserAppAuth, string>, IUserAppAuthRepository
     {
 
-        private readonly IFreeSql freeSql;
+        private readonly IFreeSqlFactory freeSqlFactory;
 
-        public UserAppAuthRepository(IFreeSql freeSql) : base(freeSql)
+        public UserAppAuthRepository(IFreeSqlFactory freeSqlFactory) : base(freeSqlFactory.Create())
         {
-            this.freeSql = freeSql;
+            this.freeSqlFactory = freeSqlFactory;
         }
     }
 }

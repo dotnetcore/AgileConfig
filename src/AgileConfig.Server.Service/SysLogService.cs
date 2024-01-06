@@ -87,7 +87,7 @@ namespace AgileConfig.Server.Service
                 exp = exp.And(x => x.LogType == logType);
             }
 
-            var list = await _sysLogRepository.QueryPageAsync(exp, pageIndex, pageSize, defaultSortType: "DESC");
+            var list = await _sysLogRepository.QueryPageAsync(exp, pageIndex, pageSize, defaultSortField: "LogTime", defaultSortType: "DESC");
             return list;
         }
     }

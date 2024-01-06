@@ -1,18 +1,17 @@
 ﻿using AgileConfig.Server.Data.Abstraction;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.Data.Freesql;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace AgileConfig.Server.Data.Repository.Freesql
 {
     public class UserRepository : FreesqlRepository<User, string>, IUserRepository
     {
 
-        private readonly IFreeSql freeSql;
+        private readonly IFreeSqlFactory freeSqlFactory;
 
-        public UserRepository(IFreeSql freeSql) : base(freeSql)
+        public UserRepository(IFreeSqlFactory freeSqlFactory) : base(freeSqlFactory.Create())
         {
-            this.freeSql = freeSql;
+            this.freeSqlFactory = freeSqlFactory;
         }
     }
 }

@@ -7,15 +7,22 @@ namespace AgileConfig.Server.Data.Repository.Freesql;
 
 public class SysInitRepository : ISysInitRepository
 {
+    private readonly IFreeSqlFactory freeSqlFactory;
+
+    public SysInitRepository(IFreeSqlFactory freeSqlFactory)
+    {
+        this.freeSqlFactory = freeSqlFactory;
+    }
+
     public string? GetJwtTokenSecret()
     {
-        var setting = FreeSQL.Instance.Select<Setting>().Where(x => x.Id == SystemSettings.DefaultJwtSecretKey)
+        var setting = freeSqlFactory.Create().Select<Setting>().Where(x => x.Id == SystemSettings.DefaultJwtSecretKey)
             .ToOne();
         return setting?.Value;
     }
 
     public void SaveInitSetting(Setting setting)
     {
-        FreeSQL.Instance.Insert(setting).ExecuteAffrows();
+        freeSqlFactory.Create().Insert(setting).ExecuteAffrows();
     }
 }

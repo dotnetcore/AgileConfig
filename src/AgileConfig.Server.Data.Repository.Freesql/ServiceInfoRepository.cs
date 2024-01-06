@@ -6,11 +6,11 @@ namespace AgileConfig.Server.Data.Repository.Freesql
 {
     public class ServiceInfoRepository : FreesqlRepository<ServiceInfo, string>, IServiceInfoRepository
     {
-        private readonly IFreeSql freeSql;
+        private readonly IFreeSqlFactory freeSqlFactory;
 
-        public ServiceInfoRepository(IFreeSql freeSql) : base(freeSql)
+        public ServiceInfoRepository(IFreeSqlFactory freeSqlFactory) : base(freeSqlFactory.Create())
         {
-            this.freeSql = freeSql;
+            this.freeSqlFactory = freeSqlFactory;
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Abstraction;
+using AgileConfig.Server.Data.Abstraction.DbProvider;
 using AgileConfig.Server.Data.Freesql;
+using AgileConfig.Server.Data.Mongodb;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,16 +14,15 @@ namespace AgileConfig.Server.Data.Repository.Selector
         {
             sc.AddFreeRepository();
 
-            var config = Global.Config;
-            var defaultProvider = config["db:provider"];
+            var defaultProvider = DbConfigInfoFactory.GetConfigInfo();
 
-            if (string.IsNullOrEmpty(defaultProvider))
+            if (string.IsNullOrEmpty(defaultProvider.Provider))
             {
                 throw new ArgumentNullException(nameof(defaultProvider));
             }
 
-            #region these repository will use default conn provider
-            if (defaultProvider.Equals("mongodb", StringComparison.OrdinalIgnoreCase))
+            #region these repository will use default provider
+            if (defaultProvider.Provider.Equals("mongodb", StringComparison.OrdinalIgnoreCase))
             {
                 sc.AddScoped<IAppInheritancedRepository, Mongodb.AppInheritancedRepository>();
                 sc.AddScoped<IAppRepository, Mongodb.AppRepository>();
@@ -52,11 +53,11 @@ namespace AgileConfig.Server.Data.Repository.Selector
             #region these repositories genereated dependency env provider, if no env provider use default provider
             sc.AddScoped<Func<string, IUow>>(sp => env =>
             {
-                string envProvider = GetEnvProvider(env, config, defaultProvider);
+                var envDbConfig = DbConfigInfoFactory.GetConfigInfo(env);
 
-                if (envProvider.Equals("mongodb", StringComparison.OrdinalIgnoreCase))
+                if (envDbConfig.Provider.Equals("mongodb", StringComparison.OrdinalIgnoreCase))
                 {
-                    return null;
+                    return new MongodbUow(); // currently this is an empty uow
                 }
                 else
                 {
@@ -68,11 +69,11 @@ namespace AgileConfig.Server.Data.Repository.Selector
 
             sc.AddScoped<Func<string, IConfigPublishedRepository>>(sp => env =>
             {
-                string envProvider = GetEnvProvider(env, config, defaultProvider);
+                var envDbConfig = DbConfigInfoFactory.GetConfigInfo(env);
 
-                if (envProvider.Equals("mongodb", StringComparison.OrdinalIgnoreCase))
+                if (envDbConfig.Provider.Equals("mongodb", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new Mongodb.ConfigPublishedRepository(GetConnectionString(env, config));
+                    return new Mongodb.ConfigPublishedRepository(envDbConfig.ConnectionString);
                 }
                 else
                 {
@@ -83,11 +84,11 @@ namespace AgileConfig.Server.Data.Repository.Selector
 
             sc.AddScoped<Func<string, IConfigRepository>>(sp => env =>
             {
-                string envProvider = GetEnvProvider(env, config, defaultProvider);
+                var envDbConfig = DbConfigInfoFactory.GetConfigInfo(env);
 
-                if (envProvider.Equals("mongodb", StringComparison.OrdinalIgnoreCase))
+                if (envDbConfig.Provider.Equals("mongodb", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new Mongodb.ConfigRepository(GetConnectionString(env, config));
+                    return new Mongodb.ConfigRepository(envDbConfig.ConnectionString);
                 }
                 else
                 {
@@ -99,11 +100,11 @@ namespace AgileConfig.Server.Data.Repository.Selector
 
             sc.AddScoped<Func<string, IPublishDetailRepository>>(sp => env =>
             {
-                string envProvider = GetEnvProvider(env, config, defaultProvider);
+                var envDbConfig = DbConfigInfoFactory.GetConfigInfo(env);
 
-                if (envProvider.Equals("mongodb", StringComparison.OrdinalIgnoreCase))
+                if (envDbConfig.Provider.Equals("mongodb", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new Mongodb.PublishDetailRepository(GetConnectionString(env, config));
+                    return new Mongodb.PublishDetailRepository(envDbConfig.ConnectionString);
                 }
                 else
                 {
@@ -114,11 +115,11 @@ namespace AgileConfig.Server.Data.Repository.Selector
 
             sc.AddScoped<Func<string, IPublishTimelineRepository>>(sp => env =>
             {
-                string envProvider = GetEnvProvider(env, config, defaultProvider);
+                var envDbConfig = DbConfigInfoFactory.GetConfigInfo(env);
 
-                if (envProvider.Equals("mongodb", StringComparison.OrdinalIgnoreCase))
+                if (envDbConfig.Provider.Equals("mongodb", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new Mongodb.PublishTimelineRepository(GetConnectionString(env, config));
+                    return new Mongodb.PublishTimelineRepository(envDbConfig.ConnectionString);
                 }
                 else
                 {
@@ -131,22 +132,5 @@ namespace AgileConfig.Server.Data.Repository.Selector
             return sc;
         }
 
-        private static string GetEnvProvider(string env, IConfiguration config, string defaultProvider)
-        {
-            var envProviderKey = $"db:env:{env}:provider";
-            var envProvider = config[envProviderKey];
-            if (string.IsNullOrEmpty(envProvider))
-            {
-                // use default provider
-                envProvider = defaultProvider;
-            }
-
-            return envProvider;
-        }
-
-        private static string? GetConnectionString(string env, IConfiguration config)
-        {
-            return string.IsNullOrEmpty(env) ? config["db:conn"] : config[$"db:env:{env}:conn"];
-        }
     }
 }

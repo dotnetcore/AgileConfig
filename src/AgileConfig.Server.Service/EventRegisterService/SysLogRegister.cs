@@ -62,7 +62,18 @@ internal class SysLogRegister : IEventRegister
             Task.Run(async () =>
             {
                 await _sysLogService.AddSysLogAsync(log);
-            });
+            })
+            .ContinueWith(x =>
+            {
+                if (x.IsFaulted)
+                {
+                    foreach (var ex in x.Exception?.InnerExceptions ?? new(Array.Empty<Exception>()))
+                    {
+                        throw ex;
+                    }
+                }
+            })
+            ;
         });
 
         TinyEventBus.Instance.Register(EventKeys.CHANGE_USER_PASSWORD_SUCCESS, (param) =>

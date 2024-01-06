@@ -13,7 +13,7 @@ public class MongodbRepository<TEntity, TId> : Abstraction.IRepository<TEntity, 
 {
     private readonly MongodbAccess<TEntity> _access;
 
-    public IUow Uow { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public IUow Uow { get; set; }
 
     public MongodbRepository(string? connectionString)
     {
@@ -36,8 +36,8 @@ public class MongodbRepository<TEntity, TId> : Abstraction.IRepository<TEntity, 
     {
         return await _access.MongoQueryable.ToListAsync();
     }
-    
-    private Expression<Func<TEntity,bool>> GetIdPropertyFilter(TId id)
+
+    private Expression<Func<TEntity, bool>> GetIdPropertyFilter(TId id)
     {
         Expression<Func<TEntity, bool>> expression = x => Equals(x.Id, id);
         return expression;
@@ -89,7 +89,7 @@ public class MongodbRepository<TEntity, TId> : Abstraction.IRepository<TEntity, 
 
     public async Task InsertAsync(IList<TEntity> entities)
     {
-        if(entities.Count > 0)
+        if (entities.Count > 0)
             await _access.Collection.InsertManyAsync(entities);
     }
 
@@ -127,7 +127,7 @@ public class MongodbRepository<TEntity, TId> : Abstraction.IRepository<TEntity, 
             }
             var parameter = Expression.Parameter(typeof(TEntity), "__q");
             var memberExpress = Expression.Property(parameter, property);
-            return Expression.Lambda<Func<TEntity,object>>(memberExpress, parameter);
+            return Expression.Lambda<Func<TEntity, object>>(memberExpress, parameter);
         }
         return defaultSort;
     }

@@ -13,10 +13,15 @@ namespace AgileConfig.Server.Data.Entity
 
     [Table(Name = "agc_sys_log")]
     [OraclePrimaryKeyName("agc_sys_log_pk")]
-    public class SysLog: IEntity<int>
+    public class SysLog: IEntity<string>
     {
-        [Column(Name = "id", IsIdentity = true)]
-        public int Id { get; set; }
+        public SysLog()
+        {
+            Id = Guid.NewGuid().ToString("N");
+        }
+
+        [Column(Name = "id", StringLength = 36)]
+        public string Id { get; set; }
 
         [Column(Name = "app_id", StringLength = 36)]
         public string AppId { get; set; }

@@ -720,11 +720,19 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> RollbackAsync(string publishTimelineId, string env)
         {
+            using var uow = _uowAccessor(env);
+            
             using var configRepository = _configRepositoryAccessor(env);
             using var publishTimelineRepository = _publishTimelineRepositoryAccsssor(env);
             using var configPublishedRepository = _configPublishedRepositoryAccessor(env);
             using var publishDetailRepository = _publishDetailRepositoryAccessor(env);
 
+            configRepository.Uow = uow;
+            publishTimelineRepository.Uow = uow;
+            configPublishedRepository.Uow = uow;
+            publishDetailRepository.Uow = uow;
+
+            uow?.Begin();
 
             var publishNode = (await publishTimelineRepository.QueryAsync(x => x.Id == publishTimelineId && x.Env == env)).FirstOrDefault();
 
@@ -781,6 +789,8 @@ namespace AgileConfig.Server.Service
             await publishTimelineRepository.DeleteAsync(deletePublishTimeLineItems);
             var deletePublishDetailItems = await publishDetailRepository.QueryAsync(x => x.AppId == appId && x.Env == env && x.Version > version);
             await publishDetailRepository.DeleteAsync(deletePublishDetailItems);
+
+            await uow?.SaveChangesAsync();
 
             ClearAppPublishedConfigsMd5Cache(appId, env);
             ClearAppPublishedConfigsMd5CacheWithInheritanced(appId, env);
@@ -865,7 +875,12 @@ namespace AgileConfig.Server.Service
 
         private async Task<bool> SaveFromDictAsync(IDictionary<string, string> dict, string appId, string env, bool isPatch)
         {
+            using var uow = _uowAccessor(env);
             using var configRepository = _configRepositoryAccessor(env);
+
+            configRepository.Uow = uow;
+
+            uow?.Begin();
 
             var currentConfigs = await configRepository
                 .QueryAsync(x => x.AppId == appId && x.Env == env && x.Status == ConfigStatus.Enabled);
@@ -958,6 +973,8 @@ namespace AgileConfig.Server.Service
             {
                 await configRepository.UpdateAsync(deleteConfigs);
             }
+
+            await uow?.SaveChangesAsync();
 
             return true;
         }

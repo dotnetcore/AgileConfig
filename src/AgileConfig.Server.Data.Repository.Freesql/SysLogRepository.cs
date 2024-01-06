@@ -4,14 +4,14 @@ using AgileConfig.Server.Data.Freesql;
 
 namespace AgileConfig.Server.Data.Repository.Freesql
 {
-    public class SysLogRepository : FreesqlRepository<SysLog, int>, ISysLogRepository
+    public class SysLogRepository : FreesqlRepository<SysLog, string>, ISysLogRepository
     {
 
-        private readonly IFreeSql freeSql;
+        private readonly IFreeSqlFactory freeSqlFactory;
 
-        public SysLogRepository(IFreeSql freeSql) : base(freeSql)
+        public SysLogRepository(IFreeSqlFactory freeSqlFactory) : base(freeSqlFactory.Create())
         {
-            this.freeSql = freeSql;
+            this.freeSqlFactory = freeSqlFactory;
         }
     }
 }

@@ -4,6 +4,8 @@ public static class MongodbRepositoryExt
 {
     public static void AddMongodbRepository(this IServiceCollection services)
     {
+        services.AddScoped<IUow, MongodbUow>();
+
         services.AddScoped<IAppInheritancedRepository, AppInheritancedRepository>();
         services.AddScoped<IAppRepository, AppRepository>();
         services.AddScoped<IConfigPublishedRepository, ConfigPublishedRepository>();
