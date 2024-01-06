@@ -470,10 +470,9 @@ namespace AgileConfig.Server.Service
         public async Task<(bool result, string publishTimelineId)> Publish(string appId, string[] ids, string log, string operatorr, string env)
         {
             await _lock.WaitAsync();
+            using var uow = _uowAccessor(env);
             try
             {
-                using var uow = _uowAccessor(env);
-
                 using var configRepository = _configRepositoryAccessor(env);
                 configRepository.Uow = uow;
                 using var publishTimelineRepository = _publishTimelineRepositoryAccsssor(env);
@@ -637,6 +636,7 @@ namespace AgileConfig.Server.Service
             }
             catch (Exception exc)
             {
+                uow?.Rollback();
                 throw;
             }
             finally

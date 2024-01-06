@@ -12,5 +12,7 @@ namespace AgileConfig.Server.Data.Abstraction
 
         Task<bool> SaveChangesAsync();
 
+        void Rollback();
+
     }
 }

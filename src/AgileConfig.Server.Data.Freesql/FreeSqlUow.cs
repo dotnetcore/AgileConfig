@@ -31,6 +31,11 @@ namespace AgileConfig.Server.Data.Freesql
             return Task.FromResult(true);
         }
 
+        public void Rollback()
+        {
+            _unitOfWork.Rollback();
+        }
+
         public void Dispose()
         {
             _unitOfWork?.Dispose();
