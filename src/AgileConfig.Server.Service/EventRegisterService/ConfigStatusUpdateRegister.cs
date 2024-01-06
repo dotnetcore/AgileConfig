@@ -11,17 +11,17 @@ namespace AgileConfig.Server.Service.EventRegisterService;
 internal class ConfigStatusUpdateRegister : IEventRegister
 {
     private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
-    private readonly EventRegisterTransient<IServerNodeService> _serverNodeService;
-    private readonly EventRegisterTransient<IAppService> _appService;
+    private readonly IServerNodeService _serverNodeService;
+    private readonly IAppService _appService;
 
     public ConfigStatusUpdateRegister(
         IRemoteServerNodeProxy remoteServerNodeProxy,
-        EventRegisterTransient<IServerNodeService> serverNodeService,
-        EventRegisterTransient<IAppService> appService)
+        EventRegisterTransient<IServerNodeService> serverNodeServiceAccessor,
+        EventRegisterTransient<IAppService> appServiceAccessor)
     {
         _remoteServerNodeProxy = remoteServerNodeProxy;
-        _serverNodeService = serverNodeService;
-        _appService = appService;
+        _serverNodeService = serverNodeServiceAccessor();
+        _appService = appServiceAccessor();
     }
 
     public void Register()
@@ -34,9 +34,8 @@ internal class ConfigStatusUpdateRegister : IEventRegister
             {
                 Task.Run(async () =>
                 {
-                    using (var serverNodeService = _serverNodeService())
                     {
-                        var nodes = await serverNodeService.GetAllNodesAsync();
+                        var nodes = await _serverNodeService.GetAllNodesAsync();
                         var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(timelineNode.AppId);
                         noticeApps.Add(timelineNode.AppId,
                             new WebsocketAction { Action = ActionConst.Reload, Module = ActionModule.ConfigCenter });
@@ -81,9 +80,8 @@ internal class ConfigStatusUpdateRegister : IEventRegister
             {
                 Task.Run(async () =>
                 {
-                    using (var serverNodeService = _serverNodeService())
                     {
-                        var nodes = await serverNodeService.GetAllNodesAsync();
+                        var nodes = await _serverNodeService.GetAllNodesAsync();
                         var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(timelineNode.AppId);
                         noticeApps.Add(timelineNode.AppId,
                             new WebsocketAction
@@ -118,12 +116,11 @@ internal class ConfigStatusUpdateRegister : IEventRegister
         Dictionary<string, WebsocketAction> needNoticeAppsActions = new Dictionary<string, WebsocketAction>
         {
         };
-        using (var appService = _appService())
         {
-            var currentApp = await appService.GetAsync(appId);
+            var currentApp = await _appService.GetAsync(appId);
             if (currentApp.Type == AppType.Inheritance)
             {
-                var inheritancedFromApps = await appService.GetInheritancedFromAppsAsync(appId);
+                var inheritancedFromApps = await _appService.GetInheritancedFromAppsAsync(appId);
                 inheritancedFromApps.ForEach(x =>
                 {
                     needNoticeAppsActions.Add(x.Id, new WebsocketAction

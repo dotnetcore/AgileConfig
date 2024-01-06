@@ -8,11 +8,11 @@ namespace AgileConfig.Server.Service.EventRegisterService;
 
 internal class SysLogRegister : IEventRegister
 {
-    private readonly EventRegisterTransient<ISysLogService> _sysLogService;
+    private readonly ISysLogService _sysLogService;
 
-    public SysLogRegister(EventRegisterTransient<ISysLogService> sysLogService)
+    public SysLogRegister(EventRegisterTransient<ISysLogService> sysLogServiceAccessor)
     {
-        _sysLogService = sysLogService;
+        _sysLogService = sysLogServiceAccessor();
     }
 
     public void Register()
@@ -29,10 +29,7 @@ internal class SysLogRegister : IEventRegister
             };
             Task.Run(async () =>
             {
-                using (var syslogService = _sysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                await _sysLogService.AddSysLogAsync(log);
             });
         });
 
@@ -46,10 +43,7 @@ internal class SysLogRegister : IEventRegister
             };
             Task.Run(async () =>
             {
-                using (var syslogService = _sysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                await _sysLogService.AddSysLogAsync(log);
             });
         });
 
@@ -67,10 +61,7 @@ internal class SysLogRegister : IEventRegister
             };
             Task.Run(async () =>
             {
-                using (var syslogService = _sysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                await _sysLogService.AddSysLogAsync(log);
             });
         });
 
@@ -87,10 +78,7 @@ internal class SysLogRegister : IEventRegister
             };
             Task.Run(async () =>
             {
-                using (var syslogService = _sysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                await _sysLogService.AddSysLogAsync(log);
             });
         });
 
@@ -109,10 +97,7 @@ internal class SysLogRegister : IEventRegister
                 };
                 Task.Run(async () =>
                 {
-                    using (var syslogService = _sysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                    await _sysLogService.AddSysLogAsync(log);
                 });
             }
         });
@@ -133,10 +118,7 @@ internal class SysLogRegister : IEventRegister
                 };
                 Task.Run(async () =>
                 {
-                    using (var syslogService = _sysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                    await _sysLogService.AddSysLogAsync(log);
                 });
             }
         });
@@ -156,10 +138,7 @@ internal class SysLogRegister : IEventRegister
                 };
                 Task.Run(async () =>
                 {
-                    using (var syslogService = _sysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                    await _sysLogService.AddSysLogAsync(log);
                 });
             }
         });
@@ -179,10 +158,7 @@ internal class SysLogRegister : IEventRegister
                 };
                 Task.Run(async () =>
                 {
-                    using (var syslogService = _sysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                    await _sysLogService.AddSysLogAsync(log);
                 });
             }
         });
@@ -206,10 +182,7 @@ internal class SysLogRegister : IEventRegister
                 };
                 Task.Run(async () =>
                 {
-                    using (var syslogService = _sysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                    await _sysLogService.AddSysLogAsync(log);
                 });
             }
         });
@@ -231,10 +204,7 @@ internal class SysLogRegister : IEventRegister
                 };
                 Task.Run(async () =>
                 {
-                    using (var syslogService = _sysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                    await _sysLogService.AddSysLogAsync(log);
                 });
             }
         });
@@ -257,10 +227,7 @@ internal class SysLogRegister : IEventRegister
                 };
                 Task.Run(async () =>
                 {
-                    using (var syslogService = _sysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                    await _sysLogService.AddSysLogAsync(log);
                 });
             }
         });
@@ -281,10 +248,7 @@ internal class SysLogRegister : IEventRegister
                 };
                 Task.Run(async () =>
                 {
-                    using (var syslogService = _sysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                    await _sysLogService.AddSysLogAsync(log);
                 });
             }
         });
@@ -305,10 +269,7 @@ internal class SysLogRegister : IEventRegister
             };
             Task.Run(async () =>
             {
-                using (var syslogService = _sysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                await _sysLogService.AddSysLogAsync(log);
             });
         });
         TinyEventBus.Instance.Register(EventKeys.ROLLBACK_CONFIG_SUCCESS, (param) =>
@@ -330,10 +291,7 @@ internal class SysLogRegister : IEventRegister
                 };
                 Task.Run(async () =>
                 {
-                    using (var syslogService = _sysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                    await _sysLogService.AddSysLogAsync(log);
                 });
             }
         });
@@ -355,10 +313,7 @@ internal class SysLogRegister : IEventRegister
                 };
                 Task.Run(async () =>
                 {
-                    using (var syslogService = _sysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                    await _sysLogService.AddSysLogAsync(log);
                 });
             }
         });
@@ -380,10 +335,7 @@ internal class SysLogRegister : IEventRegister
                 };
                 Task.Run(async () =>
                 {
-                    using (var syslogService = _sysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                    await _sysLogService.AddSysLogAsync(log);
                 });
             }
         });
@@ -401,10 +353,7 @@ internal class SysLogRegister : IEventRegister
             };
             Task.Run(async () =>
             {
-                using (var syslogService = _sysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                await _sysLogService.AddSysLogAsync(log);
             });
         });
 
@@ -422,10 +371,7 @@ internal class SysLogRegister : IEventRegister
             };
             Task.Run(async () =>
             {
-                using (var syslogService = _sysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                await _sysLogService.AddSysLogAsync(log);
             });
         });
 
@@ -443,10 +389,7 @@ internal class SysLogRegister : IEventRegister
             };
             Task.Run(async () =>
             {
-                using (var syslogService = _sysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                await _sysLogService.AddSysLogAsync(log);
             });
         });
 
@@ -464,10 +407,7 @@ internal class SysLogRegister : IEventRegister
             };
             Task.Run(async () =>
             {
-                using (var syslogService = _sysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                await _sysLogService.AddSysLogAsync(log);
             });
         });
 
@@ -485,10 +425,7 @@ internal class SysLogRegister : IEventRegister
             };
             Task.Run(async () =>
             {
-                using (var syslogService = _sysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                await _sysLogService.AddSysLogAsync(log);
             });
         });
 
@@ -506,10 +443,7 @@ internal class SysLogRegister : IEventRegister
             };
             Task.Run(async () =>
             {
-                using (var syslogService = _sysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                await _sysLogService.AddSysLogAsync(log);
             });
         });
 
@@ -527,8 +461,7 @@ internal class SysLogRegister : IEventRegister
             };
             Task.Run(async () =>
             {
-                using var syslogService = _sysLogService();
-                await syslogService.AddSysLogAsync(log);
+                await _sysLogService.AddSysLogAsync(log);
             });
         });
         TinyEventBus.Instance.Register(EventKeys.UNREGISTER_A_SERVICE, (param) =>
@@ -544,8 +477,7 @@ internal class SysLogRegister : IEventRegister
             };
             Task.Run(async () =>
             {
-                using var syslogService = _sysLogService();
-                await syslogService.AddSysLogAsync(log);
+                await _sysLogService.AddSysLogAsync(log);
             });
         });
     }

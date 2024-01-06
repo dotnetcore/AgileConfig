@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using AgileConfig.Server.Data.Abstraction;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 
 namespace AgileConfig.Server.Service
 {
@@ -32,34 +33,26 @@ namespace AgileConfig.Server.Service
 
         public async Task<long> Count(string appId, SysLogType? logType, DateTime? startTime, DateTime? endTime)
         {
-            var query = (Expression)Expression
-                .Constant(true);
-
+            Expression<Func<SysLog, bool>> exp = x => true;
             if (!string.IsNullOrEmpty(appId))
             {
-                Expression<Func<SysLog, bool>> expr = x => x.AppId == appId;
-                query = Expression.AndAlso(query, expr);
+                exp = exp.And(c => c.AppId == appId);
             }
 
             if (startTime.HasValue)
             {
-                Expression<Func<SysLog, bool>> expr = (x => x.LogTime >= startTime);
-                query = Expression.AndAlso(query, expr);
+                exp = exp.And(x => x.LogTime >= startTime);
             }
 
             if (endTime.HasValue)
             {
-                Expression<Func<SysLog, bool>> expr = (x => x.LogTime < endTime);
-                query = Expression.AndAlso(query, expr);
+                exp = exp.And(x => x.LogTime < endTime);
             }
 
             if (logType.HasValue)
             {
-                Expression<Func<SysLog, bool>> expr = (x => x.LogType == logType);
-                query = Expression.AndAlso(query, expr);
+                exp = exp.And(x => x.LogType == logType);
             }
-
-            var exp = Expression.Lambda<Func<SysLog, bool>>(query);
 
             var count = await _sysLogRepository.CountAsync(exp);
 
@@ -73,34 +66,26 @@ namespace AgileConfig.Server.Service
 
         public async Task<List<SysLog>> SearchPage(string appId, SysLogType? logType, DateTime? startTime, DateTime? endTime, int pageSize, int pageIndex)
         {
-            var query = (Expression)Expression
-                .Constant(true);
-
+            Expression<Func<SysLog, bool>> exp = x => true;
             if (!string.IsNullOrEmpty(appId))
             {
-                Expression<Func<SysLog, bool>> expr = x => x.AppId == appId;
-                query = Expression.AndAlso(query, expr);
+                exp = exp.And(c => c.AppId == appId);
             }
 
             if (startTime.HasValue)
             {
-                Expression<Func<SysLog, bool>> expr = (x => x.LogTime >= startTime);
-                query = Expression.AndAlso(query, expr);
+                exp = exp.And(x => x.LogTime >= startTime);
             }
 
             if (endTime.HasValue)
             {
-                Expression<Func<SysLog, bool>> expr = (x => x.LogTime < endTime);
-                query = Expression.AndAlso(query, expr);
+                exp = exp.And(x => x.LogTime < endTime);
             }
 
             if (logType.HasValue)
             {
-                Expression<Func<SysLog, bool>> expr = (x => x.LogType == logType);
-                query = Expression.AndAlso(query, expr);
+                exp = exp.And(x => x.LogType == logType);
             }
-
-            var exp = Expression.Lambda<Func<SysLog, bool>>(query);
 
             var list = await _sysLogRepository.QueryPageAsync(exp, pageIndex, pageSize, defaultSortType: "DESC");
             return list;

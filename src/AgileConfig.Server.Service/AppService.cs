@@ -12,25 +12,29 @@ namespace AgileConfig.Server.Service
     {
         private readonly IAppRepository _appRepository;
         private readonly IAppInheritancedRepository _appInheritancedRepository;
-        private readonly IConfigRepository _configRepository;
-        private readonly IConfigPublishedRepository _configPublishedRepository;
+        private readonly Func<string, IConfigRepository> _configRepositoryAccessor;
+        private readonly Func<string, IConfigPublishedRepository> _configPublishedRepositoryAccessor;
         private readonly IUserRepository _userRepository;
         private readonly IUserAppAuthRepository _userAppAuthRepository;
+        private readonly ISettingService _settingService;
 
         public AppService(
             IAppRepository repository, 
             IAppInheritancedRepository appInheritancedRepository,
-            IConfigRepository configRepository,
-            IConfigPublishedRepository configPublishedRepository,
+            Func<string, IConfigRepository> configRepository,
+            Func<string, IConfigPublishedRepository> configPublishedRepository,
             IUserRepository userRepository,
-            IUserAppAuthRepository userAppAuthRepository)
+            IUserAppAuthRepository userAppAuthRepository,
+            ISettingService settingService
+            )
         {
             _appRepository = repository;
             _appInheritancedRepository = appInheritancedRepository;
-            _configRepository = configRepository;
-            _configPublishedRepository = configPublishedRepository;
+            _configRepositoryAccessor = configRepository;
+            _configPublishedRepositoryAccessor = configPublishedRepository;
             _userRepository = userRepository;
             _userAppAuthRepository = userAppAuthRepository;
+            _settingService = settingService;
         }
 
         public async Task<bool> AddAsync(App app)
@@ -54,22 +58,43 @@ namespace AgileConfig.Server.Service
             app = await _appRepository.GetAsync(app.Id);
             if (app != null)
             {
-                await _appRepository.DeleteAsync(app);
-                //怕有的同学误删app导致要恢复，所以保留配置项吧。
-                var configs = await _configRepository.QueryAsync(x => x.AppId == app.Id);
-                foreach (var item in configs)
+                var envs = await _settingService.GetEnvironmentList();
+                var updatedConfigIds = new List<string>();
+                var updatedConfigPublishedIds = new List<string>();
+
+                foreach (var env in envs)
                 {
-                    item.Status = ConfigStatus.Deleted;
-                    await _configRepository.UpdateAsync(item);
-                }
-                //删除发布的配置项
-                var publishedConfigs = await _configPublishedRepository
-                    .QueryAsync(x => x.AppId == app.Id && x.Status == ConfigStatus.Enabled)
-                    ;
-                foreach (var item in publishedConfigs)
-                {
-                    item.Status = ConfigStatus.Deleted;
-                    await _configPublishedRepository.UpdateAsync(item);
+                    using var configRepository = _configRepositoryAccessor(env);
+                    using var configPublishedRepository = _configPublishedRepositoryAccessor(env);
+                    await _appRepository.DeleteAsync(app);
+                    //怕有的同学误删app导致要恢复，所以保留配置项吧。
+                    var configs = await configRepository.QueryAsync(x => x.AppId == app.Id);
+                    foreach (var item in configs)
+                    {
+                        if (updatedConfigIds.Contains(item.Id))
+                        {
+                            // 因为根据 env 构造的 provider 最终可能都定位到 default provider 上去，所以可能重复更新数据行，这里进行判断以下。
+                            continue;
+                        }
+                        item.Status = ConfigStatus.Deleted;
+                        await configRepository.UpdateAsync(item);
+                        updatedConfigIds.Add(item.Id);
+                    }
+                    //删除发布的配置项
+                    var publishedConfigs = await configPublishedRepository
+                        .QueryAsync(x => x.AppId == app.Id && x.Status == ConfigStatus.Enabled)
+                        ;
+                    foreach (var item in publishedConfigs)
+                    {
+                        if (updatedConfigPublishedIds.Contains(item.Id))
+                        {
+                            // 因为根据 env 构造的 provider 最终可能都定位到 default provider 上去，所以可能重复更新数据行，这里进行判断以下。
+                            continue;
+                        }
+                        item.Status = ConfigStatus.Deleted;
+                        await configPublishedRepository.UpdateAsync(item);
+                        updatedConfigPublishedIds.Add(item.Id);
+                    }
                 }
             }
 
@@ -206,8 +231,6 @@ namespace AgileConfig.Server.Service
         {
             _appInheritancedRepository.Dispose();
             _appRepository.Dispose();
-            _configPublishedRepository.Dispose();
-            _configRepository.Dispose();
             _userAppAuthRepository.Dispose();
             _userRepository.Dispose();
         }

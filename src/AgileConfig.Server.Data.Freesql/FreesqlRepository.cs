@@ -60,36 +60,13 @@ namespace AgileConfig.Server.Data.Freesql
         public async Task<List<T>> QueryPageAsync(Expression<Func<T, bool>> exp, int pageIndex, int pageSize, string defaultSortField = "Id",
             string defaultSortType = "ASC")
         {
-            var query = _repository.Where(exp);
-            var sort = Sort(defaultSortField);
-            if (string.Equals(defaultSortField, "DESC", StringComparison.OrdinalIgnoreCase))
-            {
-                query.OrderByDescending(sort);
-            }
-            else
-            {
-                query.OrderBy(sort);
-            }
-            return await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToListAsync();
+            var list = await _repository.Where(exp)
+                .OrderByPropertyName(defaultSortField, defaultSortType.Equals("ASC", StringComparison.OrdinalIgnoreCase))
+                .Skip((pageIndex - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            return list;
         }
 
-        private Expression<Func<T, object>> Sort(string defaultSortField)
-        {
-            Expression<Func<T, object>> defaultSort = x => x.Id;
-            if (!string.IsNullOrEmpty(defaultSortField) &&
-                !defaultSortField.Equals("Id", StringComparison.OrdinalIgnoreCase))
-            {
-                var property = typeof(T).GetProperty(defaultSortField);
-                if (property == null)
-                {
-                    return defaultSort;
-                }
-                var parameter = Expression.Parameter(typeof(T), "__q");
-                var memberExpress = Expression.Property(parameter, property);
-                return Expression.Lambda<Func<T, object>>(memberExpress, parameter);
-            }
-            return defaultSort;
-        }
 
         public async Task<long> CountAsync(Expression<Func<T, bool>>? exp = null)
         {

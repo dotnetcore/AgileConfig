@@ -3,7 +3,6 @@ using AgileConfig.Server.Data.Abstraction;
 using AgileConfig.Server.Data.Freesql;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Security.Cryptography;
 
 namespace AgileConfig.Server.Data.Repository.Selector
 {
@@ -21,6 +20,7 @@ namespace AgileConfig.Server.Data.Repository.Selector
                 throw new ArgumentNullException(nameof(defaultProvider));
             }
 
+            #region these repository will use default conn provider
             if (defaultProvider.Equals("mongodb", StringComparison.OrdinalIgnoreCase))
             {
                 sc.AddScoped<IAppInheritancedRepository, Mongodb.AppInheritancedRepository>();
@@ -47,17 +47,9 @@ namespace AgileConfig.Server.Data.Repository.Selector
                 sc.AddScoped<IUserRoleRepository, Freesql.UserRoleRepository>();
                 sc.AddSingleton<ISysInitRepository, Freesql.SysInitRepository>();
             }
+            #endregion
 
-            sc.AddScoped<Freesql.ConfigPublishedRepository>();
-            sc.AddScoped<Freesql.ConfigRepository>();
-            sc.AddScoped<Freesql.PublishDetailRepository>();
-            sc.AddScoped<Freesql.PublishTimelineRepository>();
-
-            // sc.AddScoped<Mongodb.ConfigPublishedRepository>();
-            // sc.AddScoped<Mongodb.ConfigRepository>();
-            // sc.AddScoped<Mongodb.PublishDetailRepository>();
-            // sc.AddScoped<Mongodb.PublishTimelineRepository>();
-
+            #region these repositories genereated dependency env provider, if no env provider use default provider
             sc.AddScoped<Func<string, IConfigPublishedRepository>>(sp => env =>
             {
                 string envProvider = GetEnvProvider(env, config, defaultProvider);
@@ -103,20 +95,21 @@ namespace AgileConfig.Server.Data.Repository.Selector
                 }
             });
 
-            sc.AddScoped((Func<IServiceProvider, Func<string, IPublishTimelineRepository>>)(sp => env =>
+            sc.AddScoped<Func<string, IPublishTimelineRepository>>(sp => env =>
             {
                 string envProvider = GetEnvProvider(env, config, defaultProvider);
 
                 if (envProvider.Equals("mongodb", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new Mongodb.PublishTimelineRepository(GetConnectionString(env,config));
+                    return new Mongodb.PublishTimelineRepository(GetConnectionString(env, config));
                 }
                 else
                 {
                     var factory = sp.GetService<IFreeSqlFactory>();
                     return new Freesql.PublishTimelineRepository(factory.Create(env));
                 }
-            }));
+            });
+            #endregion
 
             return sc;
         }

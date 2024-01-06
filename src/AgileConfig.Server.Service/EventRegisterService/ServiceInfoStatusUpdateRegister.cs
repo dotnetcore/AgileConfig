@@ -16,22 +16,22 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
 {
     private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
     private readonly IRestClient _restClient;
-    private readonly EventRegisterTransient<IServerNodeService> _serverNodeService;
-    private readonly EventRegisterTransient<IServiceInfoService> _serviceInfoService;
     private ILogger _logger;
+    private readonly IServerNodeService _serverNodeService;
+    private readonly IServiceInfoService _serviceInfoService;
 
     public ServiceInfoStatusUpdateRegister(
         IRemoteServerNodeProxy remoteServerNodeProxy,
         ILoggerFactory loggerFactory,
         IRestClient restClient,
-        EventRegisterTransient<IServerNodeService> serverNodeService,
-        EventRegisterTransient<IServiceInfoService> serviceInfoService
+        EventRegisterTransient<IServerNodeService> serverNodeServiceAccessor,
+        EventRegisterTransient<IServiceInfoService> serviceInfoServiceAccessor
         )
     {
         _remoteServerNodeProxy = remoteServerNodeProxy;
         _restClient = restClient;
-        _serverNodeService = serverNodeService;
-        _serviceInfoService = serviceInfoService;
+        _serverNodeService = serverNodeServiceAccessor();
+        _serviceInfoService = serviceInfoServiceAccessor();
         _logger = loggerFactory.CreateLogger<ServiceInfoStatusUpdateRegister>();
     }
     
@@ -42,8 +42,7 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
         {
             Task.Run(async () =>
             {
-                using var serverNodeService = _serverNodeService();
-                var serverNodes = await serverNodeService.GetAllNodesAsync();
+                var serverNodes = await _serverNodeService.GetAllNodesAsync();
                 foreach (var serverNode in serverNodes.Where(x => x.Status == NodeStatus.Online))
                 {
                     //clear cache
@@ -62,8 +61,7 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
         {
             Task.Run(async () =>
             {
-                using var serverNodeService = _serverNodeService();
-                var serverNodes = await serverNodeService.GetAllNodesAsync();
+                var serverNodes = await _serverNodeService.GetAllNodesAsync();
                 foreach (var serverNode in serverNodes.Where(x => x.Status == NodeStatus.Online))
                 {
                     //clear cache
@@ -82,8 +80,7 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
         {
             Task.Run(async () =>
             {
-                using var serverNodeService = _serverNodeService();
-                var serverNodes = await serverNodeService.GetAllNodesAsync();
+                var serverNodes = await _serverNodeService.GetAllNodesAsync();
                 foreach (var serverNode in serverNodes.Where(x => x.Status == NodeStatus.Online))
                 {
                     //clear cache
@@ -104,8 +101,7 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
             {
                 dynamic paramObj = param;
                 string id = paramObj.UniqueId;
-                using var serviceInfoService = _serviceInfoService();
-                var service = await serviceInfoService.GetByUniqueIdAsync(id);
+                var service = await _serviceInfoService.GetByUniqueIdAsync(id);
                 if (service != null && !string.IsNullOrWhiteSpace(service.AlarmUrl) &&
                     service.Status == ServiceStatus.Unhealthy)
                 {

@@ -18,6 +18,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using AgileConfig.Server.Data.Repository.Freesql;
 using AgileConfig.Server.Data.Repository.Mongodb;
+using AgileConfig.Server.Data.Repository.Selector;
 
 namespace AgileConfig.Server.Apisite
 {
@@ -72,9 +73,9 @@ namespace AgileConfig.Server.Apisite
             }
 
             services.AddEnvAccessor();
-
+            services.AddFreeSqlFactory();
             // Add freesqlRepositories or other repositories
-            AddDataRepositories(services);
+            services.AddRepositories();
 
             services.AddBusinessServices();
 
@@ -151,20 +152,6 @@ namespace AgileConfig.Server.Apisite
             {
                 c.SwaggerEndpoint("v1/swagger.json", "My API V1");
             });
-        }
-
-
-        private void AddDataRepositories(IServiceCollection services)
-        {
-            if (string.Equals(Configuration["db:provider"], "mongodb", StringComparison.OrdinalIgnoreCase))
-            {
-                services.AddMongodbRepository();
-            }
-            else
-            {
-                services.AddFreeSqlFactory();
-                services.AddFreeSqlRepository();
-            }
         }
 
     }

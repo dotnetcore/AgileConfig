@@ -67,23 +67,26 @@ namespace AgileConfig.Server.Service
                 config.Value = "";
             }
 
-            await _configRepositoryAccessor(env).InsertAsync(config);
+            using var repoistory =  _configRepositoryAccessor(env);
+            await repoistory.InsertAsync(config);
 
             return true;
         }
 
         public async Task<bool> UpdateAsync(Config config, string env)
         {
-            await _configRepositoryAccessor(env).UpdateAsync(config);
+            using var repoistory = _configRepositoryAccessor(env);
+            await repoistory.UpdateAsync(config);
 
             return true;
         }
 
         public async Task<bool> UpdateAsync(List<Config> configs, string env)
         {
+            using var repoistory = _configRepositoryAccessor(env);
             foreach (var item in configs)
             {
-                await _configRepositoryAccessor(env).UpdateAsync(item);
+                await repoistory.UpdateAsync(item);
             }
 
             return true;
@@ -91,7 +94,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> CancelEdit(List<string> ids, string env)
         {
-            var configRepository = _configRepositoryAccessor(env);
+            using var configRepository = _configRepositoryAccessor(env);
             foreach (var configId in ids)
             {
                 var config = await configRepository.GetAsync(configId);
@@ -139,7 +142,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> DeleteAsync(Config config, string env)
         {
-            var configRepository = _configRepositoryAccessor(env);
+            using var configRepository = _configRepositoryAccessor(env);
             config = await configRepository.GetAsync(config.Id);
             if (config != null)
             {
@@ -151,7 +154,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> DeleteAsync(string configId, string env)
         {
-            var configRepository = _configRepositoryAccessor(env);
+            using var configRepository = _configRepositoryAccessor(env);
             var config = await configRepository.GetAsync(configId);
             if (config != null)
             {
@@ -163,14 +166,16 @@ namespace AgileConfig.Server.Service
 
         public async Task<Config> GetAsync(string id, string env)
         {
-            var config = await _configRepositoryAccessor(env).GetAsync(id);
+            using var repository = _configRepositoryAccessor(env);
+            var config = await repository.GetAsync(id);
 
             return config;
         }
 
         public async Task<List<Config>> GetAllConfigsAsync(string env)
         {
-            return await _configRepositoryAccessor(env).QueryAsync(c => c.Status == ConfigStatus.Enabled && c.Env == env);
+            using var repository = _configRepositoryAccessor(env);
+            return await repository.QueryAsync(c => c.Status == ConfigStatus.Enabled && c.Env == env);
         }
 
         public async Task<Config> GetByAppIdKeyEnv(string appId, string group, string key, string env)
@@ -191,20 +196,24 @@ namespace AgileConfig.Server.Service
                 exp.And(exp1);
             }
 
-            var configs = await _configRepositoryAccessor(env).QueryAsync(exp);
+            using var repository = _configRepositoryAccessor(env);
+            var configs = await repository.QueryAsync(exp);
 
             return configs.FirstOrDefault();
         }
 
         public async Task<List<Config>> GetByAppIdAsync(string appId, string env)
         {
-            return await _configRepositoryAccessor(env).QueryAsync(c =>
+            using var repository = _configRepositoryAccessor(env);
+            return await repository.QueryAsync(c =>
                 c.AppId == appId && c.Status == ConfigStatus.Enabled && c.Env == env
             );
         }
 
         public async Task<List<Config>> Search(string appId, string group, string key, string env)
         {
+            using var repository = _configRepositoryAccessor(env);
+
             Expression<Func<Config, bool>> exp = c => c.Status == ConfigStatus.Enabled && c.Env == env;
             if (!string.IsNullOrEmpty(appId))
             {
@@ -221,7 +230,7 @@ namespace AgileConfig.Server.Service
                 exp = exp.And(c => c.Key.Contains(key));
             }
 
-            return await _configRepositoryAccessor(env).QueryAsync(exp);
+            return await repository.QueryAsync(exp);
         }
 
         public async Task<int> CountEnabledConfigsAsync()
@@ -239,7 +248,8 @@ namespace AgileConfig.Server.Service
         public async Task<int> CountEnabledConfigsAsync(string env)
         {
             //这里计算所有的配置
-            var q = await _configRepositoryAccessor(env).QueryAsync(c => c.Status == ConfigStatus.Enabled && c.Env == env);
+            using var repository = _configRepositoryAccessor(env);
+            var q = await repository.QueryAsync(c => c.Status == ConfigStatus.Enabled && c.Env == env);
 
             return q.Count;
         }
@@ -271,7 +281,8 @@ namespace AgileConfig.Server.Service
         /// <returns></returns>
         public async Task<string> AppPublishedConfigsMd5(string appId, string env)
         {
-            var configs = await _configPublishedRepositoryAccessor(env).QueryAsync(c =>
+            using var repository =  _configPublishedRepositoryAccessor(env);
+            var configs = await repository.QueryAsync(c =>
                 c.AppId == appId && c.Status == ConfigStatus.Enabled
                                  && c.Env == env
             );
@@ -337,6 +348,7 @@ namespace AgileConfig.Server.Service
                 }
             });
 
+            using var repository = _configRepositoryAccessor(env);
             await _configRepositoryAccessor(env).InsertAsync(configs);
 
             ClearAppPublishedConfigsMd5Cache(configs.First().AppId, env);
@@ -457,10 +469,10 @@ namespace AgileConfig.Server.Service
             await _lock.WaitAsync();
             try
             {
-                var configRepository = _configRepositoryAccessor(env);
-                var publishTimelineRepository = _publishTimelineRepositoryAccsssor(env);
-                var configPublishedRepository = _configPublishedRepositoryAccessor(env);
-                var publishDetailRepository = _publishDetailRepositoryAccessor(env);
+                using var configRepository = _configRepositoryAccessor(env);
+                using var publishTimelineRepository = _publishTimelineRepositoryAccsssor(env);
+                using var configPublishedRepository = _configPublishedRepositoryAccessor(env);
+                using var publishDetailRepository = _publishDetailRepositoryAccessor(env);
 
                 var waitPublishConfigs = await configRepository.QueryAsync(x =>
                  x.AppId == appId &&
@@ -622,7 +634,8 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> IsPublishedAsync(string configId, string env)
         {
-            var any = await _configPublishedRepositoryAccessor(env).QueryAsync(
+            using var repository = _configPublishedRepositoryAccessor(env);
+            var any = await repository.QueryAsync(
                 x => x.ConfigId == configId
                      && x.Env == env
                      && x.Status == ConfigStatus.Enabled);
@@ -633,7 +646,8 @@ namespace AgileConfig.Server.Service
         public async Task<List<PublishDetail>> GetPublishDetailByPublishTimelineIdAsync(string publishTimelineId,
             string env)
         {
-            var list = await _publishDetailRepositoryAccessor(env)
+            using var repository = _publishDetailRepositoryAccessor(env);
+            var list = await repository
                 .QueryAsync(x => x.PublishTimelineId == publishTimelineId && x.Env == env);
 
             return list;
@@ -641,7 +655,8 @@ namespace AgileConfig.Server.Service
 
         public async Task<PublishTimeline> GetPublishTimeLineNodeAsync(string publishTimelineId, string env)
         {
-            var one = (await _publishTimelineRepositoryAccsssor(env).QueryAsync(x => x.Id == publishTimelineId && x.Env == env))
+            using var repository = _publishTimelineRepositoryAccsssor(env);
+            var one = (await repository.QueryAsync(x => x.Id == publishTimelineId && x.Env == env))
                 .FirstOrDefault();
 
             return one;
@@ -649,36 +664,40 @@ namespace AgileConfig.Server.Service
 
         public async Task<List<PublishTimeline>> GetPublishTimelineHistoryAsync(string appId, string env)
         {
-            var list = await _publishTimelineRepositoryAccsssor(env).QueryAsync(x => x.AppId == appId && x.Env == env);
+            using var repository = _publishTimelineRepositoryAccsssor(env);
+            var list = await repository.QueryAsync(x => x.AppId == appId && x.Env == env);
 
             return list;
         }
 
         public async Task<List<PublishDetail>> GetPublishDetailListAsync(string appId, string env)
         {
-            var list = await _publishDetailRepositoryAccessor(env).QueryAsync(x => x.AppId == appId && x.Env == env);
+            using var repository = _publishDetailRepositoryAccessor(env);
+            var list = await repository.QueryAsync(x => x.AppId == appId && x.Env == env);
 
             return list;
         }
 
         public async Task<List<PublishDetail>> GetConfigPublishedHistory(string configId, string env)
         {
-            var list = await _publishDetailRepositoryAccessor(env).QueryAsync(x => x.ConfigId == configId && x.Env == env);
+            using var repository = _publishDetailRepositoryAccessor(env);
+            var list = await repository.QueryAsync(x => x.ConfigId == configId && x.Env == env);
 
             return list;
         }
 
         public async Task<List<ConfigPublished>> GetPublishedConfigsAsync(string appId, string env)
         {
-            var list = await _configPublishedRepositoryAccessor(env)
-                .QueryAsync(x => x.AppId == appId && x.Status == ConfigStatus.Enabled && x.Env == env);
+            using var repository = _configPublishedRepositoryAccessor(env);
+            var list = await repository.QueryAsync(x => x.AppId == appId && x.Status == ConfigStatus.Enabled && x.Env == env);
 
             return list;
         }
 
         public async Task<ConfigPublished> GetPublishedConfigAsync(string configId, string env)
         {
-            var one = (await _configPublishedRepositoryAccessor(env).QueryAsync(x => x.ConfigId == configId
+            using var repository = _configPublishedRepositoryAccessor(env);
+            var one = (await repository.QueryAsync(x => x.ConfigId == configId
                                                                  && x.Status == ConfigStatus.Enabled
                                                                  && x.Env == env
             )).FirstOrDefault();
@@ -688,10 +707,10 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> RollbackAsync(string publishTimelineId, string env)
         {
-            var configRepository = _configRepositoryAccessor(env);
-            var publishTimelineRepository = _publishTimelineRepositoryAccsssor(env);
-            var configPublishedRepository = _configPublishedRepositoryAccessor(env);
-            var publishDetailRepository = _publishDetailRepositoryAccessor(env);
+            using var configRepository = _configRepositoryAccessor(env);
+            using var publishTimelineRepository = _publishTimelineRepositoryAccsssor(env);
+            using var configPublishedRepository = _configPublishedRepositoryAccessor(env);
+            using var publishDetailRepository = _publishDetailRepositoryAccessor(env);
 
 
             var publishNode = (await publishTimelineRepository.QueryAsync(x => x.Id == publishTimelineId && x.Env == env)).FirstOrDefault();
@@ -710,7 +729,7 @@ namespace AgileConfig.Server.Service
 
             var publishedConfigs = await configPublishedRepository
                 .QueryAsync(x => x.AppId == appId && x.Version == version && x.Env == env);
-            var currentConfigs = await _configRepositoryAccessor(env)
+            var currentConfigs = await configRepository
                 .QueryAsync(x => x.AppId == appId && x.Status == ConfigStatus.Enabled && x.Env == env);
 
             //把当前的全部软删除
@@ -833,7 +852,7 @@ namespace AgileConfig.Server.Service
 
         private async Task<bool> SaveFromDictAsync(IDictionary<string, string> dict, string appId, string env, bool isPatch)
         {
-            var configRepository = _configRepositoryAccessor(env);
+            using var configRepository = _configRepositoryAccessor(env);
 
             var currentConfigs = await configRepository
                 .QueryAsync(x => x.AppId == appId && x.Env == env && x.Status == ConfigStatus.Enabled);
