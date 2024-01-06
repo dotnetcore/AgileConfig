@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 using AgileConfig.Server.Data.Abstraction;
+using static FreeSql.Internal.GlobalFilter;
 
 namespace AgileConfig.Server.Service
 {
@@ -69,6 +70,7 @@ namespace AgileConfig.Server.Service
                     await _appRepository.DeleteAsync(app);
                     //怕有的同学误删app导致要恢复，所以保留配置项吧。
                     var configs = await configRepository.QueryAsync(x => x.AppId == app.Id);
+                    var waitDeleteConfigs = new List<Config>();
                     foreach (var item in configs)
                     {
                         if (updatedConfigIds.Contains(item.Id))
@@ -77,13 +79,15 @@ namespace AgileConfig.Server.Service
                             continue;
                         }
                         item.Status = ConfigStatus.Deleted;
-                        await configRepository.UpdateAsync(item);
+                        waitDeleteConfigs.Add(item);
                         updatedConfigIds.Add(item.Id);
                     }
+                    await configRepository.UpdateAsync(waitDeleteConfigs);
                     //删除发布的配置项
                     var publishedConfigs = await configPublishedRepository
                         .QueryAsync(x => x.AppId == app.Id && x.Status == ConfigStatus.Enabled)
                         ;
+                    var waitDeletePublishedConfigs = new List<ConfigPublished>();
                     foreach (var item in publishedConfigs)
                     {
                         if (updatedConfigPublishedIds.Contains(item.Id))
@@ -92,9 +96,10 @@ namespace AgileConfig.Server.Service
                             continue;
                         }
                         item.Status = ConfigStatus.Deleted;
-                        await configPublishedRepository.UpdateAsync(item);
+                        waitDeletePublishedConfigs.Add(item);
                         updatedConfigPublishedIds.Add(item.Id);
                     }
+                    await configPublishedRepository.UpdateAsync(waitDeletePublishedConfigs);
                 }
             }
 

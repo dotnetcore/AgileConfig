@@ -10,9 +10,9 @@ internal class SysLogRegister : IEventRegister
 {
     private readonly ISysLogService _sysLogService;
 
-    public SysLogRegister(EventRegisterTransient<ISysLogService> sysLogServiceAccessor)
+    public SysLogRegister(ISysLogService sysLogService)
     {
-        _sysLogService = sysLogServiceAccessor();
+        _sysLogService = sysLogService;
     }
 
     public void Register()

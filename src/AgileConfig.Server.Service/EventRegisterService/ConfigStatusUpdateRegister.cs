@@ -16,12 +16,12 @@ internal class ConfigStatusUpdateRegister : IEventRegister
 
     public ConfigStatusUpdateRegister(
         IRemoteServerNodeProxy remoteServerNodeProxy,
-        EventRegisterTransient<IServerNodeService> serverNodeServiceAccessor,
-        EventRegisterTransient<IAppService> appServiceAccessor)
+        IServerNodeService serverNodeService,
+        IAppService appService)
     {
         _remoteServerNodeProxy = remoteServerNodeProxy;
-        _serverNodeService = serverNodeServiceAccessor();
-        _appService = appServiceAccessor();
+        _serverNodeService = serverNodeService;
+        _appService = appService;
     }
 
     public void Register()
@@ -34,38 +34,36 @@ internal class ConfigStatusUpdateRegister : IEventRegister
             {
                 Task.Run(async () =>
                 {
+                    var nodes = await _serverNodeService.GetAllNodesAsync();
+                    var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(timelineNode.AppId);
+                    noticeApps.Add(timelineNode.AppId,
+                        new WebsocketAction { Action = ActionConst.Reload, Module = ActionModule.ConfigCenter });
+
+                    foreach (var node in nodes)
                     {
-                        var nodes = await _serverNodeService.GetAllNodesAsync();
-                        var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(timelineNode.AppId);
-                        noticeApps.Add(timelineNode.AppId,
-                            new WebsocketAction { Action = ActionConst.Reload, Module = ActionModule.ConfigCenter });
-
-                        foreach (var node in nodes)
+                        if (node.Status == NodeStatus.Offline)
                         {
-                            if (node.Status == NodeStatus.Offline)
-                            {
-                                continue;
-                            }
-
-                            //all server cache
-                            await _remoteServerNodeProxy.ClearConfigServiceCache(node.Id);
+                            continue;
                         }
 
-                        foreach (var node in nodes)
-                        {
-                            if (node.Status == NodeStatus.Offline)
-                            {
-                                continue;
-                            }
+                        //all server cache
+                        await _remoteServerNodeProxy.ClearConfigServiceCache(node.Id);
+                    }
 
-                            foreach (var item in noticeApps)
-                            {
-                                await _remoteServerNodeProxy.AppClientsDoActionAsync(
-                                    node.Id,
-                                    item.Key,
-                                    timelineNode.Env,
-                                    item.Value);
-                            }
+                    foreach (var node in nodes)
+                    {
+                        if (node.Status == NodeStatus.Offline)
+                        {
+                            continue;
+                        }
+
+                        foreach (var item in noticeApps)
+                        {
+                            await _remoteServerNodeProxy.AppClientsDoActionAsync(
+                                node.Id,
+                                item.Key,
+                                timelineNode.Env,
+                                item.Value);
                         }
                     }
                 });
@@ -80,26 +78,24 @@ internal class ConfigStatusUpdateRegister : IEventRegister
             {
                 Task.Run(async () =>
                 {
+                    var nodes = await _serverNodeService.GetAllNodesAsync();
+                    var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(timelineNode.AppId);
+                    noticeApps.Add(timelineNode.AppId,
+                        new WebsocketAction
+                        { Action = ActionConst.Reload, Module = ActionModule.ConfigCenter });
+
+                    foreach (var node in nodes)
                     {
-                        var nodes = await _serverNodeService.GetAllNodesAsync();
-                        var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(timelineNode.AppId);
-                        noticeApps.Add(timelineNode.AppId,
-                            new WebsocketAction
-                                { Action = ActionConst.Reload, Module = ActionModule.ConfigCenter });
-
-                        foreach (var node in nodes)
+                        if (node.Status == NodeStatus.Offline)
                         {
-                            if (node.Status == NodeStatus.Offline)
-                            {
-                                continue;
-                            }
+                            continue;
+                        }
 
-                            foreach (var item in noticeApps)
-                            {
-                                await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Id, item.Key,
-                                    timelineNode.Env,
-                                    item.Value);
-                            }
+                        foreach (var item in noticeApps)
+                        {
+                            await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Id, item.Key,
+                                timelineNode.Env,
+                                item.Value);
                         }
                     }
                 });
@@ -116,21 +112,20 @@ internal class ConfigStatusUpdateRegister : IEventRegister
         Dictionary<string, WebsocketAction> needNoticeAppsActions = new Dictionary<string, WebsocketAction>
         {
         };
+        var currentApp = await _appService.GetAsync(appId);
+        if (currentApp.Type == AppType.Inheritance)
         {
-            var currentApp = await _appService.GetAsync(appId);
-            if (currentApp.Type == AppType.Inheritance)
+            var inheritancedFromApps = await _appService.GetInheritancedFromAppsAsync(appId);
+            inheritancedFromApps.ForEach(x =>
             {
-                var inheritancedFromApps = await _appService.GetInheritancedFromAppsAsync(appId);
-                inheritancedFromApps.ForEach(x =>
+                needNoticeAppsActions.Add(x.Id, new WebsocketAction
                 {
-                    needNoticeAppsActions.Add(x.Id, new WebsocketAction
-                    {
-                        Action = ActionConst.Reload, Module = ActionModule.ConfigCenter
-                    });
+                    Action = ActionConst.Reload,
+                    Module = ActionModule.ConfigCenter
                 });
-            }
-
-            return needNoticeAppsActions;
+            });
         }
+
+        return needNoticeAppsActions;
     }
 }

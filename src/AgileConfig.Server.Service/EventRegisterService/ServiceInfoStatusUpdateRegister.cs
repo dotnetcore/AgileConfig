@@ -24,14 +24,14 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
         IRemoteServerNodeProxy remoteServerNodeProxy,
         ILoggerFactory loggerFactory,
         IRestClient restClient,
-        EventRegisterTransient<IServerNodeService> serverNodeServiceAccessor,
-        EventRegisterTransient<IServiceInfoService> serviceInfoServiceAccessor
+        IServerNodeService serverNodeService,
+        IServiceInfoService serviceInfoService
         )
     {
         _remoteServerNodeProxy = remoteServerNodeProxy;
         _restClient = restClient;
-        _serverNodeService = serverNodeServiceAccessor();
-        _serviceInfoService = serviceInfoServiceAccessor();
+        _serverNodeService = serverNodeService;
+        _serviceInfoService = serviceInfoService;
         _logger = loggerFactory.CreateLogger<ServiceInfoStatusUpdateRegister>();
     }
     
