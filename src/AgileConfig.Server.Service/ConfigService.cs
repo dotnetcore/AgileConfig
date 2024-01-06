@@ -33,8 +33,8 @@ namespace AgileConfig.Server.Service
             Func<string, IUow> uowAccessor,
             Func<string, IConfigRepository> configRepositoryAccessor,
             Func<string, IConfigPublishedRepository> configPublishedRepositoryAccessor,
-            Func<string, IPublishDetailRepository>  publishDetailRepositoryAccessor,
-            Func<string, IPublishTimelineRepository>  publishTimelineRepositoryAccessor)
+            Func<string, IPublishDetailRepository> publishDetailRepositoryAccessor,
+            Func<string, IPublishTimelineRepository> publishTimelineRepositoryAccessor)
         {
             _memoryCache = memoryCache;
             _appService = appService;
@@ -70,7 +70,7 @@ namespace AgileConfig.Server.Service
                 config.Value = "";
             }
 
-            using var repoistory =  _configRepositoryAccessor(env);
+            using var repoistory = _configRepositoryAccessor(env);
             await repoistory.InsertAsync(config);
 
             return true;
@@ -284,7 +284,7 @@ namespace AgileConfig.Server.Service
         /// <returns></returns>
         public async Task<string> AppPublishedConfigsMd5(string appId, string env)
         {
-            using var repository =  _configPublishedRepositoryAccessor(env);
+            using var repository = _configPublishedRepositoryAccessor(env);
             var configs = await repository.QueryAsync(c =>
                 c.AppId == appId && c.Status == ConfigStatus.Enabled
                                  && c.Env == env
@@ -472,7 +472,7 @@ namespace AgileConfig.Server.Service
             await _lock.WaitAsync();
             try
             {
-                using var uow  = _uowAccessor(env);
+                using var uow = _uowAccessor(env);
 
                 using var configRepository = _configRepositoryAccessor(env);
                 configRepository.Uow = uow;
@@ -482,6 +482,8 @@ namespace AgileConfig.Server.Service
                 configPublishedRepository.Uow = uow;
                 using var publishDetailRepository = _publishDetailRepositoryAccessor(env);
                 publishDetailRepository.Uow = uow;
+
+                uow?.Begin();
 
                 var waitPublishConfigs = await configRepository.QueryAsync(x =>
                  x.AppId == appId &&

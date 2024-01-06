@@ -22,7 +22,7 @@ namespace AgileConfig.Server.Data.Freesql
         public IUnitOfWork GetFreesqlUnitOfWork()
         {
             return _unitOfWork;
-        }   
+        }
 
         public Task<bool> SaveChangesAsync()
         {
@@ -34,6 +34,11 @@ namespace AgileConfig.Server.Data.Freesql
         public void Dispose()
         {
             _unitOfWork?.Dispose();
+        }
+
+        public void Begin()
+        {
+            // freeSql的uow不需要手动begin
         }
     }
 }
