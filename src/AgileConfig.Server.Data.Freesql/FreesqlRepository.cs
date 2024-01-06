@@ -11,10 +11,26 @@ namespace AgileConfig.Server.Data.Freesql
     public abstract class FreesqlRepository<T, T1> : IRepository<T, T1> where T : class, IEntity<T1>
     {
         private readonly IBaseRepository<T> _repository;
+        private readonly IFreeSql _freeSql;
+        private IUow _uow;
+        public IUow Uow
+        {
+            get
+            {
+                return _uow;
+            }
+            set
+            {
+                _uow = value;
+                var freesqlUow = value as FreeSqlUow;
+                _repository.UnitOfWork = freesqlUow.GetFreesqlUnitOfWork();
+            }
+        }
 
         public FreesqlRepository(IFreeSql freeSql)
         {
             _repository = freeSql.GetRepository<T>();
+            _freeSql = freeSql;
         }
 
         public Task<List<T>> AllAsync()

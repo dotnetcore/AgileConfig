@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using AgileConfig.Server.Common;
+using AgileConfig.Server.Data.Abstraction;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
@@ -11,6 +12,8 @@ public class MongodbRepository<TEntity, TId> : Abstraction.IRepository<TEntity, 
     where TEntity : IEntity<TId>, new()
 {
     private readonly MongodbAccess<TEntity> _access;
+
+    public IUow Uow { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
     public MongodbRepository(string? connectionString)
     {

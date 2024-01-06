@@ -20,6 +20,7 @@ namespace AgileConfig.Server.Service
         private readonly IAppService _appService;
         private readonly ISettingService _settingService;
         private readonly IUserService _userService;
+        private readonly Func<string, IUow> _uowAccessor;
         private readonly Func<string, IConfigRepository> _configRepositoryAccessor;
         private readonly Func<string, IConfigPublishedRepository> _configPublishedRepositoryAccessor;
         private readonly Func<string, IPublishDetailRepository> _publishDetailRepositoryAccessor;
@@ -29,19 +30,21 @@ namespace AgileConfig.Server.Service
             IAppService appService,
             ISettingService settingService,
             IUserService userService,
-            Func<string, IConfigRepository> configRepository,
-            Func<string, IConfigPublishedRepository> configPublishedRepository,
-            Func<string, IPublishDetailRepository>  publishDetailRepository,
-            Func<string, IPublishTimelineRepository>  publishTimelineRepository)
+            Func<string, IUow> uowAccessor,
+            Func<string, IConfigRepository> configRepositoryAccessor,
+            Func<string, IConfigPublishedRepository> configPublishedRepositoryAccessor,
+            Func<string, IPublishDetailRepository>  publishDetailRepositoryAccessor,
+            Func<string, IPublishTimelineRepository>  publishTimelineRepositoryAccessor)
         {
             _memoryCache = memoryCache;
             _appService = appService;
             _settingService = settingService;
             _userService = userService;
-            _configRepositoryAccessor = configRepository;
-            _configPublishedRepositoryAccessor = configPublishedRepository;
-            _publishDetailRepositoryAccessor = publishDetailRepository;
-            _publishTimelineRepositoryAccsssor = publishTimelineRepository;
+            _uowAccessor = uowAccessor;
+            _configRepositoryAccessor = configRepositoryAccessor;
+            _configPublishedRepositoryAccessor = configPublishedRepositoryAccessor;
+            _publishDetailRepositoryAccessor = publishDetailRepositoryAccessor;
+            _publishTimelineRepositoryAccsssor = publishTimelineRepositoryAccessor;
         }
 
         public async Task<string> IfEnvEmptySetDefaultAsync(string env)
@@ -349,7 +352,7 @@ namespace AgileConfig.Server.Service
             });
 
             using var repository = _configRepositoryAccessor(env);
-            await _configRepositoryAccessor(env).InsertAsync(configs);
+            await repository.InsertAsync(configs);
 
             ClearAppPublishedConfigsMd5Cache(configs.First().AppId, env);
             ClearAppPublishedConfigsMd5CacheWithInheritanced(configs.First().AppId, env);
@@ -469,10 +472,16 @@ namespace AgileConfig.Server.Service
             await _lock.WaitAsync();
             try
             {
+                using var uow  = _uowAccessor(env);
+
                 using var configRepository = _configRepositoryAccessor(env);
+                configRepository.Uow = uow;
                 using var publishTimelineRepository = _publishTimelineRepositoryAccsssor(env);
+                publishTimelineRepository.Uow = uow;
                 using var configPublishedRepository = _configPublishedRepositoryAccessor(env);
+                configPublishedRepository.Uow = uow;
                 using var publishDetailRepository = _publishDetailRepositoryAccessor(env);
+                publishDetailRepository.Uow = uow;
 
                 var waitPublishConfigs = await configRepository.QueryAsync(x =>
                  x.AppId == appId &&
@@ -616,6 +625,8 @@ namespace AgileConfig.Server.Service
                 await publishDetailRepository.InsertAsync(publishDetails);
                 await configPublishedRepository.UpdateAsync(publishedConfigs);
                 await configPublishedRepository.InsertAsync(publishedConfigsCopy);
+
+                await uow?.SaveChangesAsync();
 
                 ClearAppPublishedConfigsMd5Cache(appId, env);
                 ClearAppPublishedConfigsMd5CacheWithInheritanced(appId, env);

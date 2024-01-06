@@ -50,6 +50,22 @@ namespace AgileConfig.Server.Data.Repository.Selector
             #endregion
 
             #region these repositories genereated dependency env provider, if no env provider use default provider
+            sc.AddScoped<Func<string, IUow>>(sp => env =>
+            {
+                string envProvider = GetEnvProvider(env, config, defaultProvider);
+
+                if (envProvider.Equals("mongodb", StringComparison.OrdinalIgnoreCase))
+                {
+                    return null;
+                }
+                else
+                {
+                    var factory = sp.GetService<IFreeSqlFactory>();
+                    var fsq = factory.Create(env);
+                    return new FreeSqlUow(fsq);
+                }
+            });
+
             sc.AddScoped<Func<string, IConfigPublishedRepository>>(sp => env =>
             {
                 string envProvider = GetEnvProvider(env, config, defaultProvider);
@@ -76,6 +92,7 @@ namespace AgileConfig.Server.Data.Repository.Selector
                 else
                 {
                     var factory = sp.GetService<IFreeSqlFactory>();
+
                     return new Freesql.ConfigRepository(factory.Create(env));
                 }
             });

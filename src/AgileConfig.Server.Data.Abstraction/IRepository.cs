@@ -27,5 +27,7 @@ namespace AgileConfig.Server.Data.Abstraction
             string defaultSortField = "Id", string defaultSortType = "ASC");
 
         Task<long> CountAsync(Expression<Func<T, bool>>? exp = null);
+
+        IUow Uow { get; set; }
     }
 }
