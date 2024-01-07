@@ -6,10 +6,6 @@ on:
     paths-ignore: 
       - '**/*.md'
       - '**/*.yml'
-  pull_request:
-    branches: [  ]
-  workflow_dispatch:
-
 jobs:
   build-reactapp:
     runs-on: ubuntu-latest
