@@ -7,12 +7,10 @@ using Microsoft.IdentityModel.Tokens;
 namespace AgileConfig.Server.Apisite;
 
 public class ConfigureJwtBearerOptions(
-    IJwtService jwtService,
-    ISystemInitializationService systemInitializationService) : IConfigureNamedOptions<JwtBearerOptions>
+    IJwtService jwtService) : IConfigureNamedOptions<JwtBearerOptions>
 {
     public void Configure(JwtBearerOptions options)
     {
-        systemInitializationService.TryInitJwtSecret();
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidIssuer = jwtService.Issuer,

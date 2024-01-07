@@ -16,10 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using AgileConfig.Server.Data.Repository.Freesql;
-using AgileConfig.Server.Data.Repository.Mongodb;
 using AgileConfig.Server.Data.Repository.Selector;
-using AgileConfig.Server.Data.Abstraction.DbProvider;
 
 namespace AgileConfig.Server.Apisite
 {

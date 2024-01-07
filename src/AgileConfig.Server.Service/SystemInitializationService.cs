@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Abstraction;
 using AgileConfig.Server.Data.Entity;
@@ -44,7 +45,26 @@ public class SystemInitializationService(ISysInitRepository sysInitRepository):I
 
         return true;
     }
-    
+
+    public async Task<bool> TryInitDefaultEnvironmentAsync()
+    {
+        var env = await sysInitRepository.GetDefaultEnvironmentAsync();
+        if (env == null)
+        {
+            var setting = new Setting
+            {
+                Id = SystemSettings.DefaultEnvironmentKey,
+                Value = SystemSettings.DefaultEnvironment,
+                CreateTime = DateTime.Now
+            };
+            sysInitRepository.SaveInitSetting(setting);
+
+            return true;
+        }
+
+        return true;
+    }
+
     /// <summary>
     /// 生成一个 jwt 加密的 key ，38位
     /// </summary>

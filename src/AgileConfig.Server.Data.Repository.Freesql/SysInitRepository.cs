@@ -14,6 +14,13 @@ public class SysInitRepository : ISysInitRepository
         this.freeSqlFactory = freeSqlFactory;
     }
 
+    public async Task<string?> GetDefaultEnvironmentAsync()
+    {
+        var setting = await freeSqlFactory.Create().Select<Setting>().Where(x => x.Id == SystemSettings.DefaultEnvironmentKey)
+                 .ToOneAsync();
+        return setting?.Value;
+    }
+
     public string? GetJwtTokenSecret()
     {
         var setting = freeSqlFactory.Create().Select<Setting>().Where(x => x.Id == SystemSettings.DefaultJwtSecretKey)

@@ -114,25 +114,6 @@ namespace AgileConfig.Server.Service
             return admin != null;
         }
 
-        public async Task<bool> InitDefaultEnvironment()
-        {
-            var env = await _settingRepository.GetAsync(SystemSettings.DefaultEnvironmentKey);
-            if (env == null)
-            {
-                var setting = new Setting
-                {
-                    Id = SystemSettings.DefaultEnvironmentKey,
-                    Value = SystemSettings.DefaultEnvironment,
-                    CreateTime = DateTime.Now
-                };
-                await _settingRepository.InsertAsync(setting);
-
-                return true;
-            }
-
-            return true;
-        }
-
         public void Dispose()
         {
             _settingRepository.Dispose();

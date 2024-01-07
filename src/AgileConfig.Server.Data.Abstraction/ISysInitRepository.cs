@@ -11,6 +11,12 @@ public interface ISysInitRepository
     string? GetJwtTokenSecret();
 
     /// <summary>
+    /// get default environment from db
+    /// </summary>
+    /// <returns></returns>
+    Task<string?> GetDefaultEnvironmentAsync();
+
+    /// <summary>
     /// save initialization setting 
     /// </summary>
     /// <param name="setting"></param>

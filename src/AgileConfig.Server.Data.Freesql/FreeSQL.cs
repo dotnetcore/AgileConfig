@@ -41,13 +41,18 @@ namespace AgileConfig.Server.Data.Freesql
                 var sql = new FreeSql.FreeSqlBuilder()
                         .UseConnectionString(dbType.Value, dbConfig.ConnectionString)
                         .Build();
-                FluentApi.Config(sql);
-                EnsureTables.Ensure(sql);
+                ApplyDatabaseStructrue(sql);
 
                 _envFreesqls.Add(key, sql);
 
                 return sql;
             }
+        }
+
+        private static void ApplyDatabaseStructrue(IFreeSql sql)
+        {
+            FluentApi.Config(sql);
+            EnsureTables.Ensure(sql);
         }
 
         private static FreeSql.DataType? ProviderToFreesqlDbType(string provider)
