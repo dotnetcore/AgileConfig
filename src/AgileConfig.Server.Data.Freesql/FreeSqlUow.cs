@@ -33,7 +33,7 @@ namespace AgileConfig.Server.Data.Freesql
 
         public void Rollback()
         {
-            _unitOfWork.Rollback();
+            _unitOfWork?.Rollback();
         }
 
         public void Dispose()

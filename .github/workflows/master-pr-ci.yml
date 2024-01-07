@@ -1,13 +1,8 @@
-name: master ci workflow
+name: master pr ci workflow
 
 on:
-  push:
-    branches: [ master ]
-    paths-ignore: 
-      - '**/*.md'
-      - '**/*.yml'
   pull_request:
-    branches: [  ]
+    branches: [ master ]
   workflow_dispatch:
 
 jobs:
@@ -29,10 +24,6 @@ jobs:
         
     - run: npm install
     - run: npm run build
-    - uses: actions/upload-artifact@v2
-      with:
-        name: agileconfig-ui
-        path: src/AgileConfig.Server.UI/react-ui-antd/dist/
   build-dotnet:
     needs: build-reactapp
     runs-on: ubuntu-latest
@@ -47,14 +38,3 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --configuration Release --no-restore
-    - uses: actions/download-artifact@v2
-      with:
-        name: agileconfig-ui
-        path: src/AgileConfig.Server.Apisite/wwwroot/ui
-    - name: Push to Docker Hub
-      uses: docker/build-push-action@v1
-      with:
-        username: ${{ secrets.DOCKER_HUB_NAME }}
-        password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-        repository: kklldog/agile_config
-        tags: test
