@@ -11,7 +11,13 @@ namespace AgileConfig.Server.Data.Mongodb
 
         public async Task<bool> SaveChangesAsync()
         {
-            await Session?.CommitTransactionAsync()!;
+            if (Session == null)
+            {
+            }
+            else
+            {
+                await Session.CommitTransactionAsync();
+            }
             return true;
         }
 
@@ -47,10 +53,17 @@ namespace AgileConfig.Server.Data.Mongodb
                 Session?.StartTransaction();
             }
         }
-        
+
         internal void SetSession(IClientSessionHandle session)
         {
-            Session = session;
+            if (session.Client.Cluster.Description.Type == MongoDB.Driver.Core.Clusters.ClusterType.Standalone)
+            {
+                // standalone mode is not support transaction.
+            }
+            else
+            {
+                Session = session;
+            }
         }
     }
 }
