@@ -2,56 +2,36 @@
 using AgileConfig.Server.Service;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using AgileConfig.Server.Data.Freesql;
-using FreeSql;
 using AgileConfig.Server.Data.Entity;
 using System.Threading.Tasks;
-using AgileConfig.Server.Data.Repository.Freesql;
 using AgileConfig.Server.IService;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver.Linq;
 
-namespace AgileConfig.Server.Service.Tests
+namespace AgileConfig.Server.ServiceTests.sqlite
 {
     [TestClass()]
-    public class SysLogServiceTests
+    public class SysLogServiceTests: BasicTestService
     {
-
-        IFreeSql fsq = null;
-        FreeSqlContext freeSqlContext;
-        ISysLogService service = null;
+        ISysLogService _syslogservice = null;
+        public override Dictionary<string, string> GetConfigurationData()
+        {
+            return
+                new Dictionary<string, string>
+                {
+                {"db:provider","sqlite" },
+                {"db:conn","Data Source=agile_config.db" }
+            };
+        }
 
         [TestInitialize]
         public void TestInitialize()
         {
-            string conn = "Data Source=agile_config.db";
-            fsq = new FreeSqlBuilder()
-                          .UseConnectionString(FreeSql.DataType.Sqlite, conn)
-                          .UseAutoSyncStructure(true)
-                          .Build();
-            freeSqlContext = new FreeSqlContext(fsq);
-
-            IServiceCollection services = new ServiceCollection();
-            services.AddFreeSqlFactory();
-            services.AddFreeSqlRepository();
-            services.AddBusinessServices();
-            
-            
-            var serviceProvider = services.BuildServiceProvider();
-            service = serviceProvider.GetService<ISysLogService>();
-            fsq.Delete<SysLog>().Where("1=1");
-
-            Console.WriteLine("TestInitialize");
+            _syslogservice = _serviceProvider.GetService<ISysLogService>();
+            _fsq.Delete<SysLog>().Where("1=1");
         }
 
 
-
-        [TestCleanup]
-        public void Clean()
-        {
-            freeSqlContext.Dispose();
-            fsq.Dispose();
-        }
         [TestMethod()]
         public async Task AddSysLogAsyncTest()
         {
@@ -63,11 +43,12 @@ namespace AgileConfig.Server.Service.Tests
                 LogText = "123"
             };
 
-            var result = await service.AddSysLogAsync(source);
+            var result = await _syslogservice.AddSysLogAsync(source);
             Assert.IsTrue(result);
 
-            var log = fsq.Select<SysLog>(new { 
-                Id = source.Id
+            var log = _fsq.Select<SysLog>(new
+            {
+                source.Id
             }).ToOne();
 
             Assert.IsNotNull(log);
@@ -75,7 +56,7 @@ namespace AgileConfig.Server.Service.Tests
             Assert.AreEqual(source.Id, log.Id);
             Assert.AreEqual(source.AppId, log.AppId);
             Assert.AreEqual(source.LogType, log.LogType);
-            Assert.AreEqual(source.LogTime, log.LogTime);
+            Assert.AreEqual(source.LogTime.Value.ToString("yyyyMMddHHmmss"), log.LogTime.Value.ToString("yyyyMMddHHmmss"));
             Assert.AreEqual(source.LogText, log.LogText);
         }
 
@@ -97,39 +78,39 @@ namespace AgileConfig.Server.Service.Tests
                 LogTime = DateTime.Now,
                 LogText = "124"
             };
-            var result = await service.AddRangeAsync(new List<SysLog> {
+            var result = await _syslogservice.AddRangeAsync(new List<SysLog> {
                 source, source1
             });
             Assert.IsTrue(result);
 
-            var log = fsq.Select<SysLog>(new
+            var log = _fsq.Select<SysLog>(new
             {
-                Id = source.Id
+                source.Id
             }).ToOne();
             Assert.IsNotNull(log);
             Assert.AreEqual(source.Id, log.Id);
             Assert.AreEqual(source.AppId, log.AppId);
             Assert.AreEqual(source.LogType, log.LogType);
-            Assert.AreEqual(source.LogTime, log.LogTime);
+            Assert.AreEqual(source.LogTime.Value.ToString("yyyyMMddHHmmss"), log.LogTime.Value.ToString("yyyyMMddHHmmss"));
             Assert.AreEqual(source.LogText, log.LogText);
 
-            var log1 = fsq.Select<SysLog>(new
+            var log1 = _fsq.Select<SysLog>(new
             {
-                Id = source1.Id
+                source1.Id
             }).ToOne();
             Assert.IsNotNull(log1);
             Assert.AreEqual(source1.Id, log1.Id);
             Assert.AreEqual(source1.AppId, log1.AppId);
             Assert.AreEqual(source1.LogType, log1.LogType);
-            Assert.AreEqual(source1.LogTime, log1.LogTime);
+            Assert.AreEqual(source1.LogTime.Value.ToString("yyyyMMddHHmmss"), log1.LogTime.Value.ToString("yyyyMMddHHmmss"));
             Assert.AreEqual(source1.LogText, log1.LogText);
         }
 
-       
+
         [TestMethod()]
         public async Task CountTest()
         {
-            fsq.Delete<SysLog>().Where("1=1").ExecuteAffrows();
+            _fsq.Delete<SysLog>().Where("1=1").ExecuteAffrows();
 
             var source = new SysLog
             {
@@ -145,22 +126,22 @@ namespace AgileConfig.Server.Service.Tests
                 LogTime = DateTime.Now,
                 LogText = "124"
             };
-            var result = await service.AddRangeAsync(new List<SysLog> {
+            var result = await _syslogservice.AddRangeAsync(new List<SysLog> {
                 source, source1
             });
             Assert.IsTrue(result);
 
-           var count = await service.Count("001", SysLogType.Normal, DateTime.Now.AddDays(-1), DateTime.Now.AddDays(1));
+            var count = await _syslogservice.Count("001", SysLogType.Normal, DateTime.Now.AddDays(-1), DateTime.Now.AddDays(1));
             Assert.AreEqual(1, count);
 
-            var count1 = await service.Count("002", SysLogType.Warn, DateTime.Now.AddDays(-1), DateTime.Now.AddDays(-1));
+            var count1 = await _syslogservice.Count("002", SysLogType.Warn, DateTime.Now.AddDays(-1), DateTime.Now.AddDays(-1));
             Assert.AreEqual(0, count1);
         }
 
         [TestMethod()]
         public async Task SearchPageTest()
         {
-            fsq.Delete<SysLog>().Where("1=1").ExecuteAffrows();
+            _fsq.Delete<SysLog>().Where("1=1").ExecuteAffrows();
 
             var source = new SysLog
             {
@@ -176,15 +157,15 @@ namespace AgileConfig.Server.Service.Tests
                 LogTime = DateTime.Now,
                 LogText = "124"
             };
-            var result = await service.AddRangeAsync(new List<SysLog> {
+            var result = await _syslogservice.AddRangeAsync(new List<SysLog> {
                 source, source1
             });
             Assert.IsTrue(result);
 
-            var page = await service.SearchPage("001", SysLogType.Normal, DateTime.Now.AddDays(-1), DateTime.Now.AddDays(1),1,0);
+            var page = await _syslogservice.SearchPage("001", SysLogType.Normal, DateTime.Now.AddDays(-1), DateTime.Now.AddDays(1), 1, 0);
             Assert.AreEqual(1, page.Count);
 
-            var page1 = await service.SearchPage("002", SysLogType.Warn, DateTime.Now.AddDays(-1), DateTime.Now.AddDays(-1), 1, 0);
+            var page1 = await _syslogservice.SearchPage("002", SysLogType.Warn, DateTime.Now.AddDays(-1), DateTime.Now.AddDays(-1), 1, 0);
             Assert.AreEqual(0, page1.Count);
         }
     }

@@ -2,12 +2,12 @@
 using AgileConfig.Server.ServiceTests.sqlite;
 using System.Collections.Generic;
 
-namespace AgileConfig.Server.Service.Tests.mysql
+namespace AgileConfig.Server.ServiceTests.mysql
 {
     [TestClass()]
-    public class AppServiceTests_mysql: AppServiceTests
+    public class AppServiceTests_mysql : AppServiceTests
     {
-        string conn = "Database=agile_config_test;Data Source=192.168.0.125;User Id=root;Password=123456;port=13306";
+        string conn = "Database=agile_config_test;Data Source=192.168.0.125;User Id=root;Password=mimi756310;port=13306";
 
         public override Dictionary<string, string> GetConfigurationData()
         {
@@ -17,6 +17,6 @@ namespace AgileConfig.Server.Service.Tests.mysql
 
             return dict;
         }
-     
+
     }
 }

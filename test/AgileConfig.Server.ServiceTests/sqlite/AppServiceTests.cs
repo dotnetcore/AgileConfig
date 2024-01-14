@@ -20,16 +20,12 @@ using MongoDB.Driver.Linq;
 namespace AgileConfig.Server.ServiceTests.sqlite
 {
     [TestClass()]
-    public class AppServiceTests
+    public class AppServiceTests: BasicTestService
     {
-
-        private ServiceProvider _serviceProvider;
-        IFreeSql _fsq = null;
         IAppService _appservice = null;
-
-        public virtual Dictionary<string, string> GetConfigurationData()
+        public override Dictionary<string, string> GetConfigurationData()
         {
-            return 
+            return
                 new Dictionary<string, string>
                 {
                 {"db:provider","sqlite" },
@@ -40,69 +36,10 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         [TestInitialize]
         public void TestInitialize()
         {
-            var config = new ConfigurationBuilder()
-              .AddInMemoryCollection(GetConfigurationData())
-              .Build();
-            Global.Config = config;
-
-            var factory = new EnvFreeSqlFactory();
-            _fsq = factory.Create("");
-
-            var cache = new Mock<IMemoryCache>();
-            IServiceCollection services = new ServiceCollection();
-            services.AddScoped<IMemoryCache>(_ => cache.Object);
-            services.AddSingleton<IConfiguration>(config);
-            services.AddFreeSqlFactory();
-            services.AddFreeSqlRepository();
-            services.AddBusinessServices();
-            AddEnvRepositiroies(services);
-
-            _serviceProvider = services.BuildServiceProvider();
-            var systeminitializationService = _serviceProvider.GetService<ISystemInitializationService>();
-            systeminitializationService.TryInitDefaultEnvironmentAsync();//初始化环境 DEV TEST STAGE PROD
-            systeminitializationService.TryInitJwtSecret();//初始化 jwt secret
-
             _appservice = _serviceProvider.GetService<IAppService>();
-
-            _fsq.Delete<App>().Where("1=1");
-
-            Console.WriteLine("TestInitialize");
+            _fsq.Delete<AppService>().Where("1=1");
         }
 
-        private static void AddEnvRepositiroies(IServiceCollection sc)
-        {
-            sc.AddScoped<Func<string, IUow>>(sp => env =>
-            {
-                var factory = sp.GetService<IFreeSqlFactory>();
-                var fsq = factory.Create(env);
-                return new FreeSqlUow(fsq);
-            });
-
-            sc.AddScoped<Func<string, IConfigPublishedRepository>>(sp => env =>
-            {
-                var factory = sp.GetService<IFreeSqlFactory>();
-                return new ConfigPublishedRepository(factory.Create(env));
-            });
-
-            sc.AddScoped<Func<string, IConfigRepository>>(sp => env =>
-            {
-                var factory = sp.GetService<IFreeSqlFactory>();
-
-                return new ConfigRepository(factory.Create(env));
-            });
-
-            sc.AddScoped<Func<string, IPublishDetailRepository>>(sp => env =>
-            {
-                var factory = sp.GetService<IFreeSqlFactory>();
-                return new PublishDetailRepository(factory.Create(env));
-            });
-
-            sc.AddScoped<Func<string, IPublishTimelineRepository>>(sp => env =>
-            {
-                var factory = sp.GetService<IFreeSqlFactory>();
-                return new PublishTimelineRepository(factory.Create(env));
-            });
-        }
 
         [TestMethod()]
         public async Task AddAsyncTest()
