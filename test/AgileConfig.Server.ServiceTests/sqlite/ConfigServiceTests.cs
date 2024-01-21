@@ -1,55 +1,39 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using AgileConfig.Server.Service;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using FreeSql;
 using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.Data.Entity;
 using System.Threading.Tasks;
 using AgileConfig.Server.IService;
-using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
+using AgileConfig.Server.ServiceTests.sqlite;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AgileConfig.Server.Service.Tests
 {
     [TestClass()]
-    public class ConfigServiceTests
+    public class ConfigServiceTests : BasicTestService
     {
-        IFreeSql fsq = null;
-        FreeSqlContext freeSqlContext;
-        IConfigService service = null;
+        IConfigService _service = null;
+        public override Dictionary<string, string> GetConfigurationData()
+        {
+            return
+                new Dictionary<string, string>
+                {
+                {"db:provider","sqlite" },
+                {"db:conn","Data Source=agile_config.db" }
+            };
+        }
 
         [TestInitialize]
         public void TestInitialize()
         {
-            string conn = "Data Source=agile_config.db";
-            fsq = new FreeSqlBuilder()
-                          .UseConnectionString(FreeSql.DataType.Sqlite, conn)
-                          .UseAutoSyncStructure(true)
-                          .Build();
-            freeSqlContext = new FreeSqlContext(fsq);
-
-            var cache = new Mock<IMemoryCache>();
-            var config = new Config();
-
-            // todo
-
-            //service = new ConfigService(cache.Object, new AppService(freeSqlContext), new SettingService(freeSqlContext), new UserService(freeSqlContext));
-            fsq.Delete<Config>().Where("1=1");
-
-            Console.WriteLine("TestInitialize");
+            _service = _serviceProvider.GetService<IConfigService>();
+            _fsq.Delete<Config>().Where("1=1");
         }
 
-
-
-        [TestCleanup]
-        public void Clean()
-        {
-            freeSqlContext.Dispose();
-            fsq.Dispose();
-        }
 
         [TestMethod()]
         public async Task AddAsyncTest()
@@ -69,9 +53,9 @@ namespace AgileConfig.Server.Service.Tests
                 OnlineStatus = OnlineStatus.Online
             };
 
-           var result = await service.AddAsync(source, "");
+            var result = await _service.AddAsync(source, "");
             Assert.IsTrue(result);
-            var config = fsq.Select<Config>(new
+            var config = _fsq.Select<Config>(new
             {
                 Id = id
             }).ToOne();
@@ -109,7 +93,7 @@ namespace AgileConfig.Server.Service.Tests
                 OnlineStatus = OnlineStatus.Online
             };
 
-            var result = await service.AddAsync(source, "");
+            var result = await _service.AddAsync(source, "");
             Assert.IsTrue(result);
 
             source.AppId = "1";
@@ -122,8 +106,8 @@ namespace AgileConfig.Server.Service.Tests
             source.Status = ConfigStatus.Enabled;
             source.OnlineStatus = OnlineStatus.WaitPublish;
 
-            var result1 = await service.UpdateAsync(source, "");
-            var config = fsq.Select<Config>(new
+            var result1 = await _service.UpdateAsync(source, "");
+            var config = _fsq.Select<Config>(new
             {
                 Id = id
             }).ToOne();
@@ -161,13 +145,13 @@ namespace AgileConfig.Server.Service.Tests
                 OnlineStatus = OnlineStatus.Online
             };
 
-            var result = await service.AddAsync(source, "");
+            var result = await _service.AddAsync(source, "");
             Assert.IsTrue(result);
 
-            var result1 = await service.DeleteAsync(source, "");
+            var result1 = await _service.DeleteAsync(source, "");
             Assert.IsTrue(result1);
 
-            var config = fsq.Select<Config>(new
+            var config = _fsq.Select<Config>(new
             {
                 Id = id
             }).ToOne();
@@ -193,13 +177,13 @@ namespace AgileConfig.Server.Service.Tests
                 OnlineStatus = OnlineStatus.Online
             };
 
-            var result = await service.AddAsync(source, "");
+            var result = await _service.AddAsync(source, "");
             Assert.IsTrue(result);
 
-            var result1 = await service.DeleteAsync(id, "");
+            var result1 = await _service.DeleteAsync(id, "");
             Assert.IsTrue(result1);
 
-            var config = fsq.Select<Config>(new
+            var config = _fsq.Select<Config>(new
             {
                 Id = id
             }).ToOne();
@@ -225,10 +209,10 @@ namespace AgileConfig.Server.Service.Tests
                 OnlineStatus = OnlineStatus.Online
             };
 
-            var result = await service.AddAsync(source, "");
+            var result = await _service.AddAsync(source, "");
             Assert.IsTrue(result);
 
-            var config = await service.GetAsync(id, "");
+            var config = await _service.GetAsync(id, "");
             Assert.IsNotNull(config);
 
             Assert.AreEqual(source.Id, config.Id);
@@ -246,8 +230,9 @@ namespace AgileConfig.Server.Service.Tests
         [TestMethod()]
         public async Task GetAllConfigsAsyncTest()
         {
-            fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
+            _fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
 
+            var env = "DEV";
             var id = Guid.NewGuid().ToString();
             var source = new Config
             {
@@ -260,7 +245,8 @@ namespace AgileConfig.Server.Service.Tests
                 CreateTime = DateTime.Now,
                 UpdateTime = DateTime.Now,
                 Status = ConfigStatus.Enabled,
-                OnlineStatus = OnlineStatus.Online
+                OnlineStatus = OnlineStatus.Online,
+                Env = env
             };
             var id1 = Guid.NewGuid().ToString();
             var source1 = new Config
@@ -274,14 +260,15 @@ namespace AgileConfig.Server.Service.Tests
                 CreateTime = DateTime.Now,
                 UpdateTime = DateTime.Now,
                 Status = ConfigStatus.Deleted,
-                OnlineStatus = OnlineStatus.Online
+                OnlineStatus = OnlineStatus.Online,
+                Env = env
             };
-            var result = await service.AddAsync(source, "");
+            var result = await _service.AddAsync(source, env);
             Assert.IsTrue(result);
-            var result1 = await service.AddAsync(source1, "");
+            var result1 = await _service.AddAsync(source1, env);
             Assert.IsTrue(result1);
 
-            var configs = await service.GetAllConfigsAsync("");
+            var configs = await _service.GetAllConfigsAsync(env);
             Assert.IsNotNull(configs);
             Assert.AreEqual(1, configs.Count);
         }
@@ -289,8 +276,8 @@ namespace AgileConfig.Server.Service.Tests
         [TestMethod()]
         public async Task GetByAppIdKeyTest()
         {
-            fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
-
+            _fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
+            var env = "DEV";
             var id = Guid.NewGuid().ToString();
             var source = new Config
             {
@@ -303,7 +290,8 @@ namespace AgileConfig.Server.Service.Tests
                 CreateTime = DateTime.Now,
                 UpdateTime = DateTime.Now,
                 Status = ConfigStatus.Enabled,
-                OnlineStatus = OnlineStatus.Online
+                OnlineStatus = OnlineStatus.Online,
+                Env = env
             };
             var id1 = Guid.NewGuid().ToString();
             var source1 = new Config
@@ -317,7 +305,8 @@ namespace AgileConfig.Server.Service.Tests
                 CreateTime = DateTime.Now,
                 UpdateTime = DateTime.Now,
                 Status = ConfigStatus.Deleted,
-                OnlineStatus = OnlineStatus.Online
+                OnlineStatus = OnlineStatus.Online,
+                Env = env
             };
             var id2 = Guid.NewGuid().ToString();
             var source2 = new Config
@@ -331,28 +320,30 @@ namespace AgileConfig.Server.Service.Tests
                 CreateTime = DateTime.Now,
                 UpdateTime = DateTime.Now,
                 Status = ConfigStatus.Deleted,
-                OnlineStatus = OnlineStatus.Online
+                OnlineStatus = OnlineStatus.Online,
+                Env = env
             };
-            var result = await service.AddAsync(source, "");
+            var result = await _service.AddAsync(source, env);
             Assert.IsTrue(result);
-            var result1 = await service.AddAsync(source1, "");
+            var result1 = await _service.AddAsync(source1, env);
             Assert.IsTrue(result1);
-            var result2 = await service.AddAsync(source2, "");
+            var result2 = await _service.AddAsync(source2, env);
             Assert.IsTrue(result2);
 
-            var config = await service.GetByAppIdKeyEnv("001", "g", "k", "env");
+            var config = await _service.GetByAppIdKeyEnv("001", "g", "k", env);
             Assert.IsNotNull(config);
 
-            var config1 = await service.GetByAppIdKeyEnv("002", "g", "k", "env");
+            var config1 = await _service.GetByAppIdKeyEnv("002", "g", "k", env);
             Assert.IsNull(config1);
         }
 
         [TestMethod()]
         public async Task GetByAppIdTest()
         {
-            fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
+            _fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
 
             var id = Guid.NewGuid().ToString();
+            var env = "DEV";
             var source = new Config
             {
                 AppId = "001",
@@ -364,7 +355,8 @@ namespace AgileConfig.Server.Service.Tests
                 CreateTime = DateTime.Now,
                 UpdateTime = DateTime.Now,
                 Status = ConfigStatus.Enabled,
-                OnlineStatus = OnlineStatus.Online
+                OnlineStatus = OnlineStatus.Online,
+                Env = env
             };
             var id1 = Guid.NewGuid().ToString();
             var source1 = new Config
@@ -378,7 +370,8 @@ namespace AgileConfig.Server.Service.Tests
                 CreateTime = DateTime.Now,
                 UpdateTime = DateTime.Now,
                 Status = ConfigStatus.Deleted,
-                OnlineStatus = OnlineStatus.Online
+                OnlineStatus = OnlineStatus.Online,
+                Env = env
             };
             var id2 = Guid.NewGuid().ToString();
             var source2 = new Config
@@ -392,16 +385,17 @@ namespace AgileConfig.Server.Service.Tests
                 CreateTime = DateTime.Now,
                 UpdateTime = DateTime.Now,
                 Status = ConfigStatus.Deleted,
-                OnlineStatus = OnlineStatus.Online
+                OnlineStatus = OnlineStatus.Online,
+                Env = env
             };
-            var result = await service.AddAsync(source, "");
+            var result = await _service.AddAsync(source, env);
             Assert.IsTrue(result);
-            var result1 = await service.AddAsync(source1, "");
+            var result1 = await _service.AddAsync(source1, env);
             Assert.IsTrue(result1);
-            var result2 = await service.AddAsync(source2, "");
+            var result2 = await _service.AddAsync(source2, env);
             Assert.IsTrue(result2);
 
-            var configs = await service.GetByAppIdAsync("001", "");
+            var configs = await _service.GetByAppIdAsync("001", env);
             Assert.IsNotNull(configs);
             Assert.AreEqual(1, configs.Count);
         }
@@ -409,8 +403,8 @@ namespace AgileConfig.Server.Service.Tests
         [TestMethod()]
         public async Task SearchTest()
         {
-            fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
-
+            _fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
+            var env = "DEV";
             var id = Guid.NewGuid().ToString();
             var source = new Config
             {
@@ -423,7 +417,8 @@ namespace AgileConfig.Server.Service.Tests
                 CreateTime = DateTime.Now,
                 UpdateTime = DateTime.Now,
                 Status = ConfigStatus.Enabled,
-                OnlineStatus = OnlineStatus.Online
+                OnlineStatus = OnlineStatus.Online,
+                Env = env
             };
             var id1 = Guid.NewGuid().ToString();
             var source1 = new Config
@@ -437,7 +432,8 @@ namespace AgileConfig.Server.Service.Tests
                 CreateTime = DateTime.Now,
                 UpdateTime = DateTime.Now,
                 Status = ConfigStatus.Deleted,
-                OnlineStatus = OnlineStatus.Online
+                Env = env,
+                OnlineStatus = OnlineStatus.Online,
             };
             var id2 = Guid.NewGuid().ToString();
             var source2 = new Config
@@ -451,22 +447,23 @@ namespace AgileConfig.Server.Service.Tests
                 CreateTime = DateTime.Now,
                 UpdateTime = DateTime.Now,
                 Status = ConfigStatus.Deleted,
-                OnlineStatus = OnlineStatus.Online
+                OnlineStatus = OnlineStatus.Online,
+                Env = env,
             };
-            var result = await service.AddAsync(source, "");
+            var result = await _service.AddAsync(source, env);
             Assert.IsTrue(result);
-            var result1 = await service.AddAsync(source1, "");
+            var result1 = await _service.AddAsync(source1, env);
             Assert.IsTrue(result1);
-            var result2 = await service.AddAsync(source2, "");
+            var result2 = await _service.AddAsync(source2, env);
             Assert.IsTrue(result2);
 
-            var configs = await service.Search("001", "", "", "");
+            var configs = await _service.Search("001", "", "", env);
             Assert.IsNotNull(configs);
             Assert.AreEqual(1, configs.Count);
-            var configs1 = await service.Search("", "o", "", "");
+            var configs1 = await _service.Search("", "o", "", env);
             Assert.IsNotNull(configs1);
             Assert.AreEqual(1, configs1.Count);
-            var configs2 = await service.Search("", "", "e", "");
+            var configs2 = await _service.Search("", "", "e", env);
             Assert.IsNotNull(configs2);
             Assert.AreEqual(1, configs2.Count);
         }
@@ -474,8 +471,9 @@ namespace AgileConfig.Server.Service.Tests
         [TestMethod()]
         public async Task CountEnabledConfigsAsyncTest()
         {
-            fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
+            _fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
 
+            string env = "DEV";
             var id = Guid.NewGuid().ToString();
             var source = new Config
             {
@@ -488,7 +486,8 @@ namespace AgileConfig.Server.Service.Tests
                 CreateTime = DateTime.Now,
                 UpdateTime = DateTime.Now,
                 Status = ConfigStatus.Enabled,
-                OnlineStatus = OnlineStatus.Online
+                OnlineStatus = OnlineStatus.Online,
+                Env = env
             };
             var id1 = Guid.NewGuid().ToString();
             var source1 = new Config
@@ -502,7 +501,8 @@ namespace AgileConfig.Server.Service.Tests
                 CreateTime = DateTime.Now,
                 UpdateTime = DateTime.Now,
                 Status = ConfigStatus.Deleted,
-                OnlineStatus = OnlineStatus.Online
+                OnlineStatus = OnlineStatus.Online,
+                Env = env
             };
             var id2 = Guid.NewGuid().ToString();
             var source2 = new Config
@@ -516,23 +516,24 @@ namespace AgileConfig.Server.Service.Tests
                 CreateTime = DateTime.Now,
                 UpdateTime = DateTime.Now,
                 Status = ConfigStatus.Deleted,
-                OnlineStatus = OnlineStatus.Online
+                OnlineStatus = OnlineStatus.Online,
+                Env = env
             };
-            var result = await service.AddAsync(source, "");
+            var result = await _service.AddAsync(source, "");
             Assert.IsTrue(result);
-            var result1 = await service.AddAsync(source1, "");
+            var result1 = await _service.AddAsync(source1, "");
             Assert.IsTrue(result1);
-            var result2 = await service.AddAsync(source2, "");
+            var result2 = await _service.AddAsync(source2, "");
             Assert.IsTrue(result2);
 
-            var count = await service.CountEnabledConfigsAsync();
+            var count = await _service.CountEnabledConfigsAsync();
             Assert.AreEqual(1, count);
         }
 
         [TestMethod()]
         public async Task AppPublishedConfigsMd5Test()
         {
-            fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
+            _fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
 
             var id = Guid.NewGuid().ToString();
             var source = new Config
@@ -576,14 +577,14 @@ namespace AgileConfig.Server.Service.Tests
                 Status = ConfigStatus.Deleted,
                 OnlineStatus = OnlineStatus.Online
             };
-            var result = await service.AddAsync(source, "");
+            var result = await _service.AddAsync(source, "");
             Assert.IsTrue(result);
-            var result1 = await service.AddAsync(source1, "");
+            var result1 = await _service.AddAsync(source1, "");
             Assert.IsTrue(result1);
-            var result2 = await service.AddAsync(source2, "");
+            var result2 = await _service.AddAsync(source2, "");
             Assert.IsTrue(result2);
 
-            var md5 = await service.AppPublishedConfigsMd5("001", "");
+            var md5 = await _service.AppPublishedConfigsMd5("001", "");
             Assert.IsNotNull(md5);
         }
 
@@ -595,7 +596,7 @@ namespace AgileConfig.Server.Service.Tests
         [TestMethod()]
         public async Task GetPublishedConfigsByAppIdTest()
         {
-            fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
+            _fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
 
             var id = Guid.NewGuid().ToString();
             var source = new Config
@@ -639,11 +640,11 @@ namespace AgileConfig.Server.Service.Tests
                 Status = ConfigStatus.Deleted,
                 OnlineStatus = OnlineStatus.Online
             };
-            var result = await service.AddAsync(source, "");
+            var result = await _service.AddAsync(source, "");
             Assert.IsTrue(result);
-            var result1 = await service.AddAsync(source1, "");
+            var result1 = await _service.AddAsync(source1, "");
             Assert.IsTrue(result1);
-            var result2 = await service.AddAsync(source2, "");
+            var result2 = await _service.AddAsync(source2, "");
             Assert.IsTrue(result2);
 
             //var configs = await service.GetPublishedConfigsByAppId("001");
@@ -682,19 +683,19 @@ namespace AgileConfig.Server.Service.Tests
                 Status = ConfigStatus.Deleted,
                 OnlineStatus = OnlineStatus.Online
             };
-            
-            var result = await service.AddRangeAsync(new List<Config> {
+
+            var result = await _service.AddRangeAsync(new List<Config> {
                 source,
                 source1
             }, "");
             Assert.IsTrue(result);
 
-            var config = fsq.Select<Config>(new
+            var config = _fsq.Select<Config>(new
             {
                 Id = id
             }).ToOne();
             Assert.IsNotNull(config);
-            var config1 = fsq.Select<Config>(new
+            var config1 = _fsq.Select<Config>(new
             {
                 Id = id1
             }).ToOne();
@@ -704,9 +705,14 @@ namespace AgileConfig.Server.Service.Tests
         [TestMethod()]
         public async Task GetPublishedConfigsByAppIdWithInheritanced_DictionaryTest()
         {
-            fsq.Delete<App>().Where("1=1").ExecuteAffrows();
-            fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
-            fsq.Delete<AppInheritanced>().Where("1=1").ExecuteAffrows();
+            _fsq.Delete<App>().Where("1=1").ExecuteAffrows();
+            _fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
+            _fsq.Delete<AppInheritanced>().Where("1=1").ExecuteAffrows();
+            _fsq.Delete<ConfigPublished>().Where("1=1").ExecuteAffrows();
+            _fsq.Delete<PublishTimeline>().Where("1=1").ExecuteAffrows();
+            _fsq.Delete<PublishDetail>().Where("1=1").ExecuteAffrows();
+
+            string env = "DEV";
 
             var app = new App();
             app.Id = "001";
@@ -714,14 +720,15 @@ namespace AgileConfig.Server.Service.Tests
             app.Enabled = true;
             app.CreateTime = DateTime.Now;
             app.UpdateTime = DateTime.Now;
-            app.Type = AppType.PRIVATE;
+            app.Type = AppType.PRIVATE; // app 001 私有
             var app1 = new App();
             app1.Id = "002";
-            app1.Name = "x";
+            app1.Name = "x2";
             app1.Enabled = true;
             app1.CreateTime = DateTime.Now;
             app1.UpdateTime = DateTime.Now;
-            app.Type = AppType.Inheritance;
+            app1.Type = AppType.Inheritance; // APP 002 公开
+
             var id = Guid.NewGuid().ToString();
             var source = new Config
             {
@@ -733,7 +740,8 @@ namespace AgileConfig.Server.Service.Tests
                 CreateTime = DateTime.Now,
                 UpdateTime = DateTime.Now,
                 Status = ConfigStatus.Enabled,
-                OnlineStatus = OnlineStatus.Online
+                OnlineStatus = OnlineStatus.WaitPublish,
+                Env = env
             };
             var id1 = Guid.NewGuid().ToString();
             var source1 = new Config
@@ -746,7 +754,8 @@ namespace AgileConfig.Server.Service.Tests
                 CreateTime = DateTime.Now,
                 UpdateTime = DateTime.Now,
                 Status = ConfigStatus.Enabled,
-                OnlineStatus = OnlineStatus.Online
+                OnlineStatus = OnlineStatus.WaitPublish,
+                Env = env
             };
             var source2 = new Config
             {
@@ -758,7 +767,8 @@ namespace AgileConfig.Server.Service.Tests
                 CreateTime = DateTime.Now,
                 UpdateTime = DateTime.Now,
                 Status = ConfigStatus.Enabled,
-                OnlineStatus = OnlineStatus.Online
+                OnlineStatus = OnlineStatus.WaitPublish,
+                Env = env
             };
             var source3 = new Config
             {
@@ -770,23 +780,29 @@ namespace AgileConfig.Server.Service.Tests
                 CreateTime = DateTime.Now,
                 UpdateTime = DateTime.Now,
                 Status = ConfigStatus.Enabled,
-                OnlineStatus = OnlineStatus.Online
+                OnlineStatus = OnlineStatus.WaitPublish,
+                Env = env
             };
             var appref = new AppInheritanced();
             appref.AppId = app.Id;
-            appref.InheritancedAppId = app1.Id;
+            appref.InheritancedAppId = app1.Id; // app 001 继承 app 002
             appref.Sort = 1;
             appref.Id = Guid.NewGuid().ToString();
 
-            fsq.Insert(app).ExecuteAffrows();
-            fsq.Insert(app1).ExecuteAffrows();
-            fsq.Insert(source).ExecuteAffrows();
-            fsq.Insert(source1).ExecuteAffrows();
-            fsq.Insert(source2).ExecuteAffrows();
-            fsq.Insert(source3).ExecuteAffrows();
-            fsq.Insert(appref).ExecuteAffrows();
+            _fsq.Insert(app).ExecuteAffrows();
+            _fsq.Insert(app1).ExecuteAffrows();
+            _fsq.Insert(appref).ExecuteAffrows();
 
-            var dict = await service.GetPublishedConfigsByAppIdWithInheritanced_Dictionary(app.Id, "");
+            // 插入4个config，2个app 001，2个app 002
+            _fsq.Insert(source).ExecuteAffrows();
+            _fsq.Insert(source1).ExecuteAffrows();
+            _fsq.Insert(source2).ExecuteAffrows();
+            _fsq.Insert(source3).ExecuteAffrows();
+
+            await _service.Publish(app1.Id, new string[] { }, "", "", env);
+            await _service.Publish(app.Id, new string[] { },"", "", env);
+
+            var dict = await _service.GetPublishedConfigsByAppIdWithInheritanced_Dictionary(app.Id, env);
             Assert.IsNotNull(dict);
             Assert.AreEqual(4, dict.Keys.Count);
 
@@ -810,7 +826,8 @@ namespace AgileConfig.Server.Service.Tests
                 CreateTime = DateTime.Now,
                 UpdateTime = DateTime.Now,
                 Status = ConfigStatus.Enabled,
-                OnlineStatus = OnlineStatus.Online
+                OnlineStatus = OnlineStatus.WaitPublish,
+                Env = env
             };
             var source5 = new Config
             {
@@ -822,12 +839,17 @@ namespace AgileConfig.Server.Service.Tests
                 CreateTime = DateTime.Now,
                 UpdateTime = DateTime.Now,
                 Status = ConfigStatus.Enabled,
-                OnlineStatus = OnlineStatus.Online
+                OnlineStatus = OnlineStatus.WaitPublish,
+                Env = env
             };
-            fsq.Insert(source4).ExecuteAffrows();
-            fsq.Insert(source5).ExecuteAffrows();
+            // 插入2个config，1个app 001，1个app 002，keyvalue相同，app 001 优先级高
+            _fsq.Insert(source4).ExecuteAffrows();
+            _fsq.Insert(source5).ExecuteAffrows();
 
-            dict = await service.GetPublishedConfigsByAppIdWithInheritanced_Dictionary(app.Id, "");
+            await _service.Publish(app1.Id, new string[] { }, "", "", env);
+            await _service.Publish(app.Id, new string[] { }, "", "", env);
+
+            dict = await _service.GetPublishedConfigsByAppIdWithInheritanced_Dictionary(app.Id, env);
             Assert.IsNotNull(dict);
             Assert.AreEqual(5, dict.Keys.Count);
 
@@ -841,7 +863,18 @@ namespace AgileConfig.Server.Service.Tests
             app2.CreateTime = DateTime.Now;
             app2.UpdateTime = DateTime.Now;
             app2.Type = AppType.Inheritance;
-            fsq.Insert(app2).ExecuteAffrows();
+            _fsq.Insert(app2).ExecuteAffrows();
+        
+
+            // 插入1个app 003
+            _fsq.Delete<AppInheritanced>().Where("1=1").ExecuteAffrows();
+            var appref1 = new AppInheritanced();
+            appref1.AppId = app.Id;
+            appref1.InheritancedAppId = app2.Id; // app 001 继承 app 003
+            appref1.Sort = 2;
+            appref1.Id = Guid.NewGuid().ToString();
+            _fsq.Insert(appref1).ExecuteAffrows();
+
             var source6 = new Config
             {
                 AppId = "003",
@@ -852,24 +885,25 @@ namespace AgileConfig.Server.Service.Tests
                 CreateTime = DateTime.Now,
                 UpdateTime = DateTime.Now,
                 Status = ConfigStatus.Enabled,
-                OnlineStatus = OnlineStatus.Online
+                OnlineStatus = OnlineStatus.WaitPublish,
+                Env = env
             };
-            fsq.Delete<AppInheritanced>().Where("1=1").ExecuteAffrows();
-            fsq.Insert(source6).ExecuteAffrows();
+            _fsq.Insert(source6).ExecuteAffrows();
+            await _service.Publish(app2.Id, new string[] { }, "", "", env); // 发布app 003
 
-            fsq.Insert(appref).ExecuteAffrows();
-            var appref1 = new AppInheritanced();
-            appref1.AppId = app.Id;
-            appref1.InheritancedAppId = app2.Id;
-            appref1.Sort = 2;
-            appref1.Id = Guid.NewGuid().ToString();
-            fsq.Insert(appref1).ExecuteAffrows();
-            dict = await service.GetPublishedConfigsByAppIdWithInheritanced_Dictionary(app.Id, "");
+            dict = await _service.GetPublishedConfigsByAppIdWithInheritanced_Dictionary(app.Id, env);
             Assert.IsNotNull(dict);
-            Assert.AreEqual(5, dict.Keys.Count);
+            Assert.AreEqual(4, dict.Keys.Count);
 
-            config1 = dict["k2"];
-            Assert.AreEqual(source6.Value, config1.Value);
+            Assert.IsTrue(dict.ContainsKey(source6.Key));
+            Assert.IsTrue(dict.ContainsKey(source4.Key));
+            Assert.IsTrue(dict.ContainsKey(source1.Key));
+            Assert.IsTrue(dict.ContainsKey(source.Key));
+
+            Assert.IsTrue(dict[source6.Key].Value == "k4444");
+            Assert.IsTrue(dict[source4.Key].Value == "v3");
+            Assert.IsTrue(dict[source1.Key].Value == "v1");
+            Assert.IsTrue(dict[source.Key].Value == "v");
         }
     }
 }

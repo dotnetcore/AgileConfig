@@ -1,21 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using FreeSql;
-using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.Data.Entity;
 using System.Threading.Tasks;
 using AgileConfig.Server.IService;
 using AgileConfig.Server.Service;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
-using AgileConfig.Server.Data.Abstraction;
-using AgileConfig.Server.Data.Repository.Freesql;
-using AgileConfig.Server.Common;
-using MongoDB.Driver.Linq;
 
 namespace AgileConfig.Server.ServiceTests.sqlite
 {

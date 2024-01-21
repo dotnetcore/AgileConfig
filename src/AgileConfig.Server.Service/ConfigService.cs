@@ -505,8 +505,8 @@ namespace AgileConfig.Server.Service
                 publishTimelineNode.AppId = appId;
                 publishTimelineNode.Id = Guid.NewGuid().ToString("N");
                 publishTimelineNode.PublishTime = DateTime.Now;
-                publishTimelineNode.PublishUserId = user.Id;
-                publishTimelineNode.PublishUserName = user.UserName;
+                publishTimelineNode.PublishUserId = user?.Id;
+                publishTimelineNode.PublishUserName = user?.UserName;
                 publishTimelineNode.Version = versionMax + 1;
                 publishTimelineNode.Log = log;
                 publishTimelineNode.Env = env;
