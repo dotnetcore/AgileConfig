@@ -9,90 +9,90 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
+using AgileConfig.Server.Apisite.Controllers.api.Models;
 
-namespace ApiSiteTests
+namespace ApiSiteTests;
+
+[TestClass]
+public class TestApiConfigController
 {
-    [TestClass]
-    public class TestApiConfigController
+    [TestMethod]
+    public async Task TestGet()
     {
-        [TestMethod]
-        public async Task TestGet()
+        App newApp()
         {
-            App newApp()
-            {
-                return new App() {
-                    Enabled = true
-                };
-            }
-
-            var appService = new Mock<IAppService>();
-            appService.Setup(s => s.GetAsync("001")).ReturnsAsync(newApp);
-
-            List<Config> newConfigs() {
-                var list = new List<Config>();
-                list.Add(new Config { 
-                    Id = "001",
-                    Key ="key1",
-                    Value = "val1",
-                    Group = ""
-                });
-                list.Add(new Config
-                {
-                    Id = "002",
-                    Key = "key2",
-                    Value = "val2",
-                    Group = "group1",
-                    AppId = "001",
-                    Status = ConfigStatus.Enabled
-                });
-
-                return list;
-            }
-            var configService = new Mock<IConfigService>();
-            //configService.Setup(s => s.GetPublishedConfigsAsync("001"))
-            //    .ReturnsAsync(newConfigs);
-            configService.Setup(s => s.GetPublishedConfigsByAppIdWithInheritanced("001", ""))
-                .ReturnsAsync(newConfigs);
-
-            var memoryCache = new Mock<IMemoryCache>();
-            var remoteNodeProxy = new Mock<IRemoteServerNodeProxy>();
-            var serverNodeService = new Mock<IServerNodeService>();
-            var sysLogService = new Mock<ISysLogService>();
-            var appBasicAuthService = new Mock<IAppBasicAuthService>();
-            var userSErvice = new Mock<IUserService>();
-
-            var ctrl = new ConfigController(
-                configService.Object,
-                appService.Object,
-                userSErvice.Object,
-                memoryCache.Object);
-            var act = await ctrl.GetAppConfig("001", "");
-
-            Assert.IsNotNull(act);
-            Assert.IsNotNull(act.Value);
-            Assert.IsInstanceOfType(act.Value, typeof(List<ConfigVM>));
-            Assert.AreEqual(2, act.Value.Count);
-
-            App newApp1()
-            {
-                return new App()
-                {
-                    Enabled = false
-                };
-            }
-            appService = new Mock<IAppService>();
-            appService.Setup(s => s.GetAsync("001")).ReturnsAsync(newApp1);
-
-            ctrl = new ConfigController(
-                configService.Object,
-                appService.Object,
-                userSErvice.Object,
-                memoryCache.Object);
-            act = await ctrl.GetAppConfig("001", "");
-
-            Assert.IsNotNull(act);
-            Assert.IsNull(act.Value);
-            Assert.IsInstanceOfType(act.Result, typeof(NotFoundResult));
+            return new App() {
+                Enabled = true
+            };
         }
+
+        var appService = new Mock<IAppService>();
+        appService.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync(newApp);
+
+        List<Config> newConfigs() {
+            var list = new List<Config>();
+            list.Add(new Config { 
+                Id = "001",
+                Key ="key1",
+                Value = "val1",
+                Group = ""
+            });
+            list.Add(new Config
+            {
+                Id = "002",
+                Key = "key2",
+                Value = "val2",
+                Group = "group1",
+                AppId = "001",
+                Status = ConfigStatus.Enabled
+            });
+
+            return list;
+        }
+        var configService = new Mock<IConfigService>();
+        //configService.Setup(s => s.GetPublishedConfigsAsync("001"))
+        //    .ReturnsAsync(newConfigs);
+        configService.Setup(s => s.GetPublishedConfigsByAppIdWithInheritanced(It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync(newConfigs);
+
+        IMemoryCache memoryCache = null;
+        var remoteNodeProxy = new Mock<IRemoteServerNodeProxy>();
+        var serverNodeService = new Mock<IServerNodeService>();
+        var sysLogService = new Mock<ISysLogService>();
+        var appBasicAuthService = new Mock<IAppBasicAuthService>();
+        var userSErvice = new Mock<IUserService>();
+
+        var ctrl = new ConfigController(
+            configService.Object,
+            appService.Object,
+            userSErvice.Object,
+            memoryCache);
+        var act = await ctrl.GetAppConfig("001", "DEV");
+
+        Assert.IsNotNull(act);
+        Assert.IsNotNull(act.Value);
+        Assert.IsInstanceOfType(act.Value, typeof(List<ApiConfigVM>));
+        Assert.AreEqual(2, act.Value.Count);
+
+        App newApp1()
+        {
+            return new App()
+            {
+                Enabled = false
+            };
+        }
+        appService = new Mock<IAppService>();
+        appService.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync(newApp1);
+
+        ctrl = new ConfigController(
+            configService.Object,
+            appService.Object,
+            userSErvice.Object,
+            memoryCache);
+        act = await ctrl.GetAppConfig("001", "DEV");
+
+        Assert.IsNotNull(act);
+        Assert.IsNull(act.Value);
+        Assert.IsInstanceOfType(act.Result, typeof(NotFoundResult));
     }
 }

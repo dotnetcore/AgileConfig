@@ -31,6 +31,8 @@ namespace AgileConfig.Server.Apisite.Websocket
         void SendActionToAll(WebsocketAction action);
 
         void SendToAppClients(string appId, string message);
+
+        void Clear();
     }
 
 }

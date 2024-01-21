@@ -204,6 +204,11 @@ namespace AgileConfig.Server.Apisite.Websocket
             }
         }
 
+        public void Clear()
+        {
+            _Clients?.Clear();
+        }
+
         public static IWebsocketCollection Instance { get; private set; }
 
         public int Count => _Clients.Count;

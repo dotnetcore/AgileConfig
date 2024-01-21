@@ -42,7 +42,7 @@ namespace AgileConfig.Server.Common
         private ILogger _logger = null;
         private TinyEventBus()
         {
-            _logger = Global.LoggerFactory.CreateLogger<TinyEventBus>();
+            _logger = Global.LoggerFactory?.CreateLogger<TinyEventBus>();
             _events = new ConcurrentDictionary<string, List<Action<object>>>();
         }
 

@@ -32,7 +32,7 @@ namespace AgileConfig.Server.Data.Freesql.Tests
         public void ExistTableSqlServerTest()
         {
             //SqlServer
-            string conn = "Persist Security Info = False; User ID =dev; Password =dev@123,; Initial Catalog =agile_config_test; Server =www..com";
+            string conn = "TrustServerCertificate=True;Persist Security Info = False; User ID =dev; Password =dev; Initial Catalog =agile_config_test; Server =.";
             var sqlserver_fsq = new FreeSqlBuilder()
                           .UseConnectionString(FreeSql.DataType.SqlServer, conn)
                           .Build();
@@ -90,7 +90,7 @@ namespace AgileConfig.Server.Data.Freesql.Tests
         public void ExistTablePostgreSqlTest()
         {
             //SqlServer
-            string conn = "Host=127.0.0.1;Database=agile_config;Username=postgres;Password=dev@123";
+            string conn = "Host=192.168.0.125;Port=15432;Database=agileconfig;Username=postgres;Password=123456";
             var postgresql_fsq = new FreeSqlBuilder()
                           .UseConnectionString(FreeSql.DataType.PostgreSQL, conn)
                           .Build();

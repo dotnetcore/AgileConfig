@@ -58,7 +58,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             }
 
             var cacheKey = $"ConfigController_APPCONFIG_{appId}_{env}";
-            _cacheMemory.TryGetValue(cacheKey, out List<ApiConfigVM> configs);
+            List<ApiConfigVM> configs = null;
+            _cacheMemory?.TryGetValue(cacheKey, out configs);
             if (configs != null)
             {
                 return configs;
@@ -83,7 +84,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             //增加5s的缓存，防止同一个app同时启动造成db的压力过大
             var cacheOp = new MemoryCacheEntryOptions()
                 .SetAbsoluteExpiration(TimeSpan.FromSeconds(5));
-            _cacheMemory.Set(cacheKey, vms, cacheOp);
+            _cacheMemory?.Set(cacheKey, vms, cacheOp);
             
             return vms;
         }
