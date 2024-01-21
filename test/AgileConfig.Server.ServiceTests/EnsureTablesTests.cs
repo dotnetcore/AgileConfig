@@ -6,7 +6,7 @@ using System.Text;
 using FreeSql;
 using AgileConfig.Server.Data.Entity;
 
-namespace AgileConfig.Server.Data.Freesql.Tests
+namespace AgileConfig.Server.ServiceTests
 {
     [TestClass()]
     public class EnsureTablesTests
@@ -17,7 +17,7 @@ namespace AgileConfig.Server.Data.Freesql.Tests
             //sqlite
             string conn = "Data Source=agile_config.db";
             var sqllite_fsq = new FreeSqlBuilder()
-                          .UseConnectionString(FreeSql.DataType.Sqlite, conn)
+                          .UseConnectionString(DataType.Sqlite, conn)
                           .Build();
             FluentApi.Config(sqllite_fsq);
             sqllite_fsq.Ado.ExecuteNonQuery("drop table agc_app");
@@ -34,7 +34,7 @@ namespace AgileConfig.Server.Data.Freesql.Tests
             //SqlServer
             string conn = "TrustServerCertificate=True;Persist Security Info = False; User ID =dev; Password =dev; Initial Catalog =agile_config_test; Server =.";
             var sqlserver_fsq = new FreeSqlBuilder()
-                          .UseConnectionString(FreeSql.DataType.SqlServer, conn)
+                          .UseConnectionString(DataType.SqlServer, conn)
                           .Build();
             FluentApi.Config(sqlserver_fsq);
             sqlserver_fsq.Ado.ExecuteNonQuery("drop table agc_app");
@@ -51,7 +51,7 @@ namespace AgileConfig.Server.Data.Freesql.Tests
             //SqlServer
             string conn = "Database=agile_config_test;Data Source=192.168.0.125;User Id=root;Password=x;port=13306";
             var mysql_fsq = new FreeSqlBuilder()
-                          .UseConnectionString(FreeSql.DataType.MySql, conn)
+                          .UseConnectionString(DataType.MySql, conn)
                           .Build();
             FluentApi.Config(mysql_fsq);
             try
@@ -75,7 +75,7 @@ namespace AgileConfig.Server.Data.Freesql.Tests
             //SqlServer
             string conn = "user id=CLINIC;password=CLINIC;data source=192.168.0.91/orcl";
             var oracle_fsq = new FreeSqlBuilder()
-                          .UseConnectionString(FreeSql.DataType.Oracle, conn)
+                          .UseConnectionString(DataType.Oracle, conn)
                           .Build();
             FluentApi.Config(oracle_fsq);
             oracle_fsq.Ado.ExecuteNonQuery("drop table \"agc_app\" ");
@@ -92,7 +92,7 @@ namespace AgileConfig.Server.Data.Freesql.Tests
             //SqlServer
             string conn = "Host=192.168.0.125;Port=15432;Database=agileconfig;Username=postgres;Password=123456";
             var postgresql_fsq = new FreeSqlBuilder()
-                          .UseConnectionString(FreeSql.DataType.PostgreSQL, conn)
+                          .UseConnectionString(DataType.PostgreSQL, conn)
                           .Build();
             FluentApi.Config(postgresql_fsq);
             postgresql_fsq.Ado.ExecuteNonQuery("drop table \"agc_app\" ");

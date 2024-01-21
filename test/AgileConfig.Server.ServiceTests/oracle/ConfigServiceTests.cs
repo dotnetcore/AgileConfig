@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using AgileConfig.Server.Service.Tests;
 using System.Collections.Generic;
+using AgileConfig.Server.ServiceTests.sqlite;
 
 namespace AgileConfig.Server.ServiceTests.oracle
 {

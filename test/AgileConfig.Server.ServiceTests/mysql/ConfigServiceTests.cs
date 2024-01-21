@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using AgileConfig.Server.Service.Tests;
+using AgileConfig.Server.ServiceTests.sqlite;
 
 namespace AgileConfig.Server.ServiceTests.mysql
 {

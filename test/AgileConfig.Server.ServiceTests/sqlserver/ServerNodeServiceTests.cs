@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using AgileConfig.Server.ServiceTests.sqlite;
 
-namespace AgileConfig.Server.Service.Tests.sqlserver
+namespace AgileConfig.Server.ServiceTests.sqlserver
 {
     [TestClass()]
     public class ServerNodeServiceTests_sqlserver: ServerNodeServiceTests

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using AgileConfig.Server.ServiceTests.sqlite;
 
-namespace AgileConfig.Server.Service.Tests.PostgreSQL
+namespace AgileConfig.Server.ServiceTests.PostgreSQL
 {
     [TestClass()]
     public class AppServiceTests_pg : AppServiceTests

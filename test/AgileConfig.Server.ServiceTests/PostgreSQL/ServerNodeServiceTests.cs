@@ -2,17 +2,9 @@
 using AgileConfig.Server.Service;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using AgileConfig.Server.Data.Freesql;
-using FreeSql;
-using AgileConfig.Server.Data.Entity;
-using System.Threading.Tasks;
-using AgileConfig.Server.Data.Repository.Freesql;
-using AgileConfig.Server.IService;
-using Microsoft.Extensions.DependencyInjection;
 using AgileConfig.Server.ServiceTests.sqlite;
 
-namespace AgileConfig.Server.Service.Tests.PostgreSQL
+namespace AgileConfig.Server.ServiceTests.PostgreSQL
 {
     [TestClass()]
     public class ServerNodeServiceTests_pg: ServerNodeServiceTests

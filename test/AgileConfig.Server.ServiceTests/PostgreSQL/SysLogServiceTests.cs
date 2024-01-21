@@ -3,7 +3,7 @@
 using AgileConfig.Server.ServiceTests.sqlite;
 using System.Collections.Generic;
 
-namespace AgileConfig.Server.Service.Tests.PostgreSQL
+namespace AgileConfig.Server.ServiceTests.PostgreSQL
 {
     [TestClass()]
     public class SysLogServiceTests_pg: SysLogServiceTests

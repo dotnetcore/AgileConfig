@@ -1,10 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using AgileConfig.Server.Service;
 using System;
 using System.Collections.Generic;
 using AgileConfig.Server.ServiceTests.sqlite;
 
-namespace AgileConfig.Server.Service.Tests.oracle
+namespace AgileConfig.Server.ServiceTests.oracle
 {
     [TestClass()]
     public class AppServiceTests_oracle : AppServiceTests

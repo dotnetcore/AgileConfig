@@ -1,7 +1,8 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using AgileConfig.Server.ServiceTests.sqlite;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 
-namespace AgileConfig.Server.Service.Tests.sqlserver
+namespace AgileConfig.Server.ServiceTests.sqlserver
 {
     [TestClass()]
     public class ConfigServiceTests_sqlserver: ConfigServiceTests

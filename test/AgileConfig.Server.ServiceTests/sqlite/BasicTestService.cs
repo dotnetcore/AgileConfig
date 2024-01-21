@@ -2,6 +2,7 @@
 using AgileConfig.Server.Data.Abstraction;
 using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.Data.Repository.Freesql;
+using AgileConfig.Server.Data.Repository.Selector;
 using AgileConfig.Server.IService;
 using AgileConfig.Server.Service;
 using Microsoft.Extensions.Caching.Memory;
@@ -43,9 +44,8 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             services.AddScoped(_ => cache.Object);
             services.AddSingleton<IConfiguration>(config);
             services.AddFreeSqlFactory();
-            services.AddFreeSqlRepository();
+            services.AddRepositories();
             services.AddBusinessServices();
-            AddEnvRepositiroies(services);
 
             _serviceProvider = services.BuildServiceProvider();
             var systeminitializationService = _serviceProvider.GetService<ISystemInitializationService>();

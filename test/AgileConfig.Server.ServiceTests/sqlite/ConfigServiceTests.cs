@@ -8,10 +8,9 @@ using System.Threading.Tasks;
 using AgileConfig.Server.IService;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
-using AgileConfig.Server.ServiceTests.sqlite;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AgileConfig.Server.Service.Tests
+namespace AgileConfig.Server.ServiceTests.sqlite
 {
     [TestClass()]
     public class ConfigServiceTests : BasicTestService
@@ -800,7 +799,7 @@ namespace AgileConfig.Server.Service.Tests
             _fsq.Insert(source3).ExecuteAffrows();
 
             await _service.Publish(app1.Id, new string[] { }, "", "", env);
-            await _service.Publish(app.Id, new string[] { },"", "", env);
+            await _service.Publish(app.Id, new string[] { }, "", "", env);
 
             var dict = await _service.GetPublishedConfigsByAppIdWithInheritanced_Dictionary(app.Id, env);
             Assert.IsNotNull(dict);
@@ -864,7 +863,7 @@ namespace AgileConfig.Server.Service.Tests
             app2.UpdateTime = DateTime.Now;
             app2.Type = AppType.Inheritance;
             _fsq.Insert(app2).ExecuteAffrows();
-        
+
 
             // 插入1个app 003
             _fsq.Delete<AppInheritanced>().Where("1=1").ExecuteAffrows();

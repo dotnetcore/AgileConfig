@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using AgileConfig.Server.ServiceTests.sqlite;
 
-namespace AgileConfig.Server.Service.Tests.oracle
+namespace AgileConfig.Server.ServiceTests.oracle
 {
     [TestClass()]
     public class SysLogServiceTests_oracle : SysLogServiceTests
