@@ -1,9 +1,7 @@
-﻿using AgileConfig.Server.Common;
-using AgileConfig.Server.Data.Abstraction;
+﻿using AgileConfig.Server.Data.Abstraction;
 using AgileConfig.Server.Data.Abstraction.DbProvider;
-using AgileConfig.Server.Data.Freesql;
-using AgileConfig.Server.Data.Mongodb;
-using Microsoft.Extensions.Configuration;
+using AgileConfig.Server.Data.Repository.Freesql;
+using AgileConfig.Server.Data.Repository.Mongodb;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AgileConfig.Server.Data.Repository.Selector
@@ -21,33 +19,10 @@ namespace AgileConfig.Server.Data.Repository.Selector
                 throw new ArgumentNullException(nameof(defaultProvider));
             }
 
-            #region these repository will use default provider
-            if (defaultProvider.Provider.Equals("mongodb", StringComparison.OrdinalIgnoreCase))
-            {
-                sc.AddScoped<IAppInheritancedRepository, Mongodb.AppInheritancedRepository>();
-                sc.AddScoped<IAppRepository, Mongodb.AppRepository>();
-                sc.AddScoped<IServerNodeRepository, Mongodb.ServerNodeRepository>();
-                sc.AddScoped<IServiceInfoRepository, Mongodb.ServiceInfoRepository>();
-                sc.AddScoped<ISettingRepository, Mongodb.SettingRepository>();
-                sc.AddScoped<ISysLogRepository, Mongodb.SysLogRepository>();
-                sc.AddScoped<IUserAppAuthRepository, Mongodb.UserAppAuthRepository>();
-                sc.AddScoped<IUserRepository, Mongodb.UserRepository>();
-                sc.AddScoped<IUserRoleRepository, Mongodb.UserRoleRepository>();
-                sc.AddSingleton<ISysInitRepository, Mongodb.SysInitRepository>();
-            }
-            else
-            {
-                sc.AddScoped<IAppInheritancedRepository, Freesql.AppInheritancedRepository>();
-                sc.AddScoped<IAppRepository, Freesql.AppRepository>();
-                sc.AddScoped<IServerNodeRepository, Freesql.ServerNodeRepository>();
-                sc.AddScoped<IServiceInfoRepository, Freesql.ServiceInfoRepository>();
-                sc.AddScoped<ISettingRepository, Freesql.SettingRepository>();
-                sc.AddScoped<ISysLogRepository, Freesql.SysLogRepository>();
-                sc.AddScoped<IUserAppAuthRepository, Freesql.UserAppAuthRepository>();
-                sc.AddScoped<IUserRepository, Freesql.UserRepository>();
-                sc.AddScoped<IUserRoleRepository, Freesql.UserRoleRepository>();
-                sc.AddSingleton<ISysInitRepository, Freesql.SysInitRepository>();
-            }
+            #region add default fixed repositories
+
+            GetRepositoryServiceRegister(defaultProvider.Provider).AddFixedRepositories(sc);
+          
             #endregion
 
             #region these repositories genereated dependency env provider, if no env provider use default provider
@@ -55,82 +30,58 @@ namespace AgileConfig.Server.Data.Repository.Selector
             {
                 var envDbConfig = DbConfigInfoFactory.GetConfigInfo(env);
 
-                if (envDbConfig.Provider.Equals("mongodb", StringComparison.OrdinalIgnoreCase))
-                {
-                    return new MongodbUow(); // currently this is an empty uow
-                }
-                else
-                {
-                    var factory = sp.GetService<IFreeSqlFactory>();
-                    var fsq = factory.Create(env);
-                    return new FreeSqlUow(fsq);
-                }
+                return GetRepositoryServiceRegister(envDbConfig.Provider).GetServiceByEnv<IUow>(sp, env);
             });
 
             sc.AddScoped<Func<string, IConfigPublishedRepository>>(sp => env =>
             {
                 var envDbConfig = DbConfigInfoFactory.GetConfigInfo(env);
 
-                if (envDbConfig.Provider.Equals("mongodb", StringComparison.OrdinalIgnoreCase))
-                {
-                    return new Mongodb.ConfigPublishedRepository(envDbConfig.ConnectionString);
-                }
-                else
-                {
-                    var factory = sp.GetService<IFreeSqlFactory>();
-                    return new Freesql.ConfigPublishedRepository(factory.Create(env));
-                }
+                return GetRepositoryServiceRegister(envDbConfig.Provider).GetServiceByEnv<IConfigPublishedRepository>(sp, env);
             });
 
             sc.AddScoped<Func<string, IConfigRepository>>(sp => env =>
             {
                 var envDbConfig = DbConfigInfoFactory.GetConfigInfo(env);
 
-                if (envDbConfig.Provider.Equals("mongodb", StringComparison.OrdinalIgnoreCase))
-                {
-                    return new Mongodb.ConfigRepository(envDbConfig.ConnectionString);
-                }
-                else
-                {
-                    var factory = sp.GetService<IFreeSqlFactory>();
-
-                    return new Freesql.ConfigRepository(factory.Create(env));
-                }
+                return GetRepositoryServiceRegister(envDbConfig.Provider).GetServiceByEnv<IConfigRepository>(sp, env);
             });
 
             sc.AddScoped<Func<string, IPublishDetailRepository>>(sp => env =>
             {
                 var envDbConfig = DbConfigInfoFactory.GetConfigInfo(env);
 
-                if (envDbConfig.Provider.Equals("mongodb", StringComparison.OrdinalIgnoreCase))
-                {
-                    return new Mongodb.PublishDetailRepository(envDbConfig.ConnectionString);
-                }
-                else
-                {
-                    var factory = sp.GetService<IFreeSqlFactory>();
-                    return new Freesql.PublishDetailRepository(factory.Create(env));
-                }
+                return GetRepositoryServiceRegister(envDbConfig.Provider).GetServiceByEnv<IPublishDetailRepository>(sp, env);
             });
 
             sc.AddScoped<Func<string, IPublishTimelineRepository>>(sp => env =>
             {
                 var envDbConfig = DbConfigInfoFactory.GetConfigInfo(env);
 
-                if (envDbConfig.Provider.Equals("mongodb", StringComparison.OrdinalIgnoreCase))
-                {
-                    return new Mongodb.PublishTimelineRepository(envDbConfig.ConnectionString);
-                }
-                else
-                {
-                    var factory = sp.GetService<IFreeSqlFactory>();
-                    return new Freesql.PublishTimelineRepository(factory.Create(env));
-                }
+                return GetRepositoryServiceRegister(envDbConfig.Provider).GetServiceByEnv<IPublishTimelineRepository>(sp, env);
             });
             #endregion
 
             return sc;
         }
 
+        // if add new type of repository service, add it here
+        private static List<IRepositoryServiceRegister> _repositoryServiceRegisters = new List<IRepositoryServiceRegister>() {
+            new FreesqlRepositoryServiceRegister(),
+            new MongodbRepositoryServiceRegister()
+        };
+
+        private static IRepositoryServiceRegister GetRepositoryServiceRegister(string provider)
+        {
+            foreach (var register in _repositoryServiceRegisters)
+            {
+                if (register.IsSuit4Provider(provider))
+                {
+                    return register;
+                }
+            }
+
+            throw new ArgumentException($"[{provider}] is not a supported provider.");
+        }
     }
 }

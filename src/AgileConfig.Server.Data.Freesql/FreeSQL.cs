@@ -55,7 +55,7 @@ namespace AgileConfig.Server.Data.Freesql
             EnsureTables.Ensure(sql);
         }
 
-        private static FreeSql.DataType? ProviderToFreesqlDbType(string provider)
+        public static FreeSql.DataType? ProviderToFreesqlDbType(string provider)
         {
             switch (provider.ToLower())
             {
@@ -68,6 +68,8 @@ namespace AgileConfig.Server.Data.Freesql
                 case "npgsql":
                     return FreeSql.DataType.PostgreSQL;
                 case "postgresql":
+                    return FreeSql.DataType.PostgreSQL;
+                case "pg":
                     return FreeSql.DataType.PostgreSQL;
                 case "oracle":
                     return FreeSql.DataType.Oracle;

@@ -94,17 +94,14 @@ namespace AgileConfig.Server.Common
                 {
                     foreach (var act in actions)
                     {
-                        Task.Run(() =>
+                        try
                         {
-                            try
-                            {
-                                act(param);
-                            }
-                            catch (Exception e)
-                            {
-                                _logger?.LogError(e, $"fire event {eventKey} error");
-                            }
-                        });
+                            act(param);
+                        }
+                        catch (Exception e)
+                        {
+                            _logger?.LogError(e, $"fire event {eventKey} error");
+                        }
                     }
                 }
             }
