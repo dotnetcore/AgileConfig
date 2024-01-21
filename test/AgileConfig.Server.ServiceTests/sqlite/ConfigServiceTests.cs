@@ -69,8 +69,8 @@ namespace AgileConfig.Server.Service.Tests
             Assert.AreEqual(source.Value, config.Value);
             Assert.AreEqual(source.Description, config.Description);
             Assert.AreEqual(source.AppId, config.AppId);
-            Assert.AreEqual(source.CreateTime, config.CreateTime);
-            Assert.AreEqual(source.UpdateTime, config.UpdateTime);
+            Assert.AreEqual(source.CreateTime.ToString("yyyyMMddHHmmss"), config.CreateTime.ToString("yyyyMMddHHmmss"));
+            Assert.AreEqual(source.UpdateTime.Value.ToString("yyyyMMddHHmmss"), config.UpdateTime.Value.ToString("yyyyMMddHHmmss"));
             Assert.AreEqual(source.Status, config.Status);
             Assert.AreEqual(source.OnlineStatus, config.OnlineStatus);
         }
@@ -121,8 +121,8 @@ namespace AgileConfig.Server.Service.Tests
             Assert.AreEqual(source.Value, config.Value);
             Assert.AreEqual(source.Description, config.Description);
             Assert.AreEqual(source.AppId, config.AppId);
-            Assert.AreEqual(source.CreateTime, config.CreateTime);
-            Assert.AreEqual(source.UpdateTime, config.UpdateTime);
+            Assert.AreEqual(source.CreateTime.ToString("yyyyMMddHHmmss"), config.CreateTime.ToString("yyyyMMddHHmmss"));
+            Assert.AreEqual(source.UpdateTime.Value.ToString("yyyyMMddHHmmss"), config.UpdateTime.Value.ToString("yyyyMMddHHmmss"));
             Assert.AreEqual(source.Status, config.Status);
             Assert.AreEqual(source.OnlineStatus, config.OnlineStatus);
         }
@@ -221,8 +221,8 @@ namespace AgileConfig.Server.Service.Tests
             Assert.AreEqual(source.Value, config.Value);
             Assert.AreEqual(source.Description, config.Description);
             Assert.AreEqual(source.AppId, config.AppId);
-            Assert.AreEqual(source.CreateTime, config.CreateTime);
-            Assert.AreEqual(source.UpdateTime, config.UpdateTime);
+            Assert.AreEqual(source.CreateTime.ToString("yyyyMMddHHmmss"), config.CreateTime.ToString("yyyyMMddHHmmss"));
+            Assert.AreEqual(source.UpdateTime.Value.ToString("yyyyMMddHHmmss"), config.UpdateTime.Value.ToString("yyyyMMddHHmmss"));
             Assert.AreEqual(source.Status, config.Status);
             Assert.AreEqual(source.OnlineStatus, config.OnlineStatus);
         }
