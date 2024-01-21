@@ -177,7 +177,7 @@ public class MongodbRepository<TEntity, TId> : IRepository<TEntity, TId>
             return new List<TEntity>();
         var query = _access.MongoQueryable.Where(exp);
         var sort = Sort(defaultSortField);
-        query = string.Equals(defaultSortField, "DESC", StringComparison.OrdinalIgnoreCase)
+        query = string.Equals(defaultSortType, "DESC", StringComparison.OrdinalIgnoreCase)
             ? query.OrderByDescending(sort)
             : query.OrderBy(sort);
         return await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToListAsync();
