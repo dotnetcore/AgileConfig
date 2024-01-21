@@ -27,13 +27,13 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         public void TestInitialize()
         {
             _serverNodeService = _serviceProvider.GetService<IServerNodeService>();
-            _fsq.Delete<ServerNode>().Where("1=1");
+            this.ClearData();
         }
 
         [TestMethod()]
         public async Task AddAsyncTest()
         {
-            _fsq.Delete<ServerNode>().Where("1=1").ExecuteAffrows();
+            this.ClearData();
 
             var source = new ServerNode();
             source.Id = "1";
@@ -45,10 +45,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var result = await _serverNodeService.AddAsync(source);
             Assert.IsTrue(result);
 
-            var node = _fsq.Select<ServerNode>(new
-            {
-                Address = "1"
-            }).ToOne();
+            var node = await _serverNodeService.GetAsync("1");
             Assert.IsNotNull(node);
 
             Assert.AreEqual(source.Id, node.Id);
@@ -61,7 +58,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         [TestMethod()]
         public async Task DeleteAsyncTest()
         {
-            _fsq.Delete<ServerNode>().Where("1=1").ExecuteAffrows();
+            this.ClearData();
 
             var source = new ServerNode();
             source.Id = "1";
@@ -76,17 +73,15 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var result1 = await _serverNodeService.DeleteAsync(source);
             Assert.IsTrue(result1);
 
-            var node = _fsq.Select<ServerNode>(new
-            {
-                Address = "1"
-            }).ToOne();
+            var node = await _serverNodeService.GetAsync("1");
+
             Assert.IsNull(node);
         }
 
         [TestMethod()]
         public async Task DeleteAsyncTest1()
         {
-            _fsq.Delete<ServerNode>().Where("1=1").ExecuteAffrows();
+            this.ClearData();
 
             var source = new ServerNode();
             source.Id = "1";
@@ -101,17 +96,15 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var result1 = await _serverNodeService.DeleteAsync(source.Id);
             Assert.IsTrue(result1);
 
-            var node = _fsq.Select<ServerNode>(new
-            {
-                Address = "1"
-            }).ToOne();
+            var node = await _serverNodeService.GetAsync("1");
+
             Assert.IsNull(node);
         }
 
         [TestMethod()]
         public async Task GetAllNodesAsyncTest()
         {
-            _fsq.Delete<ServerNode>().Where("1=1").ExecuteAffrows();
+            this.ClearData();
 
             var source = new ServerNode();
             source.Id = "1";
@@ -132,7 +125,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         [TestMethod()]
         public async Task GetAsyncTest()
         {
-            _fsq.Delete<ServerNode>().Where("1=1").ExecuteAffrows();
+            this.ClearData();
 
             var source = new ServerNode();
             source.Id = "1";
@@ -156,7 +149,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         [TestMethod()]
         public async Task UpdateAsyncTest()
         {
-            _fsq.Delete<ServerNode>().Where("1=1").ExecuteAffrows();
+            this.ClearData();
 
             var source = new ServerNode();
             source.Id = "1";

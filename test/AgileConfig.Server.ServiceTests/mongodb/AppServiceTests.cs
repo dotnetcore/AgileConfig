@@ -1,16 +1,16 @@
-﻿using AgileConfig.Server.Data.Repository.Mongodb;
-using AgileConfig.Server.ServiceTests.sqlite;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using AgileConfig.Server.ServiceTests.sqlite;
+using AgileConfig.Server.Data.Repository.Mongodb;
 
 namespace AgileConfig.Server.ServiceTests.mongodb
 {
     [TestClass()]
-    public class ConfigServiceTests_mongo : ConfigServiceTests
+    public class AppServiceTests_mongo : AppServiceTests
     {
         public override void ClearData()
         {
-            var repository = new ConfigRepository(conn);
+            var repository = new AppRepository(conn);
             var entities = repository.AllAsync().Result;
             foreach (var entity in entities)
             {

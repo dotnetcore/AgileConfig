@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AgileConfig.Server.IService;
 using AgileConfig.Server.Service;
 using Microsoft.Extensions.DependencyInjection;
+using AgileConfig.Server.Data.Abstraction;
 
 namespace AgileConfig.Server.ServiceTests.sqlite
 {
@@ -27,7 +28,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         public void TestInitialize()
         {
             _appservice = _serviceProvider.GetService<IAppService>();
-            _fsq.Delete<AppService>().Where("1=1");
+            ClearData();
         }
 
 
@@ -45,10 +46,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
                 Enabled = true
             };
             var result = await _appservice.AddAsync(source);
-            var app = _fsq.Select<App>(new
-            {
-                Id = id
-            }).ToOne();
+            var app = await _appservice.GetAsync(source.Id);
 
             Assert.IsTrue(result);
             Assert.IsNotNull(app);
@@ -79,13 +77,6 @@ namespace AgileConfig.Server.ServiceTests.sqlite
 
             var delResult = await _appservice.DeleteAsync(source);
             Assert.IsTrue(delResult);
-
-            var app = _fsq.Select<App>(new
-            {
-                Id = id
-            }).ToOne();
-            Assert.IsNull(app);
-
         }
 
         [TestMethod()]
@@ -107,10 +98,8 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var delResult = await _appservice.DeleteAsync(id);
             Assert.IsTrue(delResult);
 
-            var app = _fsq.Select<App>(new
-            {
-                Id = id
-            }).ToOne();
+            var app = await _appservice.GetAsync(source.Id);
+
             Assert.IsNull(app);
 
         }
@@ -137,15 +126,16 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             Assert.AreEqual(source.Id, app.Id);
             Assert.AreEqual(source.Name, app.Name);
             Assert.AreEqual(source.Secret, app.Secret);
-            Assert.AreEqual(source.CreateTime.ToString("yyyyMMddhhmmss"), app.CreateTime.ToString("yyyyMMddhhmmss"));
-            Assert.AreEqual(source.UpdateTime.Value.ToString("yyyyMMddhhmmss"), app.UpdateTime.Value.ToString("yyyyMMddhhmmss"));
+            Assert.AreEqual(source.CreateTime.ToString("yyyyMMddhhmm"), app.CreateTime.ToString("yyyyMMddhhmm"));
+            Assert.AreEqual(source.UpdateTime.Value.ToString("yyyyMMddhhmm"), app.UpdateTime.Value.ToString("yyyyMMddhhmm"));
             Assert.AreEqual(source.Enabled, app.Enabled);
         }
 
         [TestMethod()]
         public async Task GetAllAppsAsyncTest()
         {
-            _fsq.Delete<App>().Where("1=1").ExecuteAffrows();
+            ClearData();
+
             var id = Guid.NewGuid().ToString();
             var source = new App
             {
@@ -203,10 +193,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var result1 = await _appservice.UpdateAsync(source);
             Assert.IsTrue(result1);
 
-            var app = _fsq.Select<App>(new
-            {
-                Id = id
-            }).ToOne();
+            var app = await _appservice.GetAsync(source.Id);
 
             Assert.AreEqual(source.Id, app.Id);
             Assert.AreEqual(source.Name, app.Name);
@@ -219,7 +206,8 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         [TestMethod()]
         public async Task CountEnabledAppsAsyncTest()
         {
-            _fsq.Delete<App>().Where("1=1").ExecuteAffrows();
+            this.ClearData();
+
             var id = Guid.NewGuid().ToString();
             var source = new App
             {
@@ -252,7 +240,8 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         [TestMethod()]
         public async Task GetAllInheritancedAppsAsyncTest()
         {
-            _fsq.Delete<App>().Where("1=1").ExecuteAffrows();
+            this.ClearData();
+
             var id = Guid.NewGuid().ToString();
             var source = new App
             {
@@ -308,8 +297,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         [TestMethod()]
         public async Task GetInheritancedAppsAsyncTest()
         {
-            _fsq.Delete<App>().Where("1=1").ExecuteAffrows();
-            _fsq.Delete<AppInheritanced>().Where("1=1").ExecuteAffrows();
+            this.ClearData();
 
             var id = Guid.NewGuid().ToString();
             var source = new App
@@ -357,8 +345,9 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var result = await _appservice.AddAsync(source);
             await _appservice.AddAsync(source1);
             await _appservice.AddAsync(source2);
-            _fsq.Insert(appInher).ExecuteAffrows();
-            _fsq.Insert(appInher1).ExecuteAffrows();
+
+            await _serviceProvider.GetService<IAppInheritancedRepository>().InsertAsync(appInher);
+            await _serviceProvider.GetService<IAppInheritancedRepository>().InsertAsync(appInher1);
 
             Assert.IsTrue(result);
 

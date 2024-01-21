@@ -9,6 +9,7 @@ using AgileConfig.Server.IService;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using Microsoft.Extensions.DependencyInjection;
+using AgileConfig.Server.Data.Abstraction;
 
 namespace AgileConfig.Server.ServiceTests.sqlite
 {
@@ -30,7 +31,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         public void TestInitialize()
         {
             _service = _serviceProvider.GetService<IConfigService>();
-            _fsq.Delete<Config>().Where("1=1");
+            this.ClearData();
         }
 
 
@@ -54,10 +55,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
 
             var result = await _service.AddAsync(source, "");
             Assert.IsTrue(result);
-            var config = _fsq.Select<Config>(new
-            {
-                Id = id
-            }).ToOne();
+            var config = await _service.GetAsync(source.Id, "");
 
             Assert.IsTrue(result);
             Assert.IsNotNull(config);
@@ -106,10 +104,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             source.OnlineStatus = OnlineStatus.WaitPublish;
 
             var result1 = await _service.UpdateAsync(source, "");
-            var config = _fsq.Select<Config>(new
-            {
-                Id = id
-            }).ToOne();
+            var config = await _service.GetAsync(source.Id, "");
 
             Assert.IsTrue(result1);
             Assert.IsNotNull(config);
@@ -150,10 +145,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var result1 = await _service.DeleteAsync(source, "");
             Assert.IsTrue(result1);
 
-            var config = _fsq.Select<Config>(new
-            {
-                Id = id
-            }).ToOne();
+            var config = await _service.GetAsync(source.Id, "");
 
             Assert.IsNull(config);
         }
@@ -182,10 +174,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var result1 = await _service.DeleteAsync(id, "");
             Assert.IsTrue(result1);
 
-            var config = _fsq.Select<Config>(new
-            {
-                Id = id
-            }).ToOne();
+            var config = await _service.GetAsync(source.Id, "");
 
             Assert.IsNull(config);
         }
@@ -229,7 +218,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         [TestMethod()]
         public async Task GetAllConfigsAsyncTest()
         {
-            _fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
+            this.ClearData();
 
             var env = "DEV";
             var id = Guid.NewGuid().ToString();
@@ -275,7 +264,8 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         [TestMethod()]
         public async Task GetByAppIdKeyTest()
         {
-            _fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
+            this.ClearData();
+
             var env = "DEV";
             var id = Guid.NewGuid().ToString();
             var source = new Config
@@ -339,8 +329,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         [TestMethod()]
         public async Task GetByAppIdTest()
         {
-            _fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
-
+            this.ClearData();
             var id = Guid.NewGuid().ToString();
             var env = "DEV";
             var source = new Config
@@ -402,7 +391,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         [TestMethod()]
         public async Task SearchTest()
         {
-            _fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
+            this.ClearData();
             var env = "DEV";
             var id = Guid.NewGuid().ToString();
             var source = new Config
@@ -470,7 +459,72 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         [TestMethod()]
         public async Task CountEnabledConfigsAsyncTest()
         {
-            _fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
+            this.ClearData();
+
+            string env = "DEV";
+            var id = Guid.NewGuid().ToString();
+            var source = new Config
+            {
+                AppId = "001",
+                Id = id,
+                Group = "group",
+                Key = "key",
+                Value = "v",
+                Description = "d",
+                CreateTime = DateTime.Now,
+                UpdateTime = DateTime.Now,
+                Status = ConfigStatus.Enabled,
+                OnlineStatus = OnlineStatus.WaitPublish,
+                Env = env
+            };
+            var id1 = Guid.NewGuid().ToString();
+            var source1 = new Config
+            {
+                AppId = "001",
+                Id = id1,
+                Group = "g",
+                Key = "k",
+                Value = "v",
+                Description = "d",
+                CreateTime = DateTime.Now,
+                UpdateTime = DateTime.Now,
+                Status = ConfigStatus.Deleted,
+                OnlineStatus = OnlineStatus.WaitPublish,
+                Env = env
+            };
+            var id2 = Guid.NewGuid().ToString();
+            var source2 = new Config
+            {
+                AppId = "002",
+                Id = id2,
+                Group = "g",
+                Key = "k",
+                Value = "v",
+                Description = "d",
+                CreateTime = DateTime.Now,
+                UpdateTime = DateTime.Now,
+                Status = ConfigStatus.Deleted,
+                OnlineStatus = OnlineStatus.WaitPublish,
+                Env = env
+            };
+            var result = await _service.AddAsync(source, env);
+            Assert.IsTrue(result);
+            var result1 = await _service.AddAsync(source1, env);
+            Assert.IsTrue(result1);
+            var result2 = await _service.AddAsync(source2, env);
+            Assert.IsTrue(result2);
+
+            await _service.Publish("001", new string[] { }, "", "", env);
+            await _service.Publish("002", new string[] { }, "", "", env);
+
+            var count = await _service.CountEnabledConfigsAsync();
+            Assert.AreEqual(1, count);
+        }
+
+        [TestMethod()]
+        public async Task AppPublishedConfigsMd5Test()
+        {
+            this.ClearData();
 
             string env = "DEV";
             var id = Guid.NewGuid().ToString();
@@ -502,6 +556,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
                 Status = ConfigStatus.Deleted,
                 OnlineStatus = OnlineStatus.Online,
                 Env = env
+
             };
             var id2 = Guid.NewGuid().ToString();
             var source2 = new Config
@@ -518,72 +573,14 @@ namespace AgileConfig.Server.ServiceTests.sqlite
                 OnlineStatus = OnlineStatus.Online,
                 Env = env
             };
-            var result = await _service.AddAsync(source, "");
+            var result = await _service.AddAsync(source, env);
             Assert.IsTrue(result);
-            var result1 = await _service.AddAsync(source1, "");
+            var result1 = await _service.AddAsync(source1, env);
             Assert.IsTrue(result1);
-            var result2 = await _service.AddAsync(source2, "");
+            var result2 = await _service.AddAsync(source2, env);
             Assert.IsTrue(result2);
 
-            var count = await _service.CountEnabledConfigsAsync();
-            Assert.AreEqual(1, count);
-        }
-
-        [TestMethod()]
-        public async Task AppPublishedConfigsMd5Test()
-        {
-            _fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
-
-            var id = Guid.NewGuid().ToString();
-            var source = new Config
-            {
-                AppId = "001",
-                Id = id,
-                Group = "group",
-                Key = "key",
-                Value = "v",
-                Description = "d",
-                CreateTime = DateTime.Now,
-                UpdateTime = DateTime.Now,
-                Status = ConfigStatus.Enabled,
-                OnlineStatus = OnlineStatus.Online
-            };
-            var id1 = Guid.NewGuid().ToString();
-            var source1 = new Config
-            {
-                AppId = "001",
-                Id = id1,
-                Group = "g",
-                Key = "k",
-                Value = "v",
-                Description = "d",
-                CreateTime = DateTime.Now,
-                UpdateTime = DateTime.Now,
-                Status = ConfigStatus.Deleted,
-                OnlineStatus = OnlineStatus.Online
-            };
-            var id2 = Guid.NewGuid().ToString();
-            var source2 = new Config
-            {
-                AppId = "002",
-                Id = id2,
-                Group = "g",
-                Key = "k",
-                Value = "v",
-                Description = "d",
-                CreateTime = DateTime.Now,
-                UpdateTime = DateTime.Now,
-                Status = ConfigStatus.Deleted,
-                OnlineStatus = OnlineStatus.Online
-            };
-            var result = await _service.AddAsync(source, "");
-            Assert.IsTrue(result);
-            var result1 = await _service.AddAsync(source1, "");
-            Assert.IsTrue(result1);
-            var result2 = await _service.AddAsync(source2, "");
-            Assert.IsTrue(result2);
-
-            var md5 = await _service.AppPublishedConfigsMd5("001", "");
+            var md5 = await _service.AppPublishedConfigsMd5("001", env);
             Assert.IsNotNull(md5);
         }
 
@@ -595,7 +592,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         [TestMethod()]
         public async Task GetPublishedConfigsByAppIdTest()
         {
-            _fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
+            this.ClearData();
 
             var id = Guid.NewGuid().ToString();
             var source = new Config
@@ -646,9 +643,6 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var result2 = await _service.AddAsync(source2, "");
             Assert.IsTrue(result2);
 
-            //var configs = await service.GetPublishedConfigsByAppId("001");
-            //Assert.IsNotNull(configs);
-            //Assert.AreEqual(1, configs.Count);
         }
 
         [TestMethod()]
@@ -689,27 +683,16 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             }, "");
             Assert.IsTrue(result);
 
-            var config = _fsq.Select<Config>(new
-            {
-                Id = id
-            }).ToOne();
+            var config = await _service.GetAsync(id, "");
             Assert.IsNotNull(config);
-            var config1 = _fsq.Select<Config>(new
-            {
-                Id = id1
-            }).ToOne();
+            var config1 = await _service.GetAsync(id1, "");
             Assert.IsNotNull(config1);
         }
 
         [TestMethod()]
         public async Task GetPublishedConfigsByAppIdWithInheritanced_DictionaryTest()
         {
-            _fsq.Delete<App>().Where("1=1").ExecuteAffrows();
-            _fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
-            _fsq.Delete<AppInheritanced>().Where("1=1").ExecuteAffrows();
-            _fsq.Delete<ConfigPublished>().Where("1=1").ExecuteAffrows();
-            _fsq.Delete<PublishTimeline>().Where("1=1").ExecuteAffrows();
-            _fsq.Delete<PublishDetail>().Where("1=1").ExecuteAffrows();
+            this.ClearData();
 
             string env = "DEV";
 
@@ -788,15 +771,15 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             appref.Sort = 1;
             appref.Id = Guid.NewGuid().ToString();
 
-            _fsq.Insert(app).ExecuteAffrows();
-            _fsq.Insert(app1).ExecuteAffrows();
-            _fsq.Insert(appref).ExecuteAffrows();
+            await _serviceProvider.GetService<IAppService>().AddAsync(app);
+            await _serviceProvider.GetService<IAppService>().AddAsync(app1);
+            await _serviceProvider.GetService<IAppInheritancedRepository>().InsertAsync(appref);
 
             // 插入4个config，2个app 001，2个app 002
-            _fsq.Insert(source).ExecuteAffrows();
-            _fsq.Insert(source1).ExecuteAffrows();
-            _fsq.Insert(source2).ExecuteAffrows();
-            _fsq.Insert(source3).ExecuteAffrows();
+            await _service.AddAsync(source, env);
+            await _service.AddAsync(source1, env);
+            await _service.AddAsync(source2, env);
+            await _service.AddAsync(source3, env);
 
             await _service.Publish(app1.Id, new string[] { }, "", "", env);
             await _service.Publish(app.Id, new string[] { }, "", "", env);
@@ -842,8 +825,8 @@ namespace AgileConfig.Server.ServiceTests.sqlite
                 Env = env
             };
             // 插入2个config，1个app 001，1个app 002，keyvalue相同，app 001 优先级高
-            _fsq.Insert(source4).ExecuteAffrows();
-            _fsq.Insert(source5).ExecuteAffrows();
+            await _service.AddAsync(source4, env);
+            await _service.AddAsync(source5, env);
 
             await _service.Publish(app1.Id, new string[] { }, "", "", env);
             await _service.Publish(app.Id, new string[] { }, "", "", env);
@@ -862,17 +845,17 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             app2.CreateTime = DateTime.Now;
             app2.UpdateTime = DateTime.Now;
             app2.Type = AppType.Inheritance;
-            _fsq.Insert(app2).ExecuteAffrows();
+            await _serviceProvider.GetService<IAppService>().AddAsync(app2);
 
 
             // 插入1个app 003
-            _fsq.Delete<AppInheritanced>().Where("1=1").ExecuteAffrows();
+            await _serviceProvider.GetService<IAppInheritancedRepository>().DeleteAsync(appref);
             var appref1 = new AppInheritanced();
             appref1.AppId = app.Id;
             appref1.InheritancedAppId = app2.Id; // app 001 继承 app 003
             appref1.Sort = 2;
             appref1.Id = Guid.NewGuid().ToString();
-            _fsq.Insert(appref1).ExecuteAffrows();
+            await _serviceProvider.GetService<IAppInheritancedRepository>().InsertAsync(appref1);
 
             var source6 = new Config
             {
@@ -887,7 +870,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
                 OnlineStatus = OnlineStatus.WaitPublish,
                 Env = env
             };
-            _fsq.Insert(source6).ExecuteAffrows();
+            await _service.AddAsync(source6, env);
             await _service.Publish(app2.Id, new string[] { }, "", "", env); // 发布app 003
 
             dict = await _service.GetPublishedConfigsByAppIdWithInheritanced_Dictionary(app.Id, env);

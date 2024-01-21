@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AgileConfig.Server.IService;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver.Linq;
+using AgileConfig.Server.Data.Abstraction;
 
 namespace AgileConfig.Server.ServiceTests.sqlite
 {
@@ -28,8 +29,8 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         public void TestInitialize()
         {
             _syslogservice = _serviceProvider.GetService<ISysLogService>();
-            _fsq.Delete<SysLog>().Where("1=1");
-        }
+            this.ClearData();
+         }
 
 
         [TestMethod()]
@@ -46,10 +47,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var result = await _syslogservice.AddSysLogAsync(source);
             Assert.IsTrue(result);
 
-            var log = _fsq.Select<SysLog>(new
-            {
-                source.Id
-            }).ToOne();
+            var log = await _serviceProvider.GetService<ISysLogRepository>().GetAsync(source.Id);
 
             Assert.IsNotNull(log);
 
@@ -83,10 +81,8 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             });
             Assert.IsTrue(result);
 
-            var log = _fsq.Select<SysLog>(new
-            {
-                source.Id
-            }).ToOne();
+            var log = await _serviceProvider.GetService<ISysLogRepository>().GetAsync(source.Id);
+
             Assert.IsNotNull(log);
             Assert.AreEqual(source.Id, log.Id);
             Assert.AreEqual(source.AppId, log.AppId);
@@ -94,10 +90,8 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             Assert.AreEqual(source.LogTime.Value.ToString("yyyyMMddHHmmss"), log.LogTime.Value.ToString("yyyyMMddHHmmss"));
             Assert.AreEqual(source.LogText, log.LogText);
 
-            var log1 = _fsq.Select<SysLog>(new
-            {
-                source1.Id
-            }).ToOne();
+            var log1 = await _serviceProvider.GetService<ISysLogRepository>().GetAsync(source1.Id);
+
             Assert.IsNotNull(log1);
             Assert.AreEqual(source1.Id, log1.Id);
             Assert.AreEqual(source1.AppId, log1.AppId);
@@ -110,8 +104,8 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         [TestMethod()]
         public async Task CountTest()
         {
-            _fsq.Delete<SysLog>().Where("1=1").ExecuteAffrows();
-
+            this.ClearData();
+ 
             var source = new SysLog
             {
                 AppId = "001",
@@ -141,7 +135,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         [TestMethod()]
         public async Task SearchPageTest()
         {
-            _fsq.Delete<SysLog>().Where("1=1").ExecuteAffrows();
+            this.ClearData();
 
             var source = new SysLog
             {
@@ -157,10 +151,16 @@ namespace AgileConfig.Server.ServiceTests.sqlite
                 LogTime = DateTime.Now,
                 LogText = "124"
             };
-            var result = await _syslogservice.AddRangeAsync(new List<SysLog> {
-                source, source1
-            });
+            var result = await _syslogservice.AddSysLogAsync(source);
             Assert.IsTrue(result);
+            result = await _syslogservice.AddSysLogAsync(source1);
+            Assert.IsTrue(result);
+
+            var log = await _serviceProvider.GetService<ISysLogRepository>().GetAsync(source.Id);
+            Assert.IsNotNull(log);
+
+            var log1 = await _serviceProvider.GetService<ISysLogRepository>().GetAsync(source1.Id);
+            Assert.IsNotNull(log1);
 
             var page = await _syslogservice.SearchPage("001", SysLogType.Normal, DateTime.Now.AddDays(-1), DateTime.Now.AddDays(1), 1, 0);
             Assert.AreEqual(1, page.Count);

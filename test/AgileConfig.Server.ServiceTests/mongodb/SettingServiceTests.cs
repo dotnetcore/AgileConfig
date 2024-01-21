@@ -1,21 +1,14 @@
-﻿using AgileConfig.Server.Data.Repository.Mongodb;
-using AgileConfig.Server.ServiceTests.sqlite;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using AgileConfig.Server.ServiceTests.sqlite;
 
 namespace AgileConfig.Server.ServiceTests.mongodb
 {
     [TestClass()]
-    public class ConfigServiceTests_mongo : ConfigServiceTests
+    public class SettingServiceTests_mongo : SettingServiceTests
     {
         public override void ClearData()
         {
-            var repository = new ConfigRepository(conn);
-            var entities = repository.AllAsync().Result;
-            foreach (var entity in entities)
-            {
-                repository.DeleteAsync(entity).Wait();
-            }
         }
 
         string conn = "mongodb://192.168.0.125:27017/agile_config_1";

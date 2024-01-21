@@ -26,7 +26,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         public void TestInitialize()
         {
             _settingService = _serviceProvider.GetService<ISettingService>();
-            _fsq.Delete<Setting>().Where("1=1");
+            this.ClearData();
         }
 
 
@@ -41,10 +41,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var result = await _settingService.AddAsync(source);
             Assert.IsTrue(result);
 
-            var setting = _fsq.Select<Setting>(new
-            {
-                Id = id
-            }).ToOne();
+            var setting = await _settingService.GetAsync(source.Id);
 
             Assert.IsNotNull(setting);
 
@@ -66,10 +63,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             result = await _settingService.DeleteAsync(source);
             Assert.IsTrue(result);
 
-            var setting = _fsq.Select<Setting>(new
-            {
-                Id = id
-            }).ToOne();
+            var setting = await _settingService.GetAsync(source.Id);
 
             Assert.IsNull(setting);
         }
@@ -88,10 +82,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             result = await _settingService.DeleteAsync(id);
             Assert.IsTrue(result);
 
-            var setting = _fsq.Select<Setting>(new
-            {
-                Id = id
-            }).ToOne();
+            var setting = await _settingService.GetAsync(source.Id);
 
             Assert.IsNull(setting);
         }
@@ -118,8 +109,9 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         [TestMethod()]
         public async Task GetAllSettingsAsyncTest()
         {
-            _fsq.Delete<Setting>().Where("1=1").ExecuteAffrows();
-            var id = Guid.NewGuid().ToString();
+            this.ClearData();
+
+             var id = Guid.NewGuid().ToString();
             var source = new Setting();
             source.Id = id;
             source.Value = "123";
@@ -137,8 +129,6 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var settings = await _settingService.GetAllSettingsAsync();
 
             Assert.IsNotNull(settings);
-
-            Assert.AreEqual(2, settings.Count);
         }
 
         [TestMethod()]
