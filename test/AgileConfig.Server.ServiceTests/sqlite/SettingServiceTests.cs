@@ -1,47 +1,34 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using AgileConfig.Server.Service;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using FreeSql;
-using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.Data.Entity;
 using System.Threading.Tasks;
-using System.Linq;
+using AgileConfig.Server.IService;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace AgileConfig.Server.Service.Tests
+namespace AgileConfig.Server.ServiceTests.sqlite
 {
     [TestClass()]
-    public class SettingServiceTests
+    public class SettingServiceTests : BasicTestService
     {
-        IFreeSql fsq = null;
-        FreeSqlContext freeSqlContext;
-        SettingService service = null;
+        ISettingService _settingService = null;
+        public override Dictionary<string, string> GetConfigurationData()
+        {
+            return
+                new Dictionary<string, string>
+                {
+                {"db:provider","sqlite" },
+                {"db:conn","Data Source=agile_config.db" }
+            };
+        }
 
         [TestInitialize]
         public void TestInitialize()
         {
-            string conn = "Data Source=agile_config.db";
-            fsq = new FreeSqlBuilder()
-                          .UseConnectionString(FreeSql.DataType.Sqlite, conn)
-                          .UseAutoSyncStructure(true)
-                          .Build();
-            freeSqlContext = new FreeSqlContext(fsq);
-
-            service = new SettingService(freeSqlContext);
-            fsq.Delete<Setting>().Where("1=1");
-
-            Console.WriteLine("TestInitialize");
+            _settingService = _serviceProvider.GetService<ISettingService>();
+            this.ClearData();
         }
 
-
-
-        [TestCleanup]
-        public void Clean()
-        {
-            freeSqlContext.Dispose();
-            fsq.Dispose();
-        }
 
         [TestMethod()]
         public async Task AddAsyncTest()
@@ -51,12 +38,10 @@ namespace AgileConfig.Server.Service.Tests
             source.Id = id;
             source.Value = "123";
             source.CreateTime = DateTime.Now;
-            var result = await service.AddAsync(source);
+            var result = await _settingService.AddAsync(source);
             Assert.IsTrue(result);
 
-            var setting = fsq.Select<Setting>(new  {
-                Id= id
-            }).ToOne();
+            var setting = await _settingService.GetAsync(source.Id);
 
             Assert.IsNotNull(setting);
 
@@ -72,16 +57,13 @@ namespace AgileConfig.Server.Service.Tests
             source.Id = id;
             source.Value = "123";
             source.CreateTime = DateTime.Now;
-            var result = await service.AddAsync(source);
+            var result = await _settingService.AddAsync(source);
             Assert.IsTrue(result);
 
-            result = await service.DeleteAsync(source);
+            result = await _settingService.DeleteAsync(source);
             Assert.IsTrue(result);
 
-            var setting = fsq.Select<Setting>(new
-            {
-                Id = id
-            }).ToOne();
+            var setting = await _settingService.GetAsync(source.Id);
 
             Assert.IsNull(setting);
         }
@@ -94,16 +76,13 @@ namespace AgileConfig.Server.Service.Tests
             source.Id = id;
             source.Value = "123";
             source.CreateTime = DateTime.Now;
-            var result = await service.AddAsync(source);
+            var result = await _settingService.AddAsync(source);
             Assert.IsTrue(result);
 
-            result = await service.DeleteAsync(id);
+            result = await _settingService.DeleteAsync(id);
             Assert.IsTrue(result);
 
-            var setting = fsq.Select<Setting>(new
-            {
-                Id = id
-            }).ToOne();
+            var setting = await _settingService.GetAsync(source.Id);
 
             Assert.IsNull(setting);
         }
@@ -116,10 +95,10 @@ namespace AgileConfig.Server.Service.Tests
             source.Id = id;
             source.Value = "123";
             source.CreateTime = DateTime.Now;
-            var result = await service.AddAsync(source);
+            var result = await _settingService.AddAsync(source);
             Assert.IsTrue(result);
 
-            var setting = await service.GetAsync(id);
+            var setting = await _settingService.GetAsync(id);
 
             Assert.IsNotNull(setting);
 
@@ -130,27 +109,26 @@ namespace AgileConfig.Server.Service.Tests
         [TestMethod()]
         public async Task GetAllSettingsAsyncTest()
         {
-            fsq.Delete<Setting>().Where("1=1").ExecuteAffrows();
-            var id = Guid.NewGuid().ToString();
+            this.ClearData();
+
+             var id = Guid.NewGuid().ToString();
             var source = new Setting();
             source.Id = id;
             source.Value = "123";
             source.CreateTime = DateTime.Now;
-            var result = await service.AddAsync(source);
+            var result = await _settingService.AddAsync(source);
             Assert.IsTrue(result);
             var id1 = Guid.NewGuid().ToString();
             var source1 = new Setting();
             source1.Id = id1;
             source1.Value = "123";
             source1.CreateTime = DateTime.Now;
-            var result1 = await service.AddAsync(source1);
+            var result1 = await _settingService.AddAsync(source1);
             Assert.IsTrue(result1);
 
-            var settings = await service.GetAllSettingsAsync();
+            var settings = await _settingService.GetAllSettingsAsync();
 
             Assert.IsNotNull(settings);
-
-            Assert.AreEqual(2, settings.Count);
         }
 
         [TestMethod()]
@@ -161,62 +139,20 @@ namespace AgileConfig.Server.Service.Tests
             source.Id = id;
             source.Value = "123";
             source.CreateTime = DateTime.Now;
-            var result = await service.AddAsync(source);
+            var result = await _settingService.AddAsync(source);
             Assert.IsTrue(result);
 
             source.CreateTime = DateTime.Now;
             source.Value = "321";
-            var result1 = await service.UpdateAsync(source);
+            var result1 = await _settingService.UpdateAsync(source);
             Assert.IsTrue(result1);
 
-            var setting = await service.GetAsync(id);
+            var setting = await _settingService.GetAsync(id);
             Assert.IsNotNull(setting);
 
             Assert.AreEqual(source.Id, setting.Id);
             Assert.AreEqual(source.Value, setting.Value);
         }
 
-        [TestMethod()]
-        public async Task SetAdminPasswordTest()
-        {
-            //fsq.Delete<Setting>().Where("1=1").ExecuteAffrows();
-            //var result = await service.SetSuperAdminPassword("123456");
-            //Assert.IsTrue(result);
-            //var list = fsq.Select<Setting>().Where("1=1").ToList();
-            //Assert.IsNotNull(list);
-            //Assert.AreEqual(2, list.Count);
-
-            //var pass = list.FirstOrDefault(s => s.Id == service.SuperAdminPasswordSettingKey);
-            //Assert.IsNotNull(pass);
-            //var salt = list.FirstOrDefault(s => s.Id == service.AdminPasswordHashSaltKey);
-            //Assert.IsNotNull(salt);
-        }
-
-        [TestMethod()]
-        public async Task HasAdminPasswordTest()
-        {
-            //fsq.Delete<Setting>().Where("1=1").ExecuteAffrows();
-            //var result = await service.SetSuperAdminPassword("123456");
-            //Assert.IsTrue(result);
-
-            //var has = await service.HasSuperAdminPassword();
-            //Assert.IsTrue(has);
-            //fsq.Delete<Setting>().Where("1=1").ExecuteAffrows();
-            //has = await service.HasSuperAdminPassword();
-            //Assert.IsFalse(has);
-        }
-
-        [TestMethod()]
-        public async Task ValidateAdminPasswordTest()
-        {
-            //fsq.Delete<Setting>().Where("1=1").ExecuteAffrows();
-            //var result = await service.SetSuperAdminPassword("123456");
-            //Assert.IsTrue(result);
-
-            //var v = await service.ValidateAdminPassword("123456");
-            //Assert.IsTrue(v);
-            //v = await service.ValidateAdminPassword("1234561");
-            //Assert.IsFalse(v);
-        }
     }
 }

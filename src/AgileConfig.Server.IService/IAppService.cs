@@ -32,6 +32,6 @@ namespace AgileConfig.Server.IService
 
         Task<List<User>> GetUserAppAuth(string appId, string permission);
 
-        List<string> GetAppGroups();
+        Task<List<string>> GetAppGroups();
     }
 }

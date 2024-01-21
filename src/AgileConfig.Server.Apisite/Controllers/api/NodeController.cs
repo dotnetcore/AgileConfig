@@ -38,7 +38,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
             var vms = nodes.Select(x=> new ApiNodeVM
             { 
-                Address = x.Address,
+                Address = x.Id,
                 Remark = x.Remark,
                 LastEchoTime = x.LastEchoTime,
                 Status= x.Status

@@ -12,6 +12,8 @@ namespace AgileConfig.Server.Apisite.Websocket.Tests
         [TestMethod()]
         public void AddClientTest()
         {
+            WebsocketCollection.Instance.Clear();
+
             var client = new WebsocketClient();
             client.Id = Guid.NewGuid().ToString();
             WebsocketCollection.Instance.AddClient(client);
@@ -28,6 +30,8 @@ namespace AgileConfig.Server.Apisite.Websocket.Tests
         [TestMethod()]
         public void RemoveClientTest()
         {
+            WebsocketCollection.Instance.Clear();
+
             var client = new WebsocketClient();
             client.Id = Guid.NewGuid().ToString();
             WebsocketCollection.Instance.AddClient(client);

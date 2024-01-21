@@ -7,7 +7,6 @@ using Agile.Config.Protocol;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Common.RestClient;
 using AgileConfig.Server.Data.Entity;
-using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.IService;
 using Microsoft.Extensions.Logging;
 
@@ -18,27 +17,24 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
     private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
     private readonly IRestClient _restClient;
     private ILogger _logger;
+    private readonly IServerNodeService _serverNodeService;
+    private readonly IServiceInfoService _serviceInfoService;
 
     public ServiceInfoStatusUpdateRegister(
         IRemoteServerNodeProxy remoteServerNodeProxy,
         ILoggerFactory loggerFactory,
-        IRestClient restClient
+        IRestClient restClient,
+        IServerNodeService serverNodeService,
+        IServiceInfoService serviceInfoService
         )
     {
         _remoteServerNodeProxy = remoteServerNodeProxy;
         _restClient = restClient;
+        _serverNodeService = serverNodeService;
+        _serviceInfoService = serviceInfoService;
         _logger = loggerFactory.CreateLogger<ServiceInfoStatusUpdateRegister>();
     }
-
-    private IServerNodeService NewServerNodeService()
-    {
-        return new ServerNodeService(new FreeSqlContext(FreeSQL.Instance));
-    }
-
-    private IServiceInfoService NewServiceInfoService()
-    {
-        return new ServiceInfoService(null);
-    }
+    
 
     public void Register()
     {
@@ -46,19 +42,18 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
         {
             Task.Run(async () =>
             {
-                using var serverNodeService = NewServerNodeService();
-                var serverNodes = await serverNodeService.GetAllNodesAsync();
+                var serverNodes = await _serverNodeService.GetAllNodesAsync();
                 foreach (var serverNode in serverNodes.Where(x => x.Status == NodeStatus.Online))
                 {
                     //clear cache
-                    _ = _remoteServerNodeProxy.ClearServiceInfoCache(serverNode.Address);
+                    _ = _remoteServerNodeProxy.ClearServiceInfoCache(serverNode.Id);
                     //send ws action
                     var act = new WebsocketAction()
                     {
                         Module = ActionModule.RegisterCenter,
                         Action = ActionConst.Reload
                     };
-                    _ = _remoteServerNodeProxy.AllClientsDoActionAsync(serverNode.Address, act);
+                    _ = _remoteServerNodeProxy.AllClientsDoActionAsync(serverNode.Id, act);
                 }
             });
         });
@@ -66,19 +61,18 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
         {
             Task.Run(async () =>
             {
-                using var serverNodeService = NewServerNodeService();
-                var serverNodes = await serverNodeService.GetAllNodesAsync();
+                var serverNodes = await _serverNodeService.GetAllNodesAsync();
                 foreach (var serverNode in serverNodes.Where(x => x.Status == NodeStatus.Online))
                 {
                     //clear cache
-                    _ = _remoteServerNodeProxy.ClearServiceInfoCache(serverNode.Address);
+                    _ = _remoteServerNodeProxy.ClearServiceInfoCache(serverNode.Id);
                     //send ws action
                     var act = new WebsocketAction()
                     {
                         Module = ActionModule.RegisterCenter,
                         Action = ActionConst.Reload
                     };
-                    _ = _remoteServerNodeProxy.AllClientsDoActionAsync(serverNode.Address, act);
+                    _ = _remoteServerNodeProxy.AllClientsDoActionAsync(serverNode.Id, act);
                 }
             });
         });
@@ -86,19 +80,18 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
         {
             Task.Run(async () =>
             {
-                using var serverNodeService = NewServerNodeService();
-                var serverNodes = await serverNodeService.GetAllNodesAsync();
+                var serverNodes = await _serverNodeService.GetAllNodesAsync();
                 foreach (var serverNode in serverNodes.Where(x => x.Status == NodeStatus.Online))
                 {
                     //clear cache
-                    _ = _remoteServerNodeProxy.ClearServiceInfoCache(serverNode.Address);
+                    _ = _remoteServerNodeProxy.ClearServiceInfoCache(serverNode.Id);
                     //send ws action
                     var act = new WebsocketAction()
                     {
                         Module = ActionModule.RegisterCenter,
                         Action = ActionConst.Reload
                     };
-                    _ = _remoteServerNodeProxy.AllClientsDoActionAsync(serverNode.Address, act);
+                    _ = _remoteServerNodeProxy.AllClientsDoActionAsync(serverNode.Id, act);
                 }
             });
         });
@@ -108,8 +101,7 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
             {
                 dynamic paramObj = param;
                 string id = paramObj.UniqueId;
-                using var serviceInfoService = NewServiceInfoService();
-                var service = await serviceInfoService.GetByUniqueIdAsync(id);
+                var service = await _serviceInfoService.GetByUniqueIdAsync(id);
                 if (service != null && !string.IsNullOrWhiteSpace(service.AlarmUrl) &&
                     service.Status == ServiceStatus.Unhealthy)
                 {

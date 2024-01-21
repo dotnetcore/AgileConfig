@@ -1,7 +1,7 @@
 ﻿using FreeSql.DataAnnotations;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using MongoDB.Bson.Serialization.Attributes;
+using AgileConfig.Server.Common;
 
 namespace AgileConfig.Server.Data.Entity
 {
@@ -13,10 +13,15 @@ namespace AgileConfig.Server.Data.Entity
 
     [Table(Name = "agc_sys_log")]
     [OraclePrimaryKeyName("agc_sys_log_pk")]
-    public class SysLog
+    public class SysLog: IEntity<string>
     {
-        [Column(Name = "id", IsIdentity = true)]
-        public int Id { get; set; }
+        public SysLog()
+        {
+            Id = Guid.NewGuid().ToString("N");
+        }
+
+        [Column(Name = "id", StringLength = 36)]
+        public string Id { get; set; }
 
         [Column(Name = "app_id", StringLength = 36)]
         public string AppId { get; set; }
@@ -25,6 +30,7 @@ namespace AgileConfig.Server.Data.Entity
         public SysLogType LogType { get; set; }
 
         [Column(Name = "log_time")]
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime? LogTime { get; set; }
 
         [Column(Name = "log_text", StringLength = 2000)]

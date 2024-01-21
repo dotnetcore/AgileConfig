@@ -3,7 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using AgileConfig.Server.Common;
-using AgileConfig.Server.Data.Freesql;
+using AgileConfig.Server.Data.Abstraction;
 using AgileConfig.Server.IService;
 using Microsoft.IdentityModel.Tokens;
 
@@ -12,14 +12,15 @@ namespace AgileConfig.Server.Service;
 /// <summary>
 /// jwt 相关业务
 /// </summary>
-public class JwtService : IJwtService
+public class JwtService(ISysInitRepository sysInitRepository) : IJwtService
 {
-    static JwtService()
-    {
-        // 则尝试生成一个key到数据库
-        using var settingService = new SettingService(new FreeSqlContext(FreeSQL.Instance));
-        settingService.TryInitJwtSecret();
-    }
+    // static JwtService()
+    // {
+    //     // 则尝试生成一个key到数据库
+    //     using var settingService = new SettingService(new FreeSqlContext(FreeSQL.Instance));
+    //     settingService.TryInitJwtSecret();
+    // }
+
     public  string Issuer => Global.Config["JwtSetting:Issuer"];
     public  string Audience => Global.Config["JwtSetting:Audience"];
     public  int ExpireSeconds => int.Parse(Global.Config["JwtSetting:ExpireSeconds"]);
@@ -38,8 +39,8 @@ public class JwtService : IJwtService
             return _secretKey;
         }
 
-        using var settingService = new SettingService(new FreeSqlContext(FreeSQL.Instance));
-        _secretKey = settingService.GetJwtTokenSecret();
+        //using var settingService = new SettingService(new FreeSqlContext(FreeSQL.Instance));
+        _secretKey = sysInitRepository.GetJwtTokenSecret();
 
         if (string.IsNullOrEmpty(_secretKey))
         {

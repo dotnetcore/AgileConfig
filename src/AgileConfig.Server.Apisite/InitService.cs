@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using AgileConfig.Server.Apisite.Utilites;
 using AgileConfig.Server.IService;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -19,10 +18,12 @@ namespace AgileConfig.Server.Apisite
         private readonly ISettingService _settingService;
         private readonly IServerNodeService _serverNodeService;
         private readonly IServiceHealthCheckService _serviceHealthCheckService;
+        private readonly ISystemInitializationService _systemInitializationService;
         private readonly ILogger _logger;
-        public InitService(IServiceScopeFactory serviceScopeFactory, ILogger<InitService> logger)
+        public InitService(IServiceScopeFactory serviceScopeFactory, ISystemInitializationService systemInitializationService, ILogger<InitService> logger)
         {
             _logger = logger;
+            _systemInitializationService = systemInitializationService;
             using (var scope = serviceScopeFactory.CreateScope())
             {
                 _remoteServerNodeProxy = scope.ServiceProvider.GetService<IRemoteServerNodeProxy>();
@@ -34,13 +35,14 @@ namespace AgileConfig.Server.Apisite
             }
         }
 
-        public Task StartAsync(CancellationToken cancellationToken)
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             if (Appsettings.IsAdminConsoleMode)
             {
-                _settingService.InitDefaultEnvironment();//初始化环境 DEV TEST STAGE PROD
-                _remoteServerNodeProxy.TestEchoAsync();//开启节点检测
-                _serviceHealthCheckService.StartCheckAsync();//开启服务健康检测
+                await _systemInitializationService.TryInitDefaultEnvironmentAsync();//初始化环境 DEV TEST STAGE PROD
+                _systemInitializationService.TryInitJwtSecret();//初始化 jwt secret
+                _ = _remoteServerNodeProxy.TestEchoAsync();//开启节点检测
+                _ = _serviceHealthCheckService.StartCheckAsync();//开启服务健康检测
                 _eventRegister.Register();//注册 eventbus 的回调
             }
 
@@ -51,12 +53,10 @@ namespace AgileConfig.Server.Apisite
                 if (!string.IsNullOrEmpty(ip))
                 {
                     var desc = Appsettings.IsAdminConsoleMode ? "控制台节点" : "";
-                    _serverNodeService.JoinAsync(ip, 5000, desc);
+                    _ =_serverNodeService.JoinAsync(ip, 5000, desc);
                     _logger.LogInformation($"AgileConfig node http://{ip}:5000 joined .");
                 }
             }
-
-            return Task.CompletedTask;
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)

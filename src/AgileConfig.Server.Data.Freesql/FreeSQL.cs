@@ -1,5 +1,4 @@
-﻿using AgileConfig.Server.Common;
-using Microsoft.Extensions.Configuration;
+﻿using AgileConfig.Server.Data.Abstraction.DbProvider;
 using System;
 using System.Collections.Generic;
 
@@ -7,37 +6,25 @@ namespace AgileConfig.Server.Data.Freesql
 {
     public static class FreeSQL
     {
-        private static IFreeSql _freesql;
-        private static Dictionary<string, IFreeSql> _envFreesqls = new ();
+        private static Dictionary<string, IFreeSql> _envFreesqls = new();
         private static object _lock = new object();
-
-        static FreeSQL()
-        {
-            _freesql = new FreeSql.FreeSqlBuilder()
-                          .UseConnectionString(ProviderToFreesqlDbType(DbProvider), DbConnection)
-                          .Build();
-            FluentApi.Config(_freesql);
-            EnsureTables.Ensure(_freesql);
-        }
-
-        public static IFreeSql Instance => _freesql;
 
         /// <summary>
         /// 根据环境配置的字符串返回freesql 实例
         /// </summary>
         /// <param name="env"></param>
         /// <returns></returns>
-        public static IFreeSql GetInstance(string env)
+        public static IFreeSql GetInstanceByEnv(string env)
         {
-            if (string.IsNullOrEmpty(env))
+            var dbConfig = DbConfigInfoFactory.GetConfigInfo(env);
+
+            var dbType = ProviderToFreesqlDbType(dbConfig.Provider);
+            if (!dbType.HasValue)
             {
-                return Instance;
+                throw new ArgumentException(nameof(dbConfig.Provider), $"[{dbConfig.Provider}] is not a freesql supported provider.");
             }
 
-            var provider = Global.Config[$"db:env:{env}:provider"];
-            var conn = Global.Config[$"db:env:{env}:conn"];
-
-            var key = provider;
+            var key = dbConfig.ConnectionString;
 
             if (_envFreesqls.ContainsKey(key))
             {
@@ -52,10 +39,9 @@ namespace AgileConfig.Server.Data.Freesql
                 }
 
                 var sql = new FreeSql.FreeSqlBuilder()
-                        .UseConnectionString(ProviderToFreesqlDbType(provider), conn)
+                        .UseConnectionString(dbType.Value, dbConfig.ConnectionString)
                         .Build();
-                FluentApi.Config(sql);
-                EnsureTables.Ensure(sql);
+                ApplyDatabaseStructrue(sql);
 
                 _envFreesqls.Add(key, sql);
 
@@ -63,10 +49,13 @@ namespace AgileConfig.Server.Data.Freesql
             }
         }
 
-        private static string DbProvider => Global.Config["db:provider"];
-        private static string DbConnection => Global.Config["db:conn"];
-        
-        private static FreeSql.DataType ProviderToFreesqlDbType(string provider)
+        private static void ApplyDatabaseStructrue(IFreeSql sql)
+        {
+            FluentApi.Config(sql);
+            EnsureTables.Ensure(sql);
+        }
+
+        private static FreeSql.DataType? ProviderToFreesqlDbType(string provider)
         {
             switch (provider.ToLower())
             {
@@ -86,7 +75,7 @@ namespace AgileConfig.Server.Data.Freesql
                     break;
             }
 
-            return FreeSql.DataType.Sqlite;
+            return null;
         }
     }
 }

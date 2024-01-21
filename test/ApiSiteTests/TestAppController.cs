@@ -3,6 +3,7 @@ using AgileConfig.Server.Apisite.Controllers.api;
 using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -25,6 +26,9 @@ namespace ApiSiteTests
             var permissionService = new Mock<IPremissionService>();
 
             var ctl = new AgileConfig.Server.Apisite.Controllers.AppController(appService.Object, permissionService.Object, userService.Object);
+
+            ctl.ControllerContext.HttpContext = new DefaultHttpContext();
+
             Assert.ThrowsException<ArgumentNullException>( () => {
                 ctl.Add(null).GetAwaiter().GetResult();
             });

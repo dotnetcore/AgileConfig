@@ -1,19 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using Agile.Config.Protocol;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Entity;
-using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.IService;
 
 namespace AgileConfig.Server.Service.EventRegisterService;
 
 internal class SysLogRegister : IEventRegister
 {
-    private ISysLogService NewSysLogService()
+    private readonly ISysLogService _sysLogService;
+
+    public SysLogRegister(ISysLogService sysLogService)
     {
-        return new SysLogService(new FreeSqlContext(FreeSQL.Instance));
+        _sysLogService = sysLogService;
     }
 
     public void Register()
@@ -30,10 +29,7 @@ internal class SysLogRegister : IEventRegister
             };
             Task.Run(async () =>
             {
-                using (var syslogService = NewSysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                await _sysLogService.AddSysLogAsync(log);
             });
         });
 
@@ -47,10 +43,7 @@ internal class SysLogRegister : IEventRegister
             };
             Task.Run(async () =>
             {
-                using (var syslogService = NewSysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                await _sysLogService.AddSysLogAsync(log);
             });
         });
 
@@ -68,11 +61,19 @@ internal class SysLogRegister : IEventRegister
             };
             Task.Run(async () =>
             {
-                using (var syslogService = NewSysLogService())
+                await _sysLogService.AddSysLogAsync(log);
+            })
+            .ContinueWith(x =>
+            {
+                if (x.IsFaulted)
                 {
-                    await syslogService.AddSysLogAsync(log);
+                    foreach (var ex in x.Exception?.InnerExceptions ?? new(Array.Empty<Exception>()))
+                    {
+                        throw ex;
+                    }
                 }
-            });
+            })
+            ;
         });
 
         TinyEventBus.Instance.Register(EventKeys.CHANGE_USER_PASSWORD_SUCCESS, (param) =>
@@ -88,10 +89,7 @@ internal class SysLogRegister : IEventRegister
             };
             Task.Run(async () =>
             {
-                using (var syslogService = NewSysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                await _sysLogService.AddSysLogAsync(log);
             });
         });
 
@@ -110,10 +108,7 @@ internal class SysLogRegister : IEventRegister
                 };
                 Task.Run(async () =>
                 {
-                    using (var syslogService = NewSysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                    await _sysLogService.AddSysLogAsync(log);
                 });
             }
         });
@@ -134,10 +129,7 @@ internal class SysLogRegister : IEventRegister
                 };
                 Task.Run(async () =>
                 {
-                    using (var syslogService = NewSysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                    await _sysLogService.AddSysLogAsync(log);
                 });
             }
         });
@@ -157,10 +149,7 @@ internal class SysLogRegister : IEventRegister
                 };
                 Task.Run(async () =>
                 {
-                    using (var syslogService = NewSysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                    await _sysLogService.AddSysLogAsync(log);
                 });
             }
         });
@@ -180,10 +169,7 @@ internal class SysLogRegister : IEventRegister
                 };
                 Task.Run(async () =>
                 {
-                    using (var syslogService = NewSysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                    await _sysLogService.AddSysLogAsync(log);
                 });
             }
         });
@@ -207,10 +193,7 @@ internal class SysLogRegister : IEventRegister
                 };
                 Task.Run(async () =>
                 {
-                    using (var syslogService = NewSysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                    await _sysLogService.AddSysLogAsync(log);
                 });
             }
         });
@@ -232,10 +215,7 @@ internal class SysLogRegister : IEventRegister
                 };
                 Task.Run(async () =>
                 {
-                    using (var syslogService = NewSysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                    await _sysLogService.AddSysLogAsync(log);
                 });
             }
         });
@@ -258,10 +238,7 @@ internal class SysLogRegister : IEventRegister
                 };
                 Task.Run(async () =>
                 {
-                    using (var syslogService = NewSysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                    await _sysLogService.AddSysLogAsync(log);
                 });
             }
         });
@@ -282,10 +259,7 @@ internal class SysLogRegister : IEventRegister
                 };
                 Task.Run(async () =>
                 {
-                    using (var syslogService = NewSysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                    await _sysLogService.AddSysLogAsync(log);
                 });
             }
         });
@@ -306,10 +280,7 @@ internal class SysLogRegister : IEventRegister
             };
             Task.Run(async () =>
             {
-                using (var syslogService = NewSysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                await _sysLogService.AddSysLogAsync(log);
             });
         });
         TinyEventBus.Instance.Register(EventKeys.ROLLBACK_CONFIG_SUCCESS, (param) =>
@@ -331,10 +302,7 @@ internal class SysLogRegister : IEventRegister
                 };
                 Task.Run(async () =>
                 {
-                    using (var syslogService = NewSysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                    await _sysLogService.AddSysLogAsync(log);
                 });
             }
         });
@@ -356,10 +324,7 @@ internal class SysLogRegister : IEventRegister
                 };
                 Task.Run(async () =>
                 {
-                    using (var syslogService = NewSysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                    await _sysLogService.AddSysLogAsync(log);
                 });
             }
         });
@@ -381,10 +346,7 @@ internal class SysLogRegister : IEventRegister
                 };
                 Task.Run(async () =>
                 {
-                    using (var syslogService = NewSysLogService())
-                    {
-                        await syslogService.AddSysLogAsync(log);
-                    }
+                    await _sysLogService.AddSysLogAsync(log);
                 });
             }
         });
@@ -398,14 +360,11 @@ internal class SysLogRegister : IEventRegister
             {
                 LogTime = DateTime.Now,
                 LogType = SysLogType.Normal,
-                LogText = $"用户：{userName} 添加节点：{node.Address}"
+                LogText = $"用户：{userName} 添加节点：{node.Id}"
             };
             Task.Run(async () =>
             {
-                using (var syslogService = NewSysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                await _sysLogService.AddSysLogAsync(log);
             });
         });
 
@@ -419,14 +378,11 @@ internal class SysLogRegister : IEventRegister
             {
                 LogTime = DateTime.Now,
                 LogType = SysLogType.Warn,
-                LogText = $"用户：{userName} 删除节点：{node.Address}"
+                LogText = $"用户：{userName} 删除节点：{node.Id}"
             };
             Task.Run(async () =>
             {
-                using (var syslogService = NewSysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                await _sysLogService.AddSysLogAsync(log);
             });
         });
 
@@ -444,10 +400,7 @@ internal class SysLogRegister : IEventRegister
             };
             Task.Run(async () =>
             {
-                using (var syslogService = NewSysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                await _sysLogService.AddSysLogAsync(log);
             });
         });
 
@@ -465,10 +418,7 @@ internal class SysLogRegister : IEventRegister
             };
             Task.Run(async () =>
             {
-                using (var syslogService = NewSysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                await _sysLogService.AddSysLogAsync(log);
             });
         });
 
@@ -486,10 +436,7 @@ internal class SysLogRegister : IEventRegister
             };
             Task.Run(async () =>
             {
-                using (var syslogService = NewSysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                await _sysLogService.AddSysLogAsync(log);
             });
         });
 
@@ -507,10 +454,7 @@ internal class SysLogRegister : IEventRegister
             };
             Task.Run(async () =>
             {
-                using (var syslogService = NewSysLogService())
-                {
-                    await syslogService.AddSysLogAsync(log);
-                }
+                await _sysLogService.AddSysLogAsync(log);
             });
         });
 
@@ -528,8 +472,7 @@ internal class SysLogRegister : IEventRegister
             };
             Task.Run(async () =>
             {
-                using var syslogService = NewSysLogService();
-                await syslogService.AddSysLogAsync(log);
+                await _sysLogService.AddSysLogAsync(log);
             });
         });
         TinyEventBus.Instance.Register(EventKeys.UNREGISTER_A_SERVICE, (param) =>
@@ -545,8 +488,7 @@ internal class SysLogRegister : IEventRegister
             };
             Task.Run(async () =>
             {
-                using var syslogService = NewSysLogService();
-                await syslogService.AddSysLogAsync(log);
+                await _sysLogService.AddSysLogAsync(log);
             });
         });
     }

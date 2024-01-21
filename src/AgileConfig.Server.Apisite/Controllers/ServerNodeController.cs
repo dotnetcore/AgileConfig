@@ -32,7 +32,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
         [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Node.Add", Functions.Node_Add })]
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody]ServerNodeVM model)
+        public async Task<IActionResult> Add([FromBody] ServerNodeVM model)
         {
             if (model == null)
             {
@@ -50,7 +50,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var node = new ServerNode();
-            node.Address = model.Address.TrimEnd('/');
+            node.Id = model.Address.TrimEnd('/');
             node.Remark = model.Remark;
             node.Status = NodeStatus.Offline;
             node.CreateTime = DateTime.Now;
@@ -62,9 +62,9 @@ namespace AgileConfig.Server.Apisite.Controllers
                 param.node = node;
                 param.userName = this.GetCurrentUserName();
                 TinyEventBus.Instance.Fire(EventKeys.ADD_NODE_SUCCESS, param);
-                await _remoteServerNodeProxy.TestEchoAsync(node.Address);
+                await _remoteServerNodeProxy.TestEchoAsync(node.Id);
             }
-           
+
             return Json(new
             {
                 data = node,
@@ -75,7 +75,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
         [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Node.Delete", Functions.Node_Delete })]
         [HttpPost]
-        public async Task<IActionResult> Delete([FromBody]ServerNodeVM model)
+        public async Task<IActionResult> Delete([FromBody] ServerNodeVM model)
         {
             if (Appsettings.IsPreviewMode)
             {
@@ -120,10 +120,21 @@ namespace AgileConfig.Server.Apisite.Controllers
         {
             var nodes = await _serverNodeService.GetAllNodesAsync();
 
+            var vms = nodes.OrderBy(x => x.CreateTime).Select(x =>
+            {
+                return new ServerNodeVM
+                {
+                    Address = x.Id,
+                    Remark = x.Remark,
+                    LastEchoTime = x.LastEchoTime,
+                    Status = x.Status
+                };
+            });
+
             return Json(new
             {
                 success = true,
-                data = nodes.OrderBy(n => n.CreateTime)
+                data = vms
             });
         }
     }

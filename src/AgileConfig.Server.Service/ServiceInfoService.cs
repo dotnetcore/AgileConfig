@@ -1,5 +1,4 @@
 ﻿using AgileConfig.Server.Data.Entity;
-using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.IService;
 using System;
 using System.Collections.Generic;
@@ -8,61 +7,61 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AgileConfig.Server.Common;
+using AgileConfig.Server.Data.Abstraction;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
+using System.Linq.Expressions;
 
 namespace AgileConfig.Server.Service
 {
     public class ServiceInfoService : IServiceInfoService
     {
         private readonly IMemoryCache _memoryCache;
+        private readonly IServiceInfoRepository _serviceInfoRepository;
 
-        public ServiceInfoService(IMemoryCache memoryCache)
+        public ServiceInfoService(IMemoryCache memoryCache, IServiceInfoRepository serviceInfoRepository)
         {
             _memoryCache = memoryCache;
+            _serviceInfoRepository = serviceInfoRepository;
         }
 
         public async Task<ServiceInfo> GetByUniqueIdAsync(string id)
         {
-            var entity = await FreeSQL.Instance.Select<ServiceInfo>().Where(x => x.Id == id).FirstAsync();
+            var entity = await _serviceInfoRepository.GetAsync(id);
 
             return entity;
         }
 
         public async Task<ServiceInfo> GetByServiceIdAsync(string serviceId)
         {
-            var entity = await FreeSQL.Instance.Select<ServiceInfo>().Where(x => x.ServiceId == serviceId).FirstAsync();
+            var entity = (await _serviceInfoRepository.QueryAsync(x => x.ServiceId == serviceId)).FirstOrDefault();
 
             return entity;
         }
 
         public async Task<bool> RemoveAsync(string id)
         {
-            var aff = await FreeSQL.Instance.Delete<ServiceInfo>().Where(x => x.Id == id)
-                .ExecuteAffrowsAsync();
-
-            return aff > 0;
+            await _serviceInfoRepository.DeleteAsync(id);
+            return true;
         }
 
         public async Task<List<ServiceInfo>> GetAllServiceInfoAsync()
         {
-            var services = await FreeSQL.Instance.Select<ServiceInfo>().Where(x => 1 == 1).ToListAsync();
+            var services = await _serviceInfoRepository.AllAsync();
 
             return services;
         }
 
         public async Task<List<ServiceInfo>> GetOnlineServiceInfoAsync()
         {
-            var services = await FreeSQL.Instance.Select<ServiceInfo>().Where(x => x.Status == ServiceStatus.Healthy)
-                .ToListAsync();
+            var services = await _serviceInfoRepository.QueryAsync(x => x.Status == ServiceStatus.Healthy);
 
             return services;
         }
 
         public async Task<List<ServiceInfo>> GetOfflineServiceInfoAsync()
         {
-            var services = await FreeSQL.Instance.Select<ServiceInfo>().Where(x => x.Status == ServiceStatus.Unhealthy)
-                .ToListAsync();
+            var services = await _serviceInfoRepository.QueryAsync(x => x.Status == ServiceStatus.Unhealthy);
 
             return services;
         }
@@ -127,21 +126,15 @@ namespace AgileConfig.Server.Service
             var id = service.Id;
             var oldStatus = service.Status;
 
-            if (status == ServiceStatus.Unhealthy)
+            var service2 = await _serviceInfoRepository.GetAsync(id);
+            if (service2 == null) return;
+
+            service2.Status = status;
+            if (status != ServiceStatus.Unhealthy)
             {
-                await FreeSQL.Instance.Update<ServiceInfo>()
-                    .Set(x => x.Status, status)
-                    .Where(x => x.Id == id)
-                    .ExecuteAffrowsAsync();
+                service2.LastHeartBeat = DateTime.Now;
             }
-            else
-            {
-                await FreeSQL.Instance.Update<ServiceInfo>()
-                    .Set(x => x.Status, status)
-                    .Set(x => x.LastHeartBeat, DateTime.Now)
-                    .Where(x => x.Id == id)
-                    .ExecuteAffrowsAsync();
-            }
+            await _serviceInfoRepository.UpdateAsync(service2);
 
             if (oldStatus != status)
             {
@@ -156,6 +149,12 @@ namespace AgileConfig.Server.Service
 
         public void Dispose()
         {
+            _serviceInfoRepository.Dispose();
+        }
+
+        public Task<List<ServiceInfo>> QueryAsync(Expression<Func<ServiceInfo, bool>> exp)
+        {
+            return _serviceInfoRepository.QueryAsync(exp);
         }
     }
 }

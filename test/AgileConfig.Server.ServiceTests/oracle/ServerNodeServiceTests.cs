@@ -1,199 +1,22 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using AgileConfig.Server.Service;
-using System;
 using System.Collections.Generic;
-using System.Text;
-using AgileConfig.Server.Data.Freesql;
-using FreeSql;
-using AgileConfig.Server.Data.Entity;
-using System.Threading.Tasks;
+using AgileConfig.Server.ServiceTests.sqlite;
 
-namespace AgileConfig.Server.Service.Tests.oracle
+namespace AgileConfig.Server.ServiceTests.oracle
 {
     [TestClass()]
-    public class ServerNodeServiceTests
+    public class ServerNodeServiceTests_oracle: ServerNodeServiceTests
     {
-        IFreeSql fsq = null;
-        FreeSqlContext freeSqlContext;
-        ServerNodeService service = null;
+        string conn = "user id=x;password=x;data source=192.168.0.123/orcl";
 
-        [TestInitialize]
-        public void TestInitialize()
+        public override Dictionary<string, string> GetConfigurationData()
         {
-            string conn = "user id=CLINIC;password=CLINIC;data source=192.168.0.91/orcl";
-            fsq = new FreeSqlBuilder()
-                          .UseConnectionString(FreeSql.DataType.Oracle, conn)
-                          .UseAutoSyncStructure(true)
-                          .Build();
-            FluentApi.Config(fsq);
-            freeSqlContext = new FreeSqlContext(fsq);
+            var dict = base.GetConfigurationData();
+            dict["db:provider"] = "oracle";
+            dict["db:conn"] = conn;
 
-            service = new ServerNodeService(freeSqlContext);
-            fsq.Delete<ServerNode>().Where("1=1");
-
-            Console.WriteLine("TestInitialize");
+            return dict;
         }
 
-
-
-        [TestCleanup]
-        public void Clean()
-        {
-            freeSqlContext.Dispose();
-            fsq.Dispose();
-        }
-
-        [TestMethod()]
-        public async Task AddAsyncTest()
-        {
-            fsq.Delete<ServerNode>().Where("1=1").ExecuteAffrows();
-
-            var source = new ServerNode();
-            source.Address = "1";
-            source.CreateTime = DateTime.Now;
-            source.LastEchoTime = DateTime.Now;
-            source.Remark = "2";
-            source.Status = NodeStatus.Offline;
-
-            var result = await service.AddAsync(source);
-            Assert.IsTrue(result);
-
-            var node = fsq.Select<ServerNode>(new {
-                Address = "1"
-            }).ToOne();
-            Assert.IsNotNull(node);
-
-            Assert.AreEqual(source.Address,node.Address);
-           // Assert.AreEqual(source.CreateTime, node.CreateTime);
-         //   Assert.AreEqual(source.LastEchoTime, node.LastEchoTime);
-            Assert.AreEqual(source.Remark, node.Remark);
-            Assert.AreEqual(source.Status, node.Status);
-        }
-
-        [TestMethod()]
-        public async Task DeleteAsyncTest()
-        {
-            fsq.Delete<ServerNode>().Where("1=1").ExecuteAffrows();
-
-            var source = new ServerNode();
-            source.Address = "1";
-            source.CreateTime = DateTime.Now;
-            source.LastEchoTime = DateTime.Now;
-            source.Remark = "2";
-            source.Status = NodeStatus.Offline;
-
-            var result = await service.AddAsync(source);
-            Assert.IsTrue(result);
-
-            var result1 = await service.DeleteAsync(source);
-            Assert.IsTrue(result1);
-
-            var node = fsq.Select<ServerNode>(new
-            {
-                Address = "1"
-            }).ToOne();
-            Assert.IsNull(node);
-        }
-
-        [TestMethod()]
-        public async Task DeleteAsyncTest1()
-        {
-            fsq.Delete<ServerNode>().Where("1=1").ExecuteAffrows();
-
-            var source = new ServerNode();
-            source.Address = "1";
-            source.CreateTime = DateTime.Now;
-            source.LastEchoTime = DateTime.Now;
-            source.Remark = "2";
-            source.Status = NodeStatus.Offline;
-
-            var result = await service.AddAsync(source);
-            Assert.IsTrue(result);
-
-            var result1 = await service.DeleteAsync(source.Address);
-            Assert.IsTrue(result1);
-
-            var node = fsq.Select<ServerNode>(new
-            {
-                Address = "1"
-            }).ToOne();
-            Assert.IsNull(node);
-        }
-
-        [TestMethod()]
-        public async Task GetAllNodesAsyncTest()
-        {
-            fsq.Delete<ServerNode>().Where("1=1").ExecuteAffrows();
-
-            var source = new ServerNode();
-            source.Address = "1";
-            source.CreateTime = DateTime.Now;
-            source.LastEchoTime = DateTime.Now;
-            source.Remark = "2";
-            source.Status = NodeStatus.Offline;
-
-            var result = await service.AddAsync(source);
-            Assert.IsTrue(result);
-
-            var nodes = await service.GetAllNodesAsync();
-            Assert.IsNotNull(nodes);
-
-            Assert.AreEqual(1, nodes.Count);
-        }
-
-        [TestMethod()]
-        public async Task GetAsyncTest()
-        {
-            fsq.Delete<ServerNode>().Where("1=1").ExecuteAffrows();
-
-            var source = new ServerNode();
-            source.Address = "1";
-            source.CreateTime = DateTime.Now;
-            source.LastEchoTime = DateTime.Now;
-            source.Remark = "2";
-            source.Status = NodeStatus.Offline;
-            var result = await service.AddAsync(source);
-            Assert.IsTrue(result);
-
-            var node = await service.GetAsync(source.Address);
-            Assert.IsNotNull(node);
-
-            Assert.AreEqual(source.Address, node.Address);
-         //   Assert.AreEqual(source.CreateTime, node.CreateTime);
-         //   Assert.AreEqual(source.LastEchoTime, node.LastEchoTime);
-            Assert.AreEqual(source.Remark, node.Remark);
-            Assert.AreEqual(source.Status, node.Status);
-        }
-
-        [TestMethod()]
-        public async Task UpdateAsyncTest()
-        {
-            fsq.Delete<ServerNode>().Where("1=1").ExecuteAffrows();
-
-            var source = new ServerNode();
-            source.Address = "1";
-            source.CreateTime = DateTime.Now;
-            source.LastEchoTime = DateTime.Now;
-            source.Remark = "2";
-            source.Status = NodeStatus.Offline;
-            var result = await service.AddAsync(source);
-            Assert.IsTrue(result);
-
-            source.CreateTime = DateTime.Now;
-            source.LastEchoTime = DateTime.Now;
-            source.Remark = "3";
-            source.Status = NodeStatus.Online;
-            var result1 = await service.UpdateAsync(source);
-            Assert.IsTrue(result);
-
-            var node = await service.GetAsync(source.Address);
-            Assert.IsNotNull(node);
-
-            Assert.AreEqual(source.Address, node.Address);
-         //   Assert.AreEqual(source.CreateTime, node.CreateTime);
-         //   Assert.AreEqual(source.LastEchoTime, node.LastEchoTime);
-            Assert.AreEqual(source.Remark, node.Remark);
-            Assert.AreEqual(source.Status, node.Status);
-        }
     }
 }

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Net;
-using System.Net.Http;
-using System.Text;
 using AgileConfig.Server.Apisite.UIExtension;
 using AgileConfig.Server.Apisite.Websocket;
 using AgileConfig.Server.Common;
@@ -17,8 +15,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using AgileConfig.Server.Data.Repository.Selector;
 
 namespace AgileConfig.Server.Apisite
 {
@@ -62,18 +60,8 @@ namespace AgileConfig.Server.Apisite
             services.AddDefaultHttpClient(IsTrustSSL(Configuration));
             services.AddRestClient();
 
-            var jwtService = new JwtService();
             services.AddMemoryCache();
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                      .AddJwtBearer(options =>
-                      {
-                          options.TokenValidationParameters = new TokenValidationParameters
-                          {
-                              ValidIssuer = jwtService.Issuer,
-                              ValidAudience = jwtService.Audience,
-                              IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtService.GetSecurityKey())),
-                          };
-                      });
+
             services.AddCors();
             services.AddMvc().AddRazorRuntimeCompilation();
 
@@ -82,8 +70,17 @@ namespace AgileConfig.Server.Apisite
                 AddSwaggerService(services);
             }
 
-            services.AddFreeSqlDbContext();
+            services.AddEnvAccessor();
+            services.AddFreeSqlFactory();
+            // Add freesqlRepositories or other repositories
+            services.AddRepositories();
+
             services.AddBusinessServices();
+
+            services.ConfigureOptions<ConfigureJwtBearerOptions>();
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer();
+
             services.AddHostedService<InitService>();
             services.AddAntiforgery(o => o.SuppressXFrameOptionsHeader = true);
 
@@ -154,7 +151,6 @@ namespace AgileConfig.Server.Apisite
                 c.SwaggerEndpoint("v1/swagger.json", "My API V1");
             });
         }
-
 
     }
 }

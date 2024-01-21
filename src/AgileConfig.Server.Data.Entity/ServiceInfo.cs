@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using MongoDB.Bson.Serialization.Attributes;
+using AgileConfig.Server.Common;
 
 namespace AgileConfig.Server.Data.Entity
 {
@@ -26,7 +28,7 @@ namespace AgileConfig.Server.Data.Entity
 
     [Table(Name = "agc_service_info")]
     [OraclePrimaryKeyName("agc_serviceinfo_pk")]
-    public class ServiceInfo
+    public class ServiceInfo : IEntity<string>
     {
         [Column(Name = "id", StringLength = 36)]
         public string Id { get; set; }
@@ -50,9 +52,11 @@ namespace AgileConfig.Server.Data.Entity
         public ServiceStatus Status { get; set; }
 
         [Column(Name = "register_time")] 
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime? RegisterTime { get; set; }
 
         [Column(Name = "last_heart_beat")] 
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime? LastHeartBeat { get; set; }
 
         [Column(Name = "heart_beat_mode",StringLength = 10)] 

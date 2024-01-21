@@ -38,9 +38,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AgileConfig.Server.Data.Abstraction\AgileConfig.Server.Data.Abstraction.csproj" />
+    <ProjectReference Include="..\AgileConfig.Server.Data.Repository.Freesql\AgileConfig.Server.Data.Repository.Freesql.csproj" />
+    <ProjectReference Include="..\AgileConfig.Server.Data.Repository.Mongodb\AgileConfig.Server.Data.Repository.Mongodb.csproj" />
     <ProjectReference Include="..\Agile.Config.Protocol\Agile.Config.Protocol.csproj" />
     <ProjectReference Include="..\AgileConfig.Server.Data.Entity\AgileConfig.Server.Data.Entity.csproj" />
     <ProjectReference Include="..\AgileConfig.Server.Data.Freesql\AgileConfig.Server.Data.Freesql.csproj" />
+    <ProjectReference Include="..\AgileConfig.Server.Data.Repository.Selector\AgileConfig.Server.Data.Repository.Selector.csproj" />
     <ProjectReference Include="..\AgileConfig.Server.OIDC\AgileConfig.Server.OIDC.csproj" />
     <ProjectReference Include="..\AgileConfig.Server.Service\AgileConfig.Server.Service.csproj" />
   </ItemGroup>

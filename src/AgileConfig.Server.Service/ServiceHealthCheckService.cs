@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Common.RestClient;
 using AgileConfig.Server.Data.Entity;
-using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.IService;
 using Microsoft.Extensions.Logging;
 
@@ -121,8 +120,8 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
             while (true)
             {
                 //没有填写心跳模式，则不做检查
-                var services = await FreeSQL.Instance.Select<ServiceInfo>()
-                    .Where(x => x.HeartBeatMode != null && x.HeartBeatMode != "").ToListAsync();
+                var services = await _serviceInfoService
+                    .QueryAsync(x => x.HeartBeatMode != null && x.HeartBeatMode != "");
                 foreach (var service in services)
                 {
                     if (service.HeartBeatMode == HeartBeatModes.none.ToString())

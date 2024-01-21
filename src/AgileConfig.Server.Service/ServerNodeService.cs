@@ -4,82 +4,73 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AgileConfig.Server.Common;
 using System;
-using AgileConfig.Server.Data.Freesql;
+using System.Linq;
+using AgileConfig.Server.Data.Abstraction;
 
 namespace AgileConfig.Server.Service
 {
     public class ServerNodeService : IServerNodeService
     {
-        private FreeSqlContext _dbContext;
+        private readonly IServerNodeRepository _serverNodeRepository;
 
-        public ServerNodeService(FreeSqlContext context)
+
+        public ServerNodeService(IServerNodeRepository serverNodeRepository)
         {
-            _dbContext = context;
+            _serverNodeRepository = serverNodeRepository;
         }
 
         public async Task<bool> AddAsync(ServerNode node)
         {
-            await _dbContext.ServerNodes.AddAsync(node);
-            int x = await _dbContext.SaveChangesAsync();
-            var result = x > 0;
-
-            return result;
+            await _serverNodeRepository.InsertAsync(node);
+            return true;
         }
 
         public async Task<bool> DeleteAsync(ServerNode node)
         {
-            node = await _dbContext.ServerNodes.Where(n => n.Address == node.Address).ToOneAsync();
-            if (node != null)
+            var node2 = await _serverNodeRepository.GetAsync(node.Id);
+            if (node2 != null)
             {
-                _dbContext.ServerNodes.Remove(node);
+                await _serverNodeRepository.DeleteAsync(node2);
             }
-            int x = await _dbContext.SaveChangesAsync();
-            var result = x > 0;
-
-            return result;
+            return true;
         }
 
         public async Task<bool> DeleteAsync(string address)
         {
-            var node = await _dbContext.ServerNodes.Where(n => n.Address == address).ToOneAsync();
-            if (node != null)
+            var node2 = await _serverNodeRepository.GetAsync(address);
+            if (node2 != null)
             {
-                _dbContext.ServerNodes.Remove(node);
+                await _serverNodeRepository.DeleteAsync(node2);
             }
-            int x = await _dbContext.SaveChangesAsync();
-            var result = x > 0;
 
-            return result;
+            return true;
         }
 
         public void Dispose()
         {
-            _dbContext.Dispose();
+            _serverNodeRepository.Dispose();
         }
 
         public async Task<List<ServerNode>> GetAllNodesAsync()
         {
-            return await _dbContext.ServerNodes.Where(n => 1 == 1).ToListAsync();
+            return await _serverNodeRepository.AllAsync();
         }
 
         public async Task<ServerNode> GetAsync(string address)
         {
-           return await _dbContext.ServerNodes.Where(n => n.Address == address).ToOneAsync();
+           return await _serverNodeRepository.GetAsync(address);
         }
 
         public async Task<bool> UpdateAsync(ServerNode node)
         {
-            _dbContext.Update(node);
-            var x = await _dbContext.SaveChangesAsync();
-            var result = x > 0;
-
-            return result;
+            await _serverNodeRepository.UpdateAsync(node);
+            return true;
         }
 
         
         public async Task<bool> InitWatchNodeAsync()
         {
-            var count = await _dbContext.ServerNodes.Select.CountAsync();
+            var count = await _serverNodeRepository.CountAsync();
             if (count > 0)
             {
                 return false;
@@ -105,45 +96,35 @@ namespace AgileConfig.Server.Service
                 }
             }
             
-            foreach (var address in addresses)
-            {
-                var node = await _dbContext.ServerNodes.Where(n => n.Address == address).ToOneAsync();
-                if (node == null)
-                {
-                    node = new ServerNode()
-                    {
-                        Address = address,
-                        CreateTime = DateTime.Now,
-                    };
-                    await _dbContext.ServerNodes.AddAsync(node);
-                }
-            }
+            var existNodes = await _serverNodeRepository.QueryAsync(x => addresses.Contains(x.Id));
+            var newNodes = addresses
+                .Where(x => existNodes.All(y => y.Id != x))
+                .Select(x => new ServerNode { Id = x, CreateTime = DateTime.Now })
+                .ToList();
 
-            var result = 0;
-            if (addresses.Count > 0)
-            {
-                result = await _dbContext.SaveChangesAsync();
-            }
+            if (newNodes.Count == 0)
+                return false;
 
-            return result > 0;
+            await _serverNodeRepository.InsertAsync(newNodes);
+            return true;
         }
 
         public async Task<bool> JoinAsync(string ip, int port, string desc)
         {
             var address = $"http://{ip}:{port}";
-            var nodes = await _dbContext.ServerNodes.Where(x => x.Address == address).ToListAsync();
+            var nodes = await _serverNodeRepository.QueryAsync(x => x.Id == address);
             if (nodes.Count > 0)
             {
                 nodes.ForEach(n => {
-                    n.Address = address;
+                    n.Id = address;
                     n.Remark = desc;
                     n.Status = NodeStatus.Online;
                 });
             }
             else
             {
-                await _dbContext.ServerNodes.AddAsync(new ServerNode { 
-                    Address = address,
+                await _serverNodeRepository.InsertAsync(new ServerNode { 
+                    Id = address,
                     CreateTime = DateTime.Now,
                     Remark = desc,
                     Status = NodeStatus.Online,
@@ -151,8 +132,7 @@ namespace AgileConfig.Server.Service
                 });
             }
 
-            var effRows = await _dbContext.SaveChangesAsync();
-            return effRows > 0;
+            return true;
         }
     }
 }

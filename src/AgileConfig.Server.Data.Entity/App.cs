@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using MongoDB.Bson.Serialization.Attributes;
+using AgileConfig.Server.Common;
 
 namespace AgileConfig.Server.Data.Entity
 {
@@ -26,7 +28,7 @@ namespace AgileConfig.Server.Data.Entity
 
     [Table(Name = "agc_app")]
     [OraclePrimaryKeyName("agc_app_pk")]
-    public class App: IAppModel
+    public class App: IAppModel, IEntity<string>
     {
         [Column(Name= "id" , StringLength = 36)]
         public string Id { get; set; }
@@ -41,9 +43,11 @@ namespace AgileConfig.Server.Data.Entity
         public string Secret { get; set; }
 
         [Column(Name = "create_time")]
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime CreateTime { get; set; }
 
         [Column(Name = "update_time")]
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime? UpdateTime { get; set; }
 
         [Column(Name = "enabled")]

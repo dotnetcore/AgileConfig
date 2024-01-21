@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Agile.Config.Protocol;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Entity;
-using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.IService;
 
 namespace AgileConfig.Server.Service.EventRegisterService;
@@ -11,26 +11,17 @@ namespace AgileConfig.Server.Service.EventRegisterService;
 internal class ConfigStatusUpdateRegister : IEventRegister
 {
     private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
+    private readonly IServerNodeService _serverNodeService;
+    private readonly IAppService _appService;
 
-    public ConfigStatusUpdateRegister(IRemoteServerNodeProxy remoteServerNodeProxy)
+    public ConfigStatusUpdateRegister(
+        IRemoteServerNodeProxy remoteServerNodeProxy,
+        IServerNodeService serverNodeService,
+        IAppService appService)
     {
         _remoteServerNodeProxy = remoteServerNodeProxy;
-    }
-
-    private IServerNodeService NewServerNodeService()
-    {
-        return new ServerNodeService(new FreeSqlContext(FreeSQL.Instance));
-    }
-
-    private IAppService NewAppService()
-    {
-        return new AppService(new FreeSqlContext(FreeSQL.Instance));
-    }
-
-    private IConfigService NewConfigService()
-    {
-        return new ConfigService(NewAppService(), new SettingService(new FreeSqlContext(FreeSQL.Instance)),
-            new UserService(new FreeSqlContext(FreeSQL.Instance)));
+        _serverNodeService = serverNodeService;
+        _appService = appService;
     }
 
     public void Register()
@@ -43,39 +34,36 @@ internal class ConfigStatusUpdateRegister : IEventRegister
             {
                 Task.Run(async () =>
                 {
-                    using (var serverNodeService = NewServerNodeService())
+                    var nodes = await _serverNodeService.GetAllNodesAsync();
+                    var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(timelineNode.AppId);
+                    noticeApps.Add(timelineNode.AppId,
+                        new WebsocketAction { Action = ActionConst.Reload, Module = ActionModule.ConfigCenter });
+
+                    foreach (var node in nodes)
                     {
-                        var nodes = await serverNodeService.GetAllNodesAsync();
-                        var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(timelineNode.AppId);
-                        noticeApps.Add(timelineNode.AppId,
-                            new WebsocketAction { Action = ActionConst.Reload, Module = ActionModule.ConfigCenter });
-
-                        foreach (var node in nodes)
+                        if (node.Status == NodeStatus.Offline)
                         {
-                            if (node.Status == NodeStatus.Offline)
-                            {
-                                continue;
-                            }
-
-                            //all server cache
-                            await _remoteServerNodeProxy.ClearConfigServiceCache(node.Address);
+                            continue;
                         }
 
-                        foreach (var node in nodes)
-                        {
-                            if (node.Status == NodeStatus.Offline)
-                            {
-                                continue;
-                            }
+                        //all server cache
+                        await _remoteServerNodeProxy.ClearConfigServiceCache(node.Id);
+                    }
 
-                            foreach (var item in noticeApps)
-                            {
-                                await _remoteServerNodeProxy.AppClientsDoActionAsync(
-                                    node.Address,
-                                    item.Key,
-                                    timelineNode.Env,
-                                    item.Value);
-                            }
+                    foreach (var node in nodes)
+                    {
+                        if (node.Status == NodeStatus.Offline)
+                        {
+                            continue;
+                        }
+
+                        foreach (var item in noticeApps)
+                        {
+                            await _remoteServerNodeProxy.AppClientsDoActionAsync(
+                                node.Id,
+                                item.Key,
+                                timelineNode.Env,
+                                item.Value);
                         }
                     }
                 });
@@ -90,27 +78,24 @@ internal class ConfigStatusUpdateRegister : IEventRegister
             {
                 Task.Run(async () =>
                 {
-                    using (var serverNodeService = NewServerNodeService())
+                    var nodes = await _serverNodeService.GetAllNodesAsync();
+                    var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(timelineNode.AppId);
+                    noticeApps.Add(timelineNode.AppId,
+                        new WebsocketAction
+                        { Action = ActionConst.Reload, Module = ActionModule.ConfigCenter });
+
+                    foreach (var node in nodes)
                     {
-                        var nodes = await serverNodeService.GetAllNodesAsync();
-                        var noticeApps = await GetNeedNoticeInheritancedFromAppsAction(timelineNode.AppId);
-                        noticeApps.Add(timelineNode.AppId,
-                            new WebsocketAction
-                                { Action = ActionConst.Reload, Module = ActionModule.ConfigCenter });
-
-                        foreach (var node in nodes)
+                        if (node.Status == NodeStatus.Offline)
                         {
-                            if (node.Status == NodeStatus.Offline)
-                            {
-                                continue;
-                            }
+                            continue;
+                        }
 
-                            foreach (var item in noticeApps)
-                            {
-                                await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Address, item.Key,
-                                    timelineNode.Env,
-                                    item.Value);
-                            }
+                        foreach (var item in noticeApps)
+                        {
+                            await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Id, item.Key,
+                                timelineNode.Env,
+                                item.Value);
                         }
                     }
                 });
@@ -127,22 +112,20 @@ internal class ConfigStatusUpdateRegister : IEventRegister
         Dictionary<string, WebsocketAction> needNoticeAppsActions = new Dictionary<string, WebsocketAction>
         {
         };
-        using (var appService = NewAppService())
+        var currentApp = await _appService.GetAsync(appId);
+        if (currentApp.Type == AppType.Inheritance)
         {
-            var currentApp = await appService.GetAsync(appId);
-            if (currentApp.Type == AppType.Inheritance)
+            var inheritancedFromApps = await _appService.GetInheritancedFromAppsAsync(appId);
+            inheritancedFromApps.ForEach(x =>
             {
-                var inheritancedFromApps = await appService.GetInheritancedFromAppsAsync(appId);
-                inheritancedFromApps.ForEach(x =>
+                needNoticeAppsActions.Add(x.Id, new WebsocketAction
                 {
-                    needNoticeAppsActions.Add(x.Id, new WebsocketAction
-                    {
-                        Action = ActionConst.Reload, Module = ActionModule.ConfigCenter
-                    });
+                    Action = ActionConst.Reload,
+                    Module = ActionModule.ConfigCenter
                 });
-            }
-
-            return needNoticeAppsActions;
+            });
         }
+
+        return needNoticeAppsActions;
     }
 }
