@@ -162,10 +162,10 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var log1 = await _serviceProvider.GetService<ISysLogRepository>().GetAsync(source1.Id);
             Assert.IsNotNull(log1);
 
-            var page = await _syslogservice.SearchPage("001", SysLogType.Normal, DateTime.Now.AddDays(-1), DateTime.Now.AddDays(1), 1, 0);
+            var page = await _syslogservice.SearchPage("001", SysLogType.Normal, DateTime.Now.AddDays(-1), DateTime.Now.AddDays(1), 1, 1);
             Assert.AreEqual(1, page.Count);
 
-            var page1 = await _syslogservice.SearchPage("002", SysLogType.Warn, DateTime.Now.AddDays(-1), DateTime.Now.AddDays(-1), 1, 0);
+            var page1 = await _syslogservice.SearchPage("002", SysLogType.Warn, DateTime.Now.AddDays(-1), DateTime.Now.AddDays(-1), 1, 1);
             Assert.AreEqual(0, page1.Count);
         }
     }
