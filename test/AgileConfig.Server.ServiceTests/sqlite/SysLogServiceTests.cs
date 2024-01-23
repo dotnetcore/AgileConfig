@@ -15,16 +15,16 @@ namespace AgileConfig.Server.ServiceTests.sqlite
     public class SysLogServiceTests: BasicTestService
     {
         ISysLogService _syslogservice = null;
-        public override Dictionary<string, string> GetConfigurationData()
+        public override Task<Dictionary<string, string>> GetConfigurationData()
         {
             return
+                Task.FromResult(
                 new Dictionary<string, string>
                 {
                 {"db:provider","sqlite" },
                 {"db:conn","Data Source=agile_config.db" }
-            };
+            });
         }
-
         [TestInitialize]
         public void TestInitialize()
         {

@@ -12,14 +12,15 @@ namespace AgileConfig.Server.ServiceTests.sqlite
     public class SettingServiceTests : BasicTestService
     {
         ISettingService _settingService = null;
-        public override Dictionary<string, string> GetConfigurationData()
+        public override Task<Dictionary<string, string>> GetConfigurationData()
         {
             return
+                Task.FromResult(
                 new Dictionary<string, string>
                 {
                 {"db:provider","sqlite" },
                 {"db:conn","Data Source=agile_config.db" }
-            };
+            });
         }
 
         [TestInitialize]

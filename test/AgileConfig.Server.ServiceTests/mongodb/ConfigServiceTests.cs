@@ -3,6 +3,7 @@ using AgileConfig.Server.Data.Repository.Mongodb;
 using AgileConfig.Server.ServiceTests.sqlite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace AgileConfig.Server.ServiceTests.mongodb
 {
@@ -49,13 +50,15 @@ namespace AgileConfig.Server.ServiceTests.mongodb
 
         string conn = "mongodb://192.168.0.125:27017/agile_config_1";
 
-        public override Dictionary<string, string> GetConfigurationData()
+        public override Task<Dictionary<string, string>> GetConfigurationData()
         {
-            var dict = base.GetConfigurationData();
-            dict["db:provider"] = "mongodb";
-            dict["db:conn"] = conn;
-
-            return dict;
+            return
+                Task.FromResult(
+                new Dictionary<string, string>
+                {
+                {"db:provider","mongodb" },
+                {"db:conn",conn }
+            });
         }
     }
 }

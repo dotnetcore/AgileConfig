@@ -7,28 +7,59 @@ using AgileConfig.Server.IService;
 using AgileConfig.Server.Service;
 using Microsoft.Extensions.DependencyInjection;
 using AgileConfig.Server.Data.Abstraction;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
+using Moq;
+using AgileConfig.Server.Common;
+using AgileConfig.Server.Data.Freesql;
+using AgileConfig.Server.Data.Repository.Selector;
 
 namespace AgileConfig.Server.ServiceTests.sqlite
 {
     [TestClass()]
-    public class AppServiceTests: BasicTestService
+    public class AppServiceTests : BasicTestService
     {
         IAppService _appservice = null;
-        public override Dictionary<string, string> GetConfigurationData()
+        public override Task<Dictionary<string, string>> GetConfigurationData()
         {
             return
-                new Dictionary<string, string>
+               Task.FromResult(new Dictionary<string, string>
                 {
                 {"db:provider","sqlite" },
                 {"db:conn","Data Source=agile_config.db" }
-            };
+            });
         }
 
         [TestInitialize]
-        public void TestInitialize()
+        public async Task TestInitialize()
         {
-            _appservice = _serviceProvider.GetService<IAppService>();
+            Console.WriteLine("Try get configration data");
+            var dict = await GetConfigurationData();
+
+            var config = new ConfigurationBuilder()
+                             .AddInMemoryCollection(dict)
+                             .Build();
+            Global.Config = config;
+
             ClearData();
+
+            var cache = new Mock<IMemoryCache>();
+            IServiceCollection services = new ServiceCollection();
+            services.AddScoped(_ => cache.Object);
+            services.AddSingleton<IConfiguration>(config);
+            services.AddFreeSqlFactory();
+            services.AddRepositories();
+            services.AddBusinessServices();
+
+            _serviceProvider = services.BuildServiceProvider();
+            var systeminitializationService = _serviceProvider.GetService<ISystemInitializationService>();
+            systeminitializationService.TryInitDefaultEnvironmentAsync();//初始化环境 DEV TEST STAGE PROD
+            systeminitializationService.TryInitJwtSecret();//初始化 jwt secret
+
+
+            _appservice = _serviceProvider.GetService<IAppService>();
+
+            Console.WriteLine("Run TestInitialize");
         }
 
 
@@ -356,9 +387,5 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             Assert.AreEqual(2, apps.Count);
         }
 
-        [TestCleanup]
-        public void Clean()
-        {
-        }
     }
 }

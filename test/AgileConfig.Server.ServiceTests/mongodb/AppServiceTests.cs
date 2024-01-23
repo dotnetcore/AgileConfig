@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using AgileConfig.Server.ServiceTests.sqlite;
 using AgileConfig.Server.Data.Repository.Mongodb;
+using System.Threading.Tasks;
 
 namespace AgileConfig.Server.ServiceTests.mongodb
 {
@@ -20,13 +21,13 @@ namespace AgileConfig.Server.ServiceTests.mongodb
 
         string conn = "mongodb://192.168.0.125:27017/agile_config_1";
 
-        public override Dictionary<string, string> GetConfigurationData()
+        public override Task<Dictionary<string, string>> GetConfigurationData()
         {
-            var dict = base.GetConfigurationData();
+            var dict = new Dictionary<string, string>();
             dict["db:provider"] = "mongodb";
             dict["db:conn"] = conn;
 
-            return dict;
+            return Task.FromResult(dict);
         }
     }
 }

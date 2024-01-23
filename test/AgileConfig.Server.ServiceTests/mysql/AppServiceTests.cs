@@ -1,21 +1,42 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using AgileConfig.Server.ServiceTests.sqlite;
 using System.Collections.Generic;
+using Testcontainers.MySql;
+using System.Threading.Tasks;
+using System;
 
 namespace AgileConfig.Server.ServiceTests.mysql
 {
     [TestClass()]
     public class AppServiceTests_mysql : AppServiceTests
     {
-        string conn = "Database=agile_config_test;Data Source=192.168.0.125;User Id=root;Password=x;port=13306";
+        static MySqlContainer _container = new MySqlBuilder().WithImage("mysql:8.0").Build();
 
-        public override Dictionary<string, string> GetConfigurationData()
+        [ClassInitialize]
+        public static async Task ClassInit(TestContext testContext)
         {
-            var dict = base.GetConfigurationData();
-            dict["db:provider"] = "mysql";
-            dict["db:conn"] = conn;
+            await _container.StartAsync();
+            Console.WriteLine($"MySqlContainer started");
+        }
 
-            return dict;
+        [ClassCleanup]
+        public static async Task ClassCleanup()
+        {
+            await _container.DisposeAsync();
+            Console.WriteLine($"MySqlContainer dispose");
+        }
+
+
+        public override Task<Dictionary<string, string>> GetConfigurationData()
+        {
+            var connstr = _container.GetConnectionString();
+            Console.WriteLine($"MySqlContainer connstr: {connstr}");
+
+            var dict = new Dictionary<string, string>();
+            dict["db:provider"] = "mysql";
+            dict["db:conn"] = connstr;
+
+            return Task.FromResult(dict);
         }
 
     }

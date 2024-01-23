@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace AgileConfig.Server.ServiceTests.sqlite
 {
@@ -19,14 +20,9 @@ namespace AgileConfig.Server.ServiceTests.sqlite
     {
         protected ServiceProvider _serviceProvider;
 
-        public virtual Dictionary<string, string> GetConfigurationData()
+        public virtual Task<Dictionary<string, string>> GetConfigurationData()
         {
-            return
-                new Dictionary<string, string>
-                {
-                {"db:provider","sqlite" },
-                {"db:conn","Data Source=agile_config.db" }
-            };
+            return null;
         }
 
         public virtual void ClearData()
@@ -47,25 +43,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
 
         public BasicTestService()
         {
-            var config = new ConfigurationBuilder()
-             .AddInMemoryCollection(GetConfigurationData())
-             .Build();
-            Global.Config = config;
-
-            var cache = new Mock<IMemoryCache>();
-            IServiceCollection services = new ServiceCollection();
-            services.AddScoped(_ => cache.Object);
-            services.AddSingleton<IConfiguration>(config);
-            services.AddFreeSqlFactory();
-            services.AddRepositories();
-            services.AddBusinessServices();
-
-            _serviceProvider = services.BuildServiceProvider();
-            var systeminitializationService = _serviceProvider.GetService<ISystemInitializationService>();
-            systeminitializationService.TryInitDefaultEnvironmentAsync();//初始化环境 DEV TEST STAGE PROD
-            systeminitializationService.TryInitJwtSecret();//初始化 jwt secret
-
-            Console.WriteLine("Run BasicTestService");
+            Console.WriteLine("BasicTestService ctor.");
         }
     }
 }

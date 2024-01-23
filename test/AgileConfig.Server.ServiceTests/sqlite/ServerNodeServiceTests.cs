@@ -10,17 +10,18 @@ using MongoDB.Driver.Linq;
 namespace AgileConfig.Server.ServiceTests.sqlite
 {
     [TestClass()]
-    public class ServerNodeServiceTests: BasicTestService
+    public class ServerNodeServiceTests : BasicTestService
     {
         IServerNodeService _serverNodeService = null;
-        public override Dictionary<string, string> GetConfigurationData()
+        public override Task<Dictionary<string, string>> GetConfigurationData()
         {
             return
+                Task.FromResult(
                 new Dictionary<string, string>
                 {
                 {"db:provider","sqlite" },
                 {"db:conn","Data Source=agile_config.db" }
-            };
+            });
         }
 
         [TestInitialize]
