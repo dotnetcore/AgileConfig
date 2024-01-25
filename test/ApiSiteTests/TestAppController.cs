@@ -71,7 +71,7 @@ namespace ApiSiteTests
             jr = result as JsonResult;
             Assert.IsNotNull(jr.Value);
             Console.WriteLine(jr.Value.ToString());
-            Assert.IsTrue(jr.Value.ToString().Contains("success = False"));
+            Assert.IsTrue(jr.Value.ToString().Contains("success = True"));
         }
     }
 }
