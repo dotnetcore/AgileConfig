@@ -6,6 +6,13 @@ using System.Threading.Tasks;
 using AgileConfig.Server.IService;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver.Linq;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
+using Moq;
+using AgileConfig.Server.Common;
+using AgileConfig.Server.Data.Repository.Selector;
+using AgileConfig.Server.Data.Freesql;
+using AgileConfig.Server.Service;
 
 namespace AgileConfig.Server.ServiceTests.sqlite
 {
@@ -23,12 +30,36 @@ namespace AgileConfig.Server.ServiceTests.sqlite
                 {"db:conn","Data Source=agile_config.db" }
             });
         }
-
         [TestInitialize]
-        public void TestInitialize()
+        public async Task TestInitialize()
         {
+            Console.WriteLine("Try get configration data");
+            var dict = await GetConfigurationData();
+
+            var config = new ConfigurationBuilder()
+                             .AddInMemoryCollection(dict)
+                             .Build();
+            Global.Config = config;
+
+            ClearData();
+
+            var cache = new Mock<IMemoryCache>();
+            IServiceCollection services = new ServiceCollection();
+            services.AddScoped(_ => cache.Object);
+            services.AddSingleton<IConfiguration>(config);
+            services.AddFreeSqlFactory();
+            services.AddRepositories();
+            services.AddBusinessServices();
+
+            _serviceProvider = services.BuildServiceProvider();
+            var systeminitializationService = _serviceProvider.GetService<ISystemInitializationService>();
+            systeminitializationService.TryInitDefaultEnvironmentAsync();//初始化环境 DEV TEST STAGE PROD
+            systeminitializationService.TryInitJwtSecret();//初始化 jwt secret
+
+
             _serverNodeService = _serviceProvider.GetService<IServerNodeService>();
-            this.ClearData();
+
+            Console.WriteLine("Run TestInitialize");
         }
 
         [TestMethod()]
