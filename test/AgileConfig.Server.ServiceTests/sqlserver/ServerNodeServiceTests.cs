@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.ServiceTests.sqlserver
 {
-    [TestClass()]
     public class ServerNodeServiceTests_sqlserver: ServerNodeServiceTests
     {
         string conn = "TrustServerCertificate=True;Persist Security Info = False; User ID =dev; Password =dev; Initial Catalog =agile_config_test; Server =.";

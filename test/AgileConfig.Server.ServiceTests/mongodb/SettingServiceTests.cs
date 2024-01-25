@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.ServiceTests.mongodb
 {
-    [TestClass()]
     public class SettingServiceTests_mongo : SettingServiceTests
     {
         public override void ClearData()

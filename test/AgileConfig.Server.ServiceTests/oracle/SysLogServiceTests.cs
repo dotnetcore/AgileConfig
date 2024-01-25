@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.ServiceTests.oracle
 {
-    [TestClass()]
     public class SysLogServiceTests_oracle : SysLogServiceTests
     {
 

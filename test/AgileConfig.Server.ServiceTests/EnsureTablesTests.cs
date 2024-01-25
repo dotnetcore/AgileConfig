@@ -8,7 +8,6 @@ using AgileConfig.Server.Data.Entity;
 
 namespace AgileConfig.Server.ServiceTests
 {
-    [TestClass()]
     public class EnsureTablesTests
     {
         [TestMethod()]

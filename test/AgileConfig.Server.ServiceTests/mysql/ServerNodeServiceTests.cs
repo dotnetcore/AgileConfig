@@ -3,23 +3,40 @@ using System;
 using System.Collections.Generic;
 using AgileConfig.Server.ServiceTests.sqlite;
 using System.Threading.Tasks;
+using Testcontainers.MySql;
 
 namespace AgileConfig.Server.ServiceTests.mysql
 {
     [TestClass()]
     public class ServerNodeServiceTests_mysql : ServerNodeServiceTests
     {
-        string conn = "Database=agile_config_test;Data Source=192.168.0.125;User Id=root;Password=x;port=13306";
+        static MySqlContainer _container = new MySqlBuilder().WithImage("mysql:8.0").Build();
+
+        [ClassInitialize]
+        public static async Task ClassInit(TestContext testContext)
+        {
+            await _container.StartAsync();
+            Console.WriteLine($"MySqlContainer started");
+        }
+
+        [ClassCleanup]
+        public static async Task ClassCleanup()
+        {
+            await _container.DisposeAsync();
+            Console.WriteLine($"MySqlContainer dispose");
+        }
+
 
         public override Task<Dictionary<string, string>> GetConfigurationData()
         {
-            return
-                Task.FromResult(
-                new Dictionary<string, string>
-                {
-                {"db:provider","mysql" },
-                {"db:conn",conn }
-            });
+            var connstr = _container.GetConnectionString();
+            Console.WriteLine($"MySqlContainer connstr: {connstr}");
+
+            var dict = new Dictionary<string, string>();
+            dict["db:provider"] = "mysql";
+            dict["db:conn"] = connstr;
+
+            return Task.FromResult(dict);
         }
     }
 }

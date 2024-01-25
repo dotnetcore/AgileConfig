@@ -10,7 +10,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace AgileConfig.Server.ServiceTests.mongodb;
 
-[TestClass()]
 public class SysLogServiceTests_mongo : SysLogServiceTests
 {
     public override void ClearData()

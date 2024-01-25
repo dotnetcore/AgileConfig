@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.ServiceTests.oracle
 {
-    [TestClass()]
     public class AppServiceTests_oracle : AppServiceTests
     {
         string conn = "user id=x;password=x;data source=192.168.0.123/orcl";
