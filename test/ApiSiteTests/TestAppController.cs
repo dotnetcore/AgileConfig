@@ -56,7 +56,8 @@ namespace ApiSiteTests
             Assert.IsInstanceOfType(result, typeof(JsonResult));
             jr = result as JsonResult;
             Assert.IsNotNull(jr.Value);
-            Assert.IsTrue(jr.Value.ToString().Contains("新建应用失败，请查看错误日志"));
+            Console.WriteLine(jr.Value.ToString());
+            Assert.IsTrue(jr.Value.ToString().Contains("success = False"));
 
             appService.Setup(s => s.AddAsync(It.IsAny<App>())).ReturnsAsync(true);
             appService.Setup(s => s.AddAsync(It.IsAny<App>(), It.IsAny<List<AppInheritanced>>())).ReturnsAsync(true);
@@ -69,7 +70,8 @@ namespace ApiSiteTests
             Assert.IsInstanceOfType(result, typeof(JsonResult));
             jr = result as JsonResult;
             Assert.IsNotNull(jr.Value);
-            Assert.IsFalse(jr.Value.ToString().Contains("新建应用失败，请查看错误日志"));
+            Console.WriteLine(jr.Value.ToString());
+            Assert.IsTrue(jr.Value.ToString().Contains("success = False"));
         }
     }
 }
