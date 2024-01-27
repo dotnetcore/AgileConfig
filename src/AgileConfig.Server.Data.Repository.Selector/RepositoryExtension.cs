@@ -19,6 +19,8 @@ namespace AgileConfig.Server.Data.Repository.Selector
                 throw new ArgumentNullException(nameof(defaultProvider));
             }
 
+            Console.WriteLine($"default db provider: {defaultProvider.Provider}");
+
             #region add default fixed repositories
 
             GetRepositoryServiceRegister(defaultProvider.Provider).AddFixedRepositories(sc);

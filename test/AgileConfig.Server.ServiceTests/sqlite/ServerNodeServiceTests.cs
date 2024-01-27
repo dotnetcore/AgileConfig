@@ -36,6 +36,11 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             Console.WriteLine("Try get configration data");
             var dict = await GetConfigurationData();
 
+            foreach (var item in dict)
+            {
+                Console.WriteLine($"key: {item.Key} value: {item.Value}");
+            }
+
             var config = new ConfigurationBuilder()
                              .AddInMemoryCollection(dict)
                              .Build();
@@ -58,6 +63,8 @@ namespace AgileConfig.Server.ServiceTests.sqlite
 
 
             _serverNodeService = _serviceProvider.GetService<IServerNodeService>();
+
+            Console.WriteLine($"IServerNodeService type is {_serverNodeService.GetType().FullName}");
 
             Console.WriteLine("Run TestInitialize");
         }
