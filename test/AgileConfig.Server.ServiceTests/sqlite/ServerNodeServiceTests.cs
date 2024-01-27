@@ -45,6 +45,11 @@ namespace AgileConfig.Server.ServiceTests.sqlite
                              .AddInMemoryCollection(dict)
                              .Build();
             Global.Config = config;
+            Console.WriteLine("Global.Config list");
+            foreach (var item in Global.Config.AsEnumerable())
+            {
+                Console.WriteLine($"key: {item.Key} value: {item.Value}");
+            }
 
             ClearData();
 
