@@ -251,9 +251,10 @@ namespace AgileConfig.Server.ServiceTests.sqlite
 
             var env = "DEV";
             var id = Guid.NewGuid().ToString();
+            var appid = Guid.NewGuid().ToString();
             var source = new Config
             {
-                AppId = "001",
+                AppId = appid,
                 Id = id,
                 Group = "g",
                 Key = "k",
@@ -268,7 +269,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var id1 = Guid.NewGuid().ToString();
             var source1 = new Config
             {
-                AppId = "001",
+                AppId = appid,
                 Id = id1,
                 Group = "g",
                 Key = "k",
@@ -297,9 +298,12 @@ namespace AgileConfig.Server.ServiceTests.sqlite
 
             var env = "DEV";
             var id = Guid.NewGuid().ToString();
+            var appid1 = Guid.NewGuid().ToString();
+            var appid2 = Guid.NewGuid().ToString();
+
             var source = new Config
             {
-                AppId = "001",
+                AppId = appid1,
                 Id = id,
                 Group = "g",
                 Key = "k",
@@ -314,7 +318,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var id1 = Guid.NewGuid().ToString();
             var source1 = new Config
             {
-                AppId = "001",
+                AppId = appid1,
                 Id = id1,
                 Group = "g",
                 Key = "k",
@@ -329,7 +333,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var id2 = Guid.NewGuid().ToString();
             var source2 = new Config
             {
-                AppId = "002",
+                AppId = appid2,
                 Id = id2,
                 Group = "g",
                 Key = "k",
@@ -348,10 +352,10 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var result2 = await _service.AddAsync(source2, env);
             Assert.IsTrue(result2);
 
-            var config = await _service.GetByAppIdKeyEnv("001", "g", "k", env);
+            var config = await _service.GetByAppIdKeyEnv(appid1, "g", "k", env);
             Assert.IsNotNull(config);
 
-            var config1 = await _service.GetByAppIdKeyEnv("002", "g", "k", env);
+            var config1 = await _service.GetByAppIdKeyEnv(appid2, "g", "k", env);
             Assert.IsNull(config1);
         }
 
@@ -361,9 +365,12 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             this.ClearData();
             var id = Guid.NewGuid().ToString();
             var env = "DEV";
+            var appid1 = Guid.NewGuid().ToString();
+            var appid2 = Guid.NewGuid().ToString();
+
             var source = new Config
             {
-                AppId = "001",
+                AppId = appid1,
                 Id = id,
                 Group = "g",
                 Key = "k",
@@ -378,7 +385,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var id1 = Guid.NewGuid().ToString();
             var source1 = new Config
             {
-                AppId = "001",
+                AppId = appid1,
                 Id = id1,
                 Group = "g",
                 Key = "k",
@@ -393,7 +400,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var id2 = Guid.NewGuid().ToString();
             var source2 = new Config
             {
-                AppId = "002",
+                AppId = appid2,
                 Id = id2,
                 Group = "g",
                 Key = "k",
@@ -412,7 +419,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var result2 = await _service.AddAsync(source2, env);
             Assert.IsTrue(result2);
 
-            var configs = await _service.GetByAppIdAsync("001", env);
+            var configs = await _service.GetByAppIdAsync(appid1, env);
             Assert.IsNotNull(configs);
             Assert.AreEqual(1, configs.Count);
         }
@@ -423,9 +430,11 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             this.ClearData();
             var env = "DEV";
             var id = Guid.NewGuid().ToString();
+            var appid1 = Guid.NewGuid().ToString();
+            var appid2 = Guid.NewGuid().ToString();
             var source = new Config
             {
-                AppId = "001",
+                AppId = appid1,
                 Id = id,
                 Group = "group",
                 Key = "key",
@@ -440,7 +449,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var id1 = Guid.NewGuid().ToString();
             var source1 = new Config
             {
-                AppId = "001",
+                AppId = appid1,
                 Id = id1,
                 Group = "g",
                 Key = "k",
@@ -455,7 +464,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var id2 = Guid.NewGuid().ToString();
             var source2 = new Config
             {
-                AppId = "002",
+                AppId = appid2,
                 Id = id2,
                 Group = "g",
                 Key = "k",
@@ -474,7 +483,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var result2 = await _service.AddAsync(source2, env);
             Assert.IsTrue(result2);
 
-            var configs = await _service.Search("001", "", "", env);
+            var configs = await _service.Search(appid1, "", "", env);
             Assert.IsNotNull(configs);
             Assert.AreEqual(1, configs.Count);
             var configs1 = await _service.Search("", "o", "", env);
@@ -492,9 +501,11 @@ namespace AgileConfig.Server.ServiceTests.sqlite
 
             string env = "DEV";
             var id = Guid.NewGuid().ToString();
+            var appid = Guid.NewGuid().ToString();
+
             var source = new Config
             {
-                AppId = "001",
+                AppId = appid,
                 Id = id,
                 Group = "group",
                 Key = "key",
@@ -509,7 +520,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var id1 = Guid.NewGuid().ToString();
             var source1 = new Config
             {
-                AppId = "001",
+                AppId = appid,
                 Id = id1,
                 Group = "g",
                 Key = "k",
@@ -524,7 +535,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var id2 = Guid.NewGuid().ToString();
             var source2 = new Config
             {
-                AppId = "002",
+                AppId = "xxx",
                 Id = id2,
                 Group = "g",
                 Key = "k",
@@ -543,8 +554,8 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var result2 = await _service.AddAsync(source2, env);
             Assert.IsTrue(result2);
 
-            await _service.Publish("001", new string[] { }, "", "", env);
-            await _service.Publish("002", new string[] { }, "", "", env);
+            await _service.Publish(appid, new string[] { }, "", "", env);
+            await _service.Publish("xxx", new string[] { }, "", "", env);
 
             var count = await _service.CountEnabledConfigsAsync();
             Assert.AreEqual(1, count);
@@ -557,9 +568,13 @@ namespace AgileConfig.Server.ServiceTests.sqlite
 
             string env = "DEV";
             var id = Guid.NewGuid().ToString();
+            var app1 = Guid.NewGuid().ToString();
+            var app2 = Guid.NewGuid().ToString();
+
+
             var source = new Config
             {
-                AppId = "001",
+                AppId = app1,
                 Id = id,
                 Group = "group",
                 Key = "key",
@@ -574,7 +589,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var id1 = Guid.NewGuid().ToString();
             var source1 = new Config
             {
-                AppId = "001",
+                AppId = app1,
                 Id = id1,
                 Group = "g",
                 Key = "k",
@@ -590,7 +605,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var id2 = Guid.NewGuid().ToString();
             var source2 = new Config
             {
-                AppId = "002",
+                AppId = app2,
                 Id = id2,
                 Group = "g",
                 Key = "k",
@@ -609,7 +624,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var result2 = await _service.AddAsync(source2, env);
             Assert.IsTrue(result2);
 
-            var md5 = await _service.AppPublishedConfigsMd5("001", env);
+            var md5 = await _service.AppPublishedConfigsMd5(app1, env);
             Assert.IsNotNull(md5);
         }
 
@@ -624,9 +639,12 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             this.ClearData();
 
             var id = Guid.NewGuid().ToString();
+            var app1 = Guid.NewGuid().ToString();
+            var app2 = Guid.NewGuid().ToString();
+
             var source = new Config
             {
-                AppId = "001",
+                AppId = app1,
                 Id = id,
                 Group = "group",
                 Key = "key",
@@ -640,7 +658,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var id1 = Guid.NewGuid().ToString();
             var source1 = new Config
             {
-                AppId = "001",
+                AppId = app1,
                 Id = id1,
                 Group = "g",
                 Key = "k",
@@ -654,7 +672,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var id2 = Guid.NewGuid().ToString();
             var source2 = new Config
             {
-                AppId = "002",
+                AppId = app2,
                 Id = id2,
                 Group = "g",
                 Key = "k",
@@ -678,9 +696,13 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         public async Task AddRangeAsyncTest()
         {
             var id = Guid.NewGuid().ToString();
+            var app1 = Guid.NewGuid().ToString();
+            var app2 = Guid.NewGuid().ToString();
+            var env = "DEV";
+
             var source = new Config
             {
-                AppId = "001",
+                AppId = app1,
                 Id = id,
                 Group = "group",
                 Key = "key",
@@ -689,12 +711,13 @@ namespace AgileConfig.Server.ServiceTests.sqlite
                 CreateTime = DateTime.Now,
                 UpdateTime = DateTime.Now,
                 Status = ConfigStatus.Enabled,
-                OnlineStatus = OnlineStatus.Online
+                OnlineStatus = OnlineStatus.Online,
+                Env = env
             };
             var id1 = Guid.NewGuid().ToString();
             var source1 = new Config
             {
-                AppId = "001",
+                AppId = app1,
                 Id = id1,
                 Group = "g",
                 Key = "k",
@@ -703,18 +726,19 @@ namespace AgileConfig.Server.ServiceTests.sqlite
                 CreateTime = DateTime.Now,
                 UpdateTime = DateTime.Now,
                 Status = ConfigStatus.Deleted,
-                OnlineStatus = OnlineStatus.Online
+                OnlineStatus = OnlineStatus.Online,
+                Env = env
             };
 
             var result = await _service.AddRangeAsync(new List<Config> {
                 source,
                 source1
-            }, "");
+            }, env);
             Assert.IsTrue(result);
 
-            var config = await _service.GetAsync(id, "");
+            var config = await _service.GetAsync(id, env);
             Assert.IsNotNull(config);
-            var config1 = await _service.GetAsync(id1, "");
+            var config1 = await _service.GetAsync(id1, env);
             Assert.IsNotNull(config1);
         }
 

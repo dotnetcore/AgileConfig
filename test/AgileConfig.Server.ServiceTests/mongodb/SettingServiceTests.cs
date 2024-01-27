@@ -13,6 +13,7 @@ namespace AgileConfig.Server.ServiceTests.mongodb
         public override void ClearData()
         {
         }
+
         static MongoDbContainer _container = new MongoDbBuilder().WithImage("mongo:6.0").Build();
 
         [ClassInitialize]
