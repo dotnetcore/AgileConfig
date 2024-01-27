@@ -23,7 +23,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         private readonly IJwtService _jwtService;
         private readonly IOidcClient _oidcClient;
         public AdminController(
-            ISettingService settingService, 
+            ISettingService settingService,
             IUserService userService,
             IPremissionService permissionService,
             IJwtService jwtService,
@@ -54,7 +54,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _userService.ValidateUserPassword(userName, model.password);
             if (result)
             {
-                var response =  await LoginSuccessful(userName);
+                var response = await LoginSuccessful(userName);
                 return Json(response);
             }
 
@@ -133,6 +133,14 @@ namespace AgileConfig.Server.Apisite.Controllers
                 };
                 await _userService.AddAsync(newUser);
                 await _userService.UpdateUserRolesAsync(newUser.Id, new List<Role> { Role.NormalUser });
+            }
+            else if (user.Status == UserStatus.Deleted)
+            {
+                return Json(new
+                {
+                    status = "error",
+                    message = "该用户已被删除"
+                });
             }
 
             var response = await LoginSuccessful(userInfo.UserName);

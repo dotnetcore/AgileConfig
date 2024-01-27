@@ -24,5 +24,7 @@ namespace AgileConfig.Server.Common
                 _loggerFactory = value;
             }
         }
+
+        public const string DefaultHttpClientName = "Default";
     }
 }

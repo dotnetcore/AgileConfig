@@ -56,6 +56,8 @@ namespace AgileConfig.Server.Apisite.Websocket
                         appId = appIdSecret.Item1;
                     }
 
+                    appId = HttpUtility.UrlDecode(appId);
+
                     var env = context.Request.Headers["env"];
                     if (!string.IsNullOrEmpty(env))
                     {

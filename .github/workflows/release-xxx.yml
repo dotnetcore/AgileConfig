@@ -7,7 +7,7 @@ on:
       - '**/*.yml'
     tags:        
       - 'v-*'
-    
+  workflow_dispatch:  
 jobs:
   build-reactapp:
     runs-on: ubuntu-latest
@@ -40,7 +40,7 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 6.0.100
+        dotnet-version: 8.0.*
     - name: Install dependencies
       run: dotnet restore
     - name: Build
@@ -50,10 +50,10 @@ jobs:
         name: agileconfig-ui
         path: src/AgileConfig.Server.Apisite/wwwroot/ui
     - name: build server release xxx
-      run: dotnet publish AgileConfig.Server.Apisite/AgileConfig.Server.Apisite.csproj -c Release
+      run: dotnet publish src/AgileConfig.Server.Apisite/AgileConfig.Server.Apisite.csproj -c Release
     - uses: vimtor/action-zip@v1
       with:
-        files: AgileConfig.Server.Apisite/bin/Release/net6.0/publish/
+        files: src/AgileConfig.Server.Apisite/bin/Release/net8.0/publish/
         dest: agileconfig_server_deploy.zip
     - name: create release
       uses: ncipollo/release-action@v1
