@@ -15,6 +15,7 @@
 ![Nuget](https://img.shields.io/nuget/dt/agileconfig.client?label=client%20download)
 ![Docker image](https://img.shields.io/docker/v/kklldog/agile_config?label=docker%20image)
 ![GitHub license](https://img.shields.io/github/license/kklldog/AgileConfig)
+![build workflow](https://github.com/dotnetcore/AgileConfig/actions/workflows/master-ci.yml/badge.svg)
     
 # [English](https://github.com/kklldog/AgileConfig/blob/master/README_EN.md) | [中文](https://github.com/kklldog/AgileConfig/blob/master/README.md)
     
