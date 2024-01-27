@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AgileConfig.Server.Data.Abstraction;
-using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.Data.Repository.Mongodb;
-using AgileConfig.Server.IService;
 using AgileConfig.Server.ServiceTests.sqlite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Testcontainers.MongoDb;
 
 namespace AgileConfig.Server.ServiceTests.mongodb;
 
+[TestClass()]
 public class SysLogServiceTests_mongo : SysLogServiceTests
 {
     public override void ClearData()
     {
-        var repository = new SysLogRepository(conn);
+        var repository = new SysLogRepository(_container.GetConnectionString());
        var syslogs = repository.AllAsync().Result;
         foreach (var log in syslogs)
         {
@@ -22,16 +21,32 @@ public class SysLogServiceTests_mongo : SysLogServiceTests
         }
     }
 
-    string conn = "mongodb://192.168.0.125:27017/agile_config_1";
+    static MongoDbContainer _container = new MongoDbBuilder().WithImage("mongo:6.0").Build();
+
+    [ClassInitialize]
+    public static async Task ClassInit(TestContext testContext)
+    {
+        await _container.StartAsync();
+        Console.WriteLine($"MongoDbContainer started");
+    }
+
+    [ClassCleanup]
+    public static async Task ClassCleanup()
+    {
+        await _container.DisposeAsync();
+        Console.WriteLine($"MongoDbContainer dispose");
+    }
+
 
     public override Task<Dictionary<string, string>> GetConfigurationData()
     {
-        return
-            Task.FromResult(
-            new Dictionary<string, string>
-            {
-                {"db:provider","mongodb" },
-                {"db:conn",conn }
-        });
+        var connstr = _container.GetConnectionString();
+        Console.WriteLine($"MongoDbContainer connstr: {connstr}");
+
+        var dict = new Dictionary<string, string>();
+        dict["db:provider"] = "mongodb";
+        dict["db:conn"] = connstr;
+
+        return Task.FromResult(dict);
     }
 }
