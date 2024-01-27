@@ -1,8 +1,7 @@
-name: package workflow
+name: test tag release workflow
 
 on:
   push:
-    branches: [ master ]
     paths-ignore: 
       - '**/*.md'
       - '**/*.yml'
