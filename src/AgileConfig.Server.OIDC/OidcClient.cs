@@ -1,4 +1,5 @@
-﻿using AgileConfig.Server.OIDC.SettingProvider;
+﻿using AgileConfig.Server.Common;
+using AgileConfig.Server.OIDC.SettingProvider;
 using AgileConfig.Server.OIDC.TokenEndpointAuthMethods;
 using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
@@ -10,11 +11,13 @@ namespace AgileConfig.Server.OIDC
     {
         private readonly IOidcSettingProvider _oidcSettingProvider;
         private readonly OidcSetting _oidcSetting;
+        private readonly IHttpClientFactory _httpClientFactory;
 
         public OidcSetting OidcSetting => _oidcSetting;
 
-        public OidcClient(IOidcSettingProvider oidcSettingProvider)
+        public OidcClient(IOidcSettingProvider oidcSettingProvider, IHttpClientFactory httpClientFactory)
         {
+            _httpClientFactory = httpClientFactory;
             _oidcSettingProvider = oidcSettingProvider;
             _oidcSetting = _oidcSettingProvider.GetSetting();
         }
@@ -35,7 +38,8 @@ namespace AgileConfig.Server.OIDC
             var authMethod = TokenEndpointAuthMethodFactory.Create(_oidcSetting.TokenEndpointAuthMethod);
             var httpContent = authMethod.GetAuthHttpContent(code, _oidcSetting);
 
-            using var httpclient = new HttpClient();
+
+            var httpclient = _httpClientFactory.CreateClient(Global.DefaultHttpClientName);
             if (!string.IsNullOrEmpty(httpContent.BasicAuthorizationString))
             {
                 httpclient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", httpContent.BasicAuthorizationString);

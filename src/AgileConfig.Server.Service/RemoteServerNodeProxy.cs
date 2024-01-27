@@ -1,39 +1,20 @@
 ﻿using Agile.Config.Protocol;
 using AgileConfig.Server.Common;
+using AgileConfig.Server.Common.RestClient;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.IService;
-using AgileHttp;
-using AgileHttp.serialize;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Security.Policy;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 
 namespace AgileConfig.Server.Service
 {
     public class RemoteServerNodeProxy : IRemoteServerNodeProxy
     {
-        internal class SerializeProvider : ISerializeProvider
-        {
-            public T Deserialize<T>(string content)
-            {
-                return JsonConvert.DeserializeObject<T>(content, new JsonSerializerSettings
-                {
-                    ContractResolver = new CamelCasePropertyNamesContractResolver()
-                });
-            }
-
-            public string Serialize(object obj)
-            {
-                return JsonConvert.SerializeObject(obj);
-            }
-        }
-
         private IServerNodeService GetServerNodeService()
         {
             return new ServerNodeService(new FreeSqlContext(FreeSQL.Instance));
@@ -48,33 +29,25 @@ namespace AgileConfig.Server.Service
 
         private static ConcurrentDictionary<string, ClientInfos> _serverNodeClientReports =
             new ConcurrentDictionary<string, ClientInfos>();
+        private readonly IRestClient _restClient;
 
-        public RemoteServerNodeProxy(ILoggerFactory loggerFactory)
+        public RemoteServerNodeProxy(ILoggerFactory loggerFactory, IRestClient restClient)
         {
             _logger = loggerFactory.CreateLogger<RemoteServerNodeProxy>();
+            _restClient = restClient;
         }
 
         public async Task<bool> AllClientsDoActionAsync(string address, WebsocketAction action)
         {
             var result = await FunctionUtil.TRYAsync(async () =>
             {
-                using (var resp = await (address + "/RemoteOP/AllClientsDoAction")
-                    .AsHttp("POST", action)
-                    .Config(new RequestOptions { ContentType = "application/json" })
-                    .SendAsync())
+                dynamic result = await _restClient.PostAsync<dynamic>(address + "/RemoteOP/AllClientsDoAction", action);
+                if ((bool)result.success)
                 {
-                    if (resp.StatusCode == System.Net.HttpStatusCode.OK)
-                    {
-                        var result = resp.Deserialize<dynamic>();
-
-                        if ((bool)result.success)
-                        {
-                            return true;
-                        }
-                    }
-
-                    return false;
+                    return true;
                 }
+
+                return false;
             }, 5);
 
             using (var service = GetSysLogService())
@@ -103,23 +76,14 @@ namespace AgileConfig.Server.Service
         {
             var result = await FunctionUtil.TRYAsync(async () =>
             {
-                using (var resp = await (address + "/RemoteOP/AppClientsDoAction".AppendQueryString("appId", appId).AppendQueryString("env", env))
-                    .AsHttp("POST", action)
-                    .Config(new RequestOptions { ContentType = "application/json" })
-                    .SendAsync())
+                var url = $"{address}/RemoteOP/AppClientsDoAction?appId={Uri.EscapeDataString(appId)}&env={env}";
+                dynamic result = await _restClient.PostAsync<dynamic>(url, action);
+                if ((bool)result.success)
                 {
-                    if (resp.StatusCode == System.Net.HttpStatusCode.OK)
-                    {
-                        var result = resp.Deserialize<dynamic>();
-
-                        if ((bool)result.success)
-                        {
-                            return true;
-                        }
-                    }
-
-                    return false;
+                    return true;
                 }
+
+                return false;
             }, 5);
 
             using (var service = GetSysLogService())
@@ -149,36 +113,28 @@ namespace AgileConfig.Server.Service
         {
             var result = await FunctionUtil.TRYAsync(async () =>
             {
-                using (var resp = await (address + "/RemoteOP/OneClientDoAction?clientId=" + clientId)
-                    .AsHttp("POST", action)
-                    .Config(new RequestOptions { ContentType = "application/json" })
-                    .SendAsync())
+                var url = $"{address}/RemoteOP/OneClientDoAction?clientId={clientId}";
+                dynamic result = await _restClient.PostAsync<dynamic>(url, action);
+
+                if ((bool)result.success)
                 {
-                    if (resp.StatusCode == System.Net.HttpStatusCode.OK)
+                    if (action.Action == ActionConst.Offline)
                     {
-                        var result = resp.Deserialize<dynamic>();
-
-                        if ((bool)result.success)
+                        if (_serverNodeClientReports.ContainsKey(address))
                         {
-                            if (action.Action == ActionConst.Offline)
+                            if (_serverNodeClientReports[address].Infos != null)
                             {
-                                if (_serverNodeClientReports.ContainsKey(address))
-                                {
-                                    if (_serverNodeClientReports[address].Infos != null)
-                                    {
-                                        var report = _serverNodeClientReports[address];
-                                        report.Infos.RemoveAll(c => c.Id == clientId);
-                                        report.ClientCount = report.Infos.Count;
-                                    }
-                                }
+                                var report = _serverNodeClientReports[address];
+                                report.Infos.RemoveAll(c => c.Id == clientId);
+                                report.ClientCount = report.Infos.Count;
                             }
-
-                            return true;
                         }
                     }
 
-                    return false;
+                    return true;
                 }
+
+                return false;
             }, 5);
 
             using (var service = GetSysLogService())
@@ -216,25 +172,20 @@ namespace AgileConfig.Server.Service
 
             try
             {
-                using (var resp = await (address + "/report/Clients").AsHttp()
-               .Config(new RequestOptions(new SerializeProvider())).SendAsync())
-                {
-                    if (resp.StatusCode == System.Net.HttpStatusCode.OK)
-                    {
-                        var clients = resp.Deserialize<ClientInfos>();
-                        if (clients != null)
-                        {
-                            clients.Infos?.ForEach(i => { i.Address = address; });
-                            return clients;
-                        }
-                    }
+                var url = address + "/report/Clients";
 
-                    return new ClientInfos()
-                    {
-                        ClientCount = 0,
-                        Infos = new List<ClientInfo>()
-                    };
+                var clients = await _restClient.GetAsync<ClientInfos>(url);
+                if (clients != null)
+                {
+                    clients.Infos?.ForEach(i => { i.Address = address; });
+                    return clients;
                 }
+
+                return new ClientInfos()
+                {
+                    ClientCount = 0,
+                    Infos = new List<ClientInfo>()
+                };
             }
             catch (Exception ex)
             {
@@ -254,8 +205,11 @@ namespace AgileConfig.Server.Service
             var node = await service.GetAsync(address);
             try
             {
-                using var resp = await (node.Address + "/home/echo").AsHttp().SendAsync();
-                if (resp.StatusCode == System.Net.HttpStatusCode.OK && (await resp.GetResponseContentAsync()) == "ok")
+                var url = node.Address + "/home/echo";
+
+                using var resp = await _restClient.GetAsync(url);
+
+                if (resp.StatusCode == System.Net.HttpStatusCode.OK && (await resp.Content.ReadAsStringAsync()) == "ok")
                 {
                     node.LastEchoTime = DateTime.Now;
                     node.Status = NodeStatus.Online;
@@ -311,8 +265,9 @@ namespace AgileConfig.Server.Service
         public async Task ClearConfigServiceCache(string address)
         {
             try
-            { 
-                await (address + "/RemoteOP/ClearConfigServiceCache").AsHttp("POST").SendAsync();
+            {
+                var url = (address + "/RemoteOP/ClearConfigServiceCache");
+                using var resp = await _restClient.PostAsync(url, null);
             }
             catch (Exception e)
             {
@@ -323,8 +278,11 @@ namespace AgileConfig.Server.Service
         public async Task ClearServiceInfoCache(string address)
         {
             try
-            { 
-                await (address + "/RemoteOP/ClearServiceInfoCache").AsHttp("POST").SendAsync();
+            {
+                var url = (address + "/RemoteOP/ClearServiceInfoCache");
+
+                await _restClient.PostAsync(url, null);
+
             }
             catch (Exception e)
             {

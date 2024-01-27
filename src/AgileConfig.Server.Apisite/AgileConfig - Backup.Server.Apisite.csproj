@@ -5,9 +5,9 @@
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
     <AssemblyVersion>1.8</AssemblyVersion>
     <Version>1.8</Version>
-    <PackageVersion>1.8</PackageVersion>
+    <PackageVersion>1.6.20</PackageVersion>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <FileVersion>1.8</FileVersion>
+    <FileVersion>1.7.3</FileVersion>
     <Authors>kklldog</Authors>
     <Company>kklldog</Company>
   </PropertyGroup>

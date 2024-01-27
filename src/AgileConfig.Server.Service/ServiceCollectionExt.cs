@@ -1,4 +1,5 @@
-﻿using AgileConfig.Server.IService;
+﻿using AgileConfig.Server.Common.RestClient;
+using AgileConfig.Server.IService;
 using AgileConfig.Server.Service.EventRegisterService;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,11 +11,11 @@ namespace AgileConfig.Server.Service
         {
             sc.AddSingleton<IJwtService, JwtService>();
 
-            sc.AddSingleton<IRemoteServerNodeProxy, RemoteServerNodeProxy>();
-            sc.AddSingleton<IEventRegister, EventRegister>();
-            sc.AddSingleton<IServiceHealthCheckService, ServiceHealthCheckService>();
-            sc.AddSingleton<IServiceInfoService, ServiceInfoService>();
-            
+            sc.AddScoped<IRemoteServerNodeProxy, RemoteServerNodeProxy>();
+            sc.AddScoped<IEventRegister, EventRegister>();
+            sc.AddScoped<IServiceHealthCheckService, ServiceHealthCheckService>();
+            sc.AddScoped<IServiceInfoService, ServiceInfoService>();
+
             sc.AddScoped<IAppService, AppService>();
             sc.AddScoped<IConfigService, ConfigService>();
             sc.AddScoped<IServerNodeService, ServerNodeService>();

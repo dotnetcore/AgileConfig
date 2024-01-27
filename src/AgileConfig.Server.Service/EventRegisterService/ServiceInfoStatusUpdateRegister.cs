@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Agile.Config.Protocol;
 using AgileConfig.Server.Common;
+using AgileConfig.Server.Common.RestClient;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.IService;
-using AgileHttp;
 using Microsoft.Extensions.Logging;
 
 namespace AgileConfig.Server.Service.EventRegisterService;
@@ -15,11 +16,17 @@ namespace AgileConfig.Server.Service.EventRegisterService;
 internal class ServiceInfoStatusUpdateRegister : IEventRegister
 {
     private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
+    private readonly IRestClient _restClient;
     private ILogger _logger;
 
-    public ServiceInfoStatusUpdateRegister(IRemoteServerNodeProxy remoteServerNodeProxy, ILoggerFactory loggerFactory)
+    public ServiceInfoStatusUpdateRegister(
+        IRemoteServerNodeProxy remoteServerNodeProxy,
+        ILoggerFactory loggerFactory,
+        IRestClient restClient
+        )
     {
         _remoteServerNodeProxy = remoteServerNodeProxy;
+        _restClient = restClient;
         _logger = loggerFactory.CreateLogger<ServiceInfoStatusUpdateRegister>();
     }
 
@@ -129,14 +136,11 @@ internal class ServiceInfoStatusUpdateRegister : IEventRegister
         {
             await FunctionUtil.TRYAsync(async () =>
             {
-                var resp = await service.AlarmUrl.AsHttp("POST", msg).Config(new RequestOptions()
-                {
-                    ContentType = "application/json"
-                }).SendAsync();
-                if (resp.Exception != null)
-                {
-                    throw resp.Exception;
-                }
+                var content = new StringContent("");
+                content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+                using var resp = await _restClient.PostAsync(service.AlarmUrl, null);
+
+                resp.EnsureSuccessStatusCode();
 
                 return resp.StatusCode == HttpStatusCode.OK;
             }, 5);

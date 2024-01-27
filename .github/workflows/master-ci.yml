@@ -8,6 +8,7 @@ on:
       - '**/*.yml'
   pull_request:
     branches: [ master ]
+  workflow_dispatch:
 
 jobs:
   build-reactapp:
@@ -41,7 +42,7 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 6.0.100
+        dotnet-version: 8.0.*
     - name: Install dependencies
       run: dotnet restore
     - name: Build

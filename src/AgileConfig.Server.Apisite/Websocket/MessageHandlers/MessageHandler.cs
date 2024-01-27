@@ -4,6 +4,7 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using Agile.Config.Protocol;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Http;
@@ -58,10 +59,12 @@ internal class MessageHandler : IMessageHandler
             message = "";
         }
 
-        if (message == "ping")
+        // "ping" is old version
+        if (message == "ping" || message == "c:ping")
         {
             //如果是ping，回复本地数据的md5版本 
             var appId = request.Headers["appid"];
+            appId = HttpUtility.UrlDecode(appId);
             var env = request.Headers["env"];
             env = await _configService.IfEnvEmptySetDefaultAsync(env);
             var md5 = await _configService.AppPublishedConfigsMd5CacheWithInheritanced(appId, env);

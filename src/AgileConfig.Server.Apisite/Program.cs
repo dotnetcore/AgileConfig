@@ -1,12 +1,8 @@
 ﻿using System;
-using System.IO;
 using AgileConfig.Server.Common;
-using AgileConfig.Server.IService;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using NLog.Web;
 
 namespace AgileConfig.Server.Apisite
