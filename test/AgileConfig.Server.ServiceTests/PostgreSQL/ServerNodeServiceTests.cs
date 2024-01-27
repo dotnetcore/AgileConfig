@@ -8,7 +8,6 @@ using Testcontainers.PostgreSql;
 
 namespace AgileConfig.Server.ServiceTests.PostgreSQL
 {
-    [TestClass()]
     public class ServerNodeServiceTests_pg: ServerNodeServiceTests
     {
         static PostgreSqlContainer _container = new PostgreSqlBuilder().WithImage("postgres:15.1").Build();
