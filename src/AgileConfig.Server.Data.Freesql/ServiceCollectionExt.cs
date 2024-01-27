@@ -8,6 +8,7 @@ namespace AgileConfig.Server.Data.Freesql
         public static void AddFreeSqlFactory(this IServiceCollection sc)
         {
             sc.AddScoped<IUow, FreeSqlUow>();
+            sc.AddSingleton<IMyFreeSQL, MyFreeSQL>();
             sc.AddSingleton<IFreeSqlFactory, EnvFreeSqlFactory>();
         }
     }

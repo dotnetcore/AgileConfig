@@ -4,19 +4,25 @@ using System.Collections.Generic;
 
 namespace AgileConfig.Server.Data.Freesql
 {
-    public static class FreeSQL
+    public class MyFreeSQL : IMyFreeSQL
     {
-        private static Dictionary<string, IFreeSql> _envFreesqls = new();
+        private Dictionary<string, IFreeSql> _envFreesqls = new();
         private static object _lock = new object();
+        private readonly IDbConfigInfoFactory _dbConfigInfoFactory;
+
+        public MyFreeSQL(IDbConfigInfoFactory dbConfigInfoFactory)
+        {
+            this._dbConfigInfoFactory = dbConfigInfoFactory;
+        }
 
         /// <summary>
         /// 根据环境配置的字符串返回freesql 实例
         /// </summary>
         /// <param name="env"></param>
         /// <returns></returns>
-        public static IFreeSql GetInstanceByEnv(string env)
+        public IFreeSql GetInstanceByEnv(string env)
         {
-            var dbConfig = DbConfigInfoFactory.GetConfigInfo(env);
+            var dbConfig = _dbConfigInfoFactory.GetConfigInfo(env);
 
             var dbType = ProviderToFreesqlDbType(dbConfig.Provider);
             if (!dbType.HasValue)

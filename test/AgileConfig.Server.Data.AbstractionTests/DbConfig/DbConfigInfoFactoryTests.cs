@@ -28,17 +28,17 @@ namespace AgileConfig.Server.Data.AbstractionTests.DbConfig
             var configuration = configurationBuilder.Build();
             Global.Config = configuration;
 
-            var configInfo = DbConfigInfoFactory.GetConfigInfo();
+            var configInfo = new DbConfigInfoFactory(configuration).GetConfigInfo();
             Assert.IsNotNull(configInfo);
             Assert.AreEqual("sqlserver", configInfo.Provider);
             Assert.AreEqual("localhost", configInfo.ConnectionString);
 
-            configInfo = DbConfigInfoFactory.GetConfigInfo("test");
+            configInfo = new DbConfigInfoFactory(configuration).GetConfigInfo("test");
             Assert.IsNotNull(configInfo);
             Assert.AreEqual("sqlite", configInfo.Provider);
             Assert.AreEqual("Data Source=agile_config.db", configInfo.ConnectionString);
 
-            configInfo = DbConfigInfoFactory.GetConfigInfo("x");
+            configInfo = new DbConfigInfoFactory(configuration).GetConfigInfo("x");
             Assert.IsNotNull(configInfo);
             Assert.AreEqual("sqlserver", configInfo.Provider);
             Assert.AreEqual("localhost", configInfo.ConnectionString);

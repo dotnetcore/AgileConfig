@@ -4,10 +4,11 @@ using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Abstraction;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
+using Microsoft.Extensions.Configuration;
 
 namespace AgileConfig.Server.Service;
 
-public class SystemInitializationService(ISysInitRepository sysInitRepository):ISystemInitializationService
+public class SystemInitializationService(ISysInitRepository sysInitRepository, IConfiguration configuration):ISystemInitializationService
 {
     /// <summary>
     /// 如果 配置文件或者环境变量没配置 JwtSetting:SecurityKey 则生成一个存库
@@ -15,7 +16,7 @@ public class SystemInitializationService(ISysInitRepository sysInitRepository):I
     /// <returns></returns>
     public bool TryInitJwtSecret()
     {
-        var jwtSecretFromConfig = Global.Config["JwtSetting:SecurityKey"];
+        var jwtSecretFromConfig = configuration["JwtSetting:SecurityKey"];
         if (string.IsNullOrEmpty(jwtSecretFromConfig))
         {
             var jwtSecretSetting = sysInitRepository.GetJwtTokenSecret();

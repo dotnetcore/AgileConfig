@@ -20,28 +20,30 @@ namespace AgileConfig.Server.Data.Repository.Mongodb
 
         public T GetServiceByEnv<T>(IServiceProvider sp, string env) where T : class
         {
+            var dbConfigInfoFactory = sp.GetRequiredService<IDbConfigInfoFactory>();
+
             if (typeof(T) == typeof(IUow))
             {
                 return new MongodbUow() as T;
             }
             if (typeof(T) == typeof(IConfigPublishedRepository))
             {
-                var envDbConfig = DbConfigInfoFactory.GetConfigInfo(env);
+                var envDbConfig = dbConfigInfoFactory.GetConfigInfo(env);
                 return new ConfigPublishedRepository(envDbConfig.ConnectionString) as T;
             }
             if (typeof(T) == typeof(IConfigRepository))
             {
-                var envDbConfig = DbConfigInfoFactory.GetConfigInfo(env);
+                var envDbConfig = dbConfigInfoFactory.GetConfigInfo(env);
                 return new ConfigRepository(envDbConfig.ConnectionString) as T;
             }
             if (typeof(T) == typeof(IPublishDetailRepository))
             {
-                var envDbConfig = DbConfigInfoFactory.GetConfigInfo(env);
+                var envDbConfig = dbConfigInfoFactory.GetConfigInfo(env);
                 return new PublishDetailRepository(envDbConfig.ConnectionString) as T;
             }
             if (typeof(T) == typeof(IPublishTimelineRepository))
             {
-                var envDbConfig = DbConfigInfoFactory.GetConfigInfo(env);
+                var envDbConfig = dbConfigInfoFactory.GetConfigInfo(env);
                 return new PublishTimelineRepository(envDbConfig.ConnectionString) as T;
             }
 

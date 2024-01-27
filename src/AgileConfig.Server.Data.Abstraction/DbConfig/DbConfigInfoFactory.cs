@@ -1,20 +1,23 @@
 ﻿using AgileConfig.Server.Common;
+using Microsoft.Extensions.Configuration;
 using System.Collections.Concurrent;
 
 namespace AgileConfig.Server.Data.Abstraction.DbProvider
 {
-    public static class DbConfigInfoFactory
+    public class DbConfigInfoFactory : IDbConfigInfoFactory
     {
-        private static ConcurrentDictionary<string, IDbConfigInfo> _envProviders = new ConcurrentDictionary<string, IDbConfigInfo>();
-        private static IDbConfigInfo _default { get; }
+        private ConcurrentDictionary<string, IDbConfigInfo> _envProviders = new ConcurrentDictionary<string, IDbConfigInfo>();
+        private readonly IConfiguration _configuration;
 
-        static DbConfigInfoFactory()
+        private IDbConfigInfo _default { get; }
+
+        public DbConfigInfoFactory(IConfiguration configuration)
         {
             var providerPath = $"db:provider";
             var connPath = $"db:conn";
 
-            var providerValue = Global.Config[providerPath];
-            var connValue = Global.Config[connPath];
+            var providerValue = configuration[providerPath];
+            var connValue = configuration[connPath];
 
             if (string.IsNullOrEmpty(providerValue))
             {
@@ -28,9 +31,10 @@ namespace AgileConfig.Server.Data.Abstraction.DbProvider
             var configInfo = new DbConfigInfo("", providerValue, connValue);
             _default = configInfo;
             _envProviders.TryAdd(providerPath, configInfo);
+            this._configuration = configuration;
         }
 
-        public static IDbConfigInfo GetConfigInfo(string env = "")
+        public IDbConfigInfo GetConfigInfo(string env = "")
         {
             if (string.IsNullOrEmpty(env))
             {
@@ -49,8 +53,8 @@ namespace AgileConfig.Server.Data.Abstraction.DbProvider
                 return configInfo;
             }
 
-            var providerValue = Global.Config[providerPath];
-            var connValue = Global.Config[connPath];
+            var providerValue = _configuration[providerPath];
+            var connValue = _configuration[connPath];
 
             if (string.IsNullOrEmpty(providerValue))
             {

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using AgileConfig.Server.Common;
+using AgileConfig.Server.Data.Abstraction.DbProvider;
 
 namespace AgileConfig.Server.Data.Freesql.Tests
 {
@@ -27,20 +28,22 @@ namespace AgileConfig.Server.Data.Freesql.Tests
             var configuration = configurationBuilder.Build();
             Global.Config = configuration;
 
-            var fsq = FreeSQL.GetInstanceByEnv("");
+            var myfreesql = new MyFreeSQL(new DbConfigInfoFactory(configuration));
+
+            var fsq = myfreesql.GetInstanceByEnv("");
             Assert.IsNotNull(fsq);
             Assert.AreEqual(FreeSql.DataType.Sqlite, fsq.Ado.DataType);
 
-            var fsqtest = FreeSQL.GetInstanceByEnv("test");
+            var fsqtest = myfreesql.GetInstanceByEnv("test");
             Assert.IsNotNull(fsqtest);
             Assert.AreEqual(FreeSql.DataType.Sqlite, fsqtest.Ado.DataType);
 
             Assert.AreNotSame(fsq, fsqtest);
-            var fsqtest_ag = FreeSQL.GetInstanceByEnv("test");
+            var fsqtest_ag = myfreesql.GetInstanceByEnv("test");
             Assert.AreSame(fsqtest, fsqtest_ag);
 
 
-            var fsq_none = FreeSQL.GetInstanceByEnv("x");
+            var fsq_none = myfreesql.GetInstanceByEnv("x");
             Assert.IsNotNull(fsq_none);
             Assert.AreEqual(FreeSql.DataType.Sqlite, fsq_none.Ado.DataType);
             Assert.AreSame(fsq, fsq_none);

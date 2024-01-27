@@ -1,5 +1,6 @@
 ﻿using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Abstraction;
+using AgileConfig.Server.Data.Abstraction.DbProvider;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.Data.Repository.Freesql;
@@ -22,13 +23,37 @@ namespace AgileConfig.Server.ServiceTests.sqlite
 
         public virtual Task<Dictionary<string, string>> GetConfigurationData()
         {
-            return null;
+            return
+              null;
+        }
+
+        public IFreeSql GetFreeSql()
+        {
+            var dict = this.GetConfigurationData().Result;
+
+            var config = new ConfigurationBuilder()
+                       .AddInMemoryCollection(dict)
+                       .Build();
+
+            var myfreesql = new MyFreeSQL(new DbConfigInfoFactory(config));
+            var factory = new EnvFreeSqlFactory(myfreesql);
+            var fsq = factory.Create("");
+
+            return fsq;
         }
 
         public virtual void ClearData()
         {
-            var factory = new EnvFreeSqlFactory();
-            var fsq = factory.Create("");
+            var dict = new Dictionary<string, string>
+                 {
+                {"db:provider","sqlite" },
+                {"db:conn","Data Source=agile_config.db" }
+             };
+            var config = new ConfigurationBuilder()
+                         .AddInMemoryCollection(dict)
+                         .Build();
+       
+            var fsq = GetFreeSql();
 
             fsq.Delete<ServerNode>().Where("1=1").ExecuteAffrows();
             fsq.Delete<App>().Where("1=1").ExecuteAffrows();

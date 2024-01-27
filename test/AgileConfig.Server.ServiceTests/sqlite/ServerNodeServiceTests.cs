@@ -13,6 +13,7 @@ using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Repository.Selector;
 using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.Service;
+using AgileConfig.Server.Data.Abstraction;
 
 namespace AgileConfig.Server.ServiceTests.sqlite
 {
@@ -44,19 +45,17 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             var config = new ConfigurationBuilder()
                              .AddInMemoryCollection(dict)
                              .Build();
-            Global.Config = config;
-            Console.WriteLine("Global.Config list");
-            foreach (var item in Global.Config.AsEnumerable())
+            Console.WriteLine("Config list");
+            foreach (var item in config.AsEnumerable())
             {
                 Console.WriteLine($"key: {item.Key} value: {item.Value}");
             }
-
-            ClearData();
 
             var cache = new Mock<IMemoryCache>();
             IServiceCollection services = new ServiceCollection();
             services.AddScoped(_ => cache.Object);
             services.AddSingleton<IConfiguration>(config);
+            services.AddDbConfigInfoFactory();
             services.AddFreeSqlFactory();
             services.AddRepositories();
             services.AddBusinessServices();

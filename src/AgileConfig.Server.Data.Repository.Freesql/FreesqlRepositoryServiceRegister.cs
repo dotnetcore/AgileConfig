@@ -54,7 +54,7 @@ namespace AgileConfig.Server.Data.Repository.Freesql
 
         public bool IsSuit4Provider(string provider)
         {
-            var freesqlType = FreeSQL.ProviderToFreesqlDbType(provider);
+            var freesqlType = MyFreeSQL.ProviderToFreesqlDbType(provider);
 
             return freesqlType.HasValue;
         }

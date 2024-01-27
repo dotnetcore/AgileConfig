@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
 using Testcontainers.MySql;
+using System.Data;
+using AgileConfig.Server.Data.Entity;
+using Microsoft.Extensions.Configuration;
 
 namespace AgileConfig.Server.ServiceTests.mysql
 {
@@ -24,6 +27,13 @@ namespace AgileConfig.Server.ServiceTests.mysql
         {
             await _container.DisposeAsync();
             Console.WriteLine($"MySqlContainer dispose");
+        }
+
+        public override void ClearData()
+        {
+            var sql =  this.GetFreeSql();
+
+            sql.Delete<SysLog>().Where("1=1").ExecuteAffrows();
         }
 
 

@@ -17,6 +17,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using AgileConfig.Server.Data.Repository.Selector;
+using AgileConfig.Server.Data.Abstraction;
 
 namespace AgileConfig.Server.Apisite
 {
@@ -71,6 +72,7 @@ namespace AgileConfig.Server.Apisite
             }
 
             services.AddEnvAccessor();
+            services.AddDbConfigInfoFactory();
             services.AddFreeSqlFactory();
             // Add freesqlRepositories or other repositories
             services.AddRepositories();

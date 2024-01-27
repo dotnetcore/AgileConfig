@@ -38,10 +38,19 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             Console.WriteLine("Try get configration data");
             var dict = await GetConfigurationData();
 
+            foreach (var item in dict)
+            {
+                Console.WriteLine($"key: {item.Key} value: {item.Value}");
+            }
+
             var config = new ConfigurationBuilder()
                              .AddInMemoryCollection(dict)
                              .Build();
-            Global.Config = config;
+            Console.WriteLine("Config list");
+            foreach (var item in config.AsEnumerable())
+            {
+                Console.WriteLine($"key: {item.Key} value: {item.Value}");
+            }
 
             ClearData();
 
@@ -49,6 +58,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             IServiceCollection services = new ServiceCollection();
             services.AddScoped(_ => cache.Object);
             services.AddSingleton<IConfiguration>(config);
+            services.AddDbConfigInfoFactory();
             services.AddFreeSqlFactory();
             services.AddRepositories();
             services.AddBusinessServices();
@@ -141,6 +151,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
  
             var source = new SysLog
             {
+                Id= "1",
                 AppId = "001",
                 LogType = SysLogType.Normal,
                 LogTime = DateTime.Now,
@@ -148,6 +159,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             };
             var source1 = new SysLog
             {
+                Id = "2",
                 AppId = "002",
                 LogType = SysLogType.Warn,
                 LogTime = DateTime.Now,

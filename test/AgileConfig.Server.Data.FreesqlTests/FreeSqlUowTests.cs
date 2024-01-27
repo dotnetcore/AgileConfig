@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Entity;
+using AgileConfig.Server.Data.Abstraction.DbProvider;
+using System.Configuration;
+using Microsoft.Testing.Platform.Configurations;
 
 namespace AgileConfig.Server.Data.Freesql.Tests
 {
@@ -26,9 +29,11 @@ namespace AgileConfig.Server.Data.Freesql.Tests
             ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
             configurationBuilder.AddInMemoryCollection(configMap);
             var configuration = configurationBuilder.Build();
-            Global.Config = configuration;
+            //Global.Config = configuration;
 
-            var fsql = FreeSQL.GetInstanceByEnv("");
+            var myfreesql = new MyFreeSQL(new DbConfigInfoFactory(configuration));
+
+            var fsql = myfreesql.GetInstanceByEnv("");
             fsql.CodeFirst.SyncStructure<User_test>();
             fsql.CodeFirst.SyncStructure<Address_test>();
             fsql.Delete<User_test>(new User_test() { Id = 1 }).ExecuteAffrows();
@@ -40,7 +45,18 @@ namespace AgileConfig.Server.Data.Freesql.Tests
         public async Task SaveChangesAsyncTest_success()
         {
             // arrange
-            var fsql = FreeSQL.GetInstanceByEnv("");
+            var configMap = new Dictionary<string, string>() {
+                {"db:provider","sqlite" },
+                {"db:conn","Data Source=agile_config.db" },
+                {"db:env:test:provider","sqlite" },
+                {"db:env:test:conn","Data Source=agile_config1.db" },
+            };
+            ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
+            configurationBuilder.AddInMemoryCollection(configMap);
+            var configuration = configurationBuilder.Build();
+            var myfreesql = new MyFreeSQL(new DbConfigInfoFactory(configuration));
+
+            var fsql = myfreesql.GetInstanceByEnv("");
             var user = new User_test()
             {
                 Id = 1,
@@ -81,7 +97,18 @@ namespace AgileConfig.Server.Data.Freesql.Tests
         public async Task SaveChangesAsyncTest_rollback()
         {
             // arrange
-            var fsql = FreeSQL.GetInstanceByEnv("");
+            var configMap = new Dictionary<string, string>() {
+                {"db:provider","sqlite" },
+                {"db:conn","Data Source=agile_config.db" },
+                {"db:env:test:provider","sqlite" },
+                {"db:env:test:conn","Data Source=agile_config1.db" },
+            };
+            ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
+            configurationBuilder.AddInMemoryCollection(configMap);
+            var configuration = configurationBuilder.Build();
+            var myfreesql = new MyFreeSQL(new DbConfigInfoFactory(configuration));
+
+            var fsql = myfreesql.GetInstanceByEnv("");
             var user = new User_test()
             {
                 Id = 2,

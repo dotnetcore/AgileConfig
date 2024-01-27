@@ -12,7 +12,10 @@ namespace AgileConfig.Server.Data.Repository.Selector
         {
             sc.AddFreeRepository();
 
-            var defaultProvider = DbConfigInfoFactory.GetConfigInfo();
+            var serviceProvider = sc.BuildServiceProvider();
+            var dbConfigInfoFactory = serviceProvider.GetRequiredService<IDbConfigInfoFactory>();
+
+            var defaultProvider = dbConfigInfoFactory.GetConfigInfo();
 
             if (string.IsNullOrEmpty(defaultProvider.Provider))
             {
@@ -30,35 +33,35 @@ namespace AgileConfig.Server.Data.Repository.Selector
             #region these repositories genereated dependency env provider, if no env provider use default provider
             sc.AddScoped<Func<string, IUow>>(sp => env =>
             {
-                var envDbConfig = DbConfigInfoFactory.GetConfigInfo(env);
+                var envDbConfig = dbConfigInfoFactory.GetConfigInfo(env);
 
                 return GetRepositoryServiceRegister(envDbConfig.Provider).GetServiceByEnv<IUow>(sp, env);
             });
 
             sc.AddScoped<Func<string, IConfigPublishedRepository>>(sp => env =>
             {
-                var envDbConfig = DbConfigInfoFactory.GetConfigInfo(env);
+                var envDbConfig = dbConfigInfoFactory.GetConfigInfo(env);
 
                 return GetRepositoryServiceRegister(envDbConfig.Provider).GetServiceByEnv<IConfigPublishedRepository>(sp, env);
             });
 
             sc.AddScoped<Func<string, IConfigRepository>>(sp => env =>
             {
-                var envDbConfig = DbConfigInfoFactory.GetConfigInfo(env);
+                var envDbConfig = dbConfigInfoFactory.GetConfigInfo(env);
 
                 return GetRepositoryServiceRegister(envDbConfig.Provider).GetServiceByEnv<IConfigRepository>(sp, env);
             });
 
             sc.AddScoped<Func<string, IPublishDetailRepository>>(sp => env =>
             {
-                var envDbConfig = DbConfigInfoFactory.GetConfigInfo(env);
+                var envDbConfig = dbConfigInfoFactory.GetConfigInfo(env);
 
                 return GetRepositoryServiceRegister(envDbConfig.Provider).GetServiceByEnv<IPublishDetailRepository>(sp, env);
             });
 
             sc.AddScoped<Func<string, IPublishTimelineRepository>>(sp => env =>
             {
-                var envDbConfig = DbConfigInfoFactory.GetConfigInfo(env);
+                var envDbConfig = dbConfigInfoFactory.GetConfigInfo(env);
 
                 return GetRepositoryServiceRegister(envDbConfig.Provider).GetServiceByEnv<IPublishTimelineRepository>(sp, env);
             });

@@ -5,7 +5,13 @@ namespace AgileConfig.Server.Data.Repository.Mongodb;
 
 public class SysInitRepository : ISysInitRepository
 {
-    private readonly MongodbAccess<Setting> _access = new(Global.Config["db:conn"]);
+    public SysInitRepository(IConfiguration configuration)
+    {
+        this._configuration = configuration;
+    }
+
+    private MongodbAccess<Setting> _access => new MongodbAccess<Setting>(_configuration["db:conn"]);
+    private readonly IConfiguration _configuration;
 
     public  Task<string?> GetDefaultEnvironmentAsync()
     {
