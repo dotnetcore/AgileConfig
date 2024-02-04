@@ -9,16 +9,31 @@ namespace AgileConfig.Server.Common.RestClient
     {
         private readonly IHttpClientFactory _httpClientFactory;
 
+        private readonly HttpClient _defaultHttpClient;
+
         public DefaultRestClient(
             IHttpClientFactory httpClientFactory
             )
         {
             this._httpClientFactory = httpClientFactory;
+            this._defaultHttpClient= _httpClientFactory.CreateClient(Global.DefaultHttpClientName);
         }
 
         private HttpClient GetDefaultClient()
         {
-            return _httpClientFactory.CreateClient(Global.DefaultHttpClientName);
+            return _defaultHttpClient;
+        }
+
+        private HttpClient GetDefaultClient(string clientName)
+        {
+            string clientNamlower = clientName.ToLower();
+
+            if (clientNamlower.Equals(Global.DefaultHttpClientName))
+            {
+                return _defaultHttpClient;
+            }
+
+            return _httpClientFactory.CreateClient(clientNamlower);
         }
 
         public async Task<T> GetAsync<T>(string url, Dictionary<string, string> headers = null)
