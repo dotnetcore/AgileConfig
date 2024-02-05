@@ -50,14 +50,14 @@ namespace AgileConfig.Server.Service
             return true;
         }
 
-        public async Task<Setting> GetAsync(string id)
+        public Task<Setting> GetAsync(string id)
         {
-            return await _settingRepository.GetAsync(id);
+            return _settingRepository.GetAsync(id);
         }
 
-        public async Task<List<Setting>> GetAllSettingsAsync()
+        public Task<List<Setting>> GetAllSettingsAsync()
         {
-            return await _settingRepository.AllAsync();
+            return _settingRepository.AllAsync();
         }
 
         public async Task<bool> UpdateAsync(Setting setting)
