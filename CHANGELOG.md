@@ -1,5 +1,8 @@
 # Change log
 ------------------------------
+[1.9.0]
+* mongodb supported
+  
 [1.8.1]
 * Use build-in HttpClient instead of AgileHttp client.
 
