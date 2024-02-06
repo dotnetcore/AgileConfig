@@ -31,7 +31,7 @@ namespace AgileConfig.Server.Service
             return true;
         }
 
-        public async Task<long> Count(string appId, SysLogType? logType, DateTime? startTime, DateTime? endTime)
+        public Task<long> Count(string appId, SysLogType? logType, DateTime? startTime, DateTime? endTime)
         {
             Expression<Func<SysLog, bool>> exp = x => true;
             if (!string.IsNullOrEmpty(appId))
@@ -54,9 +54,7 @@ namespace AgileConfig.Server.Service
                 exp = exp.And(x => x.LogType == logType);
             }
 
-            var count = await _sysLogRepository.CountAsync(exp);
-
-            return count;
+            return _sysLogRepository.CountAsync(exp);
         }
 
         public void Dispose()
@@ -64,7 +62,7 @@ namespace AgileConfig.Server.Service
             _sysLogRepository.Dispose();
         }
 
-        public async Task<List<SysLog>> SearchPage(string appId, SysLogType? logType, DateTime? startTime, DateTime? endTime, int pageSize, int pageIndex)
+        public Task<List<SysLog>> SearchPage(string appId, SysLogType? logType, DateTime? startTime, DateTime? endTime, int pageSize, int pageIndex)
         {
             Expression<Func<SysLog, bool>> exp = x => true;
             if (!string.IsNullOrEmpty(appId))
@@ -87,8 +85,7 @@ namespace AgileConfig.Server.Service
                 exp = exp.And(x => x.LogType == logType);
             }
 
-            var list = await _sysLogRepository.QueryPageAsync(exp, pageIndex, pageSize, defaultSortField: "LogTime", defaultSortType: "DESC");
-            return list;
+            return _sysLogRepository.QueryPageAsync(exp, pageIndex, pageSize, defaultSortField: "LogTime", defaultSortType: "DESC");
         }
     }
 }

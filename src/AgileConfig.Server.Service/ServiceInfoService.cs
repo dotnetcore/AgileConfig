@@ -25,11 +25,9 @@ namespace AgileConfig.Server.Service
             _serviceInfoRepository = serviceInfoRepository;
         }
 
-        public async Task<ServiceInfo> GetByUniqueIdAsync(string id)
+        public Task<ServiceInfo> GetByUniqueIdAsync(string id)
         {
-            var entity = await _serviceInfoRepository.GetAsync(id);
-
-            return entity;
+            return _serviceInfoRepository.GetAsync(id);
         }
 
         public async Task<ServiceInfo> GetByServiceIdAsync(string serviceId)
@@ -45,25 +43,19 @@ namespace AgileConfig.Server.Service
             return true;
         }
 
-        public async Task<List<ServiceInfo>> GetAllServiceInfoAsync()
+        public Task<List<ServiceInfo>> GetAllServiceInfoAsync()
         {
-            var services = await _serviceInfoRepository.AllAsync();
-
-            return services;
+            return _serviceInfoRepository.AllAsync();
         }
 
-        public async Task<List<ServiceInfo>> GetOnlineServiceInfoAsync()
+        public Task<List<ServiceInfo>> GetOnlineServiceInfoAsync()
         {
-            var services = await _serviceInfoRepository.QueryAsync(x => x.Status == ServiceStatus.Healthy);
-
-            return services;
+            return _serviceInfoRepository.QueryAsync(x => x.Status == ServiceStatus.Healthy);
         }
 
-        public async Task<List<ServiceInfo>> GetOfflineServiceInfoAsync()
+        public Task<List<ServiceInfo>> GetOfflineServiceInfoAsync()
         {
-            var services = await _serviceInfoRepository.QueryAsync(x => x.Status == ServiceStatus.Unhealthy);
-
-            return services;
+            return _serviceInfoRepository.QueryAsync(x => x.Status == ServiceStatus.Unhealthy);
         }
 
         public async Task<string> ServicesMD5Cache()

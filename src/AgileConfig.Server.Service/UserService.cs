@@ -15,7 +15,7 @@ namespace AgileConfig.Server.Service
         private readonly IUserRoleRepository _userRoleRepository;
 
 
-        public UserService(IUserRepository userRepository,IUserRoleRepository userRoleRepository)
+        public UserService(IUserRepository userRepository, IUserRoleRepository userRoleRepository)
         {
             _userRepository = userRepository;
             _userRoleRepository = userRoleRepository;
@@ -40,14 +40,14 @@ namespace AgileConfig.Server.Service
             return true;
         }
 
-        public async Task<List<User>> GetUsersByNameAsync(string userName)
+        public Task<List<User>> GetUsersByNameAsync(string userName)
         {
-            return await _userRepository.QueryAsync(u => u.UserName == userName);
+            return _userRepository.QueryAsync(u => u.UserName == userName);
         }
 
-        public async Task<User> GetUserAsync(string id)
+        public Task<User> GetUserAsync(string id)
         {
-            return await _userRepository.GetAsync(id);
+            return _userRepository.GetAsync(id);
         }
 
 
@@ -70,7 +70,8 @@ namespace AgileConfig.Server.Service
             var dbUserRoles = await _userRoleRepository.QueryAsync(x => x.UserId == userId);
             await _userRoleRepository.DeleteAsync(dbUserRoles);
             var userRoles = new List<UserRole>();
-            roles.ForEach(x => {
+            roles.ForEach(x =>
+            {
                 userRoles.Add(new UserRole
                 {
                     Id = Guid.NewGuid().ToString("N"),
@@ -89,9 +90,9 @@ namespace AgileConfig.Server.Service
             _userRoleRepository.Dispose();
         }
 
-        public async Task<List<User>> GetAll()
+        public Task<List<User>> GetAll()
         {
-            return await _userRepository.AllAsync();
+            return _userRepository.AllAsync();
         }
 
         public async Task<bool> ValidateUserPassword(string userName, string password)
@@ -101,7 +102,7 @@ namespace AgileConfig.Server.Service
             {
                 return false;
             }
-            
+
             if (user.Password == Encrypt.Md5(password + user.Salt))
             {
                 return true;

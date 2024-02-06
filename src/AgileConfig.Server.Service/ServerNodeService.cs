@@ -51,14 +51,14 @@ namespace AgileConfig.Server.Service
             _serverNodeRepository.Dispose();
         }
 
-        public async Task<List<ServerNode>> GetAllNodesAsync()
+        public Task<List<ServerNode>> GetAllNodesAsync()
         {
-            return await _serverNodeRepository.AllAsync();
+            return _serverNodeRepository.AllAsync();
         }
 
-        public async Task<ServerNode> GetAsync(string address)
+        public Task<ServerNode> GetAsync(string address)
         {
-           return await _serverNodeRepository.GetAsync(address);
+            return _serverNodeRepository.GetAsync(address);
         }
 
         public async Task<bool> UpdateAsync(ServerNode node)
@@ -67,7 +67,7 @@ namespace AgileConfig.Server.Service
             return true;
         }
 
-        
+
         public async Task<bool> InitWatchNodeAsync()
         {
             var count = await _serverNodeRepository.CountAsync();
@@ -91,11 +91,11 @@ namespace AgileConfig.Server.Service
                     {
                         address = "http://" + item;
                     }
-                    
+
                     addresses.Add(address);
                 }
             }
-            
+
             var existNodes = await _serverNodeRepository.QueryAsync(x => addresses.Contains(x.Id));
             var newNodes = addresses
                 .Where(x => existNodes.All(y => y.Id != x))
@@ -115,7 +115,8 @@ namespace AgileConfig.Server.Service
             var nodes = await _serverNodeRepository.QueryAsync(x => x.Id == address);
             if (nodes.Count > 0)
             {
-                nodes.ForEach(n => {
+                nodes.ForEach(n =>
+                {
                     n.Id = address;
                     n.Remark = desc;
                     n.Status = NodeStatus.Online;
@@ -123,7 +124,8 @@ namespace AgileConfig.Server.Service
             }
             else
             {
-                await _serverNodeRepository.InsertAsync(new ServerNode { 
+                await _serverNodeRepository.InsertAsync(new ServerNode
+                {
                     Id = address,
                     CreateTime = DateTime.Now,
                     Remark = desc,

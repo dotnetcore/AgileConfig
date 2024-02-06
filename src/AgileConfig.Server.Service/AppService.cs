@@ -20,7 +20,7 @@ namespace AgileConfig.Server.Service
         private readonly ISettingService _settingService;
 
         public AppService(
-            IAppRepository repository, 
+            IAppRepository repository,
             IAppInheritancedRepository appInheritancedRepository,
             Func<string, IConfigRepository> configRepository,
             Func<string, IConfigPublishedRepository> configPublishedRepository,
@@ -111,20 +111,20 @@ namespace AgileConfig.Server.Service
             var app = await _appRepository.GetAsync(appId);
             if (app != null)
             {
-               await _appRepository.DeleteAsync(app);
+                await _appRepository.DeleteAsync(app);
             }
 
             return true;
         }
 
-        public async Task<App> GetAsync(string id)
+        public Task<App> GetAsync(string id)
         {
-            return await _appRepository.GetAsync(id);
+            return _appRepository.GetAsync(id);
         }
 
-        public async Task<List<App>> GetAllAppsAsync()
+        public Task<List<App>> GetAllAppsAsync()
         {
-            return await _appRepository.AllAsync();
+            return _appRepository.AllAsync();
         }
 
         public async Task<bool> UpdateAsync(App app)
@@ -141,9 +141,9 @@ namespace AgileConfig.Server.Service
             return q.Count;
         }
 
-        public async Task<List<App>> GetAllInheritancedAppsAsync()
+        public Task<List<App>> GetAllInheritancedAppsAsync()
         {
-            return await _appRepository.QueryAsync(a => a.Type == AppType.Inheritance);
+            return _appRepository.QueryAsync(a => a.Type == AppType.Inheritance);
         }
 
         /// <summary>
@@ -260,8 +260,7 @@ namespace AgileConfig.Server.Service
         public async Task<List<string>> GetAppGroups()
         {
             var apps = await _appRepository.AllAsync();
-            var groups = apps.GroupBy(x => x.Group).Select(x => x.Key)
-                ;
+            var groups = apps.GroupBy(x => x.Group).Select(x => x.Key);
             return groups.Where(x => !string.IsNullOrEmpty(x)).ToList();
         }
     }
