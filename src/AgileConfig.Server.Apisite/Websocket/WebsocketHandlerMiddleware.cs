@@ -106,13 +106,11 @@ namespace AgileConfig.Server.Apisite.Websocket
                     {
                         _logger.LogInformation("client {0} closed the websocket connection directly .", client.Id);
                         await _websocketCollection.RemoveClient(client, WebSocketCloseStatus.Empty, null);
-                        await context.Response.WriteAsync("500 closed");
                     }
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, "Handle websocket client {0} err .", client.Id);
                         await _websocketCollection.RemoveClient(client, WebSocketCloseStatus.Empty, null);
-                        await context.Response.WriteAsync("500 closed");
                     }
                 }
                 else
