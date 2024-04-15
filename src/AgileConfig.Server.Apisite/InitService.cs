@@ -15,24 +15,21 @@ namespace AgileConfig.Server.Apisite
     {
         private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
         private readonly IEventRegister _eventRegister;
-        private readonly ISettingService _settingService;
         private readonly IServerNodeService _serverNodeService;
         private readonly IServiceHealthCheckService _serviceHealthCheckService;
         private readonly ISystemInitializationService _systemInitializationService;
         private readonly ILogger _logger;
+        private readonly IServiceScope _localServiceScope;
         public InitService(IServiceScopeFactory serviceScopeFactory, ISystemInitializationService systemInitializationService, ILogger<InitService> logger)
         {
             _logger = logger;
             _systemInitializationService = systemInitializationService;
-            using (var scope = serviceScopeFactory.CreateScope())
-            {
-                _remoteServerNodeProxy = scope.ServiceProvider.GetService<IRemoteServerNodeProxy>();
-                _eventRegister = scope.ServiceProvider.GetService<IEventRegister>();
-                _settingService = scope.ServiceProvider.GetService<ISettingService>();
-                _serverNodeService = scope.ServiceProvider.GetService<IServerNodeService>();
-                _serverNodeService = scope.ServiceProvider.GetService<IServerNodeService>();
-                _serviceHealthCheckService = scope.ServiceProvider.GetService<IServiceHealthCheckService>();
-            }
+            _localServiceScope = serviceScopeFactory.CreateScope();
+            _remoteServerNodeProxy = _localServiceScope.ServiceProvider.GetService<IRemoteServerNodeProxy>();
+            _eventRegister = _localServiceScope.ServiceProvider.GetService<IEventRegister>();
+            _serverNodeService = _localServiceScope.ServiceProvider.GetService<IServerNodeService>();
+            _serverNodeService = _localServiceScope.ServiceProvider.GetService<IServerNodeService>();
+            _serviceHealthCheckService = _localServiceScope.ServiceProvider.GetService<IServiceHealthCheckService>();
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -53,7 +50,7 @@ namespace AgileConfig.Server.Apisite
                 if (!string.IsNullOrEmpty(ip))
                 {
                     var desc = Appsettings.IsAdminConsoleMode ? "控制台节点" : "";
-                    _ =_serverNodeService.JoinAsync(ip, 5000, desc);
+                    _ = _serverNodeService.JoinAsync(ip, 5000, desc);
                     _logger.LogInformation($"AgileConfig node http://{ip}:5000 joined .");
                 }
             }
@@ -70,6 +67,8 @@ namespace AgileConfig.Server.Apisite
                     _logger.LogInformation($"AgileConfig node http://{ip}:5000 removed .");
                 }
             }
+
+            _localServiceScope?.Dispose();
         }
 
         private string GetIp()
