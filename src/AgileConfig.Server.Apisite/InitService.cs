@@ -28,7 +28,6 @@ namespace AgileConfig.Server.Apisite
             _remoteServerNodeProxy = _localServiceScope.ServiceProvider.GetService<IRemoteServerNodeProxy>();
             _eventRegister = _localServiceScope.ServiceProvider.GetService<IEventRegister>();
             _serverNodeService = _localServiceScope.ServiceProvider.GetService<IServerNodeService>();
-            _serverNodeService = _localServiceScope.ServiceProvider.GetService<IServerNodeService>();
             _serviceHealthCheckService = _localServiceScope.ServiceProvider.GetService<IServiceHealthCheckService>();
         }
 
