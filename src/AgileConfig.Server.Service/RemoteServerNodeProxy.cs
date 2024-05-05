@@ -7,27 +7,16 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Security.Policy;
 using System.Threading.Tasks;
 
 namespace AgileConfig.Server.Service
 {
     public class RemoteServerNodeProxy : IRemoteServerNodeProxy
     {
-        // private IServerNodeService GetServerNodeService()
-        // {
-        //     return new ServerNodeService(new FreeSqlContext(FreeSQL.Instance));
-        // }
-        //
-        // private ISysLogService GetSysLogService()
-        // {
-        //     return new SysLogService(new FreeSqlContext(FreeSQL.Instance));
-        // }
-
         private readonly ILogger _logger;
         private readonly IRestClient _restClient;
-        private readonly EventRegisterTransient<IServerNodeService> _serverNodeService;
-        private readonly EventRegisterTransient<ISysLogService> _sysLogService;
+        private readonly IServerNodeService _serverNodeService;
+        private readonly ISysLogService _sysLogService;
 
         private static ConcurrentDictionary<string, ClientInfos> _serverNodeClientReports =
             new ConcurrentDictionary<string, ClientInfos>();
@@ -36,8 +25,8 @@ namespace AgileConfig.Server.Service
         public RemoteServerNodeProxy(
             ILoggerFactory loggerFactory, 
             IRestClient restClient,
-            EventRegisterTransient<IServerNodeService> serverNodeService,
-            EventRegisterTransient<ISysLogService> sysLogService)
+            IServerNodeService serverNodeService,
+            ISysLogService sysLogService)
         {
             _logger = loggerFactory.CreateLogger<RemoteServerNodeProxy>();
             _restClient = restClient;
@@ -58,24 +47,21 @@ namespace AgileConfig.Server.Service
                 return false;
             }, 5);
 
-            using (var service = _sysLogService())
+            var module = "";
+            if (action.Module == "r")
             {
-                var module = "";
-                if (action.Module == "r")
-                {
-                    module = "注册中心";
-                }
-                if (action.Module == "c")
-                {
-                    module = "配置中心";
-                }
-                await service.AddSysLogAsync(new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = result ? SysLogType.Normal : SysLogType.Warn,
-                    LogText = $"通知节点【{address}】所有客户端：【{module}】【{action.Action}】 响应：{(result ? "成功" : "失败")}"
-                });
+                module = "注册中心";
             }
+            if (action.Module == "c")
+            {
+                module = "配置中心";
+            }
+            await _sysLogService.AddSysLogAsync(new SysLog
+            {
+                LogTime = DateTime.Now,
+                LogType = result ? SysLogType.Normal : SysLogType.Warn,
+                LogText = $"通知节点【{address}】所有客户端：【{module}】【{action.Action}】 响应：{(result ? "成功" : "失败")}"
+            });
 
             return result;
         }
@@ -94,26 +80,22 @@ namespace AgileConfig.Server.Service
                 return false;
             }, 5);
 
-            using (var service = _sysLogService())
+            var module = "";
+            if (action.Module == "r")
             {
-                var module = "";
-                if (action.Module == "r")
-                {
-                    module = "注册中心";
-                }
-                if (action.Module == "c")
-                {
-                    module = "配置中心";
-                }
-                await service.AddSysLogAsync(new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = result ? SysLogType.Normal : SysLogType.Warn,
-                    AppId = appId,
-                    LogText = $"通知节点【{address}】应用【{appId}】的客户端：【{module}】【{action.Action}】 响应：{(result ? "成功" : "失败")}"
-                });
+                module = "注册中心";
             }
-
+            if (action.Module == "c")
+            {
+                module = "配置中心";
+            }
+            await _sysLogService.AddSysLogAsync(new SysLog
+            {
+                LogTime = DateTime.Now,
+                LogType = result ? SysLogType.Normal : SysLogType.Warn,
+                AppId = appId,
+                LogText = $"通知节点【{address}】应用【{appId}】的客户端：【{module}】【{action.Action}】 响应：{(result ? "成功" : "失败")}"
+            });
             return result;
         }
 
@@ -145,24 +127,21 @@ namespace AgileConfig.Server.Service
                 return false;
             }, 5);
 
-            using (var service = _sysLogService())
+            var module = "";
+            if (action.Module == "r")
             {
-                var module = "";
-                if (action.Module == "r")
-                {
-                    module = "注册中心";
-                }
-                if (action.Module == "c")
-                {
-                    module = "配置中心";
-                }
-                await service.AddSysLogAsync(new SysLog
-                {
-                    LogTime = DateTime.Now,
-                    LogType = result ? SysLogType.Normal : SysLogType.Warn,
-                    LogText = $"通知节点【{address}】的客户端【{clientId}】：【{module}】【{action.Action}】 响应：{(result ? "成功" : "失败")}"
-                });
+                module = "注册中心";
             }
+            if (action.Module == "c")
+            {
+                module = "配置中心";
+            }
+            await _sysLogService.AddSysLogAsync(new SysLog
+            {
+                LogTime = DateTime.Now,
+                LogType = result ? SysLogType.Normal : SysLogType.Warn,
+                LogText = $"通知节点【{address}】的客户端【{clientId}】：【{module}】【{action.Action}】 响应：{(result ? "成功" : "失败")}"
+            });
 
             return result;
         }
@@ -209,8 +188,7 @@ namespace AgileConfig.Server.Service
 
         public async Task TestEchoAsync(string address)
         {
-            using var service = _serverNodeService();
-            var node = await service.GetAsync(address);
+            var node = await _serverNodeService.GetAsync(address);
             try
             {
                 var url = node.Id + "/home/echo";
@@ -243,12 +221,12 @@ namespace AgileConfig.Server.Service
                 if (time.HasValue && (DateTime.Now - time.Value).TotalMinutes >= 30)
                 {
                     // 超过 30 分钟没有回应，则移除节点
-                    await service.DeleteAsync(address);
+                    await _serverNodeService.DeleteAsync(address);
                     return;
                 }
             }
             
-            await service.UpdateAsync(node);
+            await _serverNodeService.UpdateAsync(node);
         }
 
         public Task TestEchoAsync()
@@ -257,8 +235,7 @@ namespace AgileConfig.Server.Service
             {
                 while (true)
                 {
-                    using var service = _serverNodeService();
-                    var nodes = await service.GetAllNodesAsync();
+                    var nodes = await _serverNodeService.GetAllNodesAsync();
 
                     foreach (var node in nodes)
                     {

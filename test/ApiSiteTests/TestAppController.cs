@@ -1,6 +1,7 @@
 using AgileConfig.Server.Apisite.Controllers;
 using AgileConfig.Server.Apisite.Controllers.api;
 using AgileConfig.Server.Apisite.Models;
+using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Http;
@@ -24,8 +25,9 @@ namespace ApiSiteTests
             var logService = new Mock<ISysLogService>();
             var userService = new Mock<IUserService>();
             var permissionService = new Mock<IPremissionService>();
+            var eventBus = new Mock<ITinyEventBus>();
 
-            var ctl = new AgileConfig.Server.Apisite.Controllers.AppController(appService.Object, permissionService.Object, userService.Object);
+            var ctl = new AgileConfig.Server.Apisite.Controllers.AppController(appService.Object, permissionService.Object, userService.Object, eventBus.Object);
 
             ctl.ControllerContext.HttpContext = new DefaultHttpContext();
 

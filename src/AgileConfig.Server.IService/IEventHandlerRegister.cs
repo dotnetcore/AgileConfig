@@ -4,7 +4,7 @@ using System.Text;
 
 namespace AgileConfig.Server.IService
 {
-    public interface IEventRegister
+    public interface IEventHandlerRegister
     {
         void Register();
     }

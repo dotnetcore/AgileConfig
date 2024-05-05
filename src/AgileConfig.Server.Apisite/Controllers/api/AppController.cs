@@ -1,6 +1,7 @@
 ﻿using AgileConfig.Server.Apisite.Controllers.api.Models;
 using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Apisite.Models;
+using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
@@ -19,16 +20,22 @@ namespace AgileConfig.Server.Apisite.Controllers.api
     public class AppController : Controller
     {
         private readonly IConfigService _configService;
+        private readonly ITinyEventBus _tinyEventBus;
         private readonly IAppService _appService;
         private readonly IPremissionService _premissionService;
         private readonly IUserService _userService;
 
-        public AppController(IAppService appService, IPremissionService premissionService, IUserService userService, IConfigService configService)
+        public AppController(IAppService appService, 
+            IPremissionService premissionService, 
+            IUserService userService, 
+            IConfigService configService,
+            ITinyEventBus tinyEventBus)
         {
             _appService = appService;
             _premissionService = premissionService;
             _userService = userService;
             _configService = configService;
+            _tinyEventBus = tinyEventBus;
         }
 
         /// <summary>
@@ -65,7 +72,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             var ctrl = new Controllers.AppController(
              _appService,
              _premissionService,
-             _userService
+             _userService,
+             _tinyEventBus
              );
             var result = (await ctrl.Get(id)) as JsonResult;
             dynamic obj = result.Value;
@@ -116,7 +124,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             var ctrl = new Controllers.AppController(
                 _appService,
                 _premissionService,
-                _userService
+                _userService,
+                _tinyEventBus
                 );
             ctrl.ControllerContext.HttpContext = HttpContext;
 
@@ -167,7 +176,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             var ctrl = new Controllers.AppController(
                   _appService,
                   _premissionService,
-                  _userService
+                  _userService,
+                  _tinyEventBus
                   );
             ctrl.ControllerContext.HttpContext = HttpContext;
 
@@ -207,7 +217,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             var ctrl = new Controllers.AppController(
                     _appService,
                     _premissionService,
-                    _userService
+                    _userService,
+                    _tinyEventBus
                     );
             ctrl.ControllerContext.HttpContext = HttpContext;
 
@@ -242,7 +253,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             var ctrl = new Controllers.ConfigController(
                 _configService,
                 _appService,
-                _userService
+                _userService,
+                _tinyEventBus
                 );
             ctrl.ControllerContext.HttpContext = HttpContext;
 
@@ -312,7 +324,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             var ctrl = new Controllers.ConfigController(
                 _configService,
                 _appService,
-                _userService
+                _userService,
+                _tinyEventBus
                 );
             ctrl.ControllerContext.HttpContext = HttpContext;
 

@@ -11,6 +11,8 @@ using System.Collections.Generic;
 using AgileConfig.Server.Common;
 using System.Dynamic;
 using AgileConfig.Server.Apisite.Utilites;
+using AgileConfig.Server.Common.EventBus;
+using AgileConfig.Server.Event;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -21,10 +23,15 @@ namespace AgileConfig.Server.Apisite.Controllers
         private readonly IAppService _appService;
         private readonly IPremissionService _premissionService;
         private readonly IUserService _userService;
+        private readonly ITinyEventBus _tinyEventBus;
 
-        public AppController(IAppService appService, IPremissionService premissionService, IUserService userService)
+        public AppController(IAppService appService, 
+            IPremissionService premissionService, 
+            IUserService userService,
+            ITinyEventBus tinyEventBus)
         {
             _userService = userService;
+            _tinyEventBus = tinyEventBus;
             _appService = appService;
             _premissionService = premissionService;
         }
@@ -260,10 +267,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _appService.AddAsync(app, inheritanceApps);
             if (result)
             {
-                dynamic param = new ExpandoObject();
-                param.app = app;
-                param.userName = this.GetCurrentUserName();
-                TinyEventBus.Instance.Fire(EventKeys.ADD_APP_SUCCESS, param);
+                _tinyEventBus.Fire(new AddAppSuccessful(app, this.GetCurrentUserName()));
             }
 
             return Json(new
@@ -329,10 +333,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _appService.UpdateAsync(app, inheritanceApps);
             if (result)
             {
-                dynamic param = new ExpandoObject();
-                param.app = app;
-                param.userName = this.GetCurrentUserName();
-                TinyEventBus.Instance.Fire(EventKeys.EDIT_APP_SUCCESS, param);
+                _tinyEventBus.Fire(new EditAppSuccessful(app, this.GetCurrentUserName()));
             }
             return Json(new
             {
@@ -431,10 +432,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                dynamic param = new ExpandoObject();
-                param.app = app;
-                param.userName = this.GetCurrentUserName();
-                TinyEventBus.Instance.Fire(EventKeys.DISABLE_OR_ENABLE_APP_SUCCESS, param);
+                _tinyEventBus.Fire(new DisableOrEnableAppSuccessful(app, this.GetCurrentUserName()));
             }
 
             return Json(new
@@ -467,10 +465,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                dynamic param = new ExpandoObject();
-                param.app = app;
-                param.userName = this.GetCurrentUserName();
-                TinyEventBus.Instance.Fire(EventKeys.DELETE_APP_SUCCESS, param);
+                _tinyEventBus.Fire(new DeleteAppSuccessful(app, this.GetCurrentUserName()));
             }
 
             return Json(new

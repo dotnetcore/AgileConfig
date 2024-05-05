@@ -18,6 +18,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using AgileConfig.Server.Data.Repository.Selector;
 using AgileConfig.Server.Data.Abstraction;
+using AgileConfig.Server.Common.EventBus;
 
 namespace AgileConfig.Server.Apisite
 {
@@ -70,6 +71,7 @@ namespace AgileConfig.Server.Apisite
             {
                 AddSwaggerService(services);
             }
+            services.AddTinyEventBus();
 
             services.AddEnvAccessor();
             services.AddDbConfigInfoFactory();
@@ -87,6 +89,7 @@ namespace AgileConfig.Server.Apisite
             services.AddAntiforgery(o => o.SuppressXFrameOptionsHeader = true);
 
             services.AddOIDC();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

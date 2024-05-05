@@ -1,15 +1,14 @@
 using AgileConfig.Server.Apisite.Controllers.api;
-using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using AgileConfig.Server.Apisite.Controllers.api.Models;
+using AgileConfig.Server.Common.EventBus;
 
 namespace ApiSiteTests;
 
@@ -21,7 +20,8 @@ public class TestApiConfigController
     {
         App newApp()
         {
-            return new App() {
+            return new App()
+            {
                 Enabled = true
             };
         }
@@ -29,11 +29,13 @@ public class TestApiConfigController
         var appService = new Mock<IAppService>();
         appService.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync(newApp);
 
-        List<Config> newConfigs() {
+        List<Config> newConfigs()
+        {
             var list = new List<Config>();
-            list.Add(new Config { 
+            list.Add(new Config
+            {
                 Id = "001",
-                Key ="key1",
+                Key = "key1",
                 Value = "val1",
                 Group = ""
             });
@@ -61,12 +63,13 @@ public class TestApiConfigController
         var sysLogService = new Mock<ISysLogService>();
         var appBasicAuthService = new Mock<IAppBasicAuthService>();
         var userSErvice = new Mock<IUserService>();
+        var eventBus = new Mock<ITinyEventBus>();
 
         var ctrl = new ConfigController(
             configService.Object,
             appService.Object,
             userSErvice.Object,
-            memoryCache);
+            memoryCache, eventBus.Object);
         var act = await ctrl.GetAppConfig("001", "DEV");
 
         Assert.IsNotNull(act);
@@ -88,7 +91,7 @@ public class TestApiConfigController
             configService.Object,
             appService.Object,
             userSErvice.Object,
-            memoryCache);
+            memoryCache, eventBus.Object);
         act = await ctrl.GetAppConfig("001", "DEV");
 
         Assert.IsNotNull(act);

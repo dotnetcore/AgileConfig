@@ -10,6 +10,8 @@ using Agile.Config.Protocol;
 using AgileConfig.Server.Common;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using AgileConfig.Server.Common.EventBus;
+using AgileConfig.Server.Event;
 
 namespace AgileConfig.Server.Apisite.Controllers.api
 {
@@ -22,20 +24,23 @@ namespace AgileConfig.Server.Apisite.Controllers.api
     {
         private readonly IRegisterCenterService _registerCenterService;
         private readonly IServiceInfoService _serviceInfoService;
+        private readonly ITinyEventBus _tinyEventBus;
         private readonly ILogger<RegisterCenterController> _logger;
 
         public RegisterCenterController(IRegisterCenterService registerCenterService
-            ,IServiceInfoService serviceInfoService,
-            ILoggerFactory loggerFactory
+            , IServiceInfoService serviceInfoService,
+            ILoggerFactory loggerFactory,
+            ITinyEventBus tinyEventBus
             )
         {
             _registerCenterService = registerCenterService;
             _serviceInfoService = serviceInfoService;
+            _tinyEventBus = tinyEventBus;
             _logger = loggerFactory.CreateLogger<RegisterCenterController>();
         }
-       
+
         [HttpPost]
-        public async Task<RegisterResultVM> Register([FromBody]RegisterServiceInfoVM model)
+        public async Task<RegisterResultVM> Register([FromBody] RegisterServiceInfoVM model)
         {
             var entity = new ServiceInfo();
             entity.ServiceId = model.ServiceId;
@@ -47,16 +52,11 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             entity.HeartBeatMode = model.HeartBeatMode;
             entity.MetaData = model.MetaData is null ? "[]" : JsonConvert.SerializeObject(model.MetaData);
             entity.RegisterWay = RegisterWay.Auto;
-            
+
             var id = await _registerCenterService.RegisterAsync(entity);
 
-            //send a message to notify other services
-            dynamic param = new ExpandoObject();
-            param.ServiceId = model.ServiceId;
-            param.ServiceName = model.ServiceName;
-            param.UniqueId = id;
-            TinyEventBus.Instance.Fire(EventKeys.REGISTER_A_SERVICE,param);
-            
+            _tinyEventBus.Fire(new ServiceRegisteredEvent(id));
+
             return new RegisterResultVM
             {
                 UniqueId = id
@@ -65,33 +65,28 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult<RegisterResultVM>> UnRegister(string id, [FromBody]RegisterServiceInfoVM vm)
+        public async Task<ActionResult<RegisterResultVM>> UnRegister(string id, [FromBody] RegisterServiceInfoVM vm)
         {
             var entity = await _serviceInfoService.GetByUniqueIdAsync(id);
             if (entity == null)
             {
                 return NotFound();
             }
-            
+
             var result = await _registerCenterService.UnRegisterAsync(id);
             if (!result)
             {
                 if (!string.IsNullOrEmpty(vm?.ServiceId))
-                { 
+                {
                     result = await _registerCenterService.UnRegisterByServiceIdAsync(vm.ServiceId);
                 }
             }
 
             if (result)
             {
-                //send a message to notify other services
-                dynamic param = new ExpandoObject();
-                param.ServiceId = entity.ServiceId;
-                param.ServiceName = entity.ServiceName;
-                param.UniqueId = id;
-                TinyEventBus.Instance.Fire(EventKeys.UNREGISTER_A_SERVICE,param);
+                _tinyEventBus.Fire(new ServiceUnRegisterEvent(id));
             }
-            
+
             return new RegisterResultVM
             {
                 UniqueId = id,
@@ -99,11 +94,11 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         [HttpPost("heartbeat")]
-        public async Task<ActionResult<HeartbeatResultVM>> Heartbeat([FromBody]HeartbeatParam param)
+        public async Task<ActionResult<HeartbeatResultVM>> Heartbeat([FromBody] HeartbeatParam param)
         {
             if (param == null)
             {
-                throw  new ArgumentNullException(nameof(param));
+                throw new ArgumentNullException(nameof(param));
             }
 
             bool serviceHeartbeatResult = false;
@@ -125,7 +120,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
             return NotFound();
         }
-        
+
         [HttpGet("services")]
         public async Task<List<ServiceInfoVM>> AllServices()
         {
@@ -155,7 +150,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
             return vms;
         }
-        
+
         [HttpGet("services/online")]
         public async Task<List<ServiceInfoVM>> OnlineServices()
         {
@@ -185,7 +180,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
             return vms;
         }
-        
+
         [HttpGet("services/offline")]
         public async Task<List<ServiceInfoVM>> OfflineServices()
         {

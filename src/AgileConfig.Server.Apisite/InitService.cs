@@ -14,7 +14,7 @@ namespace AgileConfig.Server.Apisite
     public class InitService : IHostedService
     {
         private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
-        private readonly IEventRegister _eventRegister;
+        private readonly IEventHandlerRegister _eventRegister;
         private readonly IServerNodeService _serverNodeService;
         private readonly IServiceHealthCheckService _serviceHealthCheckService;
         private readonly ISystemInitializationService _systemInitializationService;
@@ -26,7 +26,7 @@ namespace AgileConfig.Server.Apisite
             _systemInitializationService = systemInitializationService;
             _localServiceScope = serviceScopeFactory.CreateScope();
             _remoteServerNodeProxy = _localServiceScope.ServiceProvider.GetService<IRemoteServerNodeProxy>();
-            _eventRegister = _localServiceScope.ServiceProvider.GetService<IEventRegister>();
+            _eventRegister = _localServiceScope.ServiceProvider.GetService<IEventHandlerRegister>();
             _serverNodeService = _localServiceScope.ServiceProvider.GetService<IServerNodeService>();
             _serviceHealthCheckService = _localServiceScope.ServiceProvider.GetService<IServiceHealthCheckService>();
         }

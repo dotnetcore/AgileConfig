@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AgileConfig.Server.Apisite.Controllers.api.Models;
 using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Apisite.Models;
+using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
@@ -21,17 +22,21 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         private readonly IAppService _appService;
         private readonly IUserService _userService;
         private readonly IMemoryCache _cacheMemory;
+        private readonly ITinyEventBus _tinyEventBus;
 
         public ConfigController(
             IConfigService configService,
             IAppService appService,
             IUserService userService,
-            IMemoryCache cacheMemory)
+            IMemoryCache cacheMemory,
+            ITinyEventBus tinyEventBus
+            )
         {
             _configService = configService;
             _appService = appService;
             _userService = userService;
             _cacheMemory = cacheMemory;
+            _tinyEventBus = tinyEventBus;
         }
 
         /// <summary>
@@ -176,7 +181,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             var ctrl = new Controllers.ConfigController(
                 _configService,
                 _appService,
-                _userService
+                _userService,
+                _tinyEventBus
                 );
             ctrl.ControllerContext.HttpContext = HttpContext;
 
@@ -231,7 +237,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             var ctrl = new Controllers.ConfigController(
                 _configService,
                 _appService,
-                _userService
+                _userService,
+                _tinyEventBus
                 );
             ctrl.ControllerContext.HttpContext = HttpContext;
 
@@ -276,7 +283,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             var ctrl = new Controllers.ConfigController(
                 _configService,
                 _appService,
-                _userService
+                _userService,
+                _tinyEventBus
                 );
             ctrl.ControllerContext.HttpContext = HttpContext;
 

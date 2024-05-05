@@ -11,6 +11,8 @@ using AgileConfig.Server.Data.Abstraction;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using System.Linq.Expressions;
+using AgileConfig.Server.Common.EventBus;
+using AgileConfig.Server.Event;
 
 namespace AgileConfig.Server.Service
 {
@@ -18,11 +20,15 @@ namespace AgileConfig.Server.Service
     {
         private readonly IMemoryCache _memoryCache;
         private readonly IServiceInfoRepository _serviceInfoRepository;
+        private readonly ITinyEventBus _tinyEventBus;
 
-        public ServiceInfoService(IMemoryCache memoryCache, IServiceInfoRepository serviceInfoRepository)
+        public ServiceInfoService(IMemoryCache memoryCache, 
+            IServiceInfoRepository serviceInfoRepository,
+            ITinyEventBus tinyEventBus)
         {
             _memoryCache = memoryCache;
             _serviceInfoRepository = serviceInfoRepository;
+            _tinyEventBus = tinyEventBus;
         }
 
         public Task<ServiceInfo> GetByUniqueIdAsync(string id)
@@ -131,11 +137,8 @@ namespace AgileConfig.Server.Service
             if (oldStatus != status)
             {
                 ClearCache();
-                dynamic param = new ExpandoObject();
-                param.ServiceId = service.ServiceId;
-                param.ServiceName = service.ServiceName;
-                param.UniqueId = service.Id;
-                TinyEventBus.Instance.Fire(EventKeys.UPDATE_SERVICE_STATUS, param);
+
+                _tinyEventBus.Fire(new ServiceStatusUpdateEvent(service.Id));
             }
         }
 

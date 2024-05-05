@@ -14,6 +14,8 @@ using System.Text;
 using System.Dynamic;
 using System.IO;
 using AgileConfig.Server.Apisite.Utilites;
+using AgileConfig.Server.Common.EventBus;
+using AgileConfig.Server.Event;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -24,15 +26,19 @@ namespace AgileConfig.Server.Apisite.Controllers
         private readonly IConfigService _configService;
         private readonly IAppService _appService;
         private readonly IUserService _userService;
+        private readonly ITinyEventBus _tinyEventBus;
 
         public ConfigController(
             IConfigService configService,
             IAppService appService,
-            IUserService userService)
+            IUserService userService,
+            ITinyEventBus tinyEventBus
+            )
         {
             _configService = configService;
             _appService = appService;
             _userService = userService;
+            _tinyEventBus = tinyEventBus;
         }
 
         [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Add", Functions.Config_Add })]
@@ -84,10 +90,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                dynamic param = new ExpandoObject();
-                param.config = config;
-                param.userName = this.GetCurrentUserName();
-                TinyEventBus.Instance.Fire(EventKeys.ADD_CONFIG_SUCCESS, param);
+                _tinyEventBus.Fire(new AddConfigSuccessful(config, this.GetCurrentUserName()));
             }
 
             return Json(new
@@ -158,10 +161,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 var userName = this.GetCurrentUserName();
                 addConfigs.ForEach(c =>
                 {
-                    dynamic param = new ExpandoObject();
-                    param.config = c;
-                    param.userName = userName;
-                    TinyEventBus.Instance.Fire(EventKeys.ADD_CONFIG_SUCCESS, param);
+                    _tinyEventBus.Fire(new AddConfigSuccessful(c, this.GetCurrentUserName()));
                 });
             }
 
@@ -252,11 +252,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                dynamic param = new ExpandoObject();
-                param.config = config;
-                param.userName = this.GetCurrentUserName();
-                param.oldConfig = config;
-                TinyEventBus.Instance.Fire(EventKeys.EDIT_CONFIG_SUCCESS, param);
+                _tinyEventBus.Fire(new EditConfigSuccessful(config, this.GetCurrentUserName()));
             }
 
             return Json(new
@@ -417,10 +413,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _configService.UpdateAsync(config, env);
             if (result)
             {
-                dynamic param = new ExpandoObject();
-                param.config = config;
-                param.userName = this.GetCurrentUserName();
-                TinyEventBus.Instance.Fire(EventKeys.DELETE_CONFIG_SUCCESS, param);
+                _tinyEventBus.Fire(new DeleteConfigSuccessful(config, this.GetCurrentUserName()));
             }
 
             return Json(new
@@ -472,11 +465,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _configService.UpdateAsync(deleteConfigs, env);
             if (result)
             {
-                dynamic param = new ExpandoObject();
-                param.userName = this.GetCurrentUserName();
-                param.appId = deleteConfigs.First().AppId;
-                param.env = env;
-                TinyEventBus.Instance.Fire(EventKeys.DELETE_CONFIG_SOME_SUCCESS, param);
+                _tinyEventBus.Fire(new DeleteSomeConfigSuccessful(deleteConfigs.First(), this.GetCurrentUserName()));
             }
 
             return Json(new
@@ -503,11 +492,8 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                dynamic param = new ExpandoObject();
-                param.userName = this.GetCurrentUserName();
-                param.timelineNode = await _configService.GetPublishTimeLineNodeAsync(publishTimelineId, env);
-                param.env = env;
-                TinyEventBus.Instance.Fire(EventKeys.ROLLBACK_CONFIG_SUCCESS, param);
+                var node = await _configService.GetPublishTimeLineNodeAsync(publishTimelineId, env);
+                _tinyEventBus.Fire(new RollbackConfigSuccessful(node, this.GetCurrentUserName()));
             }
 
             return Json(new
@@ -577,11 +563,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             if (ret.result)
             {
                 var timelineNode = await _configService.GetPublishTimeLineNodeAsync(ret.publishTimelineId, env);
-                dynamic param = new ExpandoObject();
-                param.publishTimelineNode = timelineNode;
-                param.userName = this.GetCurrentUserName();
-                param.env = env;
-                TinyEventBus.Instance.Fire(EventKeys.PUBLISH_CONFIG_SUCCESS, param);
+                _tinyEventBus.Fire(new PublishConfigSuccessful(timelineNode, this.GetCurrentUserName()));
             }
 
             return Json(new
@@ -753,11 +735,8 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                dynamic param = new ExpandoObject();
-                param.config = await _configService.GetAsync(configId, env);
-                param.userName = this.GetCurrentUserName();
-                param.env = env;
-                TinyEventBus.Instance.Fire(EventKeys.CANCEL_EDIT_CONFIG_SUCCESS, param);
+                var config = await _configService.GetAsync(configId, env);
+                _tinyEventBus.Fire(new CancelEditConfigSuccessful(config, this.GetCurrentUserName()));
             }
 
             return Json(new
@@ -780,11 +759,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             if (result)
             {
                 var config = await _configService.GetAsync(ids.First(), env);
-                dynamic param = new ExpandoObject();
-                param.userName = this.GetCurrentUserName();
-                param.appId = config.AppId;
-                param.env = env;
-                TinyEventBus.Instance.Fire(EventKeys.CANCEL_EDIT_CONFIG_SOME_SUCCESS, param);
+                _tinyEventBus.Fire(new CancelEditConfigSomeSuccessful(config, this.GetCurrentUserName()));
             }
 
             return Json(new

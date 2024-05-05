@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Authorization;
 using AgileConfig.Server.Common;
 using System.Dynamic;
 using AgileConfig.Server.Apisite.Utilites;
+using AgileConfig.Server.Common.EventBus;
+using AgileConfig.Server.Event;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -20,14 +22,18 @@ namespace AgileConfig.Server.Apisite.Controllers
         private readonly IServerNodeService _serverNodeService;
         private readonly ISysLogService _sysLogService;
         private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
+        private readonly ITinyEventBus _tinyEventBus;
 
         public ServerNodeController(IServerNodeService serverNodeService,
             ISysLogService sysLogService,
-            IRemoteServerNodeProxy remoteServerNodeProxy)
+            IRemoteServerNodeProxy remoteServerNodeProxy,
+            ITinyEventBus tinyEventBus
+            )
         {
             _serverNodeService = serverNodeService;
             _sysLogService = sysLogService;
             _remoteServerNodeProxy = remoteServerNodeProxy;
+            _tinyEventBus = tinyEventBus;
         }
 
         [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Node.Add", Functions.Node_Add })]
@@ -58,10 +64,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _serverNodeService.AddAsync(node);
             if (result)
             {
-                dynamic param = new ExpandoObject();
-                param.node = node;
-                param.userName = this.GetCurrentUserName();
-                TinyEventBus.Instance.Fire(EventKeys.ADD_NODE_SUCCESS, param);
+                _tinyEventBus.Fire(new AddNodeSuccessful(node, this.GetCurrentUserName()));
                 await _remoteServerNodeProxy.TestEchoAsync(node.Id);
             }
 
@@ -103,10 +106,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _serverNodeService.DeleteAsync(node);
             if (result)
             {
-                dynamic param = new ExpandoObject();
-                param.node = node;
-                param.userName = this.GetCurrentUserName();
-                TinyEventBus.Instance.Fire(EventKeys.DELETE_NODE_SUCCESS, param);
+                _tinyEventBus.Fire(new DeleteNodeSuccessful(node, this.GetCurrentUserName()));
             }
             return Json(new
             {

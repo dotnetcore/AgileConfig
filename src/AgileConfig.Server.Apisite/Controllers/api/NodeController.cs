@@ -1,6 +1,7 @@
 ﻿using AgileConfig.Server.Apisite.Controllers.api.Models;
 using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Apisite.Models;
+using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -20,11 +21,18 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         private readonly IServerNodeService _serverNodeService;
         private readonly ISysLogService _sysLogService;
         private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
-        public NodeController(IServerNodeService serverNodeService, ISysLogService sysLogService, IRemoteServerNodeProxy remoteServerNodeProxy)
+        private readonly ITinyEventBus _tinyEventBus;
+
+        public NodeController(IServerNodeService serverNodeService,
+            ISysLogService sysLogService,
+            IRemoteServerNodeProxy remoteServerNodeProxy,
+            ITinyEventBus tinyEventBus
+            )
         {
             _serverNodeService = serverNodeService;
             _sysLogService = sysLogService;
             _remoteServerNodeProxy = remoteServerNodeProxy;
+            _tinyEventBus = tinyEventBus;
         }
 
         /// <summary>
@@ -36,12 +44,12 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         {
             var nodes = await _serverNodeService.GetAllNodesAsync();
 
-            var vms = nodes.Select(x=> new ApiNodeVM
-            { 
+            var vms = nodes.Select(x => new ApiNodeVM
+            {
                 Address = x.Id,
                 Remark = x.Remark,
                 LastEchoTime = x.LastEchoTime,
-                Status= x.Status
+                Status = x.Status
             });
 
             return Json(vms);
@@ -68,9 +76,10 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 });
             }
 
-            var ctrl = new ServerNodeController(_serverNodeService, _sysLogService, _remoteServerNodeProxy);
+            var ctrl = new ServerNodeController(_serverNodeService, _sysLogService, _remoteServerNodeProxy, _tinyEventBus);
             ctrl.ControllerContext.HttpContext = HttpContext;
-            var result = (await ctrl.Add(new ServerNodeVM { 
+            var result = (await ctrl.Add(new ServerNodeVM
+            {
                 Address = model.Address,
                 Remark = model.Remark,
                 LastEchoTime = model.LastEchoTime,
@@ -80,7 +89,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             dynamic obj = result.Value;
             if (obj.success == true)
             {
-                return Created("","");
+                return Created("", "");
             }
 
             Response.StatusCode = 400;
@@ -100,7 +109,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [HttpDelete()]
         public async Task<IActionResult> Delete([FromQuery] string address)
         {
-            var ctrl = new ServerNodeController(_serverNodeService, _sysLogService, _remoteServerNodeProxy);
+            var ctrl = new ServerNodeController(_serverNodeService, _sysLogService, _remoteServerNodeProxy, _tinyEventBus);
             ctrl.ControllerContext.HttpContext = HttpContext;
             var result = (await ctrl.Delete(new ServerNodeVM { Address = address })) as JsonResult;
 

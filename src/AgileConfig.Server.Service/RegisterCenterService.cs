@@ -1,14 +1,13 @@
 ﻿using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using System;
-using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Abstraction;
 using Microsoft.Extensions.Logging;
+using AgileConfig.Server.Common.EventBus;
+using AgileConfig.Server.Event;
 
 namespace AgileConfig.Server.Service
 {
@@ -17,15 +16,18 @@ namespace AgileConfig.Server.Service
         private readonly IServiceInfoRepository _serviceInfoRepository;
         private readonly ILogger<RegisterCenterService> _logger;
         private readonly IServiceInfoService _serviceInfoService;
+        private readonly ITinyEventBus _tinyEventBus;
 
         public RegisterCenterService(
             IServiceInfoRepository serviceInfoRepository,
             IServiceInfoService serviceInfoService,
+            ITinyEventBus tinyEventBus,
             ILogger<RegisterCenterService> logger)
         {
             _serviceInfoRepository = serviceInfoRepository;
             _logger = logger;
             _serviceInfoService = serviceInfoService;
+            _tinyEventBus = tinyEventBus;
         }
 
         public async Task<string> RegisterAsync(ServiceInfo serviceInfo)
@@ -156,11 +158,8 @@ namespace AgileConfig.Server.Service
                 if (oldStatus != ServiceStatus.Healthy)
                 {
                     _serviceInfoService.ClearCache();
-                    dynamic param = new ExpandoObject();
-                    param.ServiceId = entity.ServiceId;
-                    param.ServiceName = entity.ServiceName;
-                    param.UniqueId = entity.Id;
-                    TinyEventBus.Instance.Fire(EventKeys.UPDATE_SERVICE_STATUS, param);
+
+                    _tinyEventBus.Fire(new ServiceStatusUpdateEvent(entity.Id));
                 }
             }
 
