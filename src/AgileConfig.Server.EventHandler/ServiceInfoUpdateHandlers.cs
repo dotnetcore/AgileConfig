@@ -6,6 +6,7 @@ using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.Event;
 using AgileConfig.Server.IService;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using System.Net;
 
 namespace AgileConfig.Server.EventHandler
@@ -14,18 +15,22 @@ namespace AgileConfig.Server.EventHandler
     {
         private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
         private readonly IServerNodeService _serverNodeService;
+        private readonly ISysLogService _sysLogService;
 
         public ServiceRegisterHandler(
             IRemoteServerNodeProxy remoteServerNodeProxy,
-            IServerNodeService serverNodeService
+            IServerNodeService serverNodeService,
+            ISysLogService sysLogService
             )
         {
             _remoteServerNodeProxy = remoteServerNodeProxy;
             _serverNodeService = serverNodeService;
+            _sysLogService = sysLogService;
         }
 
         public async Task Handle(IEvent evt)
         {
+            var evtInstance = evt as ServiceRegisteredEvent;
             var serverNodes = await _serverNodeService.GetAllNodesAsync();
             foreach (var serverNode in serverNodes.Where(x => x.Status == NodeStatus.Online))
             {
@@ -39,6 +44,13 @@ namespace AgileConfig.Server.EventHandler
                 };
                 _ = _remoteServerNodeProxy.AllClientsDoActionAsync(serverNode.Id, act);
             }
+
+            await _sysLogService.AddSysLogAsync(new SysLog
+            {
+                LogTime = DateTime.Now,
+                LogType = SysLogType.Normal,
+                LogText = $"服务【{evtInstance.UniqueId}】【注册】成功",
+            });
         }
     }
 
@@ -46,18 +58,22 @@ namespace AgileConfig.Server.EventHandler
     {
         private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
         private readonly IServerNodeService _serverNodeService;
+        private readonly ISysLogService _sysLogService;
 
         public ServiceUnRegisterHandler(
             IRemoteServerNodeProxy remoteServerNodeProxy,
-            IServerNodeService serverNodeService
+            IServerNodeService serverNodeService,
+            ISysLogService sysLogService
             )
         {
             _remoteServerNodeProxy = remoteServerNodeProxy;
             _serverNodeService = serverNodeService;
+            _sysLogService = sysLogService;
         }
 
         public async Task Handle(IEvent evt)
         {
+            var evtInstance = evt as ServiceUnRegisterEvent;
             var serverNodes = await _serverNodeService.GetAllNodesAsync();
             foreach (var serverNode in serverNodes.Where(x => x.Status == NodeStatus.Online))
             {
@@ -71,6 +87,13 @@ namespace AgileConfig.Server.EventHandler
                 };
                 _ = _remoteServerNodeProxy.AllClientsDoActionAsync(serverNode.Id, act);
             }
+
+            await _sysLogService.AddSysLogAsync(new SysLog
+            {
+                LogTime = DateTime.Now,
+                LogType = SysLogType.Normal,
+                LogText = $"服务【{evtInstance.UniqueId}】【卸载】成功",
+            });
         }
     }
 
@@ -81,19 +104,22 @@ namespace AgileConfig.Server.EventHandler
         private ILogger _logger;
         private readonly IServerNodeService _serverNodeService;
         private readonly IServiceInfoService _serviceInfoService;
+        private readonly ISysLogService _sysLogService;
 
         public ServiceStatusUpdateHandler(
             IRemoteServerNodeProxy remoteServerNodeProxy,
             ILoggerFactory loggerFactory,
             IRestClient restClient,
             IServerNodeService serverNodeService,
-            IServiceInfoService serviceInfoService
+            IServiceInfoService serviceInfoService,
+            ISysLogService sysLogService
             )
         {
             _remoteServerNodeProxy = remoteServerNodeProxy;
             _restClient = restClient;
             _serverNodeService = serverNodeService;
             _serviceInfoService = serviceInfoService;
+            _sysLogService = sysLogService;
             _logger = loggerFactory.CreateLogger<ServiceStatusUpdateHandler>();
         }
 
@@ -120,6 +146,13 @@ namespace AgileConfig.Server.EventHandler
                 return;
             }
             var service = await _serviceInfoService.GetByUniqueIdAsync(id);
+            await _sysLogService.AddSysLogAsync(new SysLog
+            {
+                LogTime = DateTime.Now,
+                LogType = SysLogType.Normal,
+                LogText = $"服务【{id}】状态更新为【{service.Status}】",
+            });
+
             if (service != null && !string.IsNullOrWhiteSpace(service.AlarmUrl) &&
                 service.Status == ServiceStatus.Unhealthy)
             {

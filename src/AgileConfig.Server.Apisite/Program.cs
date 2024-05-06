@@ -36,7 +36,7 @@ namespace AgileConfig.Server.Apisite
         {
             return WebHost.CreateDefaultBuilder(args)
                   .UseConfiguration(Global.Config)
-                  .UseNLog()
+                  //.UseNLog()
                   .UseStartup<Startup>();
         }
           
