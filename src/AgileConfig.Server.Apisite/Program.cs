@@ -3,7 +3,6 @@ using AgileConfig.Server.Common;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
-using NLog.Web;
 
 namespace AgileConfig.Server.Apisite
 {
@@ -36,7 +35,6 @@ namespace AgileConfig.Server.Apisite
         {
             return WebHost.CreateDefaultBuilder(args)
                   .UseConfiguration(Global.Config)
-                  //.UseNLog()
                   .UseStartup<Startup>();
         }
           
