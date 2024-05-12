@@ -1,7 +1,6 @@
 ﻿using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using System;
-using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 using AgileConfig.Server.Data.Abstraction;

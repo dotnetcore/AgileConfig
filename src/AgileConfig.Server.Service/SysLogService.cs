@@ -6,28 +6,40 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using AgileConfig.Server.Data.Abstraction;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.Extensions.Logging;
+using static FreeSql.Internal.GlobalFilter;
 
 namespace AgileConfig.Server.Service
 {
     public class SysLogService : ISysLogService
     {
         private readonly ISysLogRepository _sysLogRepository;
+        private readonly ILogger<SysLogService> _logger;
 
-        public SysLogService(ISysLogRepository sysLogRepository)
+        public SysLogService(ISysLogRepository sysLogRepository, ILogger<SysLogService> logger)
         {
             _sysLogRepository = sysLogRepository;
+            _logger = logger;
         }
 
         public async Task<bool> AddRangeAsync(IEnumerable<SysLog> logs)
         {
             await _sysLogRepository.InsertAsync(logs.ToList());
+
+            foreach (var item in logs)
+            {
+                _logger.LogInformation("{AppId} {LogType} {LogTime} {LogText}", item.AppId, item.LogType, item.LogTime, item.LogText);
+            }
+
             return true;
         }
 
         public async Task<bool> AddSysLogAsync(SysLog log)
         {
             await _sysLogRepository.InsertAsync(log);
+
+            _logger.LogInformation("{AppId} {LogType} {LogTime} {LogText}", log.AppId, log.LogType, log.LogTime, log.LogText);
+
             return true;
         }
 

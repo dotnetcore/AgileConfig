@@ -36,5 +36,9 @@ namespace AgileConfig.Server.Apisite
         /// SSO button text
         /// </summary>
         public static string SsoButtonText => Global.Config["SSO:loginButtonText"];
+
+        public static string OtlpLogsEndpoint => Global.Config["otlp:logs:endpoint"];
+
+        public static string OtlpLogsProtocol => Global.Config["otlp:logs:protocol"];
     }
 }

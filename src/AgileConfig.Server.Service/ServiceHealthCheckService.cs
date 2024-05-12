@@ -128,7 +128,7 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
                     {
                         continue;
                     }
-                    
+
                     var lstHeartBeat = service.LastHeartBeat;
                     if (!lstHeartBeat.HasValue)
                     {
@@ -198,8 +198,12 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
             int istatus = ((int)resp.StatusCode - 200);
             result = istatus >= 0 && istatus < 100; // 200 段都认为是正常的
 
-            _logger.LogInformation("check service health {0} {1} {2} result：{3}", service.CheckUrl, service.ServiceId,
-                service.ServiceName, result ? "up" : "down");
+            if (!result)
+            {
+                _logger.LogInformation("check service health {0} {1} {2} result：{3}", service.CheckUrl, service.ServiceId,
+                                                                                        service.ServiceName, "down");
+            }
+
             return result;
         }
         catch (Exception e)

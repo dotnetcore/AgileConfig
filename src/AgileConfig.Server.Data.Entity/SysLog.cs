@@ -24,7 +24,7 @@ namespace AgileConfig.Server.Data.Entity
         public string Id { get; set; }
 
         [Column(Name = "app_id", StringLength = 36)]
-        public string AppId { get; set; }
+        public string AppId { get; set; } = "";
 
         [Column(Name = "log_type")]
         public SysLogType LogType { get; set; }
@@ -35,5 +35,10 @@ namespace AgileConfig.Server.Data.Entity
 
         [Column(Name = "log_text", StringLength = 2000)]
         public string LogText { get; set; }
+
+        public override string ToString()
+        {
+            return $"Id:{Id}, AppId:{AppId}, LogType:{LogType}, LogTime:{LogTime}, LogText:{LogText}";
+        }
     }
 }
