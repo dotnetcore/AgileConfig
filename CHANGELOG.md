@@ -1,5 +1,8 @@
 # Change log
 ------------------------------
+[1.9.3]
+* Refactoring the TinyEventbus
+
 [1.9.2]
 * 修复无法后台校验 node 存活的问题
 
