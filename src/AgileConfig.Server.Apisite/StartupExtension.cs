@@ -21,19 +21,24 @@ namespace AgileConfig.Server.Apisite
                 ;
         }
 
-        public static void AddOtlp(this IServiceCollection services)
+        public static void AddOtlpTraces(this IServiceCollection services)
         {
-            //services.AddOpenTelemetry()
-            //          .ConfigureResource(resource => resource.AddService(Program.AppName))
-            //          .WithTracing(tracing => tracing
-            //          .AddAspNetCoreInstrumentation()
-            //          .AddHttpClientInstrumentation() 
-            //                                    .AddOtlpExporter(op =>
-            //                                    {
-            //                                        op.Protocol = OtlpExportProtocol.HttpProtobuf;
-            //                                        op.Endpoint = new System.Uri(Global.Config["otlp:traces:endpoint"]);
-            //                                    })
-            //                      )
+            if (string.IsNullOrEmpty(Appsettings.OtlpTracesEndpoint))
+            {
+                return;
+            }
+
+            services.AddOpenTelemetry()
+                      .ConfigureResource(resource => resource.AddService(Program.AppName))
+                      .WithTracing(tracing => tracing
+                      .AddAspNetCoreInstrumentation()
+                      .AddHttpClientInstrumentation()
+                      .AddOtlpExporter(op =>
+                          {
+                              op.Protocol = Appsettings.OtlpTracesProtocol == "http" ? OtlpExportProtocol.HttpProtobuf : OtlpExportProtocol.Grpc;
+                              op.Endpoint = new System.Uri(Appsettings.OtlpTracesEndpoint);
+                          })
+                       )
                       //.WithMetrics(metrics => metrics
                       //                        .AddRuntimeInstrumentation()
                       //                        .AddAspNetCoreInstrumentation()
@@ -43,6 +48,27 @@ namespace AgileConfig.Server.Apisite
                       //                            op.Endpoint = new System.Uri(Global.Config["otlp:trace:endpoint"]);
                       //                        })
                       //              )
+                      ;
+        }
+
+        public static void AddOtlpMetrics(this IServiceCollection services)
+        {
+            if (string.IsNullOrEmpty(Appsettings.OtlpMetricsEndpoint))
+            {
+                return;
+            }
+
+            services.AddOpenTelemetry()
+                      .ConfigureResource(resource => resource.AddService(Program.AppName))
+                      .WithMetrics(metrics => metrics
+                                              .AddRuntimeInstrumentation()
+                                              .AddAspNetCoreInstrumentation()
+                                              .AddOtlpExporter(op =>
+                                              {
+                                                  op.Protocol = Appsettings.OtlpMetricsProtocol == "http" ? OtlpExportProtocol.HttpProtobuf : OtlpExportProtocol.Grpc;
+                                                  op.Endpoint = new System.Uri(Appsettings.OtlpMetricsEndpoint);
+                                              })
+                                    )
                       ;
         }
 

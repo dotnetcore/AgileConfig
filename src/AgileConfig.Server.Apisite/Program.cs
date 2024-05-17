@@ -61,15 +61,7 @@ namespace AgileConfig.Server.Apisite
                 options
                        .AddOtlpExporter(expOp =>
                        {
-                           if (Appsettings.OtlpLogsProtocol == "grpc")
-                           {
-                               expOp.Protocol = OtlpExportProtocol.Grpc;
-                           }
-                           else
-                           {
-                               expOp.Protocol = OtlpExportProtocol.HttpProtobuf;
-                           }
-
+                           expOp.Protocol = Appsettings.OtlpLogsProtocol == "http" ? OtlpExportProtocol.HttpProtobuf : OtlpExportProtocol.Grpc;
                            expOp.Endpoint = new Uri(Appsettings.OtlpLogsEndpoint);
                        })
                        ;

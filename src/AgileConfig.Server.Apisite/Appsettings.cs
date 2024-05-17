@@ -40,5 +40,14 @@ namespace AgileConfig.Server.Apisite
         public static string OtlpLogsEndpoint => Global.Config["otlp:logs:endpoint"];
 
         public static string OtlpLogsProtocol => Global.Config["otlp:logs:protocol"];
+
+        public static string OtlpTracesEndpoint => Global.Config["otlp:traces:endpoint"];
+
+        public static string OtlpTracesProtocol => Global.Config["otlp:traces:protocol"];
+
+        public static string OtlpMetricsEndpoint => Global.Config["otlp:metrics:endpoint"];
+
+        public static string OtlpMetricsProtocol => Global.Config["otlp:metrics:protocol"];
+
     }
 }
