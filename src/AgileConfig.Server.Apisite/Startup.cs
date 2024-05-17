@@ -19,6 +19,7 @@ using Microsoft.OpenApi.Models;
 using AgileConfig.Server.Data.Repository.Selector;
 using AgileConfig.Server.Data.Abstraction;
 using AgileConfig.Server.Common.EventBus;
+using OpenTelemetry.Resources;
 
 namespace AgileConfig.Server.Apisite
 {
@@ -59,7 +60,6 @@ namespace AgileConfig.Server.Apisite
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddOtlpTraces();
             services.AddDefaultHttpClient(IsTrustSSL(Configuration));
             services.AddRestClient();
 
@@ -91,6 +91,10 @@ namespace AgileConfig.Server.Apisite
 
             services.AddOIDC();
 
+            services.AddOpenTelemetry()
+                    .ConfigureResource(resource => resource.AddService(Program.AppName))
+                    .AddOtlpTraces()
+                    .AddOtlpMetrics();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

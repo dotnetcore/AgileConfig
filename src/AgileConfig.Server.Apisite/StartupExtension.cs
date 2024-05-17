@@ -6,6 +6,7 @@ using System.Net.Http;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Exporter;
+using OpenTelemetry;
 
 namespace AgileConfig.Server.Apisite
 {
@@ -21,55 +22,44 @@ namespace AgileConfig.Server.Apisite
                 ;
         }
 
-        public static void AddOtlpTraces(this IServiceCollection services)
+        public static IOpenTelemetryBuilder AddOtlpTraces(this IOpenTelemetryBuilder builder)
         {
             if (string.IsNullOrEmpty(Appsettings.OtlpTracesEndpoint))
             {
-                return;
+                return builder;
             }
 
-            services.AddOpenTelemetry()
-                      .ConfigureResource(resource => resource.AddService(Program.AppName))
-                      .WithTracing(tracing => tracing
-                      .AddAspNetCoreInstrumentation()
-                      .AddHttpClientInstrumentation()
-                      .AddOtlpExporter(op =>
-                          {
-                              op.Protocol = Appsettings.OtlpTracesProtocol == "http" ? OtlpExportProtocol.HttpProtobuf : OtlpExportProtocol.Grpc;
-                              op.Endpoint = new System.Uri(Appsettings.OtlpTracesEndpoint);
-                          })
-                       )
-                      //.WithMetrics(metrics => metrics
-                      //                        .AddRuntimeInstrumentation()
-                      //                        .AddAspNetCoreInstrumentation()
-                      //                        .AddOtlpExporter(op =>
-                      //                        {
-                      //                            op.Protocol = OtlpExportProtocol.HttpProtobuf;
-                      //                            op.Endpoint = new System.Uri(Global.Config["otlp:trace:endpoint"]);
-                      //                        })
-                      //              )
-                      ;
+            builder.WithTracing(tracing => tracing
+                          .AddAspNetCoreInstrumentation()
+                          .AddHttpClientInstrumentation()
+                          .AddOtlpExporter(op =>
+                              {
+                                  op.Protocol = Appsettings.OtlpTracesProtocol == "http" ? OtlpExportProtocol.HttpProtobuf : OtlpExportProtocol.Grpc;
+                                  op.Endpoint = new System.Uri(Appsettings.OtlpTracesEndpoint);
+                              })
+                       );
+
+            return builder;
         }
 
-        public static void AddOtlpMetrics(this IServiceCollection services)
+        public static IOpenTelemetryBuilder AddOtlpMetrics(this IOpenTelemetryBuilder builder)
         {
             if (string.IsNullOrEmpty(Appsettings.OtlpMetricsEndpoint))
             {
-                return;
+                return builder;
             }
 
-            services.AddOpenTelemetry()
-                      .ConfigureResource(resource => resource.AddService(Program.AppName))
-                      .WithMetrics(metrics => metrics
-                                              .AddRuntimeInstrumentation()
-                                              .AddAspNetCoreInstrumentation()
-                                              .AddOtlpExporter(op =>
-                                              {
-                                                  op.Protocol = Appsettings.OtlpMetricsProtocol == "http" ? OtlpExportProtocol.HttpProtobuf : OtlpExportProtocol.Grpc;
-                                                  op.Endpoint = new System.Uri(Appsettings.OtlpMetricsEndpoint);
-                                              })
-                                    )
-                      ;
+            builder.WithMetrics(metrics => metrics
+                          .AddAspNetCoreInstrumentation()
+                          .AddRuntimeInstrumentation()
+                          .AddOtlpExporter(op =>
+                              {
+                                  op.Protocol = Appsettings.OtlpMetricsProtocol == "http" ? OtlpExportProtocol.HttpProtobuf : OtlpExportProtocol.Grpc;
+                                  op.Endpoint = new System.Uri(Appsettings.OtlpMetricsEndpoint);
+                              })
+                      );
+
+            return builder;
         }
 
         static HttpMessageHandler NewMessageHandler(bool alwaysTrustSsl)
