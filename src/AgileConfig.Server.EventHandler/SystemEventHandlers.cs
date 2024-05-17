@@ -157,7 +157,7 @@ namespace AgileConfig.Server.EventHandler
 
         public async Task Handle(IEvent evt)
         {
-            var evtInstance = evt as EditAppSuccessful;
+            var evtInstance = evt as DisableOrEnableAppSuccessful;
             App app = evtInstance.App;
             string userName = evtInstance.UserName;
             if (app != null)
