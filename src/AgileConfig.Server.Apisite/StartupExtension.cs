@@ -1,12 +1,12 @@
 ﻿using AgileConfig.Server.Common;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
 using System.Net.Http;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Exporter;
 using OpenTelemetry;
+using Npgsql;
 
 namespace AgileConfig.Server.Apisite
 {
@@ -31,7 +31,7 @@ namespace AgileConfig.Server.Apisite
 
             builder.WithTracing(tracing => tracing
                           .AddAspNetCoreInstrumentation()
-                          .AddHttpClientInstrumentation()
+                          .AddNpgsql()
                           .AddOtlpExporter(op =>
                               {
                                   op.Protocol = Appsettings.OtlpTracesProtocol == "http" ? OtlpExportProtocol.HttpProtobuf : OtlpExportProtocol.Grpc;
