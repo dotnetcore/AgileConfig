@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using AgileConfig.Server.Apisite.Controllers.api.Models;
 using AgileConfig.Server.Common.EventBus;
+using AgileConfig.Server.Apisite.Metrics;
 
 namespace ApiSiteTests;
 
@@ -64,12 +65,15 @@ public class TestApiConfigController
         var appBasicAuthService = new Mock<IAppBasicAuthService>();
         var userSErvice = new Mock<IUserService>();
         var eventBus = new Mock<ITinyEventBus>();
+        var meterService = new Mock<IMeterService>();
 
         var ctrl = new ConfigController(
             configService.Object,
             appService.Object,
             userSErvice.Object,
-            memoryCache, eventBus.Object);
+            memoryCache, eventBus.Object,
+            meterService.Object
+            );
         var act = await ctrl.GetAppConfig("001", "DEV");
 
         Assert.IsNotNull(act);
@@ -91,7 +95,9 @@ public class TestApiConfigController
             configService.Object,
             appService.Object,
             userSErvice.Object,
-            memoryCache, eventBus.Object);
+            memoryCache, eventBus.Object,
+            meterService.Object
+            );
         act = await ctrl.GetAppConfig("001", "DEV");
 
         Assert.IsNotNull(act);

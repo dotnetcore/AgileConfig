@@ -22,7 +22,7 @@ namespace AgileConfig.Server.Apisite
         private readonly IServiceScope _localServiceScope;
         public InitService(IServiceScopeFactory serviceScopeFactory,
             ISystemInitializationService systemInitializationService,
-            MeterService meterService,
+            IMeterService meterService,
             ILogger<InitService> logger)
         {
             _logger = logger;

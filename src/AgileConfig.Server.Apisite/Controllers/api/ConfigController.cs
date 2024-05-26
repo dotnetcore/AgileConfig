@@ -24,7 +24,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         private readonly IUserService _userService;
         private readonly IMemoryCache _cacheMemory;
         private readonly ITinyEventBus _tinyEventBus;
-        private readonly MeterService _meterService;
+        private readonly IMeterService _meterService;
 
         public ConfigController(
             IConfigService configService,
@@ -32,7 +32,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             IUserService userService,
             IMemoryCache cacheMemory,
             ITinyEventBus tinyEventBus,
-            MeterService meterService
+            IMeterService meterService
             )
         {
             _configService = configService;
@@ -95,7 +95,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 .SetAbsoluteExpiration(TimeSpan.FromSeconds(5));
             _cacheMemory?.Set(cacheKey, vms, cacheOp);
 
-            _meterService.PullAppConfigCounter.Add(1, new("appId", appId), new("env", env));
+            _meterService.PullAppConfigCounter?.Add(1, new("appId", appId), new("env", env));
 
             return vms;
         }

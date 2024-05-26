@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.Apisite.Metrics
 {
-    public class MeterService
+    public class MeterService : IMeterService
     {
         public const string MeterName = "AgileConfigMeter";
 
