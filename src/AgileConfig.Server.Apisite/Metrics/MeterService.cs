@@ -71,10 +71,6 @@ namespace AgileConfig.Server.Apisite.Metrics
         public void Start()
         {
             _ = StartCheckAppCountAsync();
-            _ = StartCheckConfigCountAsync();
-            _ = StartCheckNodeCountAsync();
-            _ = StartCheckNodeCountAsync();
-            _ = StartCheckServiceCountAsync();
         }
 
         private Task StartCheckAppCountAsync()
@@ -84,29 +80,12 @@ namespace AgileConfig.Server.Apisite.Metrics
                 while (true)
                 {
                     _appCount = await _appService.CountEnabledAppsAsync();
-                    await Task.Delay(1000 * _checkInterval);
-                }
-            });
-        }
 
-        private Task StartCheckConfigCountAsync()
-        {
-            return Task.Run(async () =>
-            {
-                while (true)
-                {
                     _configCount = await _configService.CountEnabledConfigsAsync();
-                    await Task.Delay(1000 * _checkInterval);
-                }
-            });
-        }
 
-        private Task StartCheckNodeCountAsync()
-        {
-            return Task.Run(async () =>
-            {
-                while (true)
-                {
+                    var services = await _serviceInfoService.GetAllServiceInfoAsync();
+                    _serviceCount = services.Count;
+
                     var nodes = await _serverNodeService.GetAllNodesAsync();
                     _serverNodeCount = nodes.Count;
 
@@ -120,20 +99,6 @@ namespace AgileConfig.Server.Apisite.Metrics
                         }
                     }
                     _clientCount = clientCount;
-
-                    await Task.Delay(1000 * _checkInterval);
-                }
-            });
-        }
-
-        private Task StartCheckServiceCountAsync()
-        {
-            return Task.Run(async () =>
-            {
-                while (true)
-                {
-                    var services = await _serviceInfoService.GetAllServiceInfoAsync();
-                    _serviceCount = services.Count;
 
                     await Task.Delay(1000 * _checkInterval);
                 }
