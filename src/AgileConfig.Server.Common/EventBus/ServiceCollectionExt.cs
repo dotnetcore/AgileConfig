@@ -6,7 +6,7 @@ namespace AgileConfig.Server.Common.EventBus
     {
         public static IServiceCollection AddTinyEventBus(this IServiceCollection sc)
         {
-            sc.AddScoped<ITinyEventBus, TinyEventBus>(sp=> new TinyEventBus(sc));
+            sc.AddSingleton<ITinyEventBus, TinyEventBus>(sp => new TinyEventBus(sc));
             return sc;
         }
     }
