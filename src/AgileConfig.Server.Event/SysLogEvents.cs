@@ -1,6 +1,5 @@
 ﻿using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.Data.Entity;
-using System.Xml.Linq;
 
 namespace AgileConfig.Server.Event
 {

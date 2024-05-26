@@ -20,6 +20,7 @@ using AgileConfig.Server.Data.Repository.Selector;
 using AgileConfig.Server.Data.Abstraction;
 using AgileConfig.Server.Common.EventBus;
 using OpenTelemetry.Resources;
+using AgileConfig.Server.Apisite.Metrics;
 
 namespace AgileConfig.Server.Apisite
 {
@@ -90,6 +91,8 @@ namespace AgileConfig.Server.Apisite
             services.AddAntiforgery(o => o.SuppressXFrameOptionsHeader = true);
 
             services.AddOIDC();
+
+            services.AddSingleton<MeterService>();
 
             services.AddOpenTelemetry()
                     .ConfigureResource(resource => resource.AddService(Program.AppName))

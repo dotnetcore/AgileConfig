@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,7 +11,7 @@ namespace AgileConfig.Server.Common.EventBus
     public class TinyEventBus : ITinyEventBus
     {
         private readonly IServiceCollection _serviceCollection;
-        private readonly static Dictionary<Type, List<Type>> _eventHandlerMap = new Dictionary<Type, List<Type>>();
+        private readonly static ConcurrentDictionary<Type, List<Type>> _eventHandlerMap = new ConcurrentDictionary<Type, List<Type>>();
 
         public TinyEventBus(IServiceCollection serviceCollection)
         {
@@ -26,7 +27,7 @@ namespace AgileConfig.Server.Common.EventBus
             }
             else
             {
-                _eventHandlerMap.Add(eventType, new List<Type> {
+                _eventHandlerMap.TryAdd(eventType, new List<Type> {
                     handlerType
                 });
             }
@@ -36,8 +37,9 @@ namespace AgileConfig.Server.Common.EventBus
 
         public void Fire<TEvent>(TEvent evt) where TEvent : IEvent
         {
-            using var scope = _serviceCollection.BuildServiceProvider().CreateScope();
-            var logger = scope.ServiceProvider.GetService<ILoggerFactory>().CreateLogger<TinyEventBus>();
+            IServiceProvider sp = _serviceCollection.BuildServiceProvider();
+            using var scope = sp.CreateScope();
+            var logger = sp.GetService<ILoggerFactory>().CreateLogger<TinyEventBus>();
 
             logger.LogInformation($"Event fired: {typeof(TEvent).Name}");
 
@@ -48,9 +50,9 @@ namespace AgileConfig.Server.Common.EventBus
                 {
                     _ = Task.Run(async () =>
                     {
-                        using (var scope = _serviceCollection.BuildServiceProvider().CreateScope())
+                        using (var scope = sp.CreateScope())
                         {
-                            var handler = scope.ServiceProvider.GetService(handlerType);
+                            var handler = sp.GetService(handlerType);
                             if (handler != null)
                             {
                                 var handlerIntance = handler as IEventHandler;

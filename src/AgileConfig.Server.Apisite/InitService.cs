@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AgileConfig.Server.Apisite.Metrics;
 using AgileConfig.Server.Apisite.Utilites;
 using AgileConfig.Server.IService;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,7 +20,10 @@ namespace AgileConfig.Server.Apisite
         private readonly ISystemInitializationService _systemInitializationService;
         private readonly ILogger _logger;
         private readonly IServiceScope _localServiceScope;
-        public InitService(IServiceScopeFactory serviceScopeFactory, ISystemInitializationService systemInitializationService, ILogger<InitService> logger)
+        public InitService(IServiceScopeFactory serviceScopeFactory,
+            ISystemInitializationService systemInitializationService,
+            MeterService meterService,
+            ILogger<InitService> logger)
         {
             _logger = logger;
             _systemInitializationService = systemInitializationService;
@@ -29,6 +32,8 @@ namespace AgileConfig.Server.Apisite
             _eventRegister = _localServiceScope.ServiceProvider.GetService<IEventHandlerRegister>();
             _serverNodeService = _localServiceScope.ServiceProvider.GetService<IServerNodeService>();
             _serviceHealthCheckService = _localServiceScope.ServiceProvider.GetService<IServiceHealthCheckService>();
+
+            meterService.Start();
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)

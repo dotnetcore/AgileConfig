@@ -7,8 +7,6 @@ using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
-using AgileConfig.Server.Common;
-using System.Dynamic;
 using AgileConfig.Server.Apisite.Utilites;
 using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.Event;

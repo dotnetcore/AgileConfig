@@ -7,6 +7,7 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Exporter;
 using OpenTelemetry;
 using Npgsql;
+using AgileConfig.Server.Apisite.Metrics;
 
 namespace AgileConfig.Server.Apisite
 {
@@ -52,10 +53,12 @@ namespace AgileConfig.Server.Apisite
             builder.WithMetrics(metrics => metrics
                           .AddAspNetCoreInstrumentation()
                           .AddRuntimeInstrumentation()
-                          .AddOtlpExporter(op =>
+                          .AddMeter(MeterService.MeterName)
+                          .AddOtlpExporter((op, reader) =>
                               {
                                   op.Protocol = Appsettings.OtlpMetricsProtocol == "http" ? OtlpExportProtocol.HttpProtobuf : OtlpExportProtocol.Grpc;
                                   op.Endpoint = new System.Uri(Appsettings.OtlpMetricsEndpoint);
+                                  reader.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = 1000;
                               })
                       );
 
