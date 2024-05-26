@@ -18,6 +18,8 @@ namespace AgileConfig.Server.Apisite.Metrics
         public ObservableGauge<int> ClientGauge { get; }
         public ObservableGauge<int> NodeGauge { get; }
 
+        public Counter<long> PullAppConfigCounter { get; }
+
         private readonly IAppService _appService;
         private readonly IConfigService _configService;
         private readonly IServerNodeService _serverNodeService;
@@ -66,6 +68,7 @@ namespace AgileConfig.Server.Apisite.Metrics
             {
                 return _serverNodeCount;
             }, "", "The number of nodes");
+            PullAppConfigCounter = AgileConfigMeter.CreateCounter<long>("PullAppConfigCounter", "The number of times the app configuration was pulled");
         }
 
         public void Start()

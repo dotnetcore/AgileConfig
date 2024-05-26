@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AgileConfig.Server.Apisite.Controllers.api.Models;
 using AgileConfig.Server.Apisite.Filters;
+using AgileConfig.Server.Apisite.Metrics;
 using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.Data.Entity;
@@ -23,13 +24,15 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         private readonly IUserService _userService;
         private readonly IMemoryCache _cacheMemory;
         private readonly ITinyEventBus _tinyEventBus;
+        private readonly MeterService _meterService;
 
         public ConfigController(
             IConfigService configService,
             IAppService appService,
             IUserService userService,
             IMemoryCache cacheMemory,
-            ITinyEventBus tinyEventBus
+            ITinyEventBus tinyEventBus,
+            MeterService meterService
             )
         {
             _configService = configService;
@@ -37,6 +40,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             _userService = userService;
             _cacheMemory = cacheMemory;
             _tinyEventBus = tinyEventBus;
+            _meterService = meterService;
         }
 
         /// <summary>
@@ -48,7 +52,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <returns></returns>
         [TypeFilter(typeof(AppBasicAuthenticationAttribute))]
         [HttpGet("app/{appId}")]
-        public async Task<ActionResult<List<ApiConfigVM>>> GetAppConfig(string appId, [FromQuery]string env)
+        public async Task<ActionResult<List<ApiConfigVM>>> GetAppConfig(string appId, [FromQuery] string env)
         {
             if (string.IsNullOrEmpty(appId))
             {
@@ -69,7 +73,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             {
                 return configs;
             }
-            
+
             var appConfigs = await _configService.GetPublishedConfigsByAppIdWithInheritanced(appId, env);
             var vms = appConfigs.Select(c =>
             {
@@ -85,12 +89,14 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                     EditStatus = c.EditStatus
                 };
             }).ToList();
-            
+
             //增加5s的缓存，防止同一个app同时启动造成db的压力过大
             var cacheOp = new MemoryCacheEntryOptions()
                 .SetAbsoluteExpiration(TimeSpan.FromSeconds(5));
             _cacheMemory?.Set(cacheKey, vms, cacheOp);
-            
+
+            _meterService.PullAppConfigCounter.Add(1, new("appId", appId), new("env", env));
+
             return vms;
         }
 
