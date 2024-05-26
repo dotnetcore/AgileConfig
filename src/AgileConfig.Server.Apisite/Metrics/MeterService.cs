@@ -78,34 +78,40 @@ namespace AgileConfig.Server.Apisite.Metrics
 
         private Task StartCheckAppCountAsync()
         {
-            return Task.Run(async () =>
+            return Task.Factory.StartNew(async () =>
             {
                 while (true)
                 {
-                    _appCount = await _appService.CountEnabledAppsAsync();
-
-                    _configCount = await _configService.CountEnabledConfigsAsync();
-
-                    var services = await _serviceInfoService.GetAllServiceInfoAsync();
-                    _serviceCount = services.Count;
-
-                    var nodes = await _serverNodeService.GetAllNodesAsync();
-                    _serverNodeCount = nodes.Count;
-
-                    var clientCount = 0;
-                    foreach (var item in nodes)
+                    try
                     {
-                        if (item.Status == NodeStatus.Online)
+                        _appCount = await _appService.CountEnabledAppsAsync();
+
+                        _configCount = await _configService.CountEnabledConfigsAsync();
+
+                        var services = await _serviceInfoService.GetAllServiceInfoAsync();
+                        _serviceCount = services.Count;
+
+                        var nodes = await _serverNodeService.GetAllNodesAsync();
+                        _serverNodeCount = nodes.Count;
+
+                        var clientCount = 0;
+                        foreach (var item in nodes)
                         {
-                            var clientInfos = await _remoteServer.GetClientsReportAsync(item.Id.ToString());
-                            clientCount += clientInfos.ClientCount;
+                            if (item.Status == NodeStatus.Online)
+                            {
+                                var clientInfos = await _remoteServer.GetClientsReportAsync(item.Id.ToString());
+                                clientCount += clientInfos.ClientCount;
+                            }
                         }
+                        _clientCount = clientCount;
                     }
-                    _clientCount = clientCount;
+                    catch
+                    {
+                    }
 
                     await Task.Delay(1000 * _checkInterval);
                 }
-            });
+            }, TaskCreationOptions.LongRunning);
         }
     }
 }
