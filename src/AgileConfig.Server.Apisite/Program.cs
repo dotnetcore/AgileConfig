@@ -57,7 +57,9 @@ namespace AgileConfig.Server.Apisite
 
             builder.AddOpenTelemetry(options =>
             {
-                options.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(Program.AppName));
+                options.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(Program.AppName
+                    , null, null, string.IsNullOrEmpty(Appsettings.OtlpInstanceId), Appsettings.OtlpInstanceId)
+                    );
                 options
                        .AddOtlpExporter(expOp =>
                        {

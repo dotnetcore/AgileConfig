@@ -95,7 +95,8 @@ namespace AgileConfig.Server.Apisite
             services.AddSingleton<IMeterService, MeterService>();
 
             services.AddOpenTelemetry()
-                    .ConfigureResource(resource => resource.AddService(Program.AppName))
+                    .ConfigureResource(resource => resource.AddService(Program.AppName,
+                    null, null, string.IsNullOrEmpty(Appsettings.OtlpInstanceId), Appsettings.OtlpInstanceId))
                     .AddOtlpTraces()
                     .AddOtlpMetrics();
         }

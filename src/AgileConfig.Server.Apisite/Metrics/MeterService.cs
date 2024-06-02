@@ -68,7 +68,7 @@ namespace AgileConfig.Server.Apisite.Metrics
             {
                 return _serverNodeCount;
             }, "", "The number of nodes");
-            PullAppConfigCounter = AgileConfigMeter.CreateCounter<long>("PullAppConfigCounter", "The number of times the app configuration was pulled");
+            PullAppConfigCounter = AgileConfigMeter.CreateCounter<long>("PullAppConfigCounter", "", "The number of times the app configuration was pulled");
         }
 
         public void Start()

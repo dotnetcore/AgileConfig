@@ -48,6 +48,7 @@ namespace AgileConfig.Server.Apisite
         public static string OtlpMetricsEndpoint => Global.Config["otlp:metrics:endpoint"];
 
         public static string OtlpMetricsProtocol => Global.Config["otlp:metrics:protocol"];
+        public static string OtlpInstanceId => Global.Config["otlp:instanceId"];
 
     }
 }
