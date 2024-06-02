@@ -1,5 +1,8 @@
 # Change log
 ------------------------------
+[1.9.4]
+* Support opentelemetry logs, traces, metrics
+
 [1.9.3]
 * Refactoring the TinyEventbus
 
