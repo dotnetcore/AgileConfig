@@ -1,6 +1,9 @@
 ﻿using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.ResourceMonitoring;
+using System;
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Threading.Tasks;
 
@@ -17,6 +20,8 @@ namespace AgileConfig.Server.Apisite.Metrics
         public ObservableGauge<int> ServiceGauge { get; }
         public ObservableGauge<int> ClientGauge { get; }
         public ObservableGauge<int> NodeGauge { get; }
+        public ObservableGauge<long> MemoryUsedGauge { get; }
+        public ObservableGauge<double> CpuUsedGauge { get; }
 
         public Counter<long> PullAppConfigCounter { get; }
 
@@ -25,14 +30,17 @@ namespace AgileConfig.Server.Apisite.Metrics
         private readonly IServerNodeService _serverNodeService;
         private readonly IRemoteServerNodeProxy _remoteServer;
         private readonly IServiceInfoService _serviceInfoService;
+        private readonly IResourceMonitor _resourceMonitor;
 
         private int _appCount = 0;
         private int _configCount = 0;
         private int _clientCount = 0;
         private int _serverNodeCount = 0;
         private int _serviceCount = 0;
+        private long _memoryUsed = 0;
+        private double _cpuUsed = 0;
 
-        private const int _checkInterval = 30;
+        private const int _checkInterval = 5;
 
         static MeterService()
         {
@@ -47,27 +55,43 @@ namespace AgileConfig.Server.Apisite.Metrics
             _serverNodeService = sp.GetService<IServerNodeService>();
             _remoteServer = sp.GetService<IRemoteServerNodeProxy>();
             _serviceInfoService = sp.GetService<IServiceInfoService>();
+            _resourceMonitor = sp.GetService<IResourceMonitor>();
 
             AppGauge = AgileConfigMeter.CreateObservableGauge<int>("AppCount", () =>
             {
                 return _appCount;
             }, "", "The number of enabled apps");
+
             ConfigGauge = AgileConfigMeter.CreateObservableGauge<int>("ConfigCount", () =>
             {
                 return _configCount;
             }, "", "The number of enabled configuration items");
+
             ServiceGauge = AgileConfigMeter.CreateObservableGauge<int>("ServiceCount", () =>
             {
                 return _serviceCount;
             }, "", "The number of registered services");
+
             ClientGauge = AgileConfigMeter.CreateObservableGauge<int>("ClientCount", () =>
             {
                 return _clientCount;
             }, "", "The number of connected clients");
+
             NodeGauge = AgileConfigMeter.CreateObservableGauge<int>("NodeCount", () =>
             {
                 return _serverNodeCount;
             }, "", "The number of nodes");
+
+            MemoryUsedGauge = AgileConfigMeter.CreateObservableGauge<long>("MemoryUsed", () =>
+            {
+                return _memoryUsed;
+            }, "MB", "Memory used (MB)");
+
+            CpuUsedGauge = AgileConfigMeter.CreateObservableGauge<double>("CpuUsed", () =>
+            {
+                return _cpuUsed;
+            }, "%", "CPU used percent");
+
             PullAppConfigCounter = AgileConfigMeter.CreateCounter<long>("PullAppConfigCounter", "", "The number of times the app configuration was pulled");
         }
 
@@ -104,6 +128,12 @@ namespace AgileConfig.Server.Apisite.Metrics
                             }
                         }
                         _clientCount = clientCount;
+
+                        // memory and cpu
+                        var window = TimeSpan.FromSeconds(3);
+                        var utilization = _resourceMonitor.GetUtilization(window);
+                        _memoryUsed = (long)utilization.MemoryUsedInBytes / 1024 / 1024;
+                        _cpuUsed = utilization.CpuUsedPercentage;
                     }
                     catch
                     {

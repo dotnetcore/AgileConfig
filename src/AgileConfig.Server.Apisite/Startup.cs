@@ -92,6 +92,7 @@ namespace AgileConfig.Server.Apisite
 
             services.AddOIDC();
 
+            services.AddResourceMonitoring();
             services.AddSingleton<IMeterService, MeterService>();
 
             services.AddOpenTelemetry()
