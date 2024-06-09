@@ -2,8 +2,8 @@
 using AgileConfig.Server.IService;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.ResourceMonitoring;
+using Microsoft.Extensions.Logging;
 using System;
-using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Threading.Tasks;
 
@@ -55,7 +55,15 @@ namespace AgileConfig.Server.Apisite.Metrics
             _serverNodeService = sp.GetService<IServerNodeService>();
             _remoteServer = sp.GetService<IRemoteServerNodeProxy>();
             _serviceInfoService = sp.GetService<IServiceInfoService>();
-            _resourceMonitor = sp.GetService<IResourceMonitor>();
+            try
+            {
+                _resourceMonitor = sp.GetService<IResourceMonitor>();
+            }
+            catch (Exception ex)
+            {
+                var logger = sp.GetService<ILoggerFactory>().CreateLogger<MeterService>();
+                logger.LogWarning(ex, "Failed to get IResourceMonitor, maybe you are using cgroups v2, currently is not supported.");
+            }
 
             AppGauge = AgileConfigMeter.CreateObservableGauge<int>("AppCount", () =>
             {
@@ -130,10 +138,13 @@ namespace AgileConfig.Server.Apisite.Metrics
                         _clientCount = clientCount;
 
                         // memory and cpu
-                        var window = TimeSpan.FromSeconds(3);
-                        var utilization = _resourceMonitor.GetUtilization(window);
-                        _memoryUsed = (long)utilization.MemoryUsedInBytes / 1024 / 1024;
-                        _cpuUsed = utilization.CpuUsedPercentage;
+                        if (_resourceMonitor != null)
+                        {
+                            var window = TimeSpan.FromSeconds(3);
+                            var utilization = _resourceMonitor.GetUtilization(window);
+                            _memoryUsed = (long)utilization.MemoryUsedInBytes / 1024 / 1024;
+                            _cpuUsed = utilization.CpuUsedPercentage;
+                        }
                     }
                     catch
                     {

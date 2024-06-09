@@ -18,6 +18,7 @@ namespace AgileConfig.Server.Apisite
         private readonly IServerNodeService _serverNodeService;
         private readonly IServiceHealthCheckService _serviceHealthCheckService;
         private readonly ISystemInitializationService _systemInitializationService;
+        private readonly IMeterService _meterService;
         private readonly ILogger _logger;
         private readonly IServiceScope _localServiceScope;
         public InitService(IServiceScopeFactory serviceScopeFactory,
@@ -27,13 +28,13 @@ namespace AgileConfig.Server.Apisite
         {
             _logger = logger;
             _systemInitializationService = systemInitializationService;
+            _meterService = meterService;
             _localServiceScope = serviceScopeFactory.CreateScope();
             _remoteServerNodeProxy = _localServiceScope.ServiceProvider.GetService<IRemoteServerNodeProxy>();
             _eventRegister = _localServiceScope.ServiceProvider.GetService<IEventHandlerRegister>();
             _serverNodeService = _localServiceScope.ServiceProvider.GetService<IServerNodeService>();
             _serviceHealthCheckService = _localServiceScope.ServiceProvider.GetService<IServiceHealthCheckService>();
 
-            meterService.Start();
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -57,6 +58,11 @@ namespace AgileConfig.Server.Apisite
                     _ = _serverNodeService.JoinAsync(ip, 5000, desc);
                     _logger.LogInformation($"AgileConfig node http://{ip}:5000 joined .");
                 }
+            }
+
+            if (!string.IsNullOrEmpty(Appsettings.OtlpMetricsEndpoint))
+            {
+                _meterService.Start();
             }
         }
 
