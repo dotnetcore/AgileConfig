@@ -59,10 +59,10 @@ namespace AgileConfig.Server.Apisite.Metrics
             {
                 _resourceMonitor = sp.GetService<IResourceMonitor>();
             }
-            catch (Exception ex)
+            catch
             {
                 var logger = sp.GetService<ILoggerFactory>().CreateLogger<MeterService>();
-                logger.LogWarning(ex, "Failed to get IResourceMonitor, maybe you are using cgroups v2, currently is not supported.");
+                logger.LogWarning("Failed to get IResourceMonitor, maybe you are using cgroups v2, currently is not supported.");
             }
 
             AppGauge = AgileConfigMeter.CreateObservableGauge<int>("AppCount", () =>
