@@ -65,6 +65,19 @@ namespace AgileConfig.Server.Apisite
             return builder;
         }
 
+        public static IServiceCollection AddMeterService(this IServiceCollection services)
+        {
+            if (string.IsNullOrEmpty(Appsettings.OtlpMetricsEndpoint))
+            {
+                return services;
+            }
+
+            services.AddResourceMonitoring();
+            services.AddSingleton<IMeterService, MeterService>();
+
+            return services;
+        }
+
         static HttpMessageHandler NewMessageHandler(bool alwaysTrustSsl)
         {
             var handler = new HttpClientHandler();
