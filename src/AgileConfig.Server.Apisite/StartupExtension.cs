@@ -67,12 +67,11 @@ namespace AgileConfig.Server.Apisite
 
         public static IServiceCollection AddMeterService(this IServiceCollection services)
         {
-            if (string.IsNullOrEmpty(Appsettings.OtlpMetricsEndpoint))
+            if (!string.IsNullOrEmpty(Appsettings.OtlpMetricsEndpoint))
             {
-                return services;
+                services.AddResourceMonitoring();
             }
 
-            services.AddResourceMonitoring();
             services.AddSingleton<IMeterService, MeterService>();
 
             return services;
