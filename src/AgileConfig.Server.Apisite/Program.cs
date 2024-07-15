@@ -65,8 +65,11 @@ namespace AgileConfig.Server.Apisite
                        {
                            expOp.Protocol = Appsettings.OtlpLogsProtocol == "http" ? OtlpExportProtocol.HttpProtobuf : OtlpExportProtocol.Grpc;
                            expOp.Endpoint = new Uri(Appsettings.OtlpLogsEndpoint);
-                       })
-                       ;
+                           if (!string.IsNullOrEmpty(Appsettings.OtlpLogsHeaders))
+                           {
+                               expOp.Headers = Appsettings.OtlpLogsHeaders;    
+                           }
+                       });
             });
         }
 

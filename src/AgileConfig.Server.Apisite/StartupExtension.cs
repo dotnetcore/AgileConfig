@@ -37,6 +37,10 @@ namespace AgileConfig.Server.Apisite
                               {
                                   op.Protocol = Appsettings.OtlpTracesProtocol == "http" ? OtlpExportProtocol.HttpProtobuf : OtlpExportProtocol.Grpc;
                                   op.Endpoint = new System.Uri(Appsettings.OtlpTracesEndpoint);
+                                  if (!string.IsNullOrEmpty(Appsettings.OtlpTracesHeaders))
+                                  {
+                                      op.Headers = Appsettings.OtlpTracesHeaders;    
+                                  }
                               })
                        );
 
@@ -59,6 +63,10 @@ namespace AgileConfig.Server.Apisite
                                   op.Protocol = Appsettings.OtlpMetricsProtocol == "http" ? OtlpExportProtocol.HttpProtobuf : OtlpExportProtocol.Grpc;
                                   op.Endpoint = new System.Uri(Appsettings.OtlpMetricsEndpoint);
                                   reader.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = 1000;
+                                  if (!string.IsNullOrEmpty(Appsettings.OtlpMetricsHeaders))
+                                  {
+                                      op.Headers = Appsettings.OtlpMetricsHeaders;    
+                                  }
                               })
                       );
 
