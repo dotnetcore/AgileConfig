@@ -1,5 +1,9 @@
 # Change log
 ------------------------------
+[1.9.6]
+* Support OTLP headers
+[1.9.5]
+* Fix some small issue
 [1.9.4]
 * Support opentelemetry logs, traces, metrics
 
