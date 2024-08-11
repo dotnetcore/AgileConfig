@@ -31,7 +31,7 @@ jobs:
       with:
         name: agileconfig-ui
         path: src/AgileConfig.Server.UI/react-ui-antd/dist/
-  build-dotnet:
+  build-dotnet-push-to-hub:
     needs: build-reactapp
     runs-on: ubuntu-latest
 
@@ -59,12 +59,12 @@ jobs:
     - name: Login to ACR and push
       uses: aliyun/acr-login@v1
       with:
-        login-server: https://registry.cn-hangzhou.aliyuncs.com
+        login-server: https://registry.cn-shanghai.aliyuncs.com
         username: "${{ secrets.ALI_REGISTRY_USERNAME }}"
         password: "${{ secrets.ALI_REGISTRY_PASSWORD }}"
     - name: Build and push image
       env:
-        IMAGE_TAG: ${{ github.sha }}
+        IMAGE_TAG: latest
       run: |
         docker build -t registry.cn-shanghai.aliyuncs.com/kklldog/agile_config:$IMAGE_TAG .
         docker push registry.cn-shanghai.aliyuncs.com/kklldog/agile_config:$IMAGE_TAG
