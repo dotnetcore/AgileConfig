@@ -31,7 +31,7 @@ jobs:
       with:
         name: agileconfig-ui
         path: src/AgileConfig.Server.UI/react-ui-antd/dist/
-  build-dotnet-push-to-hub:
+  build-dotnet:
     needs: build-reactapp
     runs-on: ubuntu-latest
 
@@ -49,6 +49,11 @@ jobs:
       with:
         name: agileconfig-ui
         path: src/AgileConfig.Server.Apisite/wwwroot/ui
+        
+  build-image-push-docker-hub:
+    needs: build-reactapp
+    runs-on: ubuntu-latest
+    steps:
     - name: Push to Docker Hub
       uses: docker/build-push-action@v1
       with:
@@ -56,6 +61,11 @@ jobs:
         password: ${{ secrets.DOCKER_HUB_PASSWORD }}
         repository: kklldog/agile_config
         tags: test
+
+  push-ACR-hub:
+    needs: build-reactapp
+    runs-on: ubuntu-latest
+    steps:
     - name: Login to ACR and push
       uses: aliyun/acr-login@v1
       with:
