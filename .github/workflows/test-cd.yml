@@ -51,7 +51,7 @@ jobs:
         path: src/AgileConfig.Server.Apisite/wwwroot/ui
         
   build-image-push-docker-hub:
-    needs: build-reactapp
+    needs: build-dotnet
     runs-on: ubuntu-latest
     steps:
     - name: Push to Docker Hub
@@ -63,7 +63,7 @@ jobs:
         tags: test
 
   push-ACR-hub:
-    needs: build-reactapp
+    needs: build-dotnet
     runs-on: ubuntu-latest
     steps:
     - name: Login to ACR and push
