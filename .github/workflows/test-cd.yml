@@ -59,7 +59,7 @@ jobs:
     - name: Login to ACR and push
       uses: aliyun/acr-login@v1
       with:
-        login-server: https://registry.cn-hangzhou.aliyuncs.com
+        login-server: https://registry.cn-shanghai.aliyuncs.com
         username: "${{ secrets.ALI_REGISTRY_USERNAME }}"
         password: "${{ secrets.ALI_REGISTRY_PASSWORD }}"
     - name: Build and push image
