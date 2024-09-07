@@ -17,18 +17,18 @@ namespace AgileConfig.Server.Apisite.Filters
     {
         private static string GetEnvFromArgs(IDictionary<string, object> args, IConfigService configService)
         {
-            args.TryGetValue("env", out object env);
-            var envStr = "";
-            if (env == null)
+            args.TryGetValue("env", out object envArg);
+            var env = "";
+            if (envArg == null)
             {
-                envStr = configService.IfEnvEmptySetDefaultAsync(null).GetAwaiter().GetResult();
+                configService.IfEnvEmptySetDefault(ref env);
             }
             else
             {
-                envStr = env.ToString();
+                env = envArg.ToString();
             }
 
-            return envStr;
+            return env;
         }
 
         /// <summary>

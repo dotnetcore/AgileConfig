@@ -25,9 +25,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         private readonly IPremissionService _premissionService;
         private readonly IUserService _userService;
 
-        public AppController(IAppService appService, 
-            IPremissionService premissionService, 
-            IUserService userService, 
+        public AppController(IAppService appService,
+            IPremissionService premissionService,
+            IUserService userService,
             IConfigService configService,
             ITinyEventBus tinyEventBus)
         {
@@ -129,8 +129,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 );
             ctrl.ControllerContext.HttpContext = HttpContext;
 
-            var result = (await ctrl.Add(new AppVM { 
-                Id=model.Id,
+            var result = (await ctrl.Add(new AppVM
+            {
+                Id = model.Id,
                 Name = model.Name,
                 Secret = model.Secret,
                 AppAdmin = model.AppAdmin,
@@ -248,7 +249,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [HttpPost("publish")]
         public async Task<IActionResult> Publish(string appId, string env)
         {
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+            _configService.IfEnvEmptySetDefault(ref env);
 
             var ctrl = new Controllers.ConfigController(
                 _configService,
@@ -286,17 +287,16 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [HttpGet("Publish_History")]
         public async Task<ActionResult<IEnumerable<ApiPublishTimelineVM>>> PublishHistory(string appId, string env)
         {
-            if (string.IsNullOrEmpty(appId))
-            {
-                throw new ArgumentNullException("appId");
-            }
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+            ArgumentNullException.ThrowIfNullOrEmpty(appId);
+
+            _configService.IfEnvEmptySetDefault(ref env);
 
             var history = await _configService.GetPublishTimelineHistoryAsync(appId, env);
 
             history = history.OrderByDescending(x => x.Version).ToList();
 
-            var vms = history.Select(x => new ApiPublishTimelineVM {
+            var vms = history.Select(x => new ApiPublishTimelineVM
+            {
                 Id = x.Id,
                 Version = x.Version,
                 Log = x.Log,
@@ -319,7 +319,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [HttpPost("rollback")]
         public async Task<IActionResult> Rollback(string historyId, string env)
         {
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+            _configService.IfEnvEmptySetDefault(ref env);
 
             var ctrl = new Controllers.ConfigController(
                 _configService,

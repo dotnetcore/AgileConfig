@@ -171,7 +171,7 @@ namespace AgileConfig.Server.Apisite.UIExtension
                 context.Response.OnStarting(() =>
                 {
                     context.Response.ContentType = uiFile.ContentType;
-                    context.Response.Headers.Add("last-modified", uiFile.LastModified.ToString("R"));
+                    context.Response.Headers.TryAdd("last-modified", uiFile.LastModified.ToString("R"));
                     return Task.CompletedTask;
                 });
 

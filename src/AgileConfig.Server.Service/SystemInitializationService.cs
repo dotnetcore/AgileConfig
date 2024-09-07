@@ -49,8 +49,8 @@ public class SystemInitializationService(ISysInitRepository sysInitRepository, I
 
     public async Task<bool> TryInitDefaultEnvironmentAsync()
     {
-        var env = await sysInitRepository.GetDefaultEnvironmentAsync();
-        if (env == null)
+        var envArrayString = await sysInitRepository.GetDefaultEnvironmentAsync();
+        if (envArrayString == null)
         {
             var setting = new Setting
             {
@@ -59,9 +59,9 @@ public class SystemInitializationService(ISysInitRepository sysInitRepository, I
                 CreateTime = DateTime.Now
             };
             sysInitRepository.SaveInitSetting(setting);
-
-            return true;
         }
+
+        ISettingService.EnvironmentList = envArrayString.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries);
 
         return true;
     }

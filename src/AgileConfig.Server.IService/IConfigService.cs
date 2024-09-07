@@ -12,7 +12,7 @@ namespace AgileConfig.Server.IService
         /// </summary>
         /// <param name="env"></param>
         /// <returns></returns>
-        Task<string> IfEnvEmptySetDefaultAsync(string env);
+        string IfEnvEmptySetDefault(ref string env);
 
         /// <summary>
         /// 发布当前待发布的配置项,如果传ids那么就是只发布这些项目，如果不传ids，那么就是全部发布

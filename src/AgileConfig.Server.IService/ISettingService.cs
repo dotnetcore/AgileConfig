@@ -7,6 +7,8 @@ namespace AgileConfig.Server.IService
 {
     public interface ISettingService: IDisposable
     {
+        static string[] EnvironmentList { get; set; }
+
         Task<Setting> GetAsync(string id);
         Task<bool> AddAsync(Setting setting);
 

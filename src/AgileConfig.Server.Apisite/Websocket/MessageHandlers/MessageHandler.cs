@@ -65,8 +65,8 @@ internal class MessageHandler : IMessageHandler
             //如果是ping，回复本地数据的md5版本 
             var appId = request.Headers["appid"];
             appId = HttpUtility.UrlDecode(appId);
-            var env = request.Headers["env"];
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+            var env = request.Headers["env"].ToString();
+            _configService.IfEnvEmptySetDefault(ref env);
             var md5 = await _configService.AppPublishedConfigsMd5CacheWithInheritanced(appId, env);
             await SendMessage(client.Client, JsonConvert.SerializeObject(new WebsocketAction()
             {

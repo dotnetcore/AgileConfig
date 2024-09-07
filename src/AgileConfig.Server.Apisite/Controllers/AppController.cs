@@ -8,8 +8,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Collections.Generic;
-using AgileConfig.Server.Common;
-using System.Dynamic;
 using AgileConfig.Server.Apisite.Utilites;
 using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.Event;

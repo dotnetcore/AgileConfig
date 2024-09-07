@@ -47,14 +47,14 @@ namespace AgileConfig.Server.Service
             _publishTimelineRepositoryAccsssor = publishTimelineRepositoryAccessor;
         }
 
-        public async Task<string> IfEnvEmptySetDefaultAsync(string env)
+        public string IfEnvEmptySetDefault(ref string env)
         {
             if (!string.IsNullOrEmpty(env))
             {
                 return env;
             }
 
-            var envList = await _settingService.GetEnvironmentList();
+            var envList = ISettingService.EnvironmentList;
             if (envList == null || envList.Length == 0)
             {
                 return "";
@@ -721,7 +721,7 @@ namespace AgileConfig.Server.Service
         public async Task<bool> RollbackAsync(string publishTimelineId, string env)
         {
             using var uow = _uowAccessor(env);
-            
+
             using var configRepository = _configRepositoryAccessor(env);
             using var publishTimelineRepository = _publishTimelineRepositoryAccsssor(env);
             using var configPublishedRepository = _configPublishedRepositoryAccessor(env);

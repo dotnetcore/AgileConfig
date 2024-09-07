@@ -11,8 +11,6 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using AgileConfig.Server.Common;
 using System.Text;
-using System.Dynamic;
-using System.IO;
 using AgileConfig.Server.Apisite.Utilites;
 using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.Event;
@@ -45,12 +43,9 @@ namespace AgileConfig.Server.Apisite.Controllers
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] ConfigVM model, [FromQuery] string env)
         {
-            if (model == null)
-            {
-                throw new ArgumentNullException("model");
-            }
+            ArgumentNullException.ThrowIfNull(model);
 
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+            _configService.IfEnvEmptySetDefault(ref env);
 
             var app = await _appService.GetAsync(model.AppId);
             if (app == null)
@@ -73,7 +68,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var config = new Config();
-            config.Id = string.IsNullOrEmpty(config.Id) ? Guid.NewGuid().ToString("N") : config.Id;
+            config.Id = string.IsNullOrEmpty(model.Id) ? Guid.NewGuid().ToString("N") : model.Id;
             config.Key = model.Key;
             config.AppId = model.AppId;
             config.Description = model.Description;
@@ -111,7 +106,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException("model");
             }
 
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+            _configService.IfEnvEmptySetDefault(ref env);
 
             var configs = await _configService.GetByAppIdAsync(model.First().AppId, env);
 
@@ -182,7 +177,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException("model");
             }
 
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+            _configService.IfEnvEmptySetDefault(ref env);
 
             var config = await _configService.GetAsync(model.Id, env);
             if (config == null)
@@ -277,7 +272,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         [HttpGet]
         public async Task<IActionResult> All(string env)
         {
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+            _configService.IfEnvEmptySetDefault(ref env);
 
             var configs = await _configService.GetAllConfigsAsync(env);
 
@@ -312,7 +307,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentException("pageIndex can not less then 1 .");
             }
 
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+            _configService.IfEnvEmptySetDefault(ref env);
 
             var configs = await _configService.Search(appId, group, key, env);
             configs = configs.Where(c => c.Status == ConfigStatus.Enabled).ToList();
@@ -366,7 +361,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException("id");
             }
 
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+            _configService.IfEnvEmptySetDefault(ref env);
 
             var config = await _configService.GetAsync(id, env);
 
@@ -388,7 +383,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException("id");
             }
 
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+            _configService.IfEnvEmptySetDefault(ref env);
 
             var config = await _configService.GetAsync(id, env);
             if (config == null)
@@ -433,7 +428,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException("ids");
             }
 
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+            _configService.IfEnvEmptySetDefault(ref env);
 
             List<Config> deleteConfigs = new List<Config>();
 
@@ -486,7 +481,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException("publishTimelineId");
             }
 
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+            _configService.IfEnvEmptySetDefault(ref env);
 
             var result = await _configService.RollbackAsync(publishTimelineId, env);
 
@@ -511,7 +506,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException("configId");
             }
 
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+            _configService.IfEnvEmptySetDefault(ref env);
 
             var configPublishedHistory = await _configService.GetConfigPublishedHistory(configId, env);
             var result = new List<object>();
@@ -554,7 +549,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException("appId");
             }
 
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+            _configService.IfEnvEmptySetDefault(ref env);
 
             var appId = model.AppId;
             var userId = await this.GetCurrentUserId(_userService);
@@ -636,7 +631,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException("appId");
             }
 
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+            _configService.IfEnvEmptySetDefault(ref env);
 
             var configs = await _configService.GetByAppIdAsync(appId, env);
 
@@ -664,7 +659,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException("appId");
             }
 
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+            _configService.IfEnvEmptySetDefault(ref env);
 
             var configs = await _configService.Search(appId, "", "", env);
             configs = configs.Where(x => x.Status == ConfigStatus.Enabled && x.EditStatus != EditStatus.Commit)
@@ -698,7 +693,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException("appId");
             }
 
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+            _configService.IfEnvEmptySetDefault(ref env);
 
             var history = await _configService.GetPublishDetailListAsync(appId, env);
 
@@ -729,7 +724,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException("configId");
             }
 
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+            env = _configService.IfEnvEmptySetDefault(ref env);
 
             var result = await _configService.CancelEdit(new List<string>() { configId }, env);
 
@@ -752,7 +747,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException("ids");
             }
 
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+            _configService.IfEnvEmptySetDefault(ref env);
 
             var result = await _configService.CancelEdit(ids, env);
 
@@ -814,7 +809,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException("appId");
             }
 
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+            _configService.IfEnvEmptySetDefault(ref env);
 
             var configs = await _configService.GetByAppIdAsync(appId, env);
             // text 格式展示的时候不需要删除的配置
@@ -845,7 +840,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 throw new ArgumentNullException("appId");
             }
 
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+            _configService.IfEnvEmptySetDefault(ref env);
 
             var configs = await _configService.GetByAppIdAsync(appId, env);
             // json 格式展示的时候不需要删除的配置

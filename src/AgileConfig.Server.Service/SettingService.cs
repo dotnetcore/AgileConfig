@@ -123,9 +123,16 @@ namespace AgileConfig.Server.Service
 
         public async Task<string[]> GetEnvironmentList()
         {
-            var env = await _settingRepository.GetAsync(SystemSettings.DefaultEnvironmentKey);
+            if (ISettingService.EnvironmentList != null)
+            {
+                return ISettingService.EnvironmentList;
+            }
 
-            return env?.Value?.ToUpper().Split(',') ?? [];
+            var environments = await _settingRepository.GetAsync(SystemSettings.DefaultEnvironmentKey);
+
+            ISettingService.EnvironmentList = environments?.Value?.ToUpper().Split(',') ?? [];
+
+            return ISettingService.EnvironmentList;
         }
     }
 }

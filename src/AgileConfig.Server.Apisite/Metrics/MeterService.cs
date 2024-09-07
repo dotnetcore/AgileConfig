@@ -25,6 +25,8 @@ namespace AgileConfig.Server.Apisite.Metrics
 
         public Counter<long> PullAppConfigCounter { get; }
 
+        private readonly IServiceScope _serviceScope;
+
         private readonly IAppService _appService;
         private readonly IConfigService _configService;
         private readonly IServerNodeService _serverNodeService;
@@ -49,7 +51,9 @@ namespace AgileConfig.Server.Apisite.Metrics
 
         public MeterService(IServiceScopeFactory sf)
         {
-            var sp = sf.CreateScope().ServiceProvider;
+            _serviceScope = sf.CreateScope();
+            var sp = _serviceScope.ServiceProvider;
+
             _appService = sp.GetService<IAppService>();
             _configService = sp.GetService<IConfigService>();
             _serverNodeService = sp.GetService<IServerNodeService>();
