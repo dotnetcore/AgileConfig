@@ -59,6 +59,8 @@ namespace AgileConfig.Server.Service
             app = await _appRepository.GetAsync(app.Id);
             if (app != null)
             {
+                await _appRepository.DeleteAsync(app);
+                    
                 var envs = await _settingService.GetEnvironmentList();
                 var updatedConfigIds = new List<string>();
                 var updatedConfigPublishedIds = new List<string>();
@@ -67,9 +69,9 @@ namespace AgileConfig.Server.Service
                 {
                     using var configRepository = _configRepositoryAccessor(env);
                     using var configPublishedRepository = _configPublishedRepositoryAccessor(env);
-                    await _appRepository.DeleteAsync(app);
+
                     //怕有的同学误删app导致要恢复，所以保留配置项吧。
-                    var configs = await configRepository.QueryAsync(x => x.AppId == app.Id);
+                    var configs = await configRepository.QueryAsync(x => x.AppId == app.Id && x.Status == ConfigStatus.Enabled);
                     var waitDeleteConfigs = new List<Config>();
                     foreach (var item in configs)
                     {
