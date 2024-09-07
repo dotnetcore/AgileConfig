@@ -111,7 +111,7 @@ add a section in appsettings.json of you application：
 }
 
 ```
-appsettings.json
+in Main function add agileconfig client services:
 ``` c#
    public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
@@ -120,10 +120,10 @@ appsettings.json
                 {
                     webBuilder.UseStartup<Startup>();
                 });
-``
+```
 
 ## read configuration
-You can still use IConfiguration or IOption patten to get the specific configuration value.
+You can still use `IConfiguration` or `IOption` patten to get the specific configuration value.
 ``` c#
 public class HomeController : Controller
 {
@@ -138,7 +138,7 @@ public class HomeController : Controller
 }
 ```
 
-Or you can use IConfigClient interface to get the specific configuration value.
+Or you can use `IConfigClient` interface to get the specific configuration value.
 
 ``` c#
 public class HomeController : Controller
