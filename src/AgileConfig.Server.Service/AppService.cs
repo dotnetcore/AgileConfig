@@ -71,7 +71,7 @@ namespace AgileConfig.Server.Service
                     using var configPublishedRepository = _configPublishedRepositoryAccessor(env);
 
                     //怕有的同学误删app导致要恢复，所以保留配置项吧。
-                    var configs = await configRepository.QueryAsync(x => x.AppId == app.Id);
+                    var configs = await configRepository.QueryAsync(x => x.AppId == app.Id && x.Status == ConfigStatus.Enabled);
                     var waitDeleteConfigs = new List<Config>();
                     foreach (var item in configs)
                     {
