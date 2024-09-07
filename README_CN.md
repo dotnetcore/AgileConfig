@@ -17,7 +17,7 @@
 ![GitHub license](https://img.shields.io/github/license/kklldog/AgileConfig)
 ![build workflow](https://github.com/dotnetcore/AgileConfig/actions/workflows/master-ci.yml/badge.svg)
     
-# [English](https://github.com/kklldog/AgileConfig/blob/master/README_EN.md) | [中文](https://github.com/kklldog/AgileConfig/blob/master/README.md)
+# [English](https://github.com/kklldog/AgileConfig/blob/master/README_EN.md) | [中文看这里](https://github.com/kklldog/AgileConfig/blob/master/README.md)
     
 这是一个基于.net core开发的轻量级配置中心。说起配置中心很容易让人跟微服务联系起来，如果你选择微服务架构，那么几乎逃不了需要一个配置中心。事实上我这里并不是要蹭微服务的热度。这个世界上有很多分布式程序但它并不是微服务。比如有很多传统的SOA的应用他们分布式部署，但并不是完整的微服务架构。这些程序由于分散在多个服务器上所以更改配置很困难。又或者某些程序即使不是分布式部署的，但是他们采用了容器化部署，他们修改配置同样很费劲。所以我开发AgileConfig并不是为了什么微服务，我更多的是为了那些分布式、容器化部署的应用能够更加简单的读取、修改配置。    
 AgileConfig秉承轻量化的特点，部署简单、配置简单、使用简单、学习简单，它只提取了必要的一些功能，并没有像Apollo那样复杂且庞大。但是它的功能也已经足够你替换webconfig，appsettings.json这些文件了。如果你不想用微服务全家桶，不想为了部署一个配置中心而需要看N篇教程跟几台服务器那么你可以试试AgileConfig  ：）   
@@ -211,7 +211,8 @@ AgileConfig支持多应用程序接入。需要为每个应用程序配置名称
 Install-Package AgileConfig.Client
 ```
 ### 初始化客户端
-以asp.net core mvc项目为例：
+## 以 asp.net core 项目为例  
+在appsettings.json文件配置agileconfig的配置信息。
 ``` json
 {
   "Logging": {
@@ -235,27 +236,17 @@ Install-Package AgileConfig.Client
 }
 
 ```
-在appsettings.json文件配置agileconfig的配置信息。
+在 Main 里面启用 AgileConfig
 ``` c#
      public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .UseAgileConfig(e => Console.WriteLine($"configs {e.Action}"))
+                .UseAgileConfig()
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
                 });
 ```
-使用 UseAgileConfig 扩展方法配置一个配置源。
-``` c#
-     public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .UseAgileConfig(new ConfigClient($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json"), e => Console.WriteLine($"configs {e.Action}"))
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
-```
-如果需要根据环境变量读取appsettings.{env}.json配置信息，可以通过Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")来获取。   
+
 > 💥注意：如果你的程序是Framework的程序请使用[AgileConfig.Client4FR](https://github.com/kklldog/AgileConfig.Client4FR)这个专门为Framework打造的client。使用当前版本有可能死锁造成cpu100% 的风险。
 
 > 💥注意：如果节点使用nginx反代的话，需要对nginx进行配置，使其支持websocket协议，不然客户端跟节点的长连接没法建立。
@@ -265,48 +256,15 @@ AgileConfig支持asp.net core 标准的IConfiguration，跟IOptions模式读取�
 ``` c#
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
     private readonly IConfiguration _IConfiguration;
     private readonly IOptions<DbConfigOptions> _dbOptions;
 
-    public HomeController(ILogger<HomeController> logger, IConfiguration configuration, IOptions<DbConfigOptions> dbOptions)
+    public HomeController(IConfiguration configuration, IOptions<DbConfigOptions> dbOptions)
     {
-        _logger = logger;
         _IConfiguration = configuration;
         _dbOptions = dbOptions;
     }
 
-    public IActionResult Index()
-    {
-        return View();
-    }
-
-    /// <summary>
-    /// 使用IConfiguration读取配置
-    /// </summary>
-    /// <returns></returns>
-    public IActionResult ByIConfiguration()
-    {
-        var userId = _IConfiguration["userId"];
-        var dbConn = _IConfiguration["db:connection"];
-
-        ViewBag.userId = userId;
-        ViewBag.dbConn = dbConn;
-
-        return View();
-    }
-
-    /// <summary>
-    /// 使用Options模式读取配置
-    /// </summary>
-    /// <returns></returns>
-    public IActionResult ByOptions()
-    {
-        var dbConn = _dbOptions.Value.connection;
-        ViewBag.dbConn = dbConn;
-
-        return View("ByOptions");
-    }
 }
 ```
 
@@ -322,15 +280,6 @@ public class HomeController : Controller
         _configClient = configClient;
     }
 
-    public IActionResult Index()
-    {
-        return View();
-    }
-
-    /// <summary>
-    /// 使用IConfigClient读取配置
-    /// </summary>
-    /// <returns></returns>
     public IActionResult ByIConfigClient()
     {
         var userId = _configClient["userId"];
@@ -347,6 +296,10 @@ public class HomeController : Controller
         return View();
     }
 }
+```
+还可以直接使用一个静态实例来读取配置，这样就不用先注入了
+``` C#
+var userid = ConfigClient.Instance["userid"]
 ```
 
 ## 联系我
