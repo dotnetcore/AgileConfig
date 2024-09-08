@@ -12,7 +12,6 @@ using Microsoft.Extensions.DependencyInjection;
 using AgileConfig.Server.Data.Abstraction;
 using AgileConfig.Server.Service;
 using Microsoft.Extensions.Configuration;
-using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Repository.Selector;
 
 namespace AgileConfig.Server.ServiceTests.sqlite
@@ -20,6 +19,8 @@ namespace AgileConfig.Server.ServiceTests.sqlite
     [TestClass()]
     public class ConfigServiceTests : BasicTestService
     {
+        IServiceProvider _serviceProvider = null;
+        IServiceScope _serviceScope = null;
         IConfigService _service = null;
         public override Task<Dictionary<string, string>> GetConfigurationData()
         {
@@ -34,13 +35,24 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         [TestInitialize]
         public async Task TestInitialize()
         {
-            if (_service != null)
-            {
-                Console.WriteLine("IConfigService already there.");
+            await NewGloablSp();
 
-                return;
-            }
+            ClearData();
 
+            _serviceScope = this.GlobalServiceProvider.CreateScope();
+            _serviceProvider = this.GlobalServiceProvider.CreateScope().ServiceProvider;
+       
+            _service = this._serviceProvider.GetService<IConfigService>();
+
+            var systeminitializationService = this._serviceProvider.GetService<ISystemInitializationService>();
+            systeminitializationService.TryInitDefaultEnvironment();//初始化环境 DEV TEST STAGE PROD
+            systeminitializationService.TryInitJwtSecret();//初始化 jwt secret
+
+            Console.WriteLine("Run TestInitialize");
+        }
+
+        private async Task NewGloablSp()
+        {
             Console.WriteLine("Try get configration data");
             var dict = await GetConfigurationData();
 
@@ -57,9 +69,6 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             {
                 Console.WriteLine($"key: {item.Key} value: {item.Value}");
             }
-
-            ClearData();
-
             var cache = new Mock<IMemoryCache>();
             IServiceCollection services = new ServiceCollection();
             services.AddScoped(_ => cache.Object);
@@ -69,17 +78,15 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             services.AddRepositories();
             services.AddBusinessServices();
 
-            _serviceProvider = services.BuildServiceProvider();
-            var systeminitializationService = _serviceProvider.GetService<ISystemInitializationService>();
-            systeminitializationService.TryInitDefaultEnvironment();//初始化环境 DEV TEST STAGE PROD
-            systeminitializationService.TryInitJwtSecret();//初始化 jwt secret
-
-
-            _service = _serviceProvider.GetService<IConfigService>();
-
-            Console.WriteLine("Run TestInitialize");
+            this.GlobalServiceProvider = services.BuildServiceProvider();
         }
 
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            _service.Dispose();
+            _serviceScope.Dispose();
+        }
 
         [TestMethod()]
         public async Task AddAsyncTest()

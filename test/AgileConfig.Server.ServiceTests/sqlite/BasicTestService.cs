@@ -1,16 +1,9 @@
 ﻿using AgileConfig.Server.Common;
-using AgileConfig.Server.Data.Abstraction;
 using AgileConfig.Server.Data.Abstraction.DbProvider;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.Data.Freesql;
-using AgileConfig.Server.Data.Repository.Freesql;
-using AgileConfig.Server.Data.Repository.Selector;
-using AgileConfig.Server.IService;
-using AgileConfig.Server.Service;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -19,8 +12,8 @@ namespace AgileConfig.Server.ServiceTests.sqlite
 {
     public class BasicTestService
     {
-        protected ServiceProvider _serviceProvider;
-
+        protected ServiceProvider GlobalServiceProvider { get; set; }
+        
         public virtual Task<Dictionary<string, string>> GetConfigurationData()
         {
             return
@@ -44,15 +37,6 @@ namespace AgileConfig.Server.ServiceTests.sqlite
 
         public virtual void ClearData()
         {
-            var dict = new Dictionary<string, string>
-                 {
-                {"db:provider","sqlite" },
-                {"db:conn","Data Source=agile_config.db" }
-             };
-            var config = new ConfigurationBuilder()
-                         .AddInMemoryCollection(dict)
-                         .Build();
-       
             var fsq = GetFreeSql();
 
             fsq.Delete<ServerNode>().Where("1=1").ExecuteAffrows();

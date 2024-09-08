@@ -20,7 +20,10 @@ namespace AgileConfig.Server.ServiceTests.sqlite
     [TestClass()]
     public class ServerNodeServiceTests : BasicTestService
     {
+        IServiceProvider _serviceProvider = null;
+        IServiceScope _serviceScope = null;
         IServerNodeService _serverNodeService = null;
+
         public override Task<Dictionary<string, string>> GetConfigurationData()
         {
             return
@@ -34,13 +37,24 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         [TestInitialize]
         public async Task TestInitialize()
         {
-            if (_serverNodeService != null)
-            {
-                Console.WriteLine("IServerNodeService already there.");
+            await NewGlobalSp();
 
-                return;
-            }
+            _serviceScope = GlobalServiceProvider.CreateScope();
+            _serviceProvider = _serviceScope.ServiceProvider;
 
+            var systeminitializationService = _serviceProvider.GetService<ISystemInitializationService>();
+            systeminitializationService.TryInitDefaultEnvironment();//初始化环境 DEV TEST STAGE PROD
+            systeminitializationService.TryInitJwtSecret();//初始化 jwt secret
+
+            _serverNodeService = _serviceProvider.GetService<IServerNodeService>();
+
+            Console.WriteLine($"IServerNodeService type is {_serverNodeService.GetType().FullName}");
+
+            Console.WriteLine("Run TestInitialize");
+        }
+
+        private async Task NewGlobalSp()
+        {
             Console.WriteLine("Try get configration data");
             var dict = await GetConfigurationData();
 
@@ -67,17 +81,14 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             services.AddRepositories();
             services.AddBusinessServices();
 
-            _serviceProvider = services.BuildServiceProvider();
-            var systeminitializationService = _serviceProvider.GetService<ISystemInitializationService>();
-            systeminitializationService.TryInitDefaultEnvironment();//初始化环境 DEV TEST STAGE PROD
-            systeminitializationService.TryInitJwtSecret();//初始化 jwt secret
+            this.GlobalServiceProvider = services.BuildServiceProvider();
+        }
 
-
-            _serverNodeService = _serviceProvider.GetService<IServerNodeService>();
-
-            Console.WriteLine($"IServerNodeService type is {_serverNodeService.GetType().FullName}");
-
-            Console.WriteLine("Run TestInitialize");
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            _serverNodeService.Dispose();
+            _serviceScope.Dispose();
         }
 
         [TestMethod()]

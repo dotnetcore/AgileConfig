@@ -20,7 +20,10 @@ namespace AgileConfig.Server.ServiceTests.sqlite
     [TestClass()]
     public class SysLogServiceTests: BasicTestService
     {
+        IServiceProvider _serviceProvider = null;
+        IServiceScope _serviceScope = null;
         ISysLogService _syslogservice = null;
+
         public override Task<Dictionary<string, string>> GetConfigurationData()
         {
             return
@@ -35,13 +38,24 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         [TestInitialize]
         public async Task TestInitialize()
         {
-            if (_syslogservice != null)
-            {
-                Console.WriteLine("ISysLogService already there.");
+            await NewGlobalSp();
 
-                return;
-            }
+            ClearData();
 
+            _serviceScope = GlobalServiceProvider.CreateScope();
+            _serviceProvider = _serviceScope.ServiceProvider;
+
+            var systeminitializationService = _serviceProvider.GetService<ISystemInitializationService>();
+            systeminitializationService.TryInitDefaultEnvironment();//初始化环境 DEV TEST STAGE PROD
+            systeminitializationService.TryInitJwtSecret();//初始化 jwt secret
+
+            _syslogservice = _serviceProvider.GetService<ISysLogService>();
+
+            Console.WriteLine("Run TestInitialize");
+        }
+
+        private async Task NewGlobalSp()
+        {
             Console.WriteLine("Try get configration data");
             var dict = await GetConfigurationData();
 
@@ -59,8 +73,6 @@ namespace AgileConfig.Server.ServiceTests.sqlite
                 Console.WriteLine($"key: {item.Key} value: {item.Value}");
             }
 
-            ClearData();
-
             var cache = new Mock<IMemoryCache>();
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
@@ -71,18 +83,15 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             services.AddRepositories();
             services.AddBusinessServices();
 
-            _serviceProvider = services.BuildServiceProvider();
-            var systeminitializationService = _serviceProvider.GetService<ISystemInitializationService>();
-            systeminitializationService.TryInitDefaultEnvironment();//初始化环境 DEV TEST STAGE PROD
-            systeminitializationService.TryInitJwtSecret();//初始化 jwt secret
-
-
-            _syslogservice = _serviceProvider.GetService<ISysLogService>();
-
-            Console.WriteLine("Run TestInitialize");
+            this.GlobalServiceProvider = services.BuildServiceProvider();
         }
 
-
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            _syslogservice.Dispose();
+            _serviceScope.Dispose();
+        }
 
         [TestMethod()]
         public async Task AddSysLogAsyncTest()

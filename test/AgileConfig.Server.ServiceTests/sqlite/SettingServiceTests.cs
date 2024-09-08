@@ -19,7 +19,10 @@ namespace AgileConfig.Server.ServiceTests.sqlite
     [TestClass()]
     public class SettingServiceTests : BasicTestService
     {
+        IServiceProvider _serviceProvider = null;
+        IServiceScope _serviceScope = null;
         ISettingService _settingService = null;
+
         public override Task<Dictionary<string, string>> GetConfigurationData()
         {
             return
@@ -34,13 +37,24 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         [TestInitialize]
         public async Task TestInitialize()
         {
-            if (_settingService != null)
-            {
-                Console.WriteLine("ISettingService already there.");
+            await NewGlobalSp();
 
-                return;
-            }
+            ClearData();
 
+            _serviceScope = GlobalServiceProvider.CreateScope();
+            _serviceProvider = _serviceScope.ServiceProvider;
+
+            var systeminitializationService = _serviceProvider.GetService<ISystemInitializationService>();
+            systeminitializationService.TryInitDefaultEnvironment();//初始化环境 DEV TEST STAGE PROD
+            systeminitializationService.TryInitJwtSecret();//初始化 jwt secret
+
+            _settingService = _serviceProvider.GetService<ISettingService>();
+
+            Console.WriteLine("Run TestInitialize");
+        }
+
+        private async Task NewGlobalSp()
+        {
             Console.WriteLine("Try get configration data");
             var dict = await GetConfigurationData();
 
@@ -58,8 +72,6 @@ namespace AgileConfig.Server.ServiceTests.sqlite
                 Console.WriteLine($"key: {item.Key} value: {item.Value}");
             }
 
-            ClearData();
-
             var cache = new Mock<IMemoryCache>();
             IServiceCollection services = new ServiceCollection();
             services.AddScoped(_ => cache.Object);
@@ -69,17 +81,15 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             services.AddRepositories();
             services.AddBusinessServices();
 
-            _serviceProvider = services.BuildServiceProvider();
-            var systeminitializationService = _serviceProvider.GetService<ISystemInitializationService>();
-            systeminitializationService.TryInitDefaultEnvironment();//初始化环境 DEV TEST STAGE PROD
-            systeminitializationService.TryInitJwtSecret();//初始化 jwt secret
-
-
-            _settingService = _serviceProvider.GetService<ISettingService>();
-
-            Console.WriteLine("Run TestInitialize");
+            this.GlobalServiceProvider = services.BuildServiceProvider();
         }
 
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            _settingService.Dispose();
+            _serviceScope.Dispose();
+        }
 
         [TestMethod()]
         public async Task AddAsyncTest()
