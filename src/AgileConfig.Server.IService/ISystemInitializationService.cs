@@ -6,5 +6,5 @@ public interface ISystemInitializationService
 {
     bool TryInitJwtSecret();
 
-    Task<bool> TryInitDefaultEnvironmentAsync();
+    bool TryInitDefaultEnvironment();
 }

@@ -41,7 +41,7 @@ namespace AgileConfig.Server.Apisite
         {
             if (Appsettings.IsAdminConsoleMode)
             {
-                await _systemInitializationService.TryInitDefaultEnvironmentAsync();//初始化环境 DEV TEST STAGE PROD
+                _systemInitializationService.TryInitDefaultEnvironment();//初始化环境 DEV TEST STAGE PROD
                 _systemInitializationService.TryInitJwtSecret();//初始化 jwt secret
                 _ = _remoteServerNodeProxy.TestEchoAsync();//开启节点检测
                 _ = _serviceHealthCheckService.StartCheckAsync();//开启服务健康检测
@@ -54,8 +54,8 @@ namespace AgileConfig.Server.Apisite
                 var ip = GetIp();
                 if (!string.IsNullOrEmpty(ip))
                 {
-                    var desc = Appsettings.IsAdminConsoleMode ? "控制台节点" : "";
-                    _ = _serverNodeService.JoinAsync(ip, 5000, desc);
+                    var desc = Appsettings.IsAdminConsoleMode ? "Console node" : "";
+                    await _serverNodeService.JoinAsync(ip, 5000, desc);
                     _logger.LogInformation($"AgileConfig node http://{ip}:5000 joined .");
                 }
             }

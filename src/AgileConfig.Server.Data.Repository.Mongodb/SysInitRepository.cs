@@ -13,17 +13,18 @@ public class SysInitRepository : ISysInitRepository
     private MongodbAccess<Setting> _access => new MongodbAccess<Setting>(_configuration["db:conn"]);
     private readonly IConfiguration _configuration;
 
-    public  Task<string?> GetDefaultEnvironmentAsync()
+    public string? GetDefaultEnvironmentFromDb()
     {
         var setting = _access.MongoQueryable.FirstOrDefault(x => x.Id == SystemSettings.DefaultEnvironmentKey);
         var val = setting?.Value;
 
-        return Task.FromResult(val);
+        return val;
     }
 
     public string? GetJwtTokenSecret()
     {
         var setting = _access.MongoQueryable.FirstOrDefault(x => x.Id == SystemSettings.DefaultJwtSecretKey);
+
         return setting?.Value;
     }
 

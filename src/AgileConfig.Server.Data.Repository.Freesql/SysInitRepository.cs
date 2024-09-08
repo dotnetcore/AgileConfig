@@ -14,10 +14,11 @@ public class SysInitRepository : ISysInitRepository
         this.freeSqlFactory = freeSqlFactory;
     }
 
-    public async Task<string?> GetDefaultEnvironmentAsync()
+    public string? GetDefaultEnvironmentFromDb()
     {
-        var setting = await freeSqlFactory.Create().Select<Setting>().Where(x => x.Id == SystemSettings.DefaultEnvironmentKey)
-                 .ToOneAsync();
+        var setting = freeSqlFactory.Create().Select<Setting>().Where(x => x.Id == SystemSettings.DefaultEnvironmentKey)
+                 .ToOne();
+
         return setting?.Value;
     }
 
@@ -25,6 +26,7 @@ public class SysInitRepository : ISysInitRepository
     {
         var setting = freeSqlFactory.Create().Select<Setting>().Where(x => x.Id == SystemSettings.DefaultJwtSecretKey)
             .ToOne();
+
         return setting?.Value;
     }
 

@@ -14,7 +14,7 @@ public interface ISysInitRepository
     /// get default environment from db
     /// </summary>
     /// <returns></returns>
-    Task<string?> GetDefaultEnvironmentAsync();
+    string? GetDefaultEnvironmentFromDb();
 
     /// <summary>
     /// save initialization setting 

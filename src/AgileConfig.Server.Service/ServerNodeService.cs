@@ -115,12 +115,7 @@ namespace AgileConfig.Server.Service
             var nodes = await _serverNodeRepository.QueryAsync(x => x.Id == address);
             if (nodes.Count > 0)
             {
-                nodes.ForEach(n =>
-                {
-                    n.Id = address;
-                    n.Remark = desc;
-                    n.Status = NodeStatus.Online;
-                });
+                // if already there, noting to do
             }
             else
             {

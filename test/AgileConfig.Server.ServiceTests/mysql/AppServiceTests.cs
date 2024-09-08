@@ -7,6 +7,7 @@ using System;
 
 namespace AgileConfig.Server.ServiceTests.mysql
 {
+    [TestClass]
     public class AppServiceTests_mysql : AppServiceTests
     {
         static MySqlContainer _container = new MySqlBuilder().WithImage("mysql:8.0").Build();

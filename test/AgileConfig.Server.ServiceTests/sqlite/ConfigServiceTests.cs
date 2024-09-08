@@ -64,7 +64,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
 
             _serviceProvider = services.BuildServiceProvider();
             var systeminitializationService = _serviceProvider.GetService<ISystemInitializationService>();
-            systeminitializationService.TryInitDefaultEnvironmentAsync();//初始化环境 DEV TEST STAGE PROD
+            systeminitializationService.TryInitDefaultEnvironment();//初始化环境 DEV TEST STAGE PROD
             systeminitializationService.TryInitJwtSecret();//初始化 jwt secret
 
 

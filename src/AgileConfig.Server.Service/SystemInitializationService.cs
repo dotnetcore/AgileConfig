@@ -47,15 +47,16 @@ public class SystemInitializationService(ISysInitRepository sysInitRepository, I
         return true;
     }
 
-    public async Task<bool> TryInitDefaultEnvironmentAsync()
+    public bool TryInitDefaultEnvironment()
     {
-        var envArrayString = await sysInitRepository.GetDefaultEnvironmentAsync();
+        var envArrayString = sysInitRepository.GetDefaultEnvironmentFromDb();
         if (envArrayString == null)
         {
+            envArrayString = SystemSettings.DefaultEnvironment;
             var setting = new Setting
             {
                 Id = SystemSettings.DefaultEnvironmentKey,
-                Value = SystemSettings.DefaultEnvironment,
+                Value = envArrayString,
                 CreateTime = DateTime.Now
             };
             sysInitRepository.SaveInitSetting(setting);
