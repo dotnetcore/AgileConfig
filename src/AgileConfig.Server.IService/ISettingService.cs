@@ -5,9 +5,26 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.IService
 {
-    public interface ISettingService: IDisposable
+    public interface ISettingService : IDisposable
     {
         static string[] EnvironmentList { get; set; }
+
+        static string IfEnvEmptySetDefault(ref string env)
+        {
+            if (!string.IsNullOrEmpty(env))
+            {
+                return env;
+            }
+
+            if (EnvironmentList == null || EnvironmentList.Length == 0)
+            {
+                throw new ArgumentNullException(nameof(EnvironmentList));
+            }
+
+            env = EnvironmentList[0];
+
+            return env;
+        }
 
         Task<Setting> GetAsync(string id);
         Task<bool> AddAsync(Setting setting);

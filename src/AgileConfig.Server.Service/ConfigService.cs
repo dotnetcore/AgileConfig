@@ -47,22 +47,6 @@ namespace AgileConfig.Server.Service
             _publishTimelineRepositoryAccsssor = publishTimelineRepositoryAccessor;
         }
 
-        public string IfEnvEmptySetDefault(ref string env)
-        {
-            if (!string.IsNullOrEmpty(env))
-            {
-                return env;
-            }
-
-            var envList = ISettingService.EnvironmentList;
-            if (envList == null || envList.Length == 0)
-            {
-                return "";
-            }
-
-            return envList[0];
-        }
-
         public async Task<bool> AddAsync(Config config, string env)
         {
             if (config.Value == null)

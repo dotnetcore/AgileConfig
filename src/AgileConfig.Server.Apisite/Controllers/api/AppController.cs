@@ -249,7 +249,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [HttpPost("publish")]
         public async Task<IActionResult> Publish(string appId, string env)
         {
-            _configService.IfEnvEmptySetDefault(ref env);
+            ISettingService.IfEnvEmptySetDefault(ref env);
 
             var ctrl = new Controllers.ConfigController(
                 _configService,
@@ -289,7 +289,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         {
             ArgumentNullException.ThrowIfNullOrEmpty(appId);
 
-            _configService.IfEnvEmptySetDefault(ref env);
+            ISettingService.IfEnvEmptySetDefault(ref env);
 
             var history = await _configService.GetPublishTimelineHistoryAsync(appId, env);
 
@@ -319,7 +319,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [HttpPost("rollback")]
         public async Task<IActionResult> Rollback(string historyId, string env)
         {
-            _configService.IfEnvEmptySetDefault(ref env);
+            ISettingService.IfEnvEmptySetDefault(ref env);
 
             var ctrl = new Controllers.ConfigController(
                 _configService,

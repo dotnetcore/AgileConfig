@@ -21,7 +21,7 @@ namespace AgileConfig.Server.Apisite.Filters
             var env = "";
             if (envArg == null)
             {
-                configService.IfEnvEmptySetDefault(ref env);
+                ISettingService.IfEnvEmptySetDefault(ref env);
             }
             else
             {

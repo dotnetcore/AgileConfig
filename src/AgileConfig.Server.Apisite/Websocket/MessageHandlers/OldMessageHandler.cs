@@ -45,7 +45,7 @@ internal class OldMessageHandler : IMessageHandler
             //如果是ping，回复本地数据的md5版本 
             var appId = request.Headers["appid"];
             var env = request.Headers["env"].ToString();
-            env = _configService.IfEnvEmptySetDefault(ref env);
+            env = ISettingService.IfEnvEmptySetDefault(ref env);
             var md5 = await _configService.AppPublishedConfigsMd5CacheWithInheritanced(appId, env);
             await SendMessage(client.Client, $"V:{md5}");
         }

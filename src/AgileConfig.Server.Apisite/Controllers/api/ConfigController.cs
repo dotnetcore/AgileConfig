@@ -56,7 +56,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         {
             ArgumentNullException.ThrowIfNullOrEmpty(appId);
 
-            _configService.IfEnvEmptySetDefault(ref env);
+            ISettingService.IfEnvEmptySetDefault(ref env);
 
             var app = await _appService.GetAsync(appId);
             if (!app.Enabled)
@@ -110,7 +110,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         {
             ArgumentNullException.ThrowIfNullOrEmpty(appId);
 
-            _configService.IfEnvEmptySetDefault(ref env);
+            ISettingService.IfEnvEmptySetDefault(ref env);
 
             var configs = await _configService.GetByAppIdAsync(appId, env);
 
@@ -140,7 +140,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         {
             ArgumentNullException.ThrowIfNullOrEmpty(id);
 
-            _configService.IfEnvEmptySetDefault(ref env);
+            ISettingService.IfEnvEmptySetDefault(ref env);
 
             var config = await _configService.GetAsync(id, env);
             if (config == null || config.Status == ConfigStatus.Deleted)
@@ -193,7 +193,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 );
             ctrl.ControllerContext.HttpContext = HttpContext;
 
-            _configService.IfEnvEmptySetDefault(ref env);
+            ISettingService.IfEnvEmptySetDefault(ref env);
 
             var result = (await ctrl.Add(new ConfigVM()
             {
@@ -250,7 +250,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 );
             ctrl.ControllerContext.HttpContext = HttpContext;
 
-            _configService.IfEnvEmptySetDefault(ref env);
+            ISettingService.IfEnvEmptySetDefault(ref env);
 
             model.Id = id;
             var result = (await ctrl.Edit(new ConfigVM()
@@ -296,7 +296,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 );
             ctrl.ControllerContext.HttpContext = HttpContext;
 
-            _configService.IfEnvEmptySetDefault(ref env);
+            ISettingService.IfEnvEmptySetDefault(ref env);
 
             var result = (await ctrl.Delete(id, env)) as JsonResult;
 

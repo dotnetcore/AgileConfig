@@ -66,7 +66,7 @@ internal class MessageHandler : IMessageHandler
             var appId = request.Headers["appid"];
             appId = HttpUtility.UrlDecode(appId);
             var env = request.Headers["env"].ToString();
-            _configService.IfEnvEmptySetDefault(ref env);
+            ISettingService.IfEnvEmptySetDefault(ref env);
             var md5 = await _configService.AppPublishedConfigsMd5CacheWithInheritanced(appId, env);
             await SendMessage(client.Client, JsonConvert.SerializeObject(new WebsocketAction()
             {
