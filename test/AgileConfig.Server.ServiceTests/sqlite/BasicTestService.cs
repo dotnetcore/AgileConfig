@@ -48,6 +48,8 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             fsq.Delete<ConfigPublished>().Where("1=1").ExecuteAffrows();
             //fsq.Delete<Setting>().Where("1=1").ExecuteAffrows();
             fsq.Delete<SysLog>().Where("1=1").ExecuteAffrows();
+
+            fsq.Dispose();
         }
 
         public BasicTestService()

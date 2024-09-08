@@ -34,6 +34,8 @@ namespace AgileConfig.Server.ServiceTests.mysql
             var sql =  this.GetFreeSql();
 
             sql.Delete<SysLog>().Where("1=1").ExecuteAffrows();
+
+            sql.Dispose();
         }
 
 

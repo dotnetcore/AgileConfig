@@ -36,14 +36,12 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         public async Task TestInitialize()
         {
             await NewGloablSp();
-
-            ClearData();
-
             _serviceScope = this.GlobalServiceProvider.CreateScope();
             _serviceProvider = this.GlobalServiceProvider.CreateScope().ServiceProvider;
+
+            ClearData();
        
             _service = this._serviceProvider.GetService<IConfigService>();
-
             var systeminitializationService = this._serviceProvider.GetService<ISystemInitializationService>();
             systeminitializationService.TryInitDefaultEnvironment();//初始化环境 DEV TEST STAGE PROD
             systeminitializationService.TryInitJwtSecret();//初始化 jwt secret

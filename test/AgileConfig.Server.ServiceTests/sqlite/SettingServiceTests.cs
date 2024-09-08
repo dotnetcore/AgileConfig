@@ -38,11 +38,10 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         public async Task TestInitialize()
         {
             await NewGlobalSp();
-
-            ClearData();
-
             _serviceScope = GlobalServiceProvider.CreateScope();
             _serviceProvider = _serviceScope.ServiceProvider;
+
+            ClearData();
 
             var systeminitializationService = _serviceProvider.GetService<ISystemInitializationService>();
             systeminitializationService.TryInitDefaultEnvironment();//初始化环境 DEV TEST STAGE PROD
