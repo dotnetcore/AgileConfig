@@ -33,6 +33,13 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         [TestInitialize]
         public async Task TestInitialize()
         {
+            if (_appservice != null)
+            {
+                Console.WriteLine("IAppService already there.");
+
+                return;
+            }
+
             Console.WriteLine("Try get configration data");
             var dict = await GetConfigurationData();
 

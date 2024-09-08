@@ -12,7 +12,6 @@ using Moq;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Repository.Selector;
 using AgileConfig.Server.Data.Freesql;
-using AgileConfig.Server.Service;
 using AgileConfig.Server.Data.Abstraction;
 
 namespace AgileConfig.Server.ServiceTests.sqlite
@@ -35,6 +34,13 @@ namespace AgileConfig.Server.ServiceTests.sqlite
         [TestInitialize]
         public async Task TestInitialize()
         {
+            if (_settingService != null)
+            {
+                Console.WriteLine("ISettingService already there.");
+
+                return;
+            }
+
             Console.WriteLine("Try get configration data");
             var dict = await GetConfigurationData();
 
