@@ -247,10 +247,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Publish_API", Functions.Config_Publish })]
         [HttpPost("publish")]
-        public async Task<IActionResult> Publish(string appId, string env)
+        public async Task<IActionResult> Publish(string appId, EnvString env)
         {
-            ISettingService.IfEnvEmptySetDefault(ref env);
-
             var ctrl = new Controllers.ConfigController(
                 _configService,
                 _appService,
@@ -317,10 +315,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Rollback_API", Functions.Config_Publish })]
         [HttpPost("rollback")]
-        public async Task<IActionResult> Rollback(string historyId, string env)
+        public async Task<IActionResult> Rollback(string historyId, EnvString env)
         {
-            ISettingService.IfEnvEmptySetDefault(ref env);
-
             var ctrl = new Controllers.ConfigController(
                 _configService,
                 _appService,

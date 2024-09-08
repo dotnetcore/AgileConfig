@@ -172,7 +172,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Add", Functions.Config_Add })]
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] ApiConfigVM model, string env)
+        public async Task<IActionResult> Add([FromBody] ApiConfigVM model, EnvString env)
         {
             var requiredResult = CheckRequired(model);
 
@@ -192,8 +192,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 _tinyEventBus
                 );
             ctrl.ControllerContext.HttpContext = HttpContext;
-
-            ISettingService.IfEnvEmptySetDefault(ref env);
 
             var result = (await ctrl.Add(new ConfigVM()
             {
@@ -229,7 +227,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Edit", Functions.Config_Edit })]
         [HttpPut("{id}")]
-        public async Task<IActionResult> Edit(string id, [FromBody] ApiConfigVM model, string env)
+        public async Task<IActionResult> Edit(string id, [FromBody] ApiConfigVM model, EnvString env)
         {
             var requiredResult = CheckRequired(model);
 
@@ -249,8 +247,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 _tinyEventBus
                 );
             ctrl.ControllerContext.HttpContext = HttpContext;
-
-            ISettingService.IfEnvEmptySetDefault(ref env);
 
             model.Id = id;
             var result = (await ctrl.Edit(new ConfigVM()
@@ -286,7 +282,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Delete", Functions.Config_Delete })]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id, string env)
+        public async Task<IActionResult> Delete(string id, EnvString env)
         {
             var ctrl = new Controllers.ConfigController(
                 _configService,
@@ -295,8 +291,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 _tinyEventBus
                 );
             ctrl.ControllerContext.HttpContext = HttpContext;
-
-            ISettingService.IfEnvEmptySetDefault(ref env);
 
             var result = (await ctrl.Delete(id, env)) as JsonResult;
 
