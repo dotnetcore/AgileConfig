@@ -37,40 +37,41 @@ namespace AgileConfig.Server.Common.EventBus
 
         public void Fire<TEvent>(TEvent evt) where TEvent : IEvent
         {
-            IServiceProvider sp = _serviceCollection.BuildServiceProvider();
+            var sp = _serviceCollection.BuildServiceProvider();
             using var scope = sp.CreateScope();
-            var logger = sp.GetService<ILoggerFactory>().CreateLogger<TinyEventBus>();
+            var logger = scope.ServiceProvider.GetService<ILoggerFactory>().CreateLogger<TinyEventBus>();
 
             logger.LogInformation($"Event fired: {typeof(TEvent).Name}");
 
             var eventType = typeof(TEvent);
             if (_eventHandlerMap.TryGetValue(eventType, out List<Type> handlers))
             {
+                if (handlers.Count == 0)
+                {
+                    logger.LogInformation($"Event fired: {typeof(TEvent).Name}, but no handlers.");
+                    return;
+                }
+
                 foreach (var handlerType in handlers)
                 {
                     _ = Task.Run(async () =>
                     {
-                        using (var scope = sp.CreateScope())
+                        using var sc = sp.CreateScope();
+                        var handler = sc.ServiceProvider.GetService(handlerType);
+                        if (handler != null)
                         {
-                            var handler = sp.GetService(handlerType);
-                            if (handler != null)
+                            var handlerInstance = handler as IEventHandler;
+                            try
                             {
-                                var handlerIntance = handler as IEventHandler;
-                                try
-                                {
-                                    await handlerIntance.Handle(evt);
-                                }
-                                catch (Exception ex)
-                                {
-                                    logger.LogError(ex, "try run {handler} occur error.", handlerType);
-                                }
+                                await handlerInstance.Handle(evt);
+                            }
+                            catch (Exception ex)
+                            {
+                                sc.ServiceProvider.GetService<ILoggerFactory>().CreateLogger<TinyEventBus>()
+                                    .LogError(ex, "try run {handler} occur error.", handlerType);
                             }
                         }
                     });
-                }
-                if (handlers.Count == 0)
-                {
-                    logger.LogInformation($"Event fired: {typeof(TEvent).Name}, but no handlers.");
                 }
             }
         }
