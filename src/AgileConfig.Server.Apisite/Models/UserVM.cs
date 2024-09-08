@@ -1,12 +1,11 @@
 ﻿using AgileConfig.Server.Data.Entity;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AgileConfig.Server.Apisite.Models
 {
+    [ExcludeFromCodeCoverage]
     public class UserVM
     {
         [Required(ErrorMessage = "用户Id不能为空")]

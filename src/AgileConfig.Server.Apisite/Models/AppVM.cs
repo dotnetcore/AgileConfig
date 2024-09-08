@@ -2,10 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AgileConfig.Server.Apisite.Models
 {
-
+    [ExcludeFromCodeCoverage]
     public class AppVM : IAppModel
     {
         [Required(ErrorMessage = "应用Id不能为空")]
@@ -37,6 +38,7 @@ namespace AgileConfig.Server.Apisite.Models
 
     }
 
+    [ExcludeFromCodeCoverage]
     public class AppListVM : AppVM
     {
 

@@ -1,9 +1,6 @@
 ﻿using AgileConfig.Server.Data.Entity;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AgileConfig.Server.Apisite.Models
 {
@@ -12,6 +9,7 @@ namespace AgileConfig.Server.Apisite.Models
         string AppId { get; set; }
     }
 
+    [ExcludeFromCodeCoverage]
     public class ConfigVM: IAppIdModel
     {
         public string Id { get; set; }
