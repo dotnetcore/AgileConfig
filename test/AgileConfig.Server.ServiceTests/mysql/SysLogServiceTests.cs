@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace AgileConfig.Server.ServiceTests.mysql
 {
+    [TestClass]
     public class SysLogServiceTests_mysql : SysLogServiceTests
     {
         static MySqlContainer _container = new MySqlBuilder().WithImage("mysql:8.0").Build();

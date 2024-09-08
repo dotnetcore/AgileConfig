@@ -8,6 +8,7 @@ using AgileConfig.Server.Data.Entity;
 
 namespace AgileConfig.Server.ServiceTests.mysql
 {
+    [TestClass]
     public class ServerNodeServiceTests_mysql : ServerNodeServiceTests
     {
         static MySqlContainer _container = new MySqlBuilder().WithImage("mysql:8.0").Build();
