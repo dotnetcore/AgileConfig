@@ -25,17 +25,23 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         private readonly IPremissionService _premissionService;
         private readonly IUserService _userService;
 
+        private readonly Controllers.AppController ctrl;
+
         public AppController(IAppService appService,
             IPremissionService premissionService,
             IUserService userService,
             IConfigService configService,
-            ITinyEventBus tinyEventBus)
+            ITinyEventBus tinyEventBus,
+            
+            Controllers.AppController ctrl)
         {
             _appService = appService;
             _premissionService = premissionService;
             _userService = userService;
             _configService = configService;
             _tinyEventBus = tinyEventBus;
+
+            this.ctrl = ctrl;
         }
 
         /// <summary>
@@ -69,12 +75,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiAppVM>> GetById(string id)
         {
-            var ctrl = new Controllers.AppController(
-             _appService,
-             _premissionService,
-             _userService,
-             _tinyEventBus
-             );
             var result = (await ctrl.Get(id)) as JsonResult;
             dynamic obj = result.Value;
 
@@ -121,12 +121,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 });
             }
 
-            var ctrl = new Controllers.AppController(
-                _appService,
-                _premissionService,
-                _userService,
-                _tinyEventBus
-                );
             ctrl.ControllerContext.HttpContext = HttpContext;
 
             var result = (await ctrl.Add(new AppVM
@@ -174,12 +168,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 });
             }
 
-            var ctrl = new Controllers.AppController(
-                  _appService,
-                  _premissionService,
-                  _userService,
-                  _tinyEventBus
-                  );
             ctrl.ControllerContext.HttpContext = HttpContext;
 
             model.Id = id;
@@ -215,12 +203,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-            var ctrl = new Controllers.AppController(
-                    _appService,
-                    _premissionService,
-                    _userService,
-                    _tinyEventBus
-                    );
             ctrl.ControllerContext.HttpContext = HttpContext;
 
             var result = (await ctrl.Delete(id)) as JsonResult;
