@@ -4,9 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
 using Testcontainers.MySql;
-using System.Data;
 using AgileConfig.Server.Data.Entity;
-using Microsoft.Extensions.Configuration;
 
 namespace AgileConfig.Server.ServiceTests.mysql
 {

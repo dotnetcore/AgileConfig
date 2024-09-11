@@ -8,6 +8,7 @@ namespace AgileConfig.Server.Common.EventBus
         {
             sc.AddSingleton<ITinyEventBus, TinyEventBus>(sp => 
                 new TinyEventBus(sc));
+
             return sc;
         }
     }

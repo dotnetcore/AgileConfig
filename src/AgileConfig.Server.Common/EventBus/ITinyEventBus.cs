@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using System;
 
 namespace AgileConfig.Server.Common.EventBus
 {

@@ -11,23 +11,26 @@ namespace AgileConfig.Server.Common.EventBus
     public class TinyEventBus : ITinyEventBus
     {
         private readonly IServiceCollection _serviceCollection;
-        private readonly static ConcurrentDictionary<Type, List<Type>> _eventHandlerMap = new ConcurrentDictionary<Type, List<Type>>();
+        private static readonly ConcurrentDictionary<Type, List<Type>> EventHandlerMap = new ();
+        private IServiceProvider _localServiceProvider;
+        private ILogger _logger;
 
         public TinyEventBus(IServiceCollection serviceCollection)
         {
-            this._serviceCollection = serviceCollection;
+            _serviceCollection = serviceCollection;
+            _logger = _serviceCollection.BuildServiceProvider().GetService<ILoggerFactory>().CreateLogger<TinyEventBus>();
         }
         public void Register<T>() where T : class, IEventHandler
         {
             var handlerType = typeof(T);
-            var eventType = handlerType.GetInterfaces().FirstOrDefault(x => x.IsGenericType).GenericTypeArguments.FirstOrDefault();
-            if (_eventHandlerMap.TryGetValue(eventType, out List<Type> handlerTypes))
+            var eventType = handlerType.GetInterfaces().FirstOrDefault(x => x.IsGenericType)!.GenericTypeArguments.FirstOrDefault();
+            if (EventHandlerMap.TryGetValue(eventType, out List<Type> handlerTypes))
             {
                 handlerTypes.Add(handlerType);
             }
             else
             {
-                _eventHandlerMap.TryAdd(eventType, new List<Type> {
+                EventHandlerMap.TryAdd(eventType, new List<Type> {
                     handlerType
                 });
             }
@@ -35,20 +38,23 @@ namespace AgileConfig.Server.Common.EventBus
 
         }
 
+        /// <summary>
+        /// Trigger an event. This method must be called before the handler is registered.
+        /// </summary>
+        /// <typeparam name="TEvent"></typeparam>
+        /// <param name="evt"></param>
         public void Fire<TEvent>(TEvent evt) where TEvent : IEvent
         {
-            var sp = _serviceCollection.BuildServiceProvider();
-            using var scope = sp.CreateScope();
-            var logger = scope.ServiceProvider.GetService<ILoggerFactory>().CreateLogger<TinyEventBus>();
+            _localServiceProvider ??= _serviceCollection.BuildServiceProvider();
 
-            logger.LogInformation($"Event fired: {typeof(TEvent).Name}");
+            _logger.LogInformation($"Event fired: {typeof(TEvent).Name}");
 
             var eventType = typeof(TEvent);
-            if (_eventHandlerMap.TryGetValue(eventType, out List<Type> handlers))
+            if (EventHandlerMap.TryGetValue(eventType, out List<Type> handlers))
             {
                 if (handlers.Count == 0)
                 {
-                    logger.LogInformation($"Event fired: {typeof(TEvent).Name}, but no handlers.");
+                    _logger.LogInformation($"Event fired: {typeof(TEvent).Name}, but no handlers.");
                     return;
                 }
 
@@ -56,20 +62,17 @@ namespace AgileConfig.Server.Common.EventBus
                 {
                     _ = Task.Run(async () =>
                     {
-                        using var sc = sp.CreateScope();
+                        using var sc = _localServiceProvider.CreateScope();
                         var handler = sc.ServiceProvider.GetService(handlerType);
-                        if (handler != null)
+                        
+                        try
                         {
-                            var handlerInstance = handler as IEventHandler;
-                            try
-                            {
-                                await handlerInstance.Handle(evt);
-                            }
-                            catch (Exception ex)
-                            {
-                                sc.ServiceProvider.GetService<ILoggerFactory>().CreateLogger<TinyEventBus>()
-                                    .LogError(ex, "try run {handler} occur error.", handlerType);
-                            }
+                            await (handler as IEventHandler)?.Handle(evt)!;
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger
+                                .LogError(ex, "try run {handler} occur error.", handlerType);
                         }
                     });
                 }
