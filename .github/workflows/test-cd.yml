@@ -27,10 +27,12 @@ jobs:
         
     - run: npm install
     - run: npm run build
-    - uses: actions/upload-artifact@v2
+    
+    - uses: actions/upload-artifact@v4
       with:
         name: agileconfig-ui
         path: src/AgileConfig.Server.UI/react-ui-antd/dist/
+        
   build-dotnet-push-to-hub:
     needs: build-reactapp
     runs-on: ubuntu-latest
@@ -41,14 +43,17 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 8.0.*
+        
     - name: Install dependencies
       run: dotnet restore
     - name: Build
       run: dotnet build --configuration Release --no-restore
-    - uses: actions/download-artifact@v2
+      
+    - uses: actions/download-artifact@v4
       with:
         name: agileconfig-ui
         path: src/AgileConfig.Server.Apisite/wwwroot/ui
+        
     - name: Push to Docker Hub
       uses: docker/build-push-action@v1
       with:
@@ -56,12 +61,14 @@ jobs:
         password: ${{ secrets.DOCKER_HUB_PASSWORD }}
         repository: kklldog/agile_config
         tags: test
+        
     - name: Login to ACR and push
       uses: aliyun/acr-login@v1
       with:
         login-server: https://registry.cn-shanghai.aliyuncs.com
         username: "${{ secrets.ALI_REGISTRY_USERNAME }}"
         password: "${{ secrets.ALI_REGISTRY_PASSWORD }}"
+        
     - name: Build and push image
       env:
         IMAGE_TAG: test
