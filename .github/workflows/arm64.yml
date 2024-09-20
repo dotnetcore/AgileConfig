@@ -28,7 +28,7 @@ jobs:
         
     - run: npm install
     - run: npm run build
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       with:
         name: agileconfig-ui
         path: AgileConfig.Server.UI/react-ui-antd/dist/
@@ -46,7 +46,7 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --configuration Release --no-restore
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v4
       with:
         name: agileconfig-ui
         path: AgileConfig.Server.Apisite/wwwroot/ui
