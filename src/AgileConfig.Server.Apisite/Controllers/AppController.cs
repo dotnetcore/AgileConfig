@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using AgileConfig.Server.Apisite.Utilites;
 using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.Event;
+using AgileConfig.Server.Apisite.Models.Mapping;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -23,8 +24,8 @@ namespace AgileConfig.Server.Apisite.Controllers
         private readonly IUserService _userService;
         private readonly ITinyEventBus _tinyEventBus;
 
-        public AppController(IAppService appService, 
-            IPremissionService premissionService, 
+        public AppController(IAppService appService,
+            IPremissionService premissionService,
             IUserService userService,
             ITinyEventBus tinyEventBus)
         {
@@ -168,18 +169,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         private async Task<AppListVM> AppToListVM(App item, bool appendInheritancedInfo)
         {
 
-            var vm = new AppListVM
-            {
-                Id = item.Id,
-                Name = item.Name,
-                Group = item.Group,
-                Secret = item.Secret,
-                Inheritanced = item.Type == AppType.Inheritance,
-                Enabled = item.Enabled,
-                UpdateTime = item.UpdateTime,
-                CreateTime = item.CreateTime,
-                AppAdmin = item.AppAdmin,
-            };
+            var vm = item.ToAppListVM();
 
             if (appendInheritancedInfo)
             {
@@ -219,10 +209,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] AppVM model)
         {
-            if (model == null)
-            {
-                throw new ArgumentNullException("model");
-            }
+            ArgumentNullException.ThrowIfNull(model);
 
             var oldApp = await _appService.GetAsync(model.Id);
             if (oldApp != null)
@@ -235,16 +222,8 @@ namespace AgileConfig.Server.Apisite.Controllers
                 });
             }
 
-            var app = new App();
-            app.Id = model.Id;
-            app.Name = model.Name;
-            app.Secret = model.Secret;
-            app.Enabled = model.Enabled;
+            var app = model.ToApp();
             app.CreateTime = DateTime.Now;
-            app.UpdateTime = null;
-            app.Type = model.Inheritanced ? AppType.Inheritance : AppType.PRIVATE;
-            app.AppAdmin = model.AppAdmin;
-            app.Group = model.Group;
 
             var inheritanceApps = new List<AppInheritanced>();
             if (!model.Inheritanced && model.inheritancedApps != null)
@@ -280,10 +259,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit([FromBody] AppVM model)
         {
-            if (model == null)
-            {
-                throw new ArgumentNullException("model");
-            }
+            ArgumentNullException.ThrowIfNull(model);
 
             var app = await _appService.GetAsync(model.Id);
             if (app == null)
@@ -304,13 +280,8 @@ namespace AgileConfig.Server.Apisite.Controllers
                 });
             }
 
-            app.Name = model.Name;
-            app.Secret = model.Secret;
-            app.Enabled = model.Enabled;
+            app = model.ToApp();
             app.UpdateTime = DateTime.Now;
-            app.Type = model.Inheritanced ? AppType.Inheritance : AppType.PRIVATE;
-            app.AppAdmin = model.AppAdmin;
-            app.Group = model.Group;
 
             var inheritanceApps = new List<AppInheritanced>();
             if (!model.Inheritanced && model.inheritancedApps != null)
@@ -345,22 +316,12 @@ namespace AgileConfig.Server.Apisite.Controllers
         {
             var apps = await _appService.GetAllAppsAsync();
             var vms = new List<AppListVM>();
-            foreach (var item in apps)
+            foreach (var app in apps)
             {
-                vms.Add(new AppListVM
-                {
-                    Id = item.Id,
-                    Name = item.Name,
-                    Secret = item.Secret,
-                    Inheritanced = item.Type == AppType.Inheritance,
-                    Enabled = item.Enabled,
-                    UpdateTime = item.UpdateTime,
-                    CreateTime = item.CreateTime,
-                    inheritancedApps = item.Type == AppType.Inheritance ?
-                                                                            new List<string>() :
-                                                                            (await _appService.GetInheritancedAppsAsync(item.Id)).Select(ia => ia.Id).ToList(),
-                    AppAdmin = item.AppAdmin
-                });
+                var vm = app.ToAppListVM();
+                vm.inheritancedAppNames = app.Type == AppType.Inheritance ? new List<string>() :
+                                                                            (await _appService.GetInheritancedAppsAsync(app.Id)).Select(ia => ia.Id).ToList();
+                vms.Add(vm);
             }
 
             return Json(new
@@ -373,22 +334,13 @@ namespace AgileConfig.Server.Apisite.Controllers
         [HttpGet]
         public async Task<IActionResult> Get(string id)
         {
-            if (string.IsNullOrEmpty(id))
-            {
-                throw new ArgumentNullException("id");
-            }
+            ArgumentNullException.ThrowIfNullOrEmpty(id);
 
             var app = await _appService.GetAsync(id);
+            var vm = app.ToAppVM();
 
-            var vm = new AppVM();
-            if (app != null)
+            if (vm != null)
             {
-                vm.Id = app.Id;
-                vm.Name = app.Name;
-                vm.Secret = app.Secret;
-                vm.Inheritanced = app.Type == AppType.Inheritance;
-                vm.Enabled = app.Enabled;
-                vm.AppAdmin = app.AppAdmin;
                 vm.inheritancedApps = (await _appService.GetInheritancedAppsAsync(id)).Select(x => x.Id).ToList();
             }
 
@@ -409,10 +361,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         [HttpPost]
         public async Task<IActionResult> DisableOrEanble(string id)
         {
-            if (string.IsNullOrEmpty(id))
-            {
-                throw new ArgumentNullException("id");
-            }
+            ArgumentNullException.ThrowIfNullOrEmpty(id);
 
             var app = await _appService.GetAsync(id);
             if (app == null)
@@ -444,10 +393,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(string id)
         {
-            if (string.IsNullOrEmpty(id))
-            {
-                throw new ArgumentNullException("id");
-            }
+            ArgumentNullException.ThrowIfNullOrEmpty(id);
 
             var app = await _appService.GetAsync(id);
             if (app == null)
@@ -513,10 +459,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         [HttpPost]
         public async Task<IActionResult> SaveAppAuth([FromBody] AppAuthVM model)
         {
-            if (model == null)
-            {
-                throw new ArgumentNullException(nameof(model));
-            }
+            ArgumentNullException.ThrowIfNull(model);
 
             var result = await _appService.SaveUserAppAuth(model.AppId, model.EditConfigPermissionUsers, _premissionService.EditConfigPermissionKey);
             var result1 = await _appService.SaveUserAppAuth(model.AppId, model.PublishConfigPermissionUsers, _premissionService.PublishConfigPermissionKey);
@@ -530,10 +473,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUserAppAuth(string appId)
         {
-            if (string.IsNullOrEmpty(appId))
-            {
-                throw new ArgumentNullException(nameof(appId));
-            }
+            ArgumentNullException.ThrowIfNullOrEmpty(appId);
 
             var result = new AppAuthVM
             {
