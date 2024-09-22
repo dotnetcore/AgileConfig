@@ -168,7 +168,6 @@ namespace AgileConfig.Server.Apisite.Controllers
 
         private async Task<AppListVM> AppToListVM(App item, bool appendInheritancedInfo)
         {
-
             var vm = item.ToAppListVM();
 
             if (appendInheritancedInfo)
@@ -280,7 +279,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 });
             }
 
-            app = model.ToApp();
+            model.ToApp(app);
             app.UpdateTime = DateTime.Now;
 
             var inheritanceApps = new List<AppInheritanced>();

@@ -68,6 +68,29 @@ namespace AgileConfig.Server.Apisite.Models.Mapping
             app.Type = vm.Inheritanced ? AppType.Inheritance : AppType.PRIVATE;
             app.AppAdmin = vm.AppAdmin;
             app.Group = vm.Group;
+            app.CreateTime = vm.CreateTime;
+
+            return app;
+        }
+
+        public static App ToApp(this AppVM vm, App app)
+        {
+            if (vm == null)
+            {
+                return null;
+            }
+
+            app.Id = vm.Id;
+            app.Name = vm.Name;
+            app.Secret = vm.Secret;
+            app.Enabled = vm.Enabled;
+            app.Type = vm.Inheritanced ? AppType.Inheritance : AppType.PRIVATE;
+            app.AppAdmin = vm.AppAdmin;
+            app.Group = vm.Group;
+            if (vm.CreateTime > DateTime.MinValue)
+            {
+                app.CreateTime = vm.CreateTime;
+            }
 
             return app;
         }
