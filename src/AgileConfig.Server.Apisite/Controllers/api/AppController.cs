@@ -25,7 +25,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         private readonly IPremissionService _premissionService;
         private readonly IUserService _userService;
 
-        private readonly Controllers.AppController ctrl;
+        private readonly Controllers.AppController _appController;
+        private readonly Controllers.ConfigController _configController;
 
         public AppController(IAppService appService,
             IPremissionService premissionService,
@@ -33,7 +34,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             IConfigService configService,
             ITinyEventBus tinyEventBus,
             
-            Controllers.AppController ctrl)
+            Controllers.AppController _appController,
+            Controllers.ConfigController _configController)
         {
             _appService = appService;
             _premissionService = premissionService;
@@ -41,7 +43,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             _configService = configService;
             _tinyEventBus = tinyEventBus;
 
-            this.ctrl = ctrl;
+            this._appController = _appController;
+            this._configController = _configController;
         }
 
         /// <summary>
@@ -75,7 +78,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiAppVM>> GetById(string id)
         {
-            var result = (await ctrl.Get(id)) as JsonResult;
+            var result = (await _appController.Get(id)) as JsonResult;
             dynamic obj = result.Value;
 
             if (obj.success)
@@ -121,9 +124,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 });
             }
 
-            ctrl.ControllerContext.HttpContext = HttpContext;
+            _appController.ControllerContext.HttpContext = HttpContext;
 
-            var result = (await ctrl.Add(new AppVM
+            var result = (await _appController.Add(new AppVM
             {
                 Id = model.Id,
                 Name = model.Name,
@@ -168,10 +171,10 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 });
             }
 
-            ctrl.ControllerContext.HttpContext = HttpContext;
+            _appController.ControllerContext.HttpContext = HttpContext;
 
             model.Id = id;
-            var result = (await ctrl.Edit(new AppVM
+            var result = (await _appController.Edit(new AppVM
             {
                 Id = model.Id,
                 Name = model.Name,
@@ -203,9 +206,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-            ctrl.ControllerContext.HttpContext = HttpContext;
+            _appController.ControllerContext.HttpContext = HttpContext;
 
-            var result = (await ctrl.Delete(id)) as JsonResult;
+            var result = (await _appController.Delete(id)) as JsonResult;
 
             dynamic obj = result.Value;
             if (obj.success == true)
@@ -231,15 +234,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [HttpPost("publish")]
         public async Task<IActionResult> Publish(string appId, EnvString env)
         {
-            var ctrl = new Controllers.ConfigController(
-                _configService,
-                _appService,
-                _userService,
-                _tinyEventBus
-                );
-            ctrl.ControllerContext.HttpContext = HttpContext;
+            _configController.ControllerContext.HttpContext = HttpContext;
 
-            var result = (await ctrl.Publish(new PublishLogVM()
+            var result = (await _configController.Publish(new PublishLogVM()
             {
                 AppId = appId
             }, env)) as JsonResult;
@@ -299,15 +296,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [HttpPost("rollback")]
         public async Task<IActionResult> Rollback(string historyId, EnvString env)
         {
-            var ctrl = new Controllers.ConfigController(
-                _configService,
-                _appService,
-                _userService,
-                _tinyEventBus
-                );
-            ctrl.ControllerContext.HttpContext = HttpContext;
+            _configController.ControllerContext.HttpContext = HttpContext;
 
-            var result = (await ctrl.Rollback(historyId, env)) as JsonResult;
+            var result = (await _configController.Rollback(historyId, env)) as JsonResult;
 
             dynamic obj = result.Value;
             if (obj.success == true)
