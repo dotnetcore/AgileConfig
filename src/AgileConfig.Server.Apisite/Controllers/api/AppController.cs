@@ -1,14 +1,13 @@
 ﻿using AgileConfig.Server.Apisite.Controllers.api.Models;
 using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Apisite.Models;
-using AgileConfig.Server.Common.EventBus;
-using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AgileConfig.Server.Apisite.Models.Mapping;
 
 namespace AgileConfig.Server.Apisite.Controllers.api
 {
@@ -20,31 +19,21 @@ namespace AgileConfig.Server.Apisite.Controllers.api
     public class AppController : Controller
     {
         private readonly IConfigService _configService;
-        private readonly ITinyEventBus _tinyEventBus;
         private readonly IAppService _appService;
-        private readonly IPremissionService _premissionService;
-        private readonly IUserService _userService;
 
         private readonly Controllers.AppController _appController;
         private readonly Controllers.ConfigController _configController;
 
         public AppController(IAppService appService,
-            IPremissionService premissionService,
-            IUserService userService,
             IConfigService configService,
-            ITinyEventBus tinyEventBus,
-            
-            Controllers.AppController _appController,
-            Controllers.ConfigController _configController)
+            Controllers.AppController appController,
+            Controllers.ConfigController configController)
         {
             _appService = appService;
-            _premissionService = premissionService;
-            _userService = userService;
             _configService = configService;
-            _tinyEventBus = tinyEventBus;
 
-            this._appController = _appController;
-            this._configController = _configController;
+            _appController = appController;
+            _configController = configController;
         }
 
         /// <summary>
@@ -55,17 +44,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         public async Task<ActionResult<IEnumerable<ApiAppVM>>> GetAll()
         {
             var apps = await _appService.GetAllAppsAsync();
-            var vms = apps.Select(x =>
-            {
-                return new ApiAppVM
-                {
-                    Id = x.Id,
-                    Name = x.Name,
-                    Secret = x.Secret,
-                    Inheritanced = x.Type == AppType.Inheritance,
-                    Enabled = x.Enabled,
-                };
-            });
+            var vms = apps.Select(x => x.ToApiAppVM());
 
             return Json(vms);
         }
@@ -84,16 +63,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             if (obj.success)
             {
                 AppVM appVM = obj.data;
-                return Json(new ApiAppVM
-                {
-                    Id = appVM.Id,
-                    Name = appVM.Name,
-                    Secret = appVM.Secret,
-                    Inheritanced = appVM.Inheritanced,
-                    Enabled = appVM.Enabled,
-                    InheritancedApps = appVM.inheritancedApps,
-                    AppAdmin = appVM.AppAdmin
-                });
+                return Json(appVM.ToApiAppVM());
             }
 
             Response.StatusCode = 400;
@@ -126,14 +96,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
             _appController.ControllerContext.HttpContext = HttpContext;
 
-            var result = (await _appController.Add(new AppVM
-            {
-                Id = model.Id,
-                Name = model.Name,
-                Secret = model.Secret,
-                AppAdmin = model.AppAdmin,
-                Inheritanced = model.Inheritanced
-            })) as JsonResult;
+            var result = (await _appController.Add(model.ToAppVM())) as JsonResult;
 
             dynamic obj = result.Value;
 
@@ -174,14 +137,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             _appController.ControllerContext.HttpContext = HttpContext;
 
             model.Id = id;
-            var result = (await _appController.Edit(new AppVM
-            {
-                Id = model.Id,
-                Name = model.Name,
-                Secret = model.Secret,
-                AppAdmin = model.AppAdmin,
-                Inheritanced = model.Inheritanced
-            })) as JsonResult;
+            var result = (await _appController.Edit(model.ToAppVM())) as JsonResult;
 
             dynamic obj = result.Value;
             if (obj.success == true)
@@ -262,25 +218,15 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <returns></returns>
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [HttpGet("Publish_History")]
-        public async Task<ActionResult<IEnumerable<ApiPublishTimelineVM>>> PublishHistory(string appId, string env)
+        public async Task<ActionResult<IEnumerable<ApiPublishTimelineVM>>> PublishHistory(string appId, EnvString env)
         {
-            ArgumentNullException.ThrowIfNullOrEmpty(appId);
+            ArgumentException.ThrowIfNullOrEmpty(appId);
 
-            ISettingService.IfEnvEmptySetDefault(ref env);
-
-            var history = await _configService.GetPublishTimelineHistoryAsync(appId, env);
+            var history = await _configService.GetPublishTimelineHistoryAsync(appId, env.Value);
 
             history = history.OrderByDescending(x => x.Version).ToList();
 
-            var vms = history.Select(x => new ApiPublishTimelineVM
-            {
-                Id = x.Id,
-                Version = x.Version,
-                Log = x.Log,
-                PublishTime = x.PublishTime,
-                PublishUserId = x.PublishUserId,
-                Env = x.Env
-            });
+            var vms = history.Select(x => x.ToApiPublishTimelimeVM());
 
             return Json(vms);
         }

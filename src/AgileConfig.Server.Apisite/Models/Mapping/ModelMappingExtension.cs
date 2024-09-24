@@ -1,12 +1,14 @@
 ﻿using AgileConfig.Server.Data.Entity;
 using System;
+using AgileConfig.Server.Apisite.Controllers.api.Models;
+using Google.Protobuf.WellKnownTypes;
 
 namespace AgileConfig.Server.Apisite.Models.Mapping
 {
     /// <summary>
-    /// Do not ask me why not use AutoMapper, I don't know. Just like mannual mapping, it's simple and clear.
+    /// Do not ask me why not use AutoMapper, I don't know. Just like manual mapping, it's simple and clear.
     /// </summary>
-    public static class ModelMappingExtension
+    public static class AppExtension
     {
         public static AppVM ToAppVM(this App app)
         {
@@ -53,6 +55,29 @@ namespace AgileConfig.Server.Apisite.Models.Mapping
             return vm;
         }
 
+        public static ApiAppVM ToApiAppVM(this App vm)
+        {
+            if (vm == null)
+            {
+                return null;
+            }
+
+            return new ApiAppVM
+            {
+                Id = vm.Id,
+                Name = vm.Name,
+                Secret = vm.Secret,
+                Inheritanced = vm.Type == AppType.Inheritance,
+                Enabled = vm.Enabled,
+                AppAdmin = vm.AppAdmin,
+                Group = vm.Group,
+                CreateTime = vm.CreateTime
+            };
+        }
+    }
+
+    public static class AppVMExtension
+    {
         public static App ToApp(this AppVM vm)
         {
             if (vm == null)
@@ -93,6 +118,70 @@ namespace AgileConfig.Server.Apisite.Models.Mapping
             }
 
             return app;
+        }
+
+        public static ApiAppVM ToApiAppVM(this AppVM vm)
+        {
+            if (vm == null)
+            {
+                return null;
+            }
+
+            return new ApiAppVM
+            {
+                Id = vm.Id,
+                Name = vm.Name,
+                Secret = vm.Secret,
+                Inheritanced = vm.Inheritanced,
+                Enabled = vm.Enabled,
+                InheritancedApps = vm.inheritancedApps,
+                AppAdmin = vm.AppAdmin,
+                Group = vm.Group,
+                CreateTime = vm.CreateTime
+            };
+        }
+    }
+
+    public static class PublishTimelineExtension
+    {
+        public static ApiPublishTimelineVM ToApiPublishTimelimeVM(this PublishTimeline timeline)
+        {
+            if (timeline == null)
+            {
+                return null;
+            }
+
+            return new ApiPublishTimelineVM
+            {
+                Id = timeline.Id,
+                Version = timeline.Version,
+                AppId = timeline.AppId,
+                Log = timeline.Log,
+                PublishTime = timeline.PublishTime,
+                PublishUserId = timeline.PublishUserId,
+                Env = timeline.Env
+            };
+        }
+    }
+
+    public static class ApiAppVMExtension
+    {
+        public static AppVM ToAppVM(this ApiAppVM vm)
+        {
+            if (vm == null)
+            {
+                return null;
+            }
+
+            return new AppVM
+            {
+                Id = vm.Id,
+                Name = vm.Name,
+                Secret = vm.Secret,
+                AppAdmin = vm.AppAdmin,
+                Inheritanced = vm.Inheritanced,
+                Group = vm.Group
+            };
         }
     }
 }
