@@ -10,6 +10,7 @@ using Microsoft.Extensions.Caching.Memory;
 using AgileConfig.Server.Apisite.Controllers.api.Models;
 using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.Apisite.Metrics;
+using AgileConfig.Server.Apisite.Models;
 
 namespace ApiSiteTests;
 
@@ -59,10 +60,6 @@ public class TestApiConfigController
             .ReturnsAsync(newConfigs);
 
         IMemoryCache memoryCache = null;
-        var remoteNodeProxy = new Mock<IRemoteServerNodeProxy>();
-        var serverNodeService = new Mock<IServerNodeService>();
-        var sysLogService = new Mock<ISysLogService>();
-        var appBasicAuthService = new Mock<IAppBasicAuthService>();
         var userSErvice = new Mock<IUserService>();
         var eventBus = new Mock<ITinyEventBus>();
         var meterService = new Mock<IMeterService>();
@@ -70,11 +67,11 @@ public class TestApiConfigController
         var ctrl = new ConfigController(
             configService.Object,
             appService.Object,
-            userSErvice.Object,
-            memoryCache, eventBus.Object,
-            meterService.Object
+            memoryCache,
+            meterService.Object,
+            new AgileConfig.Server.Apisite.Controllers.ConfigController(configService.Object, appService.Object, userSErvice.Object, eventBus.Object)
             );
-        var act = await ctrl.GetAppConfig("001", "DEV");
+        var act = await ctrl.GetAppConfig("001", new EnvString() { Value = "DEV" });
 
         Assert.IsNotNull(act);
         Assert.IsNotNull(act.Value);
@@ -94,11 +91,11 @@ public class TestApiConfigController
         ctrl = new ConfigController(
             configService.Object,
             appService.Object,
-            userSErvice.Object,
-            memoryCache, eventBus.Object,
-            meterService.Object
+            memoryCache, 
+            meterService.Object,
+            new AgileConfig.Server.Apisite.Controllers.ConfigController(configService.Object, appService.Object, userSErvice.Object, eventBus.Object)
             );
-        act = await ctrl.GetAppConfig("001", "DEV");
+        act = await ctrl.GetAppConfig("001", new EnvString() { Value = "DEV" });
 
         Assert.IsNotNull(act);
         Assert.IsNull(act.Value);

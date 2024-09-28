@@ -7,7 +7,6 @@ using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Apisite.Metrics;
 using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Apisite.Models.Mapping;
-using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
