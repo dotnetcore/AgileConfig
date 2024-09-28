@@ -3,7 +3,7 @@ using AgileConfig.Server.Data.Entity;
 
 namespace AgileConfig.Server.Apisite.Controllers.api.Models
 {
-    public class ServiceInfoVM
+    public class ApiServiceInfoVM
     {
         public string ServiceId { get; set; } = "";
 
@@ -20,6 +20,6 @@ namespace AgileConfig.Server.Apisite.Controllers.api.Models
     
     public class QueryServiceInfoResultVM
     {
-        public List<ServiceInfoVM> Data { get; set; }
+        public List<ApiServiceInfoVM> Data { get; set; }
     }
 }

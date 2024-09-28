@@ -1,5 +1,8 @@
 ﻿using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.Apisite.Controllers.api.Models;
+using System.Collections.Generic;
+using System;
+using Newtonsoft.Json;
 
 namespace AgileConfig.Server.Apisite.Models.Mapping
 {
@@ -112,6 +115,37 @@ namespace AgileConfig.Server.Apisite.Models.Mapping
                 LastEchoTime = node.LastEchoTime,
                 Status = node.Status
             };
+        }
+    }
+
+    public static class ServiceInfoExtension
+    {
+        public static ApiServiceInfoVM ToApiServiceInfoVM(this ServiceInfo serviceInfo)
+        {
+            if (serviceInfo == null)
+            {
+                return null;
+            }
+
+            var vm = new ApiServiceInfoVM
+            {
+                ServiceId = serviceInfo.ServiceId,
+                ServiceName = serviceInfo.ServiceName,
+                Ip = serviceInfo.Ip,
+                Port = serviceInfo.Port,
+                MetaData = new List<string>(),
+                Status = serviceInfo.Status
+            };
+
+            try
+            {
+                vm.MetaData = JsonConvert.DeserializeObject<List<string>>(serviceInfo.MetaData);
+            }
+            catch
+            {
+            }
+
+            return vm;
         }
     }
 
