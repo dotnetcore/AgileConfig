@@ -17,4 +17,5 @@ namespace AgileConfig.Server.Apisite.Models
         public NodeStatus Status { get; set; }
         public DateTime? LastEchoTime { get; set; }
     }
+
 }

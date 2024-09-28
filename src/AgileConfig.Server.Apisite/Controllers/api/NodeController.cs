@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AgileConfig.Server.Apisite.Models.Mapping;
 
 namespace AgileConfig.Server.Apisite.Controllers.api
 {
@@ -43,13 +44,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         {
             var nodes = await _serverNodeService.GetAllNodesAsync();
 
-            var vms = nodes.Select(x => new ApiNodeVM
-            {
-                Address = x.Id,
-                Remark = x.Remark,
-                LastEchoTime = x.LastEchoTime,
-                Status = x.Status
-            });
+            var vms = nodes.Select(x => x.ToApiNodeVM());
 
             return Json(vms);
         }
@@ -77,16 +72,10 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
             var ctrl = new ServerNodeController(_serverNodeService, _sysLogService, _remoteServerNodeProxy, _tinyEventBus);
             ctrl.ControllerContext.HttpContext = HttpContext;
-            var result = (await ctrl.Add(new ServerNodeVM
-            {
-                Address = model.Address,
-                Remark = model.Remark,
-                LastEchoTime = model.LastEchoTime,
-                Status = model.Status
-            })) as JsonResult;
+            var result = (await ctrl.Add(model.ToServerNodeVM())) as JsonResult;
 
-            dynamic obj = result.Value;
-            if (obj.success == true)
+            dynamic obj = result?.Value;
+            if (obj?.success == true)
             {
                 return Created("", "");
             }
@@ -94,7 +83,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             Response.StatusCode = 400;
             return Json(new
             {
-                obj.message
+                obj?.message
             });
         }
 
@@ -112,8 +101,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             ctrl.ControllerContext.HttpContext = HttpContext;
             var result = (await ctrl.Delete(new ServerNodeVM { Address = address })) as JsonResult;
 
-            dynamic obj = result.Value;
-            if (obj.success == true)
+            dynamic obj = result?.Value;
+            if (obj?.success == true)
             {
                 return NoContent();
             }
@@ -121,7 +110,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             Response.StatusCode = 400;
             return Json(new
             {
-                obj.message
+                obj?.message
             });
         }
 
