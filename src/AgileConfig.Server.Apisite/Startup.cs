@@ -67,7 +67,7 @@ namespace AgileConfig.Server.Apisite
             services.AddMemoryCache();
 
             services.AddCors();
-            services.AddMvc().AddRazorRuntimeCompilation();
+            services.AddMvc().AddRazorRuntimeCompilation().AddControllersAsServices();
 
             if (Appsettings.IsPreviewMode)
             {

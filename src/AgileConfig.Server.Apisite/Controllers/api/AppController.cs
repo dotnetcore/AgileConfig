@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AgileConfig.Server.Apisite.Models.Mapping;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace AgileConfig.Server.Apisite.Controllers.api
 {
@@ -57,19 +58,22 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiAppVM>> GetById(string id)
         {
-            var result = (await _appController.Get(id)) as JsonResult;
-            dynamic obj = result.Value;
+            var actionResult = await _appController.Get(id);
+            var status = actionResult as IStatusCodeActionResult;
 
-            if (obj.success)
+            var result = actionResult as JsonResult;
+            dynamic obj = result?.Value;
+
+            if (obj?.success ?? false)
             {
                 AppVM appVM = obj.data;
                 return Json(appVM.ToApiAppVM());
             }
 
-            Response.StatusCode = 400;
+            Response.StatusCode = status.StatusCode.Value;
             return Json(new
             {
-                obj.message
+                obj?.message
             });
         }
 
@@ -98,9 +102,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
             var result = (await _appController.Add(model.ToAppVM())) as JsonResult;
 
-            dynamic obj = result.Value;
+            dynamic obj = result?.Value;
 
-            if (obj.success == true)
+            if (obj?.success == true)
             {
                 return Created("/api/app/" + obj.data.Id, "");
             }
@@ -108,7 +112,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             Response.StatusCode = 400;
             return Json(new
             {
-                obj.message
+                obj?.message
             });
         }
 
@@ -137,18 +141,20 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             _appController.ControllerContext.HttpContext = HttpContext;
 
             model.Id = id;
-            var result = (await _appController.Edit(model.ToAppVM())) as JsonResult;
+            var actionResult = await _appController.Edit(model.ToAppVM());
+            var status = actionResult as IStatusCodeActionResult;
+            var result = actionResult as JsonResult;
 
-            dynamic obj = result.Value;
-            if (obj.success == true)
+            dynamic obj = result?.Value;
+            if (obj?.success ?? false)
             {
                 return Ok();
             }
 
-            Response.StatusCode = 400;
+            Response.StatusCode = status.StatusCode.Value;
             return Json(new
             {
-                obj.message
+                obj?.message
             });
         }
 
@@ -164,18 +170,20 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         {
             _appController.ControllerContext.HttpContext = HttpContext;
 
-            var result = (await _appController.Delete(id)) as JsonResult;
+            var actionResult = await _appController.Delete(id);
+            var status = actionResult as IStatusCodeActionResult;
+            var result = actionResult as JsonResult;
 
-            dynamic obj = result.Value;
-            if (obj.success == true)
+            dynamic obj = result?.Value;
+            if (obj?.success ?? false)
             {
                 return NoContent();
             }
 
-            Response.StatusCode = 400;
+            Response.StatusCode = status.StatusCode.Value;
             return Json(new
             {
-                obj.message
+                obj?.message
             });
         }
 
@@ -192,21 +200,23 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         {
             _configController.ControllerContext.HttpContext = HttpContext;
 
-            var result = (await _configController.Publish(new PublishLogVM()
+            var actionResult = await _configController.Publish(new PublishLogVM()
             {
                 AppId = appId
-            }, env)) as JsonResult;
+            }, env);
+            var status = actionResult as IStatusCodeActionResult;
+            var result = actionResult as JsonResult;
 
-            dynamic obj = result.Value;
-            if (obj.success == true)
+            dynamic obj = result?.Value;
+            if (obj?.success ?? false)
             {
                 return Ok();
             }
 
-            Response.StatusCode = 400;
+            Response.StatusCode = status.StatusCode.Value;
             return Json(new
             {
-                obj.message
+                obj?.message
             });
         }
 
@@ -244,18 +254,20 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         {
             _configController.ControllerContext.HttpContext = HttpContext;
 
-            var result = (await _configController.Rollback(historyId, env)) as JsonResult;
+            var actionResult = await _configController.Rollback(historyId, env);
+            var status = actionResult as IStatusCodeActionResult;
+            var result = actionResult as JsonResult;
 
-            dynamic obj = result.Value;
-            if (obj.success == true)
+            dynamic obj = result?.Value;
+            if (obj?.success ?? false)
             {
                 return Ok();
             }
 
-            Response.StatusCode = 400;
+            Response.StatusCode = status.StatusCode.Value;
             return Json(new
             {
-                obj.message
+                obj?.message
             });
         }
 

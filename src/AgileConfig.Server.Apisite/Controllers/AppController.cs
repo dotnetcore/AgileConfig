@@ -333,7 +333,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         [HttpGet]
         public async Task<IActionResult> Get(string id)
         {
-            ArgumentNullException.ThrowIfNullOrEmpty(id);
+            ArgumentException.ThrowIfNullOrEmpty(id);
 
             var app = await _appService.GetAsync(id);
             var vm = app.ToAppVM();
@@ -342,12 +342,19 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 vm.inheritancedApps = (await _appService.GetInheritancedAppsAsync(id)).Select(x => x.Id).ToList();
             }
+            else
+            {
+                return NotFound(new
+                {
+                    success = false,
+                    message = "未找到对应的应用程序。"
+                });
+            }
 
             return Json(new
             {
-                success = app != null,
-                data = vm,
-                message = app == null ? "未找到对应的应用程序。" : ""
+                success = true,
+                data = vm
             });
         }
 
@@ -360,12 +367,12 @@ namespace AgileConfig.Server.Apisite.Controllers
         [HttpPost]
         public async Task<IActionResult> DisableOrEanble(string id)
         {
-            ArgumentNullException.ThrowIfNullOrEmpty(id);
+            ArgumentException.ThrowIfNullOrEmpty(id);
 
             var app = await _appService.GetAsync(id);
             if (app == null)
             {
-                return Json(new
+                return NotFound(new
                 {
                     success = false,
                     message = "未找到对应的应用程序。"
@@ -392,12 +399,12 @@ namespace AgileConfig.Server.Apisite.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(string id)
         {
-            ArgumentNullException.ThrowIfNullOrEmpty(id);
+            ArgumentException.ThrowIfNullOrEmpty(id);
 
             var app = await _appService.GetAsync(id);
             if (app == null)
             {
-                return Json(new
+                return NotFound(new
                 {
                     success = false,
                     message = "未找到对应的应用程序。"
@@ -472,7 +479,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUserAppAuth(string appId)
         {
-            ArgumentNullException.ThrowIfNullOrEmpty(appId);
+            ArgumentException.ThrowIfNullOrEmpty(appId);
 
             var result = new AppAuthVM
             {
