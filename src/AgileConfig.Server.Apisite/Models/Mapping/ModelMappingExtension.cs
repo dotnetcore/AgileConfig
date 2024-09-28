@@ -1,7 +1,5 @@
 ﻿using AgileConfig.Server.Data.Entity;
-using System;
 using AgileConfig.Server.Apisite.Controllers.api.Models;
-using Google.Protobuf.WellKnownTypes;
 
 namespace AgileConfig.Server.Apisite.Models.Mapping
 {
@@ -76,72 +74,6 @@ namespace AgileConfig.Server.Apisite.Models.Mapping
         }
     }
 
-    public static class AppVMExtension
-    {
-        public static App ToApp(this AppVM vm)
-        {
-            if (vm == null)
-            {
-                return null;
-            }
-
-            var app = new App();
-            app.Id = vm.Id;
-            app.Name = vm.Name;
-            app.Secret = vm.Secret;
-            app.Enabled = vm.Enabled;
-            app.Type = vm.Inheritanced ? AppType.Inheritance : AppType.PRIVATE;
-            app.AppAdmin = vm.AppAdmin;
-            app.Group = vm.Group;
-            app.CreateTime = vm.CreateTime;
-
-            return app;
-        }
-
-        public static App ToApp(this AppVM vm, App app)
-        {
-            if (vm == null)
-            {
-                return null;
-            }
-
-            app.Id = vm.Id;
-            app.Name = vm.Name;
-            app.Secret = vm.Secret;
-            app.Enabled = vm.Enabled;
-            app.Type = vm.Inheritanced ? AppType.Inheritance : AppType.PRIVATE;
-            app.AppAdmin = vm.AppAdmin;
-            app.Group = vm.Group;
-            if (vm.CreateTime > DateTime.MinValue)
-            {
-                app.CreateTime = vm.CreateTime;
-            }
-
-            return app;
-        }
-
-        public static ApiAppVM ToApiAppVM(this AppVM vm)
-        {
-            if (vm == null)
-            {
-                return null;
-            }
-
-            return new ApiAppVM
-            {
-                Id = vm.Id,
-                Name = vm.Name,
-                Secret = vm.Secret,
-                Inheritanced = vm.Inheritanced,
-                Enabled = vm.Enabled,
-                InheritancedApps = vm.inheritancedApps,
-                AppAdmin = vm.AppAdmin,
-                Group = vm.Group,
-                CreateTime = vm.CreateTime
-            };
-        }
-    }
-
     public static class PublishTimelineExtension
     {
         public static ApiPublishTimelineVM ToApiPublishTimelimeVM(this PublishTimeline timeline)
@@ -164,24 +96,23 @@ namespace AgileConfig.Server.Apisite.Models.Mapping
         }
     }
 
-    public static class ApiAppVMExtension
+    public static class ServerNodeExtension
     {
-        public static AppVM ToAppVM(this ApiAppVM vm)
+        public static ApiNodeVM ToApiNodeVM(this ServerNode node)
         {
-            if (vm == null)
+            if (node == null)
             {
                 return null;
             }
 
-            return new AppVM
+            return new  ApiNodeVM
             {
-                Id = vm.Id,
-                Name = vm.Name,
-                Secret = vm.Secret,
-                AppAdmin = vm.AppAdmin,
-                Inheritanced = vm.Inheritanced,
-                Group = vm.Group
+                Address = node.Id,
+                Remark = node.Remark,
+                LastEchoTime = node.LastEchoTime,
+                Status = node.Status
             };
         }
     }
+
 }
