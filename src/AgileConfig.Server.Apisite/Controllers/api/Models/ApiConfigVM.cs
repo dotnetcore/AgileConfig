@@ -52,4 +52,25 @@ namespace AgileConfig.Server.Apisite.Controllers.api.Models
         /// </summary>
         public string Description { get; set; }
     }
+
+    public static class ApiConfigVMExtension
+    {
+        public static ConfigVM ToConfigVM(this ApiConfigVM model)
+        {
+            if (model is null)
+            {
+                return null;
+            }
+
+            return new ConfigVM()
+            {
+                Id = model.Id,
+                AppId = model.AppId,
+                Group = model.Group,
+                Key = model.Key,
+                Value = model.Value,
+                Description = model.Description
+            };
+        }
+    }
 }

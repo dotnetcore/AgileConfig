@@ -6,6 +6,7 @@ using AgileConfig.Server.Apisite.Controllers.api.Models;
 using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Apisite.Metrics;
 using AgileConfig.Server.Apisite.Models;
+using AgileConfig.Server.Apisite.Models.Mapping;
 using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
@@ -21,26 +22,23 @@ namespace AgileConfig.Server.Apisite.Controllers.api
     {
         private readonly IConfigService _configService;
         private readonly IAppService _appService;
-        private readonly IUserService _userService;
         private readonly IMemoryCache _cacheMemory;
-        private readonly ITinyEventBus _tinyEventBus;
         private readonly IMeterService _meterService;
+        private readonly Controllers.ConfigController _configController;
 
         public ConfigController(
             IConfigService configService,
             IAppService appService,
-            IUserService userService,
             IMemoryCache cacheMemory,
-            ITinyEventBus tinyEventBus,
-            IMeterService meterService
+            IMeterService meterService,
+            Controllers.ConfigController configController
             )
         {
             _configService = configService;
             _appService = appService;
-            _userService = userService;
             _cacheMemory = cacheMemory;
-            _tinyEventBus = tinyEventBus;
             _meterService = meterService;
+            _configController = configController;
         }
 
         /// <summary>
@@ -52,11 +50,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <returns></returns>
         [TypeFilter(typeof(AppBasicAuthenticationAttribute))]
         [HttpGet("app/{appId}")]
-        public async Task<ActionResult<List<ApiConfigVM>>> GetAppConfig(string appId, [FromQuery] string env)
+        public async Task<ActionResult<List<ApiConfigVM>>> GetAppConfig(string appId, [FromQuery] EnvString env)
         {
-            ArgumentNullException.ThrowIfNullOrEmpty(appId);
-
-            ISettingService.IfEnvEmptySetDefault(ref env);
+            ArgumentException.ThrowIfNullOrEmpty(appId);
 
             var app = await _appService.GetAsync(appId);
             if (!app.Enabled)
@@ -64,7 +60,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 return NotFound();
             }
 
-            var cacheKey = $"ConfigController_APPCONFIG_{appId}_{env}";
+            var cacheKey = $"ConfigController_AppConfig_{appId}_{env.Value}";
             List<ApiConfigVM> configs = null;
             _cacheMemory?.TryGetValue(cacheKey, out configs);
             if (configs != null)
@@ -72,21 +68,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 return configs;
             }
 
-            var appConfigs = await _configService.GetPublishedConfigsByAppIdWithInheritanced(appId, env);
-            var vms = appConfigs.Select(c =>
-            {
-                return new ApiConfigVM()
-                {
-                    Id = c.Id,
-                    AppId = c.AppId,
-                    Group = c.Group,
-                    Key = c.Key,
-                    Value = c.Value,
-                    Status = c.Status,
-                    OnlineStatus = c.OnlineStatus,
-                    EditStatus = c.EditStatus
-                };
-            }).ToList();
+            var appConfigs = await _configService.GetPublishedConfigsByAppIdWithInheritanced(appId, env.Value);
+            var vms = appConfigs.Select(x => x.ToApiConfigVM()).ToList();
 
             //增加5s的缓存，防止同一个app同时启动造成db的压力过大
             var cacheOp = new MemoryCacheEntryOptions()
@@ -106,26 +89,13 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <returns></returns>
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [HttpGet()]
-        public async Task<ActionResult<List<ApiConfigVM>>> GetConfigs(string appId, string env)
+        public async Task<ActionResult<List<ApiConfigVM>>> GetConfigs(string appId, [FromQuery] EnvString env)
         {
-            ArgumentNullException.ThrowIfNullOrEmpty(appId);
+            ArgumentException.ThrowIfNullOrEmpty(appId);
 
-            ISettingService.IfEnvEmptySetDefault(ref env);
+            var configs = await _configService.GetByAppIdAsync(appId, env.Value);
 
-            var configs = await _configService.GetByAppIdAsync(appId, env);
-
-            return configs.Select(config => new ApiConfigVM()
-            {
-                Id = config.Id,
-                AppId = config.AppId,
-                Group = config.Group,
-                Key = config.Key,
-                Value = config.Value,
-                Status = config.Status,
-                Description = config.Description,
-                OnlineStatus = config.OnlineStatus,
-                EditStatus = config.EditStatus
-            }).ToList();
+            return configs.Select(x => x.ToApiConfigVM()).ToList();
         }
 
         /// <summary>
@@ -136,30 +106,17 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <returns></returns>
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [HttpGet("{id}")]
-        public async Task<ActionResult<ApiConfigVM>> GetConfig(string id, string env)
+        public async Task<ActionResult<ApiConfigVM>> GetConfig(string id, [FromQuery] EnvString env)
         {
-            ArgumentNullException.ThrowIfNullOrEmpty(id);
+            ArgumentException.ThrowIfNullOrEmpty(id);
 
-            ISettingService.IfEnvEmptySetDefault(ref env);
-
-            var config = await _configService.GetAsync(id, env);
+            var config = await _configService.GetAsync(id, env.Value);
             if (config == null || config.Status == ConfigStatus.Deleted)
             {
                 return NotFound();
             }
 
-            return new ApiConfigVM()
-            {
-                Id = config.Id,
-                AppId = config.AppId,
-                Group = config.Group,
-                Key = config.Key,
-                Value = config.Value,
-                Status = config.Status,
-                Description = config.Description,
-                OnlineStatus = config.OnlineStatus,
-                EditStatus = config.EditStatus
-            };
+            return config.ToApiConfigVM();
         }
 
         /// <summary>
@@ -185,27 +142,13 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 });
             }
 
-            var ctrl = new Controllers.ConfigController(
-                _configService,
-                _appService,
-                _userService,
-                _tinyEventBus
-                );
-            ctrl.ControllerContext.HttpContext = HttpContext;
+            _configController.ControllerContext.HttpContext = HttpContext;
 
-            var result = (await ctrl.Add(new ConfigVM()
-            {
-                Id = model.Id,
-                AppId = model.AppId,
-                Group = model.Group,
-                Key = model.Key,
-                Value = model.Value,
-                Description = model.Description
-            }, env)) as JsonResult;
+            var result = (await _configController.Add(model.ToConfigVM(), env)) as JsonResult;
 
-            dynamic obj = result.Value;
+            dynamic obj = result?.Value;
 
-            if (obj.success == true)
+            if (obj?.success == true)
             {
                 return Created("/api/config/" + obj.data.Id, "");
             }
@@ -213,7 +156,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             Response.StatusCode = 400;
             return Json(new
             {
-                obj.message
+                obj?.message
             });
         }
 
@@ -240,27 +183,12 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 });
             }
 
-            var ctrl = new Controllers.ConfigController(
-                _configService,
-                _appService,
-                _userService,
-                _tinyEventBus
-                );
-            ctrl.ControllerContext.HttpContext = HttpContext;
-
+            _configController.ControllerContext.HttpContext = HttpContext;
             model.Id = id;
-            var result = (await ctrl.Edit(new ConfigVM()
-            {
-                Id = model.Id,
-                AppId = model.AppId,
-                Group = model.Group,
-                Key = model.Key,
-                Value = model.Value,
-                Description = model.Description
-            }, env)) as JsonResult;
+            var result = (await _configController.Edit(model.ToConfigVM(), env)) as JsonResult;
 
-            dynamic obj = result.Value;
-            if (obj.success == true)
+            dynamic obj = result?.Value;
+            if (obj?.success == true)
             {
                 return Ok();
             }
@@ -268,7 +196,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             Response.StatusCode = 400;
             return Json(new
             {
-                obj.message
+                obj?.message
             });
         }
 
@@ -284,18 +212,12 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id, EnvString env)
         {
-            var ctrl = new Controllers.ConfigController(
-                _configService,
-                _appService,
-                _userService,
-                _tinyEventBus
-                );
-            ctrl.ControllerContext.HttpContext = HttpContext;
+            _configController.ControllerContext.HttpContext = HttpContext;
 
-            var result = (await ctrl.Delete(id, env)) as JsonResult;
+            var result = (await _configController.Delete(id, env)) as JsonResult;
 
-            dynamic obj = result.Value;
-            if (obj.success == true)
+            dynamic obj = result?.Value;
+            if (obj?.success == true)
             {
                 return NoContent();
             }
@@ -303,7 +225,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             Response.StatusCode = 400;
             return Json(new
             {
-                obj.message
+                obj?.message
             });
         }
 
