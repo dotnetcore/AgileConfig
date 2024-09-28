@@ -149,4 +149,29 @@ namespace AgileConfig.Server.Apisite.Models.Mapping
         }
     }
 
+    public static class ConfigExtension
+    {
+        public static ApiConfigVM ToApiConfigVM(this Config config)
+        {
+            if (config == null)
+            {
+                return null;
+            }
+
+            var vm = new ApiConfigVM()
+            {
+                Id = config.Id,
+                AppId = config.AppId,
+                Group = config.Group,
+                Key = config.Key,
+                Value = config.Value,
+                Status = config.Status,
+                OnlineStatus = config.OnlineStatus,
+                EditStatus = config.EditStatus
+            };
+
+            return vm;
+        }
+    }
+
 }

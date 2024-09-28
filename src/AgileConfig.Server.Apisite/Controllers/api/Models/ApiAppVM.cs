@@ -60,7 +60,8 @@ namespace AgileConfig.Server.Apisite.Controllers.api.Models
                 Secret = vm.Secret,
                 AppAdmin = vm.AppAdmin,
                 Inheritanced = vm.Inheritanced,
-                Group = vm.Group
+                Group = vm.Group,
+                Enabled = vm.Enabled.GetValueOrDefault()
             };
         }
     }
