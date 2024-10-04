@@ -4,8 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using AgileConfig.Server.Data.Abstraction;
-using static FreeSql.Internal.GlobalFilter;
 
 namespace AgileConfig.Server.Service
 {
@@ -27,7 +28,7 @@ namespace AgileConfig.Server.Service
             IUserRepository userRepository,
             IUserAppAuthRepository userAppAuthRepository,
             ISettingService settingService
-            )
+        )
         {
             _appRepository = repository;
             _appInheritancedRepository = appInheritancedRepository;
@@ -44,6 +45,7 @@ namespace AgileConfig.Server.Service
 
             return true;
         }
+
         public async Task<bool> AddAsync(App app, List<AppInheritanced> appInheritanceds)
         {
             await _appRepository.InsertAsync(app);
@@ -54,13 +56,14 @@ namespace AgileConfig.Server.Service
 
             return true;
         }
+
         public async Task<bool> DeleteAsync(App app)
         {
             app = await _appRepository.GetAsync(app.Id);
             if (app != null)
             {
                 await _appRepository.DeleteAsync(app);
-                    
+
                 var envs = await _settingService.GetEnvironmentList();
                 var updatedConfigIds = new List<string>();
                 var updatedConfigPublishedIds = new List<string>();
@@ -71,7 +74,8 @@ namespace AgileConfig.Server.Service
                     using var configPublishedRepository = _configPublishedRepositoryAccessor(env);
 
                     //怕有的同学误删app导致要恢复，所以保留配置项吧。
-                    var configs = await configRepository.QueryAsync(x => x.AppId == app.Id && x.Status == ConfigStatus.Enabled);
+                    var configs =
+                        await configRepository.QueryAsync(x => x.AppId == app.Id && x.Status == ConfigStatus.Enabled);
                     var waitDeleteConfigs = new List<Config>();
                     foreach (var item in configs)
                     {
@@ -80,14 +84,16 @@ namespace AgileConfig.Server.Service
                             // 因为根据 env 构造的 provider 最终可能都定位到 default provider 上去，所以可能重复更新数据行，这里进行判断以下。
                             continue;
                         }
+
                         item.Status = ConfigStatus.Deleted;
                         waitDeleteConfigs.Add(item);
                         updatedConfigIds.Add(item.Id);
                     }
+
                     await configRepository.UpdateAsync(waitDeleteConfigs);
                     //删除发布的配置项
                     var publishedConfigs = await configPublishedRepository
-                        .QueryAsync(x => x.AppId == app.Id && x.Status == ConfigStatus.Enabled)
+                            .QueryAsync(x => x.AppId == app.Id && x.Status == ConfigStatus.Enabled)
                         ;
                     var waitDeletePublishedConfigs = new List<ConfigPublished>();
                     foreach (var item in publishedConfigs)
@@ -97,10 +103,12 @@ namespace AgileConfig.Server.Service
                             // 因为根据 env 构造的 provider 最终可能都定位到 default provider 上去，所以可能重复更新数据行，这里进行判断以下。
                             continue;
                         }
+
                         item.Status = ConfigStatus.Deleted;
                         waitDeletePublishedConfigs.Add(item);
                         updatedConfigPublishedIds.Add(item.Id);
                     }
+
                     await configPublishedRepository.UpdateAsync(waitDeletePublishedConfigs);
                 }
             }
@@ -127,6 +135,109 @@ namespace AgileConfig.Server.Service
         public Task<List<App>> GetAllAppsAsync()
         {
             return _appRepository.AllAsync();
+        }
+
+        public async Task<(List<App> Apps, long Count)> SearchAsync(string id, string name, string group,
+            string sortField, string ascOrDesc,
+            int current, int pageSize)
+        {
+            Expression<Func<App, bool>> exp = app => true;
+
+            if (!string.IsNullOrWhiteSpace(id))
+            {
+                exp = exp.And(a => a.Id.Contains(id));
+            }
+
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                exp = exp.And(a => a.Name.Contains(name));
+            }
+
+            if (!string.IsNullOrWhiteSpace(group))
+            {
+                exp = exp.And(a => a.Group == group);
+            }
+
+            var apps = await _appRepository.QueryPageAsync(exp, current, pageSize, sortField,
+                ascOrDesc.StartsWith("asc") ? "ASC" : "DESC");
+            var count = await _appRepository.CountAsync(exp);
+
+            return (apps, count);
+        }
+
+        public async Task<(List<GroupedApp> GroupedApps, long Count)> SearchGroupedAsync(string id, string name,
+            string group, string sortField, string ascOrDesc, int current,
+            int pageSize)
+        {
+            Expression<Func<App, bool>> exp = app => true;
+
+            if (!string.IsNullOrWhiteSpace(id))
+            {
+                exp = exp.And(a => a.Id.Contains(id));
+            }
+
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                exp = exp.And(a => a.Name.Contains(name));
+            }
+
+            if (!string.IsNullOrWhiteSpace(group))
+            {
+                exp = exp.And(a => a.Group == group);
+            }
+
+            var apps = await _appRepository.QueryAsync(exp);
+
+            var appGroups = apps.GroupBy(x => x.Group);
+            var appGroupList = new List<GroupedApp>();
+            foreach (var appGroup in appGroups)
+            {
+                var app = appGroup.First();
+                var firstGroup = new GroupedApp()
+                {
+                    App = app
+                };
+                var children = new List<GroupedApp>();
+                if (appGroup.Count() > 1)
+                {
+                    foreach (var item in appGroup)
+                    {
+                        if (firstGroup.App.Id != item.Id)
+                        {
+                            children.Add(new GroupedApp()
+                            {
+                                App = item
+                            });
+                        }
+                    }
+                }
+
+                if (children.Count > 0)
+                {
+                    firstGroup.Children = children;
+                }
+
+                appGroupList.Add(firstGroup);
+            }
+
+            var sortProperty = new Dictionary<string, PropertyInfo>()
+            {
+                { "id", typeof(App).GetProperty("Id") },
+                { "name", typeof(App).GetProperty("Name") },
+                { "group", typeof(App).GetProperty("Group") },
+                { "createTime", typeof(App).GetProperty("CreateTime") }
+            };
+
+            if (sortProperty.TryGetValue(sortField, out var propertyInfo))
+            {
+                appGroupList = ascOrDesc.StartsWith("asc")
+                    ? appGroupList.OrderBy(x => propertyInfo.GetValue(x.App, null)).ToList()
+                    : appGroupList.OrderByDescending(x => propertyInfo.GetValue(x.App, null)).ToList();
+            }
+
+            var page = appGroupList.Skip(current - 1 * pageSize).Take(pageSize).ToList();
+
+            return (page, appGroupList.Count);
         }
 
         public async Task<bool> UpdateAsync(App app)
@@ -217,6 +328,7 @@ namespace AgileConfig.Server.Service
             {
                 userIds = new List<string>();
             }
+
             foreach (var userId in userIds)
             {
                 userAppAuthList.Add(new UserAppAuth
@@ -227,7 +339,9 @@ namespace AgileConfig.Server.Service
                     Permission = permission
                 });
             }
-            var removeApps = await _userAppAuthRepository.QueryAsync(x => x.AppId == appId && x.Permission == permission);
+
+            var removeApps =
+                await _userAppAuthRepository.QueryAsync(x => x.AppId == appId && x.Permission == permission);
             await _userAppAuthRepository.DeleteAsync(removeApps);
             await _userAppAuthRepository.InsertAsync(userAppAuthList);
 
