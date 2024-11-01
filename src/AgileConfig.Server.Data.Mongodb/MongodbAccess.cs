@@ -65,6 +65,6 @@ public sealed class MongodbAccess<T>(string? connectionString) : MongodbAccess(c
     /// 获取 提供对MongoDB数据查询的Queryable
     /// </summary>
     /// <returns></returns>
-    public IMongoQueryable<T> MongoQueryable => Database.GetCollection<T>(CollectionName).AsQueryable(
+    public IQueryable<T> MongoQueryable => Database.GetCollection<T>(CollectionName).AsQueryable(
         new AggregateOptions { AllowDiskUse = true });
 }
