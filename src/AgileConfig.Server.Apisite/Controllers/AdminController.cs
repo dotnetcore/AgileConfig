@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
-using System.Dynamic;
 using AgileConfig.Server.Apisite.Utilites;
 using AgileConfig.Server.OIDC;
 using System.Collections.Generic;

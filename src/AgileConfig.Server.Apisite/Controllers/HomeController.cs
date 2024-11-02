@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Reflection;
 using AgileConfig.Server.Apisite.Utilites;
 using AgileConfig.Server.OIDC;
 
@@ -19,8 +20,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         public HomeController(
             ISettingService settingService,
             IUserService userService,
-            IPremissionService permissionService,
-            IOidcClient oidcClient
+            IPremissionService permissionService
             )
         {
             _settingService = settingService;
@@ -76,7 +76,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Sys()
         {
-            string appVer = System.Reflection.Assembly.GetAssembly(typeof(AgileConfig.Server.Apisite.Program)).GetName().Version.ToString();
+            string appVer = Assembly.GetAssembly(typeof(Program))?.GetName()?.Version?.ToString();
             string userName = this.GetCurrentUserName();
             if (string.IsNullOrEmpty(userName))
             {

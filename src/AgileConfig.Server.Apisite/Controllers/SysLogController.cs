@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Authorization;
@@ -32,10 +31,8 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             var pageList = await _sysLogService.SearchPage(appId, logType, startTime, endTime?.Date.AddDays(1), pageSize, current);
             var total = await _sysLogService.Count(appId, logType, startTime, endTime?.Date.AddDays(1));
-            var totalPages = total / pageSize;
             if ((total % pageSize) > 0)
             {
-                totalPages++;
             }
 
             return Json(new

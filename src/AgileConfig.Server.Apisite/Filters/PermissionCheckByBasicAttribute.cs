@@ -13,12 +13,12 @@ namespace AgileConfig.Server.Apisite.Filters
     /// <summary>
     /// 权限判断，用户信息从basic认证的头部取
     /// </summary>
-    public class PremissionCheckByBasicAttribute : PremissionCheckAttribute
+    public class PermissionCheckByBasicAttribute : PermissionCheckAttribute
     {
         protected IAdmBasicAuthService _basicAuthService;
         protected IUserService _userService;
 
-        public PremissionCheckByBasicAttribute(
+        public PermissionCheckByBasicAttribute(
             IPremissionService premissionService, 
             IConfigService configService,
             IAdmBasicAuthService basicAuthService, 

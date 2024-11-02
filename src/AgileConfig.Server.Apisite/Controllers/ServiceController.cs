@@ -37,7 +37,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         {
             if (model == null)
             {
-                throw new ArgumentNullException("model");
+                throw new ArgumentNullException(nameof(model));
             }
 
             if ((await _serviceInfoService.GetByServiceIdAsync(model.ServiceId)) != null)

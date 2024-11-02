@@ -83,7 +83,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <param name="model">应用模型</param>
         /// <returns></returns>
         [ProducesResponseType(201)]
-        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "App.Add", Functions.App_Add })]
+        [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "App.Add", Functions.App_Add })]
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] ApiAppVM model)
         {
@@ -123,7 +123,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <param name="model">编辑后的应用模型</param>
         /// <returns></returns>
         [ProducesResponseType(200)]
-        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "App.Edit", Functions.App_Edit })]
+        [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "App.Edit", Functions.App_Edit })]
         [HttpPut("{id}")]
         public async Task<IActionResult> Edit(string id, [FromBody] ApiAppVM model)
         {
@@ -164,7 +164,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <param name="id">应用id</param>
         /// <returns></returns>
         [ProducesResponseType(204)]
-        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "App.Delete", Functions.App_Delete })]
+        [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "App.Delete", Functions.App_Delete })]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
@@ -194,7 +194,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <param name="env">环境</param>
         /// <returns></returns>
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
-        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Publish_API", Functions.Config_Publish })]
+        [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "Config.Publish_API", Functions.Config_Publish })]
         [HttpPost("publish")]
         public async Task<IActionResult> Publish(string appId, EnvString env)
         {
@@ -248,7 +248,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <param name="env">环境</param>
         /// <returns></returns>
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
-        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Rollback_API", Functions.Config_Publish })]
+        [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "Config.Rollback_API", Functions.Config_Publish })]
         [HttpPost("rollback")]
         public async Task<IActionResult> Rollback(string historyId, EnvString env)
         {

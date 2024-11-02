@@ -13,7 +13,7 @@ using AgileConfig.Server.Data.Entity;
 
 namespace AgileConfig.Server.Apisite.Filters
 {
-    public class PremissionCheckAttribute : ActionFilterAttribute
+    public class PermissionCheckAttribute : ActionFilterAttribute
     {
         private static string GetEnvFromArgs(IDictionary<string, object> args, IConfigService configService)
         {
@@ -47,28 +47,28 @@ namespace AgileConfig.Server.Apisite.Filters
                         }
                     },
                     {
-                        "Config.AddRange", (args, premission, config) =>
+                        "Config.AddRange", (args, permission, config) =>
                         {
                             var model = args.ActionArguments["model"];
                             return (model as List<ConfigVM>)?.FirstOrDefault()?.AppId;
                         }
                     },
                     {
-                        "Config.EnvSync", (args, premission, config) =>
+                        "Config.EnvSync", (args, permission, config) =>
                         {
                             var appId = args.ActionArguments["appId"];
                             return appId?.ToString();
                         }
                     },
                     {
-                        "Config.Edit", (args, premission, config) =>
+                        "Config.Edit", (args, permission, config) =>
                         {
                             var model = args.ActionArguments["model"];
                             return (model as IAppIdModel)?.AppId;
                         }
                     },
                     {
-                        "Config.Delete", (args, premission, configService) =>
+                        "Config.Delete", (args, permission, configService) =>
                         {
                             var id = args.ActionArguments["id"];
                             var env = GetEnvFromArgs(args.ActionArguments, configService);
@@ -78,7 +78,7 @@ namespace AgileConfig.Server.Apisite.Filters
                         }
                     },
                     {
-                        "Config.DeleteSome", (args, premission, configService) =>
+                        "Config.DeleteSome", (args, permission, configService) =>
                         {
                             var ids = args.ActionArguments["ids"] as List<string>;
                             var env = GetEnvFromArgs(args.ActionArguments, configService);
@@ -88,7 +88,7 @@ namespace AgileConfig.Server.Apisite.Filters
                         }
                     },
                     {
-                        "Config.Offline", (args, premission, configService) =>
+                        "Config.Offline", (args, permission, configService) =>
                         {
                             var id = args.ActionArguments["configId"];
                             var env = GetEnvFromArgs(args.ActionArguments, configService);
@@ -98,7 +98,7 @@ namespace AgileConfig.Server.Apisite.Filters
                         }
                     },
                     {
-                        "Config.OfflineSome", (args, premission, configService) =>
+                        "Config.OfflineSome", (args, permission, configService) =>
                         {
                             var ids = args.ActionArguments["configIds"] as List<string>;
                             var id = ids?.FirstOrDefault();
@@ -109,7 +109,7 @@ namespace AgileConfig.Server.Apisite.Filters
                         }
                     },
                     {
-                        "Config.Publish", (args, premission, configService) =>
+                        "Config.Publish", (args, permission, configService) =>
                         {
                             var model = args.ActionArguments["model"] as IAppIdModel;
 
@@ -117,15 +117,15 @@ namespace AgileConfig.Server.Apisite.Filters
                         }
                     },
                     {
-                        "Config.Publish_API", (args, premission, configService) =>
+                        "Config.Publish_API", (args, permission, configService) =>
                         {
                             var appId = args.ActionArguments["appId"];
 
-                            return appId.ToString();
+                            return appId?.ToString();
                         }
                     },
                     {
-                        "Config.Rollback", (args, premission, configService) =>
+                        "Config.Rollback", (args, permission, configService) =>
                         {
                             var timelineId = args.ActionArguments["publishTimelineId"] as string;
                             var env = GetEnvFromArgs(args.ActionArguments, configService);
@@ -135,7 +135,7 @@ namespace AgileConfig.Server.Apisite.Filters
                         }
                     },
                     {
-                        "Config.Rollback_API", (args, premission, configService) =>
+                        "Config.Rollback_API", (args, permission, configService) =>
                         {
                             var timelineId = args.ActionArguments["historyId"] as string;
                             var env = GetEnvFromArgs(args.ActionArguments, configService);
@@ -145,45 +145,45 @@ namespace AgileConfig.Server.Apisite.Filters
                         }
                     },
                     {
-                        "App.Add", (args, premission, configService) => { return ""; }
+                        "App.Add", (args, permission, configService) => ""
                     },
                     {
-                        "App.Edit", (args, premission, configService) =>
+                        "App.Edit", (args, permission, configService) =>
                         {
                             var app = args.ActionArguments["model"] as IAppModel;
                             return app.Id;
                         }
                     },
                     {
-                        "App.Delete", (args, premission, configService) =>
+                        "App.Delete", (args, permission, configService) =>
                         {
                             var id = args.ActionArguments["id"] as string;
                             return id;
                         }
                     },
                     {
-                        "App.DisableOrEanble", (args, premission, configService) =>
+                        "App.DisableOrEnable", (args, permission, configService) =>
                         {
                             var id = args.ActionArguments["id"] as string;
                             return id;
                         }
                     },
                     {
-                        "App.Auth", (args, premission, configService) =>
+                        "App.Auth", (args, permission, configService) =>
                         {
                             var model = args.ActionArguments["model"] as IAppIdModel;
                             return model?.AppId;
                         }
                     },
                     {
-                        "Node.Add", (args, premission, configService) =>
+                        "Node.Add", (args, permission, configService) =>
                         {
                             var id = args.ActionArguments["id"] as string;
                             return id;
                         }
                     },
                     {
-                        "Node.Delete", (args, premission, configService) =>
+                        "Node.Delete", (args, permission, configService) =>
                         {
                             var model = args.ActionArguments["model"] as IAppIdModel;
                             return model?.AppId;
@@ -194,16 +194,16 @@ namespace AgileConfig.Server.Apisite.Filters
         protected const string GlobalMatchPatten = "GLOBAL_{0}";
         protected const string AppMatchPatten = "APP_{0}_{1}";
 
-        private IPremissionService _premissionService;
-        private IConfigService _configService;
+        private readonly IPremissionService _permissionService;
+        private readonly IConfigService _configService;
 
-        private string _actionName;
-        private string _functionKey;
+        private readonly string _actionName;
+        private readonly string _functionKey;
 
-        public PremissionCheckAttribute(IPremissionService premissionService, IConfigService configService,
+        public PermissionCheckAttribute(IPremissionService premissionService, IConfigService configService,
             string actionName, string functionKey)
         {
-            _premissionService = premissionService;
+            _permissionService = premissionService;
             _configService = configService;
 
             _actionName = actionName;
@@ -229,7 +229,7 @@ namespace AgileConfig.Server.Apisite.Filters
                 return;
             }
 
-            var userFunctions = await _premissionService.GetUserPermission(userId);
+            var userFunctions = await _permissionService.GetUserPermission(userId);
 
             //judge global
             var matchKey = string.Format(GlobalMatchPatten, _functionKey);
@@ -242,7 +242,7 @@ namespace AgileConfig.Server.Apisite.Filters
             var appId = "";
             if (GetAppIdParamFuncs.TryGetValue(_actionName, out var func))
             {
-                appId = func(context, _premissionService, _configService);
+                appId = func(context, _permissionService, _configService);
             }
 
             if (!string.IsNullOrEmpty(appId))

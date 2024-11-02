@@ -55,7 +55,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <param name="model">节点模型</param>
         /// <returns></returns>
         [ProducesResponseType(201)]
-        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Node.Add", Functions.Node_Add })]
+        [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "Node.Add", Functions.Node_Add })]
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] ApiNodeVM model)
         {
@@ -93,7 +93,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <param name="address">节点地址</param>
         /// <returns></returns>
         [ProducesResponseType(204)]
-        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Node.Delete", Functions.Node_Delete })]
+        [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "Node.Delete", Functions.Node_Delete })]
         [HttpDelete()]
         public async Task<IActionResult> Delete([FromQuery] string address)
         {

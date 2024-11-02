@@ -126,7 +126,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <returns></returns>
         [ProducesResponseType(201)]
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
-        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Add", Functions.Config_Add })]
+        [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "Config.Add", Functions.Config_Add })]
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] ApiConfigVM model, EnvString env)
         {
@@ -167,7 +167,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <param name="env">环境</param>
         /// <returns></returns>
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
-        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Edit", Functions.Config_Edit })]
+        [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "Config.Edit", Functions.Config_Edit })]
         [HttpPut("{id}")]
         public async Task<IActionResult> Edit(string id, [FromBody] ApiConfigVM model, EnvString env)
         {
@@ -207,7 +207,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <returns></returns>
         [ProducesResponseType(204)]
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
-        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Delete", Functions.Config_Delete })]
+        [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "Config.Delete", Functions.Config_Delete })]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id, EnvString env)
         {

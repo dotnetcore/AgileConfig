@@ -39,7 +39,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             _tinyEventBus = tinyEventBus;
         }
 
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "Config.Add", Functions.Config_Add })]
+        [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { "Config.Add", Functions.Config_Add })]
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] ConfigVM model, EnvString env)
         {
@@ -94,7 +94,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
-        [TypeFilter(typeof(PremissionCheckAttribute),
+        [TypeFilter(typeof(PermissionCheckAttribute),
             Arguments = new object[] { "Config.AddRange", Functions.Config_Add })]
         [HttpPost]
         public async Task<IActionResult> AddRange([FromBody] List<ConfigVM> model, EnvString env)
@@ -163,7 +163,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
-        [TypeFilter(typeof(PremissionCheckAttribute),
+        [TypeFilter(typeof(PermissionCheckAttribute),
             Arguments = new object[] { "Config.Edit", Functions.Config_Edit })]
         [HttpPost]
         public async Task<IActionResult> Edit([FromBody] ConfigVM model, [FromQuery] EnvString env)
@@ -363,7 +363,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
-        [TypeFilter(typeof(PremissionCheckAttribute),
+        [TypeFilter(typeof(PermissionCheckAttribute),
             Arguments = new object[] { "Config.Delete", Functions.Config_Delete })]
         [HttpPost]
         public async Task<IActionResult> Delete(string id, EnvString env)
@@ -406,7 +406,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
-        [TypeFilter(typeof(PremissionCheckAttribute),
+        [TypeFilter(typeof(PermissionCheckAttribute),
             Arguments = new object[] { "Config.DeleteSome", Functions.Config_Delete })]
         [HttpPost]
         public async Task<IActionResult> DeleteSome([FromBody] List<string> ids, EnvString env)
@@ -457,7 +457,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
 
-        [TypeFilter(typeof(PremissionCheckAttribute),
+        [TypeFilter(typeof(PermissionCheckAttribute),
             Arguments = new object[] { "Config.Rollback", Functions.Config_Publish })]
         [HttpPost]
         public async Task<IActionResult> Rollback(string publishTimelineId, EnvString env)
@@ -516,7 +516,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         /// 发布所有待发布的配置项
         /// </summary>
         /// <returns></returns>
-        [TypeFilter(typeof(PremissionCheckAttribute),
+        [TypeFilter(typeof(PermissionCheckAttribute),
             Arguments = new object[] { "Config.Publish", Functions.Config_Publish })]
         [HttpPost]
         public async Task<IActionResult> Publish([FromBody] PublishLogVM model, EnvString env)
@@ -733,7 +733,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
-        [TypeFilter(typeof(PremissionCheckAttribute),
+        [TypeFilter(typeof(PermissionCheckAttribute),
             Arguments = new object[] { "Config.EvnSync", Functions.Config_Add })]
         [HttpPost]
         public async Task<IActionResult> SyncEnv([FromBody] List<string> toEnvs, [FromQuery] string appId,
