@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
 
 namespace AgileConfig.Server.Common
 {
@@ -16,7 +14,7 @@ namespace AgileConfig.Server.Common
                 return "";
             }
             var attrs = (DescriptionAttribute[])fi.GetCustomAttributes(typeof(DescriptionAttribute), false);
-            if (attrs != null & attrs.Any())
+            if (attrs.Length != 0)
             {
                 return attrs.First().Description;
             }

@@ -85,7 +85,7 @@ namespace AgileConfig.Server.Apisite
         {
             try
             {
-                var myips = IPExt.GetEndpointIp();
+                var myips = IpExt.GetEndpointIp();
                 _logger.LogInformation("AgileConfig node's IP " + String.Join(',', myips));
 
                 return myips.FirstOrDefault();

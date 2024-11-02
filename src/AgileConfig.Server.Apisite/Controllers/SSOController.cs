@@ -5,11 +5,11 @@ using System;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
-    public class SSOController : Controller
+    public class SsoController : Controller
     {
         private readonly IOidcClient _oidcClient;
 
-        public SSOController(IOidcClient oidcClient)
+        public SsoController(IOidcClient oidcClient)
         {
             _oidcClient = oidcClient;
         }

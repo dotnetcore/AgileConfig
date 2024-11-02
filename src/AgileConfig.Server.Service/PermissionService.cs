@@ -7,7 +7,7 @@ using AgileConfig.Server.Data.Abstraction;
 
 namespace AgileConfig.Server.Service
 {
-    public class PermissionService : IPremissionService
+    public class PermissionService : IPermissionService
     {
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly IUserAppAuthRepository _userAppAuthRepository;
@@ -23,8 +23,8 @@ namespace AgileConfig.Server.Service
             _appRepository = appRepository;
         }
 
-        private static readonly List<string> Template_SuperAdminPermissions = new List<string>
-        {
+        private static readonly List<string> Template_SuperAdminPermissions =
+        [
             "GLOBAL_" + Functions.App_Add,
             "GLOBAL_" + Functions.App_Delete,
             "GLOBAL_" + Functions.App_Edit,
@@ -43,11 +43,11 @@ namespace AgileConfig.Server.Service
 
             "GLOBAL_" + Functions.User_Add,
             "GLOBAL_" + Functions.User_Edit,
-            "GLOBAL_" + Functions.User_Delete,
-        };
+            "GLOBAL_" + Functions.User_Delete
+        ];
 
-        private static readonly List<string> Template_NormalAdminPermissions = new List<string>
-        {
+        private static readonly List<string> Template_NormalAdminPermissions =
+        [
             "GLOBAL_" + Functions.App_Add,
             "GLOBAL_" + Functions.Node_Add,
             "GLOBAL_" + Functions.Node_Delete,
@@ -65,21 +65,21 @@ namespace AgileConfig.Server.Service
             "APP_{0}_" + Functions.Config_Delete,
             "APP_{0}_" + Functions.Config_Edit,
             "APP_{0}_" + Functions.Config_Offline,
-            "APP_{0}_" + Functions.Config_Publish,
-        };
+            "APP_{0}_" + Functions.Config_Publish
+        ];
 
-        private static readonly List<string> Template_NormalUserPermissions_Edit = new List<string>
-        {
+        private static readonly List<string> Template_NormalUserPermissions_Edit =
+        [
             "APP_{0}_" + Functions.Config_Add,
             "APP_{0}_" + Functions.Config_Delete,
-            "APP_{0}_" + Functions.Config_Edit,
-        };
+            "APP_{0}_" + Functions.Config_Edit
+        ];
 
-        private static readonly List<string> Template_NormalUserPermissions_Publish = new List<string>
-        {
+        private static readonly List<string> Template_NormalUserPermissions_Publish =
+        [
             "APP_{0}_" + Functions.Config_Offline,
             "APP_{0}_" + Functions.Config_Publish
-        };
+        ];
 
         private async Task<List<string>> GetAdminUserFunctions(string userId)
         {
@@ -181,7 +181,7 @@ namespace AgileConfig.Server.Service
         /// <summary>
         /// 获取角色权限的模板
         /// </summary>
-        /// <param name="role"></param>
+        /// <param name="userId"></param>
         /// <returns></returns>
         public async Task<List<string>> GetUserPermission(string userId)
         {
@@ -210,6 +210,7 @@ namespace AgileConfig.Server.Service
         /// 获取被授权给用户的app
         /// </summary>
         /// <param name="userId"></param>
+        /// <param name="authPermissionKey"></param>
         /// <returns></returns>
         private async Task<List<App>> GetUserAuthApp(string userId, string authPermissionKey)
         {

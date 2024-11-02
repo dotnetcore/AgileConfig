@@ -1,10 +1,5 @@
-﻿using AgileConfig.Server.Apisite.Models;
-using AgileConfig.Server.Apisite.Utilites;
-using AgileConfig.Server.IService;
-using Microsoft.AspNetCore.Mvc;
+﻿using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc.Filters;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,18 +8,18 @@ namespace AgileConfig.Server.Apisite.Filters
     /// <summary>
     /// 权限判断，用户信息从basic认证的头部取
     /// </summary>
-    public class PremissionCheckByBasicAttribute : PremissionCheckAttribute
+    public class PermissionCheckByBasicAttribute : PermissionCheckAttribute
     {
         protected IAdmBasicAuthService _basicAuthService;
         protected IUserService _userService;
 
-        public PremissionCheckByBasicAttribute(
-            IPremissionService premissionService, 
+        public PermissionCheckByBasicAttribute(
+            IPermissionService permissionService, 
             IConfigService configService,
             IAdmBasicAuthService basicAuthService, 
             IUserService userService,
             string actionName, 
-            string functionKey) : base(premissionService, configService, actionName, functionKey)
+            string functionKey) : base(permissionService, configService, actionName, functionKey)
         {
             _userService = userService;
             _basicAuthService = basicAuthService;

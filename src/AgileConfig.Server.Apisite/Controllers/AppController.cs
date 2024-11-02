@@ -20,19 +20,19 @@ namespace AgileConfig.Server.Apisite.Controllers
     public class AppController : Controller
     {
         private readonly IAppService _appService;
-        private readonly IPremissionService _premissionService;
+        private readonly IPermissionService _permissionService;
         private readonly IUserService _userService;
         private readonly ITinyEventBus _tinyEventBus;
 
         public AppController(IAppService appService,
-            IPremissionService premissionService,
+            IPermissionService permissionService,
             IUserService userService,
             ITinyEventBus tinyEventBus)
         {
             _userService = userService;
             _tinyEventBus = tinyEventBus;
             _appService = appService;
-            _premissionService = premissionService;
+            _permissionService = permissionService;
         }
 
         public async Task<IActionResult> Search(string name, string id, string group, string sortField,
@@ -112,7 +112,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
         }
 
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "App.Add", Functions.App_Add })]
+        [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { "App.Add", Functions.App_Add })]
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] AppVM model)
         {
@@ -161,7 +161,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "App.Edit", Functions.App_Edit })]
+        [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { "App.Edit", Functions.App_Edit })]
         [HttpPost]
         public async Task<IActionResult> Edit([FromBody] AppVM model)
         {
@@ -272,10 +272,10 @@ namespace AgileConfig.Server.Apisite.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [TypeFilter(typeof(PremissionCheckAttribute),
-            Arguments = new object[] { "App.DisableOrEanble", Functions.App_Edit })]
+        [TypeFilter(typeof(PermissionCheckAttribute),
+            Arguments = new object[] { "App.DisableOrEnable", Functions.App_Edit })]
         [HttpPost]
-        public async Task<IActionResult> DisableOrEanble(string id)
+        public async Task<IActionResult> DisableOrEnable(string id)
         {
             ArgumentException.ThrowIfNullOrEmpty(id);
 
@@ -305,7 +305,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "App.Delete", Functions.App_Delete })]
+        [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { "App.Delete", Functions.App_Delete })]
         [HttpPost]
         public async Task<IActionResult> Delete(string id)
         {
@@ -372,16 +372,16 @@ namespace AgileConfig.Server.Apisite.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "App.Auth", Functions.App_Auth })]
+        [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { "App.Auth", Functions.App_Auth })]
         [HttpPost]
         public async Task<IActionResult> SaveAppAuth([FromBody] AppAuthVM model)
         {
             ArgumentNullException.ThrowIfNull(model);
 
             var result = await _appService.SaveUserAppAuth(model.AppId, model.EditConfigPermissionUsers,
-                _premissionService.EditConfigPermissionKey);
+                _permissionService.EditConfigPermissionKey);
             var result1 = await _appService.SaveUserAppAuth(model.AppId, model.PublishConfigPermissionUsers,
-                _premissionService.PublishConfigPermissionKey);
+                _permissionService.PublishConfigPermissionKey);
 
             return Json(new
             {
@@ -399,10 +399,10 @@ namespace AgileConfig.Server.Apisite.Controllers
                 AppId = appId
             };
             result.EditConfigPermissionUsers =
-                (await _appService.GetUserAppAuth(appId, _premissionService.EditConfigPermissionKey)).Select(x => x.Id)
+                (await _appService.GetUserAppAuth(appId, _permissionService.EditConfigPermissionKey)).Select(x => x.Id)
                 .ToList();
             result.PublishConfigPermissionUsers =
-                (await _appService.GetUserAppAuth(appId, _premissionService.PublishConfigPermissionKey))
+                (await _appService.GetUserAppAuth(appId, _permissionService.PublishConfigPermissionKey))
                 .Select(x => x.Id).ToList();
 
             return Json(new

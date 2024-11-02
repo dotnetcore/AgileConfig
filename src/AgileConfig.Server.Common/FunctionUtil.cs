@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace AgileConfig.Server.Common
 {
-    public class FunctionUtil
+    public static class FunctionUtil
     {
         /// <summary>
         /// 尝试运行一个Func几次
@@ -18,7 +16,7 @@ namespace AgileConfig.Server.Common
         {
             if (func == null)
             {
-                throw new ArgumentNullException("func");
+                throw new ArgumentNullException(nameof(func));
             }
 
             T result = default(T);
@@ -86,7 +84,7 @@ namespace AgileConfig.Server.Common
         {
             if (func == null)
             {
-                throw new ArgumentNullException("func");
+                throw new ArgumentNullException(nameof(func));
             }
 
             T result = default(T);
@@ -108,15 +106,14 @@ namespace AgileConfig.Server.Common
         /// <summary>
         /// 尝试运行一个Action几次
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="func"></param>
+        /// <param name="act"></param>
         /// <param name="tryCount"></param>
         /// <returns></returns>
         public static void TRY(Action act, int tryCount)
         {
             if (act == null)
             {
-                throw new ArgumentNullException("act");
+                throw new ArgumentNullException(nameof(act));
             }
 
             for (int i = 0; i < tryCount; i++)

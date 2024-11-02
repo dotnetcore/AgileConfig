@@ -123,7 +123,7 @@ namespace AgileConfig.Server.Apisite
                 AddSwaggerMiddleWare(app);
             }
 
-            app.UseMiddleware<ReactUIMiddleware>();
+            app.UseMiddleware<ReactUiMiddleware>();
 
             app.UseCors(op =>
             {

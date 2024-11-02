@@ -7,7 +7,7 @@ namespace AgileConfig.Server.Common
 {
     public static class Encrypt
     {
-        private static readonly ThreadLocal<MD5> Md5Instance = new ThreadLocal<MD5>(MD5.Create);
+        private static readonly ThreadLocal<MD5> Md5Instance = new(MD5.Create);
         public static string Md5(string txt)
         {
             var inputBytes = Encoding.ASCII.GetBytes(txt);
