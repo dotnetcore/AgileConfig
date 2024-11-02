@@ -1,5 +1,13 @@
 # Change log
 ------------------------------
+[1.9.8]
+* Correct naming
+* Refactor some logic
+* Upgrade MonogoDb driver to 3.0
+
+[1.9.7]
+* Refactor event bus
+
 [1.9.6]
 * Support OTLP headers
 
