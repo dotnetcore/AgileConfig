@@ -35,9 +35,9 @@ namespace AgileConfig.Server.Apisite.Filters
         /// 因为 attribute 不能传递 func 参数，所有从 action 的参数内获取 appId 的操作只能提前内置在一个静态字典内。
         /// </summary>
         protected static readonly
-            FrozenDictionary<string, Func<ActionExecutingContext, IPremissionService, IConfigService, string>>
+            FrozenDictionary<string, Func<ActionExecutingContext, IPermissionService, IConfigService, string>>
             GetAppIdParamFuncs =
-                new Dictionary<string, Func<ActionExecutingContext, IPremissionService, IConfigService, string>>
+                new Dictionary<string, Func<ActionExecutingContext, IPermissionService, IConfigService, string>>
                 {
                     {
                         "Config.Add", (args, premission, config) =>
@@ -194,16 +194,16 @@ namespace AgileConfig.Server.Apisite.Filters
         protected const string GlobalMatchPatten = "GLOBAL_{0}";
         protected const string AppMatchPatten = "APP_{0}_{1}";
 
-        private readonly IPremissionService _permissionService;
+        private readonly IPermissionService _permissionService;
         private readonly IConfigService _configService;
 
         private readonly string _actionName;
         private readonly string _functionKey;
 
-        public PermissionCheckAttribute(IPremissionService premissionService, IConfigService configService,
+        public PermissionCheckAttribute(IPermissionService permissionService, IConfigService configService,
             string actionName, string functionKey)
         {
-            _permissionService = premissionService;
+            _permissionService = permissionService;
             _configService = configService;
 
             _actionName = actionName;

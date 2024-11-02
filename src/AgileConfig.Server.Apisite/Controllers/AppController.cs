@@ -20,12 +20,12 @@ namespace AgileConfig.Server.Apisite.Controllers
     public class AppController : Controller
     {
         private readonly IAppService _appService;
-        private readonly IPremissionService _permissionService;
+        private readonly IPermissionService _permissionService;
         private readonly IUserService _userService;
         private readonly ITinyEventBus _tinyEventBus;
 
         public AppController(IAppService appService,
-            IPremissionService permissionService,
+            IPermissionService permissionService,
             IUserService userService,
             ITinyEventBus tinyEventBus)
         {

@@ -24,7 +24,7 @@ namespace ApiSiteTests
             var appService = new Mock<IAppService>();
             var logService = new Mock<ISysLogService>();
             var userService = new Mock<IUserService>();
-            var permissionService = new Mock<IPremissionService>();
+            var permissionService = new Mock<IPermissionService>();
             var eventBus = new Mock<ITinyEventBus>();
 
             var ctl = new AgileConfig.Server.Apisite.Controllers.AppController(appService.Object, permissionService.Object, userService.Object, eventBus.Object);
@@ -45,7 +45,7 @@ namespace ApiSiteTests
             var jr = result as JsonResult;
             Assert.IsNotNull(jr.Value);
             Console.WriteLine(jr.Value.ToString());
-            //Assert.IsTrue(jr.Value.ToString().Contains("Ó¦ÓÃIdÒÑ´æÔÚ£¬ÇëÖØÐÂÊäÈë"));
+            //Assert.IsTrue(jr.Value.ToString().Contains("Ó¦ï¿½ï¿½Idï¿½Ñ´ï¿½ï¿½Ú£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"));
             App nullApp = null;
 
             appService.Setup(s => s.GetAsync("02")).ReturnsAsync(nullApp);

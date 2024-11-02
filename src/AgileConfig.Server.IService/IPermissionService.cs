@@ -1,12 +1,9 @@
-﻿using AgileConfig.Server.Data.Entity;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace AgileConfig.Server.IService
 {
-    public class Functions
+    public static class Functions
     {
         public const string App_Add = "APP_ADD";
         public const string App_Edit = "APP_EDIT";
@@ -30,7 +27,7 @@ namespace AgileConfig.Server.IService
         public const string User_Delete = "USER_DELETE";
     }
 
-    public interface IPremissionService
+    public interface IPermissionService
     {
          string EditConfigPermissionKey { get; }
 

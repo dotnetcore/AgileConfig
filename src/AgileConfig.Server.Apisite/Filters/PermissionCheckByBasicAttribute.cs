@@ -19,12 +19,12 @@ namespace AgileConfig.Server.Apisite.Filters
         protected IUserService _userService;
 
         public PermissionCheckByBasicAttribute(
-            IPremissionService premissionService, 
+            IPermissionService permissionService, 
             IConfigService configService,
             IAdmBasicAuthService basicAuthService, 
             IUserService userService,
             string actionName, 
-            string functionKey) : base(premissionService, configService, actionName, functionKey)
+            string functionKey) : base(permissionService, configService, actionName, functionKey)
         {
             _userService = userService;
             _basicAuthService = basicAuthService;

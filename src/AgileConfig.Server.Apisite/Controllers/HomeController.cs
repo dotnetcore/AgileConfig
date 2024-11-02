@@ -15,12 +15,12 @@ namespace AgileConfig.Server.Apisite.Controllers
     {
         private readonly ISettingService _settingService;
         private readonly IUserService _userService;
-        private readonly IPremissionService _permissionService;
+        private readonly IPermissionService _permissionService;
 
         public HomeController(
             ISettingService settingService,
             IUserService userService,
-            IPremissionService permissionService
+            IPermissionService permissionService
             )
         {
             _settingService = settingService;

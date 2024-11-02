@@ -20,7 +20,7 @@ namespace AgileConfig.Server.Apisite.Controllers
     {
         private readonly ISettingService _settingService;
         private readonly IUserService _userService;
-        private readonly IPremissionService _permissionService;
+        private readonly IPermissionService _permissionService;
         private readonly IJwtService _jwtService;
         private readonly IOidcClient _oidcClient;
         private readonly ITinyEventBus _tinyEventBus;
@@ -28,7 +28,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         public AdminController(
             ISettingService settingService,
             IUserService userService,
-            IPremissionService permissionService,
+            IPermissionService permissionService,
             IJwtService jwtService,
             IOidcClient oidcClient,
             ITinyEventBus tinyEventBus)
