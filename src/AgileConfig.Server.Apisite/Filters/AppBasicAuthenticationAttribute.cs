@@ -11,7 +11,7 @@ namespace AgileConfig.Server.Apisite.Filters
     /// </summary>
     public class AppBasicAuthenticationAttribute : ActionFilterAttribute
     {
-        private IAppBasicAuthService _appBasicAuthService;
+        private readonly IAppBasicAuthService _appBasicAuthService;
         public AppBasicAuthenticationAttribute(IAppBasicAuthService appBasicAuthService)
         {
             _appBasicAuthService = appBasicAuthService;

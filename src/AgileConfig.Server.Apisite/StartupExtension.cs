@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry.Metrics;
 using System.Net.Http;
 using OpenTelemetry.Trace;
-using OpenTelemetry.Logs;
 using OpenTelemetry.Exporter;
 using OpenTelemetry;
 using Npgsql;
@@ -13,12 +12,12 @@ namespace AgileConfig.Server.Apisite
 {
     public static class StartupExtension
     {
-        public static void AddDefaultHttpClient(this IServiceCollection services, bool isTrustSSL)
+        public static void AddDefaultHttpClient(this IServiceCollection services, bool isTrustSsl)
         {
             services.AddHttpClient(Global.DefaultHttpClientName)
                 .ConfigurePrimaryHttpMessageHandler(() =>
                 {
-                    return NewMessageHandler(isTrustSSL);
+                    return NewMessageHandler(isTrustSsl);
                 })
                 ;
         }
@@ -90,10 +89,7 @@ namespace AgileConfig.Server.Apisite
             var handler = new HttpClientHandler();
             if (alwaysTrustSsl)
             {
-                handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
-                {
-                    return true;
-                };
+                handler.ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
             }
 
             return handler;

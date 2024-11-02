@@ -11,7 +11,7 @@ namespace AgileConfig.Server.Common
 
     public class EnvAccessor : IEnvAccessor
     {
-        private IHttpContextAccessor _httpContextAccessor;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         public EnvAccessor(IHttpContextAccessor httpContextAccessor)
         {
             _httpContextAccessor = httpContextAccessor;
@@ -20,7 +20,7 @@ namespace AgileConfig.Server.Common
         {
             get
             {
-                var env = _httpContextAccessor.HttpContext.Request.Query["env"].FirstOrDefault();
+                var env = _httpContextAccessor.HttpContext?.Request.Query["env"].FirstOrDefault();
                 return env;
             }
         }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net.Http.Json;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -54,13 +53,10 @@ internal class MessageHandler : IMessageHandler
     }
     public async Task Handle(string message, HttpRequest request, WebsocketClient client)
     {
-        if (message == null)
-        {
-            message = "";
-        }
+        message ??= "";
 
         // "ping" is old version
-        if (message == "ping" || message == "c:ping")
+        if (message is "ping" or "c:ping")
         {
             //如果是ping，回复本地数据的md5版本 
             var appId = request.Headers["appid"];

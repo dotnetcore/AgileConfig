@@ -5,7 +5,6 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Text;
 using Microsoft.Extensions.Primitives;
 using System.Collections.Concurrent;
 using AgileConfig.Server.Common;
@@ -13,14 +12,14 @@ using Microsoft.AspNetCore.Hosting;
 
 namespace AgileConfig.Server.Apisite.UIExtension
 {
-    public class ReactUIMiddleware
+    public class ReactUiMiddleware
     {
-        private static string UiDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "wwwroot/ui");
-        private static readonly ConcurrentDictionary<string, UIFileBag> StaticFilesCache = new();
+        private static string _uiDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "wwwroot/ui");
+        private static readonly ConcurrentDictionary<string, UiFileBag> StaticFilesCache = new();
         private readonly RequestDelegate _next;
         private readonly ILogger _logger;
-        private readonly IWebHostEnvironment _environment;
-        public ReactUIMiddleware(
+
+        public ReactUiMiddleware(
            RequestDelegate next,
            ILoggerFactory loggerFactory,
            IWebHostEnvironment environment
@@ -28,29 +27,28 @@ namespace AgileConfig.Server.Apisite.UIExtension
         {
             _next = next;
             _logger = loggerFactory.
-                CreateLogger<ReactUIMiddleware>();
-            _environment = environment;
+                CreateLogger<ReactUiMiddleware>();
 #if DEBUG
             //if debug mode, try to switch to project wwwwroot dir
-            var projectUIPath = Path.Combine(_environment.ContentRootPath, "wwwroot/ui");
-            if (Directory.Exists(projectUIPath))
+            var projectUiPath = Path.Combine(environment.ContentRootPath, "wwwroot/ui");
+            if (Directory.Exists(projectUiPath))
             {
-                UiDirectory = projectUIPath;
+                _uiDirectory = projectUiPath;
             }
 #endif
         }
 
         private bool IsAdminConsoleMode => "true".Equals(Global.Config["adminConsole"], StringComparison.OrdinalIgnoreCase);
 
-        private bool ShouldHandleUIRequest(HttpContext context)
+        private static bool ShouldHandleUiRequest(HttpContext context)
         {
-            return context.Request.Path.HasValue && context.Request.Path.Value.Equals("/ui", StringComparison.OrdinalIgnoreCase);
+            return context.Request.Path is { HasValue: true, Value: not null } && context.Request.Path.Value.Equals("/ui", StringComparison.OrdinalIgnoreCase);
         }
 
-        private bool ShouldHandleUIStaticFilesRequest(HttpContext context)
+        private bool ShouldHandleUiStaticFilesRequest(HttpContext context)
         {
             //请求的的Referer为 0.0.0.0/ui ,以此为依据判断是否是reactui需要的静态文件
-            if (context.Request.Path.HasValue && context.Request.Path.Value.Contains("."))
+            if (context.Request.Path is { HasValue: true, Value: not null } && context.Request.Path.Value.Contains('.'))
             {
                 context.Request.Headers.TryGetValue("Referer", out StringValues refererValues);
                 if (refererValues.Any())
@@ -105,14 +103,14 @@ namespace AgileConfig.Server.Apisite.UIExtension
         {
             //handle /ui request
             var filePath = "";
-            if (ShouldHandleUIRequest(context))
+            if (ShouldHandleUiRequest(context))
             {
-                filePath = UiDirectory + "/index.html";
+                filePath = _uiDirectory + "/index.html";
             }
             //handle static files that Referer = xxx/ui
-            if (ShouldHandleUIStaticFilesRequest(context))
+            if (ShouldHandleUiStaticFilesRequest(context))
             {
-                filePath = UiDirectory + context.Request.Path;
+                filePath = _uiDirectory + context.Request.Path;
             }
 
             if (string.IsNullOrEmpty(filePath))
@@ -146,7 +144,7 @@ namespace AgileConfig.Server.Apisite.UIExtension
                     var fileData = await File.ReadAllBytesAsync(filePath);  //read file bytes
                     var lastModified = File.GetLastWriteTime(filePath);
                     var extType = Path.GetExtension(filePath);
-                    uiFile = new UIFileBag()
+                    uiFile = new UiFileBag()
                     {
                         FilePath = filePath,
                         Data = fileData,

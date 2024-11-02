@@ -13,7 +13,7 @@ namespace AgileConfig.Server.Common.EventBus
         private readonly IServiceCollection _serviceCollection;
         private static readonly ConcurrentDictionary<Type, List<Type>> EventHandlerMap = new ();
         private IServiceProvider _localServiceProvider;
-        private ILogger _logger;
+        private readonly ILogger _logger;
 
         public TinyEventBus(IServiceCollection serviceCollection)
         {
@@ -30,9 +30,7 @@ namespace AgileConfig.Server.Common.EventBus
             }
             else
             {
-                EventHandlerMap.TryAdd(eventType, new List<Type> {
-                    handlerType
-                });
+                EventHandlerMap.TryAdd(eventType, [handlerType]);
             }
             _serviceCollection.AddScoped<T>();
 

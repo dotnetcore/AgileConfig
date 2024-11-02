@@ -110,7 +110,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         [AllowAnonymous]
         public IActionResult GetIP()
         {
-            return Content(String.Join(',', IPExt.GetEndpointIp()));
+            return Content(String.Join(',', IpExt.GetEndpointIp()));
         }
     }
 }

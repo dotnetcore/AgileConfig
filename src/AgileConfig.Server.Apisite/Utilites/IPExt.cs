@@ -5,7 +5,7 @@ using System.Net.Sockets;
 
 namespace AgileConfig.Server.Apisite.Utilites
 {
-    public class IPExt
+    public class IpExt
     {
         public static string[] GetEndpointIp()
         {
@@ -21,11 +21,15 @@ namespace AgileConfig.Server.Apisite.Utilites
                 {
                     var props = item.GetIPProperties();
                     //this is ip for ipv4
-                    var firstIpV4Address = props.UnicastAddresses
+                    var firstIpV4Address = props.UnicastAddresses?
                         .Where(c => c.Address.AddressFamily == AddressFamily.InterNetwork)
                         .Select(c => c.Address)
-                        .FirstOrDefault().ToString();
-                    ips.Add(firstIpV4Address);
+                        .FirstOrDefault()?.ToString();
+
+                    if (!string.IsNullOrEmpty(firstIpV4Address))
+                    {
+                        ips.Add(firstIpV4Address);
+                    }
                 }
             }
             return ips.ToArray();

@@ -163,7 +163,7 @@ namespace AgileConfig.Server.Apisite.Websocket
             var messageHandlers =
                 new WebsocketMessageHandlers(configService, registerCenterService, serviceInfoService);
             var buffer = new byte[1024 * 2];
-            WebSocketReceiveResult result = null;
+            WebSocketReceiveResult result;
             do
             {
                 result = await socketClient.Client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
@@ -196,10 +196,8 @@ namespace AgileConfig.Server.Apisite.Websocket
                 if (result.MessageType == WebSocketMessageType.Text)
                 {
                     ms.Seek(0, SeekOrigin.Begin);
-                    using (var reader = new StreamReader(ms, Encoding.UTF8))
-                    {
-                        return await reader.ReadToEndAsync();
-                    }
+                    using var reader = new StreamReader(ms, Encoding.UTF8);
+                    return await reader.ReadToEndAsync();
                 }
 
                 return "";
