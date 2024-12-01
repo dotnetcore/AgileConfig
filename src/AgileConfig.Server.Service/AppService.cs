@@ -159,7 +159,7 @@ namespace AgileConfig.Server.Service
             }
 
             var apps = await _appRepository.QueryPageAsync(exp, current, pageSize, sortField,
-                ascOrDesc.StartsWith("asc") ? "ASC" : "DESC");
+                ascOrDesc?.StartsWith("asc") ?? true ? "ASC" : "DESC");
             var count = await _appRepository.CountAsync(exp);
 
             return (apps, count);
@@ -230,7 +230,7 @@ namespace AgileConfig.Server.Service
 
             if (sortProperty.TryGetValue(sortField, out var propertyInfo))
             {
-                appGroupList = ascOrDesc.StartsWith("asc")
+                appGroupList = ascOrDesc?.StartsWith("asc") ?? true
                     ? appGroupList.OrderBy(x => propertyInfo.GetValue(x.App, null)).ToList()
                     : appGroupList.OrderByDescending(x => propertyInfo.GetValue(x.App, null)).ToList();
             }
