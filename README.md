@@ -18,7 +18,7 @@
     
 
 
-# [English](https://github.com/kklldog/AgileConfig/blob/master/README_EN.md) | [中文看这里](https://github.com/kklldog/AgileConfig/blob/master/README.md)
+# [English](https://github.com/kklldog/AgileConfig/blob/master/README_EN.md) | [中文看这里](https://github.com/kklldog/AgileConfig/blob/master/README_CN.md)
 
 This is a lightweight configuration center based on .net core . It is easy to deploy , easy to learn , easy to use .
 ## 😍Features
