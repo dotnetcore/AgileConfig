@@ -7,14 +7,14 @@
 
 
 [![Member project of .NET Core Community](https://img.shields.io/badge/member%20project%20of-NCC-9e20c9.svg)](https://github.com/dotnetcore)
-[![package workflow](https://github.com/dotnetcore/AgileConfig/actions/workflows/release-xxx.yml/badge.svg)](https://github.com/dotnetcore/AgileConfig/actions/workflows/release-xxx.yml)
-![GitHub stars](https://img.shields.io/github/stars/kklldog/AgileConfig)
-![Commit Date](https://img.shields.io/github/last-commit/kklldog/AgileConfig/master.svg?logo=github&logoColor=green&label=commit)
+![GitHub stars](https://img.shields.io/github/stars/dotnetcore/AgileConfig)
 ![Nuget](https://img.shields.io/nuget/v/agileconfig.client?label=agileconfig.client)
 ![Nuget](https://img.shields.io/nuget/dt/agileconfig.client?label=client%20download)
 ![Docker image](https://img.shields.io/docker/v/kklldog/agile_config?label=docker%20image)
 ![GitHub license](https://img.shields.io/github/license/kklldog/AgileConfig)
 ![build workflow](https://github.com/dotnetcore/AgileConfig/actions/workflows/master-ci.yml/badge.svg)
+[![package workflow](https://github.com/dotnetcore/AgileConfig/actions/workflows/release-xxx.yml/badge.svg)](https://github.com/dotnetcore/AgileConfig/actions/workflows/release-xxx.yml)
+![Commit Date](https://img.shields.io/github/last-commit/kklldog/AgileConfig/master.svg?logo=github&logoColor=green&label=commit)
     
 
 
