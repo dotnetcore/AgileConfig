@@ -31,6 +31,8 @@ Gitee 仓库镜像（不定时更新）：[https://gitee.com/kklldog/AgileConfig
 
 
 ❤️❤️ 演示地址：[AgileConfig Server Demo](https://agileconfig-server.xbaby.xyz)   用户名：admin 密码：123456   
+🎥[演示视频](https://www.bilibili.com/video/BV1FwqeYcEy9/?vd_source=767c7a8e20240041358ff961ab0cb9e5)
+
 .NET 客户端项目：[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
 JAVA 客户端项目：[AgileConfig_JClient](https://github.com/kklldog/agileconfig-jclient)   
 
