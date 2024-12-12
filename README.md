@@ -66,6 +66,7 @@ oracle = Oracle
 mongodb = Mongodb
 
 ## ✅️How to use ? 
+🎥[See video](https://www.bilibili.com/video/BV1FwqeYcEy9/?vd_source=767c7a8e20240041358ff961ab0cb9e5)
 ### run node on docker
 ``` shell
 sudo docker run \
