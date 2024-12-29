@@ -1,4 +1,4 @@
-﻿using AgileConfig.Server.Common.RestClient;
+﻿#nullable enable
 using AgileConfig.Server.IService;
 using AgileConfig.Server.Service.EventRegisterService;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,10 +9,11 @@ namespace AgileConfig.Server.Service
     {
         public static void AddBusinessServices(this IServiceCollection sc)
         {
+            sc.AddSingleton<ISystemInitializationService, SystemInitializationService>();
             sc.AddSingleton<IJwtService, JwtService>();
 
             sc.AddScoped<IRemoteServerNodeProxy, RemoteServerNodeProxy>();
-            sc.AddScoped<IEventRegister, EventRegister>();
+            sc.AddScoped<IEventHandlerRegister, EventHandlerRegister>();
             sc.AddScoped<IServiceHealthCheckService, ServiceHealthCheckService>();
             sc.AddScoped<IServiceInfoService, ServiceInfoService>();
 
@@ -24,8 +25,13 @@ namespace AgileConfig.Server.Service
             sc.AddScoped<IAppBasicAuthService, AppBasicAuthService>();
             sc.AddScoped<IAdmBasicAuthService, AdmBasicAuthService>();
             sc.AddScoped<IUserService, UserService>();
-            sc.AddScoped<IPremissionService, PermissionService>();
+            sc.AddScoped<IPermissionService, PermissionService>();
             sc.AddScoped<IRegisterCenterService, RegisterCenterService>();
+            
+            sc.AddScoped<ConfigStatusUpdateEventHandlersRegister>();
+            sc.AddScoped<ServiceInfoStatusUpdateEventHandlersRegister>();
+            sc.AddScoped<SystemEventHandlersRegister>();
+
         }
     }
 }

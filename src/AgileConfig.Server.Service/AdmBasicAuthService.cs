@@ -24,17 +24,16 @@ namespace AgileConfig.Server.Service
             return httpRequest.GetUserNamePasswordFromBasicAuthorization();
         }
 
-        public async Task<bool> ValidAsync(HttpRequest httpRequest)
+        public Task<bool> ValidAsync(HttpRequest httpRequest)
         {
             var userPassword = httpRequest.GetUserNamePasswordFromBasicAuthorization();
-            if (string.IsNullOrEmpty(userPassword.Item1)||string.IsNullOrEmpty(userPassword.Item2))
+            if (string.IsNullOrEmpty(userPassword.Item1) || string.IsNullOrEmpty(userPassword.Item2))
             {
                 _logger.LogWarning("Basic auth header have no username or password .");
-                return false;
+                return Task.FromResult(false);
             }
 
-            var result = await _userService.ValidateUserPassword(userPassword.Item1, userPassword.Item2);
-            return result;
+            return _userService.ValidateUserPassword(userPassword.Item1, userPassword.Item2);
         }
     }
 }

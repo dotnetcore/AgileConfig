@@ -9,9 +9,10 @@ public class WebsocketMessageHandlers
     public WebsocketMessageHandlers(IConfigService configService, IRegisterCenterService registerCenterService,
         IServiceInfoService serviceInfoService)
     {
-        MessageHandlers = new List<IMessageHandler>();
-
-        MessageHandlers.Add(new OldMessageHandler(configService));
-        MessageHandlers.Add(new MessageHandler(configService, registerCenterService, serviceInfoService));
+        MessageHandlers =
+        [
+            new OldMessageHandler(configService),
+            new MessageHandler(configService, registerCenterService, serviceInfoService)
+        ];
     }
 }

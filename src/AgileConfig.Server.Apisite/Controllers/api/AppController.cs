@@ -1,13 +1,14 @@
 ﻿using AgileConfig.Server.Apisite.Controllers.api.Models;
 using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Apisite.Models;
-using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AgileConfig.Server.Apisite.Models.Mapping;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace AgileConfig.Server.Apisite.Controllers.api
 {
@@ -20,15 +21,20 @@ namespace AgileConfig.Server.Apisite.Controllers.api
     {
         private readonly IConfigService _configService;
         private readonly IAppService _appService;
-        private readonly IPremissionService _premissionService;
-        private readonly IUserService _userService;
 
-        public AppController(IAppService appService, IPremissionService premissionService, IUserService userService, IConfigService configService)
+        private readonly Controllers.AppController _appController;
+        private readonly Controllers.ConfigController _configController;
+
+        public AppController(IAppService appService,
+            IConfigService configService,
+            Controllers.AppController appController,
+            Controllers.ConfigController configController)
         {
             _appService = appService;
-            _premissionService = premissionService;
-            _userService = userService;
             _configService = configService;
+
+            _appController = appController;
+            _configController = configController;
         }
 
         /// <summary>
@@ -39,17 +45,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         public async Task<ActionResult<IEnumerable<ApiAppVM>>> GetAll()
         {
             var apps = await _appService.GetAllAppsAsync();
-            var vms = apps.Select(x =>
-            {
-                return new ApiAppVM
-                {
-                    Id = x.Id,
-                    Name = x.Name,
-                    Secret = x.Secret,
-                    Inheritanced = x.Type == AppType.Inheritance,
-                    Enabled = x.Enabled,
-                };
-            });
+            var vms = apps.Select(x => x.ToApiAppVM());
 
             return Json(vms);
         }
@@ -62,33 +58,22 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiAppVM>> GetById(string id)
         {
-            var ctrl = new Controllers.AppController(
-             _appService,
-             _premissionService,
-             _userService
-             );
-            var result = (await ctrl.Get(id)) as JsonResult;
-            dynamic obj = result.Value;
+            var actionResult = await _appController.Get(id);
+            var status = actionResult as IStatusCodeActionResult;
 
-            if (obj.success)
+            var result = actionResult as JsonResult;
+            dynamic obj = result?.Value;
+
+            if (obj?.success ?? false)
             {
                 AppVM appVM = obj.data;
-                return Json(new ApiAppVM
-                {
-                    Id = appVM.Id,
-                    Name = appVM.Name,
-                    Secret = appVM.Secret,
-                    Inheritanced = appVM.Inheritanced,
-                    Enabled = appVM.Enabled,
-                    InheritancedApps = appVM.inheritancedApps,
-                    AppAdmin = appVM.AppAdmin
-                });
+                return Json(appVM.ToApiAppVM());
             }
 
-            Response.StatusCode = 400;
+            Response.StatusCode = status.StatusCode.Value;
             return Json(new
             {
-                obj.message
+                obj?.message
             });
         }
 
@@ -98,7 +83,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <param name="model">应用模型</param>
         /// <returns></returns>
         [ProducesResponseType(201)]
-        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "App.Add", Functions.App_Add })]
+        [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "App.Add", Functions.App_Add })]
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] ApiAppVM model)
         {
@@ -113,24 +98,13 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 });
             }
 
-            var ctrl = new Controllers.AppController(
-                _appService,
-                _premissionService,
-                _userService
-                );
-            ctrl.ControllerContext.HttpContext = HttpContext;
+            _appController.ControllerContext.HttpContext = HttpContext;
 
-            var result = (await ctrl.Add(new AppVM { 
-                Id=model.Id,
-                Name = model.Name,
-                Secret = model.Secret,
-                AppAdmin = model.AppAdmin,
-                Inheritanced = model.Inheritanced
-            })) as JsonResult;
+            var result = (await _appController.Add(model.ToAppVM())) as JsonResult;
 
-            dynamic obj = result.Value;
+            dynamic obj = result?.Value;
 
-            if (obj.success == true)
+            if (obj?.success == true)
             {
                 return Created("/api/app/" + obj.data.Id, "");
             }
@@ -138,7 +112,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             Response.StatusCode = 400;
             return Json(new
             {
-                obj.message
+                obj?.message
             });
         }
 
@@ -149,7 +123,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <param name="model">编辑后的应用模型</param>
         /// <returns></returns>
         [ProducesResponseType(200)]
-        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "App.Edit", Functions.App_Edit })]
+        [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "App.Edit", Functions.App_Edit })]
         [HttpPut("{id}")]
         public async Task<IActionResult> Edit(string id, [FromBody] ApiAppVM model)
         {
@@ -164,33 +138,23 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 });
             }
 
-            var ctrl = new Controllers.AppController(
-                  _appService,
-                  _premissionService,
-                  _userService
-                  );
-            ctrl.ControllerContext.HttpContext = HttpContext;
+            _appController.ControllerContext.HttpContext = HttpContext;
 
             model.Id = id;
-            var result = (await ctrl.Edit(new AppVM
-            {
-                Id = model.Id,
-                Name = model.Name,
-                Secret = model.Secret,
-                AppAdmin = model.AppAdmin,
-                Inheritanced = model.Inheritanced
-            })) as JsonResult;
+            var actionResult = await _appController.Edit(model.ToAppVM());
+            var status = actionResult as IStatusCodeActionResult;
+            var result = actionResult as JsonResult;
 
-            dynamic obj = result.Value;
-            if (obj.success == true)
+            dynamic obj = result?.Value;
+            if (obj?.success ?? false)
             {
                 return Ok();
             }
 
-            Response.StatusCode = 400;
+            Response.StatusCode = status.StatusCode.Value;
             return Json(new
             {
-                obj.message
+                obj?.message
             });
         }
 
@@ -200,29 +164,26 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <param name="id">应用id</param>
         /// <returns></returns>
         [ProducesResponseType(204)]
-        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "App.Delete", Functions.App_Delete })]
+        [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "App.Delete", Functions.App_Delete })]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-            var ctrl = new Controllers.AppController(
-                    _appService,
-                    _premissionService,
-                    _userService
-                    );
-            ctrl.ControllerContext.HttpContext = HttpContext;
+            _appController.ControllerContext.HttpContext = HttpContext;
 
-            var result = (await ctrl.Delete(id)) as JsonResult;
+            var actionResult = await _appController.Delete(id);
+            var status = actionResult as IStatusCodeActionResult;
+            var result = actionResult as JsonResult;
 
-            dynamic obj = result.Value;
-            if (obj.success == true)
+            dynamic obj = result?.Value;
+            if (obj?.success ?? false)
             {
                 return NoContent();
             }
 
-            Response.StatusCode = 400;
+            Response.StatusCode = status.StatusCode.Value;
             return Json(new
             {
-                obj.message
+                obj?.message
             });
         }
 
@@ -233,34 +194,29 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <param name="env">环境</param>
         /// <returns></returns>
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
-        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Publish_API", Functions.Config_Publish })]
+        [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "Config.Publish_API", Functions.Config_Publish })]
         [HttpPost("publish")]
-        public async Task<IActionResult> Publish(string appId, string env)
+        public async Task<IActionResult> Publish(string appId, EnvString env)
         {
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+            _configController.ControllerContext.HttpContext = HttpContext;
 
-            var ctrl = new Controllers.ConfigController(
-                _configService,
-                _appService,
-                _userService
-                );
-            ctrl.ControllerContext.HttpContext = HttpContext;
-
-            var result = (await ctrl.Publish(new PublishLogVM()
+            var actionResult = await _configController.Publish(new PublishLogVM()
             {
                 AppId = appId
-            }, env)) as JsonResult;
+            }, env);
+            var status = actionResult as IStatusCodeActionResult;
+            var result = actionResult as JsonResult;
 
-            dynamic obj = result.Value;
-            if (obj.success == true)
+            dynamic obj = result?.Value;
+            if (obj?.success ?? false)
             {
                 return Ok();
             }
 
-            Response.StatusCode = 400;
+            Response.StatusCode = status.StatusCode.Value;
             return Json(new
             {
-                obj.message
+                obj?.message
             });
         }
 
@@ -272,26 +228,15 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <returns></returns>
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [HttpGet("Publish_History")]
-        public async Task<ActionResult<IEnumerable<ApiPublishTimelineVM>>> PublishHistory(string appId, string env)
+        public async Task<ActionResult<IEnumerable<ApiPublishTimelineVM>>> PublishHistory(string appId, EnvString env)
         {
-            if (string.IsNullOrEmpty(appId))
-            {
-                throw new ArgumentNullException("appId");
-            }
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+            ArgumentException.ThrowIfNullOrEmpty(appId);
 
-            var history = await _configService.GetPublishTimelineHistoryAsync(appId, env);
+            var history = await _configService.GetPublishTimelineHistoryAsync(appId, env.Value);
 
             history = history.OrderByDescending(x => x.Version).ToList();
 
-            var vms = history.Select(x => new ApiPublishTimelineVM {
-                Id = x.Id,
-                Version = x.Version,
-                Log = x.Log,
-                PublishTime = x.PublishTime,
-                PublishUserId = x.PublishUserId,
-                Env = x.Env
-            });
+            var vms = history.Select(x => x.ToApiPublishTimelimeVM());
 
             return Json(vms);
         }
@@ -303,31 +248,26 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <param name="env">环境</param>
         /// <returns></returns>
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
-        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Config.Rollback_API", Functions.Config_Publish })]
+        [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "Config.Rollback_API", Functions.Config_Publish })]
         [HttpPost("rollback")]
-        public async Task<IActionResult> Rollback(string historyId, string env)
+        public async Task<IActionResult> Rollback(string historyId, EnvString env)
         {
-            env = await _configService.IfEnvEmptySetDefaultAsync(env);
+            _configController.ControllerContext.HttpContext = HttpContext;
 
-            var ctrl = new Controllers.ConfigController(
-                _configService,
-                _appService,
-                _userService
-                );
-            ctrl.ControllerContext.HttpContext = HttpContext;
+            var actionResult = await _configController.Rollback(historyId, env);
+            var status = actionResult as IStatusCodeActionResult;
+            var result = actionResult as JsonResult;
 
-            var result = (await ctrl.Rollback(historyId, env)) as JsonResult;
-
-            dynamic obj = result.Value;
-            if (obj.success == true)
+            dynamic obj = result?.Value;
+            if (obj?.success ?? false)
             {
                 return Ok();
             }
 
-            Response.StatusCode = 400;
+            Response.StatusCode = status.StatusCode.Value;
             return Json(new
             {
-                obj.message
+                obj?.message
             });
         }
 

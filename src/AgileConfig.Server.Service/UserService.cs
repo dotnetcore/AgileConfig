@@ -1,59 +1,59 @@
 ﻿using AgileConfig.Server.Data.Entity;
-using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.IService;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 using AgileConfig.Server.Common;
+using AgileConfig.Server.Data.Abstraction;
 
 namespace AgileConfig.Server.Service
 {
     public class UserService : IUserService
     {
-        private FreeSqlContext _dbContext;
+        private readonly IUserRepository _userRepository;
+        private readonly IUserRoleRepository _userRoleRepository;
 
-        public UserService(FreeSqlContext context)
+
+        public UserService(IUserRepository userRepository, IUserRoleRepository userRoleRepository)
         {
-            _dbContext = context;
+            _userRepository = userRepository;
+            _userRoleRepository = userRoleRepository;
         }
 
         public async Task<bool> AddAsync(User user)
         {
-            var old = await _dbContext.Users.Where(u => u.UserName == user.UserName && u.Status == UserStatus.Normal).FirstAsync();
+            var old = (await _userRepository.QueryAsync(u => u.UserName == user.UserName && u.Status == UserStatus.Normal)).FirstOrDefault();
             if (old != null)
             {
                 return false;
             }
 
-            await _dbContext.Users.AddAsync(user);
-            var result = await _dbContext.SaveChangesAsync();
+            await _userRepository.InsertAsync(user);
 
-            return result > 0;
+            return true;
         }
 
         public async Task<bool> DeleteAsync(User user)
         {
-            _dbContext.Users.Remove(user);
-            var result = await _dbContext.SaveChangesAsync();
-
-            return result > 0;
+            await _userRepository.DeleteAsync(user);
+            return true;
         }
 
-        public async Task<List<User>> GetUsersByNameAsync(string userName)
+        public Task<List<User>> GetUsersByNameAsync(string userName)
         {
-            return await _dbContext.Users.Where(u => u.UserName == userName).ToListAsync();
+            return _userRepository.QueryAsync(u => u.UserName == userName);
         }
 
-        public async Task<User> GetUserAsync(string id)
+        public Task<User> GetUserAsync(string id)
         {
-            return await _dbContext.Users.Where(u => u.Id == id).ToOneAsync();
+            return _userRepository.GetAsync(id);
         }
 
 
         public async Task<List<Role>> GetUserRolesAsync(string userId)
         {
-            var userRoles = await _dbContext.UserRoles.Where(x => x.UserId == userId).ToListAsync();
+            var userRoles = await _userRoleRepository.QueryAsync(x => x.UserId == userId);
 
             return userRoles.Select(x => x.Role).ToList();
         }
@@ -61,17 +61,17 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> UpdateAsync(User user)
         {
-            await _dbContext.Users.UpdateAsync(user);
-            var result = await _dbContext.SaveChangesAsync();
-
-            return result > 0;
+            await _userRepository.UpdateAsync(user);
+            return true;
         }
 
         public async Task<bool> UpdateUserRolesAsync(string userId, List<Role> roles)
         {
-            await _dbContext.UserRoles.RemoveAsync(x => x.UserId == userId);
+            var dbUserRoles = await _userRoleRepository.QueryAsync(x => x.UserId == userId);
+            await _userRoleRepository.DeleteAsync(dbUserRoles);
             var userRoles = new List<UserRole>();
-            roles.ForEach(x => {
+            roles.ForEach(x =>
+            {
                 userRoles.Add(new UserRole
                 {
                     Id = Guid.NewGuid().ToString("N"),
@@ -80,30 +80,29 @@ namespace AgileConfig.Server.Service
                 });
             });
 
-            await _dbContext.UserRoles.AddRangeAsync(userRoles);
-            var result = await _dbContext.SaveChangesAsync();
-
-            return result > 0;
+            await _userRoleRepository.InsertAsync(userRoles);
+            return true;
         }
 
         public void Dispose()
         {
-            _dbContext?.Dispose();
+            _userRepository.Dispose();
+            _userRoleRepository.Dispose();
         }
 
-        public async Task<List<User>> GetAll()
+        public Task<List<User>> GetAll()
         {
-            return await _dbContext.Users.Where(x => 1 == 1).ToListAsync();
+            return _userRepository.AllAsync();
         }
 
         public async Task<bool> ValidateUserPassword(string userName, string password)
         {
-            var user = await _dbContext.Users.Where(u => u.Status == UserStatus.Normal && u.UserName == userName).FirstAsync();
+            var user = (await _userRepository.QueryAsync(u => u.Status == UserStatus.Normal && u.UserName == userName)).FirstOrDefault();
             if (user == null)
             {
                 return false;
             }
-            
+
             if (user.Password == Encrypt.Md5(password + user.Salt))
             {
                 return true;
@@ -114,17 +113,9 @@ namespace AgileConfig.Server.Service
 
         public async Task<List<User>> GetUsersByRoleAsync(Role role)
         {
-            var users = await FreeSQL.Instance.Select<User, UserRole>()
-                .InnerJoin((a, b) => a.Id == b.UserId)
-                .Where((a, b) => b.Role == role)
-                .ToListAsync((a, b) => a);
-
-            return users;
-        }
-
-        public User GetUser(string userId)
-        {
-            return _dbContext.Users.Where(u => u.Id == userId).ToOne();
+            var userRoles = await _userRoleRepository.QueryAsync(x => x.Role == role);
+            var userIds = userRoles.Select(x => x.UserId).Distinct().ToList();
+            return await _userRepository.QueryAsync(x => userIds.Contains(x.Id));
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using Agile.Config.Protocol;
 using AgileConfig.Server.Apisite.Utilites;
 using AgileConfig.Server.Common;
+using AgileConfig.Server.Common.EventBus;
+using AgileConfig.Server.Event;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,14 +19,17 @@ namespace AgileConfig.Server.Apisite.Controllers
     public class RemoteServerProxyController : Controller
     {
         private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
+        private readonly ITinyEventBus _tinyEventBus;
         private readonly ILogger _logger;
 
         public RemoteServerProxyController(
             IRemoteServerNodeProxy remoteServerNodeProxy,
-            ILoggerFactory loggerFactory
+            ILoggerFactory loggerFactory,
+            ITinyEventBus tinyEventBus
         )
         {
             _remoteServerNodeProxy = remoteServerNodeProxy;
+            _tinyEventBus = tinyEventBus;
             _logger = loggerFactory.CreateLogger<RemoteServerProxyController>();
         }
 
@@ -50,10 +55,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _remoteServerNodeProxy.OneClientDoActionAsync(address, clientId, action);
             if (result)
             {
-                dynamic param = new ExpandoObject();
-                param.clientId = clientId;
-                param.userName = this.GetCurrentUserName();
-                TinyEventBus.Instance.Fire(EventKeys.DISCONNECT_CLIENT_SUCCESS, param);
+                _tinyEventBus.Fire(new DiscoinnectSuccessful(clientId, this.GetCurrentUserName()));
             }
 
             _logger.LogInformation("Request remote node {0} 's action OneClientDoAction {1} .", address,

@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using MongoDB.Bson.Serialization.Attributes;
+using AgileConfig.Server.Common;
 
 namespace AgileConfig.Server.Data.Entity
 {
@@ -17,10 +19,11 @@ namespace AgileConfig.Server.Data.Entity
 
     [Table(Name = "agc_server_node")]
     [OraclePrimaryKeyName("agc_server_node_pk")]
-    public class ServerNode
+    public class ServerNode: IEntity<string>
     {
+        [BsonId]
         [Column(Name = "address", StringLength = 100, IsPrimary = true)]
-        public string Address { get; set; }
+        public string Id { get; set; }
 
         [Column(Name = "remark", StringLength = 50)]
         public string Remark { get; set; }
@@ -29,9 +32,11 @@ namespace AgileConfig.Server.Data.Entity
         public NodeStatus Status { get; set; }
 
         [Column(Name = "last_echo_time")]
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime? LastEchoTime { get; set; }
 
         [Column(Name = "create_time")]
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime CreateTime { get; set; }
     }
 }

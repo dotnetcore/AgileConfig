@@ -3,7 +3,6 @@ using AgileConfig.Server.IService;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
@@ -23,16 +22,16 @@ namespace AgileConfig.Server.Apisite.Websocket
             Instance = new WebsocketCollection();
         }
 
-        private ConcurrentDictionary<string, WebsocketClient> _Clients = new ConcurrentDictionary<string, WebsocketClient>();
+        private readonly ConcurrentDictionary<string, WebsocketClient> _clients = new();
 
         public void SendMessageToAll(string message)
         {
-            if (_Clients.Count == 0)
+            if (_clients.Count == 0)
             {
                 return;
             }
             var data = Encoding.UTF8.GetBytes(message);
-            foreach (var webSocket in _Clients)
+            foreach (var webSocket in _clients)
             {
                 if (webSocket.Value.Client.State == WebSocketState.Open)
                 {
@@ -44,12 +43,12 @@ namespace AgileConfig.Server.Apisite.Websocket
 
         public void SendToAppClients(string appId, string message)
         {
-            if (_Clients.Count == 0)
+            if (_clients.IsEmpty)
             {
                 return;
             }
-            var appClients = _Clients.Values.Where(c => c.AppId == appId);
-            if (appClients.Count() == 0)
+            var appClients = _clients.Values.Where(c => c.AppId == appId);
+            if (!appClients.Any())
             {
                 return;
             }
@@ -66,12 +65,12 @@ namespace AgileConfig.Server.Apisite.Websocket
 
         public void SendActionToAppClients(string appId,string env, WebsocketAction action)
         {
-            if (_Clients.Count == 0)
+            if (_clients.IsEmpty)
             {
                 return;
             }
-            var appClients = _Clients.Values.Where(c => c.AppId == appId && c.Env == env);
-            if (appClients.Count() == 0)
+            var appClients = _clients.Values.Where(c => c.AppId == appId && c.Env == env);
+            if (!appClients.Any())
             {
                 return;
             }
@@ -112,28 +111,28 @@ namespace AgileConfig.Server.Apisite.Websocket
 
         public void AddClient(WebsocketClient client)
         {
-            _Clients.TryAdd(client.Id, client);
+            _clients.TryAdd(client.Id, client);
         }
 
         public async Task RemoveClient(WebsocketClient client, WebSocketCloseStatus? closeStatus, string closeDesc = null)
         {
-            if (_Clients.TryRemove(client.Id, out WebsocketClient tryRemoveClient) && client.Client.State == WebSocketState.Open)
+            if (_clients.TryRemove(client.Id, out WebsocketClient tryRemoveClient) && client.Client.State == WebSocketState.Open)
             {
-                await client.Client.CloseAsync(closeStatus.HasValue ? closeStatus.Value : WebSocketCloseStatus.Empty, closeDesc, CancellationToken.None);
+                await client.Client.CloseAsync(closeStatus ?? WebSocketCloseStatus.Empty, closeDesc, CancellationToken.None);
                 client.Client.Dispose();
             }
         }
 
         public void RemoveAppClients(string appId, WebSocketCloseStatus? closeStatus, string closeDesc)
         {
-            var removeClients = _Clients.Values.Where(c => c.AppId == appId).ToList();
+            var removeClients = _clients.Values.Where(c => c.AppId == appId).ToList();
             if (removeClients.Count == 0)
             {
                 return;
             }
             foreach (var webSocket in removeClients)
             {
-                _Clients.TryRemove(webSocket.Id, out WebsocketClient tryRemoveClient);
+                _clients.TryRemove(webSocket.Id, out WebsocketClient tryRemoveClient);
             }
             Task.Run(async () =>
             {
@@ -141,11 +140,9 @@ namespace AgileConfig.Server.Apisite.Websocket
                 {
                     try
                     {
-                        if (webSocket.Client.State == WebSocketState.Open)
-                        {
-                            await webSocket.Client.CloseAsync(closeStatus.HasValue ? closeStatus.Value : WebSocketCloseStatus.Empty, closeDesc, CancellationToken.None);
-                            webSocket.Client.Dispose();
-                        }
+                        if (webSocket.Client.State != WebSocketState.Open) continue;
+                        await webSocket.Client.CloseAsync(closeStatus ?? WebSocketCloseStatus.Empty, closeDesc, CancellationToken.None);
+                        webSocket.Client.Dispose();
                     }
                     catch (Exception ex)
                     {
@@ -157,13 +154,13 @@ namespace AgileConfig.Server.Apisite.Websocket
 
         public WebsocketClient Get(string clientId)
         {
-            _Clients.TryGetValue(clientId, out WebsocketClient client);
+            _clients.TryGetValue(clientId, out WebsocketClient client);
             return client;
         }
 
         public ClientInfos Report()
         {
-            var clientInfos = _Clients
+            var clientInfos = _clients
                                   .Values
                                   .Select(c => new ClientInfo { 
                                       Id = c.Id,
@@ -187,14 +184,14 @@ namespace AgileConfig.Server.Apisite.Websocket
 
         public void SendActionToAll(WebsocketAction action)
         {
-            if (_Clients.Count == 0)
+            if (_clients.IsEmpty)
             {
                 return;
             }
 
             var json = JsonConvert.SerializeObject(action);
             var data = Encoding.UTF8.GetBytes(json);
-            foreach (var webSocket in _Clients)
+            foreach (var webSocket in _clients)
             {
                 if (webSocket.Value.Client.State == WebSocketState.Open)
                 {
@@ -204,9 +201,14 @@ namespace AgileConfig.Server.Apisite.Websocket
             }
         }
 
+        public void Clear()
+        {
+            _clients?.Clear();
+        }
+
         public static IWebsocketCollection Instance { get; private set; }
 
-        public int Count => _Clients.Count;
+        public int Count => _clients.Count;
     }
 
 }

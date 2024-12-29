@@ -4,9 +4,9 @@ using NuGet.Common;
 
 namespace AgileConfig.Server.Apisite.UIExtension;
 
-internal class UIFileBag
+internal class UiFileBag
 {
-    private static Dictionary<string, string> _contentTypesMap = new()
+    private static readonly Dictionary<string, string> ContentTypesMap = new()
     {
         {".html", "text/html; charset=utf-8"},
         {".css", "text/css; charset=utf-8"},
@@ -25,7 +25,7 @@ internal class UIFileBag
     
     public string ExtType { get; init; }
 
-    public string ContentType => _contentTypesMap[ExtType];
+    public string ContentType => ContentTypesMap[ExtType];
 
     public DateTime LastModified { get; init; }
 }

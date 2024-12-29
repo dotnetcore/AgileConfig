@@ -9,9 +9,9 @@ using System.Linq;
 using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Common;
 using System.Collections.Generic;
-using AgileConfig.Server.Service;
-using System.Dynamic;
 using AgileConfig.Server.Apisite.Utilites;
+using AgileConfig.Server.Common.EventBus;
+using AgileConfig.Server.Event;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -19,10 +19,14 @@ namespace AgileConfig.Server.Apisite.Controllers
     public class UserController : Controller
     {
         private readonly IUserService _userService;
+        private readonly ITinyEventBus _tinyEventBus;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService,
+            ITinyEventBus tinyEventBus
+            )
         {
             _userService = userService;
+            _tinyEventBus = tinyEventBus;
         }
 
         [HttpGet]
@@ -38,7 +42,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var users = await _userService.GetAll();
-            users = users.Where(x => x.Status == UserStatus.Normal && x.Id != SettingService.SuperAdminId).ToList();
+            users = users.Where(x => x.Status == UserStatus.Normal && x.Id != SystemSettings.SuperAdminId).ToList();
             if (!string.IsNullOrEmpty(userName))
             {
                 users = users.Where(x => x.UserName != null && x.UserName.Contains(userName)).ToList();
@@ -82,7 +86,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "User.Add", Functions.User_Add })]
+        [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { "User.Add", Functions.User_Add })]
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] UserVM model)
         {
@@ -116,10 +120,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (addUserResult)
             {
-                dynamic param = new ExpandoObject();
-                param.userName = this.GetCurrentUserName();
-                param.user = user;
-                TinyEventBus.Instance.Fire(EventKeys.ADD_USER_SUCCESS, param);
+                _tinyEventBus.Fire(new AddUserSuccessful(user, this.GetCurrentUserName()));
             }
 
             return Json(new
@@ -129,7 +130,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "User.Edit", Functions.User_Edit })]
+        [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { "User.Edit", Functions.User_Edit })]
         [HttpPost]
         public async Task<IActionResult> Edit([FromBody] UserVM model)
         {
@@ -156,10 +157,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                dynamic param = new ExpandoObject();
-                param.userName = this.GetCurrentUserName();
-                param.user = user;
-                TinyEventBus.Instance.Fire(EventKeys.EDIT_USER_SUCCESS, param);
+                _tinyEventBus.Fire(new EditUserSuccessful(user, this.GetCurrentUserName()));
             }
 
             return Json(new
@@ -171,7 +169,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
         const string DefaultPassword = "123456";
 
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "User.ResetPassword", Functions.User_Edit })]
+        [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { "User.ResetPassword", Functions.User_Edit })]
         [HttpPost]
         public async Task<IActionResult> ResetPassword(string userId)
         {
@@ -195,10 +193,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _userService.UpdateAsync(user);
             if (result)
             {
-                dynamic param = new ExpandoObject();
-                param.user = user;
-                param.userName = this.GetCurrentUserName();
-                TinyEventBus.Instance.Fire(EventKeys.RESET_USER_PASSWORD_SUCCESS, param);
+                _tinyEventBus.Fire(new ResetUserPasswordSuccessful(this.GetCurrentUserName(), user.UserName));
             }
 
             return Json(new
@@ -208,7 +203,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
-        [TypeFilter(typeof(PremissionCheckAttribute), Arguments = new object[] { "User.Delete", Functions.User_Delete })]
+        [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { "User.Delete", Functions.User_Delete })]
         [HttpPost]
         public async Task<IActionResult> Delete(string userId)
         {
@@ -231,10 +226,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var result = await _userService.UpdateAsync(user);
             if (result)
             {
-                dynamic param = new ExpandoObject();
-                param.userName = this.GetCurrentUserName();
-                param.user = user;
-                TinyEventBus.Instance.Fire(EventKeys.DELETE_USER_SUCCESS, param);
+                _tinyEventBus.Fire(new DeleteUserSuccessful(user, this.GetCurrentUserName()));
             }
 
             return Json(new
@@ -264,7 +256,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         public async Task<IActionResult> AllUsers()
         {
             var users = await _userService.GetAll();
-            users = users.Where(x => x.Status == UserStatus.Normal && x.Id != SettingService.SuperAdminId).ToList();
+            users = users.Where(x => x.Status == UserStatus.Normal && x.Id != SystemSettings.SuperAdminId).ToList();
 
             return Json(new
             {

@@ -5,11 +5,6 @@ on:
     branches: [ master ]
     paths-ignore: 
       - '**/*.md'
-      - '**/*.yml'
-  pull_request:
-    branches: [ master ]
-  workflow_dispatch:
-
 jobs:
   build-reactapp:
     runs-on: ubuntu-latest
@@ -29,32 +24,27 @@ jobs:
         
     - run: npm install
     - run: npm run build
-    - uses: actions/upload-artifact@v2
-      with:
-        name: agileconfig-ui
-        path: src/AgileConfig.Server.UI/react-ui-antd/dist/
   build-dotnet:
-    needs: build-reactapp
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 8.0.*
-    - name: Install dependencies
+        dotnet-version: 8.0.x
+    - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --configuration Release --no-restore
-    - uses: actions/download-artifact@v2
+      run: dotnet build --no-restore
+    - name: Test
+      run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
       with:
-        name: agileconfig-ui
-        path: src/AgileConfig.Server.Apisite/wwwroot/ui
-    - name: Push to Docker Hub
-      uses: docker/build-push-action@v1
-      with:
-        username: ${{ secrets.DOCKER_HUB_NAME }}
-        password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-        repository: kklldog/agile_config
-        tags: test
+        directory: ./coverage
+        fail_ci_if_error: false
+        flags: unittests
+        name: agileconfig
+        token: ${{ secrets.CODECOV_TOKEN }}
+        verbose: true

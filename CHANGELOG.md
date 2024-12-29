@@ -1,5 +1,34 @@
 # Change log
 ------------------------------
+[1.9.8]
+* Correct naming
+* Refactor some logic
+* Upgrade MonogoDb driver to 3.0
+
+[1.9.7]
+* Refactor event bus
+
+[1.9.6]
+* Support OTLP headers
+
+[1.9.5]
+* Fix some small issue
+
+[1.9.4]
+* Support opentelemetry logs, traces, metrics
+
+[1.9.3]
+* Refactoring the TinyEventbus
+
+[1.9.2]
+* 修复无法后台校验 node 存活的问题
+
+[1.9.0]
+* mongodb supported
+  
+[1.8.1]
+* Use build-in HttpClient instead of AgileHttp client.
+
 [1.8.0]
 * 升级到 .NET8
 

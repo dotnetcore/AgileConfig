@@ -2,11 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace AgileConfig.Server.Common
 {
-    public class DictionaryConvertToJson
+    public static class DictionaryConvertToJson
     {
         public static string ToJson(IDictionary<string, string> dict)
         {

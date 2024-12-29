@@ -1,182 +1,42 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using AgileConfig.Server.Service;
-using System;
+
+using AgileConfig.Server.ServiceTests.sqlite;
 using System.Collections.Generic;
-using System.Text;
-using AgileConfig.Server.Data.Freesql;
-using FreeSql;
-using AgileConfig.Server.Data.Entity;
 using System.Threading.Tasks;
+using System;
+using Testcontainers.PostgreSql;
 
-namespace AgileConfig.Server.Service.Tests.PostgreSQL
+namespace AgileConfig.Server.ServiceTests.PostgreSQL
 {
-    [TestClass()]
-    public class SysLogServiceTests
+    public class SysLogServiceTests_pg: SysLogServiceTests
     {
+        static PostgreSqlContainer _container = new PostgreSqlBuilder().WithImage("postgres:15.1").Build();
 
-        IFreeSql fsq = null;
-        FreeSqlContext freeSqlContext;
-        SysLogService service = null;
-
-        [TestInitialize]
-        public void TestInitialize()
+        [ClassInitialize]
+        public static async Task ClassInit(TestContext testContext)
         {
-            string conn = "Host=127.0.0.1;Database=agile_config;Username=postgres;Password=dev@123";
-            fsq = new FreeSqlBuilder()
-                          .UseConnectionString(FreeSql.DataType.PostgreSQL, conn)
-                          .UseAutoSyncStructure(true)
-                          .Build();
-            FluentApi.Config(fsq);
-            freeSqlContext = new FreeSqlContext(fsq);
-
-            service = new SysLogService(freeSqlContext);
-            fsq.Delete<SysLog>().Where("1=1");
-
-            Console.WriteLine("TestInitialize");
+            await _container.StartAsync();
+            Console.WriteLine($"PostgreSqlContainer started");
         }
 
-
-
-        [TestCleanup]
-        public void Clean()
+        [ClassCleanup]
+        public static async Task ClassCleanup()
         {
-            freeSqlContext.Dispose();
-            fsq.Dispose();
+            await _container.DisposeAsync();
+            Console.WriteLine($"PostgreSqlContainer dispose");
         }
-        [TestMethod()]
-        public async Task AddSysLogAsyncTest()
+        public override Task<Dictionary<string, string>> GetConfigurationData()
         {
-            var source = new SysLog
-            {
-                AppId = "001",
-                LogType = SysLogType.Normal,
-                LogTime = DateTime.Now,
-                LogText = "123"
-            };
+            var connstr = _container.GetConnectionString();
+            Console.WriteLine($"PostgreSqlContainer connstr: {connstr}");
 
-            var result = await service.AddSysLogAsync(source);
-            Assert.IsTrue(result);
+            var dict = new Dictionary<string, string>();
+            dict["db:provider"] = "pg";
+            dict["db:conn"] = connstr;
 
-            var log = fsq.Select<SysLog>(new { 
-                Id = source.Id
-            }).ToOne();
 
-            Assert.IsNotNull(log);
-
-            Assert.AreEqual(source.Id, log.Id);
-            Assert.AreEqual(source.AppId, log.AppId);
-            Assert.AreEqual(source.LogType, log.LogType);
-         //   Assert.AreEqual(source.LogTime, log.LogTime);
-            Assert.AreEqual(source.LogText, log.LogText);
+            return Task.FromResult(dict);
         }
 
-
-        [TestMethod()]
-        public async Task AddRangeAsyncTest()
-        {
-            var source = new SysLog
-            {
-                AppId = "001",
-                LogType = SysLogType.Normal,
-                LogTime = DateTime.Now,
-                LogText = "123"
-            };
-            var source1 = new SysLog
-            {
-                AppId = "002",
-                LogType = SysLogType.Warn,
-                LogTime = DateTime.Now,
-                LogText = "124"
-            };
-            var result = await service.AddRangeAsync(new List<SysLog> {
-                source, source1
-            });
-            Assert.IsTrue(result);
-
-            var log = fsq.Select<SysLog>(new
-            {
-                Id = source.Id
-            }).ToOne();
-            Assert.IsNotNull(log);
-            Assert.AreEqual(source.Id, log.Id);
-            Assert.AreEqual(source.AppId, log.AppId);
-            Assert.AreEqual(source.LogType, log.LogType);
-          //  Assert.AreEqual(source.LogTime, log.LogTime);
-            Assert.AreEqual(source.LogText, log.LogText);
-
-            var log1 = fsq.Select<SysLog>(new
-            {
-                Id = source1.Id
-            }).ToOne();
-            Assert.IsNotNull(log1);
-            Assert.AreEqual(source1.Id, log1.Id);
-            Assert.AreEqual(source1.AppId, log1.AppId);
-            Assert.AreEqual(source1.LogType, log1.LogType);
-          //  Assert.AreEqual(source1.LogTime, log1.LogTime);
-            Assert.AreEqual(source1.LogText, log1.LogText);
-        }
-
-       
-        [TestMethod()]
-        public async Task CountTest()
-        {
-            fsq.Delete<SysLog>().Where("1=1").ExecuteAffrows();
-
-            var source = new SysLog
-            {
-                AppId = "001",
-                LogType = SysLogType.Normal,
-                LogTime = DateTime.Now,
-                LogText = "123"
-            };
-            var source1 = new SysLog
-            {
-                AppId = "002",
-                LogType = SysLogType.Warn,
-                LogTime = DateTime.Now,
-                LogText = "124"
-            };
-            var result = await service.AddRangeAsync(new List<SysLog> {
-                source, source1
-            });
-            Assert.IsTrue(result);
-
-           var count = await service.Count("001", SysLogType.Normal, DateTime.Now.AddDays(-1), DateTime.Now.AddDays(1));
-            Assert.AreEqual(1, count);
-
-            var count1 = await service.Count("002", SysLogType.Warn,DateTime.Now.AddDays(-1), DateTime.Now.AddDays(-1));
-            Assert.AreEqual(0, count1);
-        }
-
-        [TestMethod()]
-        public async Task SearchPageTest()
-        {
-            fsq.Delete<SysLog>().Where("1=1").ExecuteAffrows();
-
-            var source = new SysLog
-            {
-                AppId = "001",
-                LogType = SysLogType.Normal,
-                LogTime = DateTime.Now,
-                LogText = "123"
-            };
-            var source1 = new SysLog
-            {
-                AppId = "002",
-                LogType = SysLogType.Warn,
-                LogTime = DateTime.Now,
-                LogText = "124"
-            };
-            var result = await service.AddRangeAsync(new List<SysLog> {
-                source, source1
-            });
-            Assert.IsTrue(result);
-
-            var page = await service.SearchPage("001", SysLogType.Normal, DateTime.Now.AddDays(-1), DateTime.Now.AddDays(1),1,0);
-            Assert.AreEqual(1, page.Count);
-
-            var page1 = await service.SearchPage("002", SysLogType.Warn, DateTime.Now.AddDays(-1), DateTime.Now.AddDays(-1), 1, 0);
-            Assert.AreEqual(0, page1.Count);
-        }
     }
 }

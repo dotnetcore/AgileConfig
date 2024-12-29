@@ -8,10 +8,11 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
-using System.Dynamic;
 using AgileConfig.Server.Apisite.Utilites;
 using AgileConfig.Server.OIDC;
 using System.Collections.Generic;
+using AgileConfig.Server.Event;
+using AgileConfig.Server.Common.EventBus;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -19,21 +20,25 @@ namespace AgileConfig.Server.Apisite.Controllers
     {
         private readonly ISettingService _settingService;
         private readonly IUserService _userService;
-        private readonly IPremissionService _permissionService;
+        private readonly IPermissionService _permissionService;
         private readonly IJwtService _jwtService;
         private readonly IOidcClient _oidcClient;
+        private readonly ITinyEventBus _tinyEventBus;
+
         public AdminController(
             ISettingService settingService,
             IUserService userService,
-            IPremissionService permissionService,
+            IPermissionService permissionService,
             IJwtService jwtService,
-            IOidcClient oidcClient)
+            IOidcClient oidcClient,
+            ITinyEventBus tinyEventBus)
         {
             _settingService = settingService;
             _userService = userService;
             _permissionService = permissionService;
             _jwtService = jwtService;
             _oidcClient = oidcClient;
+            _tinyEventBus = tinyEventBus;
         }
 
 
@@ -72,9 +77,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var jwt = _jwtService.GetToken(user.Id, user.UserName, userRoles.Any(r => r == Role.Admin || r == Role.SuperAdmin));
             var userFunctions = await _permissionService.GetUserPermission(user.Id);
 
-            dynamic param = new ExpandoObject();
-            param.userName = user.UserName;
-            TinyEventBus.Instance.Fire(EventKeys.USER_LOGIN_SUCCESS, param);
+            _tinyEventBus.Fire(new LoginEvent(user.UserName));
 
             return new
             {
@@ -212,7 +215,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                TinyEventBus.Instance.Fire(EventKeys.INIT_SUPERADMIN_PASSWORD_SUCCESS);
+                _tinyEventBus.Fire(new InitSaPasswordSuccessful());
 
                 return Json(new
                 {
@@ -317,9 +320,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             if (result)
             {
-                dynamic param = new ExpandoObject();
-                param.userName = user.UserName;
-                TinyEventBus.Instance.Fire(EventKeys.CHANGE_USER_PASSWORD_SUCCESS, param);
+                _tinyEventBus.Fire(new ChangeUserPasswordSuccessful(user.UserName));
 
                 return Json(new
                 {

@@ -11,12 +11,12 @@ namespace AgileConfig.Server.Apisite.Controllers
     /// <summary>
     /// 这个Controller用来接受其它节点发送过来的命令
     /// </summary>
-    public class RemoteOPController : Controller
+    public class RemoteOpController : Controller
     {
         private readonly IConfigService _configService;
         private readonly IServiceInfoService _serviceInfoService;
         private readonly ILogger _logger;
-        public RemoteOPController(IConfigService configService,
+        public RemoteOpController(IConfigService configService,
             IServiceInfoService serviceInfoService,
             ILoggerFactory loggerFactory)
         {

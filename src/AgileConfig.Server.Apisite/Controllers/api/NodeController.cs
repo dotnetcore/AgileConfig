@@ -1,12 +1,13 @@
 ﻿using AgileConfig.Server.Apisite.Controllers.api.Models;
 using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Apisite.Models;
+using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AgileConfig.Server.Apisite.Models.Mapping;
 
 namespace AgileConfig.Server.Apisite.Controllers.api
 {
@@ -20,11 +21,18 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         private readonly IServerNodeService _serverNodeService;
         private readonly ISysLogService _sysLogService;
         private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
-        public NodeController(IServerNodeService serverNodeService, ISysLogService sysLogService, IRemoteServerNodeProxy remoteServerNodeProxy)
+        private readonly ITinyEventBus _tinyEventBus;
+
+        public NodeController(IServerNodeService serverNodeService,
+            ISysLogService sysLogService,
+            IRemoteServerNodeProxy remoteServerNodeProxy,
+            ITinyEventBus tinyEventBus
+            )
         {
             _serverNodeService = serverNodeService;
             _sysLogService = sysLogService;
             _remoteServerNodeProxy = remoteServerNodeProxy;
+            _tinyEventBus = tinyEventBus;
         }
 
         /// <summary>
@@ -36,13 +44,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         {
             var nodes = await _serverNodeService.GetAllNodesAsync();
 
-            var vms = nodes.Select(x=> new ApiNodeVM
-            { 
-                Address = x.Address,
-                Remark = x.Remark,
-                LastEchoTime = x.LastEchoTime,
-                Status= x.Status
-            });
+            var vms = nodes.Select(x => x.ToApiNodeVM());
 
             return Json(vms);
         }
@@ -53,7 +55,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <param name="model">节点模型</param>
         /// <returns></returns>
         [ProducesResponseType(201)]
-        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Node.Add", Functions.Node_Add })]
+        [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "Node.Add", Functions.Node_Add })]
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] ApiNodeVM model)
         {
@@ -68,25 +70,20 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 });
             }
 
-            var ctrl = new ServerNodeController(_serverNodeService, _sysLogService, _remoteServerNodeProxy);
+            var ctrl = new ServerNodeController(_serverNodeService, _sysLogService, _remoteServerNodeProxy, _tinyEventBus);
             ctrl.ControllerContext.HttpContext = HttpContext;
-            var result = (await ctrl.Add(new ServerNodeVM { 
-                Address = model.Address,
-                Remark = model.Remark,
-                LastEchoTime = model.LastEchoTime,
-                Status = model.Status
-            })) as JsonResult;
+            var result = (await ctrl.Add(model.ToServerNodeVM())) as JsonResult;
 
-            dynamic obj = result.Value;
-            if (obj.success == true)
+            dynamic obj = result?.Value;
+            if (obj?.success == true)
             {
-                return Created("","");
+                return Created("", "");
             }
 
             Response.StatusCode = 400;
             return Json(new
             {
-                obj.message
+                obj?.message
             });
         }
 
@@ -96,16 +93,16 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <param name="address">节点地址</param>
         /// <returns></returns>
         [ProducesResponseType(204)]
-        [TypeFilter(typeof(PremissionCheckByBasicAttribute), Arguments = new object[] { "Node.Delete", Functions.Node_Delete })]
+        [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "Node.Delete", Functions.Node_Delete })]
         [HttpDelete()]
         public async Task<IActionResult> Delete([FromQuery] string address)
         {
-            var ctrl = new ServerNodeController(_serverNodeService, _sysLogService, _remoteServerNodeProxy);
+            var ctrl = new ServerNodeController(_serverNodeService, _sysLogService, _remoteServerNodeProxy, _tinyEventBus);
             ctrl.ControllerContext.HttpContext = HttpContext;
             var result = (await ctrl.Delete(new ServerNodeVM { Address = address })) as JsonResult;
 
-            dynamic obj = result.Value;
-            if (obj.success == true)
+            dynamic obj = result?.Value;
+            if (obj?.success == true)
             {
                 return NoContent();
             }
@@ -113,7 +110,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
             Response.StatusCode = 400;
             return Json(new
             {
-                obj.message
+                obj?.message
             });
         }
 

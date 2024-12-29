@@ -1,8 +1,5 @@
 ﻿using AgileConfig.Server.Common;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace AgileConfig.Server.Apisite
 {
@@ -36,5 +33,26 @@ namespace AgileConfig.Server.Apisite
         /// SSO button text
         /// </summary>
         public static string SsoButtonText => Global.Config["SSO:loginButtonText"];
+
+        public static string OtlpLogsEndpoint => Global.Config["otlp:logs:endpoint"];
+
+        public static string OtlpLogsHeaders => Global.Config["otlp:logs:headers"];
+
+        public static string OtlpLogsProtocol => Global.Config["otlp:logs:protocol"];
+
+        public static string OtlpTracesEndpoint => Global.Config["otlp:traces:endpoint"];
+
+        public static string OtlpTracesProtocol => Global.Config["otlp:traces:protocol"];
+        
+        public static string OtlpTracesHeaders => Global.Config["otlp:traces:headers"];
+
+        public static string OtlpMetricsEndpoint => Global.Config["otlp:metrics:endpoint"];
+
+        public static string OtlpMetricsProtocol => Global.Config["otlp:metrics:protocol"];
+        
+        public static string OtlpMetricsHeaders => Global.Config["otlp:metrics:headers"];
+        
+        public static string OtlpInstanceId => Global.Config["otlp:instanceId"];
+
     }
 }

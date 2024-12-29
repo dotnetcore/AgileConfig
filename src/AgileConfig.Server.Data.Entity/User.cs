@@ -1,11 +1,13 @@
 ﻿using FreeSql.DataAnnotations;
 using System;
+using MongoDB.Bson.Serialization.Attributes;
+using AgileConfig.Server.Common;
 
 namespace AgileConfig.Server.Data.Entity
 {
     [Table(Name = "agc_user")]
     [OraclePrimaryKeyName("agc_user_pk")]
-    public class User
+    public class User: IEntity<string>
     {
         [Column(Name = "id", StringLength = 256)]
         public string Id { get; set; }
@@ -23,9 +25,11 @@ namespace AgileConfig.Server.Data.Entity
         public string Team { get; set; }
 
         [Column(Name = "create_time")]
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime CreateTime { get; set; }
 
         [Column(Name = "update_time")]
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime? UpdateTime { get; set; }
 
         [Column(Name = "status")]

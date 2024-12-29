@@ -1,5 +1,4 @@
 ﻿using AgileConfig.Server.Data.Entity;
-using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.IService;
 using System;
 using System.Collections.Generic;
@@ -8,63 +7,61 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AgileConfig.Server.Common;
+using AgileConfig.Server.Data.Abstraction;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
+using System.Linq.Expressions;
+using AgileConfig.Server.Common.EventBus;
+using AgileConfig.Server.Event;
 
 namespace AgileConfig.Server.Service
 {
     public class ServiceInfoService : IServiceInfoService
     {
         private readonly IMemoryCache _memoryCache;
+        private readonly IServiceInfoRepository _serviceInfoRepository;
+        private readonly ITinyEventBus _tinyEventBus;
 
-        public ServiceInfoService(IMemoryCache memoryCache)
+        public ServiceInfoService(IMemoryCache memoryCache, 
+            IServiceInfoRepository serviceInfoRepository,
+            ITinyEventBus tinyEventBus)
         {
             _memoryCache = memoryCache;
+            _serviceInfoRepository = serviceInfoRepository;
+            _tinyEventBus = tinyEventBus;
         }
 
-        public async Task<ServiceInfo> GetByUniqueIdAsync(string id)
+        public Task<ServiceInfo> GetByUniqueIdAsync(string id)
         {
-            var entity = await FreeSQL.Instance.Select<ServiceInfo>().Where(x => x.Id == id).FirstAsync();
-
-            return entity;
+            return _serviceInfoRepository.GetAsync(id);
         }
 
         public async Task<ServiceInfo> GetByServiceIdAsync(string serviceId)
         {
-            var entity = await FreeSQL.Instance.Select<ServiceInfo>().Where(x => x.ServiceId == serviceId).FirstAsync();
+            var entity = (await _serviceInfoRepository.QueryAsync(x => x.ServiceId == serviceId)).FirstOrDefault();
 
             return entity;
         }
 
         public async Task<bool> RemoveAsync(string id)
         {
-            var aff = await FreeSQL.Instance.Delete<ServiceInfo>().Where(x => x.Id == id)
-                .ExecuteAffrowsAsync();
-
-            return aff > 0;
+            await _serviceInfoRepository.DeleteAsync(id);
+            return true;
         }
 
-        public async Task<List<ServiceInfo>> GetAllServiceInfoAsync()
+        public Task<List<ServiceInfo>> GetAllServiceInfoAsync()
         {
-            var services = await FreeSQL.Instance.Select<ServiceInfo>().Where(x => 1 == 1).ToListAsync();
-
-            return services;
+            return _serviceInfoRepository.AllAsync();
         }
 
-        public async Task<List<ServiceInfo>> GetOnlineServiceInfoAsync()
+        public Task<List<ServiceInfo>> GetOnlineServiceInfoAsync()
         {
-            var services = await FreeSQL.Instance.Select<ServiceInfo>().Where(x => x.Status == ServiceStatus.Healthy)
-                .ToListAsync();
-
-            return services;
+            return _serviceInfoRepository.QueryAsync(x => x.Status == ServiceStatus.Healthy);
         }
 
-        public async Task<List<ServiceInfo>> GetOfflineServiceInfoAsync()
+        public Task<List<ServiceInfo>> GetOfflineServiceInfoAsync()
         {
-            var services = await FreeSQL.Instance.Select<ServiceInfo>().Where(x => x.Status == ServiceStatus.Unhealthy)
-                .ToListAsync();
-
-            return services;
+            return _serviceInfoRepository.QueryAsync(x => x.Status == ServiceStatus.Unhealthy);
         }
 
         public async Task<string> ServicesMD5Cache()
@@ -127,35 +124,32 @@ namespace AgileConfig.Server.Service
             var id = service.Id;
             var oldStatus = service.Status;
 
-            if (status == ServiceStatus.Unhealthy)
+            var service2 = await _serviceInfoRepository.GetAsync(id);
+            if (service2 == null) return;
+
+            service2.Status = status;
+            if (status != ServiceStatus.Unhealthy)
             {
-                await FreeSQL.Instance.Update<ServiceInfo>()
-                    .Set(x => x.Status, status)
-                    .Where(x => x.Id == id)
-                    .ExecuteAffrowsAsync();
+                service2.LastHeartBeat = DateTime.Now;
             }
-            else
-            {
-                await FreeSQL.Instance.Update<ServiceInfo>()
-                    .Set(x => x.Status, status)
-                    .Set(x => x.LastHeartBeat, DateTime.Now)
-                    .Where(x => x.Id == id)
-                    .ExecuteAffrowsAsync();
-            }
+            await _serviceInfoRepository.UpdateAsync(service2);
 
             if (oldStatus != status)
             {
                 ClearCache();
-                dynamic param = new ExpandoObject();
-                param.ServiceId = service.ServiceId;
-                param.ServiceName = service.ServiceName;
-                param.UniqueId = service.Id;
-                TinyEventBus.Instance.Fire(EventKeys.UPDATE_SERVICE_STATUS, param);
+
+                _tinyEventBus.Fire(new ServiceStatusUpdateEvent(service.Id));
             }
         }
 
         public void Dispose()
         {
+            _serviceInfoRepository.Dispose();
+        }
+
+        public Task<List<ServiceInfo>> QueryAsync(Expression<Func<ServiceInfo, bool>> exp)
+        {
+            return _serviceInfoRepository.QueryAsync(exp);
         }
     }
 }

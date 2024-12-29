@@ -4,12 +4,11 @@ using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Threading.Tasks;
 using Agile.Config.Protocol;
-using AgileConfig.Server.Common;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
+using AgileConfig.Server.Apisite.Models.Mapping;
+using AgileConfig.Server.Common.EventBus;
+using AgileConfig.Server.Event;
 
 namespace AgileConfig.Server.Apisite.Controllers.api
 {
@@ -22,41 +21,30 @@ namespace AgileConfig.Server.Apisite.Controllers.api
     {
         private readonly IRegisterCenterService _registerCenterService;
         private readonly IServiceInfoService _serviceInfoService;
-        private readonly ILogger<RegisterCenterController> _logger;
+        private readonly ITinyEventBus _tinyEventBus;
 
         public RegisterCenterController(IRegisterCenterService registerCenterService
-            ,IServiceInfoService serviceInfoService,
-            ILoggerFactory loggerFactory
+            , IServiceInfoService serviceInfoService,
+            ITinyEventBus tinyEventBus
             )
         {
             _registerCenterService = registerCenterService;
             _serviceInfoService = serviceInfoService;
-            _logger = loggerFactory.CreateLogger<RegisterCenterController>();
+            _tinyEventBus = tinyEventBus;
         }
-       
+
         [HttpPost]
-        public async Task<RegisterResultVM> Register([FromBody]RegisterServiceInfoVM model)
+        public async Task<RegisterResultVM> Register([FromBody] RegisterServiceInfoVM model)
         {
-            var entity = new ServiceInfo();
-            entity.ServiceId = model.ServiceId;
-            entity.ServiceName = model.ServiceName;
-            entity.Ip = model.Ip;
-            entity.Port = model.Port;
-            entity.CheckUrl = model.CheckUrl;
-            entity.AlarmUrl = model.AlarmUrl;
-            entity.HeartBeatMode = model.HeartBeatMode;
-            entity.MetaData = model.MetaData is null ? "[]" : JsonConvert.SerializeObject(model.MetaData);
+            ArgumentNullException.ThrowIfNull(model);
+
+            var entity = model.ToServiceInfo();
             entity.RegisterWay = RegisterWay.Auto;
-            
+
             var id = await _registerCenterService.RegisterAsync(entity);
 
-            //send a message to notify other services
-            dynamic param = new ExpandoObject();
-            param.ServiceId = model.ServiceId;
-            param.ServiceName = model.ServiceName;
-            param.UniqueId = id;
-            TinyEventBus.Instance.Fire(EventKeys.REGISTER_A_SERVICE,param);
-            
+            _tinyEventBus.Fire(new ServiceRegisteredEvent(id));
+
             return new RegisterResultVM
             {
                 UniqueId = id
@@ -65,33 +53,28 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult<RegisterResultVM>> UnRegister(string id, [FromBody]RegisterServiceInfoVM vm)
+        public async Task<ActionResult<RegisterResultVM>> UnRegister(string id, [FromBody] RegisterServiceInfoVM vm)
         {
             var entity = await _serviceInfoService.GetByUniqueIdAsync(id);
             if (entity == null)
             {
                 return NotFound();
             }
-            
+
             var result = await _registerCenterService.UnRegisterAsync(id);
             if (!result)
             {
                 if (!string.IsNullOrEmpty(vm?.ServiceId))
-                { 
+                {
                     result = await _registerCenterService.UnRegisterByServiceIdAsync(vm.ServiceId);
                 }
             }
 
             if (result)
             {
-                //send a message to notify other services
-                dynamic param = new ExpandoObject();
-                param.ServiceId = entity.ServiceId;
-                param.ServiceName = entity.ServiceName;
-                param.UniqueId = id;
-                TinyEventBus.Instance.Fire(EventKeys.UNREGISTER_A_SERVICE,param);
+                _tinyEventBus.Fire(new ServiceUnRegisterEvent(id));
             }
-            
+
             return new RegisterResultVM
             {
                 UniqueId = id,
@@ -99,12 +82,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         [HttpPost("heartbeat")]
-        public async Task<ActionResult<HeartbeatResultVM>> Heartbeat([FromBody]HeartbeatParam param)
+        public async Task<ActionResult<HeartbeatResultVM>> Heartbeat([FromBody] HeartbeatParam param)
         {
-            if (param == null)
-            {
-                throw  new ArgumentNullException(nameof(param));
-            }
+            ArgumentNullException.ThrowIfNull(param);
 
             bool serviceHeartbeatResult = false;
             if (!string.IsNullOrEmpty(param.UniqueId))
@@ -125,91 +105,46 @@ namespace AgileConfig.Server.Apisite.Controllers.api
 
             return NotFound();
         }
-        
+
         [HttpGet("services")]
-        public async Task<List<ServiceInfoVM>> AllServices()
+        public async Task<List<ApiServiceInfoVM>> AllServices()
         {
             var services = await _serviceInfoService.GetAllServiceInfoAsync();
-            var vms = new List<ServiceInfoVM>();
+            var vms = new List<ApiServiceInfoVM>();
             foreach (var serviceInfo in services)
             {
-                var vm = new ServiceInfoVM
-                {
-                    ServiceId = serviceInfo.ServiceId,
-                    ServiceName = serviceInfo.ServiceName,
-                    Ip = serviceInfo.Ip,
-                    Port = serviceInfo.Port,
-                    MetaData = new List<string>(),
-                    Status = serviceInfo.Status
-                };
-                try
-                {
-                    vm.MetaData = JsonConvert.DeserializeObject<List<string>>(serviceInfo.MetaData);
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError(e, $"deserialize meta data error, serviceId:{serviceInfo.ServiceId}");
-                }
+                var vm =  serviceInfo.ToApiServiceInfoVM();
+
                 vms.Add(vm);
             }
 
             return vms;
         }
-        
+
         [HttpGet("services/online")]
-        public async Task<List<ServiceInfoVM>> OnlineServices()
+        public async Task<List<ApiServiceInfoVM>> OnlineServices()
         {
             var services = await _serviceInfoService.GetOnlineServiceInfoAsync();
-            var vms = new List<ServiceInfoVM>();
+            var vms = new List<ApiServiceInfoVM>();
             foreach (var serviceInfo in services)
             {
-                var vm = new ServiceInfoVM
-                {
-                    ServiceId = serviceInfo.ServiceId,
-                    ServiceName = serviceInfo.ServiceName,
-                    Ip = serviceInfo.Ip,
-                    Port = serviceInfo.Port,
-                    MetaData = new List<string>(),
-                    Status = serviceInfo.Status
-                };
-                try
-                {
-                    vm.MetaData = JsonConvert.DeserializeObject<List<string>>(serviceInfo.MetaData);
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError(e, $"deserialize meta data error, serviceId:{serviceInfo.ServiceId}");
-                }
+                var vm = serviceInfo.ToApiServiceInfoVM();
+
                 vms.Add(vm);
             }
 
             return vms;
         }
-        
+
         [HttpGet("services/offline")]
-        public async Task<List<ServiceInfoVM>> OfflineServices()
+        public async Task<List<ApiServiceInfoVM>> OfflineServices()
         {
             var services = await _serviceInfoService.GetOfflineServiceInfoAsync();
-            var vms = new List<ServiceInfoVM>();
+            var vms = new List<ApiServiceInfoVM>();
             foreach (var serviceInfo in services)
             {
-                var vm = new ServiceInfoVM
-                {
-                    ServiceId = serviceInfo.ServiceId,
-                    ServiceName = serviceInfo.ServiceName,
-                    Ip = serviceInfo.Ip,
-                    Port = serviceInfo.Port,
-                    MetaData = new List<string>(),
-                    Status = serviceInfo.Status
-                };
-                try
-                {
-                    vm.MetaData = JsonConvert.DeserializeObject<List<string>>(serviceInfo.MetaData);
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError(e, $"deserialize meta data error, serviceId:{serviceInfo.ServiceId}");
-                }
+                var vm = serviceInfo.ToApiServiceInfoVM();
+
                 vms.Add(vm);
             }
 

@@ -1,4 +1,5 @@
-﻿using FreeSql.DataAnnotations;
+﻿using AgileConfig.Server.Common;
+using FreeSql.DataAnnotations;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,7 +11,7 @@ namespace AgileConfig.Server.Data.Entity
     /// </summary>
     [Table(Name = "agc_appInheritanced")]
     [OraclePrimaryKeyName("agc_appInheritanced_pk")]
-    public class AppInheritanced
+    public class AppInheritanced : IEntity<string>
     {
         [Column(Name = "id", StringLength = 36)]
         public string Id { get; set; }

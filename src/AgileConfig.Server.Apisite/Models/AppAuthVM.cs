@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AgileConfig.Server.Apisite.Models
 {
+    [ExcludeFromCodeCoverage]
     public class AppAuthVM: IAppIdModel
     {
         public List<string> EditConfigPermissionUsers { get; set; }

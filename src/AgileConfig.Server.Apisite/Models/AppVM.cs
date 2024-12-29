@@ -1,11 +1,13 @@
-﻿using AgileConfig.Server.Data.Entity;
+﻿using AgileConfig.Server.Apisite.Controllers.api.Models;
+using AgileConfig.Server.Data.Entity;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AgileConfig.Server.Apisite.Models
 {
-
+    [ExcludeFromCodeCoverage]
     public class AppVM : IAppModel
     {
         [Required(ErrorMessage = "应用Id不能为空")]
@@ -37,11 +39,78 @@ namespace AgileConfig.Server.Apisite.Models
 
     }
 
+    [ExcludeFromCodeCoverage]
     public class AppListVM : AppVM
     {
 
         public DateTime? UpdateTime { get; set; }
         
         public List<AppListVM> children { get; set; }
+    }
+
+    public static class AppVMExtension
+    {
+        public static App ToApp(this AppVM vm)
+        {
+            if (vm == null)
+            {
+                return null;
+            }
+
+            var app = new App();
+            app.Id = vm.Id;
+            app.Name = vm.Name;
+            app.Secret = vm.Secret;
+            app.Enabled = vm.Enabled;
+            app.Type = vm.Inheritanced ? AppType.Inheritance : AppType.PRIVATE;
+            app.AppAdmin = vm.AppAdmin;
+            app.Group = vm.Group;
+            app.CreateTime = vm.CreateTime;
+
+            return app;
+        }
+
+        public static App ToApp(this AppVM vm, App app)
+        {
+            if (vm == null)
+            {
+                return null;
+            }
+
+            app.Id = vm.Id;
+            app.Name = vm.Name;
+            app.Secret = vm.Secret;
+            app.Enabled = vm.Enabled;
+            app.Type = vm.Inheritanced ? AppType.Inheritance : AppType.PRIVATE;
+            app.AppAdmin = vm.AppAdmin;
+            app.Group = vm.Group;
+            if (vm.CreateTime > DateTime.MinValue)
+            {
+                app.CreateTime = vm.CreateTime;
+            }
+
+            return app;
+        }
+
+        public static ApiAppVM ToApiAppVM(this AppVM vm)
+        {
+            if (vm == null)
+            {
+                return null;
+            }
+
+            return new ApiAppVM
+            {
+                Id = vm.Id,
+                Name = vm.Name,
+                Secret = vm.Secret,
+                Inheritanced = vm.Inheritanced,
+                Enabled = vm.Enabled,
+                InheritancedApps = vm.inheritancedApps,
+                AppAdmin = vm.AppAdmin,
+                Group = vm.Group,
+                CreateTime = vm.CreateTime
+            };
+        }
     }
 }
