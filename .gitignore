@@ -267,3 +267,4 @@ __pycache__/
 /src/AgileConfig.Server.Apisite/agile_config_TEST.db
 /src/AgileConfig.Server.Apisite/wwwroot/ui/
 /src/AgileConfig.Server.Apisite/agile_config.db
+/coverage

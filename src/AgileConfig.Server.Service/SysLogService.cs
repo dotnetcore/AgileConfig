@@ -2,85 +2,102 @@
 using AgileConfig.Server.IService;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
-using AgileConfig.Server.Data.Freesql;
+using AgileConfig.Server.Data.Abstraction;
+using Microsoft.Extensions.Logging;
+using static FreeSql.Internal.GlobalFilter;
 
 namespace AgileConfig.Server.Service
 {
     public class SysLogService : ISysLogService
     {
-        private FreeSqlContext _dbContext;
+        private readonly ISysLogRepository _sysLogRepository;
+        private readonly ILogger<SysLogService> _logger;
 
-        public SysLogService(FreeSqlContext context)
+        public SysLogService(ISysLogRepository sysLogRepository, ILogger<SysLogService> logger)
         {
-            _dbContext = context;
+            _sysLogRepository = sysLogRepository;
+            _logger = logger;
         }
 
         public async Task<bool> AddRangeAsync(IEnumerable<SysLog> logs)
         {
-            int x = await _dbContext.Freesql.Insert(logs).ExecuteAffrowsAsync();
-            return x > 0;
+            await _sysLogRepository.InsertAsync(logs.ToList());
+
+            foreach (var item in logs)
+            {
+                _logger.LogInformation("{AppId} {LogType} {LogTime} {LogText}", item.AppId, item.LogType, item.LogTime, item.LogText);
+            }
+
+            return true;
         }
 
         public async Task<bool> AddSysLogAsync(SysLog log)
         {
-            int x =  await _dbContext.Freesql.Insert(log).ExecuteAffrowsAsync();;
-            return x > 0;
+            await _sysLogRepository.InsertAsync(log);
+
+            _logger.LogInformation("{AppId} {LogType} {LogTime} {LogText}", log.AppId, log.LogType, log.LogTime, log.LogText);
+
+            return true;
         }
 
-        public async Task<long> Count(string appId, SysLogType? logType, DateTime? startTime, DateTime? endTime)
+        public Task<long> Count(string appId, SysLogType? logType, DateTime? startTime, DateTime? endTime)
         {
-            var query = _dbContext.SysLogs.Where(s => 1 == 1);
+            Expression<Func<SysLog, bool>> exp = x => true;
             if (!string.IsNullOrEmpty(appId))
             {
-                query = query.Where(x => x.AppId == appId);
+                exp = exp.And(c => c.AppId == appId);
             }
+
             if (startTime.HasValue)
             {
-                query = query.Where(x => x.LogTime >= startTime);
+                exp = exp.And(x => x.LogTime >= startTime);
             }
+
             if (endTime.HasValue)
             {
-                query = query.Where(x => x.LogTime < endTime);
+                exp = exp.And(x => x.LogTime < endTime);
             }
+
             if (logType.HasValue)
             {
-                query = query.Where(x => x.LogType == logType);
+                exp = exp.And(x => x.LogType == logType);
             }
 
-            var count = await query.CountAsync();
-
-            return count;
+            return _sysLogRepository.CountAsync(exp);
         }
 
         public void Dispose()
         {
-            _dbContext.Dispose();
+            _sysLogRepository.Dispose();
         }
 
         public Task<List<SysLog>> SearchPage(string appId, SysLogType? logType, DateTime? startTime, DateTime? endTime, int pageSize, int pageIndex)
         {
-            var query = _dbContext.SysLogs.Where(s => 1 == 1);
+            Expression<Func<SysLog, bool>> exp = x => true;
             if (!string.IsNullOrEmpty(appId))
             {
-                query = query.Where(x => x.AppId == appId);
+                exp = exp.And(c => c.AppId == appId);
             }
+
             if (startTime.HasValue)
             {
-                query = query.Where(x => x.LogTime >= startTime);
+                exp = exp.And(x => x.LogTime >= startTime);
             }
+
             if (endTime.HasValue)
             {
-                query = query.Where(x => x.LogTime < endTime);
+                exp = exp.And(x => x.LogTime < endTime);
             }
+
             if (logType.HasValue)
             {
-                query = query.Where(x => x.LogType == logType);
+                exp = exp.And(x => x.LogType == logType);
             }
 
-            query = query.OrderByDescending(x => x.Id).Skip((pageIndex - 1) * pageSize).Take(pageSize);
-
-            return query.ToListAsync();
+            return _sysLogRepository.QueryPageAsync(exp, pageIndex, pageSize, defaultSortField: "LogTime", defaultSortType: "DESC");
         }
     }
 }

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -16,7 +11,7 @@ namespace AgileConfig.Server.Apisite.Filters
     /// </summary>
     public class AdmBasicAuthenticationAttribute : ActionFilterAttribute
     {
-        private IAdmBasicAuthService _admBasicAuthService;
+        private readonly IAdmBasicAuthService _admBasicAuthService;
         public AdmBasicAuthenticationAttribute(IAdmBasicAuthService admBasicAuthService)
         {
             _admBasicAuthService = admBasicAuthService;
@@ -32,7 +27,7 @@ namespace AgileConfig.Server.Apisite.Filters
             await base.OnActionExecutionAsync(context, next);
         }
 
-        public async Task<bool> Valid(HttpRequest httpRequest)
+        private async Task<bool> Valid(HttpRequest httpRequest)
         {
             return await _admBasicAuthService.ValidAsync(httpRequest);
         }

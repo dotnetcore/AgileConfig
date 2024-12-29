@@ -1,11 +1,13 @@
 ﻿using FreeSql.DataAnnotations;
 using System;
+using MongoDB.Bson.Serialization.Attributes;
+using AgileConfig.Server.Common;
 
 namespace AgileConfig.Server.Data.Entity
 {
     [Table(Name = "agc_config_published")]
     [OraclePrimaryKeyName("agc_config_published_pk")]
-    public class ConfigPublished
+    public class ConfigPublished : IEntity<string>
     {
         [Column(Name = "id", StringLength = 36)]
         public string Id { get; set; }
@@ -22,6 +24,7 @@ namespace AgileConfig.Server.Data.Entity
         public string Value { get; set; }
 
         [Column(Name = "publish_time")]
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime? PublishTime { get; set; }
 
         [Column(Name = "config_id", StringLength = 36)]

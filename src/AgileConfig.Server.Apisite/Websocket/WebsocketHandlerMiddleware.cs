@@ -106,13 +106,11 @@ namespace AgileConfig.Server.Apisite.Websocket
                     {
                         _logger.LogInformation("client {0} closed the websocket connection directly .", client.Id);
                         await _websocketCollection.RemoveClient(client, WebSocketCloseStatus.Empty, null);
-                        await context.Response.WriteAsync("500 closed");
                     }
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, "Handle websocket client {0} err .", client.Id);
                         await _websocketCollection.RemoveClient(client, WebSocketCloseStatus.Empty, null);
-                        await context.Response.WriteAsync("500 closed");
                     }
                 }
                 else
@@ -165,7 +163,7 @@ namespace AgileConfig.Server.Apisite.Websocket
             var messageHandlers =
                 new WebsocketMessageHandlers(configService, registerCenterService, serviceInfoService);
             var buffer = new byte[1024 * 2];
-            WebSocketReceiveResult result = null;
+            WebSocketReceiveResult result;
             do
             {
                 result = await socketClient.Client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
@@ -198,10 +196,8 @@ namespace AgileConfig.Server.Apisite.Websocket
                 if (result.MessageType == WebSocketMessageType.Text)
                 {
                     ms.Seek(0, SeekOrigin.Begin);
-                    using (var reader = new StreamReader(ms, Encoding.UTF8))
-                    {
-                        return await reader.ReadToEndAsync();
-                    }
+                    using var reader = new StreamReader(ms, Encoding.UTF8);
+                    return await reader.ReadToEndAsync();
                 }
 
                 return "";

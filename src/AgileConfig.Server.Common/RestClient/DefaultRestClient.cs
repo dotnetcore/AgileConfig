@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -40,7 +39,7 @@ namespace AgileConfig.Server.Common.RestClient
             return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(json);
         }
 
-        public async Task<HttpResponseMessage> PostAsync(string url, object data, Dictionary<string, string> headers = null)
+        public Task<HttpResponseMessage> PostAsync(string url, object data, Dictionary<string, string> headers = null)
         {
             var httpclient = GetDefaultClient();
             if (headers != null)
@@ -59,12 +58,10 @@ namespace AgileConfig.Server.Common.RestClient
             var stringContent = new StringContent(jsondata,
                 new System.Net.Http.Headers.MediaTypeHeaderValue("application/json"));
 
-            var resp = await httpclient.PostAsync(url, stringContent);
-
-            return resp;
+            return httpclient.PostAsync(url, stringContent);
         }
 
-        public async Task<HttpResponseMessage> GetAsync(string url, Dictionary<string, string> headers = null)
+        public Task<HttpResponseMessage> GetAsync(string url, Dictionary<string, string> headers = null)
         {
             var httpclient = GetDefaultClient();
             if (headers != null)
@@ -74,9 +71,8 @@ namespace AgileConfig.Server.Common.RestClient
                     httpclient.DefaultRequestHeaders.Add(header.Key, header.Value);
                 }
             }
-            var resp = await httpclient.GetAsync(url);
 
-            return resp;
+            return httpclient.GetAsync(url);
         }
     }
 }

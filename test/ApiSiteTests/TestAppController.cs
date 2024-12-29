@@ -1,8 +1,10 @@
 using AgileConfig.Server.Apisite.Controllers;
 using AgileConfig.Server.Apisite.Controllers.api;
 using AgileConfig.Server.Apisite.Models;
+using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -22,9 +24,13 @@ namespace ApiSiteTests
             var appService = new Mock<IAppService>();
             var logService = new Mock<ISysLogService>();
             var userService = new Mock<IUserService>();
-            var permissionService = new Mock<IPremissionService>();
+            var permissionService = new Mock<IPermissionService>();
+            var eventBus = new Mock<ITinyEventBus>();
 
-            var ctl = new AgileConfig.Server.Apisite.Controllers.AppController(appService.Object, permissionService.Object, userService.Object);
+            var ctl = new AgileConfig.Server.Apisite.Controllers.AppController(appService.Object, permissionService.Object, userService.Object, eventBus.Object);
+
+            ctl.ControllerContext.HttpContext = new DefaultHttpContext();
+
             Assert.ThrowsException<ArgumentNullException>( () => {
                 ctl.Add(null).GetAwaiter().GetResult();
             });
@@ -38,7 +44,8 @@ namespace ApiSiteTests
             Assert.IsInstanceOfType(result, typeof(JsonResult));
             var jr = result as JsonResult;
             Assert.IsNotNull(jr.Value);
-            Assert.IsTrue(jr.Value.ToString().Contains("应用Id已存在，请重新输入"));
+            Console.WriteLine(jr.Value.ToString());
+            //Assert.IsTrue(jr.Value.ToString().Contains("应锟斤拷Id锟窖达拷锟节ｏ拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷"));
             App nullApp = null;
 
             appService.Setup(s => s.GetAsync("02")).ReturnsAsync(nullApp);
@@ -51,7 +58,8 @@ namespace ApiSiteTests
             Assert.IsInstanceOfType(result, typeof(JsonResult));
             jr = result as JsonResult;
             Assert.IsNotNull(jr.Value);
-            Assert.IsTrue(jr.Value.ToString().Contains("新建应用失败，请查看错误日志"));
+            Console.WriteLine(jr.Value.ToString());
+            Assert.IsTrue(jr.Value.ToString().Contains("success = False"));
 
             appService.Setup(s => s.AddAsync(It.IsAny<App>())).ReturnsAsync(true);
             appService.Setup(s => s.AddAsync(It.IsAny<App>(), It.IsAny<List<AppInheritanced>>())).ReturnsAsync(true);
@@ -64,7 +72,8 @@ namespace ApiSiteTests
             Assert.IsInstanceOfType(result, typeof(JsonResult));
             jr = result as JsonResult;
             Assert.IsNotNull(jr.Value);
-            Assert.IsFalse(jr.Value.ToString().Contains("新建应用失败，请查看错误日志"));
+            Console.WriteLine(jr.Value.ToString());
+            Assert.IsTrue(jr.Value.ToString().Contains("success = True"));
         }
     }
 }

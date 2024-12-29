@@ -1,6 +1,5 @@
 ﻿using AgileConfig.Server.Common;
 using AgileConfig.Server.IService;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
@@ -31,7 +30,7 @@ namespace AgileConfig.Server.Apisite.Utilites
         /// </summary>
         /// <param name="ctrl"></param>
         /// <returns></returns>
-        public static async Task<string> GetCurrentUserId(this Controller ctrl, IUserService userservice = null)
+        public static async Task<string> GetCurrentUserId(this Controller ctrl, IUserService userService)
         {
             var userId = ctrl.HttpContext.GetUserIdFromClaim();
             if (string.IsNullOrEmpty(userId))
@@ -39,7 +38,7 @@ namespace AgileConfig.Server.Apisite.Utilites
                 var result = ctrl.Request.GetUserNamePasswordFromBasicAuthorization();
                 if (!string.IsNullOrEmpty(result.Item1))
                 {
-                    var user =(await userservice.GetUsersByNameAsync(result.Item1)).FirstOrDefault(x=>x.Status == Data.Entity.UserStatus.Normal);
+                    var user =(await userService.GetUsersByNameAsync(result.Item1)).FirstOrDefault(x=>x.Status == Data.Entity.UserStatus.Normal);
                     userId = user?.Id;
                 }
             }

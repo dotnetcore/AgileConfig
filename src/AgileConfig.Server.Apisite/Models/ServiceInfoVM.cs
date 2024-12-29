@@ -1,9 +1,11 @@
 ﻿using System;
 using AgileConfig.Server.Data.Entity;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AgileConfig.Server.Apisite.Models;
 
+[ExcludeFromCodeCoverage]
 public class ServiceInfoVM
 {
     public string Id { get; set; }

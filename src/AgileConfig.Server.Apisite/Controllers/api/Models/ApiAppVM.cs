@@ -1,10 +1,7 @@
 ﻿using AgileConfig.Server.Apisite.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AgileConfig.Server.Data.Entity;
-using NuGet.Common;
 
 namespace AgileConfig.Server.Apisite.Controllers.api.Models
 {
@@ -45,5 +42,27 @@ namespace AgileConfig.Server.Apisite.Controllers.api.Models
         public string Group { get; set; }
         
         public DateTime CreateTime { get; set; }
+    }
+
+    public static class ApiAppVMExtension
+    {
+        public static AppVM ToAppVM(this ApiAppVM vm)
+        {
+            if (vm == null)
+            {
+                return null;
+            }
+
+            return new AppVM
+            {
+                Id = vm.Id,
+                Name = vm.Name,
+                Secret = vm.Secret,
+                AppAdmin = vm.AppAdmin,
+                Inheritanced = vm.Inheritanced,
+                Group = vm.Group,
+                Enabled = vm.Enabled.GetValueOrDefault()
+            };
+        }
     }
 }

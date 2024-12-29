@@ -1,31 +1,32 @@
 ﻿using AgileConfig.Server.Data.Entity;
-using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.IService;
 using System;
-using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using AgileConfig.Server.Common;
+using AgileConfig.Server.Data.Abstraction;
 using Microsoft.Extensions.Logging;
+using AgileConfig.Server.Common.EventBus;
+using AgileConfig.Server.Event;
 
 namespace AgileConfig.Server.Service
 {
     public class RegisterCenterService : IRegisterCenterService
     {
-        private readonly FreeSqlContext _dbContext;
+        private readonly IServiceInfoRepository _serviceInfoRepository;
         private readonly ILogger<RegisterCenterService> _logger;
         private readonly IServiceInfoService _serviceInfoService;
+        private readonly ITinyEventBus _tinyEventBus;
 
         public RegisterCenterService(
-            FreeSqlContext freeSql,
+            IServiceInfoRepository serviceInfoRepository,
             IServiceInfoService serviceInfoService,
+            ITinyEventBus tinyEventBus,
             ILogger<RegisterCenterService> logger)
         {
-            _dbContext = freeSql;
+            _serviceInfoRepository = serviceInfoRepository;
             _logger = logger;
             _serviceInfoService = serviceInfoService;
+            _tinyEventBus = tinyEventBus;
         }
 
         public async Task<string> RegisterAsync(ServiceInfo serviceInfo)
@@ -38,7 +39,7 @@ namespace AgileConfig.Server.Service
             _logger.LogInformation("try to register service {0} {1}", serviceInfo.ServiceId, serviceInfo.ServiceName);
 
             //if exist
-            var oldEntity = await _dbContext.ServiceInfo.Where(x => x.ServiceId == serviceInfo.ServiceId).FirstAsync();
+            var oldEntity = (await _serviceInfoRepository.QueryAsync(x => x.ServiceId == serviceInfo.ServiceId)).FirstOrDefault();
             if (oldEntity != null)
             {
                 oldEntity.RegisterTime = DateTime.Now;
@@ -52,8 +53,7 @@ namespace AgileConfig.Server.Service
                 oldEntity.CheckUrl = serviceInfo.CheckUrl;
                 oldEntity.AlarmUrl = serviceInfo.AlarmUrl;
                 oldEntity.RegisterWay = serviceInfo.RegisterWay;
-                await _dbContext.ServiceInfo.UpdateAsync(oldEntity);
-                var rows = await _dbContext.SaveChangesAsync();
+                await _serviceInfoRepository.UpdateAsync(oldEntity);
 
                 _serviceInfoService.ClearCache();
 
@@ -68,8 +68,7 @@ namespace AgileConfig.Server.Service
             serviceInfo.Status = ServiceStatus.Healthy;
             serviceInfo.Id = Guid.NewGuid().ToString("n");
 
-            _dbContext.ServiceInfo.Add(serviceInfo);
-            await _dbContext.SaveChangesAsync();
+            await _serviceInfoRepository.InsertAsync(serviceInfo);
 
             _serviceInfoService.ClearCache();
 
@@ -88,7 +87,7 @@ namespace AgileConfig.Server.Service
                 throw new ArgumentNullException(nameof(serviceUniqueId));
             }
 
-            var oldEntity = await _dbContext.ServiceInfo.Where(x => x.Id == serviceUniqueId).FirstAsync();
+            var oldEntity = await _serviceInfoRepository.GetAsync(serviceUniqueId);
             if (oldEntity == null)
             {
                 //if not exist
@@ -96,8 +95,7 @@ namespace AgileConfig.Server.Service
                 return false;
             }
 
-            _dbContext.ServiceInfo.Remove(oldEntity);
-            await _dbContext.SaveChangesAsync();
+            await _serviceInfoRepository.DeleteAsync(oldEntity);
 
             _serviceInfoService.ClearCache();
 
@@ -116,7 +114,7 @@ namespace AgileConfig.Server.Service
                 throw new ArgumentNullException(nameof(serviceId));
             }
 
-            var oldEntity = await _dbContext.ServiceInfo.Where(x => x.ServiceId == serviceId).FirstAsync();
+            var oldEntity = (await _serviceInfoRepository.QueryAsync(x => x.ServiceId == serviceId)).FirstOrDefault();
             if (oldEntity == null)
             {
                 //if not exist
@@ -124,8 +122,7 @@ namespace AgileConfig.Server.Service
                 return false;
             }
 
-            _dbContext.ServiceInfo.Remove(oldEntity);
-            await _dbContext.SaveChangesAsync();
+            await _serviceInfoRepository.DeleteAsync(oldEntity);
 
             _serviceInfoService.ClearCache();
 
@@ -137,7 +134,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<bool> ReceiveHeartbeatAsync(string serviceUniqueId)
         {
-            var entity = await _dbContext.ServiceInfo.Where(x => x.Id == serviceUniqueId).FirstAsync();
+            var entity = await _serviceInfoRepository.GetAsync(serviceUniqueId);
             if (entity == null)
             {
                 return false;
@@ -154,18 +151,14 @@ namespace AgileConfig.Server.Service
                 var oldStatus = entity.Status;
                 entity.Status = ServiceStatus.Healthy;
                 entity.LastHeartBeat = DateTime.Now;
-                await _dbContext.UpdateAsync(entity);
 
-                await _dbContext.SaveChangesAsync();
+                await _serviceInfoRepository.UpdateAsync(entity);
 
                 if (oldStatus != ServiceStatus.Healthy)
                 {
                     _serviceInfoService.ClearCache();
-                    dynamic param = new ExpandoObject();
-                    param.ServiceId = entity.ServiceId;
-                    param.ServiceName = entity.ServiceName;
-                    param.UniqueId = entity.Id;
-                    TinyEventBus.Instance.Fire(EventKeys.UPDATE_SERVICE_STATUS, param);
+
+                    _tinyEventBus.Fire(new ServiceStatusUpdateEvent(entity.Id));
                 }
             }
 

@@ -1,11 +1,12 @@
-﻿using FreeSql.DataAnnotations;
+﻿using AgileConfig.Server.Common;
+using FreeSql.DataAnnotations;
 using System;
 
 namespace AgileConfig.Server.Data.Entity
 {
     [Table(Name = "agc_publish_detail")]
     [OraclePrimaryKeyName("agc_publish_detail_pk")]
-    public class PublishDetail
+    public class PublishDetail: IEntity<string>
     {
         [Column(Name = "id", StringLength = 36)]
         public string Id { get; set; }

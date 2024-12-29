@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.Dynamic;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Entity;
+using AgileConfig.Server.Event;
+using AgileConfig.Server.Common.EventBus;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -19,10 +21,15 @@ namespace AgileConfig.Server.Apisite.Controllers
     {
         private readonly IServiceInfoService _serviceInfoService;
         private readonly IRegisterCenterService _registerCenterService;
-        public ServiceController(IServiceInfoService serviceInfoService,IRegisterCenterService registerCenterService)
+        private readonly ITinyEventBus _tinyEventBus;
+
+        public ServiceController(IServiceInfoService serviceInfoService,
+            IRegisterCenterService registerCenterService,
+            ITinyEventBus tinyEventBus)
         {
             _serviceInfoService = serviceInfoService;
             _registerCenterService = registerCenterService;
+            _tinyEventBus = tinyEventBus;
         }
 
         [HttpPost]
@@ -30,7 +37,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         {
             if (model == null)
             {
-                throw new ArgumentNullException("model");
+                throw new ArgumentNullException(nameof(model));
             }
 
             if ((await _serviceInfoService.GetByServiceIdAsync(model.ServiceId)) != null)
@@ -54,13 +61,8 @@ namespace AgileConfig.Server.Apisite.Controllers
             service.HeartBeatMode = model.HeartBeatMode;
             var uniqueId = await _registerCenterService.RegisterAsync(service);
 
-            //send a message to notify other services
-            dynamic param = new ExpandoObject();
-            param.ServiceId = model.ServiceId;
-            param.ServiceName = model.ServiceName;
-            param.UniqueId = uniqueId;
-            TinyEventBus.Instance.Fire(EventKeys.REGISTER_A_SERVICE,param);
-            
+            _tinyEventBus.Fire(new ServiceRegisteredEvent(uniqueId));
+
             return Json(new
             {
                 success = true
@@ -87,12 +89,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             await _registerCenterService.UnRegisterAsync(id);
 
-            //send a message to notify other services
-            dynamic param = new ExpandoObject();
-            param.ServiceId = service.ServiceId;
-            param.ServiceName = service.ServiceName;
-            param.UniqueId = service.Id;
-            TinyEventBus.Instance.Fire(EventKeys.UNREGISTER_A_SERVICE,param);
+            _tinyEventBus.Fire(new ServiceUnRegisterEvent(service.Id));
 
             return Json(new
             {

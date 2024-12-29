@@ -5,8 +5,27 @@ using System.Threading.Tasks;
 
 namespace AgileConfig.Server.IService
 {
-    public interface ISettingService: IDisposable
+    public interface ISettingService : IDisposable
     {
+        static string[] EnvironmentList { get; set; }
+
+        static string IfEnvEmptySetDefault(ref string env)
+        {
+            if (!string.IsNullOrEmpty(env))
+            {
+                return env;
+            }
+
+            if (EnvironmentList == null || EnvironmentList.Length == 0)
+            {
+                throw new ArgumentNullException(nameof(EnvironmentList));
+            }
+
+            env = EnvironmentList[0];
+
+            return env;
+        }
+
         Task<Setting> GetAsync(string id);
         Task<bool> AddAsync(Setting setting);
 
@@ -36,27 +55,9 @@ namespace AgileConfig.Server.IService
         Task<bool> SetSuperAdminPassword(string password);
 
         /// <summary>
-        /// 初始化环境列表
-        /// </summary>
-        /// <returns></returns>
-        Task<bool> InitDefaultEnvironment();
-
-        /// <summary>
         /// 获取环境列表
         /// </summary>
         /// <returns></returns>
         Task<string[]> GetEnvironmentList();
-
-        /// <summary>
-        ///  如果环境变量没有 JwtSetting:SecurityKey 则尝试生成一个key到数据库
-        /// </summary>
-        /// <returns></returns>
-        bool TryInitJwtSecret();
-
-        /// <summary>
-        /// 从配置表获取 jwt secret key
-        /// </summary>
-        /// <returns></returns>
-        string GetJwtTokenSecret();
     }
 }

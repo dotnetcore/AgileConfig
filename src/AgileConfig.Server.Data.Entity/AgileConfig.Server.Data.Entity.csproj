@@ -6,6 +6,11 @@
 
   <ItemGroup>
     <PackageReference Include="FreeSql" Version="2.5.200" />
+    <PackageReference Include="MongoDB.Bson" Version="3.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AgileConfig.Server.Common\AgileConfig.Server.Common.csproj" />
   </ItemGroup>
 
 </Project>

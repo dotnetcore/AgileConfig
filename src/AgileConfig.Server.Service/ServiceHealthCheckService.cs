@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Common.RestClient;
 using AgileConfig.Server.Data.Entity;
-using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.IService;
 using Microsoft.Extensions.Logging;
 
@@ -121,15 +120,15 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
             while (true)
             {
                 //没有填写心跳模式，则不做检查
-                var services = await FreeSQL.Instance.Select<ServiceInfo>()
-                    .Where(x => x.HeartBeatMode != null && x.HeartBeatMode != "").ToListAsync();
+                var services = await _serviceInfoService
+                    .QueryAsync(x => x.HeartBeatMode != null && x.HeartBeatMode != "");
                 foreach (var service in services)
                 {
                     if (service.HeartBeatMode == HeartBeatModes.none.ToString())
                     {
                         continue;
                     }
-                    
+
                     var lstHeartBeat = service.LastHeartBeat;
                     if (!lstHeartBeat.HasValue)
                     {
@@ -199,8 +198,12 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
             int istatus = ((int)resp.StatusCode - 200);
             result = istatus >= 0 && istatus < 100; // 200 段都认为是正常的
 
-            _logger.LogInformation("check service health {0} {1} {2} result：{3}", service.CheckUrl, service.ServiceId,
-                service.ServiceName, result ? "up" : "down");
+            if (!result)
+            {
+                _logger.LogInformation("check service health {0} {1} {2} result：{3}", service.CheckUrl, service.ServiceId,
+                                                                                        service.ServiceName, "down");
+            }
+
             return result;
         }
         catch (Exception e)

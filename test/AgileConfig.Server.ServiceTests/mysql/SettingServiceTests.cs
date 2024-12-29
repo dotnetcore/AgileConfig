@@ -1,222 +1,42 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using AgileConfig.Server.Service;
-using System;
 using System.Collections.Generic;
-using System.Text;
-using FreeSql;
-using AgileConfig.Server.Data.Freesql;
-using AgileConfig.Server.Data.Entity;
+using AgileConfig.Server.ServiceTests.sqlite;
 using System.Threading.Tasks;
-using System.Linq;
+using System;
+using Testcontainers.MySql;
 
-namespace AgileConfig.Server.Service.Tests.mysql
+namespace AgileConfig.Server.ServiceTests.mysql
 {
-    [TestClass()]
-    public class SettingServiceTests
+    [TestClass]
+    public class SettingServiceTests_mysql : SettingServiceTests
     {
-        IFreeSql fsq = null;
-        FreeSqlContext freeSqlContext;
-        SettingService service = null;
+        static MySqlContainer _container = new MySqlBuilder().WithImage("mysql:8.0").Build();
 
-        [TestInitialize]
-        public void TestInitialize()
+        [ClassInitialize]
+        public static async Task ClassInit(TestContext testContext)
         {
-            string conn = "Database=agile_config_test;Data Source=localhost;User Id=root;Password=dev@123;port=3306";
-            fsq = new FreeSqlBuilder()
-                          .UseConnectionString(FreeSql.DataType.MySql, conn)
-                          .UseAutoSyncStructure(true)
-                          .Build();
-            freeSqlContext = new FreeSqlContext(fsq);
+            await _container.StartAsync();
+            Console.WriteLine($"MySqlContainer started");
+        }
 
-            service = new SettingService(freeSqlContext);
-            fsq.Delete<Setting>().Where("1=1");
-
-            Console.WriteLine("TestInitialize");
+        [ClassCleanup]
+        public static async Task ClassCleanup()
+        {
+            await _container.DisposeAsync();
+            Console.WriteLine($"MySqlContainer dispose");
         }
 
 
-
-        [TestCleanup]
-        public void Clean()
+        public override Task<Dictionary<string, string>> GetConfigurationData()
         {
-            freeSqlContext.Dispose();
-            fsq.Dispose();
-        }
+            var connstr = _container.GetConnectionString();
+            Console.WriteLine($"MySqlContainer connstr: {connstr}");
 
-        [TestMethod()]
-        public async Task AddAsyncTest()
-        {
-            var id = Guid.NewGuid().ToString();
-            var source = new Setting();
-            source.Id = id;
-            source.Value = "123";
-            source.CreateTime = DateTime.Now;
-            var result = await service.AddAsync(source);
-            Assert.IsTrue(result);
+            var dict = new Dictionary<string, string>();
+            dict["db:provider"] = "mysql";
+            dict["db:conn"] = connstr;
 
-            var setting = fsq.Select<Setting>(new  {
-                Id= id
-            }).ToOne();
-
-            Assert.IsNotNull(setting);
-
-            Assert.AreEqual(source.Id, setting.Id);
-            Assert.AreEqual(source.Value, setting.Value);
-        }
-
-        [TestMethod()]
-        public async Task DeleteAsyncTest()
-        {
-            var id = Guid.NewGuid().ToString();
-            var source = new Setting();
-            source.Id = id;
-            source.Value = "123";
-            source.CreateTime = DateTime.Now;
-            var result = await service.AddAsync(source);
-            Assert.IsTrue(result);
-
-            result = await service.DeleteAsync(source);
-            Assert.IsTrue(result);
-
-            var setting = fsq.Select<Setting>(new
-            {
-                Id = id
-            }).ToOne();
-
-            Assert.IsNull(setting);
-        }
-
-        [TestMethod()]
-        public async Task DeleteAsyncTest1()
-        {
-            var id = Guid.NewGuid().ToString();
-            var source = new Setting();
-            source.Id = id;
-            source.Value = "123";
-            source.CreateTime = DateTime.Now;
-            var result = await service.AddAsync(source);
-            Assert.IsTrue(result);
-
-            result = await service.DeleteAsync(id);
-            Assert.IsTrue(result);
-
-            var setting = fsq.Select<Setting>(new
-            {
-                Id = id
-            }).ToOne();
-
-            Assert.IsNull(setting);
-        }
-
-        [TestMethod()]
-        public async Task GetAsyncTest()
-        {
-            var id = Guid.NewGuid().ToString();
-            var source = new Setting();
-            source.Id = id;
-            source.Value = "123";
-            source.CreateTime = DateTime.Now;
-            var result = await service.AddAsync(source);
-            Assert.IsTrue(result);
-
-            var setting = await service.GetAsync(id);
-
-            Assert.IsNotNull(setting);
-
-            Assert.AreEqual(source.Id, setting.Id);
-            Assert.AreEqual(source.Value, setting.Value);
-        }
-
-        [TestMethod()]
-        public async Task GetAllSettingsAsyncTest()
-        {
-            fsq.Delete<Setting>().Where("1=1").ExecuteAffrows();
-            var id = Guid.NewGuid().ToString();
-            var source = new Setting();
-            source.Id = id;
-            source.Value = "123";
-            source.CreateTime = DateTime.Now;
-            var result = await service.AddAsync(source);
-            Assert.IsTrue(result);
-            var id1 = Guid.NewGuid().ToString();
-            var source1 = new Setting();
-            source1.Id = id1;
-            source1.Value = "123";
-            source1.CreateTime = DateTime.Now;
-            var result1 = await service.AddAsync(source1);
-            Assert.IsTrue(result1);
-
-            var settings = await service.GetAllSettingsAsync();
-
-            Assert.IsNotNull(settings);
-
-            Assert.AreEqual(2, settings.Count);
-        }
-
-        [TestMethod()]
-        public async Task UpdateAsyncTest()
-        {
-            var id = Guid.NewGuid().ToString();
-            var source = new Setting();
-            source.Id = id;
-            source.Value = "123";
-            source.CreateTime = DateTime.Now;
-            var result = await service.AddAsync(source);
-            Assert.IsTrue(result);
-
-            source.CreateTime = DateTime.Now;
-            source.Value = "321";
-            var result1 = await service.UpdateAsync(source);
-            Assert.IsTrue(result1);
-
-            var setting = await service.GetAsync(id);
-            Assert.IsNotNull(setting);
-
-            Assert.AreEqual(source.Id, setting.Id);
-            Assert.AreEqual(source.Value, setting.Value);
-        }
-
-        [TestMethod()]
-        public async Task SetAdminPasswordTest()
-        {
-            fsq.Delete<Setting>().Where("1=1").ExecuteAffrows();
-            var result = await service.SetSuperAdminPassword("123456");
-            Assert.IsTrue(result);
-            var list = fsq.Select<Setting>().Where("1=1").ToList();
-            Assert.IsNotNull(list);
-            Assert.AreEqual(2, list.Count);
-
-            var pass = list.FirstOrDefault(s => s.Id == SettingService.SuperAdminUserName);
-            Assert.IsNotNull(pass);
-            var salt = list.FirstOrDefault(s => s.Id == SettingService.SuperAdminId);
-            Assert.IsNotNull(salt);
-        }
-
-        [TestMethod()]
-        public async Task HasAdminPasswordTest()
-        {
-            //fsq.Delete<Setting>().Where("1=1").ExecuteAffrows();
-            //var result = await service.SetSuperAdminPassword("123456");
-            //Assert.IsTrue(result);
-
-            //var has = await service.HasSuperAdminPassword();
-            //Assert.IsTrue(has);
-            //fsq.Delete<Setting>().Where("1=1").ExecuteAffrows();
-            //has = await service.HasSuperAdminPassword();
-            //Assert.IsFalse(has);
-        }
-
-        [TestMethod()]
-        public async Task ValidateAdminPasswordTest()
-        {
-            //fsq.Delete<Setting>().Where("1=1").ExecuteAffrows();
-            //var result = await service.SetSuperAdminPassword("123456");
-            //Assert.IsTrue(result);
-
-            //var v = await service.ValidateAdminPassword("123456");
-            //Assert.IsTrue(v);
-            //v = await service.ValidateAdminPassword("1234561");
-            //Assert.IsFalse(v);
+            return Task.FromResult(dict);
         }
     }
 }
