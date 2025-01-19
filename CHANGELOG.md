@@ -1,5 +1,11 @@
 # Change log
 ------------------------------
+[1.9.10]
+* client page support filter by appId and env
+
+[1.9.9]
+* fix issue #200
+
 [1.9.8]
 * Correct naming
 * Refactor some logic
