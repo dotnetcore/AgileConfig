@@ -57,7 +57,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             return Json(report);
         }
 
-        public async Task<IActionResult> SearchServerNodeClients(string address, int current, int pageSize)
+        public async Task<IActionResult> SearchServerNodeClients(string address, string appId, string env, int current, int pageSize)
         {
             if (current <= 0)
             {
@@ -89,6 +89,17 @@ namespace AgileConfig.Server.Apisite.Controllers
                 {
                     clients.AddRange(report.Infos);
                 }
+            }
+
+            // filter by env
+            if (!string.IsNullOrEmpty(env))
+            {
+                clients = clients.Where(x => x.Env.Contains(env, StringComparison.CurrentCultureIgnoreCase)).ToList();
+            }
+            // filter by appid
+            if (!string.IsNullOrEmpty(appId))
+            {
+                clients = clients.Where(x => x.AppId.Contains(appId, StringComparison.CurrentCultureIgnoreCase)).ToList();
             }
 
             var page = clients.OrderBy(i => i.Address).ThenBy(i => i.Id).Skip((current - 1) * pageSize).Take(pageSize);

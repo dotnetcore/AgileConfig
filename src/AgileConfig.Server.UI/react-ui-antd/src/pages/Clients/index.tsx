@@ -12,146 +12,142 @@ import { queryNodes } from '../Nodes/service';
 import { queryClients, reloadClientConfigs, clientOffline } from './service';
 const { confirm } = Modal;
 
-const handleClientReload = async (client:any)=>{
+const handleClientReload = async (client: any) => {
   const intl = getIntl(getLocale());
-  const hide = message.loading(intl.formatMessage({id: 'refreshing'}));
+  const hide = message.loading(intl.formatMessage({ id: 'refreshing' }));
   try {
     const result = await reloadClientConfigs(client.address, client.id);
     hide();
     const success = result.success;
     if (success) {
-      message.success(intl.formatMessage({id: 'refresh_success'}));
+      message.success(intl.formatMessage({ id: 'refresh_success' }));
     } else {
       message.error(result.message);
     }
     return success;
   } catch (error) {
     hide();
-    message.error(intl.formatMessage({id: 'refresh_fail'}));
+    message.error(intl.formatMessage({ id: 'refresh_fail' }));
     return false;
   }
-}
+};
 
-
-const handleClientOffline = async (client:any)=>{
+const handleClientOffline = async (client: any) => {
   const intl = getIntl(getLocale());
-  const hide = message.loading(intl.formatMessage({id: 'disconnecting'}));
+  const hide = message.loading(intl.formatMessage({ id: 'disconnecting' }));
   try {
     const result = await clientOffline(client.address, client.id);
     hide();
     const success = result.success;
     if (success) {
-      message.success(intl.formatMessage({id: 'disconnect_success'}));
+      message.success(intl.formatMessage({ id: 'disconnect_success' }));
     } else {
       message.error(result.message);
     }
     return success;
   } catch (error) {
     hide();
-    message.error(intl.formatMessage({id: 'disconnect_fail'}));
+    message.error(intl.formatMessage({ id: 'disconnect_fail' }));
     return false;
   }
-}
+};
 
-const clients:React.FC = () => {
+const clients: React.FC = () => {
   const actionRef = useRef<ActionType>();
   const [appEnums, setAppEnums] = useState<any>();
   const intl = useIntl();
 
-  const getNodesForSelect = async () =>
-  {
-    const result = await queryNodes()
-    const arr:any[] = [];
-    result.data.forEach((x:{address:string})=>{
-       arr.push({
-         value: x.address,
-         label: x.address,
-       });
+  const getNodesForSelect = async () => {
+    const result = await queryNodes();
+    const arr: any[] = [];
+    result.data.forEach((x: { address: string }) => {
+      arr.push({
+        value: x.address,
+        label: x.address,
+      });
     });
 
     return arr;
-  }
-  const getAppEnums = async () =>
-  {
-    const result = await queryApps({})
+  };
+  const getAppEnums = async () => {
+    const result = await queryApps({});
     const obj = {};
-    result.data?.forEach(x=>{
-      if(x) {
+    result.data?.forEach((x) => {
+      if (x) {
         obj[x.id] = {
-          text: x.name
-        }
+          text: x.name,
+        };
       }
     });
 
     return obj;
-  }
-  useEffect(()=>{
-    getAppEnums().then(x=> {
+  };
+  useEffect(() => {
+    getAppEnums().then((x) => {
       console.log('app enums ', x);
-      setAppEnums({...x});
+      setAppEnums({ ...x });
     });
   }, []);
   const columns: ProColumns[] = [
     {
       title: intl.formatMessage({
-        id: 'pages.client.table.cols.id'
+        id: 'pages.client.table.cols.id',
       }),
       dataIndex: 'id',
       hideInSearch: true,
-      ellipsis: true
+      ellipsis: true,
     },
     {
       title: intl.formatMessage({
-        id: 'pages.client.table.cols.node'
+        id: 'pages.client.table.cols.node',
       }),
       dataIndex: 'address',
       valueType: 'select',
-      request: getNodesForSelect
-    },
-    {
-      title: intl.formatMessage({
-        id: 'pages.client.table.cols.appid'
-      }),
-      dataIndex: 'appId',
-      hideInSearch: true,
+      request: getNodesForSelect,
     },
     {
       title: '环境',
       dataIndex: 'env',
-      hideInSearch: true,
     },
     {
       title: intl.formatMessage({
-        id: 'pages.client.table.cols.ip'
+        id: 'pages.client.table.cols.appid',
+      }),
+      dataIndex: 'appId',
+    },
+    {
+      title: intl.formatMessage({
+        id: 'pages.client.table.cols.ip',
       }),
       dataIndex: 'ip',
       hideInSearch: true,
     },
     {
       title: intl.formatMessage({
-        id: 'pages.client.table.cols.name'
+        id: 'pages.client.table.cols.name',
       }),
       dataIndex: 'name',
       hideInSearch: true,
-    },{
+    },
+    {
       title: intl.formatMessage({
-        id: 'pages.client.table.cols.tag'
+        id: 'pages.client.table.cols.tag',
       }),
       dataIndex: 'tag',
       hideInSearch: true,
     },
     {
       title: intl.formatMessage({
-        id: 'pages.client.table.cols.lastRefreshTime'
+        id: 'pages.client.table.cols.lastRefreshTime',
       }),
       dataIndex: 'lastRefreshTime',
       hideInSearch: true,
       valueType: 'dateTime',
-      tip: '客户端从服务器最后一次全量拉取配置的时间'
+      tip: '客户端从服务器最后一次全量拉取配置的时间',
     },
     {
       title: intl.formatMessage({
-        id: 'pages.client.table.cols.action'
+        id: 'pages.client.table.cols.action',
       }),
       valueType: 'option',
       render: (text, record) => [
@@ -160,57 +156,54 @@ const clients:React.FC = () => {
             handleClientReload(record);
           }}
         >
-          {
-            intl.formatMessage({
-              id: 'pages.client.table.cols.action.refresh'
-            })
-          }
+          {intl.formatMessage({
+            id: 'pages.client.table.cols.action.refresh',
+          })}
         </a>,
         <AuthorizedEle judgeKey={functionKeys.Client_Disconnect}>
-          <Button type="link" danger onClick={
-          ()=>{
-            const msg = intl.formatMessage({
-                          id: 'pages.client.disconnect_message'
-                        }) + `【${record.id}】`;
-            confirm({
-              icon: <ExclamationCircleOutlined />,
-              content: msg,
-              async onOk() {
-                console.log('disconnect client ' + record.id);
-                const success = await handleClientOffline(record);
-                if (success) {
-                  actionRef.current?.reload();
-                }
-              },
-              onCancel() {
-              },
-            });
-            }}>
-            {
-              intl.formatMessage({
-                id: 'pages.client.table.cols.action.disconnect'
-              })
-            }
+          <Button
+            type="link"
+            danger
+            onClick={() => {
+              const msg =
+                intl.formatMessage({
+                  id: 'pages.client.disconnect_message',
+                }) + `【${record.id}】`;
+              confirm({
+                icon: <ExclamationCircleOutlined />,
+                content: msg,
+                async onOk() {
+                  console.log('disconnect client ' + record.id);
+                  const success = await handleClientOffline(record);
+                  if (success) {
+                    actionRef.current?.reload();
+                  }
+                },
+                onCancel() {},
+              });
+            }}
+          >
+            {intl.formatMessage({
+              id: 'pages.client.table.cols.action.disconnect',
+            })}
           </Button>
-        </AuthorizedEle>
-      ]
-    }
+        </AuthorizedEle>,
+      ],
+    },
   ];
   return (
-    <PageContainer header={{ title:intl.formatMessage({id:'pages.client.header.title'}) }}>
-      <ProTable     
-      search={{
-        labelWidth: 'auto',
-      }}
-      actionRef={actionRef} 
-      options={
-        false
-      }                                                                              
+    <PageContainer header={{ title: intl.formatMessage({ id: 'pages.client.header.title' }) }}>
+      <ProTable
+        search={{
+          labelWidth: 'auto',
+        }}
+        actionRef={actionRef}
+        options={false}
         rowKey="id"
-        columns = {columns}
-        request = { (params, sorter, filter) => queryClients(params) }
+        columns={columns}
+        request={(params, sorter, filter) => queryClients(params)}
       />
     </PageContainer>
   );
-}
+};
 export default clients;
