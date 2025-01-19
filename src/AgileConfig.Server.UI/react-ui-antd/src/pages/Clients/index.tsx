@@ -98,7 +98,8 @@ const clients:React.FC = () => {
       }),
       dataIndex: 'id',
       hideInSearch: true,
-      ellipsis: true
+      ellipsis: true,
+      sorter: true,
     },
     {
       title: intl.formatMessage({
@@ -106,7 +107,8 @@ const clients:React.FC = () => {
       }),
       dataIndex: 'address',
       valueType: 'select',
-      request: getNodesForSelect
+      request: getNodesForSelect,
+      sorter: true,
     },
     {
       title: intl.formatMessage({
@@ -114,11 +116,17 @@ const clients:React.FC = () => {
       }),
       dataIndex: 'appId',
       hideInSearch: true,
+      sorter: true,
+      filters: true,
+      onFilter: true,
     },
     {
       title: '环境',
       dataIndex: 'env',
       hideInSearch: true,
+      sorter: true,
+      filters: true,
+      onFilter: true,
     },
     {
       title: intl.formatMessage({
@@ -126,6 +134,9 @@ const clients:React.FC = () => {
       }),
       dataIndex: 'ip',
       hideInSearch: true,
+      sorter: true,
+      filters: true,
+      onFilter: true,
     },
     {
       title: intl.formatMessage({
@@ -133,12 +144,18 @@ const clients:React.FC = () => {
       }),
       dataIndex: 'name',
       hideInSearch: true,
+      sorter: true,
+      filters: true,
+      onFilter: true,
     },{
       title: intl.formatMessage({
         id: 'pages.client.table.cols.tag'
       }),
       dataIndex: 'tag',
       hideInSearch: true,
+      sorter: true,
+      filters: true,
+      onFilter: true,
     },
     {
       title: intl.formatMessage({
@@ -147,7 +164,8 @@ const clients:React.FC = () => {
       dataIndex: 'lastRefreshTime',
       hideInSearch: true,
       valueType: 'dateTime',
-      tip: '客户端从服务器最后一次全量拉取配置的时间'
+      tip: '客户端从服务器最后一次全量拉取配置的时间',
+      sorter: true,
     },
     {
       title: intl.formatMessage({
@@ -208,7 +226,7 @@ const clients:React.FC = () => {
       }                                                                              
         rowKey="id"
         columns = {columns}
-        request = { (params, sorter, filter) => queryClients(params) }
+        request = { (params, sorter, filter) => queryClients({ ...params, sorter, filter }) }
       />
     </PageContainer>
   );

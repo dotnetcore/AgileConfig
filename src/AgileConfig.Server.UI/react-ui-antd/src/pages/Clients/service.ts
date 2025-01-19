@@ -2,7 +2,11 @@ import request from '@/utils/request';
 
 export async function queryClients(params: any) {
   return request('report/SearchServerNodeClients', {
-    params
+    params: {
+      ...params,
+      sorter: params.sorter,
+      filter: params.filter,
+    },
   });
 }
  
@@ -24,3 +28,5 @@ export async function clientOffline(address: string, clientId: string) {
     }
   });
 }
+
+// Sorting and filtering are handled on the client side
