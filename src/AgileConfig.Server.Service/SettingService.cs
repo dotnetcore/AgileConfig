@@ -66,54 +66,6 @@ namespace AgileConfig.Server.Service
             return true;
         }
 
-        public async Task<bool> SetSuperAdminPassword(string password)
-        {
-            if (string.IsNullOrEmpty(password))
-            {
-                throw new ArgumentNullException(nameof(password));
-            }
-
-            var newSalt = Guid.NewGuid().ToString("N");
-            password = Encrypt.Md5((password + newSalt));
-
-            var su = new User();
-            su.Id = SystemSettings.SuperAdminId;
-            su.Password = password;
-            su.Salt = newSalt;
-            su.Status = UserStatus.Normal;
-            su.Team = "";
-            su.CreateTime = DateTime.Now;
-            su.UserName = SystemSettings.SuperAdminUserName;
-            await _userRepository.InsertAsync(su);
-
-            var userRoles = new List<UserRole>();
-            var ursa = new UserRole()
-            {
-                Id = Guid.NewGuid().ToString("N"),
-                Role = Role.SuperAdmin,
-                UserId = SystemSettings.SuperAdminId
-            };
-            userRoles.Add(ursa);
-            var ura = new UserRole()
-            {
-                Id = Guid.NewGuid().ToString("N"),
-                Role = Role.Admin,
-                UserId = SystemSettings.SuperAdminId
-            };
-            userRoles.Add(ura);
-
-            await _userRoleRepository.InsertAsync(userRoles);
-
-            return true;
-        }
-
-        public async Task<bool> HasSuperAdmin()
-        {
-            var admin = await _userRepository.GetAsync(SystemSettings.SuperAdminId);
-
-            return admin != null;
-        }
-
         public void Dispose()
         {
             _settingRepository.Dispose();

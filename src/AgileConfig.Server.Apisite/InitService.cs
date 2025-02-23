@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AgileConfig.Server.Apisite.Metrics;
 using AgileConfig.Server.Apisite.Utilites;
 using AgileConfig.Server.IService;
+using AgileConfig.Server.Service;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -43,6 +44,8 @@ namespace AgileConfig.Server.Apisite
             {
                 _systemInitializationService.TryInitDefaultEnvironment();//初始化环境 DEV TEST STAGE PROD
                 _systemInitializationService.TryInitJwtSecret();//初始化 jwt secret
+                _systemInitializationService.TryInitSaPassword(); // init super admin password
+                _systemInitializationService.TryInitDefaultApp();
                 _ = _remoteServerNodeProxy.TestEchoAsync();//开启节点检测
                 _ = _serviceHealthCheckService.StartCheckAsync();//开启服务健康检测
                 _eventRegister.Register();//注册 eventbus 的回调

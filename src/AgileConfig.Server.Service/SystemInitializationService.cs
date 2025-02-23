@@ -1,14 +1,17 @@
 ﻿using System;
-using System.Threading.Tasks;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Abstraction;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace AgileConfig.Server.Service;
 
-public class SystemInitializationService(ISysInitRepository sysInitRepository, IConfiguration configuration):ISystemInitializationService
+public class SystemInitializationService(
+    ISysInitRepository sysInitRepository,
+    IConfiguration configuration,
+    ILogger<SystemInitializationService> logger) : ISystemInitializationService
 {
     /// <summary>
     /// 如果 配置文件或者环境变量没配置 JwtSetting:SecurityKey 则生成一个存库
@@ -74,8 +77,65 @@ public class SystemInitializationService(ISysInitRepository sysInitRepository, I
     private static string GenerateJwtSecretKey()
     {
         var guid1 = Guid.NewGuid().ToString("n");
-        var guid2 =  Guid.NewGuid().ToString("n");
+        var guid2 = Guid.NewGuid().ToString("n");
 
         return guid1[..19] + guid2[..19];
+    }
+
+    /// <summary>
+    /// 尝试初始化sa的密码，如果 password 参数为空则会尝试从配置文件或环境变量读取 saPassword 的值作为密码
+    /// </summary>
+    /// <param name="password"></param>
+    /// <returns></returns>
+    public bool TryInitSaPassword(string password = "")
+    {
+        if (string.IsNullOrEmpty(password))
+        {
+            password = configuration["saPassword"];
+        }
+        if (!string.IsNullOrEmpty(password) && !sysInitRepository.HasSa())
+        {
+            try
+            {
+                sysInitRepository.InitSa(password);
+                logger.LogInformation("Init super admin password successful.");
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Init super admin password occur error.");
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public bool HasSa()
+    {
+        return sysInitRepository.HasSa();
+    }
+
+    public bool TryInitDefaultApp(string appName = "")
+    {
+        if (string.IsNullOrEmpty(appName))
+        {
+            appName = configuration["defaultApp"];
+        }
+
+        if (!string.IsNullOrEmpty(appName))
+        {
+            try
+            {
+                sysInitRepository.InitDefaultApp(appName);
+                logger.LogInformation("Init default app {appName} successful.", appName);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Init default app {appName} error.", appName);
+                return false;
+            }
+        }
+
+        return true;
     }
 }

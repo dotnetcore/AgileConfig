@@ -42,19 +42,6 @@ namespace AgileConfig.Server.IService
         Task<List<Setting>> GetAllSettingsAsync();
 
         /// <summary>
-        /// 是否已经设置密码
-        /// </summary>
-        /// <returns></returns>
-        Task<bool> HasSuperAdmin();
-
-        /// <summary>
-        /// 设置管理员密码
-        /// </summary>
-        /// <param name="password"></param>
-        /// <returns></returns>
-        Task<bool> SetSuperAdminPassword(string password);
-
-        /// <summary>
         /// 获取环境列表
         /// </summary>
         /// <returns></returns>

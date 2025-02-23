@@ -21,4 +21,15 @@ public interface ISysInitRepository
     /// </summary>
     /// <param name="setting"></param>
     void SaveInitSetting(Setting setting);
+
+    /// <summary>
+    /// Init super admin
+    /// </summary>
+    /// <param name="password"></param>
+    /// <returns></returns>
+    bool InitSa(string password);
+
+    bool HasSa();
+
+    bool InitDefaultApp(string appName);
 }
