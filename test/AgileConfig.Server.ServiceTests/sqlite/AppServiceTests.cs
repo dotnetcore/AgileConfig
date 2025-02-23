@@ -52,6 +52,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
 
             var cache = new Mock<IMemoryCache>();
             IServiceCollection services = new ServiceCollection();
+            services.AddLogging();
             services.AddScoped(_ => cache.Object);
             services.AddSingleton<IConfiguration>(config);
             services.AddDbConfigInfoFactory();
