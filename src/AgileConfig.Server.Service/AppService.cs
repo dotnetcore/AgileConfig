@@ -158,6 +158,11 @@ namespace AgileConfig.Server.Service
                 exp = exp.And(a => a.Group == group);
             }
 
+            if (string.IsNullOrWhiteSpace(ascOrDesc))
+            {
+                ascOrDesc = "asc";
+            }
+
             var apps = await _appRepository.QueryPageAsync(exp, current, pageSize, sortField,
                 ascOrDesc.StartsWith("asc") ? "ASC" : "DESC");
             var count = await _appRepository.CountAsync(exp);

@@ -24,6 +24,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         private readonly IJwtService _jwtService;
         private readonly IOidcClient _oidcClient;
         private readonly ITinyEventBus _tinyEventBus;
+        private readonly ISystemInitializationService _systemInitializationService;
 
         public AdminController(
             ISettingService settingService,
@@ -31,7 +32,9 @@ namespace AgileConfig.Server.Apisite.Controllers
             IPermissionService permissionService,
             IJwtService jwtService,
             IOidcClient oidcClient,
-            ITinyEventBus tinyEventBus)
+            ITinyEventBus tinyEventBus,
+            ISystemInitializationService systemInitializationService
+            )
         {
             _settingService = settingService;
             _userService = userService;
@@ -39,6 +42,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             _jwtService = jwtService;
             _oidcClient = oidcClient;
             _tinyEventBus = tinyEventBus;
+            _systemInitializationService = systemInitializationService;
         }
 
 
@@ -155,9 +159,9 @@ namespace AgileConfig.Server.Apisite.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public async Task<IActionResult> PasswordInited()
+        public IActionResult PasswordInited()
         {
-            var has = await _settingService.HasSuperAdmin();
+            var has = _systemInitializationService.HasSa();
             return Json(new
             {
                 success = true,
@@ -170,7 +174,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> InitPassword([FromBody] InitPasswordVM model)
+        public IActionResult InitPassword([FromBody] InitPasswordVM model)
         {
             var password = model.password;
             var confirmPassword = model.confirmPassword;
@@ -202,7 +206,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 });
             }
 
-            if (await _settingService.HasSuperAdmin())
+            if ( _systemInitializationService.HasSa())
             {
                 return Json(new
                 {
@@ -211,7 +215,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 });
             }
 
-            var result = await _settingService.SetSuperAdminPassword(password);
+            var result = _systemInitializationService.TryInitSaPassword(password);
 
             if (result)
             {

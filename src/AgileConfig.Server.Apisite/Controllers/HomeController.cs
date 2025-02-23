@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Reflection;
 using AgileConfig.Server.Apisite.Utilites;
-using AgileConfig.Server.OIDC;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -16,27 +15,30 @@ namespace AgileConfig.Server.Apisite.Controllers
         private readonly ISettingService _settingService;
         private readonly IUserService _userService;
         private readonly IPermissionService _permissionService;
+        private readonly ISystemInitializationService _systemInitializationService;
 
         public HomeController(
             ISettingService settingService,
             IUserService userService,
-            IPermissionService permissionService
+            IPermissionService permissionService,
+            ISystemInitializationService systemInitializationService
             )
         {
             _settingService = settingService;
             _userService = userService;
             _permissionService = permissionService;
+            _systemInitializationService = systemInitializationService;
         }
 
         [AllowAnonymous]
-        public async Task<IActionResult> IndexAsync()
+        public IActionResult IndexAsync()
         {
             if (!Appsettings.IsAdminConsoleMode)
             {
                 return Content($"AgileConfig Node is running now , {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} .");
             }
 
-            if (!await _settingService.HasSuperAdmin())
+            if (!_systemInitializationService.HasSa())
             {
                 return Redirect(Request.PathBase + "/ui#/user/initpassword");
             }
@@ -83,7 +85,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     appVer,
-                    passwordInited = await _settingService.HasSuperAdmin(),
+                    passwordInited = _systemInitializationService.HasSa(),
                     ssoEnabled = Appsettings.SsoEnabled,
                     ssoButtonText = Appsettings.SsoButtonText
                 });
@@ -93,7 +95,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             return Json(new
             {
                 appVer,
-                passwordInited = await _settingService.HasSuperAdmin(),
+                passwordInited = _systemInitializationService.HasSa(),
                 envList,
                 ssoEnabled = Appsettings.SsoEnabled,
                 ssoButtonText = Appsettings.SsoButtonText
