@@ -77,6 +77,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             services.AddSingleton<IConfiguration>(config);
             services.AddDbConfigInfoFactory();
             services.AddFreeSqlFactory();
+            services.AddLogging();
             services.AddRepositories();
             services.AddBusinessServices();
 
