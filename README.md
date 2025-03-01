@@ -42,12 +42,12 @@ samples ：
 [AgileConfig ConsoleSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigConsoleSample)    
 
 Q&A:   
-https://github.com/kklldog/AgileConfig/wiki
+https://github.com/dotnetcore/AgileConfig/wiki
  
 API:   
-[restful api](https://github.com/kklldog/AgileConfig/wiki/Restful-API)
+[restful api](https://github.com/dotnetcore/AgileConfig/wiki/Restful-API)
 ## ChangeLog
-[Changelog](https://github.com/kklldog/AgileConfig/blob/master/CHANGELOG.md)
+[Changelog](https://github.com/dotnetcore/AgileConfig/blob/master/CHANGELOG.md)
 ## architecture
 ![](https://s1.ax1x.com/2020/06/29/NRz1gO.png)
 ### client
