@@ -88,7 +88,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <returns></returns>
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [HttpGet()]
-        public async Task<ActionResult<List<ApiConfigVM>>> GetConfigs(string appId, [FromQuery] EnvString env)
+        public async Task<ActionResult<List<ApiConfigVM>>> GetConfigs(string appId, EnvString env)
         {
             ArgumentException.ThrowIfNullOrEmpty(appId);
 
@@ -105,7 +105,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         /// <returns></returns>
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [HttpGet("{id}")]
-        public async Task<ActionResult<ApiConfigVM>> GetConfig(string id, [FromQuery] EnvString env)
+        public async Task<ActionResult<ApiConfigVM>> GetConfig(string id, EnvString env)
         {
             ArgumentException.ThrowIfNullOrEmpty(id);
 

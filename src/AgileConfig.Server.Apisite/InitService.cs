@@ -40,9 +40,10 @@ namespace AgileConfig.Server.Apisite
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            _systemInitializationService.TryInitDefaultEnvironment();//init DEV TEST STAGE PROD
+
             if (Appsettings.IsAdminConsoleMode)
             {
-                _systemInitializationService.TryInitDefaultEnvironment();//初始化环境 DEV TEST STAGE PROD
                 _systemInitializationService.TryInitJwtSecret();//初始化 jwt secret
                 _systemInitializationService.TryInitSaPassword(); // init super admin password
                 _systemInitializationService.TryInitDefaultApp();
