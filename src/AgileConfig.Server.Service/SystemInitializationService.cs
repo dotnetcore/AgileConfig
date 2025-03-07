@@ -62,7 +62,14 @@ public class SystemInitializationService(
                 Value = envArrayString,
                 CreateTime = DateTime.Now
             };
-            sysInitRepository.SaveInitSetting(setting);
+            try
+            {
+                sysInitRepository.SaveInitSetting(setting);
+            }
+            catch (Exception e)
+            {
+                logger.LogError("TryInitDefaultEnvironment error, maybe exec this saveing action in parallel on another node.");
+            }
         }
 
         ISettingService.EnvironmentList = envArrayString.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries);
