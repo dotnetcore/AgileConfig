@@ -8,7 +8,7 @@ namespace AgileConfig.Server.Data.Freesql
     public class EnsureTables
     {
         private const string Sqlite_ExistTableSql =
-            "SELECT count(1) FROM sqlite_master WHERE type='table' AND (name = 'agc_app' OR name 'AGC_APP')";
+            "SELECT count(1) FROM sqlite_master WHERE type='table' AND (name = 'agc_app' OR name = 'AGC_APP')";
 
         private const string Mysql_ExistTableSql =
             " SELECT count(1) FROM information_schema.TABLES WHERE table_schema= @schema AND (table_name ='agc_app' OR table_name='AGC_APP')";
