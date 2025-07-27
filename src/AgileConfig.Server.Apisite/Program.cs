@@ -1,12 +1,13 @@
-﻿using System;
-using AgileConfig.Server.Common;
+﻿using AgileConfig.Server.Common;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Logs;
 using OpenTelemetry.Exporter;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Resources;
+using System;
+using System.Reflection;
 
 namespace AgileConfig.Server.Apisite
 {
@@ -16,10 +17,10 @@ namespace AgileConfig.Server.Apisite
 
         public static void Main(string[] args)
         {
-            var basePath = AppDomain.CurrentDomain.BaseDirectory;
-            Console.WriteLine("current dir path: " + basePath);
+            PrintBasicSysInfo();
+
             var builder = new ConfigurationBuilder()
-            .SetBasePath(basePath);
+            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory);
 #if DEBUG
             Global.Config =
                  builder
@@ -34,6 +35,16 @@ namespace AgileConfig.Server.Apisite
                 .Build();
 
             host.Run();
+        }
+
+        private static void PrintBasicSysInfo()
+        {
+            var appVer = Assembly.GetAssembly(typeof(Program))?.GetName()?.Version?.ToString();
+            var basePath = AppDomain.CurrentDomain.BaseDirectory;
+
+            Console.WriteLine(ASCII_FONT.Font.Render($"Agile Config"));
+            Console.WriteLine("Version: {0}", appVer);
+            Console.WriteLine("Path: {0}", basePath);
         }
 
         private static IWebHostBuilder CreateWebHostBuilder(string[] args)
@@ -67,7 +78,7 @@ namespace AgileConfig.Server.Apisite
                            expOp.Endpoint = new Uri(Appsettings.OtlpLogsEndpoint);
                            if (!string.IsNullOrEmpty(Appsettings.OtlpLogsHeaders))
                            {
-                               expOp.Headers = Appsettings.OtlpLogsHeaders;    
+                               expOp.Headers = Appsettings.OtlpLogsHeaders;
                            }
                        });
             });

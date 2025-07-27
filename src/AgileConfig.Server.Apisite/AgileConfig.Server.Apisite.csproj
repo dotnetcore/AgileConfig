@@ -3,11 +3,11 @@
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
 		<AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
-		<AssemblyVersion>1.9.13</AssemblyVersion>
-		<Version>1.9.13</Version>
-		<PackageVersion>1.9.13</PackageVersion>
+		<AssemblyVersion>1.9.14</AssemblyVersion>
+		<Version>1.9.14</Version>
+		<PackageVersion>1.9.14</PackageVersion>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-		<FileVersion>1.9.13</FileVersion>
+		<FileVersion>1.9.14</FileVersion>
 		<Authors>kklldog</Authors>
 		<Company>kklldog</Company>
 	</PropertyGroup>
@@ -41,6 +41,8 @@
 		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.8.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.5.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.5.0" />
+		<PackageReference Include="Figgle.Generator" Version="0.6.4" PrivateAssets="all" />
+		<PackageReference Include="Figgle.Fonts" Version="0.6.5" />
 	</ItemGroup>
 
 	<ItemGroup>
