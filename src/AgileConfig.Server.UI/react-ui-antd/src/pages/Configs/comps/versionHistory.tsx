@@ -1,30 +1,11 @@
-import { Button, Col, message, Modal, Row, Space, Table, Tag } from "antd";
+import { Button, Col, message, Modal, Row, Table, Tag } from "antd";
 import styles from './versionHistory.less';
 import moment from "moment";
 import React, { useState,useEffect } from 'react';
-import { useIntl } from "react-intl";
+import { useIntl } from "umi";
 import { PublishDetialNode } from "../data";
 import { getPublishHistory, rollback } from "../service";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
-
-const handleRollback = async (timelineId: string, env: string) => {
-  const hide = message.loading('正在回滚');
-  try {
-    const result = await rollback(timelineId, env);
-    hide();
-    const success = result.success;
-    if (success) {
-      message.success('回滚成功！');
-    } else {
-      message.error(result.message);
-    }
-    return success;
-  } catch (error) {
-    hide();
-    message.error('回滚失败！');
-    return false;
-  }
-};
 
 export type VersionHistoryFormProps = {
     appId: string,
@@ -37,12 +18,47 @@ export type VersionHistoryFormProps = {
 const { confirm } = Modal;
 const VersionHistory : React.FC<VersionHistoryFormProps> = (props)=>{
   const intl = useIntl();
+
+  const handleRollback = async (timelineId: string, env: string) => {
+    const hide = message.loading(intl.formatMessage({
+      id: 'pages.configs.version.rolling_back'
+    }));
+    try {
+      const result = await rollback(timelineId, env);
+      hide();
+      const success = result.success;
+      if (success) {
+        message.success(intl.formatMessage({
+          id: 'pages.configs.version.rollback_success'
+        }));
+      } else {
+        message.error(result.message);
+      }
+      return success;
+    } catch (error) {
+      hide();
+      message.error(intl.formatMessage({
+        id: 'pages.configs.version.rollback_fail'
+      }));
+      return false;
+    }
+  };
+
   const editStatusEnums = {
-    0: '新增',
-    1: '编辑',
-    2: '删除',
-    10: '已提交'
+    0: intl.formatMessage({
+      id: 'pages.configs.version.status.add'
+    }),
+    1: intl.formatMessage({
+      id: 'pages.configs.version.status.edit'
+    }),
+    2: intl.formatMessage({
+      id: 'pages.configs.version.status.delete'
+    }),
+    10: intl.formatMessage({
+      id: 'pages.configs.version.status.committed'
+    })
   }
+
   const editStatusColors = {
     0: 'blue',
     1: 'gold',
@@ -77,12 +93,14 @@ const VersionHistory : React.FC<VersionHistoryFormProps> = (props)=>{
         },
         {
             width: 150,
-            title: '编辑状态',
+            title: intl.formatMessage({
+              id: 'pages.configs.version.editStatus'
+            }),
             dataIndex: 'editStatus',
             render: (_:any, record:any) => (
-              <Tag color={editStatusColors[record.editStatus]}>
+              <Tag color={editStatusColors[record.editStatus as keyof typeof editStatusColors]}>
                 {
-                   editStatusEnums[record.editStatus]
+                   editStatusEnums[record.editStatus as keyof typeof editStatusEnums]
                 }
               </Tag>
            ),
@@ -91,8 +109,8 @@ const VersionHistory : React.FC<VersionHistoryFormProps> = (props)=>{
     return (
         <Modal 
           footer={false}
-          cancelText="关闭"
-          title="历史版本"
+          cancelText={intl.formatMessage({id: 'pages.configs.close'})}
+          title={intl.formatMessage({id: 'pages.config.history.title'})}
           width={1000} 
           visible={props.versionHistoryModalVisible}
           onCancel={
@@ -104,7 +122,7 @@ const VersionHistory : React.FC<VersionHistoryFormProps> = (props)=>{
             <div className={styles.historyContainer}>
             {
               datasource.length === 0 ?
-              '暂无数据'
+              intl.formatMessage({id: 'pages.configs.no_data'})
               :
               datasource.map( (e, i)=> 
                 <div key={e.key} className={styles.historyVersionTable}>
@@ -119,7 +137,7 @@ const VersionHistory : React.FC<VersionHistoryFormProps> = (props)=>{
                           moment(e.timelineNode.publishTime).format('YYYY-MM-DD HH:mm:ss')+' / ' +e.timelineNode.publishUserName + '  '
                         }
                         {
-                          i === 0 ? <Tag>当前版本</Tag> : ''
+                          i === 0 ? <Tag>{intl.formatMessage({id: 'pages.config.history.current'})}</Tag> : ''
                         }
                         <div style={{color:"#8c8c8c"}}>
                           {
@@ -148,17 +166,17 @@ const VersionHistory : React.FC<VersionHistoryFormProps> = (props)=>{
                             },
                             icon: <ExclamationCircleOutlined />,
                             content: <div>
-                              {`确定回滚至【${moment(e.timelineNode.publishTime).format('YYYY-MM-DD HH:mm:ss')}】时刻的发布版本吗？`}
+                              {`${intl.formatMessage({id: 'pages.configs.confirm_rollback_to'})}【${moment(e.timelineNode.publishTime).format('YYYY-MM-DD HH:mm:ss')}】${intl.formatMessage({id: 'pages.configs.confirm_rollback_suffix'})}`}
                               <br></br>
                               <br></br>
                               <div>
-                                注意：本操作会清空当前所有待发布的配置项
+                                {intl.formatMessage({id: 'pages.configs.rollback_warning'})}
                               </div>
                             </div>
                           });
                         }}
                       >
-                        回滚
+                        {intl.formatMessage({id: 'pages.config.history.rollback'})}
                       </Button >
                     </Col>
                   </Row>

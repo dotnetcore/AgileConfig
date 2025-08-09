@@ -25,7 +25,7 @@ const UpdateForm : React.FC<UpdateUserProps> = (props)=>{
     return (
     <ModalForm 
     width="400px"
-    title="编辑用户"
+    title={intl.formatMessage({id: props.value?.id ? 'pages.user.form.title.edit' : 'pages.user.form.title.add'})}
     initialValues={props.value}
     visible={props.updateModalVisible}
     modalProps={
@@ -46,13 +46,13 @@ const UpdateForm : React.FC<UpdateUserProps> = (props)=>{
           readonly={true}
         />
    <ProFormText
-          label= "用户名"
+          label={intl.formatMessage({id: 'pages.user.form.username'})}
           name="userName" 
           readonly={true}
         />
  
        <ProFormText
-          label= "团队"
+          label={intl.formatMessage({id: 'pages.user.form.team'})}
           name="team" 
         />
     <ProFormSelect
@@ -61,22 +61,28 @@ const UpdateForm : React.FC<UpdateUserProps> = (props)=>{
             required: true,
           },
         ]}
-        label="角色"
+        label={intl.formatMessage({id: 'pages.user.form.usertype'})}
         name="userRoles"
         mode="multiple" 
         options = {
           hasUserRole('SuperAdmin')?[
             {
               value: 1,
-              label: '管理员',
+              label: intl.formatMessage({
+                id: 'pages.user.role.admin',
+              }),
             },
             {
               value: 2,
-              label: '操作员',
+              label: intl.formatMessage({
+                id: 'pages.user.role.operator',
+              }),
             }
           ]:[{
             value: 2,
-            label: '操作员',
+            label: intl.formatMessage({
+              id: 'pages.user.role.operator',
+            }),
           }]
         }
       >

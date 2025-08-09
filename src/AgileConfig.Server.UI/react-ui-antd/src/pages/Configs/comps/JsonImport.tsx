@@ -2,7 +2,7 @@ import { getToken } from "@/utils/authority";
 import { DeleteOutlined, UploadOutlined } from "@ant-design/icons";
 import { Button, message, Modal, Space, Table, Upload } from "antd";
 import React, { useState } from 'react';
-import { useIntl } from "react-intl";
+import { useIntl } from "umi";
 import { JsonImportItem } from "../data";
 import { addRangeConfig } from "../service";
 import styles from './jsonImport.less';
@@ -14,41 +14,52 @@ export type JsonImportFormProps = {
     onCancel: () => void;
     onSaveSuccess: ()=> void;
   };
+
+const JsonImport : React.FC<JsonImportFormProps> = (props)=>{
+  const intl = useIntl();
+  const [datasource, setDatasource] = useState<JsonImportItem[]>([]);
+
   const handleSave = async ( items: JsonImportItem[], env: string) => {
     if (items.length === 0) {
-      message.warning('没有需要导入的配置项！');
+      message.warning(intl.formatMessage({
+        id: 'pages.configs.import.noItems'
+      }));
       return;
     }
 
-    const hide = message.loading('正在导入');
+    const hide = message.loading(intl.formatMessage({
+      id: 'pages.configs.importing'
+    }));
     try {
       const result = await addRangeConfig(items, env);
       hide();
       const success = result.success;
       if (success) {
-        message.success('导入成功');
+        message.success(intl.formatMessage({
+          id: 'pages.configs.import_success'
+        }));
       } else {
         message.error(result.message);
       }
       return success;
     } catch (error) {
       hide();
-      message.error('导入失败请重试！');
+      message.error(intl.formatMessage({
+        id: 'pages.configs.import_fail'
+      }));
       return false;
     }
   };
-const JsonImport : React.FC<JsonImportFormProps> = (props)=>{
-  const intl = useIntl();
-    const [datasource, setDatasource] = useState<JsonImportItem[]>([]);
-    const deleteItem = (item:JsonImportItem) => {
-      const index = datasource.findIndex(x=>x.id === item.id);
-      console.log(index, item.id);
-      if (index >= 0) {
-        datasource.splice(index, 1);
-        const cloned  = Object.assign([], datasource)
-        setDatasource(cloned);
-      }
+
+  const deleteItem = (item:JsonImportItem) => {
+    const index = datasource.findIndex(x=>x.id === item.id);
+    console.log(index, item.id);
+    if (index >= 0) {
+      datasource.splice(index, 1);
+      const cloned  = Object.assign([], datasource)
+      setDatasource(cloned);
     }
+  };
     const columns = [
         {
           title: intl.formatMessage({id:'pages.configs.table.cols.g'}),
@@ -97,7 +108,7 @@ const JsonImport : React.FC<JsonImportFormProps> = (props)=>{
               }
             }
           } else if (info.file.status === 'error') {
-            message.error(`${info.file.name} 上传失败.`);
+            message.error(`${info.file.name} ${intl.formatMessage({id: 'pages.configs.upload_failed'})}`);
           }
         },
       };

@@ -1,61 +1,56 @@
-import { getIntl, getLocale } from '@/.umi/plugin-locale/localeExports';
 import AuthorizedEle from '@/components/Authorized/AuthorizedElement';
 import functionKeys from '@/models/functionKeys';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
 import { Button, message, Modal } from 'antd';
-import React, { useState, useRef, useEffect } from 'react';
-import { useIntl } from 'react-intl';
-import { queryApps } from '../Apps/service';
+import React, { useRef } from 'react';
+import { useIntl } from 'umi';
 import { queryNodes } from '../Nodes/service';
 import { queryClients, reloadClientConfigs, clientOffline } from './service';
 const { confirm } = Modal;
 
-const handleClientReload = async (client: any) => {
-  const intl = getIntl(getLocale());
-  const hide = message.loading(intl.formatMessage({ id: 'refreshing' }));
-  try {
-    const result = await reloadClientConfigs(client.address, client.id);
-    hide();
-    const success = result.success;
-    if (success) {
-      message.success(intl.formatMessage({ id: 'refresh_success' }));
-    } else {
-      message.error(result.message);
-    }
-    return success;
-  } catch (error) {
-    hide();
-    message.error(intl.formatMessage({ id: 'refresh_fail' }));
-    return false;
-  }
-};
-
-const handleClientOffline = async (client: any) => {
-  const intl = getIntl(getLocale());
-  const hide = message.loading(intl.formatMessage({ id: 'disconnecting' }));
-  try {
-    const result = await clientOffline(client.address, client.id);
-    hide();
-    const success = result.success;
-    if (success) {
-      message.success(intl.formatMessage({ id: 'disconnect_success' }));
-    } else {
-      message.error(result.message);
-    }
-    return success;
-  } catch (error) {
-    hide();
-    message.error(intl.formatMessage({ id: 'disconnect_fail' }));
-    return false;
-  }
-};
-
 const clients: React.FC = () => {
-  const actionRef = useRef<ActionType>();
-  const [appEnums, setAppEnums] = useState<any>();
   const intl = useIntl();
+  const actionRef = useRef<ActionType>();
+
+  const handleClientReload = async (client: any) => {
+    const hide = message.loading(intl.formatMessage({ id: 'refreshing' }));
+    try {
+      const result = await reloadClientConfigs(client.address, client.id);
+      hide();
+      const success = result.success;
+      if (success) {
+        message.success(intl.formatMessage({ id: 'refresh_success' }));
+      } else {
+        message.error(result.message);
+      }
+      return success;
+    } catch (error) {
+      hide();
+      message.error(intl.formatMessage({ id: 'refresh_fail' }));
+      return false;
+    }
+  };
+
+  const handleClientOffline = async (client: any) => {
+    const hide = message.loading(intl.formatMessage({ id: 'disconnecting' }));
+    try {
+      const result = await clientOffline(client.address, client.id);
+      hide();
+      const success = result.success;
+      if (success) {
+        message.success(intl.formatMessage({ id: 'disconnect_success' }));
+      } else {
+        message.error(result.message);
+      }
+      return success;
+    } catch (error) {
+      hide();
+      message.error(intl.formatMessage({ id: 'disconnect_fail' }));
+      return false;
+    }
+  };
 
   const getNodesForSelect = async () => {
     const result = await queryNodes();
@@ -69,25 +64,7 @@ const clients: React.FC = () => {
 
     return arr;
   };
-  const getAppEnums = async () => {
-    const result = await queryApps({});
-    const obj = {};
-    result.data?.forEach((x) => {
-      if (x) {
-        obj[x.id] = {
-          text: x.name,
-        };
-      }
-    });
 
-    return obj;
-  };
-  useEffect(() => {
-    getAppEnums().then((x) => {
-      console.log('app enums ', x);
-      setAppEnums({ ...x });
-    });
-  }, []);
   const columns: ProColumns[] = [
     {
       title: intl.formatMessage({
@@ -106,7 +83,9 @@ const clients: React.FC = () => {
       request: getNodesForSelect,
     },
     {
-      title: '环境',
+      title: intl.formatMessage({
+        id: 'pages.client.table.cols.env',
+      }),
       dataIndex: 'env',
     },
     {
@@ -143,7 +122,9 @@ const clients: React.FC = () => {
       dataIndex: 'lastRefreshTime',
       hideInSearch: true,
       valueType: 'dateTime',
-      tip: '客户端从服务器最后一次全量拉取配置的时间',
+      tooltip: intl.formatMessage({
+        id: 'pages.client.table.cols.lastRefreshTime.tooltip',
+      }),
     },
     {
       title: intl.formatMessage({

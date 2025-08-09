@@ -1,11 +1,11 @@
-import { useIntl } from "@/.umi/plugin-locale/localeExports";
-import { ModalForm, ProFormDependency, ProFormSelect, ProFormSwitch, ProFormText } from "@ant-design/pro-form";
+import { useIntl } from '@/.umi/plugin-locale/localeExports';
+import { ModalForm, ProFormDependency, ProFormSelect, ProFormSwitch, ProFormText } from '@ant-design/pro-form';
 import React, { useEffect, useState } from 'react';
-import { AppListItem } from "../data";
-import { getAppGroups, inheritancedApps } from "../service";
+import { AppListItem } from '../data';
+import { getAppGroups, inheritancedApps } from '../service';
 import { adminUsers } from '@/pages/User/service';
-import { Divider, Input } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
+import { Divider, Input } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 
 export type UpdateFormProps = {
   onSubmit: (values: AppListItem) => Promise<void>;
@@ -16,7 +16,7 @@ export type UpdateFormProps = {
 };
 const UpdateForm: React.FC<UpdateFormProps> = (props) => {
   const intl = useIntl();
-  const [appGroups, setAppGroups] = useState<{ label: string, value: string }[]>([]);
+  const [appGroups, setAppGroups] = useState<{ label: string; value: string }[]>([]);
   const [newAppGroupName, setNewAppGroupName] = useState<string>('');
   useEffect(() => {
     getAppGroups().then(x => {
@@ -34,65 +34,31 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
   }, []);
   return (
     <ModalForm
-      title={
-        intl.formatMessage({
-          id: 'pages.app.form.title.edit'
-        })
-      }
+      title={intl.formatMessage({ id: 'pages.app.form.title.edit' })}
       initialValues={props.value}
       visible={props.updateModalVisible}
-      modalProps={
-        {
-          onCancel: () => {
-            props.onCancel();
-          },
-          maskClosable: false
-        }
-      }
-      onFinish={
-        props.onSubmit
-      }
+      modalProps={{ onCancel: () => props.onCancel(), maskClosable: false }}
+      onFinish={props.onSubmit}
     >
-
       <ProFormText
-        rules={[
-          {
-            required: true,
-          },
-        ]}
-        label={
-          intl.formatMessage({
-            id: 'pages.app.form.name'
-          })
-        }
-        name="name"
+        rules={[{ required: true }]}
+        label={intl.formatMessage({ id: 'pages.app.form.name' })}
+        name='name'
       />
       <ProFormText
-        rules={[
-          {
-            required: true,
-          },
-        ]}
+        rules={[{ required: true }]}
         readonly={true}
-        label={
-          intl.formatMessage({
-            id: 'pages.app.form.id'
-          })
-        }
-        name="id"
+        label={intl.formatMessage({ id: 'pages.app.form.id' })}
+        name='id'
       />
       <ProFormText.Password
-        label={
-          intl.formatMessage({
-            id: 'pages.app.form.secret'
-          })
-        }
-        name="secret"
+        label={intl.formatMessage({ id: 'pages.app.form.secret' })}
+        name='secret'
       />
       <ProFormSelect
-        placeholder="应用所属的组"
-        label="应用组"
-        name="group"
+        placeholder={intl.formatMessage({ id: 'pages.app.form.group.placeholder' })}
+        label={intl.formatMessage({ id: 'pages.app.form.group' })}
+        name='group'
         options={appGroups}
         fieldProps={{
           dropdownRender: (menu) => (
@@ -100,15 +66,17 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
               {menu}
               <Divider style={{ margin: '4px 0' }} />
               <div style={{ display: 'flex', flexWrap: 'nowrap', padding: 8 }}>
-                <Input placeholder="输入组名" style={{ flex: 'auto' }} value={newAppGroupName} onChange={(e) => { setNewAppGroupName(e.target.value) }} />
+                <Input
+                  placeholder={intl.formatMessage({ id: 'pages.app.form.group.input.placeholder' })}
+                  style={{ flex: 'auto' }}
+                  value={newAppGroupName}
+                  onChange={(e) => setNewAppGroupName(e.target.value)}
+                />
                 <a
                   style={{ flex: 'none', padding: '8px', display: 'block', cursor: 'pointer' }}
                   onClick={() => {
                     if (newAppGroupName) {
-                      setAppGroups([...appGroups, {
-                        label: newAppGroupName,
-                        value: newAppGroupName
-                      }]);
+                      setAppGroups([...appGroups, { label: newAppGroupName, value: newAppGroupName }]);
                       setNewAppGroupName('');
                     }
                   }}
@@ -117,17 +85,13 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
                 </a>
               </div>
             </div>
-          )
+          ),
         }}
-      ></ProFormSelect>
+      />
       <ProFormSwitch
-        tooltip="公共应用可以被其他应用关联"
-        label={
-          intl.formatMessage({
-            id: 'pages.app.form.public'
-          })
-        }
-        name="inheritanced"
+        tooltip={intl.formatMessage({ id: 'pages.app.form.public.tooltip' })}
+        label={intl.formatMessage({ id: 'pages.app.form.public' })}
+        name='inheritanced'
         checkedChildren={true} unCheckedChildren={false}
       >
       </ProFormSwitch>
@@ -141,7 +105,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
                 label={intl.formatMessage({
                   id: 'pages.app.form.connected'
                 })}
-                tooltip="关联后可以读取公共应用的配置项"
+                tooltip={intl.formatMessage({ id: 'pages.app.form.connected.tooltip' })}
                 name="inheritancedApps"
                 mode="multiple"
                 request={async () => {
@@ -160,7 +124,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
             required: true,
           },
         ]}
-        label="管理员"
+        label={intl.formatMessage({ id: 'pages.app.form.admin' })}
         name="appAdmin"
         request={async () => {
           const result = await adminUsers();
@@ -177,6 +141,6 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
       } name="enabled" checkedChildren={true} unCheckedChildren={false}></ProFormSwitch>
     </ModalForm>
   );
-}
+};
 
 export default UpdateForm;

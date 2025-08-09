@@ -4,141 +4,171 @@ import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
 import { Button, message, Modal } from 'antd';
 import React, {  useRef, useState } from 'react';
-import { getIntl, getLocale } from 'umi';
+import { useIntl } from 'umi';
 import { ServiceItem } from './data';
 import { addService, queryService, removeService } from './service';
 import styles from './index.less';
 const { confirm } = Modal;
 
-const handleAdd = async (fields: ServiceItem) => {
-  const intl = getIntl(getLocale());
-  const hide = message.loading(intl.formatMessage({
-    id:'saving'
-  }));
-  try {
-    const result = await addService({ ...fields });
-    hide();
-    const success = result.success;
-    if (success) {
-      message.success(intl.formatMessage({
-        id:'save_success'
-      }));
-    } else {
-      message.error(result.message);
-    }
-    return success;
-  } catch (error) {
-    hide();
-    message.error(intl.formatMessage({
-      id:'save_fail'
-    }));
-    return false;
-  }
-};
-const handleDelSome = async (service: ServiceItem):Promise<boolean> => {
-  const intl = getIntl(getLocale());
-  const hide = message.loading(intl.formatMessage({id:'deleting'}));
-  try {
-    const result = await removeService(service);
-    hide();
-    const success = result.success;
-    if (success) {
-      message.success(intl.formatMessage({id:'delete_success'}));
-    } else {
-      message.error(intl.formatMessage({id:'delete_fail'}));
-    }
-    return success;
-  } catch (error) {
-    hide();
-    message.error(intl.formatMessage({id:'delete_fail'}));
-    return false;
-  }
-};
-
 const services: React.FC = () => {
+  const intl = useIntl();
   const actionRef = useRef<ActionType>();
   const addFormRef = useRef<FormInstance>();
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
 
+  const handleAdd = async (fields: ServiceItem) => {
+    const hide = message.loading(intl.formatMessage({
+      id:'saving'
+    }));
+    try {
+      const result = await addService({ ...fields });
+      hide();
+      const success = result.success;
+      if (success) {
+        message.success(intl.formatMessage({
+          id:'save_success'
+        }));
+      } else {
+        message.error(result.message);
+      }
+      return success;
+    } catch (error) {
+      hide();
+      message.error(intl.formatMessage({
+        id:'save_fail'
+      }));
+      return false;
+    }
+  };
+
+  const handleDelSome = async (service: ServiceItem):Promise<boolean> => {
+    const hide = message.loading(intl.formatMessage({id:'deleting'}));
+    try {
+      const result = await removeService(service);
+      hide();
+      const success = result.success;
+      if (success) {
+        message.success(intl.formatMessage({id:'delete_success'}));
+      } else {
+        message.error(intl.formatMessage({id:'delete_fail'}));
+      }
+      return success;
+    } catch (error) {
+      hide();
+      message.error(intl.formatMessage({id:'delete_fail'}));
+      return false;
+    }
+  };
+
   const columns: ProColumns[] = [
     {
-      title: '服务ID',
+      title: intl.formatMessage({
+        id: 'pages.services.serviceId',
+      }),
       dataIndex: 'serviceId',
     },
     {
-      title: '服务名',
+      title: intl.formatMessage({
+        id: 'pages.services.serviceName',
+      }),
       dataIndex: 'serviceName',
       sorter: true,
     },
     {
-      title: 'IP',
+      title: intl.formatMessage({
+        id: 'pages.services.ip',
+      }),
       dataIndex: 'ip',
       hideInSearch: true,
     },
     {
-      title: '端口',
+      title: intl.formatMessage({
+        id: 'pages.services.port',
+      }),
       dataIndex: 'port',
       hideInSearch: true,
     },
     {
-      title: '元数据',
+      title: intl.formatMessage({
+        id: 'pages.services.metaData',
+      }),
       dataIndex: 'metaData',
       hideInSearch: true,
     },
     {
-      title: '健康检测模式',
+      title: intl.formatMessage({
+        id: 'pages.services.heartBeatMode',
+      }),
       dataIndex: 'heartBeatMode',
       hideInSearch: true,
     },
     {
-      title: '检测 URL',
+      title: intl.formatMessage({
+        id: 'pages.services.checkUrl',
+      }),
       dataIndex: 'checkUrl',
       hideInSearch: true,
       ellipsis: true,
     },
     {
-      title: '告警 URL',
+      title: intl.formatMessage({
+        id: 'pages.services.alarmUrl',
+      }),
       dataIndex: 'alarmUrl',
       hideInSearch: true,
       ellipsis: true,
     },
     {
-      title: '注册时间',
+      title: intl.formatMessage({
+        id: 'pages.services.registerTime',
+      }),
       dataIndex: 'registerTime',
       hideInSearch: true,
       valueType: 'dateTime',
       sorter: true,
     },
     {
-      title: '最后响应时间',
+      title: intl.formatMessage({
+        id: 'pages.services.lastHeartBeat',
+      }),
       dataIndex: 'lastHeartBeat',
       hideInSearch: true,
       valueType: 'dateTime',
     },
     {
-      title: '状态',
+      title: intl.formatMessage({
+        id: 'pages.services.status',
+      }),
       dataIndex: 'status',
       valueEnum: {
         0: {
-          text: '异常',
+          text: intl.formatMessage({
+            id: 'pages.services.statusAbnormal',
+          }),
           status: 'Default'
         },
         1: {
-          text: '健康',
+          text: intl.formatMessage({
+            id: 'pages.services.statusHealthy',
+          }),
           status: 'Success'
         }
       },
       width: 120
     },
     {
-      title: '操作',
+      title: intl.formatMessage({
+        id: 'pages.services.operation',
+      }),
       valueType: 'option',
       render: (text, record, _, action) => [
         <a className={styles.linkDanger}
           onClick={
             ()=>{
               confirm({
-                content:`确定删除选中的服务吗？`,
+                content: intl.formatMessage({
+                  id: 'pages.services.confirmDelete',
+                }),
                 onOk: async ()=>{
                   const result = await handleDelSome(record)
                   if (result) {
@@ -149,7 +179,9 @@ const services: React.FC = () => {
             }
           }
         >
-          删除
+          {intl.formatMessage({
+            id: 'pages.services.delete',
+          })}
         </a>
       ]
     }
@@ -182,14 +214,18 @@ const services: React.FC = () => {
         toolBarRender={()=>
           [
             <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { setCreateModalVisible(true) }}>
-              注册
+              {intl.formatMessage({
+                id: 'pages.services.newService',
+              })}
             </Button>
           ]
         }
       />
       <ModalForm
         formRef={addFormRef}
-        title='注册服务'
+        title={intl.formatMessage({
+          id: 'pages.services.newService',
+        })}
         visible={createModalVisible}
         onVisibleChange={setCreateModalVisible}
         onFinish={
@@ -209,18 +245,34 @@ const services: React.FC = () => {
           rules={[
             {
               required: true,
+              message: intl.formatMessage({
+                id: 'pages.services.serviceNameRequired',
+              }),
             },
           ]}
-          label='服务ID'
+          label={intl.formatMessage({
+            id: 'pages.services.serviceId',
+          })}
+          placeholder={intl.formatMessage({
+            id: 'pages.services.serviceName.placeholder',
+          })}
           name="serviceId"
         />
         <ProFormText
           rules={[
             {
               required: true,
+              message: intl.formatMessage({
+                id: 'pages.services.serviceNameRequired',
+              }),
             },
           ]}
-          label='服务名'
+          label={intl.formatMessage({
+            id: 'pages.services.serviceName',
+          })}
+          placeholder={intl.formatMessage({
+            id: 'pages.services.serviceName.placeholder',
+          })}
           name="serviceName"
         />
         <ProFormSelect
@@ -238,7 +290,9 @@ const services: React.FC = () => {
                      </div>
                    }
                  }
-                  label="健康检测模式"
+                  label={intl.formatMessage({
+                    id: 'pages.services.heartBeatMode',
+                  })}
                   name="heartBeatMode"
                   request={ async () => {
                     return [
@@ -261,17 +315,35 @@ const services: React.FC = () => {
         <ProFormText
           rules={[
             {
+              required: true,
+              message: intl.formatMessage({
+                id: 'pages.services.ipRequired',
+              }),
             },
           ]}
-          label='IP'
+          label={intl.formatMessage({
+            id: 'pages.services.ip',
+          })}
+          placeholder={intl.formatMessage({
+            id: 'pages.services.ip.placeholder',
+          })}
           name="ip"
         />
         <ProFormText
           rules={[
             {
+              required: true,
+              message: intl.formatMessage({
+                id: 'pages.services.portRequired',
+              }),
             },
           ]}
-          label='端口'
+          label={intl.formatMessage({
+            id: 'pages.services.port',
+          })}
+          placeholder={intl.formatMessage({
+            id: 'pages.services.port.placeholder',
+          })}
           name="port"
         />
         <ProFormDependency
@@ -287,7 +359,12 @@ const services: React.FC = () => {
                       required: true,
                     },
                   ]}
-                  label='检测 URL'
+                  label={intl.formatMessage({
+                    id: 'pages.services.checkUrl',
+                  })}
+                  placeholder={intl.formatMessage({
+                    id: 'pages.services.checkUrl.placeholder',
+                  })}
                   name="checkUrl"
                 />: null
             }
@@ -305,7 +382,12 @@ const services: React.FC = () => {
                     {
                     },
                   ]}
-                  label='告警 URL'
+                  label={intl.formatMessage({
+                    id: 'pages.services.alarmUrl',
+                  })}
+                  placeholder={intl.formatMessage({
+                    id: 'pages.services.alarmUrl.placeholder',
+                  })}
                   name="alarmUrl"
                 />
             }

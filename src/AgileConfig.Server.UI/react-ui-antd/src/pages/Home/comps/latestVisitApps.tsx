@@ -1,12 +1,15 @@
 import { Card } from 'antd';
-import { history } from 'umi';
+import { history, useIntl } from 'umi';
 import { useState } from 'react';
 import { getVisitApps } from '@/utils/latestVisitApps';
 
 const LatestVisitApps: React.FC = ()=> {
+    const intl = useIntl();
     const [latestVisitApps, _] = useState<{appId:string,appName:string}[]>(getVisitApps());
     return(
-      <Card title="最近访问" hidden={latestVisitApps.length === 0}>
+      <Card title={intl.formatMessage({
+        id: 'pages.home.recentVisit'
+      })} hidden={latestVisitApps.length === 0}>
       {
         latestVisitApps.map(x=>  
           <Card.Grid style={{  width: '25%'}} key={x.appId}>

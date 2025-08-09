@@ -1,10 +1,10 @@
-import { Button, message, Modal, Input, Checkbox, Tooltip } from 'antd';
-const { TextArea } = Input;
+import { Button, message, Modal, Checkbox, Tooltip } from 'antd';
 import Editor from '@monaco-editor/react';
 import React, { useState, useEffect } from 'react';
 import { getConfigsKvList, saveKvList } from '../service';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
 import { QuestionCircleOutlined } from '@ant-design/icons';
+import { useIntl } from 'umi';
 export type TextEditorProps = {
   appId: string;
   appName: string;
@@ -13,35 +13,45 @@ export type TextEditorProps = {
   onCancel: () => void;
   onSaveSuccess: () => void;
 };
-const handleSave = async (
-  kvText: string | undefined,
-  appId: string,
-  env: string,
-  isPatch: boolean,
-) => {
-  const hide = message.loading('正在保存...');
-  try {
-    const result = await saveKvList(appId, env, kvText ? kvText : '', isPatch);
-    hide();
-    const success = result.success;
-    if (success) {
-      message.success('保存成功！');
-    } else {
-      message.error(result.message ? result.message : '保存失败！');
-    }
-    return success;
-  } catch (error) {
-    hide();
-    message.error('保存失败！');
-    return false;
-  }
-};
 const TextEditor: React.FC<TextEditorProps> = (props) => {
+  const intl = useIntl();
   const [kvText, setkvText] = useState<string | undefined>('');
   const [isPatch, setIsPatch] = useState<boolean>(false);
 
   const onIsPatchChange = (e: CheckboxChangeEvent) => {
     setIsPatch(e.target.checked);
+  };
+
+  const handleSave = async (
+    kvText: string | undefined,
+    appId: string,
+    env: string,
+    isPatch: boolean,
+  ) => {
+    const hide = message.loading(intl.formatMessage({
+      id: 'saving'
+    }));
+    try {
+      const result = await saveKvList(appId, env, kvText ? kvText : '', isPatch);
+      hide();
+      const success = result.success;
+      if (success) {
+        message.success(intl.formatMessage({
+          id: 'save_success'
+        }));
+      } else {
+        message.error(result.message ? result.message : intl.formatMessage({
+          id: 'save_fail'
+        }));
+      }
+      return success;
+    } catch (error) {
+      hide();
+      message.error(intl.formatMessage({
+        id: 'save_fail'
+      }));
+      return false;
+    }
   };
   useEffect(() => {
     getConfigsKvList(props.appId, props.env).then((res) => {
@@ -55,8 +65,12 @@ const TextEditor: React.FC<TextEditorProps> = (props) => {
   return (
     <Modal
       maskClosable={false}
-      title="按 TEXT 视图编辑"
-      okText="保存"
+      title={intl.formatMessage({
+        id: 'pages.configs.textEditor.title'
+      })}
+      okText={intl.formatMessage({
+        id: 'save'
+      })}
       width={800}
       visible={props.ModalVisible}
       onCancel={() => {
@@ -70,14 +84,20 @@ const TextEditor: React.FC<TextEditorProps> = (props) => {
               fontSize: '12px',
             }}
           >
-            严格按照 KEY=VALUE 格式编辑，每行一个配置
+            {intl.formatMessage({
+              id: 'pages.configs.textEditor.format'
+            })}
           </div>
           <div>
             <span style={{ marginRight: '12px' }}>
               <Checkbox onChange={onIsPatchChange} value={isPatch}>
-                补丁模式更新
+                {intl.formatMessage({
+                  id: 'pages.configs.textEditor.patchMode'
+                })}
               </Checkbox>
-              <Tooltip title="补丁模式,只会新增或修改配置,上面未包含的现有配置项不会被删除">
+              <Tooltip title={intl.formatMessage({
+                id: 'pages.configs.textEditor.patchModeTooltip'
+              })}>
                 <QuestionCircleOutlined />
               </Tooltip>
             </span>
@@ -87,7 +107,9 @@ const TextEditor: React.FC<TextEditorProps> = (props) => {
                 props.onCancel();
               }}
             >
-              取消
+              {intl.formatMessage({
+                id: 'cancel'
+              })}
             </Button>
             <Button
               type="primary"
@@ -98,7 +120,9 @@ const TextEditor: React.FC<TextEditorProps> = (props) => {
                 }
               }}
             >
-              保存
+              {intl.formatMessage({
+                id: 'save'
+              })}
             </Button>
           </div>
         </div>

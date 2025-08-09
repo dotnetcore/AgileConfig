@@ -1,31 +1,12 @@
-import { Button, message, Modal, Input, Checkbox, Tooltip } from 'antd';
-const { TextArea } = Input;
+import { Button, message, Modal, Checkbox, Tooltip } from 'antd';
 import React, { useState, useEffect } from 'react';
 import { getConfigJson, saveJson } from '../service';
 import Editor from '@monaco-editor/react';
 import { loader } from '@monaco-editor/react';
 import { CheckboxChangeEvent } from 'antd/lib/checkbox/Checkbox';
 import { QuestionCircleOutlined } from '@ant-design/icons';
+import { useIntl } from 'umi';
 loader.config({ paths: { vs: 'monaco-editor/min/vs' } });
-
-const handleSave = async (json: string, appId: string, env: string, isPatch: boolean) => {
-  const hide = message.loading('正在保存...');
-  try {
-    const result = await saveJson(appId, env, json, isPatch);
-    hide();
-    const success = result.success;
-    if (success) {
-      message.success('保存成功！');
-    } else {
-      message.error('保存失败！');
-    }
-    return success;
-  } catch (error) {
-    hide();
-    message.error('保存失败！');
-    return false;
-  }
-};
 
 export type JsonEditorProps = {
   appId: string;
@@ -37,9 +18,37 @@ export type JsonEditorProps = {
 };
 
 const JsonEditor: React.FC<JsonEditorProps> = (props) => {
+  const intl = useIntl();
   const [json, setJson] = useState<string>();
   const [jsonValidateSuccess, setJsonValidateSuccess] = useState<boolean>(true);
   const [isPatch, setIsPatch] = useState<boolean>(false);
+
+  const handleSave = async (json: string, appId: string, env: string, isPatch: boolean) => {
+    const hide = message.loading(intl.formatMessage({
+      id: 'saving'
+    }));
+    try {
+      const result = await saveJson(appId, env, json, isPatch);
+      hide();
+      const success = result.success;
+      if (success) {
+        message.success(intl.formatMessage({
+          id: 'save_success'
+        }));
+      } else {
+        message.error(intl.formatMessage({
+          id: 'save_fail'
+        }));
+      }
+      return success;
+    } catch (error) {
+      hide();
+      message.error(intl.formatMessage({
+        id: 'save_fail'
+      }));
+      return false;
+    }
+  };
 
   const onIsPatchChange = (e: CheckboxChangeEvent) => {
     setIsPatch(e.target.checked);
@@ -59,22 +68,22 @@ const JsonEditor: React.FC<JsonEditorProps> = (props) => {
   return (
     <Modal
       maskClosable={false}
-      title="按 JSON 视图编辑"
-      okText="保存"
+      title={intl.formatMessage({id: 'pages.configs.json_editor_title'})}
+      okText={intl.formatMessage({id: 'pages.configs.save'})}
       width={800}
       visible={props.ModalVisible}
       onCancel={props.onCancel}
       footer={
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <div>
-            {jsonValidateSuccess ? <></> : <span style={{ color: 'red' }}>JSON 格式非法</span>}
+            {jsonValidateSuccess ? <></> : <span style={{ color: 'red' }}>{intl.formatMessage({id: 'pages.configs.json_invalid'})}</span>}
           </div>
           <div>
             <span style={{ marginRight: '12px' }}>
               <Checkbox onChange={onIsPatchChange} value={isPatch}>
-                补丁模式更新
+                {intl.formatMessage({id: 'pages.configs.patch_mode'})}
               </Checkbox>
-              <Tooltip title="补丁模式,只会新增或修改配置,上面未包含的现有配置项不会被删除">
+              <Tooltip title={intl.formatMessage({id: 'pages.configs.patch_mode_tooltip'})}>
                 <QuestionCircleOutlined />
               </Tooltip>
             </span>
@@ -84,7 +93,7 @@ const JsonEditor: React.FC<JsonEditorProps> = (props) => {
                 props.onCancel();
               }}
             >
-              取消
+              {intl.formatMessage({id: 'pages.configs.cancel'})}
             </Button>
             <Button
               type="primary"
@@ -95,11 +104,11 @@ const JsonEditor: React.FC<JsonEditorProps> = (props) => {
                     props.onSaveSuccess();
                   }
                 } else {
-                  message.error('JSON 格式非法');
+                  message.error(intl.formatMessage({id: 'pages.configs.json_invalid'}));
                 }
               }}
             >
-              保存
+              {intl.formatMessage({id: 'pages.configs.save'})}
             </Button>
           </div>
         </div>

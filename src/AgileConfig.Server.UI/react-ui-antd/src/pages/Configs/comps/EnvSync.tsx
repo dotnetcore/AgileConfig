@@ -1,7 +1,8 @@
 import { getEnvList } from "@/utils/system";
-import { Button, message, Modal, Space, Table, Upload, Checkbox } from "antd";
+import { message, Modal, Checkbox } from "antd";
 import { CheckboxValueType } from "antd/lib/checkbox/Group";
-import React, { useState } from 'react';
+import React from 'react';
+import { useIntl } from "umi";
 import { envSync } from "../service";
 const CheckboxGroup = Checkbox.Group;
 export type EnvSyncFormProps = {
@@ -13,6 +14,7 @@ export type EnvSyncFormProps = {
   };
   
 const EnvSync : React.FC<EnvSyncFormProps> = (props)=>{
+    const intl = useIntl();
     const [checkedList, setCheckedList] = React.useState<CheckboxValueType[]>([]);
     const envList = getEnvList();
     const onChange = (list:CheckboxValueType[]) => {
@@ -21,7 +23,7 @@ const EnvSync : React.FC<EnvSyncFormProps> = (props)=>{
 
     return (
         <Modal 
-          title="同步环境"
+          title={intl.formatMessage({id: 'pages.configs.sync_env_title'})}
           visible={props.ModalVisible}
           onCancel={
             ()=>{
@@ -31,22 +33,22 @@ const EnvSync : React.FC<EnvSyncFormProps> = (props)=>{
           onOk={
             async ()=> {
               if (!checkedList.length) {
-                message.error('请至少勾选一个环境');
+                message.error(intl.formatMessage({id: 'pages.configs.select_at_least_one_env'}));
                 return;
               }
-              const hide = message.loading('正在同步');
+              const hide = message.loading(intl.formatMessage({id: 'pages.configs.syncing'}));
               try {
                 const result = await envSync(props.appId, props.currentEnv, checkedList.map(item=>item.toString()));
                 const success = result.success;
                 if (success) {
                   props.onSaveSuccess();
-                  message.success('同步成功！');
+                  message.success(intl.formatMessage({id: 'pages.configs.sync_success'}));
                 } else {
-                  message.error('同步失败');
+                  message.error(intl.formatMessage({id: 'pages.configs.sync_failed'}));
                 }
               }
               catch (e) {
-                message.error('同步失败');
+                message.error(intl.formatMessage({id: 'pages.configs.sync_failed'}));
               }
               finally {
                 hide();
@@ -54,7 +56,7 @@ const EnvSync : React.FC<EnvSyncFormProps> = (props)=>{
             }
           }
           >
-          将当前 {props.currentEnv} 环境的配置同步到：
+          {intl.formatMessage({id: 'pages.configs.sync_from_to'}, {env: props.currentEnv})}
           <div style={{marginTop:20}}>
             <CheckboxGroup options={envList.filter(x=> x !== props.currentEnv)} value={checkedList} onChange={onChange}  />
           </div>

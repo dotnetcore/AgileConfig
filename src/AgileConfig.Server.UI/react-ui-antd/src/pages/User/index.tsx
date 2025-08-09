@@ -147,15 +147,21 @@ const userList:React.FC = () => {
   const [currentRow, setCurrentRow] = useState<UserItem>();
   const columns: ProColumns<UserItem>[] = [
     {
-      title: '用户名',
+      title: intl.formatMessage({
+        id: 'pages.user.table.cols.username',
+      }),
       dataIndex: 'userName',
     },
     {
-      title: '团队',
+      title: intl.formatMessage({
+        id: 'pages.user.table.cols.team',
+      }),
       dataIndex: 'team',
     },
     {
-      title: '角色',
+      title: intl.formatMessage({
+        id: 'pages.user.table.cols.usertype',
+      }),
       dataIndex: 'userRoles',
       search: false,
       renderFormItem: (_, { defaultRender }) => {
@@ -165,7 +171,7 @@ const userList:React.FC = () => {
         <Space>
           {record.userRoleNames?.map((name:string) => (
             <Tag color={
-              name === '管理员'? 'gold':'blue'
+              name === intl.formatMessage({id: 'pages.user.usertype.admin'}) ? 'gold':'blue'
             } key={name}>
               {name}
             </Tag>
@@ -175,7 +181,7 @@ const userList:React.FC = () => {
     },
     {
       title: intl.formatMessage({
-        id: 'pages.node.table.cols.action'
+        id: 'pages.user.table.cols.action'
       }),
       valueType: 'option',
       render: (text, record, _, action) => checkUserListModifyPermission(record)?[
@@ -187,11 +193,17 @@ const userList:React.FC = () => {
           console.log('current user ', currentRow);
         }}
         >
-          修改
+          {intl.formatMessage({
+            id: 'pages.user.table.cols.action.edit',
+          })}
         </a>,
          <a key="1"
          onClick={ ()=> {
-          const msg = '确定重置用户' + `【${record.userName}】的密码为默认密码【123456】?`;
+          const msg = intl.formatMessage({
+            id: 'pages.user.confirm_reset',
+          }) + `【${record.userName}】` + intl.formatMessage({
+            id: 'pages.user.reset_password_default',
+          });
           confirm({
             icon: <ExclamationCircleOutlined />,
             content: msg,
@@ -208,11 +220,15 @@ const userList:React.FC = () => {
           });
         }}
          >
-         重置密码
+         {intl.formatMessage({
+           id: 'pages.user.table.cols.action.reset',
+         })}
          </a>,
         <Button key="2" type="link" danger
           onClick={ ()=> {
-            const msg = '确定删除用户' + `【${record.userName}】?`;
+            const msg = intl.formatMessage({
+              id: 'pages.user.confirm_delete',
+            }) + `【${record.userName}】?`;
             confirm({
               icon: <ExclamationCircleOutlined />,
               content: msg,
@@ -229,7 +245,9 @@ const userList:React.FC = () => {
             });
           }}
         >
-          删除
+          {intl.formatMessage({
+            id: 'pages.user.table.cols.action.delete',
+          })}
         </Button >
       ]:[]
     }
@@ -249,11 +267,9 @@ const userList:React.FC = () => {
           <Button key="0" icon={<PlusOutlined />} type="primary"
           onClick={ ()=>{ handleModalVisible(true) } }
           >
-            {
-              intl.formatMessage({
-                id: 'pages.node.action.add'
-              })
-            }
+            {intl.formatMessage({
+              id: 'pages.user.table.cols.action.add'
+            })}
           </Button>
           :
           <span key="1"></span>
@@ -269,7 +285,7 @@ const userList:React.FC = () => {
         formRef={addFormRef}
         title={
           intl.formatMessage({
-            id: 'pages.node.action.add'
+            id: 'pages.user.form.title.add'
           })
         } 
         width="400px"
@@ -294,7 +310,9 @@ const userList:React.FC = () => {
               required: true,
             },
           ]}
-          label= "用户名"
+          label={intl.formatMessage({
+            id: 'pages.user.form.username'
+          })}
           name="userName" 
         />
         <ProFormText.Password
@@ -303,11 +321,15 @@ const userList:React.FC = () => {
               required: true,
             },
           ]}
-          label= "密码"
+          label={intl.formatMessage({
+            id: 'pages.user.form.password'
+          })}
           name="password" 
         />
        <ProFormText
-          label= "团队"
+          label={intl.formatMessage({
+            id: 'pages.user.form.team'
+          })}
           name="team" 
         />
         <ProFormSelect
@@ -316,22 +338,30 @@ const userList:React.FC = () => {
                     required: true,
                   },
                 ]}
-                  label="角色"
+                  label={intl.formatMessage({
+                    id: 'pages.user.form.usertype'
+                  })}
                   name="userRoles"
                   mode="multiple" 
                   options = {hasUserRole('SuperAdmin')?[
                     {
                       value: 1,
-                      label: '管理员',
+                      label: intl.formatMessage({
+                        id: 'pages.user.usertype.admin'
+                      }),
                     },
                     {
                       value: 2,
-                      label: '操作员',
+                      label: intl.formatMessage({
+                        id: 'pages.user.usertype.normaluser'
+                      }),
                     }
                   ]:[
                   {
                     value: 2,
-                    label: '操作员',
+                    label: intl.formatMessage({
+                      id: 'pages.user.usertype.normaluser'
+                    }),
                   }]}
                 >
         </ProFormSelect> 

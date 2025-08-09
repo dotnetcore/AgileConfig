@@ -27,20 +27,21 @@ const { TextArea } = Input;
 const { confirm } = Modal;
 
 const handlePublish = async (appId: string, ids:string[], log:string, env:string) => {
-  const hide = message.loading('正在发布');
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({id:'pages.configs.publishing'}));
   try {
     const result = await publish(appId, ids, log, env);
     hide();
     const success = result.success;
     if (success) {
-      message.success('发布成功！');
+      message.success(intl.formatMessage({id:'pages.configs.publish_success'}));
     } else {
-      message.error('发布失败！');
+      message.error(intl.formatMessage({id:'pages.configs.publish_fail'}));
     }
     return success;
   } catch (error) {
     hide();
-    message.error('发布失败！');
+    message.error(intl.formatMessage({id:'pages.configs.publish_fail'}));
     return false;
   }
 };
@@ -84,20 +85,29 @@ const handleDelSome = async (configs: ConfigListItem[], env: string):Promise<boo
   }
 };
 const handleCancelEditSome = async (configs: ConfigListItem[], env: string):Promise<boolean> => {
-  const hide = message.loading('正在撤销');
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({
+    id: 'pages.configs.canceling'
+  }));
   try {
     const result = await cancelSomeEdit(configs.map(x=>x.id), env);
     hide();
     const success = result.success;
     if (success) {
-      message.success('撤销成功');
+      message.success(intl.formatMessage({
+        id: 'pages.configs.cancel_success'
+      }));
     } else {
-      message.error('撤销失败');
+      message.error(intl.formatMessage({
+        id: 'pages.configs.cancel_fail'
+      }));
     }
     return success;
   } catch (error) {
     hide();
-    message.error('撤销失败');
+    message.error(intl.formatMessage({
+      id: 'pages.configs.cancel_fail'
+    }));
     return false;
   }
 };
@@ -142,26 +152,34 @@ const handleEdit = async (config: ConfigListItem, env:string) => {
 
 
 const handleCancelEdit = async (id: string, env:string) => {
-  const hide = message.loading('正在撤销');
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({
+    id: 'pages.configs.canceling'
+  }));
   try {
     const result = await cancelEdit(id, env);
     hide();
     const success = result.success;
     if (success) {
-      message.success('撤销成功！');
+      message.success(intl.formatMessage({
+        id: 'pages.configs.cancel_success'
+      }));
     } else {
       message.error(result.message);
     }
     return success;
   } catch (error) {
     hide();
-    message.error('撤销失败！');
+    message.error(intl.formatMessage({
+      id: 'pages.configs.cancel_fail'
+    }));
     return false;
   }
 }
 
 const handleExportJson = async (appId: string, env:string) => {
-  const hide = message.loading('正在导出');
+  const intl = getIntl(getLocale());
+  const hide = message.loading(intl.formatMessage({id:'pages.configs.exporting'}));
   try {
     const file = await exportJson(appId, env);
     hide();
@@ -177,7 +195,7 @@ const handleExportJson = async (appId: string, env:string) => {
     return true;
   } catch (error) {
     hide();
-    message.error('导出失败！');
+    message.error(intl.formatMessage({id:'pages.configs.export_fail'}));
     return false;
   }
 }
@@ -227,17 +245,19 @@ const configs: React.FC = (props: any) => {
   const publish = (appId: string) => {
     const rows = selectedRowsState.filter(x=>x.editStatus !== 10).map(x=>x.id);
     const isPublishAll = rows.length === 0;
-    const msg = isPublishAll ? '所有' : '已选择';
+    const msg = isPublishAll ? intl.formatMessage({id:'pages.configs.table.cols.action.publish'}) : intl.formatMessage({id:'pages.configs.confirm_publish_current'});
     _publishLog = '';
     confirm({
       content: <div>
         {
-          `确定发布当前【${msg}】的待发布配置项吗？`
+          intl.formatMessage({id:'pages.configs.confirm_publish_current'}) + `【${msg}】` + intl.formatMessage({id:'pages.configs.confirm_publish_wait_items'})
         }
         <br />
         <br />
         <div>
-         <TextArea autoSize placeholder="请填写发布日志" maxLength={50} showCount={true}
+         <TextArea autoSize placeholder={intl.formatMessage({
+           id: 'pages.configs.publish_log_placeholder'
+         })} maxLength={50} showCount={true}
           onChange={(e)=>{
             _publishLog = e.target.value;
           }}
@@ -272,10 +292,10 @@ const configs: React.FC = (props: any) => {
   }
 
   const editStatusEnums = {
-    0: '新增',
-    1: '编辑',
-    2: '删除',
-    10: '已提交'
+    0: intl.formatMessage({id:'pages.configs.table.cols.status.0'}),
+    1: intl.formatMessage({id:'pages.configs.table.cols.action.edit'}),
+    2: intl.formatMessage({id:'pages.configs.table.cols.action.delete'}),
+    10: intl.formatMessage({id:'pages.configs.table.cols.status.1'})
   }
   const editStatusColors = {
     0: 'blue',
@@ -319,19 +339,19 @@ const configs: React.FC = (props: any) => {
       sorter: true,
     },
     {
-      title: '编辑状态',
+      title: intl.formatMessage({id:'pages.configs.edit_status'}),
       dataIndex: 'editStatus',
       search: false,
       render: (_, record) => (
-         <Tag color={editStatusColors[record.editStatus]}>
+         <Tag color={editStatusColors[record.editStatus as keyof typeof editStatusColors]}>
            {
-              editStatusEnums[record.editStatus]
+              editStatusEnums[record.editStatus as keyof typeof editStatusEnums]
            }
          </Tag>
       ),
     },
     {
-      title: '发布状态',
+      title: intl.formatMessage({id:'pages.configs.publish_status'}),
       dataIndex: 'onlineStatus',
       valueEnum: {
         0: {
@@ -395,7 +415,7 @@ const configs: React.FC = (props: any) => {
 
                   if (item == 'cancelEdit') {
                     confirm({
-                      content:`确定撤销对配置【${record.group?record.group:''}${record.group?':':''}${record.key}】的编辑吗？`,
+                      content: intl.formatMessage({id:'pages.configs.confirm_cancel_edit'}) + `【${record.group?record.group:''}${record.group?':':''}${record.key}】` + intl.formatMessage({id:'pages.configs.confirm_cancel_edit_suffix'}),
                       onOk: async ()=>{
                         const result = await handleCancelEdit(record.id, currentEnv);
                         if (result) {
@@ -414,7 +434,9 @@ const configs: React.FC = (props: any) => {
                   }) }
                 ]:
                 [
-                  { key: 'cancelEdit', name: '撤销编辑' },
+                  { key: 'cancelEdit', name: intl.formatMessage({
+                    id: 'pages.configs.table.cols.action.cancel_edit'
+                  }) },
                   { key: 'history', name: intl.formatMessage({
                     id: 'pages.configs.table.cols.action.history'
                   }) }
@@ -477,13 +499,13 @@ const configs: React.FC = (props: any) => {
         headerTitle= {
           <Space size="middle">
               <Badge count={waitPublishStatus.addCount} size="small" offset={[-5, 0]}>
-                <Tag color="blue" hidden={waitPublishStatus.addCount===0}>新增</Tag>
+                <Tag color="blue" hidden={waitPublishStatus.addCount===0}>{intl.formatMessage({id:'pages.configs.table.cols.status.0'})}</Tag>
               </Badge>
               <Badge count={waitPublishStatus.editCount} size="small" offset={[-5, 0]}>
-                <Tag color="gold" hidden={waitPublishStatus.editCount===0}>编辑</Tag>
+                <Tag color="gold" hidden={waitPublishStatus.editCount===0}>{intl.formatMessage({id:'pages.configs.table.cols.action.edit'})}</Tag>
               </Badge>
               <Badge count={waitPublishStatus.deleteCount} size="small" offset={[-5, 0]}>
-                <Tag color="red" hidden={waitPublishStatus.deleteCount===0}>删除</Tag>
+                <Tag color="red" hidden={waitPublishStatus.deleteCount===0}>{intl.formatMessage({id:'pages.configs.table.cols.action.delete'})}</Tag>
               </Badge>
           </Space>
         }
@@ -503,7 +525,9 @@ const configs: React.FC = (props: any) => {
                     hidden={(waitPublishStatus.addCount + waitPublishStatus.editCount + waitPublishStatus.deleteCount) === 0} 
                     onClick={()=>{publish(appId)}}>
                 {
-                  selectedRowsState.filter(x=>x.editStatus !== 10).length > 0 ? '发布选择项' : '发布全部'
+                  selectedRowsState.filter(x=>x.editStatus !== 10).length > 0 ? 
+                  intl.formatMessage({id: 'pages.configs.publish_selected'}) : 
+                  intl.formatMessage({id: 'pages.configs.publish_all'})
                 }
             </Button>
           </AuthorizedEle>
@@ -516,7 +540,7 @@ const configs: React.FC = (props: any) => {
                       onClick={
                         ()=>{
                           confirm({
-                            content:`确定撤销选中配置项的编辑状态吗？`,
+                            content: intl.formatMessage({id:'pages.configs.confirm_cancel_selected_edit'}),
                             onOk: async ()=>{
                               const result = await handleCancelEditSome(selectedRowsState.filter(x=>x.editStatus !== 10), currentEnv)
                               if (result) {
@@ -530,7 +554,7 @@ const configs: React.FC = (props: any) => {
                         }
                       }
                     >
-                撤销编辑
+                {intl.formatMessage({id:'pages.configs.table.cols.action.cancel_edit'})}
               </Button>
               :
               <></>
@@ -546,7 +570,7 @@ const configs: React.FC = (props: any) => {
                     onClick={
                       ()=>{
                         confirm({
-                          content:`确定删除选中的配置项吗？`,
+                          content: intl.formatMessage({id:'pages.configs.confirm_delete_selected'}),
                           onOk: async ()=>{
                             const result = await handleDelSome(selectedRowsState, currentEnv)
                             if (result) {
@@ -560,7 +584,7 @@ const configs: React.FC = (props: any) => {
                       }
                     }
                     >
-                删除
+                {intl.formatMessage({id:'pages.configs.table.cols.action.delete'})}
             </Button>:<></>
           }
         </AuthorizedEle>
@@ -569,7 +593,7 @@ const configs: React.FC = (props: any) => {
           <Button  onClick={()=>{
               setJsonEditorVisible(true);
             }}>
-              编辑 JSON
+              {intl.formatMessage({id:'pages.configs.table.cols.action.edit_json'})}
             </Button>
           </AuthorizedEle>
           ,
@@ -577,28 +601,28 @@ const configs: React.FC = (props: any) => {
           <Button  onClick={()=>{
               setTextEditorVisible(true);
             }}>
-              编辑 TEXT
+              {intl.formatMessage({id:'pages.configs.table.cols.action.edit_text'})}
             </Button>
           </AuthorizedEle>
           ,
           <Dropdown overlay={
             <Menu >
               <Menu.Item hidden={!checkUserPermission(getFunctions(),functionKeys.Config_Publish,appId)} key="history" onClick={()=>{ setVersionHistoryFormModalVisible(true) }}>
-               历史版本
+               {intl.formatMessage({id:'pages.config.history.title'})}
               </Menu.Item>
               <Menu.Item hidden={!checkUserPermission(getFunctions(),functionKeys.Config_Add,appId)} key="syncEnv" onClick={()=>{ setEnvSyncModalVisible(true) }}>
-                环境同步
+                {intl.formatMessage({id: 'pages.configs.env_sync'})}
               </Menu.Item>
               <Menu.Item hidden={!checkUserPermission(getFunctions(),functionKeys.Config_Add,appId)} key="import" onClick={()=>{ setjsonImportFormModalVisible(true) }}>
-                导入
+                {intl.formatMessage({id:'pages.configs.table.cols.action.importfromjosnfile'})}
               </Menu.Item>
               <Menu.Item key="export" onClick={()=>{handleExportJson(appId, currentEnv)}}>
-                导出
+                {intl.formatMessage({id:'pages.configs.table.cols.action.exportJson'})}
               </Menu.Item>
             </Menu>
           }>
           <Button>
-            更多 <DownOutlined />
+            {intl.formatMessage({id: 'pages.configs.more'})} <DownOutlined />
           </Button>
         </Dropdown>
 
