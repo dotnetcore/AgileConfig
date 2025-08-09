@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { AppListItem, UserAppAuth } from "../data";
 import { getUserAppAuth } from "../service";
 
-// 统一接口定义缩进
+// Unified interface definition indentation
 export type UserAuthProps = {
   onSubmit: (values: UserAppAuth) => Promise<void>;
   onCancel: () => void;
@@ -21,7 +21,7 @@ const UserAuth: React.FC<UserAuthProps> = (props) => {
   const [users, setUsers] = useState<{ label: string; value: string }[]>();
   const [userAppAuthState, setUserAppAuthState] = useState<UserAppAuth>();
 
-  // 优化useEffect缩进
+  // Optimize useEffect indentation
   useEffect(() => {
     allUsers().then((resp) => {
       const usermp = resp.data.map((x: { userName: string; id: string; team: string }) => {
@@ -45,7 +45,7 @@ const UserAuth: React.FC<UserAuthProps> = (props) => {
     }
   }, [props.value?.id]);
 
-  // 统一JSX属性缩进
+  // Unified JSX attributes indentation
   return userAppAuthState ? (
     <ModalForm
       title={props.value?.name + ' - ' + intl.formatMessage({ id: 'pages.app.auth.title' })}

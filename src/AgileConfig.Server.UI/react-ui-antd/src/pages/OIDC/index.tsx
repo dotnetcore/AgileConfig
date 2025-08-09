@@ -9,8 +9,8 @@ import { message } from 'antd';
 
 const logs:React.FC = (props: any) =>  {
   const intl = getIntl(getLocale());
-  const search = props.location.search; // 获取 URL 中的查询字符串，如 "?foo=bar"
-  const params = new URLSearchParams(search); // 使用 URLSearchParams 解析查询字符串
+  const search = props.location.search; // Get query string from URL, e.g. "?foo=bar"
+  const params = new URLSearchParams(search); // Use URLSearchParams to parse query string
   const code = params.get('code'); 
   console.log('OIDC code', code);
   if (code) {

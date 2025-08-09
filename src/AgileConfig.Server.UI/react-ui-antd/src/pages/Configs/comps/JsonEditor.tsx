@@ -123,7 +123,7 @@ const JsonEditor: React.FC<JsonEditorProps> = (props) => {
         beforeMount={(monaco) => {
           monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
             validate: true,
-            allowComments: true,//是否允许json内容中带注释
+            allowComments: true,//whether to allow comments in json content
             schemaValidation: 'error',
           });
         }}

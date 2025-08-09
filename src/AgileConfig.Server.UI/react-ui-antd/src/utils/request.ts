@@ -26,7 +26,7 @@ const codeMessage = {
 const errorHandler = (error: { response: Response }): Response => {
   const { response } = error;
   if (response && response.status) {
-    const errorText = codeMessage[response.status] || response.statusText;
+    const errorText = codeMessage[response.status as keyof typeof codeMessage] || response.statusText;
     const { status, url } = response;
 
     if (status === 401 || status === 403) {
@@ -67,8 +67,8 @@ if (NODE_ENV === 'development') {
 /** 配置request请求时的默认参数 */
 const request = extend({
   prefix: requestPrefix,
-  errorHandler, // 默认错误处理
-  credentials: 'same-origin', // 默认请求是否带上cookie,
+  errorHandler, // default error handler
+  credentials: 'same-origin', // whether requests include cookies by default
 });
 
 request.interceptors.request.use(authHeaderInterceptor);

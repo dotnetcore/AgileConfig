@@ -270,9 +270,9 @@ export default {
   'pages.user.status.deleted': '已删除',
   'pages.user.confirm_reset': '确定重置用户',
   'pages.user.confirm_delete': '确定删除用户',
-  'pages.user.reset_password_default': '的密码为默认密码【123456】?',
+    'pages.user.reset_password_default': '的密码为默认密码【123456】?',
 
-  // 服务管理
+  // Service Management
   'pages.service.table.cols.servicename': '服务名',
   'pages.service.table.cols.serviceid': '服务ID',
   'pages.service.table.cols.registertime': '注册时间',
@@ -280,7 +280,7 @@ export default {
   'pages.service.table.cols.action.delete': '删除',
   'pages.service.confirm_delete_selected': '确定删除选中的服务吗？',
 
-  // 节点管理 - 只添加缺失的键值
+  // Node Management - Add missing keys only
   'pages.node.table.cols.action.add': '新建节点',
   'pages.node.table.cols.action.edit': '编辑',
   'pages.node.table.cols.action.delete': '删除',
@@ -292,7 +292,7 @@ export default {
   'pages.node.status.unhealthy': '不健康',
   'pages.node.confirm_delete': '确定删除节点',
 
-  // 首页
+  // Home Page
   'pages.home.empty_node_confirm': '节点列表为空，是否添加当前节点',
   'pages.home.to_node_list': '到节点列表？',
   'pages.home.summary.apps': '应用数',
@@ -302,7 +302,7 @@ export default {
   'pages.home.latest_visit_apps': '最近访问的应用',
   'pages.home.node_client_chart': '节点客户端统计',
 
-  // 服务管理
+  // Service Management
   'pages.services.serviceId': '服务ID',
   'pages.services.serviceName': '服务名',
   'pages.services.ip': 'IP',
@@ -330,7 +330,7 @@ export default {
   'pages.services.checkUrl.placeholder': '请输入检测URL',
   'pages.services.alarmUrl.placeholder': '请输入告警URL',
 
-  // 节点管理
+  // Node Management
   'pages.nodes.title': '节点管理',
   'pages.nodes.address': '地址',
   'pages.nodes.remark': '备注',
@@ -350,7 +350,7 @@ export default {
   'pages.nodes.addressPlaceholder': '请输入节点地址',
   'pages.nodes.remarkPlaceholder': '请输入备注',
 
-  // 文本编辑器
+  // Text Editor
   'pages.configs.textEditor.title': '按 TEXT 视图编辑',
   'pages.configs.textEditor.format': '严格按照 KEY=VALUE 格式编辑，每行一个配置',
   'pages.configs.textEditor.patchMode': '补丁模式更新',
@@ -364,7 +364,7 @@ export default {
   'pages.configs.import_success': '导入成功',
   'pages.configs.import_fail': '导入失败请重试！',
 
-  // 首页
+  // Home Page
   'pages.home.consoleNode': '控制台节点',
   'pages.home.recentVisit': '最近访问',
 

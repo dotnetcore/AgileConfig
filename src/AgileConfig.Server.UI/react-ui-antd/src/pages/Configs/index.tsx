@@ -629,7 +629,7 @@ const configs: React.FC = (props: any) => {
           // <Button key="6" onClick={()=>{
           //   setTextEditorVisible(true);
           // }}>
-          //   编辑 TEXT
+          //   Edit TEXT
           // </Button>
         ]}
         rowSelection={{
