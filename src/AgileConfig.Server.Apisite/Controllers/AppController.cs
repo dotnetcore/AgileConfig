@@ -12,6 +12,7 @@ using AgileConfig.Server.Apisite.Utilites;
 using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.Event;
 using AgileConfig.Server.Apisite.Models.Mapping;
+using AgileConfig.Server.Common.Resources;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -40,12 +41,12 @@ namespace AgileConfig.Server.Apisite.Controllers
         {
             if (current < 1)
             {
-                throw new ArgumentException("current cant less then 1 .");
+                throw new ArgumentException(Messages.CurrentCannotBeLessThanOne);
             }
 
             if (pageSize < 1)
             {
-                throw new ArgumentException("pageSize cant less then 1 .");
+                throw new ArgumentException(Messages.PageSizeCannotBeLessThanOne);
             }
 
             var appListVms = new List<AppListVM>();
@@ -124,7 +125,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = "应用Id已存在，请重新输入。"
+                    message = Messages.AppIdExists
                 });
             }
 
@@ -148,16 +149,11 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var result = await _appService.AddAsync(app, inheritanceApps);
-            if (result)
-            {
-                _tinyEventBus.Fire(new AddAppSuccessful(app, this.GetCurrentUserName()));
-            }
-
             return Json(new
             {
                 data = app,
                 success = result,
-                message = !result ? "新建应用失败，请查看错误日志" : ""
+                message = !result ? Messages.CreateAppFailed : ""
             });
         }
 
@@ -173,7 +169,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = "未找到对应的应用程序。"
+                    message = Messages.AppNotFound
                 });
             }
 
@@ -182,13 +178,12 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = "演示模式请勿修改Test_App"
+                    message = Messages.DemoModeNoTestAppEdit
                 });
             }
 
-            model.ToApp(app);
+            app = model.ToApp(app);
             app.UpdateTime = DateTime.Now;
-
             var inheritanceApps = new List<AppInheritanced>();
             if (!model.Inheritanced && model.inheritancedApps != null)
             {
@@ -205,37 +200,11 @@ namespace AgileConfig.Server.Apisite.Controllers
                 });
             }
 
-            var result = await _appService.UpdateAsync(app, inheritanceApps);
-            if (result)
-            {
-                _tinyEventBus.Fire(new EditAppSuccessful(app, this.GetCurrentUserName()));
-            }
-
+            var result = await _appService.UpdateAsync(app,inheritanceApps);
             return Json(new
             {
                 success = result,
-                message = !result ? "修改应用失败，请查看错误日志" : ""
-            });
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> All()
-        {
-            var apps = await _appService.GetAllAppsAsync();
-            var vms = new List<AppListVM>();
-            foreach (var app in apps)
-            {
-                var vm = app.ToAppListVM();
-                vm.inheritancedAppNames = app.Type == AppType.Inheritance
-                    ? new List<string>()
-                    : (await _appService.GetInheritancedAppsAsync(app.Id)).Select(ia => ia.Id).ToList();
-                vms.Add(vm);
-            }
-
-            return Json(new
-            {
-                success = true,
-                data = vms
+                message = !result ? Messages.UpdateAppFailed : ""
             });
         }
 
@@ -256,7 +225,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return NotFound(new
                 {
                     success = false,
-                    message = "未找到对应的应用程序。"
+                    message = Messages.AppNotFound
                 });
             }
 
@@ -267,11 +236,6 @@ namespace AgileConfig.Server.Apisite.Controllers
             });
         }
 
-        /// <summary>
-        /// 在启动跟禁用之间进行切换
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
         [TypeFilter(typeof(PermissionCheckAttribute),
             Arguments = new object[] { "App.DisableOrEnable", Functions.App_Edit })]
         [HttpPost]
@@ -285,23 +249,17 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return NotFound(new
                 {
                     success = false,
-                    message = "未找到对应的应用程序。"
+                    message = Messages.AppNotFound
                 });
             }
 
             app.Enabled = !app.Enabled;
-
             var result = await _appService.UpdateAsync(app);
-
-            if (result)
-            {
-                _tinyEventBus.Fire(new DisableOrEnableAppSuccessful(app, this.GetCurrentUserName()));
-            }
 
             return Json(new
             {
                 success = result,
-                message = !result ? "修改应用失败，请查看错误日志" : ""
+                message = !result ? Messages.UpdateAppFailed : ""
             });
         }
 
@@ -317,7 +275,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return NotFound(new
                 {
                     success = false,
-                    message = "未找到对应的应用程序。"
+                    message = Messages.AppNotFound
                 });
             }
 
@@ -331,7 +289,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             return Json(new
             {
                 success = result,
-                message = !result ? "修改应用失败，请查看错误日志" : ""
+                message = !result ? Messages.UpdateAppFailed : ""
             });
         }
 

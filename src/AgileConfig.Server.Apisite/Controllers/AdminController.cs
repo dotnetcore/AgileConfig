@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Common;
+using AgileConfig.Server.Common.Resources;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Authentication;
@@ -56,7 +57,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     status = "error",
-                    message = "密码不能为空"
+                    message = Messages.PasswordCannotBeEmpty
                 });
             }
 
@@ -70,7 +71,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             return Json(new
             {
                 status = "error",
-                message = "密码错误"
+                message = Messages.PasswordError
             });
         }
 
@@ -146,7 +147,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     status = "error",
-                    message = "该用户已被删除"
+                    message = Messages.UserDeleted
                 });
             }
 
@@ -183,7 +184,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 return Json(new
                 {
-                    message = "密码不能为空",
+                    message = Messages.PasswordCannotBeEmpty,
                     success = false
                 });
             }
@@ -192,7 +193,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 return Json(new
                 {
-                    message = "密码最长不能超过50位",
+                    message = Messages.PasswordMaxLength50,
                     success = false
                 });
             }
@@ -201,7 +202,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 return Json(new
                 {
-                    message = "输入的两次密码不一致",
+                    message = Messages.PasswordMismatch,
                     success = false
                 });
             }
@@ -210,7 +211,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 return Json(new
                 {
-                    message = "密码已经设置过，不需要再次设置",
+                    message = Messages.PasswordAlreadySet,
                     success = false
                 });
             }
@@ -230,7 +231,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 return Json(new
                 {
-                    message = "初始化密码失败",
+                    message = Messages.InitPasswordFailed,
                     success = false
                 });
             }
@@ -245,7 +246,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = "演示模式请勿修改管理密码"
+                    message = Messages.DemoModeNoPasswordChange
                 });
             }
 
@@ -257,7 +258,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 return Json(new
                 {
-                    message = "原始密码不能为空",
+                    message = Messages.OriginalPasswordCannotBeEmpty,
                     err_code = "err_resetpassword_01",
                     success = false
                 });
@@ -270,7 +271,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 return Json(new
                 {
-                    message = "原始密码错误，请重新再试",
+                    message = Messages.OriginalPasswordError,
                     err_code = "err_resetpassword_02",
                     success = false
                 });
@@ -280,7 +281,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 return Json(new
                 {
-                    message = "新密码不能为空",
+                    message = Messages.NewPasswordCannotBeEmpty,
                     err_code = "err_resetpassword_03",
                     success = false
                 });
@@ -290,7 +291,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 return Json(new
                 {
-                    message = "新密码最长不能超过50位",
+                    message = Messages.NewPasswordMaxLength50,
                     err_code = "err_resetpassword_04",
                     success = false
                 });
@@ -300,7 +301,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 return Json(new
                 {
-                    message = "输入的两次新密码不一致",
+                    message = Messages.NewPasswordMismatch,
                     err_code = "err_resetpassword_05",
                     success = false
                 });
@@ -313,7 +314,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 return Json(new
                 {
-                    message = "未找到对应的用户",
+                    message = Messages.UserNotFound,
                     err_code = "err_resetpassword_06",
                     success = false
                 });
@@ -335,7 +336,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 return Json(new
                 {
-                    message = "修改密码失败",
+                    message = Messages.ChangePasswordFailed,
                     success = false
                 });
             }

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using AgileConfig.Server.Apisite.Utilites;
 using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.Event;
+using AgileConfig.Server.Common.Resources;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -49,7 +50,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = "节点已存在，请重新输入。"
+                    message = Messages.NodeAlreadyExists
                 });
             }
 
@@ -70,7 +71,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             {
                 data = node,
                 success = result,
-                message = !result ? "添加节点失败，请查看错误日志" : ""
+                message = !result ? Messages.AddNodeFailed : ""
             });
         }
 
@@ -83,7 +84,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = "演示模式请勿删除节点"
+                    message = Messages.DemoModeNoNodeDelete
                 });
             }
             if (model == null)
@@ -97,7 +98,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = "未找到对应的节点。"
+                    message = Messages.NodeNotFound
                 });
             }
 
@@ -109,7 +110,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             return Json(new
             {
                 success = result,
-                message = !result ? "删除节点失败，请查看错误日志" : ""
+                message = !result ? Messages.DeleteNodeFailed : ""
             });
         }
 

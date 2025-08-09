@@ -2,7 +2,7 @@ import request from "@/utils/request";
 import { ModalForm, ProFormText } from "@ant-design/pro-form";
 import {  message } from "antd";
 import React from 'react';
-import { useIntl } from "react-intl";
+import { useIntl } from "umi";
 
 export type ChangepasswordProps = {
     changePasswordModalVisible: boolean;
@@ -13,7 +13,7 @@ export type ChangepasswordProps = {
 const Changepassword : React.FC<ChangepasswordProps> = (props)=>{
     const intl = useIntl();
     const handleChangePassword = async (params:any) => {
-        var data = await request('/admin/changepassword', {
+        var data = await request('admin/changepassword', {
             method: 'POST',
             data: params
           })

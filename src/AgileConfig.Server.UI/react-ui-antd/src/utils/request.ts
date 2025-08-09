@@ -2,7 +2,7 @@
 import { extend, RequestOptionsInit } from 'umi-request';
 import { notification } from 'antd';
 import { getToken } from './authority';
-import { history } from 'umi';
+import { history, getLocale } from 'umi';
 
 const codeMessage = {
   200: '服务器成功返回请求的数据。',
@@ -52,9 +52,24 @@ const errorHandler = (error: { response: Response }): Response => {
 
 const authHeaderInterceptor = (url: string, options: RequestOptionsInit) => {
   const authHeader = { Authorization: 'Bearer ' + getToken() };
+  const currentLocale = getLocale();
+  
+  // Map locale to accept-language header
+  const languageMap: { [key: string]: string } = {
+    'zh-CN': 'zh-CN,zh;q=0.9',
+    'en-US': 'en-US,en;q=0.9',
+  };
+  
+  const acceptLanguage = languageMap[currentLocale] || 'en-US,en;q=0.9';
+  
+  const headers = {
+    ...authHeader,
+    'Accept-Language': acceptLanguage,
+  };
+  
   return {
     url: `${url}`,
-    options: { ...options, interceptors: true, headers: authHeader },
+    options: { ...options, interceptors: true, headers },
   };
 };
 

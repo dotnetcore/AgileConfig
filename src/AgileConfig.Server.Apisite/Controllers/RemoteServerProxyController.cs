@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Dynamic;
 using System.Threading.Tasks;
+using AgileConfig.Server.Common.Resources;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -47,7 +48,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = "演示模式请勿断开客户端"
+                    message = Messages.DemoModeNoClientDisconnect
                 });
             }
 

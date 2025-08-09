@@ -275,11 +275,11 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         {
             if (string.IsNullOrEmpty(model.Id))
             {
-                return (false, "Id不能为空");
+                return (false, "Id is required");
             }
             if (string.IsNullOrEmpty(model.Name))
             {
-                return (false, "Name不能为空");
+                return (false, "Name is required");
             }
 
             return (true, "");

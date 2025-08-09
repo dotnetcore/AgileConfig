@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Apisite.Models;
+using AgileConfig.Server.Common.Resources;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
@@ -51,7 +52,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = $"应用（{model.AppId}）不存在。"
+                    message = Messages.AppNotExists(model.AppId)
                 });
             }
 
@@ -61,7 +62,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = "配置已存在，请更改输入的信息。"
+                    message = Messages.ConfigExists
                 });
             }
 
@@ -89,7 +90,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             return Json(new
             {
                 success = result,
-                message = !result ? "新建配置失败，请查看错误日志" : "",
+                message = !result ? Messages.CreateConfigFailed : "",
                 data = config
             });
         }
@@ -124,7 +125,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     return Json(new
                     {
                         success = false,
-                        message = "存在重复的配置：" + item.Key
+                        message = Messages.DuplicateConfig(item.Key)
                     });
                 }
 
@@ -159,7 +160,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             return Json(new
             {
                 success = result,
-                message = !result ? "批量新增配置失败，请查看错误日志" : ""
+                message = !result ? Messages.BatchCreateConfigFailed : ""
             });
         }
 
@@ -179,7 +180,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = "未找到对应的配置项。"
+                    message = Messages.ConfigNotFound
                 });
             }
 
@@ -189,7 +190,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = $"应用（{model.AppId}）不存在。"
+                    message = Messages.AppNotExists(model.AppId)
                 });
             }
 
@@ -207,7 +208,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     return Json(new
                     {
                         success = false,
-                        message = "配置键已存在，请重新输入。"
+                        message = Messages.ConfigKeyExists
                     });
                 }
             }

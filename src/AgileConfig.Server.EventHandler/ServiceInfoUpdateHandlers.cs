@@ -49,7 +49,7 @@ namespace AgileConfig.Server.EventHandler
             {
                 LogTime = DateTime.Now,
                 LogType = SysLogType.Normal,
-                LogText = $"服务【{evtInstance.UniqueId}】【注册】成功",
+                LogText = $"Service [{evtInstance.UniqueId}] registered successfully",
             });
         }
     }
@@ -92,7 +92,7 @@ namespace AgileConfig.Server.EventHandler
             {
                 LogTime = DateTime.Now,
                 LogType = SysLogType.Normal,
-                LogText = $"服务【{evtInstance.UniqueId}】【卸载】成功",
+                LogText = $"Service [{evtInstance.UniqueId}] unregistered successfully",
             });
         }
     }
@@ -150,7 +150,7 @@ namespace AgileConfig.Server.EventHandler
             {
                 LogTime = DateTime.Now,
                 LogType = SysLogType.Normal,
-                LogText = $"服务【{id}】状态更新为【{service.Status}】",
+                LogText = $"Service [{id}] status updated to [{service.Status}]",
             });
 
             if (service != null && !string.IsNullOrWhiteSpace(service.AlarmUrl) &&
@@ -170,7 +170,7 @@ namespace AgileConfig.Server.EventHandler
                 service.ServiceName,
                 Time = DateTime.Now,
                 Status = ServiceStatus.Unhealthy.ToString(),
-                Message = "服务不健康"
+                Message = "Service is unhealthy"
             };
 
             try

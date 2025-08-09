@@ -139,6 +139,7 @@ export default {
 
   'pages.client.table.cols.id': 'ID',
   'pages.client.table.cols.node': '节点',
+  'pages.client.table.cols.env': '环境',
   'pages.client.table.cols.appid': '应用ID',
   'pages.client.table.cols.name': '客户端名称',
   'pages.client.table.cols.tag': '标签',

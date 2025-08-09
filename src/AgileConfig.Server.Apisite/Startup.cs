@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using System.Globalization;
 using AgileConfig.Server.Apisite.UIExtension;
 using AgileConfig.Server.Apisite.Websocket;
+using AgileConfig.Server.Apisite.Middleware;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Common.RestClient;
 using AgileConfig.Server.Data.Freesql;
@@ -11,6 +13,7 @@ using AgileConfig.Server.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -20,7 +23,6 @@ using AgileConfig.Server.Data.Repository.Selector;
 using AgileConfig.Server.Data.Abstraction;
 using AgileConfig.Server.Common.EventBus;
 using OpenTelemetry.Resources;
-using AgileConfig.Server.Apisite.Metrics;
 
 namespace AgileConfig.Server.Apisite
 {
@@ -66,6 +68,9 @@ namespace AgileConfig.Server.Apisite
 
             services.AddMemoryCache();
 
+            // Add localization services
+            AddLocalizationServices(services);
+
             services.AddCors();
             services.AddMvc().AddRazorRuntimeCompilation().AddControllersAsServices();
 
@@ -109,6 +114,11 @@ namespace AgileConfig.Server.Apisite
             {
                 app.UsePathBase(basePath);
             }
+
+            // Add localization middleware
+            var localizationOptions = app.ApplicationServices.GetService<Microsoft.Extensions.Options.IOptions<RequestLocalizationOptions>>().Value;
+            app.UseRequestLocalization(localizationOptions);
+            app.UseMiddleware<LocalizationMiddleware>();
 
             if (env.IsDevelopment())
             {
@@ -166,5 +176,25 @@ namespace AgileConfig.Server.Apisite
             });
         }
 
+        private void AddLocalizationServices(IServiceCollection services)
+        {
+            services.AddLocalization(options => options.ResourcesPath = "Resources");
+            services.Configure<RequestLocalizationOptions>(options =>
+            {
+                var supportedCultures = new[]
+                {
+                    new CultureInfo("en-US"),
+                    new CultureInfo("zh-CN")
+                };
+                options.DefaultRequestCulture = new RequestCulture("en-US");
+                options.SupportedCultures = supportedCultures;
+                options.SupportedUICultures = supportedCultures;
+
+                // Configure request culture providers
+                options.RequestCultureProviders.Insert(0, new QueryStringRequestCultureProvider());
+                options.RequestCultureProviders.Insert(1, new CookieRequestCultureProvider());
+                options.RequestCultureProviders.Insert(2, new AcceptLanguageHeaderRequestCultureProvider());
+            });
+        }
     }
 }

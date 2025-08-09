@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using AgileConfig.Server.Apisite.Utilites;
 using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.Event;
+using AgileConfig.Server.Common.Resources;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -34,11 +35,11 @@ namespace AgileConfig.Server.Apisite.Controllers
         {
             if (current <= 0)
             {
-                throw new ArgumentException("current can not less than 1 .");
+                throw new ArgumentException(Messages.CurrentCannotBeLessThanOneUser);
             }
             if (pageSize <= 0)
             {
-                throw new ArgumentException("pageSize can not less than 1 .");
+                throw new ArgumentException(Messages.PageSizeCannotBeLessThanOneUser);
             }
 
             var users = await _userService.GetAll();
@@ -101,7 +102,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = "已存在用户" + model.UserName
+                    message = Messages.UserAlreadyExists(model.UserName)
                 });
             }
 
@@ -126,7 +127,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             return Json(new
             {
                 success = addUserResult && addUserRoleResult,
-                message = !(addUserResult && addUserRoleResult) ? "添加用户失败，请查看错误日志" : ""
+                message = !(addUserResult && addUserRoleResult) ? Messages.AddUserFailed : ""
             });
         }
 
@@ -145,7 +146,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = "未找到对应的用户。"
+                    message = Messages.UserNotFoundForOperation
                 });
             }
 
@@ -163,7 +164,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             return Json(new
             {
                 success = result && reuslt1,
-                message = !(result && reuslt1) ? "修改用户失败，请查看错误日志" : ""
+                message = !(result && reuslt1) ? Messages.UpdateUserFailed : ""
             });
         }
 
@@ -184,7 +185,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = "未找到对应的用户。"
+                    message = Messages.UserNotFoundForOperation
                 });
             }
 
@@ -199,7 +200,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             return Json(new
             {
                 success = result,
-                message = !result ? "重置用户密码失败，请查看错误日志" : ""
+                message = !result ? Messages.ResetUserPasswordFailed : ""
             });
         }
 
@@ -218,7 +219,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = "未找到对应的用户。"
+                    message = Messages.UserNotFoundForOperation
                 });
             }
 
@@ -232,7 +233,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             return Json(new
             {
                 success = result,
-                message = !result ? "删除用户失败，请查看错误日志" : ""
+                message = !result ? Messages.DeleteUserFailed : ""
             });
         }
 

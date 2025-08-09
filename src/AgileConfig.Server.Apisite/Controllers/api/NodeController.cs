@@ -66,7 +66,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 Response.StatusCode = 400;
                 return Json(new
                 {
-                    message = "添加节点失败"
+                    message = "Add node failed"
                 });
             }
 
@@ -118,7 +118,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         {
             if (string.IsNullOrEmpty(model.Address))
             {
-                return (false, "Address不能为空");
+                return (false, "Address is required");
             }
 
             return (true, "");

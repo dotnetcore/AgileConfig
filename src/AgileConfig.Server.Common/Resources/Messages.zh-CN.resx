@@ -1,0 +1,424 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  
+  <!-- 验证消息 -->
+  <data name="AppIdRequired" xml:space="preserve">
+    <value>应用ID不能为空</value>
+  </data>
+  <data name="AppIdMaxLength" xml:space="preserve">
+    <value>应用ID长度不能超过36个字符</value>
+  </data>
+  <data name="ConfigGroupMaxLength" xml:space="preserve">
+    <value>配置组长度不能超过100个字符</value>
+  </data>
+  <data name="ConfigKeyRequired" xml:space="preserve">
+    <value>配置键不能为空</value>
+  </data>
+  <data name="ConfigKeyMaxLength" xml:space="preserve">
+    <value>配置键长度不能超过100个字符</value>
+  </data>
+  <data name="ConfigValueMaxLength" xml:space="preserve">
+    <value>配置值长度不能超过4000个字符</value>
+  </data>
+  <data name="DescriptionMaxLength" xml:space="preserve">
+    <value>描述长度不能超过200个字符</value>
+  </data>
+  <data name="UserIdRequired" xml:space="preserve">
+    <value>用户ID不能为空</value>
+  </data>
+  <data name="UserIdMaxLength" xml:space="preserve">
+    <value>用户ID长度不能超过36个字符</value>
+  </data>
+  <data name="UserNameRequired" xml:space="preserve">
+    <value>用户名不能为空</value>
+  </data>
+  <data name="UserNameMaxLength" xml:space="preserve">
+    <value>用户名长度不能超过50个字符</value>
+  </data>
+  <data name="PasswordRequired" xml:space="preserve">
+    <value>密码不能为空</value>
+  </data>
+  <data name="PasswordMaxLength" xml:space="preserve">
+    <value>密码长度不能超过50个字符</value>
+  </data>
+  <data name="TeamMaxLength" xml:space="preserve">
+    <value>团队长度不能超过50个字符</value>
+  </data>
+  <data name="NodeAddressRequired" xml:space="preserve">
+    <value>节点地址不能为空</value>
+  </data>
+  <data name="NodeAddressMaxLength" xml:space="preserve">
+    <value>节点地址长度不能超过100个字符</value>
+  </data>
+  <data name="RemarkMaxLength" xml:space="preserve">
+    <value>备注长度不能超过50个字符</value>
+  </data>
+  <data name="ServiceIdRequired" xml:space="preserve">
+    <value>服务ID不能为空</value>
+  </data>
+  <data name="ServiceIdMaxLength" xml:space="preserve">
+    <value>服务ID长度不能超过100个字符</value>
+  </data>
+  <data name="ServiceNameRequired" xml:space="preserve">
+    <value>服务名称不能为空</value>
+  </data>
+  <data name="ServiceNameMaxLength" xml:space="preserve">
+    <value>服务名称长度不能超过100个字符</value>
+  </data>
+  <data name="IpMaxLength" xml:space="preserve">
+    <value>IP长度不能超过100个字符</value>
+  </data>
+  <data name="HealthCheckModeRequired" xml:space="preserve">
+    <value>健康检查模式不能为空</value>
+  </data>
+  <data name="HealthCheckModeMaxLength" xml:space="preserve">
+    <value>健康检查模式长度不能超过10个字符</value>
+  </data>
+  <data name="CheckUrlMaxLength" xml:space="preserve">
+    <value>检查URL长度不能超过2000个字符</value>
+  </data>
+  <data name="AlarmUrlMaxLength" xml:space="preserve">
+    <value>告警URL长度不能超过2000个字符</value>
+  </data>
+
+  <!-- 错误消息 -->
+  <data name="IdCannotBeEmpty" xml:space="preserve">
+    <value>ID不能为空</value>
+  </data>
+  <data name="NameCannotBeEmpty" xml:space="preserve">
+    <value>名称不能为空</value>
+  </data>
+  <data name="AddressCannotBeEmpty" xml:space="preserve">
+    <value>地址不能为空</value>
+  </data>
+  <data name="KeyCannotBeEmpty" xml:space="preserve">
+    <value>键不能为空</value>
+  </data>
+  <data name="AppIdCannotBeEmpty" xml:space="preserve">
+    <value>应用ID不能为空</value>
+  </data>
+
+  <!-- 配置导入消息 -->
+  <data name="ConfigImportMissingEqualSign" xml:space="preserve">
+    <value>第{0}行缺少等号。</value>
+  </data>
+  <data name="ConfigImportDuplicateKey" xml:space="preserve">
+    <value>键{0}重复。</value>
+  </data>
+
+  <!-- 日志消息 -->
+  <data name="RegistrationCenter" xml:space="preserve">
+    <value>注册中心</value>
+  </data>
+  <data name="ConfigurationCenter" xml:space="preserve">
+    <value>配置中心</value>
+  </data>
+  <data name="NotifyNodeAllClients" xml:space="preserve">
+    <value>通知节点[{0}]所有客户端：[{1}][{2}] 响应：{3}</value>
+  </data>
+  <data name="NotifyNodeAppClients" xml:space="preserve">
+    <value>通知节点[{0}]应用[{1}]客户端：[{2}][{3}] 响应：{4}</value>
+  </data>
+  <data name="NotifyNodeSpecificClient" xml:space="preserve">
+    <value>通知节点[{0}]客户端[{1}]：[{2}][{3}] 响应：{4}</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>成功</value>
+  </data>
+  <data name="Failed" xml:space="preserve">
+    <value>失败</value>
+  </data>
+
+  <!-- 事件日志消息 -->
+  <data name="LoginSuccess" xml:space="preserve">
+    <value>{0}登录成功</value>
+  </data>
+  <data name="AdminPasswordInitialized" xml:space="preserve">
+    <value>超级管理员密码初始化成功</value>
+  </data>
+  <data name="PasswordReset" xml:space="preserve">
+    <value>用户{0}重置{1}的密码为默认密码</value>
+  </data>
+  <data name="PasswordChangeSuccess" xml:space="preserve">
+    <value>用户{0}修改密码成功</value>
+  </data>
+  <data name="AppAdded" xml:space="preserve">
+    <value>用户：{0}新增应用[AppId：{1}][AppName：{2}]</value>
+  </data>
+  <data name="AppUpdated" xml:space="preserve">
+    <value>用户：{0}编辑应用[AppId：{1}][AppName：{2}]</value>
+  </data>
+  <data name="AppStatusChanged" xml:space="preserve">
+    <value>用户：{0}{1}应用[AppId：{2}]</value>
+  </data>
+  <data name="AppDeleted" xml:space="preserve">
+    <value>用户：{0}删除应用[AppId：{1}]</value>
+  </data>
+  <data name="ConfigAdded" xml:space="preserve">
+    <value>用户：{0}新增配置[Group：{1}][Key：{2}][AppId：{3}][Env：{4}][待发布]</value>
+  </data>
+  <data name="ConfigUpdated" xml:space="preserve">
+    <value>用户：{0}编辑配置[Group：{1}][Key：{2}][AppId：{3}][Env：{4}][待发布]</value>
+  </data>
+  <data name="ConfigDeleted" xml:space="preserve">
+    <value>用户：{0}删除配置[Group：{1}][Key：{2}][AppId：{3}][Env：{4}][待发布]</value>
+  </data>
+  <data name="ConfigBatchDeleted" xml:space="preserve">
+    <value>用户：{0}批量删除配置[Env：{1}]</value>
+  </data>
+  <data name="ConfigPublished" xml:space="preserve">
+    <value>用户：{0}发布配置[AppId：{1}][Env：{2}][Version：{3}]</value>
+  </data>
+  <data name="ConfigRolledBack" xml:space="preserve">
+    <value>{0}回滚应用[{1}][Env：{2}]到已发布版本[{3}]</value>
+  </data>
+  <data name="ConfigCancelled" xml:space="preserve">
+    <value>{0}取消编辑配置[Group：{1}][Key：{2}][AppId：{3}][Env：{4}]</value>
+  </data>
+  <data name="ConfigBatchCancelled" xml:space="preserve">
+    <value>{0}批量取消编辑配置[Env：{1}]</value>
+  </data>
+  <data name="NodeAdded" xml:space="preserve">
+    <value>用户：{0}新增节点：{1}</value>
+  </data>
+  <data name="NodeDeleted" xml:space="preserve">
+    <value>用户：{0}删除节点：{1}</value>
+  </data>
+  <data name="UserAdded" xml:space="preserve">
+    <value>用户：{0}新增用户：{1}成功</value>
+  </data>
+  <data name="UserUpdated" xml:space="preserve">
+    <value>用户：{0}编辑用户：{1}成功</value>
+  </data>
+  <data name="Enabled" xml:space="preserve">
+    <value>启用</value>
+  </data>
+  <data name="Disabled" xml:space="preserve">
+    <value>禁用</value>
+  </data>
+
+  <!-- 异常消息 -->
+  <data name="MongodbConnectionStringNotConfigured" xml:space="preserve">
+    <value>MongoDB连接字符串未配置</value>
+  </data>
+
+  <!-- 登录消息 -->
+  <data name="PasswordCannotBeEmpty" xml:space="preserve">
+    <value>密码不能为空</value>
+  </data>
+  <data name="PasswordError" xml:space="preserve">
+    <value>密码错误</value>
+  </data>
+  <data name="UserDeleted" xml:space="preserve">
+    <value>该用户已被删除</value>
+  </data>
+  <data name="PasswordMaxLength50" xml:space="preserve">
+    <value>密码最长不能超过50位</value>
+  </data>
+  <data name="PasswordMismatch" xml:space="preserve">
+    <value>输入的两次密码不一致</value>
+  </data>
+  <data name="PasswordAlreadySet" xml:space="preserve">
+    <value>密码已经设置过，不需要再次设置</value>
+  </data>
+  <data name="InitPasswordFailed" xml:space="preserve">
+    <value>初始化密码失败</value>
+  </data>
+  <data name="DemoModeNoPasswordChange" xml:space="preserve">
+    <value>演示模式请勿修改管理密码</value>
+  </data>
+  <data name="OriginalPasswordCannotBeEmpty" xml:space="preserve">
+    <value>原始密码不能为空</value>
+  </data>
+  <data name="OriginalPasswordError" xml:space="preserve">
+    <value>原始密码错误，请重新再试</value>
+  </data>
+  <data name="NewPasswordCannotBeEmpty" xml:space="preserve">
+    <value>新密码不能为空</value>
+  </data>
+  <data name="NewPasswordMaxLength50" xml:space="preserve">
+    <value>新密码最长不能超过50位</value>
+  </data>
+  <data name="NewPasswordMismatch" xml:space="preserve">
+    <value>输入的两次新密码不一致</value>
+  </data>
+  <data name="UserNotFound" xml:space="preserve">
+    <value>未找到对应的用户</value>
+  </data>
+  <data name="ChangePasswordFailed" xml:space="preserve">
+    <value>修改密码失败</value>
+  </data>
+
+  <!-- 配置消息 -->
+  <data name="AppNotExists" xml:space="preserve">
+    <value>应用（{0}）不存在。</value>
+  </data>
+  <data name="ConfigExists" xml:space="preserve">
+    <value>配置已存在，请更改输入的信息。</value>
+  </data>
+  <data name="CreateConfigFailed" xml:space="preserve">
+    <value>新建配置失败，请查看错误日志</value>
+  </data>
+  <data name="DuplicateConfig" xml:space="preserve">
+    <value>存在重复的配置：{0}</value>
+  </data>
+  <data name="BatchCreateConfigFailed" xml:space="preserve">
+    <value>批量新增配置失败，请查看错误日志</value>
+  </data>
+  <data name="ConfigNotFound" xml:space="preserve">
+    <value>未找到对应的配置项。</value>
+  </data>
+  <data name="UpdateConfigFailed" xml:space="preserve">
+    <value>编辑配置失败，请查看错误日志</value>
+  </data>
+  <data name="DeleteConfigFailed" xml:space="preserve">
+    <value>删除配置失败，请查看错误日志</value>
+  </data>
+  <data name="BatchDeleteConfigFailed" xml:space="preserve">
+    <value>批量删除配置失败，请查看错误日志</value>
+  </data>
+
+  <!-- 应用消息 -->
+  <data name="AppIdExists" xml:space="preserve">
+    <value>应用Id已存在，请重新输入。</value>
+  </data>
+  <data name="CreateAppFailed" xml:space="preserve">
+    <value>新建应用失败，请查看错误日志</value>
+  </data>
+  <data name="AppNotFound" xml:space="preserve">
+    <value>未找到对应的应用程序。</value>
+  </data>
+  <data name="DemoModeNoTestAppEdit" xml:space="preserve">
+    <value>演示模式请勿修改Test_App</value>
+  </data>
+  <data name="UpdateAppFailed" xml:space="preserve">
+    <value>修改应用失败，请查看错误日志</value>
+  </data>
+  <data name="ConfigKeyExists" xml:space="preserve">
+    <value>配置键已存在，请重新输入。</value>
+  </data>
+
+  <!-- App Controller specific messages -->
+  <data name="CurrentCannotBeLessThanOne" xml:space="preserve">
+    <value>current cant less then 1 .</value>
+  </data>
+  <data name="PageSizeCannotBeLessThanOne" xml:space="preserve">
+    <value>pageSize cant less then 1 .</value>
+  </data>
+  <data name="DemoModeNoClientDisconnect" xml:space="preserve">
+    <value>演示模式请勿断开客户端</value>
+  </data>
+
+  <!-- Server Node Messages -->
+  <data name="NodeAlreadyExists" xml:space="preserve">
+    <value>节点已存在，请重新输入。</value>
+  </data>
+  <data name="AddNodeFailed" xml:space="preserve">
+    <value>添加节点失败，请查看错误日志</value>
+  </data>
+  <data name="DemoModeNoNodeDelete" xml:space="preserve">
+    <value>演示模式请勿删除节点</value>
+  </data>
+  <data name="NodeNotFound" xml:space="preserve">
+    <value>未找到对应的节点。</value>
+  </data>
+  <data name="DeleteNodeFailed" xml:space="preserve">
+    <value>删除节点失败，请查看错误日志</value>
+  </data>
+
+  <!-- Service Messages -->
+  <data name="ServiceAlreadyExists" xml:space="preserve">
+    <value>该服务已存在</value>
+  </data>
+  <data name="ServiceNotFound" xml:space="preserve">
+    <value>该服务不存在</value>
+  </data>
+  <data name="CurrentCannotBeLessThanOneService" xml:space="preserve">
+    <value>current cant less then 1 .</value>
+  </data>
+  <data name="PageSizeCannotBeLessThanOneService" xml:space="preserve">
+    <value>pageSize cant less then 1 .</value>
+  </data>
+
+  <!-- User Messages -->
+  <data name="CurrentCannotBeLessThanOneUser" xml:space="preserve">
+    <value>current can not less than 1 .</value>
+  </data>
+  <data name="PageSizeCannotBeLessThanOneUser" xml:space="preserve">
+    <value>pageSize can not less than 1 .</value>
+  </data>
+  <data name="UserAlreadyExists" xml:space="preserve">
+    <value>已存在用户{0}</value>
+  </data>
+  <data name="AddUserFailed" xml:space="preserve">
+    <value>添加用户失败，请查看错误日志</value>
+  </data>
+  <data name="UserNotFoundForOperation" xml:space="preserve">
+    <value>未找到对应的用户。</value>
+  </data>
+  <data name="UpdateUserFailed" xml:space="preserve">
+    <value>修改用户失败，请查看错误日志</value>
+  </data>
+  <data name="ResetUserPasswordFailed" xml:space="preserve">
+    <value>重置用户密码失败，请查看错误日志</value>
+  </data>
+  <data name="DeleteUserFailed" xml:space="preserve">
+    <value>删除用户失败，请查看错误日志</value>
+  </data>
+</root>

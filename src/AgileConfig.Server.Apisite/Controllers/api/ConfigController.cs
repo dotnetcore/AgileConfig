@@ -232,11 +232,11 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         {
             if (string.IsNullOrEmpty(model.Key))
             {
-                return (false, "Key不能为空");
+                return (false, "Key is required");
             }
             if (string.IsNullOrEmpty(model.AppId))
             {
-                return (false, "AppId不能为空");
+                return (false, "AppId is required");
             }
 
             return (true, "");

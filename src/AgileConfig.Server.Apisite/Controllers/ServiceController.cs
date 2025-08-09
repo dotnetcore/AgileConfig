@@ -12,6 +12,7 @@ using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.Event;
 using AgileConfig.Server.Common.EventBus;
+using AgileConfig.Server.Common.Resources;
 
 namespace AgileConfig.Server.Apisite.Controllers
 {
@@ -45,7 +46,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = "该服务已存在"
+                    message = Messages.ServiceAlreadyExists
                 });
             }
             
@@ -83,7 +84,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = "该服务不存在"
+                    message = Messages.ServiceNotFound
                 });
             }
 
@@ -103,11 +104,11 @@ namespace AgileConfig.Server.Apisite.Controllers
         {
             if (current < 1)
             {
-                throw new ArgumentException("current cant less then 1 .");
+                throw new ArgumentException(Messages.CurrentCannotBeLessThanOneService);
             }
             if (pageSize < 1)
             {
-                throw new ArgumentException("pageSize cant less then 1 .");
+                throw new ArgumentException(Messages.PageSizeCannotBeLessThanOneService);
             }
 
             var query = await _serviceInfoService.GetAllServiceInfoAsync();

@@ -21,7 +21,7 @@ namespace AgileConfig.Server.EventHandler
             {
                 LogTime = DateTime.Now,
                 LogType = SysLogType.Normal,
-                LogText = $"{userName} 登录成功"
+                LogText = $"{userName} login successful"
             };
             await _sysLogService.AddSysLogAsync(log);
         }
@@ -42,7 +42,7 @@ namespace AgileConfig.Server.EventHandler
             {
                 LogTime = DateTime.Now,
                 LogType = SysLogType.Normal,
-                LogText = $"超级管理员密码初始化成功"
+                LogText = $"Super administrator password initialized successfully"
             };
             await _sysLogService.AddSysLogAsync(log);
         }
@@ -64,7 +64,7 @@ namespace AgileConfig.Server.EventHandler
             {
                 LogTime = DateTime.Now,
                 LogType = SysLogType.Normal,
-                LogText = $"用户 {evtInstance.OpUser} 重置 {evtInstance.UserName} 的密码为默认密码 "
+                LogText = $"User {evtInstance.OpUser} reset {evtInstance.UserName}'s password to default password"
             };
             await _sysLogService.AddSysLogAsync(log);
         }
@@ -86,7 +86,7 @@ namespace AgileConfig.Server.EventHandler
             {
                 LogTime = DateTime.Now,
                 LogType = SysLogType.Normal,
-                LogText = $"修改用户 {evtInstance.UserName} 的密码成功"
+                LogText = $"User {evtInstance.UserName} password changed successfully"
             };
             await _sysLogService.AddSysLogAsync(log);
         }
@@ -112,7 +112,7 @@ namespace AgileConfig.Server.EventHandler
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
-                    LogText = $"用户：{userName} 新增应用【AppId：{app.Id}】【AppName：{app.Name}】"
+                    LogText = $"User: {userName} added app [AppId: {app.Id}] [AppName: {app.Name}]"
                 };
                 await _sysLogService.AddSysLogAsync(log);
             }
@@ -139,7 +139,7 @@ namespace AgileConfig.Server.EventHandler
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
-                    LogText = $"用户：{userName} 编辑应用【AppId：{app.Id}】【AppName：{app.Name}】"
+                    LogText = $"User: {userName} updated app [AppId: {app.Id}] [AppName: {app.Name}]"
                 };
                 await _sysLogService.AddSysLogAsync(log);
             }
@@ -166,7 +166,7 @@ namespace AgileConfig.Server.EventHandler
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
-                    LogText = $"用户：{userName} {(app.Enabled ? "启用" : "禁用")}应用【AppId:{app.Id}】"
+                    LogText = $"User: {userName} {(app.Enabled ? "enabled" : "disabled")} app [AppId: {app.Id}]"
                 };
                 await _sysLogService.AddSysLogAsync(log);
             }
@@ -193,7 +193,7 @@ namespace AgileConfig.Server.EventHandler
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Warn,
-                    LogText = $"用户：{userName} 删除应用【AppId:{app.Id}】"
+                    LogText = $"User: {userName} deleted app [AppId: {app.Id}]"
                 };
                 await _sysLogService.AddSysLogAsync(log);
             }
@@ -222,7 +222,7 @@ namespace AgileConfig.Server.EventHandler
                     LogType = SysLogType.Normal,
                     AppId = config.AppId,
                     LogText =
-                        $"用户：{userName} 新增配置【Group：{config.Group}】【Key：{config.Key}】【AppId：{config.AppId}】【Env：{config.Env}】【待发布】"
+                        $"User: {userName} added config [Group: {config.Group}] [Key: {config.Key}] [AppId: {config.AppId}] [Env: {config.Env}] [Pending publish]"
                 };
                 await _sysLogService.AddSysLogAsync(log);
             }
@@ -251,7 +251,7 @@ namespace AgileConfig.Server.EventHandler
                     LogType = SysLogType.Normal,
                     AppId = config.AppId,
                     LogText =
-                        $"用户：{userName} 编辑配置【Group：{config.Group}】【Key：{config.Key}】【AppId：{config.AppId}】【Env：{config.Env}】【待发布】"
+                        $"User: {userName} updated config [Group: {config.Group}] [Key: {config.Key}] [AppId: {config.AppId}] [Env: {config.Env}] [Pending publish]"
                 };
                 await _sysLogService.AddSysLogAsync(log);
             }
@@ -280,7 +280,7 @@ namespace AgileConfig.Server.EventHandler
                     LogType = SysLogType.Warn,
                     AppId = config.AppId,
                     LogText =
-                        $"用户：{userName} 删除配置【Group：{config.Group}】【Key：{config.Key}】【AppId：{config.AppId}】【Env：{config.Env}】【待发布】"
+                        $"User: {userName} deleted config [Group: {config.Group}] [Key: {config.Key}] [AppId: {config.AppId}] [Env: {config.Env}] [Pending publish]"
                 };
                 await _sysLogService.AddSysLogAsync(log);
             }
@@ -309,7 +309,7 @@ namespace AgileConfig.Server.EventHandler
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Warn,
                     AppId = config.AppId,
-                    LogText = $"用户：{userName} 批量删除配置【Env：{env}】"
+                    LogText = $"User: {userName} batch deleted configs [Env: {env}]"
                 };
                 await _sysLogService.AddSysLogAsync(log);
             }
@@ -339,7 +339,7 @@ namespace AgileConfig.Server.EventHandler
                     LogType = SysLogType.Normal,
                     AppId = node.AppId,
                     LogText =
-                    $"用户：{userName} 发布配置【AppId：{node.AppId}】【Env：{env}】【版本：{node.PublishTime.Value:yyyyMMddHHmmss}】"
+                    $"User: {userName} published config [AppId: {node.AppId}] [Env: {env}] [Version: {node.PublishTime.Value:yyyyMMddHHmmss}]"
                 };
                 await _sysLogService.AddSysLogAsync(log);
             }
@@ -369,7 +369,7 @@ namespace AgileConfig.Server.EventHandler
                     LogType = SysLogType.Warn,
                     AppId = node.AppId,
                     LogText =
-                        $"{userName} 回滚应用【{node.AppId}】【Env：{env}】至发布版本【{node.PublishTime.Value:yyyyMMddHHmmss}】"
+                        $"{userName} rolled back app [{node.AppId}] [Env: {env}] to published version [{node.PublishTime.Value:yyyyMMddHHmmss}]"
                 };
                 await _sysLogService.AddSysLogAsync(log);
             }
@@ -398,7 +398,7 @@ namespace AgileConfig.Server.EventHandler
                     LogType = SysLogType.Normal,
                     AppId = config.AppId,
                     LogText =
-                        $"{userName} 撤销编辑状态的配置【Group：{config.Group}】【Key：{config.Key}】【AppId：{config.AppId}】【Env：{config.Env}】"
+                        $"{userName} cancelled editing config [Group: {config.Group}] [Key: {config.Key}] [AppId: {config.AppId}] [Env: {config.Env}]"
                 };
                 await _sysLogService.AddSysLogAsync(log);
             }
@@ -428,7 +428,7 @@ namespace AgileConfig.Server.EventHandler
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
                     AppId = config.AppId,
-                    LogText = $"{userName} 批量撤销编辑状态的配置【Env：{env}】"
+                    LogText = $"{userName} batch cancelled editing configs [Env: {env}]"
                 };
                 await _sysLogService.AddSysLogAsync(log);
             }
@@ -456,7 +456,7 @@ namespace AgileConfig.Server.EventHandler
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
-                    LogText = $"用户：{userName} 添加节点：{node.Id}"
+                    LogText = $"User: {userName} added node: {node.Id}"
                 };
                 await _sysLogService.AddSysLogAsync(log);
             }
@@ -484,7 +484,7 @@ namespace AgileConfig.Server.EventHandler
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Warn,
-                    LogText = $"用户：{userName} 删除节点：{node.Id}"
+                    LogText = $"User: {userName} deleted node: {node.Id}"
                 };
                 await _sysLogService.AddSysLogAsync(log);
             }
@@ -512,7 +512,7 @@ namespace AgileConfig.Server.EventHandler
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
-                    LogText = $"用户：{userName} 添加用户：{user.UserName} 成功"
+                    LogText = $"User: {userName} added user: {user.UserName} successfully"
                 };
                 await _sysLogService.AddSysLogAsync(log);
             }
@@ -540,7 +540,7 @@ namespace AgileConfig.Server.EventHandler
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Normal,
-                    LogText = $"用户：{userName} 编辑用户：{user.UserName} 成功"
+                    LogText = $"User: {userName} updated user: {user.UserName} successfully"
                 };
                 await _sysLogService.AddSysLogAsync(log);
             }
@@ -568,7 +568,7 @@ namespace AgileConfig.Server.EventHandler
                 {
                     LogTime = DateTime.Now,
                     LogType = SysLogType.Warn,
-                    LogText = $"用户：{userName} 删除用户：{user.UserName} 成功"
+                    LogText = $"User: {userName} deleted user: {user.UserName} successfully"
                 };
                 await _sysLogService.AddSysLogAsync(log);
             }
@@ -613,7 +613,7 @@ namespace AgileConfig.Server.EventHandler
             {
                 LogTime = DateTime.Now,
                 LogType = SysLogType.Normal,
-                LogText = $"服务：【{evtInstance.ServiceId}】【{evtInstance.ServiceName}】 注册成功"
+                LogText = $"Service: [{evtInstance.ServiceId}] [{evtInstance.ServiceName}] registered successfully"
             };
             await _sysLogService.AddSysLogAsync(log);
 
@@ -637,7 +637,7 @@ namespace AgileConfig.Server.EventHandler
             {
                 LogTime = DateTime.Now,
                 LogType = SysLogType.Normal,
-                LogText = $"服务：【{evtInstance.ServiceId}】【{evtInstance.ServiceName}】 卸载成功"
+                LogText = $"Service: [{evtInstance.ServiceId}] [{evtInstance.ServiceName}] unregistered successfully"
             };
             await _sysLogService.AddSysLogAsync(log);
 
