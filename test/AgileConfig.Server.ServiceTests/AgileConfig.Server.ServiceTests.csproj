@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\AgileConfig.Server.Common\AgileConfig.Server.Common.csproj" />
     <ProjectReference Include="..\..\src\AgileConfig.Server.Data.Repository.Freesql\AgileConfig.Server.Data.Repository.Freesql.csproj" />
     <ProjectReference Include="..\..\src\AgileConfig.Server.Data.Repository.Mongodb\AgileConfig.Server.Data.Repository.Mongodb.csproj" />
     <ProjectReference Include="..\..\src\AgileConfig.Server.Data.Repository.Selector\AgileConfig.Server.Data.Repository.Selector.csproj" />

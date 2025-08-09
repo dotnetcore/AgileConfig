@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\AgileConfig.Server.Apisite\AgileConfig.Server.Apisite.csproj" />
+    <ProjectReference Include="..\..\src\AgileConfig.Server.Common\AgileConfig.Server.Common.csproj" />
   </ItemGroup>
 
 </Project>
