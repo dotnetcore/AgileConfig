@@ -1,5 +1,11 @@
 # Change log
 ------------------------------
+[1.9.14]
+* add ASCII banner when app starting
+
+[1.9.13]
+* when check table existing will ignore case 
+
 [1.9.10]
 * client page support filter by appId and env
 
