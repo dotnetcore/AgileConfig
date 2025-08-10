@@ -104,6 +104,8 @@ namespace AgileConfig.Server.Apisite
                     null, null, string.IsNullOrEmpty(Appsettings.OtlpInstanceId), Appsettings.OtlpInstanceId))
                     .AddOtlpTraces()
                     .AddOtlpMetrics();
+
+            services.AddLocalization(options => options.ResourcesPath = "Resources");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -115,10 +117,19 @@ namespace AgileConfig.Server.Apisite
                 app.UsePathBase(basePath);
             }
 
-            // Add localization middleware
-            var localizationOptions = app.ApplicationServices.GetService<Microsoft.Extensions.Options.IOptions<RequestLocalizationOptions>>().Value;
-            app.UseRequestLocalization(localizationOptions);
-            app.UseMiddleware<LocalizationMiddleware>();
+            app.UseRequestLocalization(options =>
+            {
+                var cultures = new[] {"en-US", "zh-CN"};
+
+                options.DefaultRequestCulture = new RequestCulture(cultures[0]);
+                options.AddSupportedCultures(cultures);
+                options.AddSupportedUICultures(cultures);
+                options.SetDefaultCulture(cultures[0]);
+
+                // Configure request culture providers
+                options.RequestCultureProviders.Insert(0, new QueryStringRequestCultureProvider());
+                options.RequestCultureProviders.Insert(1, new AcceptLanguageHeaderRequestCultureProvider());
+            });
 
             if (env.IsDevelopment())
             {
@@ -173,27 +184,6 @@ namespace AgileConfig.Server.Apisite
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("v1/swagger.json", "My API V1");
-            });
-        }
-
-        private void AddLocalizationServices(IServiceCollection services)
-        {
-            services.AddLocalization(options => options.ResourcesPath = "Resources");
-            services.Configure<RequestLocalizationOptions>(options =>
-            {
-                var supportedCultures = new[]
-                {
-                    new CultureInfo("en-US"),
-                    new CultureInfo("zh-CN")
-                };
-                options.DefaultRequestCulture = new RequestCulture("en-US");
-                options.SupportedCultures = supportedCultures;
-                options.SupportedUICultures = supportedCultures;
-
-                // Configure request culture providers
-                options.RequestCultureProviders.Insert(0, new QueryStringRequestCultureProvider());
-                options.RequestCultureProviders.Insert(1, new CookieRequestCultureProvider());
-                options.RequestCultureProviders.Insert(2, new AcceptLanguageHeaderRequestCultureProvider());
             });
         }
     }
