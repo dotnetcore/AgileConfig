@@ -1,10 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Net;
-using System.Globalization;
 using AgileConfig.Server.Apisite.UIExtension;
 using AgileConfig.Server.Apisite.Websocket;
-using AgileConfig.Server.Apisite.Middleware;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Common.RestClient;
 using AgileConfig.Server.Data.Freesql;
@@ -67,9 +65,6 @@ namespace AgileConfig.Server.Apisite
             services.AddRestClient();
 
             services.AddMemoryCache();
-
-            // Add localization services
-            AddLocalizationServices(services);
 
             services.AddCors();
             services.AddMvc().AddRazorRuntimeCompilation().AddControllersAsServices();

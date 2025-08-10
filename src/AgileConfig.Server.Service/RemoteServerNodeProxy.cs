@@ -5,7 +5,6 @@ using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -17,13 +16,14 @@ namespace AgileConfig.Server.Service
         private readonly IRestClient _restClient;
         private readonly IServerNodeService _serverNodeService;
         private readonly ISysLogService _sysLogService;
-
-        private static ConcurrentDictionary<string, ClientInfos> _serverNodeClientReports =
-            new ConcurrentDictionary<string, ClientInfos>();
-        
+        private static readonly Dictionary<string, string> _modules = new()
+        {
+            { "r", "Registration Center" },
+            { "c", "Configuration Center" }
+        };
 
         public RemoteServerNodeProxy(
-            ILoggerFactory loggerFactory, 
+            ILoggerFactory loggerFactory,
             IRestClient restClient,
             IServerNodeService serverNodeService,
             ISysLogService sysLogService)
@@ -47,20 +47,12 @@ namespace AgileConfig.Server.Service
                 return false;
             }, 5);
 
-            var module = "";
-            if (action.Module == "r")
-            {
-                module = "注册中心";
-            }
-            if (action.Module == "c")
-            {
-                module = "配置中心";
-            }
+            _modules.TryGetValue(action.Module, out var moduleName);
             await _sysLogService.AddSysLogAsync(new SysLog
             {
                 LogTime = DateTime.Now,
                 LogType = result ? SysLogType.Normal : SysLogType.Warn,
-                LogText = $"通知节点【{address}】所有客户端：【{module}】【{action.Action}】 响应：{(result ? "成功" : "失败")}"
+                LogText = $"Notified node [{address}] all clients: [{moduleName}] [{action.Action}] Response: {(result ? "Success" : "Failed")}"
             });
 
             return result;
@@ -80,21 +72,13 @@ namespace AgileConfig.Server.Service
                 return false;
             }, 5);
 
-            var module = "";
-            if (action.Module == "r")
-            {
-                module = "注册中心";
-            }
-            if (action.Module == "c")
-            {
-                module = "配置中心";
-            }
+            _modules.TryGetValue(action.Module, out var moduleName);
             await _sysLogService.AddSysLogAsync(new SysLog
             {
                 LogTime = DateTime.Now,
                 LogType = result ? SysLogType.Normal : SysLogType.Warn,
                 AppId = appId,
-                LogText = $"通知节点【{address}】应用【{appId}】的客户端：【{module}】【{action.Action}】 响应：{(result ? "成功" : "失败")}"
+                LogText = $"Notified node [{address}] app [{appId}] clients: [{moduleName}] [{action.Action}] Response: {(result ? "Success" : "Failed")}"
             });
             return result;
         }
@@ -106,41 +90,15 @@ namespace AgileConfig.Server.Service
                 var url = $"{address}/RemoteOP/OneClientDoAction?clientId={clientId}";
                 dynamic result = await _restClient.PostAsync<dynamic>(url, action);
 
-                if ((bool)result.success)
-                {
-                    if (action.Action == ActionConst.Offline)
-                    {
-                        if (_serverNodeClientReports.ContainsKey(address))
-                        {
-                            if (_serverNodeClientReports[address].Infos != null)
-                            {
-                                var report = _serverNodeClientReports[address];
-                                report.Infos.RemoveAll(c => c.Id == clientId);
-                                report.ClientCount = report.Infos.Count;
-                            }
-                        }
-                    }
-
-                    return true;
-                }
-
-                return false;
+                return (bool)result.success;
             }, 5);
 
-            var module = "";
-            if (action.Module == "r")
-            {
-                module = "注册中心";
-            }
-            if (action.Module == "c")
-            {
-                module = "配置中心";
-            }
+            _modules.TryGetValue(action.Module, out var moduleName);
             await _sysLogService.AddSysLogAsync(new SysLog
             {
                 LogTime = DateTime.Now,
                 LogType = result ? SysLogType.Normal : SysLogType.Warn,
-                LogText = $"通知节点【{address}】的客户端【{clientId}】：【{module}】【{action.Action}】 响应：{(result ? "成功" : "失败")}"
+                LogText = $"Notified node [{address}] client [{clientId}]: [{moduleName}] [{action.Action}] Response: {(result ? "Success" : "Failed")}"
             });
 
             return result;
@@ -210,7 +168,7 @@ namespace AgileConfig.Server.Service
                 node.Status = NodeStatus.Offline;
                 _logger.LogInformation(e, "Try test node {0} echo , but fail .", node.Id);
             }
-            
+
             if (node.Status == NodeStatus.Offline)
             {
                 DateTime? time = node.LastEchoTime;
@@ -225,7 +183,7 @@ namespace AgileConfig.Server.Service
                     return;
                 }
             }
-            
+
             await _serverNodeService.UpdateAsync(node);
         }
 
@@ -259,7 +217,7 @@ namespace AgileConfig.Server.Service
                 _logger.LogError(e, "Try to clear node {0}'s config cache , but fail .", address);
             }
         }
-        
+
         public async Task ClearServiceInfoCache(string address)
         {
             try
