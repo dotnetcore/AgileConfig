@@ -3,11 +3,11 @@
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
 		<AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
-		<AssemblyVersion>1.9.14</AssemblyVersion>
-		<Version>1.9.14</Version>
-		<PackageVersion>1.9.14</PackageVersion>
+		<AssemblyVersion>1.9.15</AssemblyVersion>
+		<Version>1.9.15</Version>
+		<PackageVersion>1.9.15</PackageVersion>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-		<FileVersion>1.9.14</FileVersion>
+		<FileVersion>1.9.15</FileVersion>
 		<Authors>kklldog</Authors>
 		<Company>kklldog</Company>
 	</PropertyGroup>
