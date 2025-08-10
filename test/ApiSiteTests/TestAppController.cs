@@ -10,6 +10,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -21,6 +22,8 @@ namespace ApiSiteTests
         [TestMethod]
         public async Task TestAdd()
         {
+            CultureInfo.CurrentUICulture = new CultureInfo("en-US", false);
+
             var appService = new Mock<IAppService>();
             var logService = new Mock<ISysLogService>();
             var userService = new Mock<IUserService>();
@@ -63,7 +66,7 @@ namespace ApiSiteTests
 
             appService.Setup(s => s.AddAsync(It.IsAny<App>())).ReturnsAsync(true);
             appService.Setup(s => s.AddAsync(It.IsAny<App>(), It.IsAny<List<AppInheritanced>>())).ReturnsAsync(true);
-
+            Console.WriteLine(CultureInfo.CurrentUICulture);
             result = await ctl.Add(new AppVM
             {
                 Id = "02"
