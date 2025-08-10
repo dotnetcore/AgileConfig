@@ -69,19 +69,19 @@ const UpdateForm : React.FC<UpdateUserProps> = (props)=>{
             {
               value: 1,
               label: intl.formatMessage({
-                id: 'pages.user.role.admin',
+                id: 'pages.user.usertype.admin',
               }),
             },
             {
               value: 2,
               label: intl.formatMessage({
-                id: 'pages.user.role.operator',
+                id: 'pages.user.usertype.normaluser',
               }),
             }
           ]:[{
             value: 2,
             label: intl.formatMessage({
-              id: 'pages.user.role.operator',
+              id: 'pages.user.usertype.normaluser',
             }),
           }]
         }

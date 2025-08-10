@@ -27,19 +27,11 @@ namespace AgileConfig.Server.Data.Entity
 
     public enum Role
     {
-        [Description("超级管理员")]
+        [Description("Super Administrator")]
         SuperAdmin = 0,
-        [Description("管理员")]
+        [Description("Administrator")]
         Admin = 1,
-        [Description("操作员")]
+        [Description("Operator")]
         NormalUser = 2, 
     }
-
-    public enum AppRole
-    {
-        APP_Editor = 10, //app维护
-        Config_Publisher = 11, // 配置项发布下线
-        Config_Editor = 12 //配置项编辑
-    }
-
 }

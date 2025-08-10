@@ -56,11 +56,6 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             var pageList = users.Skip((current - 1) * pageSize).Take(pageSize);
             var total = users.Count;
-            var totalPages = total / pageSize;
-            if ((total % pageSize) > 0)
-            {
-                totalPages++;
-            }
 
             var vms = new List<UserVM>();
             foreach (var item in pageList)
@@ -93,7 +88,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         {
             if (model == null)
             {
-                throw new ArgumentNullException("model");
+                throw new ArgumentNullException(nameof(model));
             }
 
             var oldUsers = await _userService.GetUsersByNameAsync(model.UserName);
@@ -137,7 +132,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         {
             if (model == null)
             {
-                throw new ArgumentNullException("model");
+                throw new ArgumentNullException(nameof(model));
             }
 
             var user = await _userService.GetUserAsync(model.Id);
@@ -210,7 +205,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         {
             if (string.IsNullOrEmpty(userId))
             {
-                throw new ArgumentNullException("userId");
+                throw new ArgumentNullException(nameof(userId));
             }
 
             var user = await _userService.GetUserAsync(userId);
@@ -238,7 +233,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> adminUsers()
+        public async Task<IActionResult> AdminUsers()
         {
             var adminUsers = await _userService.GetUsersByRoleAsync(Role.Admin);
             adminUsers = adminUsers.Where(x => x.Status == UserStatus.Normal).ToList();
