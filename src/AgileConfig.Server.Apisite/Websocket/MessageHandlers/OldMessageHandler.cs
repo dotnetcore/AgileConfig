@@ -46,7 +46,7 @@ internal class OldMessageHandler : IMessageHandler
             var appId = request.Headers["appid"];
             var env = request.Headers["env"].ToString();
             env = ISettingService.IfEnvEmptySetDefault(ref env);
-            var md5 = await _configService.AppPublishedConfigsMd5CacheWithInheritanced(appId, env);
+            var md5 = await _configService.AppPublishedConfigsMd5CacheWithInheritance(appId, env);
             await SendMessage(client.Client, $"V:{md5}");
         }
         else

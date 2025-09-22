@@ -9,6 +9,7 @@ using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Apisite.Models.Mapping;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -59,6 +60,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 return NotFound();
             }
 
+            var publishTimelineId = await _configService.GetLastPublishTimelineVirtualIdAsync(appId, env.Value);
+            Response.Headers.Append("publish-time-line-id", publishTimelineId);
+
             var cacheKey = $"ConfigController_AppConfig_{appId}_{env.Value}";
             List<ApiConfigVM> configs = null;
             _cacheMemory?.TryGetValue(cacheKey, out configs);
@@ -67,7 +71,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 return configs;
             }
 
-            var appConfigs = await _configService.GetPublishedConfigsByAppIdWithInheritanced(appId, env.Value);
+            var appConfigs = await _configService.GetPublishedConfigsByAppIdWithInheritance(appId, env.Value);
             var vms = appConfigs.Select(x => x.ToApiConfigVM()).ToList();
 
             //增加5s的缓存，防止同一个app同时启动造成db的压力过大

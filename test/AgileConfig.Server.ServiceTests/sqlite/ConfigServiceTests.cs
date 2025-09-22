@@ -860,7 +860,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             await _service.Publish(app1.Id, new string[] { }, "", "", env);
             await _service.Publish(app.Id, new string[] { }, "", "", env);
 
-            var dict = await _service.GetPublishedConfigsByAppIdWithInheritanced_Dictionary(app.Id, env);
+            var dict = await _service.GetPublishedConfigsByAppIdWithInheritance_Dictionary(app.Id, env);
             Assert.IsNotNull(dict);
             Assert.AreEqual(4, dict.Keys.Count);
 
@@ -907,7 +907,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             await _service.Publish(app1.Id, new string[] { }, "", "", env);
             await _service.Publish(app.Id, new string[] { }, "", "", env);
 
-            dict = await _service.GetPublishedConfigsByAppIdWithInheritanced_Dictionary(app.Id, env);
+            dict = await _service.GetPublishedConfigsByAppIdWithInheritance_Dictionary(app.Id, env);
             Assert.IsNotNull(dict);
             Assert.AreEqual(5, dict.Keys.Count);
 
@@ -949,7 +949,7 @@ namespace AgileConfig.Server.ServiceTests.sqlite
             await _service.AddAsync(source6, env);
             await _service.Publish(app2.Id, new string[] { }, "", "", env); // 发布app 003
 
-            dict = await _service.GetPublishedConfigsByAppIdWithInheritanced_Dictionary(app.Id, env);
+            dict = await _service.GetPublishedConfigsByAppIdWithInheritance_Dictionary(app.Id, env);
             Assert.IsNotNull(dict);
             Assert.AreEqual(4, dict.Keys.Count);
 

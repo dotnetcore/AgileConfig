@@ -19,17 +19,19 @@ internal class MessageHandler : IMessageHandler
     private readonly IConfigService _configService;
     private readonly IRegisterCenterService _registerCenterService;
     private readonly IServiceInfoService _serviceInfoService;
-    
+
+    private int ClientVersion { get; set; }
+
     public MessageHandler(
-        IConfigService configService, 
-        IRegisterCenterService registerCenterService, 
+        IConfigService configService,
+        IRegisterCenterService registerCenterService,
         IServiceInfoService serviceInfoService)
     {
         _configService = configService;
         _registerCenterService = registerCenterService;
         _serviceInfoService = serviceInfoService;
     }
-    
+
     public bool Hit(HttpRequest request)
     {
         var ver = request.Headers["client-v"];
@@ -40,6 +42,8 @@ internal class MessageHandler : IMessageHandler
 
         if (int.TryParse(ver.ToString().Replace(".", ""), out var verInt))
         {
+            ClientVersion = verInt;
+
             return verInt >= 160;
         }
 
@@ -63,12 +67,14 @@ internal class MessageHandler : IMessageHandler
             appId = HttpUtility.UrlDecode(appId);
             var env = request.Headers["env"].ToString();
             ISettingService.IfEnvEmptySetDefault(ref env);
-            var md5 = await _configService.AppPublishedConfigsMd5CacheWithInheritanced(appId, env);
+
+            var data = await GetCPingData(appId, env);
+
             await SendMessage(client.Client, JsonConvert.SerializeObject(new WebsocketAction()
             {
                 Action = ActionConst.Ping,
                 Module = ActionModule.ConfigCenter,
-                Data = md5
+                Data = data
             }));
         }
         else if (message.StartsWith("s:ping:"))
@@ -96,6 +102,24 @@ internal class MessageHandler : IMessageHandler
         {
             //如果无法处理，回复0
             await SendMessage(client.Client, "0");
+        }
+    }
+
+    private async Task<string> GetCPingData(string appId, string env)
+    {
+        if (ClientVersion <= 176)
+        {
+            // 1.7.6及以前的版本，返回V:md5
+            var md5 = await _configService.AppPublishedConfigsMd5CacheWithInheritance(appId, env);
+
+            return md5;
+        }
+        else
+        {
+            // 1.7.7及以后的版本，返回 publish time line id
+            var publishTimeLineId = await _configService.GetLastPublishTimelineVirtualIdAsyncWithCache(appId, env);
+
+            return publishTimeLineId;
         }
     }
 }

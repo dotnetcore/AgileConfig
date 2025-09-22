@@ -56,7 +56,7 @@ public class TestApiConfigController
         var configService = new Mock<IConfigService>();
         //configService.Setup(s => s.GetPublishedConfigsAsync("001"))
         //    .ReturnsAsync(newConfigs);
-        configService.Setup(s => s.GetPublishedConfigsByAppIdWithInheritanced(It.IsAny<string>(), It.IsAny<string>()))
+        configService.Setup(s => s.GetPublishedConfigsByAppIdWithInheritance(It.IsAny<string>(), It.IsAny<string>()))
             .ReturnsAsync(newConfigs);
 
         IMemoryCache memoryCache = null;
