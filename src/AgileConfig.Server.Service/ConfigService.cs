@@ -308,9 +308,14 @@ namespace AgileConfig.Server.Service
             return $"ConfigService_AppPublishedConfigsMd5Cache_{appId}_{env}";
         }
 
-        private string AppPublishedConfigsMd5CacheKeyWithInheritanced(string appId, string env)
+        private string AppPublishedConfigsMd5CacheKeyWithInheritance(string appId, string env)
         {
-            return $"ConfigService_AppPublishedConfigsMd5CacheWithInheritanced_{appId}_{env}";
+            return $"ConfigService_AppPublishedConfigsMd5CacheWithInheritance_{appId}_{env}";
+        }
+
+        private string AppPublishTimelineVirtualIdCacheKey(string appId, string env)
+        {
+            return $"ConfigService_AppPublishTimelineVirtualIdWithCache_{appId}_{env}";
         }
 
         private void ClearAppPublishedConfigsMd5Cache(string appId, string env)
@@ -319,9 +324,15 @@ namespace AgileConfig.Server.Service
             _memoryCache?.Remove(cacheKey);
         }
 
-        private void ClearAppPublishedConfigsMd5CacheWithInheritanced(string appId, string env)
+        private void ClearAppPublishedConfigsMd5CacheWithInheritance(string appId, string env)
         {
-            var cacheKey = AppPublishedConfigsMd5CacheKeyWithInheritanced(appId, env);
+            var cacheKey = AppPublishedConfigsMd5CacheKeyWithInheritance(appId, env);
+            _memoryCache?.Remove(cacheKey);
+        }
+
+        private void ClearAppPublishTimelineVirtualIdCache(string appId, string env)
+        {
+            var cacheKey = AppPublishTimelineVirtualIdCacheKey(appId, env);
             _memoryCache?.Remove(cacheKey);
         }
 
@@ -338,8 +349,10 @@ namespace AgileConfig.Server.Service
             using var repository = _configRepositoryAccessor(env);
             await repository.InsertAsync(configs);
 
-            ClearAppPublishedConfigsMd5Cache(configs.First().AppId, env);
-            ClearAppPublishedConfigsMd5CacheWithInheritanced(configs.First().AppId, env);
+            var appId = configs.First().AppId;
+            ClearAppPublishedConfigsMd5Cache(appId,env);
+            ClearAppPublishedConfigsMd5CacheWithInheritance(appId, env);
+            ClearAppPublishTimelineVirtualIdCache(appId, env);
 
             return true;
         }
@@ -349,9 +362,9 @@ namespace AgileConfig.Server.Service
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        public async Task<List<Config>> GetPublishedConfigsByAppIdWithInheritanced(string appId, string env)
+        public async Task<List<Config>> GetPublishedConfigsByAppIdWithInheritance(string appId, string env)
         {
-            var configs = await GetPublishedConfigsByAppIdWithInheritanced_Dictionary(appId, env);
+            var configs = await GetPublishedConfigsByAppIdWithInheritance_Dictionary(appId, env);
 
             return configs.Values.ToList();
         }
@@ -361,7 +374,7 @@ namespace AgileConfig.Server.Service
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        public async Task<Dictionary<string, Config>> GetPublishedConfigsByAppIdWithInheritanced_Dictionary(
+        public async Task<Dictionary<string, Config>> GetPublishedConfigsByAppIdWithInheritance_Dictionary(
             string appId, string env)
         {
             var apps = new List<string>();
@@ -401,9 +414,9 @@ namespace AgileConfig.Server.Service
             return configs;
         }
 
-        public async Task<string> AppPublishedConfigsMd5WithInheritanced(string appId, string env)
+        public async Task<string> AppPublishedConfigsMd5WithInheritance(string appId, string env)
         {
-            var configs = await GetPublishedConfigsByAppIdWithInheritanced(appId, env);
+            var configs = await GetPublishedConfigsByAppIdWithInheritance(appId, env);
 
             var keyStr = string.Join('&', configs.Select(c => GenerateKey(c)).ToArray().OrderBy(k => k, StringComparer.Ordinal));
             var valStr = string.Join('&', configs.Select(c => c.Value).ToArray().OrderBy(v => v, StringComparer.Ordinal));
@@ -417,15 +430,15 @@ namespace AgileConfig.Server.Service
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        public async Task<string> AppPublishedConfigsMd5CacheWithInheritanced(string appId, string env)
+        public async Task<string> AppPublishedConfigsMd5CacheWithInheritance(string appId, string env)
         {
-            var cacheKey = AppPublishedConfigsMd5CacheKeyWithInheritanced(appId, env);
+            var cacheKey = AppPublishedConfigsMd5CacheKeyWithInheritance(appId, env);
             if (_memoryCache != null && _memoryCache.TryGetValue(cacheKey, out string md5))
             {
                 return md5;
             }
 
-            md5 = await AppPublishedConfigsMd5WithInheritanced(appId, env);
+            md5 = await AppPublishedConfigsMd5WithInheritance(appId, env);
 
             var cacheOp = new MemoryCacheEntryOptions()
                 .SetAbsoluteExpiration(TimeSpan.FromSeconds(60));
@@ -614,7 +627,8 @@ namespace AgileConfig.Server.Service
                 await uow?.SaveChangesAsync();
 
                 ClearAppPublishedConfigsMd5Cache(appId, env);
-                ClearAppPublishedConfigsMd5CacheWithInheritanced(appId, env);
+                ClearAppPublishedConfigsMd5CacheWithInheritance(appId, env);
+                ClearAppPublishTimelineVirtualIdCache(appId, env);
 
                 return (true, publishTimelineNode.Id);
             }
@@ -777,7 +791,8 @@ namespace AgileConfig.Server.Service
             await uow?.SaveChangesAsync();
 
             ClearAppPublishedConfigsMd5Cache(appId, env);
-            ClearAppPublishedConfigsMd5CacheWithInheritanced(appId, env);
+            ClearAppPublishedConfigsMd5CacheWithInheritance(appId, env);
+            ClearAppPublishTimelineVirtualIdCache(appId,env);
 
             return true;
         }
@@ -1076,6 +1091,62 @@ namespace AgileConfig.Server.Service
             }
 
             return ("", key);
+        }
+
+        /// <summary>
+        /// Generate the virtual id representing the last publish timeline node of the app and its inherited apps.
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <param name="env"></param>
+        /// <returns></returns>
+        public async Task<string> GetLastPublishTimelineVirtualIdAsync(string appId, string env)
+        {
+            using var publishTimelineRepository = _publishTimelineRepositoryAccsssor(env);
+
+            var apps = new List<string>();
+            var inheritanceApps = await _appService.GetInheritancedAppsAsync(appId);
+            for (int i = 0; i < inheritanceApps.Count; i++)
+            {
+                if (inheritanceApps[i].Enabled)
+                {
+                    apps.Add(inheritanceApps[i].Id as string); //后继承的排在后面
+                }
+            }
+
+            apps.Add(appId); //本应用放在最后
+
+            var ids = new List<string>();
+
+            foreach (var app in apps)
+            {
+                var id = await publishTimelineRepository.GetLastPublishTimelineNodeIdAsync(app, env);
+                ids.Add(id);
+            }
+
+            return string.Join('|', ids);
+        }
+
+        /// <summary>
+        /// Generate the virtual id representing the last publish timeline node of the app and its inherited apps, with cache.
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <param name="env"></param>
+        /// <returns></returns>
+        public async Task<string> GetLastPublishTimelineVirtualIdAsyncWithCache(string appId, string env)
+        {
+            var cacheKey = AppPublishTimelineVirtualIdCacheKey(appId, env);
+            if (_memoryCache != null && _memoryCache.TryGetValue(cacheKey, out string vId))
+            {
+                return vId;
+            }
+
+            vId = await GetLastPublishTimelineVirtualIdAsync(appId, env);
+
+            var cacheOp = new MemoryCacheEntryOptions()
+                .SetAbsoluteExpiration(TimeSpan.FromSeconds(60));
+            _memoryCache?.Set(cacheKey, vId, cacheOp);
+
+            return vId;
         }
     }
 }

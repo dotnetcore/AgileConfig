@@ -12,5 +12,15 @@ namespace AgileConfig.Server.Data.Repository.Freesql
         {
             this.freeSql = freeSql;
         }
+
+        public async Task<string> GetLastPublishTimelineNodeIdAsync(string appId, string env)
+        {
+            var node = await freeSql.Select<PublishTimeline>()
+                .Where(x => x.AppId == appId && x.Env == env)
+                .OrderByDescending(x => x.Version)
+                .FirstAsync();
+
+            return node?.Id;
+        }
     }
 }

@@ -36,13 +36,13 @@ namespace AgileConfig.Server.IService
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        Task<List<Config>> GetPublishedConfigsByAppIdWithInheritanced(string appId, string env);
+        Task<List<Config>> GetPublishedConfigsByAppIdWithInheritance(string appId, string env);
         /// <summary>
         /// 获取app的配置项继承的app配置合并进来转换为字典
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        Task<Dictionary<string, Config>> GetPublishedConfigsByAppIdWithInheritanced_Dictionary(string appId, string env);
+        Task<Dictionary<string, Config>> GetPublishedConfigsByAppIdWithInheritance_Dictionary(string appId, string env);
         Task<bool> AddAsync(Config config, string env);
 
         Task<bool> AddRangeAsync(List<Config> configs, string env);
@@ -77,7 +77,7 @@ namespace AgileConfig.Server.IService
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        Task<string> AppPublishedConfigsMd5WithInheritanced(string appId, string env);
+        Task<string> AppPublishedConfigsMd5WithInheritance(string appId, string env);
         
         /// <summary>
         /// 计算已发布配置项的MD5进行缓存
@@ -91,7 +91,7 @@ namespace AgileConfig.Server.IService
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        Task<string> AppPublishedConfigsMd5CacheWithInheritanced(string appId, string env);
+        Task<string> AppPublishedConfigsMd5CacheWithInheritance(string appId, string env);
 
         /// <summary>
         /// 构造key
@@ -213,5 +213,10 @@ namespace AgileConfig.Server.IService
         /// clear all cache
         /// </summary>
         void ClearCache();
+
+        Task<string> GetLastPublishTimelineVirtualIdAsync(string appId, string env);
+
+        Task<string> GetLastPublishTimelineVirtualIdAsyncWithCache(string appId, string env);
+
     }
 }
