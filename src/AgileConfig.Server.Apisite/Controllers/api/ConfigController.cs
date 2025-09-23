@@ -60,28 +60,33 @@ namespace AgileConfig.Server.Apisite.Controllers.api
                 return NotFound();
             }
 
-            var publishTimelineId = await _configService.GetLastPublishTimelineVirtualIdAsync(appId, env.Value);
-            Response.Headers.Append("publish-time-line-id", publishTimelineId);
-
             var cacheKey = $"ConfigController_AppConfig_{appId}_{env.Value}";
-            List<ApiConfigVM> configs = null;
-            _cacheMemory?.TryGetValue(cacheKey, out configs);
-            if (configs != null)
+            AppConfigsCache cache = null;
+            _cacheMemory?.TryGetValue(cacheKey, out cache);
+
+            if (cache == null)
             {
-                return configs;
+                cache = new AppConfigsCache();
+
+                var publishTimelineId = await _configService.GetLastPublishTimelineVirtualIdAsync(appId, env.Value);
+                var appConfigs = await _configService.GetPublishedConfigsByAppIdWithInheritance(appId, env.Value);
+                var vms = appConfigs.Select(x => x.ToApiConfigVM()).ToList();
+
+                cache.Key = cacheKey;
+                cache.Configs = vms;
+                cache.VirtualId = publishTimelineId;
+
+                //cache 5 seconds to avoid too many db query
+                var cacheOp = new MemoryCacheEntryOptions()
+                    .SetAbsoluteExpiration(TimeSpan.FromSeconds(5));
+                _cacheMemory?.Set(cacheKey, cache, cacheOp);
             }
-
-            var appConfigs = await _configService.GetPublishedConfigsByAppIdWithInheritance(appId, env.Value);
-            var vms = appConfigs.Select(x => x.ToApiConfigVM()).ToList();
-
-            //增加5s的缓存，防止同一个app同时启动造成db的压力过大
-            var cacheOp = new MemoryCacheEntryOptions()
-                .SetAbsoluteExpiration(TimeSpan.FromSeconds(5));
-            _cacheMemory?.Set(cacheKey, vms, cacheOp);
+            
+            Response?.Headers?.Append("publish-time-line-id", cache.VirtualId);
 
             _meterService.PullAppConfigCounter?.Add(1, new("appId", appId), new("env", env));
 
-            return vms;
+            return cache.Configs;
         }
 
         /// <summary>

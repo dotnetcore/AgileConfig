@@ -1,9 +1,6 @@
-﻿using AgileConfig.Server.Apisite.Models;
+﻿using System.Collections.Generic;
+using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Data.Entity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace AgileConfig.Server.Apisite.Controllers.api.Models
 {
@@ -51,6 +48,16 @@ namespace AgileConfig.Server.Apisite.Controllers.api.Models
         /// 描述
         /// </summary>
         public string Description { get; set; }
+    }
+
+
+    public class AppConfigsCache
+    {
+        public string Key { get; set; }
+
+        public string VirtualId { get; set; }
+
+        public List<ApiConfigVM> Configs { get; set; }
     }
 
     public static class ApiConfigVMExtension
