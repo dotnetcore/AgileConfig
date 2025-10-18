@@ -41,7 +41,7 @@ export default {
     'AgileConfig - a light configuration server',
   'pages.login.accountLogin.tab': 'Account Login',
   'pages.login.accountLogin.errorMessage': 'Incorrect username/password（admin/ant.design)',
-  'pages.login.username.placeholder': 'Username: admin or user',
+  'pages.login.username.placeholder': 'Username',
   'pages.login.username.required': 'Please input your username!',
   'pages.login.password.placeholder': 'Password',
   'pages.login.password.required': 'Please input your password!',
