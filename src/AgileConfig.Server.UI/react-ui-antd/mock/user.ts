@@ -13,9 +13,9 @@ async function getFakeCaptcha(req: Request, res: Response) {
   return res.json('captcha-xxx');
 }
 
-// 代码中会兼容本地 service mock 以及部署站点的静态数据
+// The code works with both local service mocks and static data deployed on the site.
 export default {
-  // 支持值为 Object 和 Array
+  // Supports values that are either Object or Array.
   'GET /api/currentUser': {
     name: 'Serati Ma',
     avatar: 'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png',
@@ -66,7 +66,7 @@ export default {
     address: '西湖区工专路 77 号',
     phone: '0752-268888888',
   },
-  // GET POST 可省略
+  // GET or POST can be omitted.
   'GET /api/users': [
     {
       key: '1',

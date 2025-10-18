@@ -47,7 +47,7 @@ namespace AgileConfig.Server.Apisite.UIExtension
 
         private bool ShouldHandleUiStaticFilesRequest(HttpContext context)
         {
-            //请求的的Referer为 0.0.0.0/ui ,以此为依据判断是否是reactui需要的静态文件
+            // Treat requests whose referer is 0.0.0.0/ui as static assets required by the React UI.
             if (context.Request.Path is { HasValue: true, Value: not null } && context.Request.Path.Value.Contains('.'))
             {
                 context.Request.Headers.TryGetValue("Referer", out StringValues refererValues);
@@ -66,10 +66,10 @@ namespace AgileConfig.Server.Apisite.UIExtension
         }
 
         /// <summary>
-        /// 为了适配 pathbase ，index.html 注入的 js css ，需要使用相对路径，所以要去除 /
+        /// To support path base, make injected JS and CSS in index.html use relative paths by removing the leading slash.
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <returns></returns>
+        /// <param name="filePath">Absolute path to the index.html file to rewrite.</param>
+        /// <returns>Task that completes when the file has been rewritten.</returns>
         private async Task RewriteIndexHtml(string filePath)
         {
             var rows = await File.ReadAllLinesAsync(filePath);
@@ -141,7 +141,7 @@ namespace AgileConfig.Server.Apisite.UIExtension
                     {
                         await RewriteIndexHtml(filePath);
                     }
-                    var fileData = await File.ReadAllBytesAsync(filePath);  //read file bytes
+                    var fileData = await File.ReadAllBytesAsync(filePath);  // read file bytes
                     var lastModified = File.GetLastWriteTime(filePath);
                     var extType = Path.GetExtension(filePath);
                     uiFile = new UiFileBag()
@@ -155,7 +155,7 @@ namespace AgileConfig.Server.Apisite.UIExtension
                     StaticFilesCache.TryAdd(filePath, uiFile);
                 }
 
-                //判断前端缓存的文件是否过期
+                // Check whether the cached file on the client has expired.
                 if (context.Request.Headers.TryGetValue("If-Modified-Since", out StringValues values))
                 {
                     var lastModified = uiFile.LastModified;

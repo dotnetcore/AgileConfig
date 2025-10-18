@@ -39,8 +39,8 @@ namespace AgileConfig.Server.Common.EventBus
         /// <summary>
         /// Trigger an event. This method must be called before the handler is registered.
         /// </summary>
-        /// <typeparam name="TEvent"></typeparam>
-        /// <param name="evt"></param>
+        /// <typeparam name="TEvent">Type of event to fire.</typeparam>
+        /// <param name="evt">Event payload instance to dispatch to handlers.</param>
         public void Fire<TEvent>(TEvent evt) where TEvent : IEvent
         {
             _localServiceProvider ??= _serviceCollection.BuildServiceProvider();

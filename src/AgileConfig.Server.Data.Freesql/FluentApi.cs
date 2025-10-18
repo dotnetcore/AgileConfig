@@ -13,7 +13,7 @@ namespace AgileConfig.Server.Data.Freesql
                 eb.Property(a => a.Value).HasColumnName("v");
                 if (freeSql.Ado.DataType == FreeSql.DataType.Oracle)
                 {
-                    //因为oracle的nvarchar2的长度不支持4000，使用-1使用clob
+                    // Oracle nvarchar2 does not support length 4000; use -1 to map to CLOB.
                     eb.Property(a => a.Value).HasMaxLength(-1);
                 } else
                 {
@@ -24,7 +24,7 @@ namespace AgileConfig.Server.Data.Freesql
                 eb.Property(a => a.Value).HasColumnName("v");
                 if (freeSql.Ado.DataType == FreeSql.DataType.Oracle)
                 {
-                    //因为oracle的nvarchar2的长度不支持4000，使用-1使用clob
+                    // Oracle nvarchar2 does not support length 4000; use -1 to map to CLOB.
                     eb.Property(a => a.Value).HasMaxLength(-1);
                 }
                 else
@@ -36,7 +36,7 @@ namespace AgileConfig.Server.Data.Freesql
                 eb.Property(a => a.Value).HasColumnName("v");
                 if (freeSql.Ado.DataType == FreeSql.DataType.Oracle)
                 {
-                    //因为oracle的nvarchar2的长度不支持4000，使用-1使用clob
+                    // Oracle nvarchar2 does not support length 4000; use -1 to map to CLOB.
                     eb.Property(a => a.Value).HasMaxLength(-1);
                 }
                 else

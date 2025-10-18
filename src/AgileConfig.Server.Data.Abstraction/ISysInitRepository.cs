@@ -17,15 +17,15 @@ public interface ISysInitRepository
     string? GetDefaultEnvironmentFromDb();
 
     /// <summary>
-    /// save initialization setting 
+    /// save initialization setting
     /// </summary>
-    /// <param name="setting"></param>
+    /// <param name="setting">Setting values to persist.</param>
     void SaveInitSetting(Setting setting);
 
     /// <summary>
     /// Init super admin
     /// </summary>
-    /// <param name="password"></param>
+    /// <param name="password">Password to assign to the super administrator.</param>
     /// <returns></returns>
     bool InitSa(string password);
 

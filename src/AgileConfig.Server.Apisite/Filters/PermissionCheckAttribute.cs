@@ -31,7 +31,8 @@ namespace AgileConfig.Server.Apisite.Filters
         }
 
         /// <summary>
-        /// 因为 attribute 不能传递 func 参数，所有从 action 的参数内获取 appId 的操作只能提前内置在一个静态字典内。
+        /// Static mapping of permission keys to delegates that extract the appId from action parameters.
+        /// Attributes cannot accept delegates directly, so the functions are predefined here.
         /// </summary>
         protected static readonly
             FrozenDictionary<string, Func<ActionExecutingContext, IPermissionService, IConfigService, string>>

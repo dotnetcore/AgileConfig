@@ -36,13 +36,13 @@ namespace AgileConfig.Server.IService
         Task<bool> UpdateAsync(Setting setting);
 
         /// <summary>
-        /// 获取所有的设定
+        /// Retrieve all settings.
         /// </summary>
         /// <returns></returns>
         Task<List<Setting>> GetAllSettingsAsync();
 
         /// <summary>
-        /// 获取环境列表
+        /// Retrieve the configured environment list.
         /// </summary>
         /// <returns></returns>
         Task<string[]> GetEnvironmentList();

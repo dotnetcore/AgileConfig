@@ -178,7 +178,7 @@ namespace AgileConfig.Server.Service
                 }
                 if (time.HasValue && (DateTime.Now - time.Value).TotalMinutes >= 30)
                 {
-                    // 超过 30 分钟没有回应，则移除节点
+                    // Remove nodes that have not responded for over 30 minutes.
                     await _serverNodeService.DeleteAsync(address);
                     return;
                 }

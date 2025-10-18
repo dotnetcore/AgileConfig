@@ -226,12 +226,12 @@ namespace AgileConfig.Server.Apisite.Controllers
                 var isPublished = await _configService.IsPublishedAsync(config.Id, env.Value);
                 if (isPublished)
                 {
-                    //如果是已发布的配置，修改后状态设置为编辑
+                    // When an already published configuration is modified, mark it as edited.
                     config.EditStatus = EditStatus.Edit;
                 }
                 else
                 {
-                    //如果没有发布，说明是新增的，一直维持新增状态
+                    // If it has never been published, keep the status as added.
                     config.EditStatus = EditStatus.Add;
                 }
 
@@ -253,11 +253,11 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         /// <summary>
-        /// 是否只是修改了描述信息
+        /// Determine whether only the description field changed.
         /// </summary>
-        /// <param name="newConfig"></param>
-        /// <param name="oldConfig"></param>
-        /// <returns></returns>
+        /// <param name="newConfig">Configuration submitted by the client.</param>
+        /// <param name="oldConfig">Existing configuration stored in the database.</param>
+        /// <returns>True when only the description differs.</returns>
         private bool IsOnlyUpdateDescription(Config newConfig, Config oldConfig)
         {
             return newConfig.Key == oldConfig.Key && newConfig.Group == oldConfig.Group &&
@@ -279,14 +279,14 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         /// <summary>
-        /// 按多条件进行搜索
+        /// Search configurations with multiple filter conditions.
         /// </summary>
-        /// <param name="appId">应用id</param>
-        /// <param name="group">分组</param>
-        /// <param name="key">键</param>
-        /// <param name="onlineStatus">在线状态</param>
-        /// <param name="pageSize">分页大小</param>
-        /// <param name="current">当前页</param>
+        /// <param name="appId">Application ID.</param>
+        /// <param name="group">Configuration group.</param>
+        /// <param name="key">Configuration key.</param>
+        /// <param name="onlineStatus">Filter by online status.</param>
+        /// <param name="pageSize">Number of items per page.</param>
+        /// <param name="current">Current page number.</param>
         /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> Search(string appId, string group, string key, OnlineStatus? onlineStatus,
@@ -390,7 +390,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var isPublished = await _configService.IsPublishedAsync(config.Id, env.Value);
             if (!isPublished)
             {
-                //如果已经没有发布过直接删掉
+                // If it has never been published, remove it directly.
                 config.Status = ConfigStatus.Deleted;
             }
 
@@ -437,7 +437,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 var isPublished = await _configService.IsPublishedAsync(config.Id, env.Value);
                 if (!isPublished)
                 {
-                    //如果已经没有发布过直接删掉
+                    // If it has never been published, remove it directly.
                     config.Status = ConfigStatus.Deleted;
                 }
 
@@ -514,7 +514,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         /// <summary>
-        /// 发布所有待发布的配置项
+        /// Publish all pending configuration items.
         /// </summary>
         /// <returns></returns>
         [TypeFilter(typeof(PermissionCheckAttribute),
@@ -550,7 +550,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         /// <summary>
-        /// 预览上传的json文件
+        /// Preview an uploaded JSON configuration file.
         /// </summary>
         /// <returns></returns>
         public IActionResult PreViewJsonFile()
@@ -578,7 +578,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     var paths = key.Split(":");
                     if (paths.Length > 1)
                     {
-                        //如果是复杂key，取最后一个为真正的key，其他作为group
+                        // For hierarchical keys, use the last segment as the key and the rest as the group.
                         newKey = paths[paths.Length - 1];
                         group = string.Join(":", paths.ToList().Take(paths.Length - 1));
                     }
@@ -601,9 +601,9 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         /// <summary>
-        /// 导出json文件
+        /// Export an application's configurations as a JSON file.
         /// </summary>
-        /// <param name="appId">应用id</param>
+        /// <param name="appId">Application ID.</param>
         /// <returns></returns>
         public async Task<IActionResult> ExportJson(string appId, EnvString env)
         {
@@ -627,9 +627,9 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         /// <summary>
-        /// 获取待发布的明细
+        /// Get counts of configuration changes that are waiting to be published.
         /// </summary>
-        /// <param name="appId">应用id</param>
+        /// <param name="appId">Application ID.</param>
         /// <returns></returns>
         public async Task<IActionResult> WaitPublishStatus(string appId, EnvString env)
         {
@@ -659,9 +659,9 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         /// <summary>
-        /// 获取发布详情的历史
+        /// Retrieve the publish history details for an application.
         /// </summary>
-        /// <param name="appId"></param>
+        /// <param name="appId">Application ID.</param>
         /// <returns></returns>
         public async Task<IActionResult> PublishHistory(string appId, EnvString env)
         {
@@ -781,7 +781,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var configs = await _configService.GetByAppIdAsync(appId, env.Value);
-            // text 格式展示的时候不需要删除的配置
+            // When displaying text format, exclude deleted configurations.
             configs = configs.Where(x => x.EditStatus != EditStatus.Deleted).ToList();
             var kvList = new List<KeyValuePair<string, string>>();
             foreach (var config in configs)
@@ -798,9 +798,9 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         /// <summary>
-        /// 获取json格式的配置
+        /// Get configuration content in JSON format.
         /// </summary>
-        /// <param name="appId">应用id</param>
+        /// <param name="appId">Application ID.</param>
         /// <returns></returns>
         public async Task<IActionResult> GetJson(string appId, EnvString env)
         {
@@ -810,7 +810,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
 
             var configs = await _configService.GetByAppIdAsync(appId, env.Value);
-            // json 格式展示的时候不需要删除的配置
+            // When producing JSON, exclude deleted configurations.
             configs = configs.Where(x => x.EditStatus != EditStatus.Deleted).ToList();
             var dict = new Dictionary<string, string>();
             configs.ForEach(x =>

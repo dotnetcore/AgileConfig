@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AgileConfig.Server.Apisite.Controllers
 {
     /// <summary>
-    /// 这个Controller用来上报节点的一些情况，比如链接了多少客户端等信息
+    /// Reports node status information, such as connected clients.
     /// </summary>
     public class ReportController : Controller
     {
@@ -35,7 +35,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         /// <summary>
-        /// 获取本节点的客户端信息
+        /// Get client connections on the current node.
         /// </summary>
         /// <returns></returns>
         public IActionResult Clients()
@@ -46,10 +46,10 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         /// <summary>
-        /// 获取某个节点的客户端信息
+        /// Get client connections on a specific node.
         /// </summary>
-        /// <param name="address"></param>
-        /// <returns></returns>
+        /// <param name="address">Server address to inspect.</param>
+        /// <returns>JSON result containing the client report.</returns>
         public IActionResult ServerNodeClients(string address)
         {
             var report = _remoteServerNodeProxy.GetClientsReportAsync(address);
@@ -115,7 +115,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         /// <summary>
-        /// 获取App数量
+        /// Get the number of enabled applications.
         /// </summary>
         /// <returns></returns>
         public async Task<IActionResult> AppCount()
@@ -125,7 +125,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         /// <summary>
-        /// 获取Config项目数量
+        /// Get the number of enabled configuration items.
         /// </summary>
         /// <returns></returns>
         public async Task<IActionResult> ConfigCount()
@@ -135,7 +135,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         /// <summary>
-        /// 获取Config项目数量
+        /// Get the number of server nodes.
         /// </summary>
         /// <returns></returns>
         public async Task<IActionResult> NodeCount()
@@ -145,7 +145,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         /// <summary>
-        /// 获取所有节点的状态信息
+        /// Get status information for all nodes.
         /// </summary>
         /// <returns></returns>
         public async Task<IActionResult> RemoteNodesStatus()

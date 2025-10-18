@@ -7,7 +7,7 @@ using System.Text;
 namespace AgileConfig.Server.Data.Entity
 {
     /// <summary>
-    /// app继承关系
+    /// Represents the inheritance relationship between applications.
     /// </summary>
     [Table(Name = "agc_appInheritanced")]
     [OraclePrimaryKeyName("agc_appInheritanced_pk")]

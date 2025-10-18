@@ -44,17 +44,17 @@ namespace AgileConfig.Server.Apisite
 
             if (Appsettings.IsAdminConsoleMode)
             {
-                _systemInitializationService.TryInitJwtSecret();//初始化 jwt secret
+                _systemInitializationService.TryInitJwtSecret();// Initialize the JWT secret.
                 _systemInitializationService.TryInitSaPassword(); // init super admin password
                 _systemInitializationService.TryInitDefaultApp();
-                _ = _remoteServerNodeProxy.TestEchoAsync();//开启节点检测
-                _ = _serviceHealthCheckService.StartCheckAsync();//开启服务健康检测
-                _eventRegister.Register();//注册 eventbus 的回调
+                _ = _remoteServerNodeProxy.TestEchoAsync();// Start node connectivity checks.
+                _ = _serviceHealthCheckService.StartCheckAsync();// Start service health monitoring.
+                _eventRegister.Register();// Register event bus callbacks.
             }
 
             if (Appsettings.Cluster)
             {
-                //如果开启集群模式，会自动获取本地的ip注册到节点表，只适合 docker-compose 环境
+                // When cluster mode is enabled, automatically register the local IP (for docker-compose setups).
                 var ip = GetIp();
                 if (!string.IsNullOrEmpty(ip))
                 {

@@ -13,7 +13,7 @@ using AgileConfig.Server.Event;
 namespace AgileConfig.Server.Apisite.Controllers.api
 {
     /// <summary>
-    /// 注册中心接口
+    /// Service registration center API.
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]

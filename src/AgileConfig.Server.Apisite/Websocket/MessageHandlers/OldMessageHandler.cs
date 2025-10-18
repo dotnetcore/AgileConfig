@@ -11,7 +11,7 @@ namespace AgileConfig.Server.Apisite.Websocket.MessageHandlers;
 
 
 /// <summary>
-/// 消息处理器，用来兼容旧版本
+/// Message handler used to remain compatible with legacy clients.
 /// </summary>
 internal class OldMessageHandler : IMessageHandler
 {
@@ -41,8 +41,8 @@ internal class OldMessageHandler : IMessageHandler
 
         if (message == "ping")
         {
-            //兼容旧版client
-            //如果是ping，回复本地数据的md5版本 
+            // Support the legacy client heartbeat.
+            // Reply with the MD5 of the local data when receiving "ping".
             var appId = request.Headers["appid"];
             var env = request.Headers["env"].ToString();
             env = ISettingService.IfEnvEmptySetDefault(ref env);
@@ -51,7 +51,7 @@ internal class OldMessageHandler : IMessageHandler
         }
         else
         {
-            //如果无法处理，回复0
+            // Reply with 0 when the message cannot be handled.
             await SendMessage(client.Client, "0");
         }
     }

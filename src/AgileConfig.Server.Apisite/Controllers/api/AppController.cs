@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 namespace AgileConfig.Server.Apisite.Controllers.api
 {
     /// <summary>
-    /// 应用操作接口
+    /// Application management API.
     /// </summary>
     [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
     [Route("api/[controller]")]
@@ -38,7 +38,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         /// <summary>
-        /// 获取所有应用
+        /// Get all applications.
         /// </summary>
         /// <returns></returns>
         [HttpGet]
@@ -51,9 +51,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         /// <summary>
-        /// 根据id获取应用
+        /// Get an application by its identifier.
         /// </summary>
-        /// <param name="id">应用id</param>
+        /// <param name="id">Application ID.</param>
         /// <returns></returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiAppVM>> GetById(string id)
@@ -78,9 +78,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         /// <summary>
-        /// 添加应用
+        /// Create a new application.
         /// </summary>
-        /// <param name="model">应用模型</param>
+        /// <param name="model">Application payload.</param>
         /// <returns></returns>
         [ProducesResponseType(201)]
         [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "App.Add", Functions.App_Add })]
@@ -117,10 +117,10 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         /// <summary>
-        /// 编辑应用
+        /// Update an existing application.
         /// </summary>
-        /// <param name="id">应用id</param>
-        /// <param name="model">编辑后的应用模型</param>
+        /// <param name="id">Application ID.</param>
+        /// <param name="model">Application payload.</param>
         /// <returns></returns>
         [ProducesResponseType(200)]
         [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "App.Edit", Functions.App_Edit })]
@@ -159,9 +159,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         /// <summary>
-        /// 删除应用
+        /// Delete an application.
         /// </summary>
-        /// <param name="id">应用id</param>
+        /// <param name="id">Application ID.</param>
         /// <returns></returns>
         [ProducesResponseType(204)]
         [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "App.Delete", Functions.App_Delete })]
@@ -188,10 +188,10 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         /// <summary>
-        /// 发布某个应用的待发布配置项
+        /// Publish pending configuration items of an application.
         /// </summary>
-        /// <param name="appId">应用id</param>
-        /// <param name="env">环境</param>
+        /// <param name="appId">Application ID.</param>
+        /// <param name="env">Target environment.</param>
         /// <returns></returns>
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "Config.Publish_API", Functions.Config_Publish })]
@@ -221,10 +221,10 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         /// <summary>
-        /// 查询某个应用的发布历史
+        /// Retrieve the publish history of an application.
         /// </summary>
-        /// <param name="appId">应用id</param>
-        /// <param name="env">环境</param>
+        /// <param name="appId">Application ID.</param>
+        /// <param name="env">Target environment.</param>
         /// <returns></returns>
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [HttpGet("Publish_History")]
@@ -242,10 +242,10 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         /// <summary>
-        /// 回滚某个应用的发布版本，回滚到 historyId 指定的时刻
+        /// Roll back the application to the configuration at the specified publish history entry.
         /// </summary>
-        /// <param name="historyId">发布历史</param>
-        /// <param name="env">环境</param>
+        /// <param name="historyId">Publish history identifier.</param>
+        /// <param name="env">Target environment.</param>
         /// <returns></returns>
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "Config.Rollback_API", Functions.Config_Publish })]

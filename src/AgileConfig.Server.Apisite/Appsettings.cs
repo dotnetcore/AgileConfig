@@ -6,16 +6,16 @@ namespace AgileConfig.Server.Apisite
     public class Appsettings
     {
         /// <summary>
-        /// 是否演示模式
+        /// Indicates whether the server runs in demo mode.
         /// </summary>
         public static bool IsPreviewMode => "true".Equals(Global.Config["preview_mode"], StringComparison.CurrentCultureIgnoreCase);
         /// <summary>
-        /// 是否控制台模式
+        /// Indicates whether the admin console mode is enabled.
         /// </summary>
         public static bool IsAdminConsoleMode => "true".Equals(Global.Config["adminConsole"], StringComparison.CurrentCultureIgnoreCase);
 
         /// <summary>
-        /// 是否自动加入节点列表
+        /// Indicates whether the cluster auto-join feature is enabled.
         /// </summary>
         public static bool Cluster => "true".Equals(Global.Config["cluster"], StringComparison.CurrentCultureIgnoreCase);
 
@@ -25,7 +25,7 @@ namespace AgileConfig.Server.Apisite
         public static string PathBase => Global.Config["pathBase"];
 
         /// <summary>
-        /// 是否开启SSO
+        /// Indicates whether single sign-on is enabled.
         /// </summary>
         public static bool SsoEnabled => "true".Equals(Global.Config["SSO:enabled"], StringComparison.CurrentCultureIgnoreCase);
 

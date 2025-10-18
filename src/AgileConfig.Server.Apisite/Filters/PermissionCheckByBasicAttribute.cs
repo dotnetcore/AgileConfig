@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace AgileConfig.Server.Apisite.Filters
 {
     /// <summary>
-    /// 权限判断，用户信息从basic认证的头部取
+    /// Permission check that reads user information from the basic authentication header.
     /// </summary>
     public class PermissionCheckByBasicAttribute : PermissionCheckAttribute
     {

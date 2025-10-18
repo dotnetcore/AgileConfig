@@ -14,7 +14,7 @@ public class SystemInitializationService(
     ILogger<SystemInitializationService> logger) : ISystemInitializationService
 {
     /// <summary>
-    /// 如果 配置文件或者环境变量没配置 JwtSetting:SecurityKey 则生成一个存库
+    /// Initialize the JWT secret if it is not configured via file or environment variables.
     /// </summary>
     /// <returns></returns>
     public bool TryInitJwtSecret()
@@ -39,7 +39,7 @@ public class SystemInitializationService(
                 }
                 catch (Exception e)
                 {
-                    //处理异常，防止多个实例第一次启动的时候，并发生成key值，发生异常，导致服务起不来
+                    // Handle concurrent initialization across multiple instances.
                     Console.WriteLine(e);
                 }
 
@@ -78,7 +78,7 @@ public class SystemInitializationService(
     }
 
     /// <summary>
-    /// 生成一个 jwt 加密的 key ，38位
+    /// Generate a 38-character JWT secret key.
     /// </summary>
     /// <returns></returns>
     private static string GenerateJwtSecretKey()
@@ -90,10 +90,10 @@ public class SystemInitializationService(
     }
 
     /// <summary>
-    /// 尝试初始化sa的密码，如果 password 参数为空则会尝试从配置文件或环境变量读取 saPassword 的值作为密码
+    /// Initialize the super administrator password, optionally reading from configuration when no value is provided.
     /// </summary>
-    /// <param name="password"></param>
-    /// <returns></returns>
+    /// <param name="password">Plain text password to set for the super administrator, or empty to read from configuration.</param>
+    /// <returns>True if the password is already set or initialization completed successfully; otherwise false.</returns>
     public bool TryInitSaPassword(string password = "")
     {
         if (string.IsNullOrEmpty(password))

@@ -73,7 +73,7 @@ namespace AgileConfig.Server.Service
                     using var configRepository = _configRepositoryAccessor(env);
                     using var configPublishedRepository = _configPublishedRepositoryAccessor(env);
 
-                    //怕有的同学误删app导致要恢复，所以保留配置项吧。
+                    // Preserve configurations so they can be recovered if the app was deleted accidentally.
                     var configs =
                         await configRepository.QueryAsync(x => x.AppId == app.Id && x.Status == ConfigStatus.Enabled);
                     var waitDeleteConfigs = new List<Config>();
@@ -81,7 +81,7 @@ namespace AgileConfig.Server.Service
                     {
                         if (updatedConfigIds.Contains(item.Id))
                         {
-                            // 因为根据 env 构造的 provider 最终可能都定位到 default provider 上去，所以可能重复更新数据行，这里进行判断以下。
+                            // Avoid duplicate updates when multiple environments use the same underlying provider.
                             continue;
                         }
 
@@ -91,7 +91,7 @@ namespace AgileConfig.Server.Service
                     }
 
                     await configRepository.UpdateAsync(waitDeleteConfigs);
-                    //删除发布的配置项
+                    // Delete published configuration entries.
                     var publishedConfigs = await configPublishedRepository
                             .QueryAsync(x => x.AppId == app.Id && x.Status == ConfigStatus.Enabled)
                         ;
@@ -100,7 +100,7 @@ namespace AgileConfig.Server.Service
                     {
                         if (updatedConfigPublishedIds.Contains(item.Id))
                         {
-                            // 因为根据 env 构造的 provider 最终可能都定位到 default provider 上去，所以可能重复更新数据行，这里进行判断以下。
+                            // Avoid duplicate updates when multiple environments use the same underlying provider.
                             continue;
                         }
 
@@ -265,10 +265,10 @@ namespace AgileConfig.Server.Service
         }
 
         /// <summary>
-        /// 根据appId查询所有继承的app
+        /// Retrieve all applications that this app inherits from.
         /// </summary>
-        /// <param name="appId"></param>
-        /// <returns></returns>
+        /// <param name="appId">Application ID whose inheritance chain should be resolved.</param>
+        /// <returns>List of applications inherited by the specified app.</returns>
         public async Task<List<App>> GetInheritancedAppsAsync(string appId)
         {
             var appInheritanceds = await _appInheritancedRepository.QueryAsync(a => a.AppId == appId);
@@ -289,10 +289,10 @@ namespace AgileConfig.Server.Service
         }
 
         /// <summary>
-        /// 查询所有继承自该app的应用
+        /// Retrieve applications that inherit from the specified app.
         /// </summary>
-        /// <param name="appId"></param>
-        /// <returns></returns>
+        /// <param name="appId">Application ID whose dependents should be returned.</param>
+        /// <returns>List of applications inheriting from the specified app.</returns>
         public async Task<List<App>> GetInheritancedFromAppsAsync(string appId)
         {
             var appInheritanceds = await _appInheritancedRepository.QueryAsync(a => a.InheritancedAppId == appId);

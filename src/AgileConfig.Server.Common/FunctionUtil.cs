@@ -6,12 +6,12 @@ namespace AgileConfig.Server.Common
     public static class FunctionUtil
     {
         /// <summary>
-        /// 尝试运行一个Func几次
+        /// Try executing a function multiple times.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="func"></param>
-        /// <param name="tryCount"></param>
-        /// <returns></returns>
+        /// <typeparam name="T">Return type of the function.</typeparam>
+        /// <param name="func">Delegate to invoke.</param>
+        /// <param name="tryCount">Number of attempts before giving up.</param>
+        /// <returns>Result produced by the function.</returns>
         public static T TRY<T>(Func<T> func, int tryCount)
         {
             if (func == null)
@@ -40,12 +40,12 @@ namespace AgileConfig.Server.Common
         }
 
         /// <summary>
-        /// 尝试执行一个异步方法多次
+        /// Try executing an asynchronous function multiple times.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="func"></param>
-        /// <param name="tryCount"></param>
-        /// <returns></returns>
+        /// <typeparam name="T">Return type of the function.</typeparam>
+        /// <param name="func">Asynchronous delegate to invoke.</param>
+        /// <param name="tryCount">Number of attempts before rethrowing the exception.</param>
+        /// <returns>Result produced by the asynchronous function.</returns>
         public static async Task<T> TRYAsync<T>(Func<Task<T>> func, int tryCount)
         {
             if (func == null)
@@ -74,12 +74,12 @@ namespace AgileConfig.Server.Common
         }
 
         /// <summary>
-        ///  尝试执行一个异步方法多次 , 直接吞掉异常
+        /// Try executing an asynchronous function multiple times and swallow exceptions.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="func"></param>
-        /// <param name="tryCount"></param>
-        /// <returns></returns>
+        /// <typeparam name="T">Return type of the function.</typeparam>
+        /// <param name="func">Asynchronous delegate to invoke.</param>
+        /// <param name="tryCount">Number of attempts to run the delegate.</param>
+        /// <returns>Result produced by the asynchronous function, or default when all attempts fail.</returns>
         public static async Task<T> EATAsync<T>(Func<Task<T>> func, int tryCount)
         {
             if (func == null)
@@ -104,11 +104,11 @@ namespace AgileConfig.Server.Common
         }
 
         /// <summary>
-        /// 尝试运行一个Action几次
+        /// Try executing an action multiple times.
         /// </summary>
-        /// <param name="act"></param>
-        /// <param name="tryCount"></param>
-        /// <returns></returns>
+        /// <param name="act">Action to invoke.</param>
+        /// <param name="tryCount">Number of attempts before rethrowing the exception.</param>
+        /// <returns>Nothing.</returns>
         public static void TRY(Action act, int tryCount)
         {
             if (act == null)

@@ -171,7 +171,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         /// <summary>
-        /// 初始化密码
+        /// Initialize the administrator password.
         /// </summary>
         /// <returns></returns>
         [HttpPost]

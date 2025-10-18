@@ -42,11 +42,11 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         /// <summary>
-        /// 根据appid查所有发布的配置项 , 包括继承过来的配置项.
-        /// 注意： 这个接口用的不是用户名密码的认证，用的是appid + secret的认证
+        /// Retrieve all published configuration items for an application, including inherited entries.
+        /// Note: this endpoint authenticates with appId and secret instead of username and password.
         /// </summary>
-        /// <param name="appId">应用id</param>
-        /// <param name="env">环境</param>
+        /// <param name="appId">Application ID.</param>
+        /// <param name="env">Target environment.</param>
         /// <returns></returns>
         [TypeFilter(typeof(AppBasicAuthenticationAttribute))]
         [HttpGet("app/{appId}")]
@@ -90,10 +90,10 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         /// <summary>
-        /// 根据应用id查找配置，这些配置有可能是未发布的配置 。请跟 config/app/{appId} 接口加以区分。
+        /// Retrieve configuration items for an application, which may include unpublished items.
         /// </summary>
-        /// <param name="appId">应用id</param>
-        /// <param name="env">环境</param>
+        /// <param name="appId">Application ID.</param>
+        /// <param name="env">Target environment.</param>
         /// <returns></returns>
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [HttpGet()]
@@ -107,10 +107,10 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         /// <summary>
-        /// 根据编号获取配置项的详情
+        /// Get configuration details by identifier.
         /// </summary>
-        /// <param name="id">配置id</param>
-        /// <param name="env">环境</param>
+        /// <param name="id">Configuration identifier.</param>
+        /// <param name="env">Target environment.</param>
         /// <returns></returns>
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [HttpGet("{id}")]
@@ -128,10 +128,10 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         /// <summary>
-        /// 添加一个配置项
+        /// Create a configuration item.
         /// </summary>
-        /// <param name="model">配置模型</param>
-        /// <param name="env">环境</param>
+        /// <param name="model">Configuration payload.</param>
+        /// <param name="env">Target environment.</param>
         /// <returns></returns>
         [ProducesResponseType(201)]
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
@@ -169,11 +169,11 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         /// <summary>
-        /// 编辑一个配置
+        /// Edit a configuration item.
         /// </summary>
-        /// <param name="id">编号</param>
-        /// <param name="model">模型</param>
-        /// <param name="env">环境</param>
+        /// <param name="id">Configuration identifier.</param>
+        /// <param name="model">Configuration payload.</param>
+        /// <param name="env">Target environment.</param>
         /// <returns></returns>
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
         [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "Config.Edit", Functions.Config_Edit })]
@@ -209,10 +209,10 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         /// <summary>
-        /// 删除一个配置
+        /// Delete a configuration item.
         /// </summary>
-        /// <param name="id">配置id</param>
-        /// <param name="env">环境</param>
+        /// <param name="id">Configuration identifier.</param>
+        /// <param name="env">Target environment.</param>
         /// <returns></returns>
         [ProducesResponseType(204)]
         [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]

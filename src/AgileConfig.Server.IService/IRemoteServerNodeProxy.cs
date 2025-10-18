@@ -37,61 +37,64 @@ namespace AgileConfig.Server.IService
     public interface IRemoteServerNodeProxy
     {
         /// <summary>
-        /// 通知某个节点所有的客户端执行某个动作
+        /// Notify all clients on a node to execute an action.
         /// </summary>
-        /// <param name="address"></param>
-        /// <param name="action"></param>
-        /// <returns></returns>
+        /// <param name="address">Server address that hosts the clients.</param>
+        /// <param name="action">Action to be executed on each client.</param>
+        /// <returns>True when the command is sent successfully.</returns>
         Task<bool> AllClientsDoActionAsync(string address, WebsocketAction action);
 
         /// <summary>
-        /// 通知某个节点某个客户端执行某个动作
+        /// Notify a specific client on a node to execute an action.
         /// </summary>
-        /// <param name="address"></param>
-        /// <param name="action"></param>
-        /// <returns></returns>
+        /// <param name="address">Server address that hosts the client.</param>
+        /// <param name="action">Action to execute.</param>
+        /// <param name="clientId">Client identifier that should receive the action.</param>
+        /// <returns>True when the command is sent successfully.</returns>
         Task<bool> OneClientDoActionAsync(string address, string clientId, WebsocketAction action);
 
         /// <summary>
-        /// 通知某个节点某个相关app的客户端执行某个动作
+        /// Notify clients of an application on a node to execute an action.
         /// </summary>
-        /// <param name="address"></param>
-        /// <param name="action"></param>
-        /// <returns></returns>
+        /// <param name="address">Server address that hosts the clients.</param>
+        /// <param name="action">Action to execute.</param>
+        /// <param name="appId">Application ID whose clients should receive the action.</param>
+        /// <param name="env">Environment of the target clients.</param>
+        /// <returns>True when the command is sent successfully.</returns>
         Task<bool> AppClientsDoActionAsync(string address, string appId, string env, WebsocketAction action);
 
         /// <summary>
-        /// 获取某个节点的客户端连接信息
+        /// Retrieve the client connection report for a node.
         /// </summary>
-        /// <param name="address"></param>
-        /// <returns></returns>
+        /// <param name="address">Server address to query.</param>
+        /// <returns>Collection of connected clients.</returns>
         Task<ClientInfos> GetClientsReportAsync(string address);
 
         /// <summary>
-        /// 探测所有个节点是否在线
+        /// Check whether all nodes are online.
         /// </summary>
         /// <returns></returns>
         Task TestEchoAsync();
 
         /// <summary>
-        /// 探测某个节点是否在校
+        /// Check whether a specific node is online.
         /// </summary>
-        /// <param name="address"></param>
-        /// <returns></returns>
+        /// <param name="address">Server address to ping.</param>
+        /// <returns>Task that completes when the echo test finishes.</returns>
         Task TestEchoAsync(string address);
 
         /// <summary>
-        /// 清除1个节点的配置信息缓存
+        /// Clear the configuration cache on a node.
         /// </summary>
-        /// <param name="address"></param>
-        /// <returns></returns>
+        /// <param name="address">Server address whose cache should be cleared.</param>
+        /// <returns>Task that completes when the cache is cleared.</returns>
         Task ClearConfigServiceCache(string address);
 
         /// <summary>
-        /// 删除某个节点的服务注册信息的缓存
+        /// Clear the service registration cache on a node.
         /// </summary>
-        /// <param name="address"></param>
-        /// <returns></returns>
+        /// <param name="address">Server address whose cache should be cleared.</param>
+        /// <returns>Task that completes when the cache is cleared.</returns>
         Task ClearServiceInfoCache(string address);
     }
 }

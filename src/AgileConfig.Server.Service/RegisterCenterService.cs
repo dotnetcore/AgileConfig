@@ -144,7 +144,7 @@ namespace AgileConfig.Server.Service
 
             if (entity.HeartBeatMode == "server")
             {
-                //如果是server模式，则不作为服务是否在线的判断依据        
+                // When the heartbeat is triggered by the server, it is not used to determine online status.
             }
             else
             {

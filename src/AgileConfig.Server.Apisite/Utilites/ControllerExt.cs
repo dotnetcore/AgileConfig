@@ -9,10 +9,10 @@ namespace AgileConfig.Server.Apisite.Utilites
     public static class ControllerExt
     {
         /// <summary>
-        /// 获取用户名，优先从Claim获取，没有从Basic认证的头部取
+        /// Retrieve the current user name, preferring claims and falling back to basic authentication.
         /// </summary>
-        /// <param name="ctrl"></param>
-        /// <returns></returns>
+        /// <param name="ctrl">Controller instance.</param>
+        /// <returns>User name of the current principal.</returns>
         public static string GetCurrentUserName(this Controller ctrl)
         {
             var name = ctrl.HttpContext.GetUserNameFromClaim();
@@ -26,10 +26,11 @@ namespace AgileConfig.Server.Apisite.Utilites
         }
 
         /// <summary>
-        /// 获取用户Id，优先从Claim获取，没有从Basic认证的头部取用户名后从数据库查Id
+        /// Retrieve the current user ID, preferring claims and falling back to a database lookup using basic authentication.
         /// </summary>
-        /// <param name="ctrl"></param>
-        /// <returns></returns>
+        /// <param name="ctrl">Controller instance.</param>
+        /// <param name="userService">User service used to resolve credentials when claims are absent.</param>
+        /// <returns>User identifier of the current principal.</returns>
         public static async Task<string> GetCurrentUserId(this Controller ctrl, IUserService userService)
         {
             var userId = ctrl.HttpContext.GetUserIdFromClaim();

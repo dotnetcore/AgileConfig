@@ -144,15 +144,16 @@ namespace AgileConfig.Server.Apisite.Websocket
         }
 
         /// <summary>
-        /// 对client的消息进行处理
-        /// ，如果是ping是老版client的心跳消息
-        /// ，如果是c:打头的消息代表是配置中心的client的消息
-        /// ，如果是s:打头的消息代表是服务中心的client的消息
+        /// Handle messages from clients.
+        /// If the payload is "ping", it is the legacy client heartbeat message.
+        /// Messages starting with "c:" come from configuration center clients.
+        /// Messages starting with "s:" come from service center clients.
         /// </summary>
-        /// <param name="context"></param>
-        /// <param name="socketClient"></param>
-        /// <param name="configService"></param>
-        /// <param name="registerCenterService"></param>
+        /// <param name="context">HTTP context associated with the websocket connection.</param>
+        /// <param name="socketClient">Active websocket client wrapper.</param>
+        /// <param name="configService">Configuration service used to respond to configuration messages.</param>
+        /// <param name="registerCenterService">Registration center service used to process registry updates.</param>
+        /// <param name="serviceInfoService">Service information service used for service center messages.</param>
         private async Task Handle(
             HttpContext context,
             WebsocketClient socketClient,

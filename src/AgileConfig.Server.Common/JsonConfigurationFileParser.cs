@@ -8,7 +8,7 @@ using System.Linq;
 namespace AgileConfig.Server.Common
 {
     /// <summary>
-    /// 这个类抄的是微软的实现
+    /// Adaptation of the JSON configuration parser implementation provided by Microsoft.
     /// </summary>
     public class JsonConfigurationFileParser
     {

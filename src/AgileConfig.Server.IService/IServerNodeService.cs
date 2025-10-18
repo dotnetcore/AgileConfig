@@ -21,7 +21,7 @@ namespace AgileConfig.Server.IService
         Task<List<ServerNode>> GetAllNodesAsync();
         
         /// <summary>
-        /// 根据appsettings里的nodes配置初始化服务器节点
+        /// Initialize server nodes from the nodes section in appsettings.
         /// </summary>
         /// <returns></returns>
         [Obsolete]

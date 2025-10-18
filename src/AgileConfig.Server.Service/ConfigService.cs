@@ -234,7 +234,7 @@ namespace AgileConfig.Server.Service
 
         public async Task<int> CountEnabledConfigsAsync(string env)
         {
-            //这里计算所有的配置
+            // Count all configurations in the specified environment.
             using var repository = _configRepositoryAccessor(env);
             var q = await repository.QueryAsync(c => c.Status == ConfigStatus.Enabled && c.Env == env);
 
@@ -262,10 +262,11 @@ namespace AgileConfig.Server.Service
         }
 
         /// <summary>
-        /// 获取当前app的配置集合的md5版本
+        /// Calculate the MD5 hash of the published configuration set for an application.
         /// </summary>
-        /// <param name="appId"></param>
-        /// <returns></returns>
+        /// <param name="appId">Application ID whose published configuration should be hashed.</param>
+        /// <param name="env">Environment from which to load published configuration values.</param>
+        /// <returns>MD5 hash of the concatenated keys and values.</returns>
         public async Task<string> AppPublishedConfigsMd5(string appId, string env)
         {
             using var repository = _configPublishedRepositoryAccessor(env);
@@ -282,10 +283,11 @@ namespace AgileConfig.Server.Service
         }
 
         /// <summary>
-        /// 获取当前app的配置集合的md5版本，1分钟缓存
+        /// Calculate the MD5 hash of the published configuration set with a one-minute cache.
         /// </summary>
-        /// <param name="appId"></param>
-        /// <returns></returns>
+        /// <param name="appId">Application ID whose published configuration hash should be cached.</param>
+        /// <param name="env">Environment for which the cache entry applies.</param>
+        /// <returns>Cached or freshly calculated MD5 hash.</returns>
         public async Task<string> AppPublishedConfigsMd5Cache(string appId, string env)
         {
             var cacheKey = AppPublishedConfigsMd5CacheKey(appId, env);
@@ -358,10 +360,11 @@ namespace AgileConfig.Server.Service
         }
 
         /// <summary>
-        /// 获取app的配置项继承的app配置合并进来
+        /// Retrieve the published configuration for an application merged with inherited applications.
         /// </summary>
-        /// <param name="appId"></param>
-        /// <returns></returns>
+        /// <param name="appId">Application ID for which to gather published configuration.</param>
+        /// <param name="env">Environment from which to load published configuration values.</param>
+        /// <returns>List of configuration records after inheritance is applied.</returns>
         public async Task<List<Config>> GetPublishedConfigsByAppIdWithInheritance(string appId, string env)
         {
             var configs = await GetPublishedConfigsByAppIdWithInheritance_Dictionary(appId, env);
@@ -370,10 +373,11 @@ namespace AgileConfig.Server.Service
         }
 
         /// <summary>
-        /// 获取app的配置项继承的app配置合并进来转换为字典
+        /// Retrieve the published configuration for an application merged with inherited applications as a dictionary.
         /// </summary>
-        /// <param name="appId"></param>
-        /// <returns></returns>
+        /// <param name="appId">Application ID for which to gather published configuration.</param>
+        /// <param name="env">Environment from which to load published configuration values.</param>
+        /// <returns>Dictionary of configuration records keyed by generated configuration key.</returns>
         public async Task<Dictionary<string, Config>> GetPublishedConfigsByAppIdWithInheritance_Dictionary(
             string appId, string env)
         {
@@ -383,14 +387,14 @@ namespace AgileConfig.Server.Service
             {
                 if (inheritanceApps[i].Enabled)
                 {
-                    apps.Add(inheritanceApps[i].Id as string); //后继承的排在后面
+                    apps.Add(inheritanceApps[i].Id as string); // Append inherited applications in order.
                 }
             }
 
-            apps.Add(appId); //本应用放在最后
+            apps.Add(appId); // Add the current application last.
 
             var configs = new Dictionary<string, Config>();
-            //读取所有继承的配置跟本app的配置
+            // Load configurations from inherited apps and the current app.
             for (int i = 0; i < apps.Count; i++)
             {
                 var id = apps[i];
@@ -401,7 +405,7 @@ namespace AgileConfig.Server.Service
                     var key = GenerateKey(config);
                     if (configs.ContainsKey(key))
                     {
-                        //后面的覆盖前面的
+                        // Later configurations override earlier ones.
                         configs[key] = config;
                     }
                     else
@@ -426,10 +430,11 @@ namespace AgileConfig.Server.Service
         }
 
         /// <summary>
-        /// 获取当前app的配置集合的md5版本，1分钟缓存 集合了继承app的配置
+        /// Calculate the MD5 hash of the published configuration merged with inherited applications, cached for one minute.
         /// </summary>
-        /// <param name="appId"></param>
-        /// <returns></returns>
+        /// <param name="appId">Application ID whose inherited configuration hash should be cached.</param>
+        /// <param name="env">Environment associated with the cached hash.</param>
+        /// <returns>Cached or freshly calculated MD5 hash for the inherited configuration.</returns>
         public async Task<string> AppPublishedConfigsMd5CacheWithInheritance(string appId, string env)
         {
             var cacheKey = AppPublishedConfigsMd5CacheKeyWithInheritance(appId, env);
@@ -457,12 +462,13 @@ namespace AgileConfig.Server.Service
         private static readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
 
         /// <summary>
-        /// 发布当前待发布的配置项
+        /// Publish pending configuration items for an application.
         /// </summary>
-        /// <param name="appId">应用id</param>
-        /// <param name="ids">待发布的id列表</param>
-        /// <param name="log">发布日志</param>
-        /// <param name="operatorr">操作员</param>
+        /// <param name="appId">Application ID.</param>
+        /// <param name="ids">Identifiers of configuration items to publish.</param>
+        /// <param name="log">Publish log.</param>
+        /// <param name="operatorr">Operator user name.</param>
+        /// <param name="env">Environment in which to publish the configuration.</param>
         /// <returns></returns>
         public async Task<(bool result, string publishTimelineId)> Publish(string appId, string[] ids, string log, string operatorr, string env)
         {
@@ -489,10 +495,10 @@ namespace AgileConfig.Server.Service
 
                 if (ids != null && ids.Any())
                 {
-                    //如果ids传值了，过滤一下
+                    // Filter by the specified configuration identifiers when provided.
                     waitPublishConfigs = waitPublishConfigs.Where(x => ids.Contains(x.Id)).ToList();
                 }
-                //这里默认admin console 实例只部署一个，如果部署多个同步操作，高并发的时候这个version会有问题
+                // Assumes a single admin console instance; concurrent publishes across multiple instances may cause version conflicts.
                 var publishList = await publishTimelineRepository.QueryAsync(x => x.AppId == appId);
                 var versionMax = publishList.Any() ? publishList.Max(x => x.Version) : 0;
 
@@ -541,10 +547,10 @@ namespace AgileConfig.Server.Service
                     x.OnlineStatus = OnlineStatus.Online;
                 });
 
-                //当前发布的配置
+                // Configurations that are currently published.
                 var publishedConfigs = await configPublishedRepository
                     .QueryAsync(x => x.Status == ConfigStatus.Enabled && x.AppId == appId && x.Env == env);
-                //复制一份新版本，最后插入发布表
+                // Clone a new version that will be inserted into the publish table.
                 var publishedConfigsCopy = new List<ConfigPublished>();
                 publishedConfigs.ForEach(x =>
                 {
@@ -742,7 +748,7 @@ namespace AgileConfig.Server.Service
 
             if (latest.Id == publishTimelineId)
             {
-                //当前版本直接返回true
+                // Already at the desired version; no rollback required.
                 return true;
             }
 
@@ -751,14 +757,14 @@ namespace AgileConfig.Server.Service
             var currentConfigs = await configRepository
                 .QueryAsync(x => x.AppId == appId && x.Status == ConfigStatus.Enabled && x.Env == env);
 
-            //把当前的全部软删除
+            // Soft delete all current configurations.
             foreach (var item in currentConfigs)
             {
                 item.Status = ConfigStatus.Deleted;
             }
 
             await configRepository.UpdateAsync(currentConfigs);
-            //根据id把所有发布项目设置为启用
+            // Enable published items that match by configuration identifier.
             var now = DateTime.Now;
             foreach (var item in publishedConfigs)
             {
@@ -772,17 +778,17 @@ namespace AgileConfig.Server.Service
                 await configRepository.UpdateAsync(config);
             }
 
-            //删除version之后的版本
+            // Remove versions newer than the rollback target.
             var configPublishedConfigs = await configPublishedRepository.QueryAsync(x => x.AppId == appId && x.Env == env && x.Version > version);
             await configPublishedRepository.DeleteAsync(configPublishedConfigs);
-            //设置为发布状态
+            // Ensure the restored items are marked as published.
             foreach (var item in publishedConfigs)
             {
                 item.Status = ConfigStatus.Enabled;
                 await configPublishedRepository.UpdateAsync(item);
             }
 
-            //删除发布时间轴version之后的版本
+            // Remove publish timeline entries newer than the target version.
             var deletePublishTimeLineItems = await publishTimelineRepository.QueryAsync(x => x.AppId == appId && x.Env == env && x.Version > version);
             await publishTimelineRepository.DeleteAsync(deletePublishTimeLineItems);
             var deletePublishDetailItems = await publishDetailRepository.QueryAsync(x => x.AppId == appId && x.Env == env && x.Version > version);
@@ -811,19 +817,19 @@ namespace AgileConfig.Server.Service
                     var envConfig = envConfigs.FirstOrDefault(x => GenerateKey(x) == GenerateKey(currentEnvConfig));
                     if (envConfig == null)
                     {
-                        //没有相同的配置，则添加
+                        // No matching configuration exists in the target environment; create a new one.
                         currentEnvConfig.Id = Guid.NewGuid().ToString("N");
                         currentEnvConfig.Env = env;
                         currentEnvConfig.CreateTime = DateTime.Now;
                         currentEnvConfig.UpdateTime = DateTime.Now;
                         currentEnvConfig.Status = ConfigStatus.Enabled;
                         currentEnvConfig.EditStatus = EditStatus.Add;
-                        currentEnvConfig.OnlineStatus = OnlineStatus.WaitPublish; //全部设置为待发布状态
+                        currentEnvConfig.OnlineStatus = OnlineStatus.WaitPublish; // Awaiting publish in target environment.
                         addRanges.Add(currentEnvConfig);
                     }
                     else
                     {
-                        // 如果有了相同的键，如果值不同，则更新
+                        // Update the target environment when values differ.
                         if (envConfig.Value != currentEnvConfig.Value)
                         {
                             envConfig.UpdateTime = DateTime.Now;
@@ -855,11 +861,11 @@ namespace AgileConfig.Server.Service
         }
 
         /// <summary>
-        /// 获取配置项转换成键值对列表形式
+        /// Convert configuration items into a key-value list.
         /// </summary>
-        /// <param name="appId"></param>
-        /// <param name="env"></param>
-        /// <returns></returns>
+        /// <param name="appId">Application ID whose configuration should be converted.</param>
+        /// <param name="env">Environment providing the configuration values.</param>
+        /// <returns>List of key-value pairs built from configuration entries.</returns>
         public async Task<List<KeyValuePair<string, string>>> GetKvListAsync(string appId, string env)
         {
             var configs = await GetByAppIdAsync(appId, env);
@@ -934,7 +940,7 @@ namespace AgileConfig.Server.Service
 
                         if (config.EditStatus == EditStatus.Deleted)
                         {
-                            //上一次是删除状态，现在恢复为编辑状态
+                            // Previously marked as deleted; revert to edited state.
                             config.EditStatus = EditStatus.Edit;
                         }
                     }
@@ -943,7 +949,7 @@ namespace AgileConfig.Server.Service
                 }
             }
 
-            if (!isPatch)//补丁模式不删除现有配置,只有全量模式才删除
+            if (!isPatch)// In full update mode remove missing configurations; patch mode preserves them.
             {
                 var keys = dict.Keys.ToList();
                 foreach (var item in currentConfigs)
@@ -979,13 +985,13 @@ namespace AgileConfig.Server.Service
         }
 
         /// <summary>
-        /// 保存json字符串为配置项
+        /// Persist configuration items from a JSON string.
         /// </summary>
-        /// <param name="json"></param>
-        /// <param name="appId"></param>
-        /// <param name="env"></param>
-        /// <param name="isPatch"></param>
-        /// <returns></returns>
+        /// <param name="json">Serialized configuration payload to import.</param>
+        /// <param name="appId">Application ID that owns the configuration.</param>
+        /// <param name="env">Environment where the configuration should be saved.</param>
+        /// <param name="isPatch">Indicates whether the import should merge into existing entries.</param>
+        /// <returns>True when the JSON content is processed successfully.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         public async Task<bool> SaveJsonAsync(string json, string appId, string env, bool isPatch)
         {
@@ -1015,7 +1021,7 @@ namespace AgileConfig.Server.Service
                 }
 
                 row++;
-                //必须要有=号
+                // Each line must contain an equals sign.
                 if (line.IndexOf('=') < 0)
                 {
                     return (false, $"第 {row} 行缺少等号。");
@@ -1096,9 +1102,9 @@ namespace AgileConfig.Server.Service
         /// <summary>
         /// Generate the virtual id representing the last publish timeline node of the app and its inherited apps.
         /// </summary>
-        /// <param name="appId"></param>
-        /// <param name="env"></param>
-        /// <returns></returns>
+        /// <param name="appId">Application ID for which to gather publish timeline information.</param>
+        /// <param name="env">Environment whose publish timeline should be inspected.</param>
+        /// <returns>Composite identifier built from the latest publish timeline nodes.</returns>
         public async Task<string> GetLastPublishTimelineVirtualIdAsync(string appId, string env)
         {
             using var publishTimelineRepository = _publishTimelineRepositoryAccsssor(env);
@@ -1109,11 +1115,11 @@ namespace AgileConfig.Server.Service
             {
                 if (inheritanceApps[i].Enabled)
                 {
-                    apps.Add(inheritanceApps[i].Id as string); //后继承的排在后面
+                    apps.Add(inheritanceApps[i].Id as string); // Append inherited applications in order.
                 }
             }
 
-            apps.Add(appId); //本应用放在最后
+            apps.Add(appId); // Add the current application last.
 
             var ids = new List<string>();
 
@@ -1129,9 +1135,9 @@ namespace AgileConfig.Server.Service
         /// <summary>
         /// Generate the virtual id representing the last publish timeline node of the app and its inherited apps, with cache.
         /// </summary>
-        /// <param name="appId"></param>
-        /// <param name="env"></param>
-        /// <returns></returns>
+        /// <param name="appId">Application ID for which to gather publish timeline information.</param>
+        /// <param name="env">Environment whose publish timeline should be inspected.</param>
+        /// <returns>Composite identifier built from the latest publish timeline nodes.</returns>
         public async Task<string> GetLastPublishTimelineVirtualIdAsyncWithCache(string appId, string env)
         {
             var cacheKey = AppPublishTimelineVirtualIdCacheKey(appId, env);

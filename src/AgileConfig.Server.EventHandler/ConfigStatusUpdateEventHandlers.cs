@@ -114,7 +114,7 @@ namespace AgileConfig.Server.EventHandler
     class ConfigUpadteNoticeUtil
     {
         /// <summary>
-        /// 根据当前配置计算需要通知的应用
+        /// Determine which applications need to be notified based on the current configuration.
         /// </summary>
         /// <returns></returns>
         public static async Task<Dictionary<string, WebsocketAction>> GetNeedNoticeInheritancedFromAppsAction(IAppService appService, string appId)

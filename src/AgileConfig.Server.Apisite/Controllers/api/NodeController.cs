@@ -12,7 +12,7 @@ using AgileConfig.Server.Apisite.Models.Mapping;
 namespace AgileConfig.Server.Apisite.Controllers.api
 {
     /// <summary>
-    /// 节点操作接口
+    /// Node management API.
     /// </summary>
     [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
     [Route("api/[controller]")]
@@ -36,7 +36,7 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         /// <summary>
-        /// 获取所有节点
+        /// Get all nodes.
         /// </summary>
         /// <returns></returns>
         [HttpGet]
@@ -50,9 +50,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         /// <summary>
-        /// 添加节点
+        /// Create a node.
         /// </summary>
-        /// <param name="model">节点模型</param>
+        /// <param name="model">Node payload.</param>
         /// <returns></returns>
         [ProducesResponseType(201)]
         [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "Node.Add", Functions.Node_Add })]
@@ -88,9 +88,9 @@ namespace AgileConfig.Server.Apisite.Controllers.api
         }
 
         /// <summary>
-        /// 删除节点
+        /// Delete a node by address.
         /// </summary>
-        /// <param name="address">节点地址</param>
+        /// <param name="address">Node address.</param>
         /// <returns></returns>
         [ProducesResponseType(204)]
         [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "Node.Delete", Functions.Node_Delete })]
