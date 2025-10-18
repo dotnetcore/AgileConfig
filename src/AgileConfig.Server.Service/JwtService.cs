@@ -10,13 +10,13 @@ using Microsoft.IdentityModel.Tokens;
 namespace AgileConfig.Server.Service;
 
 /// <summary>
-/// jwt 相关业务
+/// JWT-related service operations.
 /// </summary>
 public class JwtService(ISysInitRepository sysInitRepository) : IJwtService
 {
     // static JwtService()
     // {
-    //     // 则尝试生成一个key到数据库
+    //     // Ensure a secret key exists in the database when initializing.
     //     using var settingService = new SettingService(new FreeSqlContext(FreeSQL.Instance));
     //     settingService.TryInitJwtSecret();
     // }
@@ -52,16 +52,16 @@ public class JwtService(ISysInitRepository sysInitRepository) : IJwtService
 
     public  string GetToken(string userId, string userName, bool isAdmin)
     {
-        //创建用户身份标识，可按需要添加更多信息
+        // Create user claims; add more information as needed.
         var claims = new Claim[]
         {
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim("id", userId, ClaimValueTypes.String), // 用户id
-            new Claim("username", userName, ClaimValueTypes.String), // 用户名
-            new Claim("admin", isAdmin.ToString() ,ClaimValueTypes.Boolean) // 是否是管理员
+            new Claim("id", userId, ClaimValueTypes.String), // User identifier.
+            new Claim("username", userName, ClaimValueTypes.String), // User name.
+            new Claim("admin", isAdmin.ToString() ,ClaimValueTypes.Boolean) // Whether the user is an administrator.
         };
         var key = Encoding.UTF8.GetBytes(GetSecurityKey());
-        //创建令牌
+        // Create the JWT token.
         var token = new JwtSecurityToken(
             issuer: Issuer,
             audience: Audience,

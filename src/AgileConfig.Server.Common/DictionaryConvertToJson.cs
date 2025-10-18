@@ -26,14 +26,14 @@ namespace AgileConfig.Server.Common
         }
 
         /// <summary>
-        /// 判断字典是否符合json数组的格式
+        /// Determine whether the dictionary represents a JSON array.
         /// </summary>
-        /// <param name="dict"></param>
-        /// <returns></returns>
+        /// <param name="dict">Dictionary to inspect for sequential numeric keys.</param>
+        /// <returns>True when the dictionary can be treated as an array.</returns>
         private static bool JudgeDictIsJsonArray(IDictionary<string, object> dict)
         {
-            //从0号index开始测试这个字典的key值是否存在
-            //如果全部存在那么就是数组
+            // Check keys starting from index 0.
+            // If all keys exist consecutively, the dictionary represents an array.
             var keys = dict.Keys;
             for (int i = 0; i < keys.Count; i++)
             {
@@ -48,10 +48,10 @@ namespace AgileConfig.Server.Common
         }
         
         /// <summary>
-        /// 把字典转成Array
+        /// Convert the dictionary to an array.
         /// </summary>
-        /// <param name="dict"></param>
-        /// <returns></returns>
+        /// <param name="dict">Dictionary whose values should be projected into an array.</param>
+        /// <returns>Array built from the dictionary values.</returns>
         private static object[] ConvertDictToJsonArray(IDictionary<string, object> dict)
         {
             var keys = dict.Keys;
@@ -66,10 +66,10 @@ namespace AgileConfig.Server.Common
         }
 
         /// <summary>
-        /// 重构字典，如果有字典的值对应的是json的数组，那么就把这个数组转成Array
+        /// Rebuild the structure, turning dictionaries that represent arrays into actual arrays.
         /// </summary>
-        /// <param name="dictOrArray"></param>
-        /// <returns></returns>
+        /// <param name="dictOrArray">Dictionary or array to normalize.</param>
+        /// <returns>Normalized object graph with arrays materialized.</returns>
         private static object RebuildDict(object dictOrArray)
         {
             var dict = dictOrArray as IDictionary<string,object>;
@@ -110,11 +110,11 @@ namespace AgileConfig.Server.Common
         }
 
         /// <summary>
-        /// 把扁平化的键值对还原成字典嵌套字典的模式
+        /// Expand flattened key-value pairs into nested dictionaries.
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        /// <param name="parent"></param>
+        /// <param name="key">Flattened key representing the nested structure.</param>
+        /// <param name="value">Value to assign at the end of the key path.</param>
+        /// <param name="parent">Dictionary to populate with the nested structure.</param>
         private static void Generate(string key, string value, IDictionary<string, object> parent)
         {
             if (string.IsNullOrWhiteSpace(key))
@@ -134,7 +134,7 @@ namespace AgileConfig.Server.Common
                 var otherKeys = string.Join(':', newArr);
                 if (parent.ContainsKey(sonKey))
                 {
-                    //如果已经有子字典
+                    // If a child dictionary already exists.
                     var son = parent[sonKey] as IDictionary<string, object>;
                     if (son != null)
                     {

@@ -17,8 +17,8 @@ namespace AgileConfig.Server.Apisite.Controllers
         /// <summary>
         /// pass the oidc code to frontend
         /// </summary>
-        /// <param name="code"></param>
-        /// <returns></returns>
+        /// <param name="code">Authorization code returned by the OIDC provider.</param>
+        /// <returns>Redirect to the admin UI with the provided code.</returns>
         [AllowAnonymous]
         public IActionResult Index(string code)
         {

@@ -294,7 +294,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         /// <summary>
-        /// 获取所有可以继承的app
+        /// Get all applications that can be inherited.
         /// </summary>
         /// <returns></returns>
         [HttpGet]
@@ -305,7 +305,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             var self = apps.FirstOrDefault(a => a.Id == currentAppId);
             if (self != null)
             {
-                //过滤本身
+                // Exclude the current application itself.
                 apps.Remove(self);
             }
 
@@ -326,10 +326,10 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         /// <summary>
-        /// 保存app的授权信息
+        /// Save application authorization information.
         /// </summary>
-        /// <param name="model"></param>
-        /// <returns></returns>
+        /// <param name="model">View model containing authorization assignments.</param>
+        /// <returns>Operation result.</returns>
         [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { "App.Auth", Functions.App_Auth })]
         [HttpPost]
         public async Task<IActionResult> SaveAppAuth([FromBody] AppAuthVM model)

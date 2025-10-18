@@ -309,7 +309,7 @@
             <summary>
             在启动跟禁用之间进行切换
             </summary>
-            <param name="id"></param>
+            <param name="id">应用标识。</param>
             <returns></returns>
         </member>
         <member name="M:AgileConfig.Server.Apisite.Controllers.AppController.InheritancedApps(System.String)">
@@ -322,15 +322,15 @@
             <summary>
             保存app的授权信息
             </summary>
-            <param name="model"></param>
+            <param name="model">授权视图模型。</param>
             <returns></returns>
         </member>
         <member name="M:AgileConfig.Server.Apisite.Controllers.ConfigController.IsOnlyUpdateDescription(AgileConfig.Server.Data.Entity.Config,AgileConfig.Server.Data.Entity.Config)">
             <summary>
             是否只是修改了描述信息
             </summary>
-            <param name="newConfig"></param>
-            <param name="oldConfig"></param>
+            <param name="newConfig">新的配置。</param>
+            <param name="oldConfig">旧的配置。</param>
             <returns></returns>
         </member>
         <member name="M:AgileConfig.Server.Apisite.Controllers.ConfigController.Search(System.String,System.String,System.String,System.Nullable{AgileConfig.Server.Data.Entity.OnlineStatus},System.String,System.String,System.String,System.Int32,System.Int32)">
@@ -375,7 +375,7 @@
             <summary>
             获取发布详情的历史
             </summary>
-            <param name="appId"></param>
+            <param name="appId">应用标识。</param>
             <returns></returns>
         </member>
         <member name="M:AgileConfig.Server.Apisite.Controllers.ConfigController.GetJson(System.String,System.String)">
@@ -399,23 +399,23 @@
             <summary>
             通知一个节点的某个客户端离线
             </summary>
-            <param name="address"></param>
-            <param name="clientId"></param>
+            <param name="address">节点地址。</param>
+            <param name="clientId">客户端标识。</param>
             <returns></returns>
         </member>
         <member name="M:AgileConfig.Server.Apisite.Controllers.RemoteServerProxyController.AllClients_Reload(System.String)">
             <summary>
             通知某个节点让所有的客户端刷新配置项
             </summary>
-            <param name="address"></param>
+            <param name="address">节点地址。</param>
             <returns></returns>
         </member>
         <member name="M:AgileConfig.Server.Apisite.Controllers.RemoteServerProxyController.Client_Reload(System.String,System.String)">
             <summary>
             通知某个节点个某个客户端刷新配置项
             </summary>
-            <param name="address"></param>
-            <param name="clientId"></param>
+            <param name="address">节点地址。</param>
+            <param name="clientId">客户端标识。</param>
             <returns></returns>
         </member>
         <member name="T:AgileConfig.Server.Apisite.Controllers.ReportController">
@@ -433,7 +433,7 @@
             <summary>
             获取某个节点的客户端信息
             </summary>
-            <param name="address"></param>
+            <param name="address">节点地址。</param>
             <returns></returns>
         </member>
         <member name="M:AgileConfig.Server.Apisite.Controllers.ReportController.AppCount">
@@ -484,14 +484,15 @@
             <summary>
             获取用户名，优先从Claim获取，没有从Basic认证的头部取
             </summary>
-            <param name="ctrl"></param>
+            <param name="ctrl">控制器实例。</param>
             <returns></returns>
         </member>
         <member name="M:AgileConfig.Server.Apisite.Utilites.ControllerExt.GetCurrentUserId(Microsoft.AspNetCore.Mvc.Controller,AgileConfig.Server.IService.IUserService)">
             <summary>
             获取用户Id，优先从Claim获取，没有从Basic认证的头部取用户名后从数据库查Id
             </summary>
-            <param name="ctrl"></param>
+            <param name="ctrl">控制器实例。</param>
+            <param name="userService">用户服务。</param>
             <returns></returns>
         </member>
     </members>

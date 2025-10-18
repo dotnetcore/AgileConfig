@@ -8,10 +8,10 @@ namespace AgileConfig.Server.Common
     public static class HttpExt
     {
         /// <summary>
-        /// 从request 的 Authorization 头部中解析出 username, password
+        /// Parse the username and password from the Authorization header of a request.
         /// </summary>
-        /// <param name="httpRequest"></param>
-        /// <returns></returns>
+        /// <param name="httpRequest">HTTP request containing the Authorization header.</param>
+        /// <returns>Tuple of username and password extracted from the header.</returns>
         public static (string, string) GetUserNamePasswordFromBasicAuthorization(this HttpRequest httpRequest)
         {
             var authorization = httpRequest.Headers["Authorization"];
@@ -20,7 +20,7 @@ namespace AgileConfig.Server.Common
                 return ("", "");
             }
             var authStr = authorization.First();
-            //去掉basic_
+            // Strip the "Basic " prefix.
             if (!authStr.StartsWith("Basic "))
             {
                 return ("", "");

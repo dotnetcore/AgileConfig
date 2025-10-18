@@ -7,19 +7,19 @@ namespace AgileConfig.Server.Apisite.Controllers.api.Models
     public class ApiNodeVM
     {
         /// <summary>
-        /// 节点地址
+        /// Node address.
         /// </summary>
         public string Address { get; set; }
         /// <summary>
-        /// 备注
+        /// Remarks.
         /// </summary>
         public string Remark { get; set; }
         /// <summary>
-        /// 状态
+        /// Node status.
         /// </summary>
         public NodeStatus Status { get; set; }
         /// <summary>
-        /// 最后响应时间
+        /// Time of the last echo response.
         /// </summary>
         public DateTime? LastEchoTime { get; set; }
     }

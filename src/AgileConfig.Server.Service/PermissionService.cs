@@ -84,7 +84,7 @@ namespace AgileConfig.Server.Service
         private async Task<List<string>> GetAdminUserFunctions(string userId)
         {
             var userFunctions = new List<string>();
-            //获取当前用户为管理员的app
+            // Retrieve applications where the user is an administrator.
             var adminApps = await GetUserAdminApps(userId);
             Template_NormalAdminPermissions.Where(x => x.StartsWith("GLOBAL_")).ToList().ForEach(
                  key => {
@@ -179,10 +179,10 @@ namespace AgileConfig.Server.Service
         }
 
         /// <summary>
-        /// 获取角色权限的模板
+        /// Retrieve the permission template for a user based on roles.
         /// </summary>
-        /// <param name="userId"></param>
-        /// <returns></returns>
+        /// <param name="userId">Identifier of the user requesting permissions.</param>
+        /// <returns>List of permission keys granted to the user.</returns>
         public async Task<List<string>> GetUserPermission(string userId)
         {
             var userRoles = await _userRoleRepository.QueryAsync(x => x.UserId == userId);
@@ -192,12 +192,12 @@ namespace AgileConfig.Server.Service
             }
 
             var userFunctions = new List<string>();
-            //计算普通管理员的权限
+            // Compute permissions for regular administrators.
             if (userRoles.Any(x=>x.Role == Role.Admin))
             {
                 userFunctions.AddRange(await GetAdminUserFunctions(userId));
             }
-            //计算普通用户的权限
+            // Compute permissions for regular users.
             if (userRoles.Any(x => x.Role == Role.NormalUser))
             {
                 userFunctions.AddRange(await GetNormalUserFunctions(userId));
@@ -207,11 +207,11 @@ namespace AgileConfig.Server.Service
         }
 
         /// <summary>
-        /// 获取被授权给用户的app
+        /// Retrieve applications where the user has been explicitly authorized.
         /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="authPermissionKey"></param>
-        /// <returns></returns>
+        /// <param name="userId">Identifier of the user whose application authorizations are requested.</param>
+        /// <param name="authPermissionKey">Permission key used to filter authorized applications.</param>
+        /// <returns>List of applications the user can access for the specified permission.</returns>
         private async Task<List<App>> GetUserAuthApp(string userId, string authPermissionKey)
         {
             var apps = new List<App>();
@@ -230,10 +230,10 @@ namespace AgileConfig.Server.Service
         }
 
         /// <summary>
-        /// 获取是管理员的app
+        /// Retrieve applications managed by the user.
         /// </summary>
-        /// <param name="userId"></param>
-        /// <returns></returns>
+        /// <param name="userId">Identifier of the user who administers the applications.</param>
+        /// <returns>List of applications where the user is the administrator.</returns>
         private async Task<List<App>> GetUserAdminApps(string userId)
         {
             return await _appRepository.QueryAsync(x => x.AppAdmin == userId);

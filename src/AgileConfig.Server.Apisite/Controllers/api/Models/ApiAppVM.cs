@@ -6,12 +6,12 @@ using AgileConfig.Server.Data.Entity;
 namespace AgileConfig.Server.Apisite.Controllers.api.Models
 {
     /// <summary>
-    /// restful api 返回的 app  模型
+    /// Application model returned by the REST API.
     /// </summary>
     public class ApiAppVM : IAppModel
     {
         /// <summary>
-        /// 是否可继承
+        /// Whether the application can inherit configuration.
         /// </summary>
         public bool Inheritanced { get; set; }
         /// <summary>
@@ -23,19 +23,19 @@ namespace AgileConfig.Server.Apisite.Controllers.api.Models
         /// </summary>
         public string Name { get; set; }
         /// <summary>
-        /// 密钥
+        /// Application secret.
         /// </summary>
         public string Secret { get; set; }
         /// <summary>
-        /// 是否启用
+        /// Whether the application is enabled.
         /// </summary>
         public bool? Enabled { get; set; }
         /// <summary>
-        /// 关联的app
+        /// Applications inherited by this application.
         /// </summary>
         public List<string> InheritancedApps { get; set; }
         /// <summary>
-        /// 管理员
+        /// Administrator of the application.
         /// </summary>
         public string AppAdmin { get; set; }
         

@@ -12,40 +12,40 @@ namespace AgileConfig.Server.Apisite.Controllers.api.Models
         public string Id { get; set; }
 
         /// <summary>
-        /// 应用
+        /// Application ID.
         /// </summary>
         public string AppId { get; set; }
 
         /// <summary>
-        /// 组
+        /// Configuration group name.
         /// </summary>
         public string Group { get; set; }
         /// <summary>
-        /// 键
+        /// Configuration key.
         /// </summary>
         public string Key { get; set; }
         /// <summary>
-        /// 值
+        /// Configuration value.
         /// </summary>
         public string Value { get; set; }
 
         /// <summary>
-        /// 状态 
+        /// Configuration status.
         /// </summary>
         public ConfigStatus Status { get; set; }
 
         /// <summary>
-        /// 在线状态
+        /// Online status for the configuration.
         /// </summary>
         public OnlineStatus OnlineStatus { get; set; }
 
         /// <summary>
-        /// 编辑状态
+        /// Editing status for the configuration.
         /// </summary>
         public EditStatus EditStatus { get; set; }
 
         /// <summary>
-        /// 描述
+        /// Description of the configuration.
         /// </summary>
         public string Description { get; set; }
     }

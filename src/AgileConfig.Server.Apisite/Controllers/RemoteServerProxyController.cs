@@ -14,7 +14,7 @@ using AgileConfig.Server.Common.Resources;
 namespace AgileConfig.Server.Apisite.Controllers
 {
     /// <summary>
-    /// 这个Controller是控制台网页跟后台的接口，不要跟RemoteOp那个Controller混淆
+    /// Handles console web requests that proxy operations to remote server nodes (distinct from RemoteOpController).
     /// </summary>
     [Authorize]
     public class RemoteServerProxyController : Controller
@@ -35,11 +35,11 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         /// <summary>
-        /// 通知一个节点的某个客户端离线
+        /// Notify a node to disconnect a specific client.
         /// </summary>
-        /// <param name="address"></param>
-        /// <param name="clientId"></param>
-        /// <returns></returns>
+        /// <param name="address">Remote node address.</param>
+        /// <param name="clientId">Client identifier to disconnect.</param>
+        /// <returns>Operation result.</returns>
         [HttpPost]
         public async Task<IActionResult> Client_Offline(string address, string clientId)
         {
@@ -69,10 +69,10 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         /// <summary>
-        /// 通知某个节点让所有的客户端刷新配置项
+        /// Notify a node to instruct all clients to reload configuration.
         /// </summary>
-        /// <param name="address"></param>
-        /// <returns></returns>
+        /// <param name="address">Remote node address.</param>
+        /// <returns>Operation result.</returns>
         [HttpPost]
         public async Task<IActionResult> AllClients_Reload(string address)
         {
@@ -89,11 +89,11 @@ namespace AgileConfig.Server.Apisite.Controllers
         }
 
         /// <summary>
-        /// 通知某个节点个某个客户端刷新配置项
+        /// Notify a node to instruct a single client to reload configuration.
         /// </summary>
-        /// <param name="address"></param>
-        /// <param name="clientId"></param>
-        /// <returns></returns>
+        /// <param name="address">Remote node address.</param>
+        /// <param name="clientId">Client identifier to reload.</param>
+        /// <returns>Operation result.</returns>
         [HttpPost]
         public async Task<IActionResult> Client_Reload(string address, string clientId)
         {

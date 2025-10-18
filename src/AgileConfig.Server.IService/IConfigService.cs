@@ -8,40 +8,43 @@ namespace AgileConfig.Server.IService
     public interface IConfigService: IDisposable
     {
         /// <summary>
-        /// 发布当前待发布的配置项,如果传ids那么就是只发布这些项目，如果不传ids，那么就是全部发布
+        /// Publish the current pending configuration items. When ids are provided, only those items are published; otherwise all pending items are published.
         /// </summary>
-        /// <param name="appId"></param>
-        /// <param name="ids"></param>
-        /// <param name="log"></param>
-        /// <param name="operatorr"></param>
-        /// <returns></returns>
+        /// <param name="appId">Application ID whose configuration should be published.</param>
+        /// <param name="ids">Specific configuration identifiers to publish, or null to publish all pending items.</param>
+        /// <param name="log">Publish log message.</param>
+        /// <param name="operatorr">User name of the operator performing the publish.</param>
+        /// <param name="env">Environment in which to publish.</param>
+        /// <returns>Publish success indicator and resulting publish timeline identifier.</returns>
         Task<(bool result, string publishTimelineId)> Publish(string appId,string[] ids, string log, string operatorr, string env);
 
         Task<Config> GetAsync(string id, string env);
 
         Task<Config> GetByAppIdKeyEnv(string appId, string group, string key, string env);
         /// <summary>
-        /// 根据appId,group,key查询配置，其中group，key使用like查询
+        /// Query configuration entries by appId, group, and key; group and key use LIKE matching.
         /// </summary>
-        /// <param name="appId"></param>
-        /// <param name="group"></param>
-        /// <param name="key"></param>
-        /// <param name="env">环境</param>
-        /// <returns></returns>
+        /// <param name="appId">Application ID whose configurations should be searched.</param>
+        /// <param name="group">Group name filter, supporting partial matches.</param>
+        /// <param name="key">Configuration key filter, supporting partial matches.</param>
+        /// <param name="env">Environment from which to query configuration.</param>
+        /// <returns>List of configuration entries matching the filter.</returns>
         Task<List<Config>> Search(string appId, string group, string key, string env);
         Task<List<Config>> GetByAppIdAsync(string appId, string env);
 
         /// <summary>
-        /// 获取app相关的已发布的配置继承的app的配置一并查出
+        /// Retrieve the published configuration for the app together with inherited app configuration.
         /// </summary>
-        /// <param name="appId"></param>
-        /// <returns></returns>
+        /// <param name="appId">Application ID whose published configuration should be retrieved.</param>
+        /// <param name="env">Environment from which to load the configuration.</param>
+        /// <returns>List of configuration entries merged with inherited apps.</returns>
         Task<List<Config>> GetPublishedConfigsByAppIdWithInheritance(string appId, string env);
         /// <summary>
-        /// 获取app的配置项继承的app配置合并进来转换为字典
+        /// Retrieve the app configuration merged with inherited configuration and convert it into a dictionary.
         /// </summary>
-        /// <param name="appId"></param>
-        /// <returns></returns>
+        /// <param name="appId">Application ID whose published configuration should be retrieved.</param>
+        /// <param name="env">Environment from which to load the configuration.</param>
+        /// <returns>Dictionary of configuration entries keyed by generated configuration key.</returns>
         Task<Dictionary<string, Config>> GetPublishedConfigsByAppIdWithInheritance_Dictionary(string appId, string env);
         Task<bool> AddAsync(Config config, string env);
 
@@ -56,10 +59,11 @@ namespace AgileConfig.Server.IService
         Task<bool> UpdateAsync(List<Config> configs, string env);
 
         /// <summary>
-        /// 撤销编辑状态
+        /// Cancel the edit status.
         /// </summary>
-        /// <param name="ids"></param>
-        /// <returns></returns>
+        /// <param name="ids">Configuration identifiers to revert.</param>
+        /// <param name="env">Environment in which the configurations reside.</param>
+        /// <returns>True when the edit status is successfully cleared.</returns>
         Task<bool> CancelEdit(List<string> ids, string env);
 
         Task<List<Config>> GetAllConfigsAsync(string env);
@@ -67,146 +71,158 @@ namespace AgileConfig.Server.IService
         Task<int> CountEnabledConfigsAsync();
 
         /// <summary>
-        /// 计算已发布配置项的MD5
+        /// Calculate the MD5 hash of the published configuration items.
         /// </summary>
-        /// <param name="appId"></param>
-        /// <returns></returns>
+        /// <param name="appId">Application ID whose published configuration should be hashed.</param>
+        /// <param name="env">Environment providing the configuration.</param>
+        /// <returns>MD5 hash of the published configuration.</returns>
         Task<string> AppPublishedConfigsMd5(string appId, string env);
         /// <summary>
-        /// 计算已发布配置项的MD5 合并继承app的配置
+        /// Calculate the MD5 hash of the published configuration merged with inherited app configuration.
         /// </summary>
-        /// <param name="appId"></param>
-        /// <returns></returns>
+        /// <param name="appId">Application ID whose inherited configuration should be hashed.</param>
+        /// <param name="env">Environment providing the configuration.</param>
+        /// <returns>MD5 hash of the merged configuration.</returns>
         Task<string> AppPublishedConfigsMd5WithInheritance(string appId, string env);
-        
+
         /// <summary>
-        /// 计算已发布配置项的MD5进行缓存
+        /// Calculate and cache the MD5 hash of the published configuration items.
         /// </summary>
-        /// <param name="appId"></param>
-        /// <returns></returns>
+        /// <param name="appId">Application ID whose published configuration hash should be cached.</param>
+        /// <param name="env">Environment associated with the cached hash.</param>
+        /// <returns>MD5 hash of the published configuration.</returns>
         Task<string> AppPublishedConfigsMd5Cache(string appId, string env);
 
         /// <summary>
-        /// 计算已发布配置项的MD5进行缓存 合并继承app的配置
+        /// Calculate and cache the MD5 hash of the published configuration merged with inherited app configuration.
         /// </summary>
-        /// <param name="appId"></param>
-        /// <returns></returns>
+        /// <param name="appId">Application ID whose inherited configuration hash should be cached.</param>
+        /// <param name="env">Environment associated with the cached hash.</param>
+        /// <returns>MD5 hash of the merged configuration.</returns>
         Task<string> AppPublishedConfigsMd5CacheWithInheritance(string appId, string env);
 
         /// <summary>
-        /// 构造key
+        /// Build the configuration key.
         /// </summary>
-        /// <param name="config"></param>
-        /// <returns></returns>
+        /// <param name="config">Configuration item whose key should be generated.</param>
+        /// <returns>Composite key string.</returns>
         string GenerateKey(Config config);
 
         /// <summary>
-        /// 判断是否已经发布
+        /// Determine whether the configuration has been published.
         /// </summary>
-        /// <param name="configId"></param>
-        /// <returns></returns>
+        /// <param name="configId">Configuration identifier to check.</param>
+        /// <param name="env">Environment in which to look for published configuration.</param>
+        /// <returns>True when the configuration is published.</returns>
         Task<bool> IsPublishedAsync(string configId, string env);
 
         /// <summary>
-        /// 根据发布时间点获取发布的详细信息
+        /// Retrieve publish details by the publish timeline identifier.
         /// </summary>
-        /// <param name="publishTimelineId"></param>
-        /// <returns></returns>
+        /// <param name="publishTimelineId">Publish timeline identifier to query.</param>
+        /// <param name="env">Environment in which the publish timeline exists.</param>
+        /// <returns>List of publish details for the timeline.</returns>
         Task<List<PublishDetail>> GetPublishDetailByPublishTimelineIdAsync(string publishTimelineId, string env);
 
         /// <summary>
-        /// 查询发布时间节点
+        /// Retrieve the publish timeline node.
         /// </summary>
-        /// <param name="publishTimelineId"></param>
-        /// <returns></returns>
+        /// <param name="publishTimelineId">Publish timeline identifier.</param>
+        /// <param name="env">Environment in which the publish timeline exists.</param>
+        /// <returns>Publish timeline entity.</returns>
         Task<PublishTimeline> GetPublishTimeLineNodeAsync(string publishTimelineId, string env);
 
         /// <summary>
-        /// 获取发布历史
+        /// Retrieve the publish history for the application.
         /// </summary>
-        /// <param name="appId"></param>
-        /// <returns></returns>
+        /// <param name="appId">Application ID whose publish history is requested.</param>
+        /// <param name="env">Environment to query.</param>
+        /// <returns>List of publish timeline entries.</returns>
         Task<List<PublishTimeline>> GetPublishTimelineHistoryAsync(string appId, string env);
 
         /// <summary>
-        /// 获取发布详情列表
+        /// Retrieve the list of publish details for the application.
         /// </summary>
-        /// <param name="appId"></param>
-        /// <param name="env"></param>
-        /// <returns></returns>
+        /// <param name="appId">Application ID whose publish details are requested.</param>
+        /// <param name="env">Environment to query.</param>
+        /// <returns>List of publish detail records.</returns>
         Task<List<PublishDetail>> GetPublishDetailListAsync(string appId, string env);
 
         /// <summary>
-        /// 获取某个配置的发布历史
+        /// Retrieve the publish history for a specific configuration item.
         /// </summary>
-        /// <param name="configId"></param>
-        /// <returns></returns>
+        /// <param name="configId">Configuration identifier to query.</param>
+        /// <param name="env">Environment to query.</param>
+        /// <returns>List of publish detail records for the configuration.</returns>
         Task<List<PublishDetail>> GetConfigPublishedHistory(string configId, string env);
 
         /// <summary>
-        /// 获取当前发布的配置
+        /// Retrieve the currently published configuration items.
         /// </summary>
-        /// <param name="appId"></param>
-        /// <returns></returns>
+        /// <param name="appId">Application ID whose published configuration is requested.</param>
+        /// <param name="env">Environment to query.</param>
+        /// <returns>List of published configuration entries.</returns>
         Task<List<ConfigPublished>> GetPublishedConfigsAsync(string appId, string env);
 
         /// <summary>
-        /// 获取单个发布的配置
+        /// Retrieve a single published configuration item.
         /// </summary>
-        /// <param name="configId"></param>
-        /// <returns></returns>
+        /// <param name="configId">Configuration identifier to query.</param>
+        /// <param name="env">Environment to query.</param>
+        /// <returns>Published configuration entity.</returns>
         Task<ConfigPublished> GetPublishedConfigAsync(string configId, string env);
 
         /// <summary>
-        /// 回滚至某个时刻的发布版本
+        /// Roll back to the configuration version at the specified publish timeline.
         /// </summary>
-        /// <param name="publishTimelineId"></param>
-        /// <returns></returns>
+        /// <param name="publishTimelineId">Publish timeline identifier to restore.</param>
+        /// <param name="env">Environment in which to perform the rollback.</param>
+        /// <returns>True when the rollback succeeds.</returns>
         Task<bool> RollbackAsync(string publishTimelineId, string env);
 
         /// <summary>
-        /// 同步到环境
+        /// Synchronize configuration to target environments.
         /// </summary>
-        /// <param name="appId"></param>
-        /// <param name="currentEnv"></param>
-        /// <param name="toEnvs"></param>
-        /// <returns></returns>
+        /// <param name="appId">Application ID whose configuration should be synchronized.</param>
+        /// <param name="currentEnv">Source environment.</param>
+        /// <param name="toEnvs">Target environments.</param>
+        /// <returns>True when synchronization succeeds.</returns>
         Task<bool> EnvSync(string appId, string currentEnv, List<string> toEnvs);
 
         /// <summary>
-        /// 获取配置的 键值对 列表
+        /// Retrieve the configuration as a list of key/value pairs.
         /// </summary>
-        /// <param name="appId"></param>
-        /// <param name="env"></param>
-        /// <returns></returns>
+        /// <param name="appId">Application ID whose configuration is requested.</param>
+        /// <param name="env">Environment to query.</param>
+        /// <returns>List of key/value pairs representing configuration entries.</returns>
         Task<List<KeyValuePair<string, string>>> GetKvListAsync(string appId, string env);
 
         /// <summary>
-        /// 把json字符串格式的配置转换为标准的config然后保存到数据库。
-        /// 跟原来的配置比较，标记出新增，删除，更新
+        /// Convert the configuration represented as JSON into standard config entries and persist them.
+        /// Compare with the existing configuration to mark additions, deletions, and updates.
         /// </summary>
-        /// <param name="json">配置对象的json字符串</param>
-        /// <param name="appId">appId</param>
-        /// <param name="env">环境名</param>
-        /// <param name="isPatch">指示是否为补丁模式更新</param>
+        /// <param name="json">JSON string representing the configuration.</param>
+        /// <param name="appId">Application ID.</param>
+        /// <param name="env">Environment name.</param>
+        /// <param name="isPatch">Indicates whether to apply patch mode updates.</param>
         /// <returns></returns>
         Task<bool> SaveJsonAsync(string json, string appId, string env, bool isPatch);
 
         /// <summary>
-        /// 把键值对方式的配置列表保存到数据库
+        /// Persist the key/value configuration list to the database.
         /// </summary>
-        /// <param name="kvString"></param>
-        /// <param name="appId"></param>
-        /// <param name="env"></param>
-        /// <param name="isPatch">指示是否为补丁模式更新</param>
-        /// <returns></returns>
+        /// <param name="kvString">Serialized key/value pairs.</param>
+        /// <param name="appId">Application ID that owns the configuration.</param>
+        /// <param name="env">Environment where the configuration should be saved.</param>
+        /// <param name="isPatch">Indicates whether to apply patch mode updates.</param>
+        /// <returns>True when the key/value list is saved successfully.</returns>
         Task<bool> SaveKvListAsync(string kvString, string appId, string env, bool isPatch);
 
         /// <summary>
-        /// 校验键值对的文本是否合法
+        /// Validate whether the key/value text is well-formed.
         /// </summary>
-        /// <param name="kvStr"></param>
-        /// <returns></returns>
+        /// <param name="kvStr">Text containing key/value pairs.</param>
+        /// <returns>Tuple indicating whether validation passed and an error message.</returns>
         (bool, string) ValidateKvString(string kvStr);
 
         /// <summary>

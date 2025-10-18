@@ -43,7 +43,7 @@ namespace AgileConfig.Server.Data.Freesql
 
         public void Begin()
         {
-            // freeSql的uow不需要手动begin
+            // FreeSql unit of work does not require a manual begin call.
         }
     }
 }

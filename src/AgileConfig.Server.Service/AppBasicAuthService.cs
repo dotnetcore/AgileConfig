@@ -15,10 +15,10 @@ namespace AgileConfig.Server.Service
             _appService = appService;
         }
         /// <summary>
-        /// 从request中解析出appid、secret
+        /// Parse the appId and secret from the HTTP request.
         /// </summary>
-        /// <param name="httpRequest"></param>
-        /// <returns></returns>
+        /// <param name="httpRequest">Incoming HTTP request containing the Authorization header.</param>
+        /// <returns>Tuple of Application ID and secret extracted from the header.</returns>
         public (string, string) GetAppIdSecret(HttpRequest httpRequest)
         {
             var authorization = httpRequest.Headers["Authorization"];
@@ -27,7 +27,7 @@ namespace AgileConfig.Server.Service
                 return ("", "");
             }
             var authStr = authorization.First();
-            //去掉basic_
+            // Remove the "Basic " prefix.
             if (!authStr.StartsWith("Basic "))
             {
                 return ("", ""); ;

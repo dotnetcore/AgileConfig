@@ -3,7 +3,7 @@
 namespace AgileConfig.Server.IService
 {
     /// <summary>
-    /// 基于管理员的认证
+    /// Provides basic authentication based on administrator credentials.
     /// </summary>
     public interface IAdmBasicAuthService : IBasicAuthService
     {

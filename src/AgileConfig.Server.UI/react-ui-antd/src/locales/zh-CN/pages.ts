@@ -247,7 +247,7 @@ export default {
   'pages.config.waitpublish_at_least_one':'请至少选中一个待上线配置项',
   'pages.config.online_at_least_one':'请至少选中一个已上线配置项',
 
-  // 用户管理
+  // User management
   'pages.user.table.cols.username': '用户名',
   'pages.user.table.cols.team': '团队',
   'pages.user.table.cols.usertype': '类型',

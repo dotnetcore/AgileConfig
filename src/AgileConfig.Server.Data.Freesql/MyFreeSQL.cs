@@ -16,10 +16,10 @@ namespace AgileConfig.Server.Data.Freesql
         }
 
         /// <summary>
-        /// 根据环境配置的字符串返回freesql 实例
+        /// Return a FreeSql instance according to the connection settings of the specified environment.
         /// </summary>
-        /// <param name="env"></param>
-        /// <returns></returns>
+        /// <param name="env">Environment name whose database connection should be used.</param>
+        /// <returns>FreeSql instance configured for the specified environment.</returns>
         public IFreeSql GetInstanceByEnv(string env)
         {
             var dbConfig = _dbConfigInfoFactory.GetConfigInfo(env);

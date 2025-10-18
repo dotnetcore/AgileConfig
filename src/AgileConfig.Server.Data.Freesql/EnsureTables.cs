@@ -54,9 +54,9 @@ namespace AgileConfig.Server.Data.Freesql
         }
 
         /// <summary>
-        /// 先判断是否建过表了，如果没有则新建表
+        /// Create tables if they do not already exist.
         /// </summary>
-        /// <param name="instance"></param>
+        /// <param name="instance">FreeSql instance used to inspect schema state and create tables.</param>
         public static void Ensure(IFreeSql instance)
         {
             if (!ExistTable(instance))

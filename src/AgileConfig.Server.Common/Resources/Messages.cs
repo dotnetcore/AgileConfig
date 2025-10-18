@@ -4,7 +4,7 @@ using System.Resources;
 namespace AgileConfig.Server.Common.Resources
 {
     /// <summary>
-    /// 资源文件访问器，用于获取本地化消息
+    /// Resource accessor used to obtain localized messages.
     /// </summary>
     public static class Messages
     {
@@ -22,22 +22,22 @@ namespace AgileConfig.Server.Common.Resources
         }
 
         /// <summary>
-        /// 获取本地化字符串
+        /// Retrieve a localized string.
         /// </summary>
-        /// <param name="name">资源名称</param>
-        /// <param name="culture">文化信息，如果为null则使用当前线程的文化信息</param>
-        /// <returns>本地化字符串</returns>
+        /// <param name="name">Resource name.</param>
+        /// <param name="culture">Culture info; if null, the current thread culture is used.</param>
+        /// <returns>Localized string.</returns>
         public static string GetString(string name, CultureInfo culture = null)
         {
             return ResourceManager.GetString(name, culture ?? CultureInfo.CurrentUICulture);
         }
 
         /// <summary>
-        /// 获取格式化的本地化字符串
+        /// Retrieve a formatted localized string.
         /// </summary>
-        /// <param name="name">资源名称</param>
-        /// <param name="args">格式化参数</param>
-        /// <returns>格式化的本地化字符串</returns>
+        /// <param name="name">Resource name.</param>
+        /// <param name="args">Formatting arguments.</param>
+        /// <returns>Formatted localized string.</returns>
         public static string GetString(string name, params object[] args)
         {
             var format = GetString(name);
@@ -45,19 +45,19 @@ namespace AgileConfig.Server.Common.Resources
         }
 
         /// <summary>
-        /// 获取格式化的本地化字符串
+        /// Retrieve a formatted localized string.
         /// </summary>
-        /// <param name="name">资源名称</param>
-        /// <param name="culture">文化信息</param>
-        /// <param name="args">格式化参数</param>
-        /// <returns>格式化的本地化字符串</returns>
+        /// <param name="name">Resource name.</param>
+        /// <param name="culture">Culture info.</param>
+        /// <param name="args">Formatting arguments.</param>
+        /// <returns>Formatted localized string.</returns>
         public static string GetString(string name, CultureInfo culture, params object[] args)
         {
             var format = GetString(name, culture);
             return string.Format(format, args);
         }
 
-        // 验证消息
+        // Validation messages.
         public static string AppIdRequired => GetString(nameof(AppIdRequired));
         public static string AppIdMaxLength => GetString(nameof(AppIdMaxLength));
         public static string ConfigGroupMaxLength => GetString(nameof(ConfigGroupMaxLength));
@@ -85,18 +85,18 @@ namespace AgileConfig.Server.Common.Resources
         public static string CheckUrlMaxLength => GetString(nameof(CheckUrlMaxLength));
         public static string AlarmUrlMaxLength => GetString(nameof(AlarmUrlMaxLength));
 
-        // 错误消息
+        // Error messages.
         public static string IdCannotBeEmpty => GetString(nameof(IdCannotBeEmpty));
         public static string NameCannotBeEmpty => GetString(nameof(NameCannotBeEmpty));
         public static string AddressCannotBeEmpty => GetString(nameof(AddressCannotBeEmpty));
         public static string KeyCannotBeEmpty => GetString(nameof(KeyCannotBeEmpty));
         public static string AppIdCannotBeEmpty => GetString(nameof(AppIdCannotBeEmpty));
 
-        // 配置导入消息
+        // Configuration import messages.
         public static string ConfigImportMissingEqualSign(int lineNumber) => GetString(nameof(ConfigImportMissingEqualSign), lineNumber);
         public static string ConfigImportDuplicateKey(string key) => GetString(nameof(ConfigImportDuplicateKey), key);
 
-        // 日志消息
+        // Log messages.
         public static string RegistrationCenter => GetString(nameof(RegistrationCenter));
         public static string ConfigurationCenter => GetString(nameof(ConfigurationCenter));
         public static string NotifyNodeAllClients(string node, string action1, string action2, string response) => GetString(nameof(NotifyNodeAllClients), node, action1, action2, response);
@@ -105,7 +105,7 @@ namespace AgileConfig.Server.Common.Resources
         public static string Success => GetString(nameof(Success));
         public static string Failed => GetString(nameof(Failed));
 
-        // 事件日志消息
+        // Event log messages.
         public static string LoginSuccess(string user) => GetString(nameof(LoginSuccess), user);
         public static string AdminPasswordInitialized => GetString(nameof(AdminPasswordInitialized));
         public static string PasswordReset(string admin, string user) => GetString(nameof(PasswordReset), admin, user);
@@ -129,10 +129,10 @@ namespace AgileConfig.Server.Common.Resources
         public static string Enabled => GetString(nameof(Enabled));
         public static string Disabled => GetString(nameof(Disabled));
 
-        // 异常消息
+        // Exception messages.
         public static string MongodbConnectionStringNotConfigured => GetString(nameof(MongodbConnectionStringNotConfigured));
 
-        // 登录消息
+        // Login messages.
         public static string PasswordCannotBeEmpty => GetString(nameof(PasswordCannotBeEmpty));
         public static string PasswordError => GetString(nameof(PasswordError));
         public static string UserDeleted => GetString(nameof(UserDeleted));
@@ -149,7 +149,7 @@ namespace AgileConfig.Server.Common.Resources
         public static string UserNotFound => GetString(nameof(UserNotFound));
         public static string ChangePasswordFailed => GetString(nameof(ChangePasswordFailed));
 
-        // 配置消息
+        // Configuration messages.
         public static string AppNotExists(string appId) => GetString(nameof(AppNotExists), appId);
         public static string ConfigExists => GetString(nameof(ConfigExists));
         public static string CreateConfigFailed => GetString(nameof(CreateConfigFailed));
@@ -160,7 +160,7 @@ namespace AgileConfig.Server.Common.Resources
         public static string DeleteConfigFailed => GetString(nameof(DeleteConfigFailed));
         public static string BatchDeleteConfigFailed => GetString(nameof(BatchDeleteConfigFailed));
 
-        // 应用消息
+        // Application messages.
         public static string AppIdExists => GetString(nameof(AppIdExists));
         public static string CreateAppFailed => GetString(nameof(CreateAppFailed));
         public static string AppNotFound => GetString(nameof(AppNotFound));

@@ -3,30 +3,30 @@
 namespace AgileConfig.Server.Data.Abstraction
 {
     /// <summary>
-    /// 如果新对接一种存储，需要实现此接口
+    /// Defines the contract for integrating a new storage provider.
     /// </summary>
     public interface IRepositoryServiceRegister
     {
         /// <summary>
-        /// 根据 provider name 判断是否适合当前注册器
+        /// Determine whether this register matches the specified provider name.
         /// </summary>
-        /// <param name="provider"></param>
-        /// <returns></returns>
+        /// <param name="provider">Database provider identifier.</param>
+        /// <returns>True when the register supports the provider.</returns>
         bool IsSuit4Provider(string provider);
 
         /// <summary>
-        /// 注册固定的仓储
+        /// Register storage services that do not depend on an environment.
         /// </summary>
-        /// <param name="sc"></param>
+        /// <param name="sc">Service collection to populate.</param>
         void AddFixedRepositories(IServiceCollection sc);
 
         /// <summary>
-        /// 根据环境获取仓储
+        /// Resolve an environment-specific storage service.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="sp"></param>
-        /// <param name="env"></param>
-        /// <returns></returns>
+        /// <typeparam name="T">Type of repository to resolve.</typeparam>
+        /// <param name="sp">Service provider used for resolution.</param>
+        /// <param name="env">Environment identifier.</param>
+        /// <returns>Repository instance for the environment.</returns>
         T GetServiceByEnv<T>(IServiceProvider sp, string env) where T : class;
     }
 }

@@ -156,7 +156,7 @@ namespace AgileConfig.Server.EventHandler
             if (service != null && !string.IsNullOrWhiteSpace(service.AlarmUrl) &&
                 service.Status == ServiceStatus.Unhealthy)
             {
-                //如果是下线发送通知
+                // Notify when the service becomes unhealthy.
                 _ = SendServiceOfflineMessageAsync(service);
             }
         }
