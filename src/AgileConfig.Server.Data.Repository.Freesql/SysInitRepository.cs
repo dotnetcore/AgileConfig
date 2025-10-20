@@ -129,10 +129,10 @@ public class SysInitRepository : ISysInitRepository
 
     private static void EnsureRole(IFreeSql sql, string id, string code, string name)
     {
-        var role = sql.Select<RoleDefinition>().Where(x => x.Id == id).First();
+        var role = sql.Select<Role>().Where(x => x.Id == id).First();
         if (role == null)
         {
-            sql.Insert(new RoleDefinition
+            sql.Insert(new Role
             {
                 Id = id,
                 Code = code,
@@ -149,7 +149,7 @@ public class SysInitRepository : ISysInitRepository
             role.Name = name;
             role.Description = name;
             role.IsSystem = true;
-            sql.Update<RoleDefinition>().SetSource(role).ExecuteAffrows();
+            sql.Update<Role>().SetSource(role).ExecuteAffrows();
         }
     }
 }

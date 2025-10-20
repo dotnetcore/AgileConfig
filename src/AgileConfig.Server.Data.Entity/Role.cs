@@ -1,13 +1,12 @@
-﻿using FreeSql.DataAnnotations;
+using FreeSql.DataAnnotations;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
-using AgileConfig.Server.Common;
 
 namespace AgileConfig.Server.Data.Entity
 {
-    [Table(Name = "agc_role")]
-    [OraclePrimaryKeyName("agc_role_pk")]
-    public class Role : IEntity<string>
+    [Table(Name = "agc_role_definition")]
+    [OraclePrimaryKeyName("agc_role_definition_pk")]
+    public class RoleDefinition : IEntity<string>
     {
         [Column(Name = "id", StringLength = 64)]
         public string Id { get; set; }

@@ -12,7 +12,7 @@ namespace AgileConfig.Server.IService
         Task<User> GetUserAsync(string userId);
 
         Task<List<User>> GetUsersByNameAsync(string userName);
-        Task<List<RoleDefinition>> GetUserRolesAsync(string userId);
+        Task<List<Role>> GetUserRolesAsync(string userId);
 
         Task<bool> AddAsync(User user);
 

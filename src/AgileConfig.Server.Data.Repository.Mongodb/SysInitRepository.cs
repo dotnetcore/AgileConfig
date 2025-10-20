@@ -19,7 +19,7 @@ public class SysInitRepository : ISysInitRepository
     private MongodbAccess<Setting> _settingAccess => new MongodbAccess<Setting>(_connectionString);
     private MongodbAccess<User> _userAccess => new MongodbAccess<User>(_connectionString);
     private MongodbAccess<UserRole> _userRoleAccess => new MongodbAccess<UserRole>(_connectionString);
-    private MongodbAccess<RoleDefinition> _roleAccess => new MongodbAccess<RoleDefinition>(_connectionString);
+    private MongodbAccess<Role> _roleAccess => new MongodbAccess<Role>(_connectionString);
     private MongodbAccess<App> _appAccess => new MongodbAccess<App>(_connectionString);
 
     private readonly IConfiguration _configuration;
@@ -135,7 +135,7 @@ public class SysInitRepository : ISysInitRepository
         var role = _roleAccess.MongoQueryable.FirstOrDefault(x => x.Id == id);
         if (role == null)
         {
-            _roleAccess.Collection.InsertOne(new RoleDefinition
+            _roleAccess.Collection.InsertOne(new Role
             {
                 Id = id,
                 Code = code,

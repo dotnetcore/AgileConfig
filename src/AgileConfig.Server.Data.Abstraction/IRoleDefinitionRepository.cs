@@ -2,7 +2,7 @@
 
 namespace AgileConfig.Server.Data.Abstraction
 {
-    public interface IRoleDefinitionRepository : IRepository<RoleDefinition, string>
+    public interface IRoleDefinitionRepository : IRepository<Role, string>
     {
     }
 }

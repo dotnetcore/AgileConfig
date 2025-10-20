@@ -53,7 +53,7 @@ namespace AgileConfig.Server.Service
         }
 
 
-        public async Task<List<RoleDefinition>> GetUserRolesAsync(string userId)
+        public async Task<List<Role>> GetUserRolesAsync(string userId)
         {
             var userRoles = await _userRoleRepository.QueryAsync(x => x.UserId == userId);
             var migratedRoles = new List<UserRole>();
@@ -83,7 +83,7 @@ namespace AgileConfig.Server.Service
             var roleIds = userRoles.Select(x => x.RoleId).Distinct().ToList();
             if (!roleIds.Any())
             {
-                return new List<RoleDefinition>();
+                return new List<Role>();
             }
 
             var roles = await _roleDefinitionRepository.QueryAsync(x => roleIds.Contains(x.Id));

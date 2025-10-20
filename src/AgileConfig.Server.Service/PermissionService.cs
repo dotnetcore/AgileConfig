@@ -230,7 +230,7 @@ namespace AgileConfig.Server.Service
             return userFunctions.Distinct().ToList();
         }
 
-        private static IEnumerable<string> GetRoleFunctions(RoleDefinition role)
+        private static IEnumerable<string> GetRoleFunctions(Role role)
         {
             if (role == null || string.IsNullOrWhiteSpace(role.FunctionsJson))
             {

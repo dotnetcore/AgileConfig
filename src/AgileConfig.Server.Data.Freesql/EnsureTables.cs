@@ -76,7 +76,7 @@ namespace AgileConfig.Server.Data.Freesql
                     instance.CodeFirst.SyncStructure<AppInheritanced>();
                     instance.CodeFirst.SyncStructure<User>();
                     instance.CodeFirst.SyncStructure<UserRole>();
-                    instance.CodeFirst.SyncStructure<RoleDefinition>();
+                    instance.CodeFirst.SyncStructure<Role>();
                     instance.CodeFirst.SyncStructure<UserAppAuth>();
                     instance.CodeFirst.SyncStructure<ConfigPublished>();
                     instance.CodeFirst.SyncStructure<PublishTimeline>();

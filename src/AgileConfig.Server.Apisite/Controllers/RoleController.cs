@@ -85,7 +85,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             try
             {
-                var role = new RoleDefinition
+                var role = new Role
                 {
                     Id = model.Id,
                     Code = model.Code,
@@ -119,7 +119,7 @@ namespace AgileConfig.Server.Apisite.Controllers
 
             try
             {
-                var role = new RoleDefinition
+                var role = new Role()
                 {
                     Id = model.Id,
                     Code = model.Code,
@@ -174,7 +174,7 @@ namespace AgileConfig.Server.Apisite.Controllers
             }
         }
 
-        private static RoleVM ToViewModel(RoleDefinition role)
+        private static RoleVM ToViewModel(Role role)
         {
             return new RoleVM
             {

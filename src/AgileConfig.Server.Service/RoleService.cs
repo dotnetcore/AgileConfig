@@ -20,7 +20,7 @@ namespace AgileConfig.Server.Service
             _userRoleRepository = userRoleRepository;
         }
 
-        public async Task<RoleDefinition> CreateAsync(RoleDefinition role, IEnumerable<string> functions)
+        public async Task<Role> CreateAsync(Role role, IEnumerable<string> functions)
         {
             if (role == null)
             {
@@ -67,23 +67,23 @@ namespace AgileConfig.Server.Service
             return true;
         }
 
-        public async Task<List<RoleDefinition>> GetAllAsync()
+        public async Task<List<Role>> GetAllAsync()
         {
             return await _roleDefinitionRepository.AllAsync();
         }
 
-        public Task<RoleDefinition> GetAsync(string id)
+        public Task<Role> GetAsync(string id)
         {
             return _roleDefinitionRepository.GetAsync(id);
         }
 
-        public async Task<RoleDefinition> GetByCodeAsync(string code)
+        public async Task<Role> GetByCodeAsync(string code)
         {
             var roles = await _roleDefinitionRepository.QueryAsync(x => x.Code == code);
             return roles.FirstOrDefault();
         }
 
-        public async Task<bool> UpdateAsync(RoleDefinition role, IEnumerable<string> functions)
+        public async Task<bool> UpdateAsync(Role role, IEnumerable<string> functions)
         {
             if (role == null)
             {
@@ -117,7 +117,7 @@ namespace AgileConfig.Server.Service
             return true;
         }
 
-        private async Task<bool> ExistsWithSameCode(RoleDefinition role)
+        private async Task<bool> ExistsWithSameCode(Role role)
         {
             if (string.IsNullOrWhiteSpace(role.Code))
             {

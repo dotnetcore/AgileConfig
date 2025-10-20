@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace AgileConfig.Server.Data.Repository.Mongodb
 {
-    public class RoleDefinitionRepository : MongodbRepository<RoleDefinition, string>, IRoleDefinitionRepository
+    public class RoleDefinitionRepository : MongodbRepository<Role, string>, IRoleDefinitionRepository
     {
         public RoleDefinitionRepository(string? connectionString) : base(connectionString)
         {
