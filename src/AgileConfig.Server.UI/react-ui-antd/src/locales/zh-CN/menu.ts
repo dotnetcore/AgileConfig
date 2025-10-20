@@ -27,6 +27,7 @@ export default {
   'menu.list.node-list': '节点',
   'menu.list.config-list': '配置项',
   'menu.list.user-list': '用户',
+  'menu.list.role-list': '角色',
   'menu.list.client-list': '客户端',
   'menu.list.service-list': '服务',
   'menu.list.logs-list': '日志',

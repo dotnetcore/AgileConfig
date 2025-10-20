@@ -66,8 +66,9 @@ namespace AgileConfig.Server.Apisite.Controllers
                     Id = item.Id,
                     UserName = item.UserName,
                     Team = item.Team,
-                    UserRoles = roles,
-                    UserRoleNames = roles.Select(r => r.ToDesc()).ToList()
+                    UserRoleIds = roles.Select(r => r.Id).ToList(),
+                    UserRoleNames = roles.Select(r => r.Name).ToList(),
+                    UserRoleCodes = roles.Select(r => r.Code).ToList()
                 };
                 vms.Add(vm);
             }
@@ -112,7 +113,13 @@ namespace AgileConfig.Server.Apisite.Controllers
             user.UserName = model.UserName;
 
             var addUserResult = await _userService.AddAsync(user);
-            var addUserRoleResult = await _userService.UpdateUserRolesAsync(user.Id, model.UserRoles);
+            var roleIds = model.UserRoleIds?.Where(x => !string.IsNullOrWhiteSpace(x)).Distinct().ToList() ?? new List<string>();
+            if (!roleIds.Any())
+            {
+                roleIds.Add(SystemRoleConstants.OperatorId);
+            }
+
+            var addUserRoleResult = await _userService.UpdateUserRolesAsync(user.Id, roleIds);
 
             if (addUserResult)
             {
@@ -149,7 +156,13 @@ namespace AgileConfig.Server.Apisite.Controllers
             user.UpdateTime = DateTime.Now;
 
             var result = await _userService.UpdateAsync(user);
-            var reuslt1 = await _userService.UpdateUserRolesAsync(user.Id, model.UserRoles);
+            var roleIds = model.UserRoleIds?.Where(x => !string.IsNullOrWhiteSpace(x)).Distinct().ToList() ?? new List<string>();
+            if (!roleIds.Any())
+            {
+                roleIds.Add(SystemRoleConstants.OperatorId);
+            }
+
+            var reuslt1 = await _userService.UpdateUserRolesAsync(user.Id, roleIds);
 
             if (result)
             {
@@ -235,7 +248,7 @@ namespace AgileConfig.Server.Apisite.Controllers
         [HttpGet]
         public async Task<IActionResult> AdminUsers()
         {
-            var adminUsers = await _userService.GetUsersByRoleAsync(Role.Admin);
+            var adminUsers = await _userService.GetUsersByRoleAsync(SystemRoleConstants.AdminId);
             adminUsers = adminUsers.Where(x => x.Status == UserStatus.Normal).ToList();
             return Json(new
             {

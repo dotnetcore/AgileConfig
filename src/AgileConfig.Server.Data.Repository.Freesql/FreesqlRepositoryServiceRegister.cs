@@ -17,6 +17,7 @@ namespace AgileConfig.Server.Data.Repository.Freesql
             sc.AddScoped<IUserAppAuthRepository, UserAppAuthRepository>();
             sc.AddScoped<IUserRepository, UserRepository>();
             sc.AddScoped<IUserRoleRepository, UserRoleRepository>();
+            sc.AddScoped<IRoleDefinitionRepository, RoleDefinitionRepository>();
             sc.AddSingleton<ISysInitRepository, SysInitRepository>();
         }
 

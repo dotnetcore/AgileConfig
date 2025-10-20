@@ -26,6 +26,7 @@ namespace AgileConfig.Server.Service
             sc.AddScoped<IAdmBasicAuthService, AdmBasicAuthService>();
             sc.AddScoped<IUserService, UserService>();
             sc.AddScoped<IPermissionService, PermissionService>();
+            sc.AddScoped<IRoleService, RoleService>();
             sc.AddScoped<IRegisterCenterService, RegisterCenterService>();
             
             sc.AddScoped<ConfigStatusUpdateEventHandlersRegister>();

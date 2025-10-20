@@ -92,6 +92,13 @@
                 authority: ['Admin'],
               },
               {
+                name: 'list.role-list',
+                icon: 'SafetyCertificate',
+                path: '/roles',
+                component: './Role',
+                authority: ['Admin'],
+              },
+              {
                 name: 'list.logs-list',
                 icon: 'Bars',
                 path: '/logs',

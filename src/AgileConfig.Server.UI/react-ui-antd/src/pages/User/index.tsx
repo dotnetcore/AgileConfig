@@ -2,15 +2,23 @@ import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
 import { Button, FormInstance, message,Modal, Space, Tag } from 'antd';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { UserItem } from './data';
 import { queryUsers, addUser, delUser, editUser, resetPassword } from './service';
+import { queryRoles } from '@/services/role';
 import { useIntl, getIntl, getLocale } from 'umi';
 import { ModalForm, ProFormSelect, ProFormText } from '@ant-design/pro-form';
 import UpdateUser from './comps/updateUser';
 import { getAuthority } from '@/utils/authority';
 
 const { confirm } = Modal;
+
+type RoleOption = {
+  value: string;
+  label: string;
+  code: string;
+  isSystem: boolean;
+};
 const handleAdd = async (fields: UserItem) => {
   const intl = getIntl(getLocale());
   const hide = message.loading(intl.formatMessage({
@@ -125,14 +133,19 @@ const hasUserRole = (role:string) => {
 }
 
 const checkUserListModifyPermission = (user:UserItem) => {
-  const authMap = { 'SuperAdmin': 0,'Admin':1,'NormalUser':2};
+  const authMap:Record<string, number> = { SuperAdmin: 0, Admin: 1, NormalUser: 2 };
   let currentAuthNum = 2;
   const roles = getAuthority();
-  if (Array.isArray(roles)) {
-    let max = roles.map(x=> authMap[x]).sort((a, b) => a - b)[0];
-    currentAuthNum = max;
+  if (Array.isArray(roles) && roles.length > 0) {
+    const sorted = roles.map((x:string) => authMap[x] ?? 3).sort((a, b) => a - b);
+    if (sorted.length > 0) {
+      currentAuthNum = sorted[0];
+    }
   }
-  let userAuthNum = user.userRoles.sort((a, b) => a - b)[0];
+
+  const userCodes = user.userRoleCodes || [];
+  const userSorted = userCodes.map(code => authMap[code] ?? 3).sort((a, b) => a - b);
+  const userAuthNum = userSorted.length > 0 ? userSorted[0] : 3;
 
   return currentAuthNum < userAuthNum;
 }
@@ -145,6 +158,39 @@ const userList:React.FC = () => {
   const [createModalVisible, handleModalVisible] = useState<boolean>(false);
   const [updateModalVisible, setUpdateModalVisible] = useState<boolean>(false);
   const [currentRow, setCurrentRow] = useState<UserItem>();
+  const [roleOptions, setRoleOptions] = useState<RoleOption[]>([]);
+
+  useEffect(() => {
+    loadRoles();
+  }, []);
+
+  const loadRoles = async () => {
+    try {
+      const response = await queryRoles();
+      if (response?.success && Array.isArray(response.data)) {
+        const options = response.data.map((role: any) => ({
+          value: role.id,
+          label: role.name,
+          code: role.code,
+          isSystem: role.isSystem,
+        }));
+        setRoleOptions(options);
+      } else {
+        message.error(intl.formatMessage({ id: 'pages.role.load_failed', defaultMessage: 'Failed to load roles' }));
+      }
+    } catch (error) {
+      message.error(intl.formatMessage({ id: 'pages.role.load_failed', defaultMessage: 'Failed to load roles' }));
+    }
+  };
+
+  const getDefaultRoleIds = () => {
+    const normalRole = roleOptions.find(option => option.code === 'NormalUser');
+    return normalRole ? [normalRole.value] : [];
+  };
+
+  const availableRoleOptions = hasUserRole('SuperAdmin')
+    ? roleOptions
+    : roleOptions.filter(option => option.code !== 'SuperAdmin');
   const columns: ProColumns<UserItem>[] = [
     {
       title: intl.formatMessage({
@@ -162,20 +208,27 @@ const userList:React.FC = () => {
       title: intl.formatMessage({
         id: 'pages.user.table.cols.usertype',
       }),
-      dataIndex: 'userRoles',
+      dataIndex: 'userRoleNames',
       search: false,
       renderFormItem: (_, { defaultRender }) => {
         return defaultRender(_);
       },
       render: (_, record) => (
         <Space>
-          {record.userRoleNames?.map((name:string) => (
-            <Tag color={
-              name === intl.formatMessage({id: 'pages.user.usertype.admin'}) ? 'gold':'blue'
-            } key={name}>
-              {name}
-            </Tag>
-          ))}
+          {record.userRoleNames?.map((name:string, index:number) => {
+            const code = record.userRoleCodes?.[index];
+            let color = 'blue';
+            if (code === 'SuperAdmin') {
+              color = 'red';
+            } else if (code === 'Admin') {
+              color = 'gold';
+            }
+            return (
+              <Tag color={color} key={`${record.id}-${code || name}`}>
+                {name}
+              </Tag>
+            );
+          })}
         </Space>
       ),
     },
@@ -290,7 +343,17 @@ const userList:React.FC = () => {
         } 
         width="400px"
         visible={createModalVisible}
-        onVisibleChange={handleModalVisible}
+        initialValues={{
+          userRoleIds: getDefaultRoleIds(),
+        }}
+        onVisibleChange={(visible) => {
+          handleModalVisible(visible);
+          if (visible) {
+            addFormRef.current?.setFieldsValue({ userRoleIds: getDefaultRoleIds() });
+          } else {
+            addFormRef.current?.resetFields();
+          }
+        }}
         onFinish={
           async (value) => {
             const success = await handleAdd(value as UserItem);
@@ -341,30 +404,11 @@ const userList:React.FC = () => {
                   label={intl.formatMessage({
                     id: 'pages.user.form.usertype'
                   })}
-                  name="userRoles"
-                  mode="multiple" 
-                  options = {hasUserRole('SuperAdmin')?[
-                    {
-                      value: 1,
-                      label: intl.formatMessage({
-                        id: 'pages.user.usertype.admin'
-                      }),
-                    },
-                    {
-                      value: 2,
-                      label: intl.formatMessage({
-                        id: 'pages.user.usertype.normaluser'
-                      }),
-                    }
-                  ]:[
-                  {
-                    value: 2,
-                    label: intl.formatMessage({
-                      id: 'pages.user.usertype.normaluser'
-                    }),
-                  }]}
+                  name="userRoleIds"
+                  mode="multiple"
+                  options = {availableRoleOptions}
                 >
-        </ProFormSelect> 
+        </ProFormSelect>
       </ModalForm>
 
       {
@@ -373,6 +417,8 @@ const userList:React.FC = () => {
           value={currentRow}
           setValue={setCurrentRow}
           updateModalVisible={updateModalVisible}
+          roleOptions={availableRoleOptions}
+          defaultRoleIds={getDefaultRoleIds()}
           onCancel={
             () => {
               setCurrentRow(undefined);
@@ -389,10 +435,10 @@ const userList:React.FC = () => {
                   actionRef.current.reload();
                 }
               }
-              addFormRef.current?.resetFields();
             }
-          }/>
-      }
+          }
+        />
+     }
 
     </PageContainer>
   );

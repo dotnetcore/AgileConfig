@@ -195,5 +195,7 @@ namespace AgileConfig.Server.Common.Resources
         public static string UpdateUserFailed => GetString(nameof(UpdateUserFailed));
         public static string ResetUserPasswordFailed => GetString(nameof(ResetUserPasswordFailed));
         public static string DeleteUserFailed => GetString(nameof(DeleteUserFailed));
+        public static string UpdateRoleFailed => GetString(nameof(UpdateRoleFailed));
+        public static string DeleteRoleFailed => GetString(nameof(DeleteRoleFailed));
     }
 }

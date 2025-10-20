@@ -79,7 +79,8 @@ namespace AgileConfig.Server.Apisite.Controllers
         {
             var user = (await _userService.GetUsersByNameAsync(userName)).First();
             var userRoles = await _userService.GetUserRolesAsync(user.Id);
-            var jwt = _jwtService.GetToken(user.Id, user.UserName, userRoles.Any(r => r == Role.Admin || r == Role.SuperAdmin));
+            var jwt = _jwtService.GetToken(user.Id, user.UserName,
+                userRoles.Any(r => r.Id == SystemRoleConstants.AdminId || r.Id == SystemRoleConstants.SuperAdminId));
             var userFunctions = await _permissionService.GetUserPermission(user.Id);
 
             _tinyEventBus.Fire(new LoginEvent(user.UserName));
@@ -89,7 +90,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                 status = "ok",
                 token = jwt,
                 type = "Bearer",
-                currentAuthority = userRoles.Select(r => r.ToString()),
+                currentAuthority = userRoles.Select(r => r.Code),
                 currentFunctions = userFunctions
             };
         }
@@ -140,7 +141,7 @@ namespace AgileConfig.Server.Apisite.Controllers
                     Source = UserSource.SSO
                 };
                 await _userService.AddAsync(newUser);
-                await _userService.UpdateUserRolesAsync(newUser.Id, new List<Role> { Role.NormalUser });
+                await _userService.UpdateUserRolesAsync(newUser.Id, new List<string> { SystemRoleConstants.OperatorId });
             }
             else if (user.Status == UserStatus.Deleted)
             {

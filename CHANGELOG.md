@@ -1,5 +1,8 @@
 # Change log
 ------------------------------
+[Unreleased]
+* Introduced dynamic role management with CRUD APIs and UI allowing custom permission assignments.
+
 [1.10.0]
 * Use publish timeline virtual id to compare the version between client. To enable this feature the client should use version >=1.8.0 .
 

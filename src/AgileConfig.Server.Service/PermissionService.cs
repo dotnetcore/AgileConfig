@@ -4,21 +4,26 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 using AgileConfig.Server.Data.Abstraction;
+using AgileConfig.Server.Common;
+using System.Text.Json;
 
 namespace AgileConfig.Server.Service
 {
     public class PermissionService : IPermissionService
     {
         private readonly IUserRoleRepository _userRoleRepository;
+        private readonly IRoleDefinitionRepository _roleDefinitionRepository;
         private readonly IUserAppAuthRepository _userAppAuthRepository;
         private readonly IAppRepository _appRepository;
 
         public PermissionService(
             IUserRoleRepository userRoleRepository,
+            IRoleDefinitionRepository roleDefinitionRepository,
             IUserAppAuthRepository userAppAuthRepository,
             IAppRepository appRepository)
         {
             _userRoleRepository = userRoleRepository;
+            _roleDefinitionRepository = roleDefinitionRepository;
             _userAppAuthRepository = userAppAuthRepository;
             _appRepository = appRepository;
         }
@@ -43,7 +48,10 @@ namespace AgileConfig.Server.Service
 
             "GLOBAL_" + Functions.User_Add,
             "GLOBAL_" + Functions.User_Edit,
-            "GLOBAL_" + Functions.User_Delete
+            "GLOBAL_" + Functions.User_Delete,
+            "GLOBAL_" + Functions.Role_Add,
+            "GLOBAL_" + Functions.Role_Edit,
+            "GLOBAL_" + Functions.Role_Delete
         ];
 
         private static readonly List<string> Template_NormalAdminPermissions =
@@ -56,6 +64,9 @@ namespace AgileConfig.Server.Service
             "GLOBAL_" + Functions.User_Add,
             "GLOBAL_" + Functions.User_Edit,
             "GLOBAL_" + Functions.User_Delete,
+            "GLOBAL_" + Functions.Role_Add,
+            "GLOBAL_" + Functions.Role_Edit,
+            "GLOBAL_" + Functions.Role_Delete,
 
             "APP_{0}_" + Functions.App_Delete,
             "APP_{0}_" + Functions.App_Edit,
@@ -186,24 +197,55 @@ namespace AgileConfig.Server.Service
         public async Task<List<string>> GetUserPermission(string userId)
         {
             var userRoles = await _userRoleRepository.QueryAsync(x => x.UserId == userId);
-            if (userRoles.Any(x=>x.Role == Role.SuperAdmin))
+            var roleIds = userRoles.Select(x => x.RoleId).Distinct().ToList();
+            if (!roleIds.Any())
             {
-                return Template_SuperAdminPermissions;
+                return new List<string>();
+            }
+
+            var roleDefinitions = await _roleDefinitionRepository.QueryAsync(x => roleIds.Contains(x.Id));
+            var systemRoles = roleDefinitions.Where(r => r.IsSystem).ToList();
+            var customRoles = roleDefinitions.Where(r => !r.IsSystem).ToList();
+
+            var customFunctions = customRoles.SelectMany(GetRoleFunctions).ToList();
+
+            if (systemRoles.Any(r => r.Id == SystemRoleConstants.SuperAdminId))
+            {
+                return Template_SuperAdminPermissions.Concat(customFunctions).Distinct().ToList();
             }
 
             var userFunctions = new List<string>();
-            // Compute permissions for regular administrators.
-            if (userRoles.Any(x=>x.Role == Role.Admin))
+            if (systemRoles.Any(r => r.Id == SystemRoleConstants.AdminId))
             {
                 userFunctions.AddRange(await GetAdminUserFunctions(userId));
             }
-            // Compute permissions for regular users.
-            if (userRoles.Any(x => x.Role == Role.NormalUser))
+
+            if (systemRoles.Any(r => r.Id == SystemRoleConstants.OperatorId))
             {
                 userFunctions.AddRange(await GetNormalUserFunctions(userId));
             }
 
+            userFunctions.AddRange(customFunctions);
+
             return userFunctions.Distinct().ToList();
+        }
+
+        private static IEnumerable<string> GetRoleFunctions(RoleDefinition role)
+        {
+            if (role == null || string.IsNullOrWhiteSpace(role.FunctionsJson))
+            {
+                return Enumerable.Empty<string>();
+            }
+
+            try
+            {
+                var functions = JsonSerializer.Deserialize<List<string>>(role.FunctionsJson);
+                return functions ?? Enumerable.Empty<string>();
+            }
+            catch
+            {
+                return Enumerable.Empty<string>();
+            }
         }
 
         /// <summary>

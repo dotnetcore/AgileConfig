@@ -57,5 +57,6 @@ export default {
   'menu.list.service-list': 'Services',
   'menu.list.config-list': 'Configurations',
   'menu.list.user-list': 'User',
+  'menu.list.role-list': 'Role',
   'menu.list.logs-list': 'Log',
 };

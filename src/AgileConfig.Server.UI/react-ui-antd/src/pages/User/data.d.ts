@@ -3,8 +3,9 @@ export type UserItem = {
     userName: string,
     team: string,
     status: number,
-    userRoles: number[],
-    userRoleNames: string[]
+    userRoleIds: string[],
+    userRoleNames: string[],
+    userRoleCodes: string[]
   };
 export type UserListParams = {
     name?: string;

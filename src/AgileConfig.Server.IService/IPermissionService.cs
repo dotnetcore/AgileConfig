@@ -25,6 +25,10 @@ namespace AgileConfig.Server.IService
         public const string User_Add = "USER_ADD";
         public const string User_Edit = "USER_EDIT";
         public const string User_Delete = "USER_DELETE";
+
+        public const string Role_Add = "ROLE_ADD";
+        public const string Role_Edit = "ROLE_EDIT";
+        public const string Role_Delete = "ROLE_DELETE";
     }
 
     public interface IPermissionService

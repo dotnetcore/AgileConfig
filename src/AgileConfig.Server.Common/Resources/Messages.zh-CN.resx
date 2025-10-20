@@ -421,4 +421,10 @@
   <data name="DeleteUserFailed" xml:space="preserve">
     <value>删除用户失败，请查看错误日志</value>
   </data>
+  <data name="UpdateRoleFailed" xml:space="preserve">
+    <value>更新角色失败，请查看错误日志</value>
+  </data>
+  <data name="DeleteRoleFailed" xml:space="preserve">
+    <value>删除角色失败，请查看错误日志</value>
+  </data>
 </root>

@@ -421,4 +421,10 @@
   <data name="DeleteUserFailed" xml:space="preserve">
     <value>Failed to delete user, please check error logs</value>
   </data>
+  <data name="UpdateRoleFailed" xml:space="preserve">
+    <value>Failed to update role, please check error logs</value>
+  </data>
+  <data name="DeleteRoleFailed" xml:space="preserve">
+    <value>Failed to delete role, please check error logs</value>
+  </data>
 </root>

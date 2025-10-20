@@ -1,4 +1,5 @@
-﻿using AgileConfig.Server.Data.Abstraction.DbProvider;
+﻿using AgileConfig.Server.Data.Abstraction;
+using AgileConfig.Server.Data.Abstraction.DbProvider;
 
 namespace AgileConfig.Server.Data.Repository.Mongodb
 {
@@ -15,6 +16,7 @@ namespace AgileConfig.Server.Data.Repository.Mongodb
             sc.AddScoped<IUserAppAuthRepository, UserAppAuthRepository>();
             sc.AddScoped<IUserRepository, UserRepository>();
             sc.AddScoped<IUserRoleRepository, UserRoleRepository>();
+            sc.AddScoped<IRoleDefinitionRepository, RoleDefinitionRepository>();
             sc.AddSingleton<ISysInitRepository, SysInitRepository>();
         }
 
