@@ -10,10 +10,6 @@ namespace AgileConfig.Server.Apisite.Models
         public string Id { get; set; }
 
         [Required]
-        [MaxLength(64)]
-        public string Code { get; set; }
-
-        [Required]
         [MaxLength(128)]
         public string Name { get; set; }
 

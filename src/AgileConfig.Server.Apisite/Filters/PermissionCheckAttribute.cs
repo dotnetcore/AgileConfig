@@ -191,7 +191,6 @@ namespace AgileConfig.Server.Apisite.Filters
                     }
                 }.ToFrozenDictionary();
 
-        protected const string GlobalMatchPatten = "GLOBAL_{0}";
         protected const string AppMatchPatten = "APP_{0}_{1}";
 
         private readonly IPermissionService _permissionService;
@@ -232,8 +231,8 @@ namespace AgileConfig.Server.Apisite.Filters
             var userFunctions = await _permissionService.GetUserPermission(userId);
 
             //judge global
-            var matchKey = string.Format(GlobalMatchPatten, _functionKey);
-            if (userFunctions.Contains(matchKey))
+            var matchKey = _functionKey;
+            if (userFunctions.Contains(_functionKey))
             {
                 await base.OnActionExecutionAsync(context, next);
                 return;

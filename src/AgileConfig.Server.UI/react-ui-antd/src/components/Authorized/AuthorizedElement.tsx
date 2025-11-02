@@ -12,11 +12,12 @@ export const checkUserPermission = (functions:string[],judgeKey:string, appid:st
   if (appid) {
     appId = appid ;
   }
-  let matchKey = ('GLOBAL_'+ judgeKey);
-  let key = functions.find(x=>x === matchKey);
+  // Check for global permission (without GLOBAL_ prefix)
+  let key = functions.find(x=>x === judgeKey);
   if (key) return true;
 
-  matchKey = ('APP_'+ appId + '_' + judgeKey);
+  // Check for app-specific permission
+  let matchKey = ('APP_'+ appId + '_' + judgeKey);
   key = functions.find(x=>x === matchKey);
   if (key) return true;
 
@@ -28,7 +29,7 @@ const AuthorizedEle: React.FunctionComponent<AuthorizedProps>  = (props)=>{
   let functions:string[] = [];
   if (props.authority) {
     functions = props.authority;
-  } else {
+} else {
     functions = getFunctions();
   }
 
@@ -36,4 +37,3 @@ const AuthorizedEle: React.FunctionComponent<AuthorizedProps>  = (props)=>{
 };
 
 export default AuthorizedEle;
-

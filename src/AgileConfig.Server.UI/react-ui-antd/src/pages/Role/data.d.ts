@@ -1,6 +1,5 @@
 export type RoleItem = {
   id: string;
-  code: string;
   name: string;
   description?: string;
   isSystem: boolean;
@@ -9,7 +8,6 @@ export type RoleItem = {
 
 export type RoleFormValues = {
   id?: string;
-  code: string;
   name: string;
   description?: string;
   functions: string[];

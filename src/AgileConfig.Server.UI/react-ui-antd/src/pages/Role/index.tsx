@@ -37,7 +37,7 @@ const RolePage: React.FC = () => {
 
   const permissionOptions = supportedPermissions.map((item) => ({
     value: item,
-    label: item,
+    label: intl.formatMessage({ id: `pages.role.permissions.${item}`, defaultMessage: item }),
   }));
 
   const handleCreate = async (values: RoleFormValues) => {
@@ -106,10 +106,6 @@ const RolePage: React.FC = () => {
       dataIndex: 'name',
     },
     {
-      title: intl.formatMessage({ id: 'pages.role.table.cols.code', defaultMessage: 'Code' }),
-      dataIndex: 'code',
-    },
-    {
       title: intl.formatMessage({ id: 'pages.role.table.cols.description', defaultMessage: 'Description' }),
       dataIndex: 'description',
       search: false,
@@ -130,13 +126,18 @@ const RolePage: React.FC = () => {
       title: intl.formatMessage({ id: 'pages.role.table.cols.functions', defaultMessage: 'Permissions' }),
       dataIndex: 'functions',
       search: false,
-      render: (_, record) => (
-        <Space size={[0, 4]} wrap>
-          {record.functions?.map((fn) => (
-            <Tag key={`${record.id}-${fn}`}>{fn}</Tag>
-          ))}
-        </Space>
-      ),
+      render: (_, record) => {
+        if (record.functions?.length === supportedPermissions.length) {
+          return <Tag>{intl.formatMessage({ id: 'pages.role.permissions.all', defaultMessage: 'All' })}</Tag>;
+        }
+        return (
+          <Space size={[0, 4]} wrap>
+            {record.functions?.map((fn) => (
+              <Tag key={`${record.id}-${fn}`}>{intl.formatMessage({ id: `pages.role.permissions.${fn}`, defaultMessage: fn })}</Tag>
+            ))}
+          </Space>
+        );
+      },
     },
     {
       title: intl.formatMessage({ id: 'pages.role.table.cols.action', defaultMessage: 'Action' }),
@@ -169,8 +170,11 @@ const RolePage: React.FC = () => {
         columns={columns}
         request={async () => {
           const response = await queryRoles();
+          const data = response?.data || [];
+          // filter super admin role
+          const filteredData = data.filter((role: RoleItem) => role.name !== 'Super Administrator');
           return {
-            data: response?.data || [],
+            data: filteredData,
             success: response?.success ?? false,
           };
         }}
@@ -203,11 +207,6 @@ const RolePage: React.FC = () => {
           return success;
         }}
       >
-        <ProFormText
-          name="code"
-          label={intl.formatMessage({ id: 'pages.role.form.code', defaultMessage: 'Code' })}
-          rules={[{ required: true }]}
-        />
         <ProFormText
           name="name"
           label={intl.formatMessage({ id: 'pages.role.form.name', defaultMessage: 'Name' })}
@@ -249,12 +248,6 @@ const RolePage: React.FC = () => {
             return success;
           }}
         >
-          <ProFormText
-            name="code"
-            label={intl.formatMessage({ id: 'pages.role.form.code', defaultMessage: 'Code' })}
-            disabled={currentRole?.isSystem}
-            rules={[{ required: true }]}
-          />
           <ProFormText
             name="name"
             label={intl.formatMessage({ id: 'pages.role.form.name', defaultMessage: 'Name' })}

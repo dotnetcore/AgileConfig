@@ -63,12 +63,14 @@ const UpdateForm : React.FC<UpdateUserProps> = (props)=>{
             required: true,
           },
         ]}
-        label={intl.formatMessage({id: 'pages.user.form.usertype'})}
+        label={intl.formatMessage({id: 'pages.user.form.userrole'})}
         name="userRoleIds"
         mode="multiple"
-        options = {props.roleOptions}
-      >
-        </ProFormSelect>
+        options={props.roleOptions.map(r => ({
+          value: r.value,
+          label: r.label,
+        }))}
+      />
     </ModalForm>
     );
 }
