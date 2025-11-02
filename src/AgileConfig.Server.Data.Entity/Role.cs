@@ -1,6 +1,7 @@
 using FreeSql.DataAnnotations;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
+using AgileConfig.Server.Common;
 
 namespace AgileConfig.Server.Data.Entity
 {
