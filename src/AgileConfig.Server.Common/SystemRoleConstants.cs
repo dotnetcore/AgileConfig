@@ -8,6 +8,6 @@
 
         public const string SuperAdminCode = "SuperAdmin";
         public const string AdminCode = "Admin";
-        public const string OperatorCode = "NormalUser";
+        public const string OperatorCode = "Operator";
     }
 }
