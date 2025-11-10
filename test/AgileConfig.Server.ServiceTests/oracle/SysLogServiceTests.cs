@@ -1,24 +1,21 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
-using AgileConfig.Server.ServiceTests.sqlite;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using AgileConfig.Server.ServiceTests.sqlite;
 
-namespace AgileConfig.Server.ServiceTests.oracle
+namespace AgileConfig.Server.ServiceTests.oracle;
+
+public class SysLogServiceTests_oracle : SysLogServiceTests
 {
-    public class SysLogServiceTests_oracle : SysLogServiceTests
+    private readonly string conn = "user id=x;password=x;data source=192.168.0.123/orcl";
+
+    public override Task<Dictionary<string, string>> GetConfigurationData()
     {
-
-        string conn = "user id=x;password=x;data source=192.168.0.123/orcl";
-
-        public override Task<Dictionary<string, string>> GetConfigurationData()
-        {
-            return
-                Task.FromResult(
+        return
+            Task.FromResult(
                 new Dictionary<string, string>
                 {
-                {"db:provider","oracle" },
-                {"db:conn",conn }
-            });
-        }
+                    { "db:provider", "oracle" },
+                    { "db:conn", conn }
+                });
     }
 }

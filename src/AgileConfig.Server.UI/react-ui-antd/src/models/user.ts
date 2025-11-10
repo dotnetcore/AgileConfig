@@ -1,7 +1,7 @@
 import type { Effect, Reducer } from 'umi';
 
 import { current, query as queryUsers } from '@/services/user';
-import { setAuthority, setFunctions, setUserInfo } from '@/utils/authority';
+import { setAuthority, setCategories, setFunctions, setUserInfo } from '@/utils/authority';
 import { sys } from '@/services/system';
 import { setSysInfo } from '@/utils/system';
 
@@ -63,7 +63,8 @@ const UserModel: UserModelType = {
         appVer: sysInfo.appVer,
         envList: sysInfo.envList,
         currentAuthority: currentInfo.currentUser?.currentAuthority,
-        currentFunctions: currentInfo.currentUser?.currentFunctions
+        currentFunctions: currentInfo.currentUser?.currentFunctions,
+        currentCategories: currentInfo.currentUser?.currentCategories,
       };
       yield put({
         type: 'saveCurrentSystemInfo',
@@ -76,6 +77,7 @@ const UserModel: UserModelType = {
     saveCurrentSystemInfo(state, action) {
       setAuthority(action.payload.currentAuthority);
       setFunctions(action.payload.currentFunctions);
+      setCategories(action.payload.currentCategories);
       setUserInfo({name:action.payload.name, userid: action.payload.userid});
       setSysInfo(action.payload.appVer, action.payload.envList);
       return {

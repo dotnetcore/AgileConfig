@@ -2,12 +2,11 @@
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.Data.Freesql;
 
-namespace AgileConfig.Server.Data.Repository.Freesql
+namespace AgileConfig.Server.Data.Repository.Freesql;
+
+public class RoleDefinitionRepository : FreesqlRepository<Role, string>, IRoleDefinitionRepository
 {
-    public class RoleDefinitionRepository : FreesqlRepository<Role, string>, IRoleDefinitionRepository
+    public RoleDefinitionRepository(IFreeSqlFactory freeSqlFactory) : base(freeSqlFactory.Create())
     {
-        public RoleDefinitionRepository(IFreeSqlFactory freeSqlFactory) : base(freeSqlFactory.Create())
-        {
-        }
     }
 }

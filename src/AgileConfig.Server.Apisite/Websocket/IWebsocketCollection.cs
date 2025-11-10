@@ -1,38 +1,35 @@
-﻿using Agile.Config.Protocol;
-using AgileConfig.Server.IService;
-using System.Net.WebSockets;
+﻿using System.Net.WebSockets;
 using System.Threading.Tasks;
+using Agile.Config.Protocol;
+using AgileConfig.Server.IService;
 
-namespace AgileConfig.Server.Apisite.Websocket
+namespace AgileConfig.Server.Apisite.Websocket;
+
+public class WebsocketClient : ClientInfo
 {
-    public class WebsocketClient : ClientInfo
-    {
-        public WebSocket Client { get; set; }
-    }
+    public WebSocket Client { get; set; }
+}
 
-    public interface IWebsocketCollection
-    {
-        ClientInfos Report();
+public interface IWebsocketCollection
+{
+    int Count { get; }
+    ClientInfos Report();
+    WebsocketClient Get(string clientId);
+    void SendMessageToAll(string message);
+    Task SendMessageToOne(WebsocketClient client, string message);
 
-        int Count { get; }
-        WebsocketClient Get(string clientId);
-        void SendMessageToAll(string message);
-        Task SendMessageToOne(WebsocketClient client, string message);
+    Task SendActionToOne(WebsocketClient client, WebsocketAction action);
+    void AddClient(WebsocketClient client);
 
-        Task SendActionToOne(WebsocketClient client, WebsocketAction action);
-        void AddClient(WebsocketClient client);
+    Task RemoveClient(WebsocketClient client, WebSocketCloseStatus? closeStatus, string closeDesc);
 
-        Task RemoveClient(WebsocketClient client, WebSocketCloseStatus? closeStatus, string closeDesc);
+    void RemoveAppClients(string appId, WebSocketCloseStatus? closeStatus, string closeDesc);
 
-        void RemoveAppClients(string appId, WebSocketCloseStatus? closeStatus, string closeDesc);
+    void SendActionToAppClients(string appId, string env, WebsocketAction action);
 
-        void SendActionToAppClients(string appId,string env, WebsocketAction action);
+    void SendActionToAll(WebsocketAction action);
 
-        void SendActionToAll(WebsocketAction action);
+    void SendToAppClients(string appId, string message);
 
-        void SendToAppClients(string appId, string message);
-
-        void Clear();
-    }
-
+    void Clear();
 }

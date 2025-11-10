@@ -1,18 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace AgileConfig.Server.Data.Abstraction;
 
-namespace AgileConfig.Server.Data.Abstraction
+public interface IUow : IDisposable
 {
-    public interface IUow : IDisposable
-    {
-        void Begin();
+    void Begin();
 
-        Task<bool> SaveChangesAsync();
+    Task<bool> SaveChangesAsync();
 
-        void Rollback();
-
-    }
+    void Rollback();
 }

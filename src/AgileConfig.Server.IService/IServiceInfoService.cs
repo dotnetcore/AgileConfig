@@ -1,31 +1,30 @@
-﻿using AgileConfig.Server.Data.Entity;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using AgileConfig.Server.Data.Entity;
 
-namespace AgileConfig.Server.IService
+namespace AgileConfig.Server.IService;
+
+public interface IServiceInfoService : IDisposable
 {
-    public interface IServiceInfoService: IDisposable
-    {
-        Task<ServiceInfo> GetByUniqueIdAsync(string id);
-        Task<ServiceInfo> GetByServiceIdAsync(string serviceId);
+    Task<ServiceInfo> GetByUniqueIdAsync(string id);
+    Task<ServiceInfo> GetByServiceIdAsync(string serviceId);
 
-        Task<bool> RemoveAsync(string id);
-        
-        Task UpdateServiceStatus(ServiceInfo service, ServiceStatus status);
-        Task<List<ServiceInfo>> GetAllServiceInfoAsync();
-        
-        Task<List<ServiceInfo>> GetOnlineServiceInfoAsync();
+    Task<bool> RemoveAsync(string id);
 
-        Task<List<ServiceInfo>> GetOfflineServiceInfoAsync();
+    Task UpdateServiceStatus(ServiceInfo service, ServiceStatus status);
+    Task<List<ServiceInfo>> GetAllServiceInfoAsync();
 
-        Task<string> ServicesMD5();
+    Task<List<ServiceInfo>> GetOnlineServiceInfoAsync();
 
-        Task<string> ServicesMD5Cache();
+    Task<List<ServiceInfo>> GetOfflineServiceInfoAsync();
 
-        Task<List<ServiceInfo>> QueryAsync(Expression<Func<ServiceInfo, bool>> exp);
+    Task<string> ServicesMD5();
 
-        void ClearCache();
-    }
+    Task<string> ServicesMD5Cache();
+
+    Task<List<ServiceInfo>> QueryAsync(Expression<Func<ServiceInfo, bool>> exp);
+
+    void ClearCache();
 }

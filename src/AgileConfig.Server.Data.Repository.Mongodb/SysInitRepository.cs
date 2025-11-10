@@ -1,28 +1,25 @@
-﻿using AgileConfig.Server.Common;
-using AgileConfig.Server.Data.Entity;
+using AgileConfig.Server.Common;
 using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
-using System.Text.Json;
 
 namespace AgileConfig.Server.Data.Repository.Mongodb;
 
 public class SysInitRepository : ISysInitRepository
 {
+    private readonly IConfiguration _configuration;
+
+    private readonly string _connectionString = "";
+
     public SysInitRepository(IConfiguration configuration)
     {
-        this._configuration = configuration;
+        _configuration = configuration;
         _connectionString = _configuration["db:conn"] ?? "";
     }
 
-    private string _connectionString = "";
-    private MongodbAccess<Setting> _settingAccess => new MongodbAccess<Setting>(_connectionString);
-    private MongodbAccess<User> _userAccess => new MongodbAccess<User>(_connectionString);
-    private MongodbAccess<UserRole> _userRoleAccess => new MongodbAccess<UserRole>(_connectionString);
-    private MongodbAccess<Role> _roleAccess => new MongodbAccess<Role>(_connectionString);
-    private MongodbAccess<App> _appAccess => new MongodbAccess<App>(_connectionString);
-
-    private readonly IConfiguration _configuration;
+    private MongodbAccess<Setting> _settingAccess => new(_connectionString);
+    private MongodbAccess<User> _userAccess => new(_connectionString);
+    private MongodbAccess<UserRole> _userRoleAccess => new(_connectionString);
+    private MongodbAccess<Role> _roleAccess => new(_connectionString);
+    private MongodbAccess<App> _appAccess => new(_connectionString);
 
     public string? GetDefaultEnvironmentFromDb()
     {
@@ -46,13 +43,10 @@ public class SysInitRepository : ISysInitRepository
 
     public bool InitSa(string password)
     {
-        if (string.IsNullOrEmpty(password))
-        {
-            throw new ArgumentNullException(nameof(password));
-        }
+        if (string.IsNullOrEmpty(password)) throw new ArgumentNullException(nameof(password));
 
         var newSalt = Guid.NewGuid().ToString("N");
-        password = Encrypt.Md5((password + newSalt));
+        password = Encrypt.Md5(password + newSalt);
 
         EnsureSystemRoles();
 
@@ -69,14 +63,14 @@ public class SysInitRepository : ISysInitRepository
 
         var now = DateTime.Now;
         var userRoles = new List<UserRole>();
-        userRoles.Add(new UserRole()
+        userRoles.Add(new UserRole
         {
             Id = Guid.NewGuid().ToString("N"),
             RoleId = SystemRoleConstants.SuperAdminId,
             UserId = SystemSettings.SuperAdminId,
             CreateTime = now
         });
-        userRoles.Add(new UserRole()
+        userRoles.Add(new UserRole
         {
             Id = Guid.NewGuid().ToString("N"),
             RoleId = SystemRoleConstants.AdminId,
@@ -98,16 +92,12 @@ public class SysInitRepository : ISysInitRepository
 
     public bool InitDefaultApp(string appName)
     {
-        if (string.IsNullOrEmpty(appName))
-        {
-            throw new ArgumentNullException(nameof(appName));
-        }
+        if (string.IsNullOrEmpty(appName)) throw new ArgumentNullException(nameof(appName));
 
         var anyDefaultApp = _appAccess.MongoQueryable.FirstOrDefault(x => x.Id == appName);
         ;
         if (anyDefaultApp == null)
-        {
-            _appAccess.Collection.InsertOne(new App()
+            _appAccess.Collection.InsertOne(new App
             {
                 Id = appName,
                 Name = appName,
@@ -118,19 +108,18 @@ public class SysInitRepository : ISysInitRepository
                 Type = AppType.PRIVATE,
                 AppAdmin = SystemSettings.SuperAdminId
             });
-        }
 
         return true;
     }
 
     private void EnsureSystemRoles()
     {
-        EnsureRole(SystemRoleConstants.SuperAdminId, SystemRoleConstants.SuperAdminCode, "Super Administrator");
-        EnsureRole(SystemRoleConstants.AdminId, SystemRoleConstants.AdminCode, "Administrator");
-        EnsureRole(SystemRoleConstants.OperatorId, SystemRoleConstants.OperatorCode, "Operator");
+        EnsureRole(SystemRoleConstants.SuperAdminId, "Super Administrator");
+        EnsureRole(SystemRoleConstants.AdminId, "Administrator");
+        EnsureRole(SystemRoleConstants.OperatorId, "Operator");
     }
 
-    private void EnsureRole(string id, string code, string name)
+    private void EnsureRole(string id, string name)
     {
         var role = _roleAccess.MongoQueryable.FirstOrDefault(x => x.Id == id);
         if (role == null)
@@ -138,21 +127,17 @@ public class SysInitRepository : ISysInitRepository
             _roleAccess.Collection.InsertOne(new Role
             {
                 Id = id,
-                Code = code,
                 Name = name,
                 Description = name,
                 IsSystem = true,
-                FunctionsJson = JsonSerializer.Serialize(new List<string>()),
                 CreateTime = DateTime.Now
             });
         }
         else
         {
-            role.Code = code;
             role.Name = name;
             role.Description = name;
             role.IsSystem = true;
-            role.FunctionsJson = role.FunctionsJson ?? JsonSerializer.Serialize(new List<string>());
             role.UpdateTime = DateTime.Now;
             _roleAccess.Collection.ReplaceOne(x => x.Id == id, role, new ReplaceOptions { IsUpsert = true });
         }

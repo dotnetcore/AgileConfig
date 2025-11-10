@@ -12,15 +12,13 @@ using Newtonsoft.Json;
 namespace AgileConfig.Server.Apisite.Websocket.MessageHandlers;
 
 /// <summary>
-/// Message handler.
+///     Message handler.
 /// </summary>
 internal class MessageHandler : IMessageHandler
 {
     private readonly IConfigService _configService;
     private readonly IRegisterCenterService _registerCenterService;
     private readonly IServiceInfoService _serviceInfoService;
-
-    private int ClientVersion { get; set; }
 
     public MessageHandler(
         IConfigService configService,
@@ -32,13 +30,12 @@ internal class MessageHandler : IMessageHandler
         _serviceInfoService = serviceInfoService;
     }
 
+    private int ClientVersion { get; set; }
+
     public bool Hit(HttpRequest request)
     {
         var ver = request.Headers["client-v"];
-        if (string.IsNullOrEmpty(ver))
-        {
-            return false;
-        }
+        if (string.IsNullOrEmpty(ver)) return false;
 
         if (int.TryParse(ver.ToString().Replace(".", ""), out var verInt))
         {
@@ -49,12 +46,7 @@ internal class MessageHandler : IMessageHandler
 
         return false;
     }
-    private async Task SendMessage(WebSocket webSocket, string message)
-    {
-        var data = Encoding.UTF8.GetBytes(message);
-        await webSocket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
-            CancellationToken.None);
-    }
+
     public async Task Handle(string message, HttpRequest request, WebsocketClient client)
     {
         message ??= "";
@@ -70,7 +62,7 @@ internal class MessageHandler : IMessageHandler
 
             var data = await GetCPingData(appId, env);
 
-            await SendMessage(client.Client, JsonConvert.SerializeObject(new WebsocketAction()
+            await SendMessage(client.Client, JsonConvert.SerializeObject(new WebsocketAction
             {
                 Action = ActionConst.Ping,
                 Module = ActionModule.ConfigCenter,
@@ -85,7 +77,7 @@ internal class MessageHandler : IMessageHandler
             if (heartBeatResult)
             {
                 var version = await _serviceInfoService.ServicesMD5Cache();
-                await SendMessage(client.Client, JsonConvert.SerializeObject(new WebsocketAction()
+                await SendMessage(client.Client, JsonConvert.SerializeObject(new WebsocketAction
                 {
                     Action = ActionConst.Ping,
                     Module = ActionModule.RegisterCenter,
@@ -105,6 +97,13 @@ internal class MessageHandler : IMessageHandler
         }
     }
 
+    private async Task SendMessage(WebSocket webSocket, string message)
+    {
+        var data = Encoding.UTF8.GetBytes(message);
+        await webSocket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
+            CancellationToken.None);
+    }
+
     private async Task<string> GetCPingData(string appId, string env)
     {
         if (ClientVersion <= 176)
@@ -114,12 +113,10 @@ internal class MessageHandler : IMessageHandler
 
             return md5;
         }
-        else
-        {
-            // For versions 1.7.7 and later, respond with the publish timeline id.
-            var publishTimeLineId = await _configService.GetLastPublishTimelineVirtualIdAsyncWithCache(appId, env);
 
-            return publishTimeLineId;
-        }
+        // For versions 1.7.7 and later, respond with the publish timeline id.
+        var publishTimeLineId = await _configService.GetLastPublishTimelineVirtualIdAsyncWithCache(appId, env);
+
+        return publishTimeLineId;
     }
 }

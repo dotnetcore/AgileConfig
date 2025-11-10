@@ -1,34 +1,31 @@
-ï»¿using AgileConfig.Server.Data.Entity;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
+using AgileConfig.Server.Data.Entity;
 
-namespace AgileConfig.Server.Apisite.Models
+namespace AgileConfig.Server.Apisite.Models;
+
+[ExcludeFromCodeCoverage]
+public class UserVM
 {
-    [ExcludeFromCodeCoverage]
-    public class UserVM
-    {
-        [Required(ErrorMessage = "ç”¨æˆ·Idä¸èƒ½ä¸ºç©º")]
-        [MaxLength(36, ErrorMessage = "ç”¨æˆ·Idé•¿åº¦ä¸èƒ½è¶…è¿‡36ä½")]
-        public string Id { get; set; }
+    [Required(ErrorMessage = "ÓÃ»§Id²»ÄÜÎª¿Õ")]
+    [MaxLength(36, ErrorMessage = "ÓÃ»§Id³¤¶È²»ÄÜ³¬¹ı36Î»")]
+    public string Id { get; set; }
 
-        [Required(ErrorMessage = "ç”¨æˆ·åä¸èƒ½ä¸ºç©º")]
-        [MaxLength(50, ErrorMessage = "ç”¨æˆ·åé•¿åº¦ä¸èƒ½è¶…è¿‡50ä½")]
-        public string UserName { get; set; }
+    [Required(ErrorMessage = "ÓÃ»§Ãû²»ÄÜÎª¿Õ")]
+    [MaxLength(50, ErrorMessage = "ÓÃ»§Ãû³¤¶È²»ÄÜ³¬¹ı50Î»")]
+    public string UserName { get; set; }
 
-        [Required(ErrorMessage = "å¯†ç ä¸èƒ½ä¸ºç©º")]
-        [MaxLength(50, ErrorMessage = "å¯†ç é•¿åº¦ä¸èƒ½è¶…è¿‡50ä½")]
-        public string Password { get; set; }
+    [Required(ErrorMessage = "ÃÜÂë²»ÄÜÎª¿Õ")]
+    [MaxLength(50, ErrorMessage = "ÃÜÂë³¤¶È²»ÄÜ³¬¹ı50Î»")]
+    public string Password { get; set; }
 
-        [MaxLength(50, ErrorMessage = "å›¢é˜Ÿé•¿åº¦ä¸èƒ½è¶…è¿‡50ä½")]
-        public string Team { get; set; }
+    [MaxLength(50, ErrorMessage = "ÍÅ¶Ó³¤¶È²»ÄÜ³¬¹ı50Î»")]
+    public string Team { get; set; }
 
-        public List<string> UserRoleIds { get; set; }
+    public List<string> UserRoleIds { get; set; }
 
-        public List<string> UserRoleNames { get; set; }
+    public List<string> UserRoleNames { get; set; }
 
-        public List<string> UserRoleCodes { get; set; }
-
-        public UserStatus Status { get; set; }
-    }
+    public UserStatus Status { get; set; }
 }

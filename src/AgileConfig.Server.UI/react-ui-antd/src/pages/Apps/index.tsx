@@ -40,6 +40,7 @@ import AuthorizedEle from '@/components/Authorized/AuthorizedElement';
 import functionKeys from '@/models/functionKeys';
 import { current } from '@/services/user';
 import { getUserInfo, setAuthority, setFunctions } from '@/utils/authority';
+import { RequireFunction } from '@/utils/permission';
 
 const { confirm } = Modal;
 
@@ -369,16 +370,14 @@ const appList: React.FC = (props) => {
       }),
       valueType: 'option',
       render: (text, record, _, action) => [
-        <Link
-          key="0"
-          to={{
-            pathname: '/app/config/' + record.id + '/' + record.name,
-          }}
-        >
-          {intl.formatMessage({
-            id: 'pages.app.table.cols.action.configs',
-          })}
-        </Link>,
+        <RequireFunction fn={functionKeys.App_Read} fallback={null}>
+          <Link
+            key="0"
+            to={{ pathname: '/app/config/' + record.id + '/' + record.name }}
+          >
+            {intl.formatMessage({ id: 'pages.app.table.cols.action.configs' })}
+          </Link>
+        </RequireFunction>,
         <AuthorizedEle key="1" appId={record.id} judgeKey={functionKeys.App_Edit}>
           <a
             onClick={() => {
@@ -391,17 +390,17 @@ const appList: React.FC = (props) => {
             })}
           </a>
         </AuthorizedEle>,
-        <a
-          key="2"
-          onClick={() => {
-            setUserAuthModalVisible(true);
-            setCurrentRow(record);
-          }}
-        >
-          {intl.formatMessage({
-            id: 'pages.app.table.cols.action.auth',
-          })}
-        </a>,
+        <RequireFunction fn={functionKeys.App_Auth} fallback={null}>
+          <a
+            key="2"
+            onClick={() => {
+              setUserAuthModalVisible(true);
+              setCurrentRow(record);
+            }}
+          >
+            {intl.formatMessage({ id: 'pages.app.table.cols.action.auth' })}
+          </a>
+        </RequireFunction>,
         <AuthorizedEle key="3" appId={record.id} judgeKey={functionKeys.App_Delete}>
           <Button
             type="link"

@@ -58,6 +58,42 @@ export function setFunctions(authority: string | string[] ): void {
   reloadAuthorized();
 }
 
+// categories (business domains) control which left-menu entries are visible
+export function getCategories(str?: string): string[] {
+  const catString =
+    typeof str === 'undefined' && localStorage ? localStorage.getItem('antd-pro-categories') : str;
+  let cats;
+  try {
+    if (catString) {
+      cats = JSON.parse(catString);
+    }
+  } catch (e) {
+    cats = catString;
+  }
+  if (typeof cats === 'string') {
+    return [cats];
+  }
+  return cats || [];
+}
+
+export function setCategories(categories: string | string[]): void {
+  const arr = typeof categories === 'string' ? [categories] : categories;
+  localStorage.setItem('antd-pro-categories', JSON.stringify(arr));
+  // menu re-eval
+  reloadAuthorized();
+}
+
+// convenience helpers
+export function hasFunction(fnKey: string): boolean {
+  const fns = getFunctions();
+  return Array.isArray(fns) ? fns.includes(fnKey) : false;
+}
+
+export function hasCategory(cat: string): boolean {
+  const cats = getCategories();
+  return Array.isArray(cats) ? cats.includes(cat) : false;
+}
+
 export function setToken(token:string): void {
   localStorage.setItem('token', token);
 }

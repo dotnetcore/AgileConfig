@@ -5,44 +5,39 @@ using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AgileConfig.Server.Apisite.Controllers
+namespace AgileConfig.Server.Apisite.Controllers;
+
+[Authorize]
+public class SysLogController : Controller
 {
-    [Authorize]
-    public class SysLogController : Controller
+    private readonly ISysLogService _sysLogService;
+
+    public SysLogController(ISysLogService sysLogService)
     {
-        private readonly ISysLogService _sysLogService;
+        _sysLogService = sysLogService;
+    }
 
-        public SysLogController(ISysLogService sysLogService)
+    [HttpGet]
+    public async Task<IActionResult> Search(string appId, SysLogType? logType, DateTime? startTime, DateTime? endTime,
+        int current = 1, int pageSize = 20)
+    {
+        if (current <= 0) throw new ArgumentException("current can not less than 1 .");
+        if (pageSize <= 0) throw new ArgumentException("pageSize can not less than 1 .");
+
+        var pageList =
+            await _sysLogService.SearchPage(appId, logType, startTime, endTime?.Date.AddDays(1), pageSize, current);
+        var total = await _sysLogService.Count(appId, logType, startTime, endTime?.Date.AddDays(1));
+        if (total % pageSize > 0)
         {
-            _sysLogService = sysLogService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Search(string appId, SysLogType? logType, DateTime? startTime, DateTime? endTime, int current = 1, int pageSize = 20)
+        return Json(new
         {
-            if (current <= 0)
-            {
-                throw new ArgumentException("current can not less than 1 .");
-            }
-            if (pageSize <= 0)
-            {
-                throw new ArgumentException("pageSize can not less than 1 .");
-            }
-
-            var pageList = await _sysLogService.SearchPage(appId, logType, startTime, endTime?.Date.AddDays(1), pageSize, current);
-            var total = await _sysLogService.Count(appId, logType, startTime, endTime?.Date.AddDays(1));
-            if ((total % pageSize) > 0)
-            {
-            }
-
-            return Json(new
-            {
-                current,
-                pageSize,
-                success = true,
-                total = total,
-                data = pageList
-            });
-        }
+            current,
+            pageSize,
+            success = true,
+            total,
+            data = pageList
+        });
     }
 }

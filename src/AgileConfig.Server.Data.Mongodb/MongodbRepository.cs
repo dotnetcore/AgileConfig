@@ -13,19 +13,6 @@ public class MongodbRepository<TEntity, TId> : IRepository<TEntity, TId>
 {
     private readonly MongodbAccess<TEntity> _access;
 
-    public IUow Uow
-    {
-        get => _mongodbUow;
-        set
-        {
-            _mongodbUow = value as MongodbUow;
-            if (_mongodbUow?.Session == null && _mongodbUow?.Session?.IsInTransaction != true)
-            {
-                _mongodbUow?.SetSession(_access.Client.StartSession());
-            }
-        }
-    }
-
     private MongodbUow? _mongodbUow;
 
     public MongodbRepository(string? connectionString)
@@ -40,6 +27,17 @@ public class MongodbRepository<TEntity, TId> : IRepository<TEntity, TId>
         _access = new MongodbAccess<TEntity>(connectionString);
     }
 
+    public IUow Uow
+    {
+        get => _mongodbUow;
+        set
+        {
+            _mongodbUow = value as MongodbUow;
+            if (_mongodbUow?.Session == null && _mongodbUow?.Session?.IsInTransaction != true)
+                _mongodbUow?.SetSession(_access.Client.StartSession());
+        }
+    }
+
     public void Dispose()
     {
         GC.SuppressFinalize(this);
@@ -48,12 +46,6 @@ public class MongodbRepository<TEntity, TId> : IRepository<TEntity, TId>
     public async Task<List<TEntity>> AllAsync()
     {
         return await _access.MongoQueryable.ToListAsync();
-    }
-
-    private Expression<Func<TEntity, bool>> GetIdPropertyFilter(TId id)
-    {
-        Expression<Func<TEntity, bool>> expression = x => Equals(x.Id, id);
-        return expression;
     }
 
     public async Task<TEntity?> GetAsync(TId id)
@@ -84,13 +76,9 @@ public class MongodbRepository<TEntity, TId> : IRepository<TEntity, TId>
         if (writes.Count > 0)
         {
             if (_mongodbUow?.Session == null)
-            {
                 await _access.Collection.BulkWriteAsync(writes);
-            }
             else
-            {
                 await _access.Collection.BulkWriteAsync(_mongodbUow.Session, writes);
-            }
         }
     }
 
@@ -98,51 +86,35 @@ public class MongodbRepository<TEntity, TId> : IRepository<TEntity, TId>
     {
         var filter = Builders<TEntity>.Filter.Eq(x => x.Id, id);
         if (_mongodbUow?.Session == null)
-        {
             await _access.Collection.DeleteOneAsync(filter);
-        }
         else
-        {
             await _access.Collection.DeleteOneAsync(_mongodbUow.Session, filter);
-        }
     }
 
     public async Task DeleteAsync(TEntity entity)
     {
         var filter = GetIdPropertyFilter(entity.Id);
         if (_mongodbUow?.Session == null)
-        {
             await _access.Collection.DeleteOneAsync(filter);
-        }
         else
-        {
             await _access.Collection.DeleteOneAsync(_mongodbUow.Session, filter);
-        }
     }
 
     public async Task DeleteAsync(IList<TEntity> entities)
     {
         var filter = Builders<TEntity>.Filter.In(x => x.Id, entities.Select(y => y.Id));
         if (_mongodbUow?.Session == null)
-        {
             await _access.Collection.DeleteManyAsync(filter);
-        }
         else
-        {
             await _access.Collection.DeleteManyAsync(_mongodbUow.Session, filter);
-        }
     }
 
     public async Task<TEntity> InsertAsync(TEntity entity)
     {
         if (_mongodbUow?.Session == null)
-        {
             await _access.Collection.InsertOneAsync(entity);
-        }
         else
-        {
             await _access.Collection.InsertOneAsync(_mongodbUow.Session, entity);
-        }
 
         return entity;
     }
@@ -152,13 +124,9 @@ public class MongodbRepository<TEntity, TId> : IRepository<TEntity, TId>
         if (entities.Count > 0)
         {
             if (_mongodbUow?.Session == null)
-            {
                 await _access.Collection.InsertManyAsync(entities);
-            }
             else
-            {
                 await _access.Collection.InsertManyAsync(_mongodbUow.Session, entities);
-            }
         }
     }
 
@@ -183,6 +151,19 @@ public class MongodbRepository<TEntity, TId> : IRepository<TEntity, TId>
         return await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToListAsync();
     }
 
+    public async Task<long> CountAsync(Expression<Func<TEntity, bool>>? exp = null)
+    {
+        return await (exp == null
+            ? _access.MongoQueryable.CountAsync()
+            : _access.MongoQueryable.Where(exp).CountAsync());
+    }
+
+    private Expression<Func<TEntity, bool>> GetIdPropertyFilter(TId id)
+    {
+        Expression<Func<TEntity, bool>> expression = x => Equals(x.Id, id);
+        return expression;
+    }
+
     private static Expression<Func<TEntity, object>> Sort(string defaultSortField)
     {
         Expression<Func<TEntity, object>> defaultSort = x => x.Id;
@@ -190,10 +171,7 @@ public class MongodbRepository<TEntity, TId> : IRepository<TEntity, TId>
             !defaultSortField.Equals("Id", StringComparison.OrdinalIgnoreCase))
         {
             var property = typeof(TEntity).GetProperty(defaultSortField);
-            if (property == null)
-            {
-                return defaultSort;
-            }
+            if (property == null) return defaultSort;
 
             var parameter = Expression.Parameter(typeof(TEntity), "__q");
             var memberExpress = Expression.Property(parameter, property);
@@ -202,12 +180,5 @@ public class MongodbRepository<TEntity, TId> : IRepository<TEntity, TId>
         }
 
         return defaultSort;
-    }
-
-    public async Task<long> CountAsync(Expression<Func<TEntity, bool>>? exp = null)
-    {
-        return await (exp == null
-            ? _access.MongoQueryable.CountAsync()
-            : _access.MongoQueryable.Where(exp).CountAsync());
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace AgileConfig.Server.Data.Repository.Mongodb;
 
-public class SysLogRepository: MongodbRepository<SysLog, string>, ISysLogRepository
+public class SysLogRepository : MongodbRepository<SysLog, string>, ISysLogRepository
 {
     public SysLogRepository(string? connectionString) : base(connectionString)
     {

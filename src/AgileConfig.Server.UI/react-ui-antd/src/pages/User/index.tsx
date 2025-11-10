@@ -10,6 +10,7 @@ import { useIntl, getIntl, getLocale } from 'umi';
 import { ModalForm, ProFormSelect, ProFormText } from '@ant-design/pro-form';
 import UpdateUser from './comps/updateUser';
 import { getAuthority } from '@/utils/authority';
+import { RequireFunction } from '@/utils/permission';
 
 const { confirm } = Modal;
 
@@ -249,72 +250,72 @@ const userList:React.FC = () => {
         id: 'pages.user.table.cols.action'
       }),
       valueType: 'option',
-      render: (text, record, _, action) => checkUserListModifyPermission(record)?[
-        <a key="0"
-        onClick={() => {
-          setUpdateModalVisible(true);
-          setCurrentRow(record);
-          console.log('select user ', record);
-          console.log('current user ', currentRow);
-        }}
-        >
-          {intl.formatMessage({
-            id: 'pages.user.table.cols.action.edit',
-          })}
-        </a>,
-         <a key="1"
-         onClick={ ()=> {
-          const msg = intl.formatMessage({
-            id: 'pages.user.confirm_reset',
-          }) + `【${record.userName}】` + intl.formatMessage({
-            id: 'pages.user.reset_password_default',
-          });
-          confirm({
-            icon: <ExclamationCircleOutlined />,
-            content: msg,
-            async onOk() {
-              console.log('reset password user ' + record.userName);
-              const success = await handleResetPassword(record);
-              if (success) {
-                actionRef.current?.reload();
-              }
-            },
-            onCancel() {
-              console.log('Cancel');
-            },
-          });
-        }}
-         >
-         {intl.formatMessage({
-           id: 'pages.user.table.cols.action.reset',
-         })}
-         </a>,
-        <Button key="2" type="link" danger
-          onClick={ ()=> {
-            const msg = intl.formatMessage({
-              id: 'pages.user.confirm_delete',
-            }) + `【${record.userName}】?`;
-            confirm({
-              icon: <ExclamationCircleOutlined />,
-              content: msg,
-              async onOk() {
-                console.log('delete user ' + record.userName);
-                const success = await handleDel(record);
-                if (success) {
-                  actionRef.current?.reload();
-                }
-              },
-              onCancel() {
-                console.log('Cancel');
-              },
-            });
-          }}
-        >
-          {intl.formatMessage({
-            id: 'pages.user.table.cols.action.delete',
-          })}
-        </Button >
-      ]:[]
+      render: (text, record, _, action) => {
+        if (!checkUserListModifyPermission(record)) return [];
+        const actions: React.ReactNode[] = [];
+        actions.push(
+          <RequireFunction fn="USER_EDIT" key="edit" fallback={null}>
+            <a
+              onClick={() => {
+                setUpdateModalVisible(true);
+                setCurrentRow(record);
+              }}
+            >
+              {intl.formatMessage({ id: 'pages.user.table.cols.action.edit' })}
+            </a>
+          </RequireFunction>
+        );
+        actions.push(
+          <RequireFunction fn="USER_EDIT" key="reset" fallback={null}>
+            <a
+              onClick={() => {
+                const msg =
+                  intl.formatMessage({ id: 'pages.user.confirm_reset' }) +
+                  `【${record.userName}】` +
+                  intl.formatMessage({ id: 'pages.user.reset_password_default' });
+                confirm({
+                  icon: <ExclamationCircleOutlined />,
+                  content: msg,
+                  async onOk() {
+                    const success = await handleResetPassword(record);
+                    if (success) {
+                      actionRef.current?.reload();
+                    }
+                  },
+                });
+              }}
+            >
+              {intl.formatMessage({ id: 'pages.user.table.cols.action.reset' })}
+            </a>
+          </RequireFunction>
+        );
+        actions.push(
+          <RequireFunction fn="USER_DELETE" key="delete" fallback={null}>
+            <Button
+              type="link"
+              danger
+              onClick={() => {
+                const msg =
+                  intl.formatMessage({ id: 'pages.user.confirm_delete' }) +
+                  `【${record.userName}】?`;
+                confirm({
+                  icon: <ExclamationCircleOutlined />,
+                  content: msg,
+                  async onOk() {
+                    const success = await handleDel(record);
+                    if (success) {
+                      actionRef.current?.reload();
+                    }
+                  },
+                });
+              }}
+            >
+              {intl.formatMessage({ id: 'pages.user.table.cols.action.delete' })}
+            </Button>
+          </RequireFunction>
+        );
+        return actions;
+      }
     }
   ];
   return (
@@ -328,16 +329,17 @@ const userList:React.FC = () => {
         columns = {columns}
         request = { (params, sorter, filter) => queryUsers(params) }
         toolBarRender={() => [
-          (hasUserRole('SuperAdmin')||hasUserRole('Admin'))? 
-          <Button key="0" icon={<PlusOutlined />} type="primary"
-          onClick={ ()=>{ handleModalVisible(true) } }
-          >
-            {intl.formatMessage({
-              id: 'pages.user.table.cols.action.add'
-            })}
-          </Button>
-          :
-          <span key="1"></span>
+          <RequireFunction fn="USER_ADD" key="add" fallback={null}>
+            <Button
+              icon={<PlusOutlined />}
+              type="primary"
+              onClick={() => {
+                handleModalVisible(true);
+              }}
+            >
+              {intl.formatMessage({ id: 'pages.user.table.cols.action.add' })}
+            </Button>
+          </RequireFunction>,
         ]}
       />
 

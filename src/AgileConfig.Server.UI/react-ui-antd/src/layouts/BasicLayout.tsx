@@ -13,6 +13,7 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { Dispatch, getIntl, getLocale } from 'umi';
 import { Link, useIntl, connect, history } from 'umi';
 import { Result, Button } from 'antd';
+import { getCategories, hasFunction } from '@/utils/authority';
 import Authorized from '@/utils/Authorized';
 import RightContent from '@/components/GlobalHeader/RightContent';
 import type { ConnectState } from '@/models/connect';
@@ -45,14 +46,27 @@ export type BasicLayoutContext = { [K in 'location']: BasicLayoutProps[K] } & {
 };
 /** Use Authorized check all menu item */
 
-const menuDataRender = (menuList: MenuDataItem[]): MenuDataItem[] =>
-  menuList.map((item) => {
-    const localItem = {
-      ...item,
-      children: item.children ? menuDataRender(item.children) : undefined,
-    };
-    return Authorized.check(item.authority, localItem, null) as MenuDataItem;
-  });
+// Filter menu by categories stored from login (e.g., Application, Configuration, Node, Client, User, Role, Service, System)
+const menuDataRender = (menuList: MenuDataItem[]): MenuDataItem[] => {
+  const cats = getCategories();
+  return menuList
+    .filter(m => {
+      // category filter
+      const category = (m as any).category;
+      if (category && !cats.includes(category)) return false;
+      // function key filter (for read permission)
+      const fnKey = (m as any).functionKey;
+      if (fnKey && !hasFunction(fnKey)) return false;
+      return true;
+    })
+    .map((item) => {
+      const localItem = {
+        ...item,
+        children: item.children ? menuDataRender(item.children) : undefined,
+      };
+      return Authorized.check(item.authority, localItem, null) as MenuDataItem;
+    });
+};
 
 const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
   const {

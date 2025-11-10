@@ -1,7 +1,7 @@
 import type { Reducer, Effect } from 'umi';
 import { getIntl, history, getLocale  } from 'umi';
 import { accountLogin } from '@/services/login';
-import { setAuthority, setFunctions, setToken, setUserInfo } from '@/utils/authority';
+import { setAuthority, setFunctions, setToken, setUserInfo, setCategories } from '@/utils/authority';
 import { getPageQuery } from '@/utils/utils';
 import { message } from 'antd';
 
@@ -31,7 +31,7 @@ const Model: LoginModelType = {
   },
 
   effects: {
-    *login({ payload }, { call, put }) {
+  *login({ payload }, { call, put }): Generator<any, void, any> {
       const intl = getIntl(getLocale());
       const response = yield call(accountLogin, payload);
       yield put({
@@ -69,10 +69,11 @@ const Model: LoginModelType = {
       }
     },
 
-    logout() {
+  logout(): void {
       setToken('');
       setAuthority([]);
       setFunctions([]);
+      setCategories([]);
       setUserInfo({ name: '', userid: '' });
       const { redirect } = getPageQuery();
       // Note: There may be security issues, please note
@@ -90,6 +91,12 @@ const Model: LoginModelType = {
       setAuthority(payload.currentAuthority);
       setFunctions(payload.currentFunctions);
       setToken(payload.token);
+      if (payload.currentCategories) {
+        setCategories(payload.currentCategories);
+      } else {
+        // empty when not provided
+        setCategories([]);
+      }
       return {
         ...state,
         status: payload.status,

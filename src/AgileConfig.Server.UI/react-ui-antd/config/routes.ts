@@ -38,86 +38,51 @@
             path: '/',
             component: '../layouts/BasicLayout',
             routes: [
+              { path: '/', redirect: '/home' },
+              { path: '/index.html', redirect: '/home' },
               {
-                path: '/',
-                redirect: '/home'
+                name: 'home', icon: 'Dashboard', path: '/home', component: './Home',
+                category: 'Application', functionKey: 'APP_READ'
               },
               {
-                path: '/index.html',
-                redirect: '/home'
+                name: 'list.node-list', icon: 'Database', path: '/node', component: './Nodes',
+                category: 'Node', functionKey: 'NODE_READ'
               },
               {
-                name: 'home',
-                icon: 'Dashboard',
-                path: '/home',
-                component: './Home',
+                name: 'list.app-list', icon: 'Appstore', path: '/app', component: './Apps',
+                category: 'Application', functionKey: 'APP_READ'
               },
               {
-                name: 'list.node-list',
-                icon: 'Database',
-                path: '/node',
-                component: './Nodes',
+                name: 'list.config-list', icon: 'Table', path: '/app/config/:app_id/:app_name', component: './Configs',
+                hideInMenu: true, category: 'Configuration', functionKey: 'CONFIG_READ'
               },
               {
-                name: 'list.app-list',
-                icon: 'Appstore',
-                path: '/app',
-                component: './Apps',
-                
+                name: 'list.client-list', icon: 'Shrink', path: '/client', component: './Clients',
+                category: 'Client', functionKey: 'CLIENT_REFRESH'
               },
               {
-                name: 'list.config-list',
-                icon: 'Table',
-                path: '/app/config/:app_id/:app_name',
-                component: './Configs',
-                hideInMenu: true,
+                name: 'list.service-list', icon: 'Cloud', path: '/service', component: './Services',
+                category: 'Service', functionKey: 'SERVICE_READ'
               },
               {
-                name: 'list.client-list',
-                icon: 'Shrink',
-                path: '/client',
-                component: './Clients',
+                name: 'list.user-list', icon: 'User', path: '/users', component: './User',
+                category: 'User', functionKey: 'USER_READ'
               },
               {
-                name: 'list.service-list',
-                icon: 'Cloud',
-                path: '/service',
-                component: './Services',
+                name: 'list.role-list', icon: 'SafetyCertificate', path: '/roles', component: './Role',
+                category: 'Role', functionKey: 'ROLE_READ'
               },
               {
-                name: 'list.user-list',
-                icon: 'User',
-                path: '/users',
-                component: './User',
-                authority: ['Admin'],
+                name: 'list.logs-list', icon: 'Bars', path: '/logs', component: './Logs',
+                category: 'Log', functionKey: 'LOG_READ'
               },
-              {
-                name: 'list.role-list',
-                icon: 'SafetyCertificate',
-                path: '/roles',
-                component: './Role',
-                authority: ['Admin'],
-              },
-              {
-                name: 'list.logs-list',
-                icon: 'Bars',
-                path: '/logs',
-                component: './Logs',
-              },
-              {
-                component: './404',
-              },
+              { component: './404' },
             ],
           },
-          {
-            component: './404',
-          },
+          { component: './404' },
         ],
       },
-
     ],
   },
-  {
-    component: './404',
-  },
+  { component: './404' },
 ];

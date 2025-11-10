@@ -1,7 +1,6 @@
-﻿namespace AgileConfig.Server.Data.Freesql
+﻿namespace AgileConfig.Server.Data.Freesql;
+
+public interface IFreeSqlFactory
 {
-    public interface IFreeSqlFactory
-    {
-        IFreeSql Create(string env = "");
-    }
+    IFreeSql Create(string env = "");
 }

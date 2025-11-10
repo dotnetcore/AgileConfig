@@ -13,4 +13,6 @@ public interface ISystemInitializationService
     bool TryInitJwtSecret();
 
     bool TryInitDefaultEnvironment();
+
+    Task<bool> TryInitSuperAdminRole();
 }

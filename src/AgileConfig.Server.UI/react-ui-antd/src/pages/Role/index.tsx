@@ -7,6 +7,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useIntl } from 'umi';
 import type { RoleFormValues, RoleItem } from './data';
 import { createRole, deleteRole, fetchSupportedRolePermissions, queryRoles, updateRole } from '@/services/role';
+import { RequireFunction } from '@/utils/permission';
 
 const { confirm } = Modal;
 
@@ -127,12 +128,14 @@ const RolePage: React.FC = () => {
       dataIndex: 'functions',
       search: false,
       render: (_, record) => {
-        if (record.functions?.length === supportedPermissions.length) {
-          return <Tag>{intl.formatMessage({ id: 'pages.role.permissions.all', defaultMessage: 'All' })}</Tag>;
+        const fns = record.functions || [];
+        const hasAll = supportedPermissions.length > 0 && supportedPermissions.every(p => fns.includes(p));
+        if (hasAll) {
+          return <Tag>{intl.formatMessage({ id: 'pages.role.permissions.all', defaultMessage: '所有权限' })}</Tag>;
         }
         return (
           <Space size={[0, 4]} wrap>
-            {record.functions?.map((fn) => (
+            {fns.map((fn) => (
               <Tag key={`${record.id}-${fn}`}>{intl.formatMessage({ id: `pages.role.permissions.${fn}`, defaultMessage: fn })}</Tag>
             ))}
           </Space>
@@ -143,21 +146,24 @@ const RolePage: React.FC = () => {
       title: intl.formatMessage({ id: 'pages.role.table.cols.action', defaultMessage: 'Action' }),
       valueType: 'option',
       render: (_, record) => [
-        <a
-          key="edit"
-          onClick={() => {
-            setCurrentRole(record);
-            setUpdateModalVisible(true);
-          }}
-        >
-          {intl.formatMessage({ id: 'pages.role.table.cols.action.edit', defaultMessage: 'Edit' })}
-        </a>,
+        <RequireFunction fn="ROLE_EDIT" key="edit" fallback={null}>
+          <a
+            onClick={() => {
+              setCurrentRole(record);
+              setUpdateModalVisible(true);
+            }}
+          >
+            {intl.formatMessage({ id: 'pages.role.table.cols.action.edit', defaultMessage: 'Edit' })}
+          </a>
+        </RequireFunction>,
         !record.isSystem ? (
-          <Button key="delete" type="link" danger onClick={() => handleDelete(record)}>
-            {intl.formatMessage({ id: 'pages.role.table.cols.action.delete', defaultMessage: 'Delete' })}
-          </Button>
+          <RequireFunction fn="ROLE_DELETE" key="delete" fallback={null}>
+            <Button type="link" danger onClick={() => handleDelete(record)}>
+              {intl.formatMessage({ id: 'pages.role.table.cols.action.delete', defaultMessage: 'Delete' })}
+            </Button>
+          </RequireFunction>
         ) : null,
-      ],
+      ].filter(Boolean),
     },
   ];
 
@@ -179,17 +185,18 @@ const RolePage: React.FC = () => {
           };
         }}
         toolBarRender={() => [
-          <Button
-            key="add"
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => {
-              setCurrentRole(undefined);
-              setCreateModalVisible(true);
-            }}
-          >
-            {intl.formatMessage({ id: 'pages.role.table.cols.action.add', defaultMessage: 'Add Role' })}
-          </Button>,
+          <RequireFunction fn="ROLE_ADD" key="add" fallback={null}>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => {
+                setCurrentRole(undefined);
+                setCreateModalVisible(true);
+              }}
+            >
+              {intl.formatMessage({ id: 'pages.role.table.cols.action.add', defaultMessage: 'Add Role' })}
+            </Button>
+          </RequireFunction>,
         ]}
       />
 

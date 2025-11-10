@@ -8,36 +8,27 @@ using Microsoft.AspNetCore.Http;
 
 namespace AgileConfig.Server.Apisite.Websocket.MessageHandlers;
 
-
-
 /// <summary>
-/// Message handler used to remain compatible with legacy clients.
+///     Message handler used to remain compatible with legacy clients.
 /// </summary>
 internal class OldMessageHandler : IMessageHandler
 {
     private readonly IConfigService _configService;
+
     public OldMessageHandler(IConfigService configService)
     {
         _configService = configService;
     }
-    
+
     public bool Hit(HttpRequest request)
     {
         var ver = request.Headers["client-v"];
         return string.IsNullOrEmpty(ver);
     }
-    private async Task SendMessage(WebSocket webSocket, string message)
-    {
-        var data = Encoding.UTF8.GetBytes(message);
-        await webSocket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
-            CancellationToken.None);
-    }
+
     public async Task Handle(string message, HttpRequest request, WebsocketClient client)
     {
-        if (message == null)
-        {
-            message = "";
-        }
+        if (message == null) message = "";
 
         if (message == "ping")
         {
@@ -54,5 +45,12 @@ internal class OldMessageHandler : IMessageHandler
             // Reply with 0 when the message cannot be handled.
             await SendMessage(client.Client, "0");
         }
+    }
+
+    private async Task SendMessage(WebSocket webSocket, string message)
+    {
+        var data = Encoding.UTF8.GetBytes(message);
+        await webSocket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
+            CancellationToken.None);
     }
 }

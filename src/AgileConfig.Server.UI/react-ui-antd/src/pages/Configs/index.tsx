@@ -13,7 +13,8 @@ import styles from './index.less';
 import JsonImport from './comps/JsonImport';
 import { useIntl } from 'react-intl';
 import { getIntl, getLocale } from '@/.umi/plugin-locale/localeExports';
-import AuthorizedEle, { checkUserPermission } from '@/components/Authorized/AuthorizedElement';
+import { checkUserPermission } from '@/components/Authorized/AuthorizedElement';
+import { RequireFunction } from '@/utils/permission';
 import functionKeys from '@/models/functionKeys';
 import VersionHistory from './comps/versionHistory';
 import { getFunctions } from '@/utils/authority';
@@ -370,80 +371,73 @@ const configs: React.FC = (props: any) => {
       width: 150,
       valueType: 'option',
       render: (text, record, _, action) => [
-        <AuthorizedEle key="1" judgeKey={functionKeys.Config_Edit} appId={record.appId}>
+        <RequireFunction fn={functionKeys.Config_Edit} key="edit" fallback={null}>
           <a
             onClick={() => {
               setCurrentRow(record);
-              setUpdateModalVisible(true)
+              setUpdateModalVisible(true);
             }}
           >
-            {
-              intl.formatMessage({
-                id: 'pages.configs.table.cols.action.edit'
-              })
-            }
+            {intl.formatMessage({ id: 'pages.configs.table.cols.action.edit' })}
           </a>
-        </AuthorizedEle>
-        ,
-        <AuthorizedEle key="2" judgeKey={functionKeys.Config_Delete} appId={record.appId}>
+        </RequireFunction>,
+        <RequireFunction fn={functionKeys.Config_Delete} key="delete" fallback={null}>
           <a
             onClick={() => {
               delConfig(record);
             }}
           >
-            {
-              intl.formatMessage({
-                id: 'pages.configs.table.cols.action.delete'
-              })
-            }
+            {intl.formatMessage({ id: 'pages.configs.table.cols.action.delete' })}
           </a>
-        </AuthorizedEle>
-        ,
-        <AuthorizedEle key="3" judgeKey={functionKeys.Config_Delete} appId={record.appId}>
+        </RequireFunction>,
+        <RequireFunction fn={functionKeys.Config_Delete} key="dropdown" fallback={null}>
           <TableDropdown
-              key="actionGroup"
-              onSelect={async (item) => 
-                {
-                  if (item == 'history') {
-                    setCurrentRow(record);
-                    setmodifyLogsModalVisible(true)
-                    const result = await queryConfigPublishedHistory(record, currentEnv)
-                    if (result.success) {
-                      setModifyLogs(result.data);
-                    }
-                  }
-
-                  if (item == 'cancelEdit') {
-                    confirm({
-                      content: intl.formatMessage({id:'pages.configs.confirm_cancel_edit'}) + `【${record.group?record.group:''}${record.group?':':''}${record.key}】` + intl.formatMessage({id:'pages.configs.confirm_cancel_edit_suffix'}),
-                      onOk: async ()=>{
-                        const result = await handleCancelEdit(record.id, currentEnv);
-                        if (result) {
-                          actionRef.current?.reload();
-                        }
-                      }
-                    })
-                  }
+            key="actionGroup"
+            onSelect={async (item) => {
+              if (item == 'history') {
+                setCurrentRow(record);
+                setmodifyLogsModalVisible(true);
+                const result = await queryConfigPublishedHistory(record, currentEnv);
+                if (result.success) {
+                  setModifyLogs(result.data);
                 }
               }
-              menus={
-                record.editStatus === 10 ?
-                [
-                  { key: 'history', name: intl.formatMessage({
-                    id: 'pages.configs.table.cols.action.history'
-                  }) }
-                ]:
-                [
-                  { key: 'cancelEdit', name: intl.formatMessage({
-                    id: 'pages.configs.table.cols.action.cancel_edit'
-                  }) },
-                  { key: 'history', name: intl.formatMessage({
-                    id: 'pages.configs.table.cols.action.history'
-                  }) }
-                ]
+              if (item == 'cancelEdit') {
+                confirm({
+                  content:
+                    intl.formatMessage({ id: 'pages.configs.confirm_cancel_edit' }) +
+                    `【${record.group ? record.group : ''}${record.group ? ':' : ''}${record.key}】` +
+                    intl.formatMessage({ id: 'pages.configs.confirm_cancel_edit_suffix' }),
+                  onOk: async () => {
+                    const result = await handleCancelEdit(record.id, currentEnv);
+                    if (result) {
+                      actionRef.current?.reload();
+                    }
+                  },
+                });
               }
-            />
-        </AuthorizedEle>
+            }}
+            menus={
+              record.editStatus === 10
+                ? [
+                    {
+                      key: 'history',
+                      name: intl.formatMessage({ id: 'pages.configs.table.cols.action.history' }),
+                    },
+                  ]
+                : [
+                    {
+                      key: 'cancelEdit',
+                      name: intl.formatMessage({ id: 'pages.configs.table.cols.action.cancel_edit' }),
+                    },
+                    {
+                      key: 'history',
+                      name: intl.formatMessage({ id: 'pages.configs.table.cols.action.history' }),
+                    },
+                  ]
+            }
+          />
+        </RequireFunction>,
       ]
     },
   ];
@@ -510,100 +504,96 @@ const configs: React.FC = (props: any) => {
           </Space>
         }
         toolBarRender={() => [
-          <AuthorizedEle key="0" judgeKey={functionKeys.Config_Add} appId={appId}>
-            <Button key="button" type="primary" icon={<PlusOutlined />}  onClick={() => { setCreateModalVisible(true); }}>
-            {
-              intl.formatMessage({
-                id: 'pages.configs.table.cols.action.add'
-              })
-            }
+          <RequireFunction fn={functionKeys.Config_Add} key="add" fallback={null}>
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => { setCreateModalVisible(true); }}>
+              {intl.formatMessage({ id: 'pages.configs.table.cols.action.add' })}
             </Button>
-          </AuthorizedEle>
+          </RequireFunction>
           ,
-          <AuthorizedEle key="2" judgeKey={functionKeys.Config_Publish} appId={appId} >
-            <Button key="button" icon={<VerticalAlignTopOutlined />} type="primary" className="success"
-                    hidden={(waitPublishStatus.addCount + waitPublishStatus.editCount + waitPublishStatus.deleteCount) === 0} 
-                    onClick={()=>{publish(appId)}}>
-                {
-                  selectedRowsState.filter(x=>x.editStatus !== 10).length > 0 ? 
-                  intl.formatMessage({id: 'pages.configs.publish_selected'}) : 
-                  intl.formatMessage({id: 'pages.configs.publish_all'})
-                }
+          <RequireFunction fn={functionKeys.Config_Publish} key="publish" fallback={null}>
+            <Button
+              icon={<VerticalAlignTopOutlined />}
+              type="primary"
+              className="success"
+              hidden={
+                waitPublishStatus.addCount + waitPublishStatus.editCount + waitPublishStatus.deleteCount === 0
+              }
+              onClick={() => {
+                publish(appId);
+              }}
+            >
+              {selectedRowsState.filter((x) => x.editStatus !== 10).length > 0
+                ? intl.formatMessage({ id: 'pages.configs.publish_selected' })
+                : intl.formatMessage({ id: 'pages.configs.publish_all' })}
             </Button>
-          </AuthorizedEle>
+          </RequireFunction>
           ,
-          <AuthorizedEle key="5" judgeKey={functionKeys.Config_Publish} appId={appId} >
-            {
-              selectedRowsState.filter(x=>x.editStatus !== 10).length > 0 ?
-              <Button key="button"  type="primary" icon={<RollbackOutlined />}
-                      className="warn"
-                      onClick={
-                        ()=>{
-                          confirm({
-                            content: intl.formatMessage({id:'pages.configs.confirm_cancel_selected_edit'}),
-                            onOk: async ()=>{
-                              const result = await handleCancelEditSome(selectedRowsState.filter(x=>x.editStatus !== 10), currentEnv)
-                              if (result) {
-                                if (actionRef.current?.clearSelected){
-                                  actionRef.current?.clearSelected();
-                                }
-                                actionRef.current?.reload();
-                              }
-                            }
-                          })
+          <RequireFunction fn={functionKeys.Config_Publish} key="cancelEdit" fallback={null}>
+            {selectedRowsState.filter((x) => x.editStatus !== 10).length > 0 ? (
+              <Button
+                type="primary"
+                icon={<RollbackOutlined />}
+                className="warn"
+                onClick={() => {
+                  confirm({
+                    content: intl.formatMessage({ id: 'pages.configs.confirm_cancel_selected_edit' }),
+                    onOk: async () => {
+                      const result = await handleCancelEditSome(
+                        selectedRowsState.filter((x) => x.editStatus !== 10),
+                        currentEnv
+                      );
+                      if (result) {
+                        if (actionRef.current?.clearSelected) {
+                          actionRef.current?.clearSelected();
                         }
+                        actionRef.current?.reload();
                       }
-                    >
-                {intl.formatMessage({id:'pages.configs.table.cols.action.cancel_edit'})}
+                    },
+                  });
+                }}
+              >
+                {intl.formatMessage({ id: 'pages.configs.table.cols.action.cancel_edit' })}
               </Button>
-              :
-              <></>
-            }
-            
-          </AuthorizedEle>
+            ) : null}
+          </RequireFunction>
         ,
-        <AuthorizedEle key="6" judgeKey={functionKeys.Config_Edit} appId={appId} >
-          {
-            selectedRowsState.length > 0 ?
-            <Button  type="primary" icon={<DeleteOutlined />}
-                    className="danger"
-                    onClick={
-                      ()=>{
-                        confirm({
-                          content: intl.formatMessage({id:'pages.configs.confirm_delete_selected'}),
-                          onOk: async ()=>{
-                            const result = await handleDelSome(selectedRowsState, currentEnv)
-                            if (result) {
-                              if (actionRef.current?.clearSelected){
-                                actionRef.current?.clearSelected();
-                              }
-                              actionRef.current?.reload();
-                            }
-                          }
-                        })
+        <RequireFunction fn={functionKeys.Config_Edit} key="deleteSelected" fallback={null}>
+          {selectedRowsState.length > 0 ? (
+            <Button
+              type="primary"
+              icon={<DeleteOutlined />}
+              className="danger"
+              onClick={() => {
+                confirm({
+                  content: intl.formatMessage({ id: 'pages.configs.confirm_delete_selected' }),
+                  onOk: async () => {
+                    const result = await handleDelSome(selectedRowsState, currentEnv);
+                    if (result) {
+                      if (actionRef.current?.clearSelected) {
+                        actionRef.current?.clearSelected();
                       }
+                      actionRef.current?.reload();
                     }
-                    >
-                {intl.formatMessage({id:'pages.configs.table.cols.action.delete'})}
-            </Button>:<></>
-          }
-        </AuthorizedEle>
+                  },
+                });
+              }}
+            >
+              {intl.formatMessage({ id: 'pages.configs.table.cols.action.delete' })}
+            </Button>
+          ) : null}
+        </RequireFunction>
         ,
-         <AuthorizedEle key="5" judgeKey={functionKeys.Config_Edit} appId={appId} >
-          <Button  onClick={()=>{
-              setJsonEditorVisible(true);
-            }}>
-              {intl.formatMessage({id:'pages.configs.table.cols.action.edit_json'})}
-            </Button>
-          </AuthorizedEle>
+         <RequireFunction fn={functionKeys.Config_Edit} key="editJson" fallback={null}>
+          <Button onClick={() => { setJsonEditorVisible(true); }}>
+            {intl.formatMessage({ id: 'pages.configs.table.cols.action.edit_json' })}
+          </Button>
+        </RequireFunction>
           ,
-         <AuthorizedEle key="6" judgeKey={functionKeys.Config_Edit} appId={appId} >
-          <Button  onClick={()=>{
-              setTextEditorVisible(true);
-            }}>
-              {intl.formatMessage({id:'pages.configs.table.cols.action.edit_text'})}
-            </Button>
-          </AuthorizedEle>
+         <RequireFunction fn={functionKeys.Config_Edit} key="editText" fallback={null}>
+          <Button onClick={() => { setTextEditorVisible(true); }}>
+            {intl.formatMessage({ id: 'pages.configs.table.cols.action.edit_text' })}
+          </Button>
+        </RequireFunction>
           ,
           <Dropdown overlay={
             <Menu >

@@ -1,7 +1,6 @@
-﻿namespace AgileConfig.Server.Apisite.Controllers.api.Models
+﻿namespace AgileConfig.Server.Apisite.Controllers.api.Models;
+
+public class RegisterResultVM
 {
-    public class RegisterResultVM
-    {
-        public string UniqueId { get; set; }
-    }
+    public string UniqueId { get; set; }
 }

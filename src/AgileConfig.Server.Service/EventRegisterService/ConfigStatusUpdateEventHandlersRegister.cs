@@ -1,13 +1,14 @@
-﻿using AgileConfig.Server.EventHandler;
+﻿using AgileConfig.Server.Common.EventBus;
+using AgileConfig.Server.EventHandler;
 using AgileConfig.Server.IService;
 
 namespace AgileConfig.Server.Service.EventRegisterService;
 
 public class ConfigStatusUpdateEventHandlersRegister : IEventHandlerRegister
 {
-    private readonly Common.EventBus.ITinyEventBus _tinyEventBus;
+    private readonly ITinyEventBus _tinyEventBus;
 
-    public ConfigStatusUpdateEventHandlersRegister(Common.EventBus.ITinyEventBus tinyEventBus)
+    public ConfigStatusUpdateEventHandlersRegister(ITinyEventBus tinyEventBus)
     {
         _tinyEventBus = tinyEventBus;
     }

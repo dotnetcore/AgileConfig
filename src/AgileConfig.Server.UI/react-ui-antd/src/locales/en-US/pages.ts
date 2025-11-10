@@ -312,6 +312,16 @@ export default {
   'pages.role.permissions.ROLE_ADD': 'Add Role',
   'pages.role.permissions.ROLE_EDIT': 'Edit Role',
   'pages.role.permissions.ROLE_DELETE': 'Delete Role',
+  'pages.role.permissions.APP_READ': 'View App',
+  'pages.role.permissions.CONFIG_READ': 'View Config',
+  'pages.role.permissions.NODE_READ': 'View Node',
+  'pages.role.permissions.CLIENT_REFRESH': 'Refresh Client',
+  'pages.role.permissions.USER_READ': 'View User',
+  'pages.role.permissions.ROLE_READ': 'View Role',
+  'pages.role.permissions.SERVICE_READ': 'View Service',
+  'pages.role.permissions.SERVICE_ADD': 'Add Service',
+  'pages.role.permissions.SERVICE_DELETE': 'Delete Service',
+  'pages.role.permissions.LOG_READ': 'View Logs',
 
   // Service Management
   'pages.service.table.cols.servicename': 'Service Name',

@@ -310,6 +310,16 @@ export default {
   'pages.role.permissions.ROLE_ADD': '新增角色',
   'pages.role.permissions.ROLE_EDIT': '编辑角色',
   'pages.role.permissions.ROLE_DELETE': '删除角色',
+  'pages.role.permissions.APP_READ': '查看应用',
+  'pages.role.permissions.CONFIG_READ': '查看配置',
+  'pages.role.permissions.NODE_READ': '查看节点',
+  'pages.role.permissions.CLIENT_REFRESH': '刷新客户端',
+  'pages.role.permissions.USER_READ': '查看用户',
+  'pages.role.permissions.ROLE_READ': '查看角色',
+  'pages.role.permissions.SERVICE_READ': '查看服务',
+  'pages.role.permissions.SERVICE_ADD': '新增服务',
+  'pages.role.permissions.SERVICE_DELETE': '删除服务',
+  'pages.role.permissions.LOG_READ': '查看日志',
 
   // Service Management
   'pages.service.table.cols.servicename': '服务名',

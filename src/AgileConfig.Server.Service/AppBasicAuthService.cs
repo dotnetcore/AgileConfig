@@ -1,100 +1,83 @@
-﻿using AgileConfig.Server.IService;
-using Microsoft.AspNetCore.Http;
-using System;
+﻿using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AgileConfig.Server.IService;
+using Microsoft.AspNetCore.Http;
 
-namespace AgileConfig.Server.Service
+namespace AgileConfig.Server.Service;
+
+public class AppBasicAuthService : IAppBasicAuthService
 {
-    public class AppBasicAuthService : IAppBasicAuthService
+    private readonly IAppService _appService;
+
+    public AppBasicAuthService(IAppService appService)
     {
-        private readonly IAppService _appService;
-        public AppBasicAuthService(IAppService appService)
+        _appService = appService;
+    }
+
+    /// <summary>
+    ///     Parse the appId and secret from the HTTP request.
+    /// </summary>
+    /// <param name="httpRequest">Incoming HTTP request containing the Authorization header.</param>
+    /// <returns>Tuple of Application ID and secret extracted from the header.</returns>
+    public (string, string) GetAppIdSecret(HttpRequest httpRequest)
+    {
+        var authorization = httpRequest.Headers["Authorization"];
+        if (string.IsNullOrEmpty(authorization)) return ("", "");
+        var authStr = authorization.First();
+        // Remove the "Basic " prefix.
+        if (!authStr.StartsWith("Basic "))
         {
-            _appService = appService;
-        }
-        /// <summary>
-        /// Parse the appId and secret from the HTTP request.
-        /// </summary>
-        /// <param name="httpRequest">Incoming HTTP request containing the Authorization header.</param>
-        /// <returns>Tuple of Application ID and secret extracted from the header.</returns>
-        public (string, string) GetAppIdSecret(HttpRequest httpRequest)
-        {
-            var authorization = httpRequest.Headers["Authorization"];
-            if (string.IsNullOrEmpty(authorization))
-            {
-                return ("", "");
-            }
-            var authStr = authorization.First();
-            // Remove the "Basic " prefix.
-            if (!authStr.StartsWith("Basic "))
-            {
-                return ("", ""); ;
-            }
-            authStr = authStr.Substring(6, authStr.Length - 6);
-            byte[] base64Decode = null;
-            try
-            {
-                base64Decode = Convert.FromBase64String(authStr);
-            }
-            catch
-            {
-                return ("", "");
-            }
-            var base64Str = Encoding.UTF8.GetString(base64Decode);
-
-            if (string.IsNullOrEmpty(base64Str))
-            {
-                return ("", "");
-            }
-
-            var appId = "";
-            var sec = "";
-
-
-            var baseAuthArr = base64Str.Split(':');
-
-            if (baseAuthArr.Length > 0)
-            {
-                appId = baseAuthArr[0];
-            }
-            if (baseAuthArr.Length > 1)
-            {
-                sec = baseAuthArr[1];
-            }
-
-            return (appId, sec);
+            return ("", "");
+            ;
         }
 
-        public (string, string) GetUserNamePassword(HttpRequest httpRequest)
+        authStr = authStr.Substring(6, authStr.Length - 6);
+        byte[] base64Decode = null;
+        try
         {
-            throw new NotImplementedException();
+            base64Decode = Convert.FromBase64String(authStr);
+        }
+        catch
+        {
+            return ("", "");
         }
 
-        public async Task<bool> ValidAsync(HttpRequest httpRequest)
-        {
-            var appIdSecret = GetAppIdSecret(httpRequest);
-            var appId = appIdSecret.Item1;
-            var sec = appIdSecret.Item2;
-            if (string.IsNullOrEmpty(appIdSecret.Item1))
-            {
-                return false;
-            }
+        var base64Str = Encoding.UTF8.GetString(base64Decode);
 
-            var app = await _appService.GetAsync(appId);
-            if (app == null)
-            {
-                return false;
-            }
-            if (!app.Enabled)
-            {
-                return false;
-            }
+        if (string.IsNullOrEmpty(base64Str)) return ("", "");
 
-            var txt = $"{app.Id}:{app.Secret}";
+        var appId = "";
+        var sec = "";
 
-            return txt == $"{appId}:{sec}";
-        }
+
+        var baseAuthArr = base64Str.Split(':');
+
+        if (baseAuthArr.Length > 0) appId = baseAuthArr[0];
+        if (baseAuthArr.Length > 1) sec = baseAuthArr[1];
+
+        return (appId, sec);
+    }
+
+    public async Task<bool> ValidAsync(HttpRequest httpRequest)
+    {
+        var appIdSecret = GetAppIdSecret(httpRequest);
+        var appId = appIdSecret.Item1;
+        var sec = appIdSecret.Item2;
+        if (string.IsNullOrEmpty(appIdSecret.Item1)) return false;
+
+        var app = await _appService.GetAsync(appId);
+        if (app == null) return false;
+        if (!app.Enabled) return false;
+
+        var txt = $"{app.Id}:{app.Secret}";
+
+        return txt == $"{appId}:{sec}";
+    }
+
+    public (string, string) GetUserNamePassword(HttpRequest httpRequest)
+    {
+        throw new NotImplementedException();
     }
 }

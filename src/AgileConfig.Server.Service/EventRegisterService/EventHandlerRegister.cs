@@ -3,14 +3,15 @@ using AgileConfig.Server.IService;
 
 namespace AgileConfig.Server.Service.EventRegisterService;
 
-public class EventHandlerRegister(SystemEventHandlersRegister sysLogRegister, 
+public class EventHandlerRegister(
+    SystemEventHandlersRegister sysLogRegister,
     ConfigStatusUpdateEventHandlersRegister configStatusUpdateRegister,
     ServiceInfoStatusUpdateEventHandlersRegister serviceInfoStatusUpdateRegister
-    ) : IEventHandlerRegister
+) : IEventHandlerRegister
 {
-    private readonly IEventHandlerRegister? _sysLogRegister = sysLogRegister;
     private readonly IEventHandlerRegister? _configStatusUpdateRegister = configStatusUpdateRegister;
     private readonly IEventHandlerRegister? _serviceInfoStatusUpdateRegister = serviceInfoStatusUpdateRegister;
+    private readonly IEventHandlerRegister? _sysLogRegister = sysLogRegister;
 
     public void Register()
     {
