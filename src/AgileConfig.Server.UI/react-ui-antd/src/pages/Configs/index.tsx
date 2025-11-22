@@ -371,7 +371,7 @@ const configs: React.FC = (props: any) => {
       width: 150,
       valueType: 'option',
       render: (text, record, _, action) => [
-        <RequireFunction fn={functionKeys.Config_Edit} key="edit" fallback={null}>
+        <RequireFunction fn={functionKeys.Config_Edit} key="edit" fallback={null} appId={appId}>
           <a
             onClick={() => {
               setCurrentRow(record);
@@ -381,7 +381,7 @@ const configs: React.FC = (props: any) => {
             {intl.formatMessage({ id: 'pages.configs.table.cols.action.edit' })}
           </a>
         </RequireFunction>,
-        <RequireFunction fn={functionKeys.Config_Delete} key="delete" fallback={null}>
+        <RequireFunction fn={functionKeys.Config_Delete} key="delete" fallback={null} appId={appId}>
           <a
             onClick={() => {
               delConfig(record);
@@ -390,7 +390,7 @@ const configs: React.FC = (props: any) => {
             {intl.formatMessage({ id: 'pages.configs.table.cols.action.delete' })}
           </a>
         </RequireFunction>,
-        <RequireFunction fn={functionKeys.Config_Delete} key="dropdown" fallback={null}>
+        <RequireFunction fn={functionKeys.Config_Delete} key="dropdown" fallback={null} appId={appId}>
           <TableDropdown
             key="actionGroup"
             onSelect={async (item) => {
@@ -504,13 +504,13 @@ const configs: React.FC = (props: any) => {
           </Space>
         }
         toolBarRender={() => [
-          <RequireFunction fn={functionKeys.Config_Add} key="add" fallback={null}>
+          <RequireFunction fn={functionKeys.Config_Add} key="add" fallback={null} appId={appId}>
             <Button type="primary" icon={<PlusOutlined />} onClick={() => { setCreateModalVisible(true); }}>
               {intl.formatMessage({ id: 'pages.configs.table.cols.action.add' })}
             </Button>
           </RequireFunction>
           ,
-          <RequireFunction fn={functionKeys.Config_Publish} key="publish" fallback={null}>
+          <RequireFunction fn={functionKeys.Config_Publish} key="publish" fallback={null} appId={appId}>
             <Button
               icon={<VerticalAlignTopOutlined />}
               type="primary"
@@ -528,7 +528,7 @@ const configs: React.FC = (props: any) => {
             </Button>
           </RequireFunction>
           ,
-          <RequireFunction fn={functionKeys.Config_Publish} key="cancelEdit" fallback={null}>
+          <RequireFunction fn={functionKeys.Config_Publish} key="cancelEdit" fallback={null} appId={appId}>
             {selectedRowsState.filter((x) => x.editStatus !== 10).length > 0 ? (
               <Button
                 type="primary"
@@ -557,7 +557,7 @@ const configs: React.FC = (props: any) => {
             ) : null}
           </RequireFunction>
         ,
-        <RequireFunction fn={functionKeys.Config_Edit} key="deleteSelected" fallback={null}>
+        <RequireFunction fn={functionKeys.Config_Edit} key="deleteSelected" fallback={null} appId={appId}>
           {selectedRowsState.length > 0 ? (
             <Button
               type="primary"
@@ -583,13 +583,13 @@ const configs: React.FC = (props: any) => {
           ) : null}
         </RequireFunction>
         ,
-         <RequireFunction fn={functionKeys.Config_Edit} key="editJson" fallback={null}>
+         <RequireFunction fn={functionKeys.Config_Edit} key="editJson" fallback={null} appId={appId}>
           <Button onClick={() => { setJsonEditorVisible(true); }}>
             {intl.formatMessage({ id: 'pages.configs.table.cols.action.edit_json' })}
           </Button>
         </RequireFunction>
           ,
-         <RequireFunction fn={functionKeys.Config_Edit} key="editText" fallback={null}>
+         <RequireFunction fn={functionKeys.Config_Edit} key="editText" fallback={null} appId={appId}>
           <Button onClick={() => { setTextEditorVisible(true); }}>
             {intl.formatMessage({ id: 'pages.configs.table.cols.action.edit_text' })}
           </Button>

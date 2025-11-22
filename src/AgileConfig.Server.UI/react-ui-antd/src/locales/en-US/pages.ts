@@ -134,8 +134,7 @@ export default {
   'pages.app.table.group_aggregation': 'Group Aggregation',
 
   'pages.app.auth.title': 'User Authorization',
-  'pages.app.auth.edit_permission': 'Edit Permission',
-  'pages.app.auth.publish_permission': 'Publish Permission',
+  'pages.app.auth.bind_users': 'Bind Users',
 
   'pages.app.inheritanced.true': 'public',
   'pages.app.inheritanced.false': 'private',

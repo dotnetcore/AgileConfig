@@ -131,8 +131,7 @@ export default {
   'pages.app.table.group_aggregation': '分组聚合',
 
   'pages.app.auth.title': '用户授权',
-  'pages.app.auth.edit_permission': '修改权',
-  'pages.app.auth.publish_permission': '发布权',
+  'pages.app.auth.bind_users': '绑定用户',
 
   'pages.app.inheritanced.true': '公共',
   'pages.app.inheritanced.false': '私有',

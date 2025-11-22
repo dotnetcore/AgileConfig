@@ -32,6 +32,7 @@ public class ServiceController : Controller
     }
 
     [HttpPost]
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.Service_Add })]
     public async Task<IActionResult> Add([FromBody] ServiceInfoVM model)
     {
         if (model == null) throw new ArgumentNullException(nameof(model));
@@ -64,6 +65,7 @@ public class ServiceController : Controller
     }
 
     [HttpPost]
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.Service_Delete })]
     public async Task<IActionResult> Remove(string id)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException("id");
@@ -86,6 +88,7 @@ public class ServiceController : Controller
         });
     }
 
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.Service_Read })]
     public async Task<IActionResult> Search(string serviceName, string serviceId, ServiceStatus? status,
         string sortField, string ascOrDesc,
         int current = 1, int pageSize = 20)

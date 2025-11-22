@@ -31,6 +31,5 @@ export type AppListResult = {
 
 export type UserAppAuth = {
   appId: string,
-  editConfigPermissionUsers?: string[],
-  publishConfigPermissionUsers?: string[]
+  authorizedUsers?: string[]
 }

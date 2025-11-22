@@ -2,34 +2,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AgileConfig.Server.Data.Abstraction;
-using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 
 namespace AgileConfig.Server.Service;
 
 public class PermissionService : IPermissionService
 {
-    private readonly IAppRepository _appRepository;
     private readonly IFunctionRepository _functionRepository;
-    private readonly IRoleDefinitionRepository _roleDefinitionRepository;
     private readonly IRoleFunctionRepository _roleFunctionRepository;
     private readonly IUserAppAuthRepository _userAppAuthRepository;
     private readonly IUserRoleRepository _userRoleRepository;
 
     public PermissionService(
         IUserRoleRepository userRoleRepository,
-        IRoleDefinitionRepository roleDefinitionRepository,
         IRoleFunctionRepository roleFunctionRepository,
         IFunctionRepository functionRepository,
-        IUserAppAuthRepository userAppAuthRepository,
-        IAppRepository appRepository)
+        IUserAppAuthRepository userAppAuthRepository)
     {
         _userRoleRepository = userRoleRepository;
-        _roleDefinitionRepository = roleDefinitionRepository;
         _roleFunctionRepository = roleFunctionRepository;
         _functionRepository = functionRepository;
         _userAppAuthRepository = userAppAuthRepository;
-        _appRepository = appRepository;
     }
 
 
@@ -40,17 +33,20 @@ public class PermissionService : IPermissionService
     /// <returns>List of permission codes granted to the user.</returns>
     public async Task<List<string>> GetUserPermission(string userId)
     {
+        var functionCodes = new List<string>();
+
         var userRoles = await _userRoleRepository.QueryAsync(x => x.UserId == userId);
         var roleIds = userRoles.Select(x => x.RoleId).Distinct().ToList();
-        if (!roleIds.Any()) return new List<string>();
+        if (roleIds.Any())
+        {
+            var roleFunctions = await _roleFunctionRepository.QueryAsync(x => roleIds.Contains(x.RoleId));
+            var functionIds = roleFunctions.Select(rf => rf.FunctionId).Distinct().ToList();
 
-        var roleFunctions = await _roleFunctionRepository.QueryAsync(x => roleIds.Contains(x.RoleId));
-        var functionIds = roleFunctions.Select(rf => rf.FunctionId).Distinct().ToList();
+            var functions = await _functionRepository.QueryAsync(f => functionIds.Contains(f.Id));
+            functionCodes = functions.Select(f => f.Code).Distinct().ToList();
+        }
 
-        var functions = await _functionRepository.QueryAsync(f => functionIds.Contains(f.Id));
-        var functionCodes = functions.Select(f => f.Code).Distinct().ToList();
-
-        return functionCodes;
+        return functionCodes.Distinct().ToList();
     }
 
     /// <summary>
@@ -82,25 +78,4 @@ public class PermissionService : IPermissionService
     public string EditConfigPermissionKey => "EDIT_CONFIG";
 
     public string PublishConfigPermissionKey => "PUBLISH_CONFIG";
-
-    /// <summary>
-    ///     Retrieve applications where the user has been explicitly authorized.
-    /// </summary>
-    /// <param name="userId">Identifier of the user whose application authorizations are requested.</param>
-    /// <param name="authPermissionKey">Permission key used to filter authorized applications.</param>
-    /// <returns>List of applications the user can access for the specified permission.</returns>
-    private async Task<List<App>> GetUserAuthApp(string userId, string authPermissionKey)
-    {
-        var apps = new List<App>();
-        var userAuths =
-            await _userAppAuthRepository.QueryAsync(x => x.UserId == userId && x.Permission == authPermissionKey);
-        foreach (var appAuth in userAuths)
-        {
-            var app = await _appRepository.GetAsync(appAuth.AppId);
-            if (app != null) apps.Add(app);
-        }
-
-        return apps;
-    }
-
 }

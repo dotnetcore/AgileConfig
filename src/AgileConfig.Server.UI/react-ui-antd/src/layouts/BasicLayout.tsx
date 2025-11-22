@@ -85,6 +85,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
       });
     }
   }, []);
+
   /** Init variables */
 
   const handleMenuCollapse = (payload: boolean): void => {
@@ -108,6 +109,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
 
   return (
     <ProLayout
+      key={`pro-layout-`}
       logo={logo}
       formatMessage={formatMessage}
       {...props}

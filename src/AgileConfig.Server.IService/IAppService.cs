@@ -28,11 +28,11 @@ public interface IAppService : IDisposable
 
     Task<(List<App> Apps, long Count)> SearchAsync(string id, string name, string group, string sortField,
         string ascOrDesc,
-        int current, int pageSize);
+        int current, int pageSize, string userId, bool isAdmin);
 
     Task<(List<GroupedApp> GroupedApps, long Count)> SearchGroupedAsync(string id, string name, string group,
         string sortField, string ascOrDesc,
-        int current, int pageSize);
+        int current, int pageSize, string userId, bool isAdmin);
 
     Task<List<App>> GetAllInheritancedAppsAsync();
 
@@ -42,9 +42,9 @@ public interface IAppService : IDisposable
 
     Task<List<App>> GetInheritancedFromAppsAsync(string appId);
 
-    Task<bool> SaveUserAppAuth(string appId, List<string> userIds, string permission);
+    Task<bool> SaveUserAppAuth(string appId, List<string> userIds);
 
-    Task<List<User>> GetUserAppAuth(string appId, string permission);
+    Task<List<User>> GetUserAppAuth(string appId);
 
     Task<List<string>> GetAppGroups();
 }

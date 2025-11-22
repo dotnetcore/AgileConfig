@@ -28,7 +28,7 @@ public class TestAppController
         var permissionService = new Mock<IPermissionService>();
         var eventBus = new Mock<ITinyEventBus>();
 
-        var ctl = new AppController(appService.Object, permissionService.Object, userService.Object, eventBus.Object);
+        var ctl = new AppController(appService.Object, userService.Object, eventBus.Object);
 
         ctl.ControllerContext.HttpContext = new DefaultHttpContext();
 

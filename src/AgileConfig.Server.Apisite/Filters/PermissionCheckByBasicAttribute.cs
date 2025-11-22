@@ -20,7 +20,7 @@ public class PermissionCheckByBasicAttribute : PermissionCheckAttribute
         IAdmBasicAuthService basicAuthService,
         IUserService userService,
         string actionName,
-        string functionKey) : base(permissionService, configService, actionName, functionKey)
+        string functionKey) : base(permissionService, configService, functionKey)
     {
         _userService = userService;
         _basicAuthService = basicAuthService;

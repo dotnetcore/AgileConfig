@@ -6,6 +6,7 @@ using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Apisite.Models.Mapping;
 using AgileConfig.Server.Apisite.Utilites;
+using AgileConfig.Server.Common;
 using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.Common.Resources;
 using AgileConfig.Server.Data.Entity;
@@ -21,21 +22,20 @@ namespace AgileConfig.Server.Apisite.Controllers;
 public class AppController : Controller
 {
     private readonly IAppService _appService;
-    private readonly IPermissionService _permissionService;
     private readonly ITinyEventBus _tinyEventBus;
     private readonly IUserService _userService;
 
     public AppController(IAppService appService,
-        IPermissionService permissionService,
         IUserService userService,
         ITinyEventBus tinyEventBus)
     {
         _userService = userService;
         _tinyEventBus = tinyEventBus;
         _appService = appService;
-        _permissionService = permissionService;
     }
 
+    [TypeFilter(typeof(PermissionCheckAttribute),
+        Arguments = new object[] { Functions.App_Read })]
     public async Task<IActionResult> Search(string name, string id, string group, string sortField,
         string ascOrDesc, bool tableGrouped, int current = 1, int pageSize = 20)
     {
@@ -43,12 +43,21 @@ public class AppController : Controller
 
         if (pageSize < 1) throw new ArgumentException(Messages.PageSizeCannotBeLessThanOne);
 
+        var currentUserId = await this.GetCurrentUserId(_userService);
+        var isAdmin = false;
+        if (!string.IsNullOrWhiteSpace(currentUserId))
+        {
+            var roles = await _userService.GetUserRolesAsync(currentUserId);
+            isAdmin = roles.Any(r => r.Id == SystemRoleConstants.AdminId || r.Id == SystemRoleConstants.SuperAdminId);
+        }
+
         var appListVms = new List<AppListVM>();
         long count = 0;
         if (!tableGrouped)
         {
             var searchResult =
-                await _appService.SearchAsync(id, name, group, sortField, ascOrDesc, current, pageSize);
+                await _appService.SearchAsync(id, name, group, sortField, ascOrDesc, current, pageSize, currentUserId,
+                    isAdmin);
             foreach (var app in searchResult.Apps) appListVms.Add(app.ToAppListVM());
 
             count = searchResult.Count;
@@ -56,7 +65,8 @@ public class AppController : Controller
         else
         {
             var searchResult =
-                await _appService.SearchGroupedAsync(id, name, group, sortField, ascOrDesc, current, pageSize);
+                await _appService.SearchGroupedAsync(id, name, group, sortField, ascOrDesc, current, pageSize,
+                    currentUserId, isAdmin);
             foreach (var groupedApp in searchResult.GroupedApps)
             {
                 var app = groupedApp.App;
@@ -97,7 +107,7 @@ public class AppController : Controller
         }
     }
 
-    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { "App.Add", Functions.App_Add })]
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Add })]
     [HttpPost]
     public async Task<IActionResult> Add([FromBody] AppVM model)
     {
@@ -141,7 +151,7 @@ public class AppController : Controller
         });
     }
 
-    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { "App.Edit", Functions.App_Edit })]
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Edit })]
     [HttpPost]
     public async Task<IActionResult> Edit([FromBody] AppVM model)
     {
@@ -188,6 +198,7 @@ public class AppController : Controller
         });
     }
 
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Read })]
     [HttpGet]
     public async Task<IActionResult> Get(string id)
     {
@@ -213,7 +224,7 @@ public class AppController : Controller
     }
 
     [TypeFilter(typeof(PermissionCheckAttribute),
-        Arguments = new object[] { "App.DisableOrEnable", Functions.App_Edit })]
+        Arguments = new object[] { Functions.App_Edit })]
     [HttpPost]
     public async Task<IActionResult> DisableOrEnable(string id)
     {
@@ -237,7 +248,7 @@ public class AppController : Controller
         });
     }
 
-    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { "App.Delete", Functions.App_Delete })]
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Delete })]
     [HttpPost]
     public async Task<IActionResult> Delete(string id)
     {
@@ -267,6 +278,7 @@ public class AppController : Controller
     /// </summary>
     /// <returns></returns>
     [HttpGet]
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Read })]
     public async Task<IActionResult> InheritancedApps(string currentAppId)
     {
         var apps = await _appService.GetAllInheritancedAppsAsync();
@@ -296,24 +308,22 @@ public class AppController : Controller
     /// </summary>
     /// <param name="model">View model containing authorization assignments.</param>
     /// <returns>Operation result.</returns>
-    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { "App.Auth", Functions.App_Auth })]
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Auth })]
     [HttpPost]
     public async Task<IActionResult> SaveAppAuth([FromBody] AppAuthVM model)
     {
         ArgumentNullException.ThrowIfNull(model);
 
-        var result = await _appService.SaveUserAppAuth(model.AppId, model.EditConfigPermissionUsers,
-            _permissionService.EditConfigPermissionKey);
-        var result1 = await _appService.SaveUserAppAuth(model.AppId, model.PublishConfigPermissionUsers,
-            _permissionService.PublishConfigPermissionKey);
+        var result = await _appService.SaveUserAppAuth(model.AppId, model.AuthorizedUsers);
 
         return Json(new
         {
-            success = result && result1
+            success = result
         });
     }
 
     [HttpGet]
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Read })]
     public async Task<IActionResult> GetUserAppAuth(string appId)
     {
         ArgumentException.ThrowIfNullOrEmpty(appId);
@@ -322,12 +332,8 @@ public class AppController : Controller
         {
             AppId = appId
         };
-        result.EditConfigPermissionUsers =
-            (await _appService.GetUserAppAuth(appId, _permissionService.EditConfigPermissionKey)).Select(x => x.Id)
-            .ToList();
-        result.PublishConfigPermissionUsers =
-            (await _appService.GetUserAppAuth(appId, _permissionService.PublishConfigPermissionKey))
-            .Select(x => x.Id).ToList();
+        result.AuthorizedUsers =
+            (await _appService.GetUserAppAuth(appId)).Select(x => x.Id).ToList();
 
         return Json(new
         {
@@ -337,6 +343,7 @@ public class AppController : Controller
     }
 
     [HttpGet]
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Read })]
     public async Task<IActionResult> GetAppGroups()
     {
         var groups = await _appService.GetAppGroups();

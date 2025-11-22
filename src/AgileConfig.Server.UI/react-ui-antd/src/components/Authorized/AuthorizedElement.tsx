@@ -7,18 +7,19 @@ type AuthorizedProps = {
   noMatch?: React.ReactNode;
 };
 
-export const checkUserPermission = (functions:string[],judgeKey:string, appid:string|undefined)=>{
+export const checkUserPermission = (functions:string[] | undefined,judgeKey:string, appid:string|undefined)=>{
   let appId = '';
+  const fnList = functions ?? [];
   if (appid) {
     appId = appid ;
   }
   // Check for global permission (without GLOBAL_ prefix)
-  let key = functions.find(x=>x === judgeKey);
+  let key = fnList.find(x=>x === judgeKey);
   if (key) return true;
 
   // Check for app-specific permission
   let matchKey = ('APP_'+ appId + '_' + judgeKey);
-  key = functions.find(x=>x === matchKey);
+  key = fnList.find(x=>x === matchKey);
   if (key) return true;
 
   return false;

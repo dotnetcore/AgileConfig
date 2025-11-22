@@ -56,7 +56,7 @@ public class RoleController : Controller
         });
     }
 
-    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { "Role.Add", Functions.Role_Add })]
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.Role_Add })]
     [HttpPost]
     public async Task<IActionResult> Add([FromBody] RoleVM model)
     {
@@ -75,7 +75,7 @@ public class RoleController : Controller
         return Json(new { success = true });
     }
 
-    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { "Role.Edit", Functions.Role_Edit })]
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.Role_Edit })]
     [HttpPost]
     public async Task<IActionResult> Edit([FromBody] RoleVM model)
     {
@@ -106,7 +106,7 @@ public class RoleController : Controller
         });
     }
 
-    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { "Role.Delete", Functions.Role_Delete })]
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.Role_Delete })]
     [HttpPost]
     public async Task<IActionResult> Delete(string id)
     {

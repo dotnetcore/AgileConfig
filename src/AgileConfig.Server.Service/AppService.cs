@@ -129,7 +129,7 @@ public class AppService : IAppService
 
     public async Task<(List<App> Apps, long Count)> SearchAsync(string id, string name, string group,
         string sortField, string ascOrDesc,
-        int current, int pageSize)
+        int current, int pageSize, string userId, bool isAdmin)
     {
         Expression<Func<App, bool>> exp = app => true;
 
@@ -138,6 +138,14 @@ public class AppService : IAppService
         if (!string.IsNullOrWhiteSpace(name)) exp = exp.And(a => a.Name.Contains(name));
 
         if (!string.IsNullOrWhiteSpace(group)) exp = exp.And(a => a.Group == group);
+
+        if (!isAdmin)
+        {
+            if (string.IsNullOrWhiteSpace(userId)) return (new List<App>(), 0);
+
+            var authorizedAppIds = await GetUserAuthorizedAppIds(userId);
+            exp = exp.And(a => a.Creator == userId || authorizedAppIds.Contains(a.Id));
+        }
 
         if (string.IsNullOrWhiteSpace(ascOrDesc)) ascOrDesc = "asc";
 
@@ -150,7 +158,7 @@ public class AppService : IAppService
 
     public async Task<(List<GroupedApp> GroupedApps, long Count)> SearchGroupedAsync(string id, string name,
         string group, string sortField, string ascOrDesc, int current,
-        int pageSize)
+        int pageSize, string userId, bool isAdmin)
     {
         Expression<Func<App, bool>> exp = app => true;
 
@@ -159,6 +167,14 @@ public class AppService : IAppService
         if (!string.IsNullOrWhiteSpace(name)) exp = exp.And(a => a.Name.Contains(name));
 
         if (!string.IsNullOrWhiteSpace(group)) exp = exp.And(a => a.Group == group);
+
+        if (!isAdmin)
+        {
+            if (string.IsNullOrWhiteSpace(userId)) return (new List<GroupedApp>(), 0);
+
+            var authorizedAppIds = await GetUserAuthorizedAppIds(userId);
+            exp = exp.And(a => a.Creator == userId || authorizedAppIds.Contains(a.Id));
+        }
 
         var apps = await _appRepository.QueryAsync(exp);
 
@@ -275,7 +291,7 @@ public class AppService : IAppService
         return true;
     }
 
-    public async Task<bool> SaveUserAppAuth(string appId, List<string> userIds, string permission)
+    public async Task<bool> SaveUserAppAuth(string appId, List<string> userIds)
     {
         var userAppAuthList = new List<UserAppAuth>();
         if (userIds == null) userIds = new List<string>();
@@ -286,13 +302,13 @@ public class AppService : IAppService
                 Id = Guid.NewGuid().ToString("N"),
                 AppId = appId,
                 UserId = userId,
-                Permission = permission
+                Permission = string.Empty
             });
 
         var removeApps =
-            await _userAppAuthRepository.QueryAsync(x => x.AppId == appId && x.Permission == permission);
+            await _userAppAuthRepository.QueryAsync(x => x.AppId == appId);
         await _userAppAuthRepository.DeleteAsync(removeApps);
-        await _userAppAuthRepository.InsertAsync(userAppAuthList);
+        if (userAppAuthList.Any()) await _userAppAuthRepository.InsertAsync(userAppAuthList);
 
         return true;
     }
@@ -305,16 +321,24 @@ public class AppService : IAppService
         _userRepository.Dispose();
     }
 
-    public async Task<List<User>> GetUserAppAuth(string appId, string permission)
+    private async Task<List<string>> GetUserAuthorizedAppIds(string userId)
     {
-        var auths = await _userAppAuthRepository.QueryAsync(x => x.AppId == appId && x.Permission == permission);
+        var authorizedAppIds = new List<string>();
+        if (string.IsNullOrWhiteSpace(userId)) return authorizedAppIds;
 
-        var users = new List<User>();
-        foreach (var auth in auths)
-        {
-            var user = await _userRepository.GetAsync(auth.UserId);
-            if (user != null) users.Add(user);
-        }
+        var auths = await _userAppAuthRepository.QueryAsync(x => x.UserId == userId);
+
+        return auths.Select(x => x.AppId).Distinct().ToList();
+    }
+
+    public async Task<List<User>> GetUserAppAuth(string appId)
+    {
+        var auths = await _userAppAuthRepository.QueryAsync(x => x.AppId == appId);
+        var userIds = auths.Select(x => x.UserId).Distinct().ToList();
+
+        if (!userIds.Any()) return new List<User>();
+
+        var users = await _userRepository.QueryAsync(u => userIds.Contains(u.Id));
 
         return users;
     }

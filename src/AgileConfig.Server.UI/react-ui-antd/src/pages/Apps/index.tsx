@@ -38,7 +38,7 @@ import UserAuth from './comps/userAuth';
 import AuthorizedEle from '@/components/Authorized/AuthorizedElement';
 import functionKeys from '@/models/functionKeys';
 import { current } from '@/services/user';
-import { setAuthority, setFunctions } from '@/utils/authority';
+import { getAuthority, getUserInfo, setAuthority, setFunctions } from '@/utils/authority';
 import { RequireFunction } from '@/utils/permission';
 
 const { confirm } = Modal;
@@ -197,6 +197,17 @@ const appList: React.FC = (props) => {
   const [newAppGroupName, setNewAppGroupName] = useState<string>('');
   const [appGroupsEnums, setAppGroupsEnums] = useState<{}>({});
   const [tableGrouped, setTableGrouped] = useState<boolean>(false);
+  const currentUser = getUserInfo();
+  const isAdmin = () => {
+    const roles = getAuthority();
+    if (!roles) return false;
+    if (Array.isArray(roles)) return roles.some(r => typeof r === 'string' && r.toLowerCase().includes('admin'));
+    if (typeof roles === 'string') return roles.toLowerCase().includes('admin');
+    return false;
+  };
+  const canAuth = (record: AppListItem) => {
+    return isAdmin() || (!!currentUser?.userid && record.creator === currentUser.userid);
+  };
 
   useEffect(() => {
     getAppGroups().then((x) => {
@@ -360,7 +371,7 @@ const appList: React.FC = (props) => {
       }),
       valueType: 'option',
       render: (text, record, _, action) => [
-        <RequireFunction key="0" fn={functionKeys.Config_Read} fallback={null}>
+        <RequireFunction key="0" fn={functionKeys.Config_Read} fallback={null} appId={record.id}>
           <Link
             
             to={{ pathname: '/app/config/' + record.id + '/' + record.name }}
@@ -380,7 +391,7 @@ const appList: React.FC = (props) => {
             })}
           </a>
         </RequireFunction>,
-        <RequireFunction key="2" fn={functionKeys.App_Auth} fallback={null}>
+        <RequireFunction key="2" fn={functionKeys.App_Auth} fallback={null} appId={record.id} extraCheck={() => canAuth(record)}>
           <a
             
             onClick={() => {

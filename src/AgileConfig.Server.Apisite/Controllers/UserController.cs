@@ -32,6 +32,7 @@ public class UserController : Controller
     }
 
     [HttpGet]
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.User_Read })]
     public async Task<IActionResult> Search(string userName, string team, int current = 1, int pageSize = 20)
     {
         if (current <= 0) throw new ArgumentException(Messages.CurrentCannotBeLessThanOneUser);
@@ -72,7 +73,7 @@ public class UserController : Controller
         });
     }
 
-    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { "User.Add", Functions.User_Add })]
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.User_Add })]
     [HttpPost]
     public async Task<IActionResult> Add([FromBody] UserVM model)
     {
@@ -112,7 +113,7 @@ public class UserController : Controller
         });
     }
 
-    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { "User.Edit", Functions.User_Edit })]
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.User_Edit })]
     [HttpPost]
     public async Task<IActionResult> Edit([FromBody] UserVM model)
     {
@@ -146,7 +147,7 @@ public class UserController : Controller
     }
 
     [TypeFilter(typeof(PermissionCheckAttribute),
-        Arguments = new object[] { "User.ResetPassword", Functions.User_Edit })]
+        Arguments = new object[] { Functions.User_Edit })]
     [HttpPost]
     public async Task<IActionResult> ResetPassword(string userId)
     {
@@ -172,7 +173,7 @@ public class UserController : Controller
         });
     }
 
-    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { "User.Delete", Functions.User_Delete })]
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.User_Delete })]
     [HttpPost]
     public async Task<IActionResult> Delete(string userId)
     {

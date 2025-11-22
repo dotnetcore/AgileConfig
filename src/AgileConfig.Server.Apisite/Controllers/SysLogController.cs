@@ -1,9 +1,10 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
 
 namespace AgileConfig.Server.Apisite.Controllers;
 
@@ -18,6 +19,7 @@ public class SysLogController : Controller
     }
 
     [HttpGet]
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.Log_Read })]
     public async Task<IActionResult> Search(string appId, SysLogType? logType, DateTime? startTime, DateTime? endTime,
         int current = 1, int pageSize = 20)
     {

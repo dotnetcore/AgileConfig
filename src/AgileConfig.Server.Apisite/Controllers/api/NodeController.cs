@@ -55,7 +55,7 @@ public class NodeController : Controller
     /// <param name="model">Node payload.</param>
     /// <returns></returns>
     [ProducesResponseType(201)]
-    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { "Node.Add", Functions.Node_Add })]
+    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.Node_Add })]
     [HttpPost]
     public async Task<IActionResult> Add([FromBody] ApiNodeVM model)
     {
@@ -91,7 +91,7 @@ public class NodeController : Controller
     /// <returns></returns>
     [ProducesResponseType(204)]
     [TypeFilter(typeof(PermissionCheckByBasicAttribute),
-        Arguments = new object[] { "Node.Delete", Functions.Node_Delete })]
+        Arguments = new object[] { Functions.Node_Delete })]
     [HttpDelete]
     public async Task<IActionResult> Delete([FromQuery] string address)
     {

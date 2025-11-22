@@ -95,6 +95,8 @@ public class ConfigController : Controller
     /// <returns></returns>
     [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
     [HttpGet]
+    [TypeFilter(typeof(PermissionCheckByBasicAttribute),
+        Arguments = new object[] { Functions.Config_Read })]
     public async Task<ActionResult<List<ApiConfigVM>>> GetConfigs(string appId, EnvString env)
     {
         ArgumentException.ThrowIfNullOrEmpty(appId);
@@ -112,6 +114,8 @@ public class ConfigController : Controller
     /// <returns></returns>
     [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
     [HttpGet("{id}")]
+    [TypeFilter(typeof(PermissionCheckByBasicAttribute),
+        Arguments = new object[] { Functions.Config_Read })]
     public async Task<ActionResult<ApiConfigVM>> GetConfig(string id, EnvString env)
     {
         ArgumentException.ThrowIfNullOrEmpty(id);
@@ -131,7 +135,7 @@ public class ConfigController : Controller
     [ProducesResponseType(201)]
     [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
     [TypeFilter(typeof(PermissionCheckByBasicAttribute),
-        Arguments = new object[] { "Config.Add", Functions.Config_Add })]
+        Arguments = new object[] { Functions.Config_Add })]
     [HttpPost]
     public async Task<IActionResult> Add([FromBody] ApiConfigVM model, EnvString env)
     {
@@ -170,7 +174,7 @@ public class ConfigController : Controller
     /// <returns></returns>
     [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
     [TypeFilter(typeof(PermissionCheckByBasicAttribute),
-        Arguments = new object[] { "Config.Edit", Functions.Config_Edit })]
+        Arguments = new object[] { Functions.Config_Edit })]
     [HttpPut("{id}")]
     public async Task<IActionResult> Edit(string id, [FromBody] ApiConfigVM model, EnvString env)
     {
@@ -208,7 +212,7 @@ public class ConfigController : Controller
     [ProducesResponseType(204)]
     [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
     [TypeFilter(typeof(PermissionCheckByBasicAttribute),
-        Arguments = new object[] { "Config.Delete", Functions.Config_Delete })]
+        Arguments = new object[] { Functions.Config_Delete })]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id, EnvString env)
     {
