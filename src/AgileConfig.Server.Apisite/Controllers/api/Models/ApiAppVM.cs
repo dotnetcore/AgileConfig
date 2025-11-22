@@ -31,11 +31,6 @@ public class ApiAppVM : IAppModel
     public List<string> InheritancedApps { get; set; }
 
     /// <summary>
-    ///     Administrator of the application.
-    /// </summary>
-    public string AppAdmin { get; set; }
-
-    /// <summary>
     ///     id
     /// </summary>
     public string Id { get; set; }
@@ -46,6 +41,8 @@ public class ApiAppVM : IAppModel
     public string Name { get; set; }
 
     public string Group { get; set; }
+
+    public string Creator { get; set; }
 
     public DateTime CreateTime { get; set; }
 }
@@ -61,8 +58,8 @@ public static class ApiAppVMExtension
             Id = vm.Id,
             Name = vm.Name,
             Secret = vm.Secret,
-            AppAdmin = vm.AppAdmin,
             Inheritanced = vm.Inheritanced,
+            Creator = vm.Creator,
             Group = vm.Group,
             Enabled = vm.Enabled.GetValueOrDefault()
         };

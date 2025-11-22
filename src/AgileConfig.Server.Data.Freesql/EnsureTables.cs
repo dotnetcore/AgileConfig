@@ -64,10 +64,11 @@ public class EnsureTables
     {
         if (!ExistTable(instance))
         {
-            if (instance.Ado.DataType == DataType.Oracle) instance.CodeFirst.IsSyncStructureToUpper = true;
-
             try
             {
+                if (instance.Ado.DataType == DataType.Oracle)
+                    instance.CodeFirst.IsSyncStructureToUpper = true;
+
                 instance.CodeFirst.SyncStructure<App>();
                 instance.CodeFirst.SyncStructure<Config>();
                 instance.CodeFirst.SyncStructure<ServerNode>();

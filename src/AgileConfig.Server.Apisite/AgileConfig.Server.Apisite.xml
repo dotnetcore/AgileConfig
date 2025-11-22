@@ -182,9 +182,9 @@
 				关联的app
 			</summary>
 		</member>
-		<member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiAppVM.AppAdmin">
+		<member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiAppVM.Creator">
 			<summary>
-				管理员
+				创建者
 			</summary>
 		</member>
 		<member name="P:AgileConfig.Server.Apisite.Controllers.api.Models.ApiConfigVM.Id">

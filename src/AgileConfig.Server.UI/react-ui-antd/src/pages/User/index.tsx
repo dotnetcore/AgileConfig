@@ -133,36 +133,6 @@ const hasUserRole = (role:string) => {
   return false;
 }
 
-const checkUserListModifyPermission = (user:UserItem) => {
-  // Lower number means higher privilege
-  const authMap:Record<string, number> = { SuperAdmin: 0, Admin: 1, NormalUser: 2 };
-  const myRoles = getAuthority();
-  if (!Array.isArray(myRoles) || myRoles.length === 0) return false;
-
-  // If current user is SuperAdmin -> can edit anyone except themselves (optional)
-  if (myRoles.includes('SuperAdmin')) {
-    // Prevent editing own account if desired
-    if (user.userName && user.userName === (typeof localStorage !== 'undefined' ? localStorage.getItem('currentUserName') : undefined)) {
-      return false; // disallow self-edit via list (modal still available maybe)
-    }
-    return true;
-  }
-
-  // Determine current user's minimal privilege level
-  const currentAuthNum = myRoles
-    .map(r => authMap[r] ?? 999)
-    .reduce((min, v) => v < min ? v : min, 999);
-
-  // Determine target user's minimal privilege level
-  const targetCodes = user.userRoleCodes || [];
-  const userAuthNum = targetCodes.length > 0
-    ? targetCodes.map(c => authMap[c] ?? 999).reduce((min, v) => v < min ? v : min, 999)
-    : 999;
-
-  // Allow edit only if current privilege strictly higher than target (numerically lower)
-  return currentAuthNum < userAuthNum;
-}
-
 const userList:React.FC = () => {
   const actionRef = useRef<ActionType>();
   const addFormRef = useRef<FormInstance>();
@@ -251,7 +221,6 @@ const userList:React.FC = () => {
       }),
       valueType: 'option',
       render: (text, record, _, action) => {
-        if (!checkUserListModifyPermission(record)) return [];
         const actions: React.ReactNode[] = [];
         actions.push(
           <RequireFunction fn="USER_EDIT" key="edit" fallback={null}>

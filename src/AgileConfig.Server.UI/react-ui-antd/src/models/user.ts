@@ -77,7 +77,7 @@ const UserModel: UserModelType = {
     saveCurrentSystemInfo(state, action) {
       setAuthority(action.payload.currentAuthority);
       setFunctions(action.payload.currentFunctions);
-      setCategories(action.payload.currentCategories);
+      setCategories(action.payload.currentCategories || []);
       setUserInfo({name:action.payload.name, userid: action.payload.userid});
       setSysInfo(action.payload.appVer, action.payload.envList);
       return {

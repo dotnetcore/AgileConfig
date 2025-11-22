@@ -11,7 +11,7 @@ public static class Functions
     public const string App_Delete = "APP_DELETE";
     public const string App_Auth = "APP_AUTH";
 
-    public const string Confing_Read = "CONFIG_READ";
+    public const string Config_Read = "CONFIG_READ";
     public const string Config_Add = "CONFIG_ADD";
     public const string Config_Edit = "CONFIG_EDIT";
     public const string Config_Delete = "CONFIG_DELETE";
@@ -23,6 +23,7 @@ public static class Functions
     public const string Node_Add = "NODE_ADD";
     public const string Node_Delete = "NODE_DELETE";
 
+    public const string Client_Read = "CLIENT_READ";
     public const string Client_Refresh = "CLIENT_REFRESH";
     public const string Client_Disconnect = "CLIENT_DISCONNECT";
 
@@ -41,6 +42,59 @@ public static class Functions
     public const string Service_Delete = "SERVICE_DELETE";
 
     public const string Log_Read = "LOG_READ";
+
+    public static List<string> GetAllPermissions()
+    {
+        // SuperAdmin has all permissions
+        return new List<string>
+        {
+            // Application permissions
+            Functions.App_Read,
+            Functions.App_Add,
+            Functions.App_Edit,
+            Functions.App_Delete,
+            Functions.App_Auth,
+
+            // Configuration permissions
+            Functions.Config_Read,
+            Functions.Config_Add,
+            Functions.Config_Edit,
+            Functions.Config_Delete,
+            Functions.Config_Publish,
+            Functions.Config_Offline,
+
+            // Node permissions
+            Functions.Node_Read,
+            Functions.Node_Add,
+            Functions.Node_Delete,
+
+            // Client permissions
+            Functions.Client_Refresh,
+            Functions.Client_Disconnect,
+            Functions.Client_Read,
+
+            // User permissions
+            Functions.User_Read,
+            Functions.User_Add,
+            Functions.User_Edit,
+            Functions.User_Delete,
+
+            // Role permissions
+            Functions.Role_Read,
+            Functions.Role_Add,
+            Functions.Role_Edit,
+            Functions.Role_Delete,
+
+            // Service permissions
+            Functions.Service_Read,
+            Functions.Service_Add,
+            Functions.Service_Delete,
+
+            // System permissions
+            Functions.Log_Read
+        };
+    }
+
 }
 
 public interface IPermissionService

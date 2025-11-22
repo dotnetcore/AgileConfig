@@ -44,11 +44,9 @@ public class PermissionService : IPermissionService
         var roleIds = userRoles.Select(x => x.RoleId).Distinct().ToList();
         if (!roleIds.Any()) return new List<string>();
 
-        // Get role-function mappings for all user roles
         var roleFunctions = await _roleFunctionRepository.QueryAsync(x => roleIds.Contains(x.RoleId));
         var functionIds = roleFunctions.Select(rf => rf.FunctionId).Distinct().ToList();
 
-// Get function entities and return their codes
         var functions = await _functionRepository.QueryAsync(f => functionIds.Contains(f.Id));
         var functionCodes = functions.Select(f => f.Code).Distinct().ToList();
 
@@ -105,13 +103,4 @@ public class PermissionService : IPermissionService
         return apps;
     }
 
-    /// <summary>
-    ///     Retrieve applications managed by the user.
-    /// </summary>
-    /// <param name="userId">Identifier of the user who administers the applications.</param>
-    /// <returns>List of applications where the user is the administrator.</returns>
-    private async Task<List<App>> GetUserAdminApps(string userId)
-    {
-        return await _appRepository.QueryAsync(x => x.AppAdmin == userId);
-    }
 }

@@ -235,10 +235,11 @@ public class PermissionCheckAttribute : ActionFilterAttribute
         }
 
         var appId = "";
-        if (GetAppIdParamFuncs.TryGetValue(_actionName, out var func))
+        var isAppAction = _actionName.StartsWith("App.");
+        if (!isAppAction && GetAppIdParamFuncs.TryGetValue(_actionName, out var func))
             appId = func(context, _permissionService, _configService);
 
-        if (!string.IsNullOrEmpty(appId))
+        if (!isAppAction && !string.IsNullOrEmpty(appId))
         {
             matchKey = string.Format(AppMatchPatten, appId, _functionKey);
             if (userFunctions.Contains(matchKey))

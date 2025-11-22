@@ -20,9 +20,7 @@ public class AppVM : IAppModel
 
     public List<string> inheritancedAppNames { get; set; }
 
-    public string AppAdmin { get; set; }
-
-    public string AppAdminName { get; set; }
+    public string Creator { get; set; }
 
     [Required(ErrorMessage = "应用Id不能为空")]
     [MaxLength(36, ErrorMessage = "应用Id长度不能超过36位")]
@@ -58,9 +56,9 @@ public static class AppVMExtension
         app.Secret = vm.Secret;
         app.Enabled = vm.Enabled;
         app.Type = vm.Inheritanced ? AppType.Inheritance : AppType.PRIVATE;
-        app.AppAdmin = vm.AppAdmin;
         app.Group = vm.Group;
         app.CreateTime = vm.CreateTime;
+        app.Creator = vm.Creator;
 
         return app;
     }
@@ -74,9 +72,9 @@ public static class AppVMExtension
         app.Secret = vm.Secret;
         app.Enabled = vm.Enabled;
         app.Type = vm.Inheritanced ? AppType.Inheritance : AppType.PRIVATE;
-        app.AppAdmin = vm.AppAdmin;
         app.Group = vm.Group;
         if (vm.CreateTime > DateTime.MinValue) app.CreateTime = vm.CreateTime;
+        if (!string.IsNullOrWhiteSpace(vm.Creator)) app.Creator = vm.Creator;
 
         return app;
     }
@@ -93,8 +91,8 @@ public static class AppVMExtension
             Inheritanced = vm.Inheritanced,
             Enabled = vm.Enabled,
             InheritancedApps = vm.inheritancedApps,
-            AppAdmin = vm.AppAdmin,
             Group = vm.Group,
+            Creator = vm.Creator,
             CreateTime = vm.CreateTime
         };
     }

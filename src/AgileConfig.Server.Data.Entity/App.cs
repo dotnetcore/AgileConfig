@@ -13,6 +13,8 @@ public interface IAppModel
 
     string Group { get; set; }
 
+    string Creator { get; set; }
+
     DateTime CreateTime { get; set; }
 }
 
@@ -37,9 +39,6 @@ public class App : IAppModel, IEntity<string>
 
     [Column(Name = "type")] public AppType Type { get; set; }
 
-    [Column(Name = "app_admin", StringLength = 36)]
-    public string AppAdmin { get; set; }
-
     [Column(Name = "id", StringLength = 36)]
     public string Id { get; set; }
 
@@ -48,6 +47,9 @@ public class App : IAppModel, IEntity<string>
 
     [Column(Name = "group", StringLength = 50)]
     public string Group { get; set; }
+
+    [Column(Name = "creator", StringLength = 36)]
+    public string Creator { get; set; }
 
     [Column(Name = "create_time")]
     [BsonDateTimeOptions(Kind = DateTimeKind.Local)]

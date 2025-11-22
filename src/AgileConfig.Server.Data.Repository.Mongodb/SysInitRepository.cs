@@ -106,7 +106,7 @@ public class SysInitRepository : ISysInitRepository
                 CreateTime = DateTime.Now,
                 Enabled = true,
                 Type = AppType.PRIVATE,
-                AppAdmin = SystemSettings.SuperAdminId
+                Creator = SystemSettings.SuperAdminId
             });
 
         return true;

@@ -78,7 +78,8 @@ export function getCategories(str?: string): string[] {
 
 export function setCategories(categories: string | string[]): void {
   const arr = typeof categories === 'string' ? [categories] : categories;
-  localStorage.setItem('antd-pro-categories', JSON.stringify(arr));
+  const safeArr = arr || [];
+  localStorage.setItem('antd-pro-categories', JSON.stringify(safeArr));
   // menu re-eval
   reloadAuthorized();
 }
@@ -86,7 +87,11 @@ export function setCategories(categories: string | string[]): void {
 // convenience helpers
 export function hasFunction(fnKey: string): boolean {
   const fns = getFunctions();
-  return Array.isArray(fns) ? fns.includes(fnKey) : false;
+  const has = Array.isArray(fns) ? fns.includes(fnKey) : false;
+
+  console.log(`${fns} hasFunction(${fnKey}) => ${has}`);
+
+  return has;
 }
 
 export function hasCategory(cat: string): boolean {

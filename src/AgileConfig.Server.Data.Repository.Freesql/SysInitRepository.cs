@@ -97,7 +97,7 @@ public class SysInitRepository : ISysInitRepository
                 CreateTime = DateTime.Now,
                 Enabled = true,
                 Type = AppType.PRIVATE,
-                AppAdmin = SystemSettings.SuperAdminId
+                Creator = SystemSettings.SuperAdminId
             }).ExecuteAffrows();
 
         return true;
@@ -106,7 +106,7 @@ public class SysInitRepository : ISysInitRepository
     private static void EnsureSystemRoles(IFreeSql sql)
     {
         // Super Admin gets all permissions
-        var superAdminPermissions = GetSuperAdminPermissions();
+        var superAdminPermissions = Functions.GetAllPermissions();
         EnsureRole(sql, SystemRoleConstants.SuperAdminId, "Super Administrator", superAdminPermissions);
         EnsureRolePermissions(sql, SystemRoleConstants.SuperAdminId, superAdminPermissions);
 
@@ -121,61 +121,11 @@ public class SysInitRepository : ISysInitRepository
         EnsureRolePermissions(sql, SystemRoleConstants.OperatorId, operatorPermissions);
     }
 
-    private static List<string> GetSuperAdminPermissions()
-    {
-        // SuperAdmin has all permissions
-        return new List<string>
-        {
-            // Application permissions
-            Functions.App_Read,
-            Functions.App_Add,
-            Functions.App_Edit,
-            Functions.App_Delete,
-            Functions.App_Auth,
-
-            // Configuration permissions
-            Functions.Confing_Read,
-            Functions.Config_Add,
-            Functions.Config_Edit,
-            Functions.Config_Delete,
-            Functions.Config_Publish,
-            Functions.Config_Offline,
-
-            // Node permissions
-            Functions.Node_Read,
-            Functions.Node_Add,
-            Functions.Node_Delete,
-
-            // Client permissions
-            Functions.Client_Refresh,
-            Functions.Client_Disconnect,
-
-            // User permissions
-            Functions.User_Read,
-            Functions.User_Add,
-            Functions.User_Edit,
-            Functions.User_Delete,
-
-            // Role permissions
-            Functions.Role_Read,
-            Functions.Role_Add,
-            Functions.Role_Edit,
-            Functions.Role_Delete,
-
-            // Service permissions
-            Functions.Service_Read,
-            Functions.Service_Add,
-            Functions.Service_Delete,
-
-            // System permissions
-            Functions.Log_Read
-        };
-    }
 
     private static List<string> GetAdminPermissions()
     {
         // Administrator has all permissions same as SuperAdmin
-        return GetSuperAdminPermissions();
+        return Functions.GetAllPermissions();
     }
 
     private static List<string> GetOperatorPermissions()
@@ -191,7 +141,7 @@ public class SysInitRepository : ISysInitRepository
             Functions.App_Auth,
 
             // All Configuration permissions
-            Functions.Confing_Read,
+            Functions.Config_Read,
             Functions.Config_Add,
             Functions.Config_Edit,
             Functions.Config_Delete,

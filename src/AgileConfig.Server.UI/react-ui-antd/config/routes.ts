@@ -42,39 +42,39 @@
               { path: '/index.html', redirect: '/home' },
               {
                 name: 'home', icon: 'Dashboard', path: '/home', component: './Home',
-                category: 'Application', functionKey: 'APP_READ'
+                category: 'Application'
               },
               {
                 name: 'list.node-list', icon: 'Database', path: '/node', component: './Nodes',
-                category: 'Node', functionKey: 'NODE_READ'
+                category: 'Node'
               },
               {
                 name: 'list.app-list', icon: 'Appstore', path: '/app', component: './Apps',
-                category: 'Application', functionKey: 'APP_READ'
+                category: 'Application'
               },
               {
                 name: 'list.config-list', icon: 'Table', path: '/app/config/:app_id/:app_name', component: './Configs',
-                hideInMenu: true, category: 'Configuration', functionKey: 'CONFIG_READ'
+                hideInMenu: true, category: 'Configuration'
               },
               {
                 name: 'list.client-list', icon: 'Shrink', path: '/client', component: './Clients',
-                category: 'Client', functionKey: 'CLIENT_REFRESH'
+                category: 'Client'
               },
               {
                 name: 'list.service-list', icon: 'Cloud', path: '/service', component: './Services',
-                category: 'Service', functionKey: 'SERVICE_READ'
+                category: 'Service'
               },
               {
                 name: 'list.user-list', icon: 'User', path: '/users', component: './User',
-                category: 'User', functionKey: 'USER_READ'
+                category: 'User'
               },
               {
                 name: 'list.role-list', icon: 'SafetyCertificate', path: '/roles', component: './Role',
-                category: 'Role', functionKey: 'ROLE_READ'
+                category: 'Role'
               },
               {
                 name: 'list.logs-list', icon: 'Bars', path: '/logs', component: './Logs',
-                category: 'Log', functionKey: 'LOG_READ'
+                category: 'Log'
               },
               { component: './404' },
             ],

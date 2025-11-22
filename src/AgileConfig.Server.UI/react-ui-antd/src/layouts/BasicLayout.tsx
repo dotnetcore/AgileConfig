@@ -54,9 +54,7 @@ const menuDataRender = (menuList: MenuDataItem[]): MenuDataItem[] => {
       // category filter
       const category = (m as any).category;
       if (category && !cats.includes(category)) return false;
-      // function key filter (for read permission)
-      const fnKey = (m as any).functionKey;
-      if (fnKey && !hasFunction(fnKey)) return false;
+
       return true;
     })
     .map((item) => {

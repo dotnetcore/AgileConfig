@@ -34,12 +34,11 @@ import {
   saveAppAuth,
   getAppGroups,
 } from './service';
-import { adminUsers } from '@/pages/User/service';
 import UserAuth from './comps/userAuth';
 import AuthorizedEle from '@/components/Authorized/AuthorizedElement';
 import functionKeys from '@/models/functionKeys';
 import { current } from '@/services/user';
-import { getUserInfo, setAuthority, setFunctions } from '@/utils/authority';
+import { setAuthority, setFunctions } from '@/utils/authority';
 import { RequireFunction } from '@/utils/permission';
 
 const { confirm } = Modal;
@@ -295,13 +294,6 @@ const appList: React.FC = (props) => {
     },
     {
       title: intl.formatMessage({
-        id: 'pages.app.table.cols.admin',
-      }),
-      dataIndex: 'appAdminName',
-      hideInSearch: true,
-    },
-    {
-      title: intl.formatMessage({
         id: 'pages.app.table.cols.public',
       }),
       dataIndex: 'inheritanced',
@@ -347,10 +339,8 @@ const appList: React.FC = (props) => {
       dataIndex: 'enabled',
       render: (dom, entity) => {
         return (
-          <AuthorizedEle
-            appId={entity.id}
-            judgeKey={functionKeys.App_Edit}
-            noMatch={<Switch checked={entity.enabled} size="small" />}
+          <RequireFunction
+            fn={functionKeys.App_Edit}
           >
             <Switch
               checked={entity.enabled}
@@ -359,7 +349,7 @@ const appList: React.FC = (props) => {
                 handleEnabledChange(e, entity);
               }}
             />
-          </AuthorizedEle>
+          </RequireFunction>
         );
       },
       hideInSearch: true,
@@ -370,15 +360,15 @@ const appList: React.FC = (props) => {
       }),
       valueType: 'option',
       render: (text, record, _, action) => [
-        <RequireFunction fn={functionKeys.App_Read} fallback={null}>
+        <RequireFunction key="0" fn={functionKeys.Config_Read} fallback={null}>
           <Link
-            key="0"
+            
             to={{ pathname: '/app/config/' + record.id + '/' + record.name }}
           >
             {intl.formatMessage({ id: 'pages.app.table.cols.action.configs' })}
           </Link>
         </RequireFunction>,
-        <AuthorizedEle key="1" appId={record.id} judgeKey={functionKeys.App_Edit}>
+        <RequireFunction key="1" fn={functionKeys.App_Edit}>
           <a
             onClick={() => {
               setUpdateModalVisible(true);
@@ -389,10 +379,10 @@ const appList: React.FC = (props) => {
               id: 'pages.app.table.cols.action.edit',
             })}
           </a>
-        </AuthorizedEle>,
-        <RequireFunction fn={functionKeys.App_Auth} fallback={null}>
+        </RequireFunction>,
+        <RequireFunction key="2" fn={functionKeys.App_Auth} fallback={null}>
           <a
-            key="2"
+            
             onClick={() => {
               setUserAuthModalVisible(true);
               setCurrentRow(record);
@@ -401,7 +391,7 @@ const appList: React.FC = (props) => {
             {intl.formatMessage({ id: 'pages.app.table.cols.action.auth' })}
           </a>
         </RequireFunction>,
-        <AuthorizedEle key="3" appId={record.id} judgeKey={functionKeys.App_Delete}>
+        <RequireFunction key="3" fn={functionKeys.App_Delete}>
           <Button
             type="link"
             danger
@@ -430,7 +420,7 @@ const appList: React.FC = (props) => {
               id: 'pages.app.table.cols.action.delete',
             })}
           </Button>
-        </AuthorizedEle>,
+        </RequireFunction>,
       ],
     },
   ];
@@ -620,26 +610,6 @@ const appList: React.FC = (props) => {
             ) : null;
           }}
         </ProFormDependency>
-        <ProFormSelect
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-          initialValue={getUserInfo().userid}
-          label={intl.formatMessage({
-            id: 'pages.app.form.admin',
-          })}
-          name="appAdmin"
-          request={async () => {
-            const result = await adminUsers();
-            return result.data.map((x: { userName: string; id: string; team: string }) => {
-              console.log(x);
-              return { label: x.userName + ' - ' + (x.team ? x.team : ''), value: x.id };
-            });
-          }}
-        ></ProFormSelect>
-
         <ProFormSwitch
           label={intl.formatMessage({
             id: 'pages.app.form.enabled',

@@ -93,7 +93,6 @@ public class AppController : Controller
             appListVm.inheritancedAppNames = appListVm.Inheritanced
                 ? new List<string>()
                 : inheritancedApps.Select(ia => ia.Name).ToList();
-            appListVm.AppAdminName = (await _userService.GetUserAsync(appListVm.AppAdmin))?.UserName;
             if (appListVm.children != null) await AppendInheritancedInfo(appListVm.children);
         }
     }
@@ -114,6 +113,8 @@ public class AppController : Controller
 
         var app = model.ToApp();
         app.CreateTime = DateTime.Now;
+        var creatorId = await this.GetCurrentUserId(_userService);
+        if (!string.IsNullOrWhiteSpace(creatorId)) app.Creator = creatorId;
 
         var inheritanceApps = new List<AppInheritanced>();
         if (!model.Inheritanced && model.inheritancedApps != null)

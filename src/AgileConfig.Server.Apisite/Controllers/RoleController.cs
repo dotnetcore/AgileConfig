@@ -17,33 +17,6 @@ namespace AgileConfig.Server.Apisite.Controllers;
 [Authorize]
 public class RoleController : Controller
 {
-    private static readonly IReadOnlyList<string> SupportedFunctions = new List<string>
-    {
-        Functions.App_Add,
-        Functions.App_Edit,
-        Functions.App_Delete,
-        Functions.App_Auth,
-
-        Functions.Config_Add,
-        Functions.Config_Edit,
-        Functions.Config_Delete,
-        Functions.Config_Publish,
-        Functions.Config_Offline,
-
-        Functions.Node_Add,
-        Functions.Node_Delete,
-
-        Functions.Client_Disconnect,
-
-        Functions.User_Add,
-        Functions.User_Edit,
-        Functions.User_Delete,
-
-        Functions.Role_Add,
-        Functions.Role_Edit,
-        Functions.Role_Delete
-    };
-
     private readonly IRoleFunctionRepository _roleFunctionRepository;
     private readonly IRoleService _roleService;
 
@@ -79,7 +52,7 @@ public class RoleController : Controller
         return Json(new
         {
             success = true,
-            data = SupportedFunctions
+            data = Functions.GetAllPermissions()
         });
     }
 

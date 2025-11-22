@@ -22,7 +22,7 @@ public static class AppExtension
             Secret = app.Secret,
             Enabled = app.Enabled,
             Inheritanced = app.Type == AppType.Inheritance,
-            AppAdmin = app.AppAdmin,
+            Creator = app.Creator,
             CreateTime = app.CreateTime
         };
 
@@ -43,7 +43,7 @@ public static class AppExtension
             Enabled = app.Enabled,
             UpdateTime = app.UpdateTime,
             CreateTime = app.CreateTime,
-            AppAdmin = app.AppAdmin
+            Creator = app.Creator
         };
 
         return vm;
@@ -60,8 +60,8 @@ public static class AppExtension
             Secret = vm.Secret,
             Inheritanced = vm.Type == AppType.Inheritance,
             Enabled = vm.Enabled,
-            AppAdmin = vm.AppAdmin,
             Group = vm.Group,
+            Creator = vm.Creator,
             CreateTime = vm.CreateTime
         };
     }

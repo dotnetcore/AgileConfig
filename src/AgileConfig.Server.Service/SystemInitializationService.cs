@@ -257,8 +257,8 @@ public class SystemInitializationService(
             // Configuration permissions
             new()
             {
-                Id = Functions.Confing_Read,
-                Code = Functions.Confing_Read,
+                Id = Functions.Config_Read,
+                Code = Functions.Config_Read,
                 Name = "Read Configuration",
                 Description = "Permission to read configurations",
                 Category = "Configuration",
@@ -363,6 +363,16 @@ public class SystemInitializationService(
                 Code = Functions.Client_Disconnect,
                 Name = "Disconnect Client",
                 Description = "Permission to disconnect clients",
+                Category = "Client",
+                SortIndex = 16,
+                CreateTime = DateTime.Now
+            },
+            new()
+            {
+                Id = Functions.Client_Read,
+                Code = Functions.Client_Read,
+                Name = "Read Client",
+                Description = "Permission to read clients",
                 Category = "Client",
                 SortIndex = 16,
                 CreateTime = DateTime.Now
