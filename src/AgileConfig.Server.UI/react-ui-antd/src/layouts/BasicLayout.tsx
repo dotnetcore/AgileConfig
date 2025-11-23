@@ -9,11 +9,11 @@ import {
   Settings,
 } from '@ant-design/pro-layout';
 import ProLayout from '@ant-design/pro-layout';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useCallback } from 'react';
 import { Dispatch, getIntl, getLocale } from 'umi';
 import { Link, useIntl, connect, history } from 'umi';
 import { Result, Button } from 'antd';
-import { getCategories, hasFunction } from '@/utils/authority';
+import { getCategories } from '@/utils/authority';
 import Authorized from '@/utils/Authorized';
 import RightContent from '@/components/GlobalHeader/RightContent';
 import type { ConnectState } from '@/models/connect';
@@ -38,6 +38,7 @@ export type BasicLayoutProps = {
   route: ProLayoutProps['route'] & {
     authority: string[];
   };
+  categories?: string[];
   settings: Settings;
   dispatch: Dispatch;
 } & ProLayoutProps;
@@ -45,26 +46,6 @@ export type BasicLayoutContext = { [K in 'location']: BasicLayoutProps[K] } & {
   breadcrumbNameMap: Record<string, MenuDataItem>;
 };
 /** Use Authorized check all menu item */
-
-// Filter menu by categories stored from login (e.g., Application, Configuration, Node, Client, User, Role, Service, System)
-const menuDataRender = (menuList: MenuDataItem[]): MenuDataItem[] => {
-  const cats = getCategories();
-  return menuList
-    .filter(m => {
-      // category filter
-      const category = (m as any).category;
-      if (category && !cats.includes(category)) return false;
-
-      return true;
-    })
-    .map((item) => {
-      const localItem = {
-        ...item,
-        children: item.children ? menuDataRender(item.children) : undefined,
-      };
-      return Authorized.check(item.authority, localItem, null) as MenuDataItem;
-    });
-};
 
 const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
   const {
@@ -75,6 +56,38 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
       pathname: '/',
     },
   } = props;
+
+  // keep categories in props to force re-render when user changes; fall back to persisted storage to avoid empty menu during bootstrap
+  const categories = useMemo<string[]>(() => {
+    if (props.categories && props.categories.length) {
+      return props.categories;
+    }
+    return getCategories();
+  }, [props.categories]);
+
+  // Filter menu by categories stored from login (e.g., Application, Configuration, Node, Client, User, Role, Service, System)
+  const menuDataRender = useCallback(
+    (menuList: MenuDataItem[]): MenuDataItem[] => {
+      const cats = categories || [];
+      console.log('menuDataRender categories=', cats);
+      return menuList
+        .filter((m) => {
+          // category filter
+          const category = (m as any).category;
+          if (category && !cats.includes(category)) return false;
+
+          return true;
+        })
+        .map((item) => {
+          const localItem = {
+            ...item,
+            children: item.children ? menuDataRender(item.children) : undefined,
+          };
+          return Authorized.check(item.authority, localItem, null) as MenuDataItem;
+        });
+    },
+    [categories],
+  );
 
   const menuDataRef = useRef<MenuDataItem[]>([]);
 
@@ -166,7 +179,8 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
   );
 };
 
-export default connect(({ global, settings }: ConnectState) => ({
+export default connect(({ global, settings, user }: ConnectState) => ({
   collapsed: global.collapsed,
   settings,
+  categories: user.currentUser?.currentCategories,
 }))(BasicLayout);

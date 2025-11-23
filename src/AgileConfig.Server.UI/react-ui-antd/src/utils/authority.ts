@@ -60,6 +60,7 @@ export function setFunctions(authority: string | string[] ): void {
 
 // categories (business domains) control which left-menu entries are visible
 export function getCategories(str?: string): string[] {
+  console.log('getCategories called');
   const catString =
     typeof str === 'undefined' && localStorage ? localStorage.getItem('antd-pro-categories') : str;
   let cats;
@@ -77,6 +78,7 @@ export function getCategories(str?: string): string[] {
 }
 
 export function setCategories(categories: string | string[]): void {
+  console.log('setCategories called with', categories);
   const arr = typeof categories === 'string' ? [categories] : categories;
   const safeArr = arr || [];
   localStorage.setItem('antd-pro-categories', JSON.stringify(safeArr));

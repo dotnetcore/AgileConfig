@@ -17,6 +17,7 @@ export type CurrentUser = {
   }[];
   userid?: string;
   unreadCount?: number;
+  currentCategories?: string[];
 };
 
 export type UserModelState = {
