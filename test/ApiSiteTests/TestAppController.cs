@@ -32,7 +32,7 @@ public class TestAppController
 
         ctl.ControllerContext.HttpContext = new DefaultHttpContext();
 
-        Assert.ThrowsException<ArgumentNullException>(() => { ctl.Add(null).GetAwaiter().GetResult(); });
+        Assert.ThrowsExactly<ArgumentNullException>(() => { ctl.Add(null).GetAwaiter().GetResult(); });
 
         appService.Setup(s => s.GetAsync("01")).ReturnsAsync(new App());
         var result = await ctl.Add(new AppVM
