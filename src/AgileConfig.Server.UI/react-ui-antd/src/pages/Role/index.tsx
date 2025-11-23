@@ -3,7 +3,7 @@ import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
 import { Button, message, Modal, Space, Tag } from 'antd';
 import { ModalForm, ProFormSelect, ProFormText } from '@ant-design/pro-form';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useIntl } from 'umi';
 import type { RoleFormValues, RoleItem } from './data';
 import { createRole, deleteRole, fetchSupportedRolePermissions, queryRoles, updateRole } from '@/services/role';
@@ -23,6 +23,13 @@ const RolePage: React.FC = () => {
     loadPermissions();
   }, []);
 
+  const permissionGroupLabel = (prefix: string) => {
+    return intl.formatMessage({
+      id: `pages.role.permissionGroup.${prefix}`,
+      defaultMessage: prefix,
+    });
+  };
+
   const loadPermissions = async () => {
     try {
       const response = await fetchSupportedRolePermissions();
@@ -36,10 +43,31 @@ const RolePage: React.FC = () => {
     }
   };
 
-  const permissionOptions = supportedPermissions.map((item) => ({
-    value: item,
-    label: intl.formatMessage({ id: `pages.role.permissions.${item}`, defaultMessage: item }),
-  }));
+  const groupedPermissionOptions = useMemo(() => {
+    const groupMap: Record<
+      string,
+      {
+        label: string;
+        options: { value: string; label: string }[];
+      }
+    > = {};
+
+    supportedPermissions.forEach((item) => {
+      const prefix = item.split('_')[0] || 'OTHER';
+      if (!groupMap[prefix]) {
+        groupMap[prefix] = {
+          label: permissionGroupLabel(prefix),
+          options: [],
+        };
+      }
+      groupMap[prefix].options.push({
+        value: item,
+        label: intl.formatMessage({ id: `pages.role.permissions.${item}`, defaultMessage: item }),
+      });
+    });
+
+    return Object.values(groupMap);
+  }, [intl, supportedPermissions]);
 
   const handleCreate = async (values: RoleFormValues) => {
     const hide = message.loading(intl.formatMessage({ id: 'saving', defaultMessage: 'Saving...' }));
@@ -227,7 +255,7 @@ const RolePage: React.FC = () => {
           name="functions"
           label={intl.formatMessage({ id: 'pages.role.form.functions', defaultMessage: 'Permissions' })}
           mode="multiple"
-          options={permissionOptions}
+          options={groupedPermissionOptions}
         />
       </ModalForm>
 
@@ -268,7 +296,7 @@ const RolePage: React.FC = () => {
             name="functions"
             label={intl.formatMessage({ id: 'pages.role.form.functions', defaultMessage: 'Permissions' })}
             mode="multiple"
-            options={permissionOptions}
+            options={groupedPermissionOptions}
           />
         </ModalForm>
       )}
