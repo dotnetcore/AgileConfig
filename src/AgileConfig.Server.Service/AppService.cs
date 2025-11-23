@@ -321,16 +321,6 @@ public class AppService : IAppService
         _userRepository.Dispose();
     }
 
-    private async Task<List<string>> GetUserAuthorizedAppIds(string userId)
-    {
-        var authorizedAppIds = new List<string>();
-        if (string.IsNullOrWhiteSpace(userId)) return authorizedAppIds;
-
-        var auths = await _userAppAuthRepository.QueryAsync(x => x.UserId == userId);
-
-        return auths.Select(x => x.AppId).Distinct().ToList();
-    }
-
     public async Task<List<User>> GetUserAppAuth(string appId)
     {
         var auths = await _userAppAuthRepository.QueryAsync(x => x.AppId == appId);
@@ -348,5 +338,15 @@ public class AppService : IAppService
         var apps = await _appRepository.AllAsync();
         var groups = apps.GroupBy(x => x.Group).Select(x => x.Key);
         return groups.Where(x => !string.IsNullOrEmpty(x)).ToList();
+    }
+
+    private async Task<List<string>> GetUserAuthorizedAppIds(string userId)
+    {
+        var authorizedAppIds = new List<string>();
+        if (string.IsNullOrWhiteSpace(userId)) return authorizedAppIds;
+
+        var auths = await _userAppAuthRepository.QueryAsync(x => x.UserId == userId);
+
+        return auths.Select(x => x.AppId).Distinct().ToList();
     }
 }

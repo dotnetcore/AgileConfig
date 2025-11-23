@@ -49,52 +49,51 @@ public static class Functions
         return new List<string>
         {
             // Application permissions
-            Functions.App_Read,
-            Functions.App_Add,
-            Functions.App_Edit,
-            Functions.App_Delete,
-            Functions.App_Auth,
+            App_Read,
+            App_Add,
+            App_Edit,
+            App_Delete,
+            App_Auth,
 
             // Configuration permissions
-            Functions.Config_Read,
-            Functions.Config_Add,
-            Functions.Config_Edit,
-            Functions.Config_Delete,
-            Functions.Config_Publish,
-            Functions.Config_Offline,
+            Config_Read,
+            Config_Add,
+            Config_Edit,
+            Config_Delete,
+            Config_Publish,
+            Config_Offline,
 
             // Node permissions
-            Functions.Node_Read,
-            Functions.Node_Add,
-            Functions.Node_Delete,
+            Node_Read,
+            Node_Add,
+            Node_Delete,
 
             // Client permissions
-            Functions.Client_Refresh,
-            Functions.Client_Disconnect,
-            Functions.Client_Read,
+            Client_Refresh,
+            Client_Disconnect,
+            Client_Read,
 
             // User permissions
-            Functions.User_Read,
-            Functions.User_Add,
-            Functions.User_Edit,
-            Functions.User_Delete,
+            User_Read,
+            User_Add,
+            User_Edit,
+            User_Delete,
 
             // Role permissions
-            Functions.Role_Read,
-            Functions.Role_Add,
-            Functions.Role_Edit,
-            Functions.Role_Delete,
+            Role_Read,
+            Role_Add,
+            Role_Edit,
+            Role_Delete,
 
             // Service permissions
-            Functions.Service_Read,
-            Functions.Service_Add,
-            Functions.Service_Delete,
+            Service_Read,
+            Service_Add,
+            Service_Delete,
 
             // System permissions
-            Functions.Log_Read
+            Log_Read
         };
     }
-
 }
 
 public interface IPermissionService

@@ -1,7 +1,6 @@
 ﻿using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Abstraction.DbProvider;
 using Microsoft.Extensions.Configuration;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace AgileConfig.Server.Data.AbstractionTests.DbConfig;
 

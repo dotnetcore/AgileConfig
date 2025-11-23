@@ -63,7 +63,6 @@ public class EnsureTables
     public static void Ensure(IFreeSql instance)
     {
         if (!ExistTable(instance))
-        {
             try
             {
                 if (instance.Ado.DataType == DataType.Oracle)
@@ -91,6 +90,5 @@ public class EnsureTables
                 var logger = Global.LoggerFactory.CreateLogger<EnsureTables>();
                 logger.LogError(ex, "Ensure Tables failed .");
             }
-        }
     }
 }

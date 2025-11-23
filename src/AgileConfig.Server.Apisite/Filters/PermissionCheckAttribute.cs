@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Frozen;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Common;
-using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -19,7 +14,8 @@ public class PermissionCheckAttribute : ActionFilterAttribute
 
     private readonly IPermissionService _permissionService;
 
-    public PermissionCheckAttribute(IPermissionService permissionService, IConfigService configService, string functionKey)
+    public PermissionCheckAttribute(IPermissionService permissionService, IConfigService configService,
+        string functionKey)
     {
         _permissionService = permissionService;
         _configService = configService;
