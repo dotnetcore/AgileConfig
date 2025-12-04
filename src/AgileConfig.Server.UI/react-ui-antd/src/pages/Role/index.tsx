@@ -3,6 +3,7 @@ import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
 import { Button, message, Modal, Space, Tag } from 'antd';
 import { ModalForm, ProFormSelect, ProFormText } from '@ant-design/pro-form';
+import type { CustomTagProps } from 'rc-select/lib/BaseSelect';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useIntl } from 'umi';
 import type { RoleFormValues, RoleItem } from './data';
@@ -10,6 +11,34 @@ import { createRole, deleteRole, fetchSupportedRolePermissions, queryRoles, upda
 import { RequireFunction } from '@/utils/permission';
 
 const { confirm } = Modal;
+
+const PERMISSION_GROUP_COLORS: Record<string, string> = {
+  APP: 'blue',
+  CONFIG: 'geekblue',
+  NODE: 'purple',
+  CLIENT: 'green',
+  USER: 'gold',
+  ROLE: 'volcano',
+  SERVICE: 'cyan',
+  LOG: 'magenta',
+  OTHER: 'default',
+};
+
+const getPermissionTagColor = (permission: string) => {
+  const prefix = permission.split('_')[0];
+  return PERMISSION_GROUP_COLORS[prefix] || PERMISSION_GROUP_COLORS.OTHER;
+};
+
+const renderPermissionTag = (props: CustomTagProps) => {
+  const { label, value, closable, onClose } = props;
+  return (
+    <Tag
+      key={String(value)}
+    >
+      123
+    </Tag>
+  );
+};
 
 const RolePage: React.FC = () => {
   const actionRef = useRef<ActionType>();
@@ -163,9 +192,13 @@ const RolePage: React.FC = () => {
         }
         return (
           <Space size={[0, 4]} wrap>
-            {fns.map((fn) => (
-              <Tag key={`${record.id}-${fn}`}>{intl.formatMessage({ id: `pages.role.permissions.${fn}`, defaultMessage: fn })}</Tag>
-            ))}
+            {fns.map((fn) => {
+              return (
+                <Tag color={getPermissionTagColor(fn)} key={`${record.id}-${fn}`}>
+                  {intl.formatMessage({ id: `pages.role.permissions.${fn}`, defaultMessage: fn })}
+                </Tag>
+              );
+            })}
           </Space>
         );
       },
@@ -173,6 +206,7 @@ const RolePage: React.FC = () => {
     {
       title: intl.formatMessage({ id: 'pages.role.table.cols.action', defaultMessage: 'Action' }),
       valueType: 'option',
+      width: 160,
       render: (_, record) => [
         <RequireFunction fn="ROLE_EDIT" key="edit" fallback={null}>
           <a
@@ -256,6 +290,7 @@ const RolePage: React.FC = () => {
           label={intl.formatMessage({ id: 'pages.role.form.functions', defaultMessage: 'Permissions' })}
           mode="multiple"
           options={groupedPermissionOptions}
+          tagRender={renderPermissionTag}
         />
       </ModalForm>
 
@@ -297,6 +332,7 @@ const RolePage: React.FC = () => {
             label={intl.formatMessage({ id: 'pages.role.form.functions', defaultMessage: 'Permissions' })}
             mode="multiple"
             options={groupedPermissionOptions}
+            tagRender={renderPermissionTag}
           />
         </ModalForm>
       )}

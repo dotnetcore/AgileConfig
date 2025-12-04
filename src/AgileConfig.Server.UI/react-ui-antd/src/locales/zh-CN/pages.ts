@@ -278,7 +278,7 @@ export default {
   'pages.user.reset_password_default': '的密码为默认密码【123456】?',
   'pages.role.table.cols.name': '名称',
   'pages.role.table.cols.description': '描述',
-  'pages.role.table.cols.system': '系统角色',
+  'pages.role.table.cols.system': '系统',
   'pages.role.system.yes': '是',
   'pages.role.system.no': '否',
   'pages.role.table.cols.functions': '权限',
