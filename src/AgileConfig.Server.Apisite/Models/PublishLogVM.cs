@@ -1,13 +1,12 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace AgileConfig.Server.Apisite.Models
-{
-    [ExcludeFromCodeCoverage]
-    public class PublishLogVM: IAppIdModel
-    {
-        public string AppId { get; set; }
-        public string Log { get; set; }
+namespace AgileConfig.Server.Apisite.Models;
 
-        public string[] Ids { get; set; }
-    }
+[ExcludeFromCodeCoverage]
+public class PublishLogVM : IAppIdModel
+{
+    public string Log { get; set; }
+
+    public string[] Ids { get; set; }
+    public string AppId { get; set; }
 }

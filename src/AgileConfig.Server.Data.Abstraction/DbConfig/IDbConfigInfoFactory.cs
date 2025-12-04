@@ -1,7 +1,6 @@
-﻿namespace AgileConfig.Server.Data.Abstraction.DbProvider
+﻿namespace AgileConfig.Server.Data.Abstraction.DbProvider;
+
+public interface IDbConfigInfoFactory
 {
-    public interface IDbConfigInfoFactory
-    {
-        IDbConfigInfo GetConfigInfo(string env = "");
-    }
+    IDbConfigInfo GetConfigInfo(string env = "");
 }

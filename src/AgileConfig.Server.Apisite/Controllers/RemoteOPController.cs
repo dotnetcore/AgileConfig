@@ -6,116 +6,100 @@ using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace AgileConfig.Server.Apisite.Controllers
+namespace AgileConfig.Server.Apisite.Controllers;
+
+/// <summary>
+///     Receives commands sent from other nodes.
+/// </summary>
+public class RemoteOpController : Controller
 {
-    /// <summary>
-    /// Receives commands sent from other nodes.
-    /// </summary>
-    public class RemoteOpController : Controller
+    private readonly IConfigService _configService;
+    private readonly ILogger _logger;
+    private readonly IServiceInfoService _serviceInfoService;
+
+    public RemoteOpController(IConfigService configService,
+        IServiceInfoService serviceInfoService,
+        ILoggerFactory loggerFactory)
     {
-        private readonly IConfigService _configService;
-        private readonly IServiceInfoService _serviceInfoService;
-        private readonly ILogger _logger;
-        public RemoteOpController(IConfigService configService,
-            IServiceInfoService serviceInfoService,
-            ILoggerFactory loggerFactory)
+        _serviceInfoService = serviceInfoService;
+        _configService = configService;
+        _logger = loggerFactory.CreateLogger<RemoteServerProxyController>();
+    }
+
+    [HttpPost]
+    public IActionResult AllClientsDoActionAsync([FromBody] WebsocketAction action)
+    {
+        if (action == null) throw new ArgumentNullException(nameof(action));
+
+        WebsocketCollection.Instance.SendActionToAll(action);
+
+        return Json(new
         {
-            _serviceInfoService = serviceInfoService;
-            _configService = configService;
-            _logger = loggerFactory.CreateLogger<RemoteServerProxyController>();
-        }
-        
-        [HttpPost]
-        public IActionResult AllClientsDoActionAsync([FromBody]WebsocketAction action)
+            success = true
+        });
+    }
+
+    [HttpPost]
+    public IActionResult AppClientsDoActionAsync([FromQuery] string appId, [FromQuery] string env,
+        [FromBody] WebsocketAction action)
+    {
+        if (string.IsNullOrEmpty(appId)) throw new ArgumentNullException(nameof(appId));
+        if (action == null) throw new ArgumentNullException(nameof(action));
+        if (string.IsNullOrEmpty(env)) throw new ArgumentNullException(nameof(env));
+
+        WebsocketCollection.Instance.SendActionToAppClients(appId, env, action);
+
+        return Json(new
         {
-            if (action == null)
-            {
-                throw new ArgumentNullException(nameof(action));
-            }
+            success = true
+        });
+    }
 
-            WebsocketCollection.Instance.SendActionToAll(action);
+    [HttpPost]
+    public async Task<IActionResult> OneClientDoActionAsync([FromQuery] string clientId,
+        [FromBody] WebsocketAction action)
+    {
+        var client = WebsocketCollection.Instance.Get(clientId);
+        if (client == null) throw new Exception($"Can not find websocket client by id: {clientId}");
+        if (action == null) throw new ArgumentNullException(nameof(action));
 
-            return Json(new
-            {
-                success = true,
-            });
-        }
+        await WebsocketCollection.Instance.SendActionToOne(client, action);
 
-        [HttpPost]
-        public IActionResult AppClientsDoActionAsync([FromQuery]string appId,[FromQuery]string env, [FromBody]WebsocketAction action)
+        return Json(new
         {
-            if (string.IsNullOrEmpty(appId))
-            {
-                throw new ArgumentNullException(nameof(appId));
-            }
-            if (action == null)
-            {
-                throw new ArgumentNullException(nameof(action));
-            }
-            if (string.IsNullOrEmpty(env))
-            {
-                throw new ArgumentNullException(nameof(env));
-            }
+            success = true
+        });
+    }
 
-            WebsocketCollection.Instance.SendActionToAppClients(appId, env, action);
+    [HttpPost]
+    public IActionResult ClearConfigServiceCache()
+    {
+        _configService.ClearCache();
 
-            return Json(new
-            {
-                success = true,
-            });
-        }
+        _logger.LogInformation("Server clear all config's cache .");
 
-        [HttpPost]
-        public async Task<IActionResult> OneClientDoActionAsync([FromQuery]string clientId, [FromBody]WebsocketAction action)
+        return Json(new
         {
-            var client = WebsocketCollection.Instance.Get(clientId);
-            if (client == null)
-            {
-                throw new Exception($"Can not find websocket client by id: {clientId}");
-            }
-            if (action == null)
-            {
-                throw new ArgumentNullException(nameof(action));
-            }
+            success = true
+        });
+    }
 
-            await WebsocketCollection.Instance.SendActionToOne(client, action);
+    [HttpPost]
+    public IActionResult ClearServiceInfoCache()
+    {
+        _serviceInfoService.ClearCache();
 
-            return Json(new
-            {
-                success = true,
-            });
-        }
+        _logger.LogInformation("Server clear all serviceInfo's cache .");
 
-        [HttpPost]
-        public IActionResult ClearConfigServiceCache()
+        return Json(new
         {
-            _configService.ClearCache();
+            success = true
+        });
+    }
 
-            _logger.LogInformation("Server clear all config's cache .");
-            
-            return Json(new
-            {
-                success = true,
-            });
-        }
-
-        [HttpPost]
-        public IActionResult ClearServiceInfoCache()
-        {
-            _serviceInfoService.ClearCache();
-
-            _logger.LogInformation("Server clear all serviceInfo's cache .");
-            
-            return Json(new
-            {
-                success = true,
-            });
-        }
-
-        [HttpPost]
-        public IActionResult RegisterNode()
-        {
-            return Content("ok");
-        }
+    [HttpPost]
+    public IActionResult RegisterNode()
+    {
+        return Content("ok");
     }
 }

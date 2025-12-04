@@ -1,10 +1,9 @@
-﻿namespace AgileConfig.Server.OIDC
+﻿namespace AgileConfig.Server.OIDC;
+
+public interface IOidcClient
 {
-    public interface IOidcClient
-    {
-        OidcSetting OidcSetting { get; }
-        string GetAuthorizeUrl();
-        (string Id, string UserName) UnboxIdToken(string idToken);
-        Task<(string IdToken, string accessToken)> Validate(string code);
-    }
+    OidcSetting OidcSetting { get; }
+    string GetAuthorizeUrl();
+    (string Id, string UserName) UnboxIdToken(string idToken);
+    Task<(string IdToken, string accessToken)> Validate(string code);
 }

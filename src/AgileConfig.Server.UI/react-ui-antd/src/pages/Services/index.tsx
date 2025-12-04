@@ -3,6 +3,7 @@ import { FormInstance, ModalForm, ProFormDependency, ProFormSelect, ProFormText 
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
 import { Button, message, Modal } from 'antd';
+import { RequireFunction } from '@/utils/permission';
 import React, {  useRef, useState } from 'react';
 import { useIntl } from 'umi';
 import { ServiceItem } from './data';
@@ -157,33 +158,28 @@ const services: React.FC = () => {
       width: 120
     },
     {
-      title: intl.formatMessage({
-        id: 'pages.services.operation',
-      }),
+      title: intl.formatMessage({ id: 'pages.services.operation' }),
       valueType: 'option',
-      render: (text, record, _, action) => [
-        <a className={styles.linkDanger}
-          onClick={
-            ()=>{
+      render: (text, record) => [
+        <RequireFunction fn="SERVICE_DELETE" key="delete" fallback={null}>
+          <a
+            className={styles.linkDanger}
+            onClick={() => {
               confirm({
-                content: intl.formatMessage({
-                  id: 'pages.services.confirmDelete',
-                }),
-                onOk: async ()=>{
-                  const result = await handleDelSome(record)
+                content: intl.formatMessage({ id: 'pages.services.confirmDelete' }),
+                onOk: async () => {
+                  const result = await handleDelSome(record);
                   if (result) {
                     actionRef.current?.reload();
                   }
-                }
-              })
-            }
-          }
-        >
-          {intl.formatMessage({
-            id: 'pages.services.delete',
-          })}
-        </a>
-      ]
+                },
+              });
+            }}
+          >
+            {intl.formatMessage({ id: 'pages.services.delete' })}
+          </a>
+        </RequireFunction>,
+      ],
     }
   ];
   return (
@@ -211,15 +207,17 @@ const services: React.FC = () => {
           console.log(sortField, ascOrDesc);
           return queryService({ sortField, ascOrDesc, ...params })
         }}
-        toolBarRender={()=>
-          [
-            <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { setCreateModalVisible(true) }}>
-              {intl.formatMessage({
-                id: 'pages.services.newService',
-              })}
+        toolBarRender={() => [
+          <RequireFunction fn="SERVICE_ADD" key="add" fallback={null}>
+            <Button
+              icon={<PlusOutlined />}
+              type="primary"
+              onClick={() => { setCreateModalVisible(true); }}
+            >
+              {intl.formatMessage({ id: 'pages.services.newService' })}
             </Button>
-          ]
-        }
+          </RequireFunction>,
+        ]}
       />
       <ModalForm
         formRef={addFormRef}

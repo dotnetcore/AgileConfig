@@ -1,7 +1,6 @@
-﻿namespace AgileConfig.Server.OIDC.TokenEndpointAuthMethods
+﻿namespace AgileConfig.Server.OIDC.TokenEndpointAuthMethods;
+
+internal interface ITokenEndpointAuthMethod
 {
-    internal interface ITokenEndpointAuthMethod
-    {
-        (HttpContent HttpContent, string BasicAuthorizationString) GetAuthHttpContent(string code, OidcSetting oidcSetting);
-    }
+    (HttpContent HttpContent, string BasicAuthorizationString) GetAuthHttpContent(string code, OidcSetting oidcSetting);
 }

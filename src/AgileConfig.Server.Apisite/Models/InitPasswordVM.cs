@@ -1,12 +1,11 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace AgileConfig.Server.Apisite.Models
-{
-    [ExcludeFromCodeCoverage]
-    public class InitPasswordVM
-    {
-        public string password { get; set; }
+namespace AgileConfig.Server.Apisite.Models;
 
-        public string confirmPassword { get; set; }
-    }
+[ExcludeFromCodeCoverage]
+public class InitPasswordVM
+{
+    public string password { get; set; }
+
+    public string confirmPassword { get; set; }
 }

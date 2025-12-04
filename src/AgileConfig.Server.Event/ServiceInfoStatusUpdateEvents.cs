@@ -1,31 +1,33 @@
 ﻿using AgileConfig.Server.Common.EventBus;
 
-namespace AgileConfig.Server.Event
+namespace AgileConfig.Server.Event;
+
+public class ServiceRegisteredEvent : IEvent
 {
-    public class ServiceRegisteredEvent : IEvent
+    public ServiceRegisteredEvent(string uniqueId)
     {
-        public ServiceRegisteredEvent(string uniqueId)
-        {
-            UniqueId = uniqueId;
-        }
-        public string UniqueId { get; }
+        UniqueId = uniqueId;
     }
 
-    public class ServiceUnRegisterEvent : IEvent
+    public string UniqueId { get; }
+}
+
+public class ServiceUnRegisterEvent : IEvent
+{
+    public ServiceUnRegisterEvent(string uniqueId)
     {
-        public ServiceUnRegisterEvent(string uniqueId)
-        {
-            UniqueId = uniqueId;
-        }
-        public string UniqueId { get; }
+        UniqueId = uniqueId;
     }
 
-    public class ServiceStatusUpdateEvent : IEvent
+    public string UniqueId { get; }
+}
+
+public class ServiceStatusUpdateEvent : IEvent
+{
+    public ServiceStatusUpdateEvent(string uniqueId)
     {
-        public ServiceStatusUpdateEvent(string uniqueId)
-        {
-            UniqueId = uniqueId;
-        }
-        public string UniqueId { get; }
+        UniqueId = uniqueId;
     }
+
+    public string UniqueId { get; }
 }

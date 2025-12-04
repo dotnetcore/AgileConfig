@@ -1,16 +1,15 @@
-﻿using AgileConfig.Server.Data.Entity;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using AgileConfig.Server.Data.Entity;
 
-namespace AgileConfig.Server.IService
+namespace AgileConfig.Server.IService;
+
+public interface IRegisterCenterService
 {
-    public interface IRegisterCenterService
-    {
-        Task<string> RegisterAsync(ServiceInfo serviceInfo);
+    Task<string> RegisterAsync(ServiceInfo serviceInfo);
 
-        Task<bool> UnRegisterAsync(string serviceUniqueId);
-        
-        Task<bool> UnRegisterByServiceIdAsync(string serviceId);
+    Task<bool> UnRegisterAsync(string serviceUniqueId);
 
-        Task<bool> ReceiveHeartbeatAsync(string serviceUniqueId);
-    }
+    Task<bool> UnRegisterByServiceIdAsync(string serviceId);
+
+    Task<bool> ReceiveHeartbeatAsync(string serviceUniqueId);
 }

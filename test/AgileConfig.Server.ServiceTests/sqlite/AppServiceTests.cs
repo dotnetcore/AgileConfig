@@ -1,417 +1,411 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using AgileConfig.Server.Data.Entity;
 using System.Threading.Tasks;
-using AgileConfig.Server.IService;
-using AgileConfig.Server.Service;
-using Microsoft.Extensions.DependencyInjection;
 using AgileConfig.Server.Data.Abstraction;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Configuration;
-using Moq;
+using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.Data.Repository.Selector;
+using AgileConfig.Server.IService;
+using AgileConfig.Server.Service;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 
-namespace AgileConfig.Server.ServiceTests.sqlite
+namespace AgileConfig.Server.ServiceTests.sqlite;
+
+[TestClass]
+public class AppServiceTests : BasicTestService
 {
-    [TestClass()]
-    public class AppServiceTests : BasicTestService
+    private IAppService _appservice;
+    private IServiceProvider _serviceProvider;
+    private IServiceScope _serviceScope;
+
+    public override Task<Dictionary<string, string>> GetConfigurationData()
     {
-        IServiceProvider _serviceProvider = null;
-        IServiceScope _serviceScope = null;
-        IAppService _appservice = null;
-        public override Task<Dictionary<string, string>> GetConfigurationData()
-        {
-            return
-               Task.FromResult(new Dictionary<string, string>
-                {
-                {"db:provider","sqlite" },
-                {"db:conn","Data Source=agile_config.db" }
+        return
+            Task.FromResult(new Dictionary<string, string>
+            {
+                { "db:provider", "sqlite" },
+                { "db:conn", "Data Source=agile_config.db" }
             });
-        }
+    }
 
-        public virtual async Task<ServiceProvider> NewGlobalSp()
+    public virtual async Task<ServiceProvider> NewGlobalSp()
+    {
+        Console.WriteLine("Try get configration data");
+        var dict = await GetConfigurationData();
+
+        foreach (var item in dict) Console.WriteLine($"key: {item.Key} value: {item.Value}");
+
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(dict)
+            .Build();
+        Console.WriteLine("Config list");
+        foreach (var item in config.AsEnumerable()) Console.WriteLine($"key: {item.Key} value: {item.Value}");
+
+        var cache = new Mock<IMemoryCache>();
+        IServiceCollection services = new ServiceCollection();
+        services.AddLogging();
+        services.AddScoped(_ => cache.Object);
+        services.AddSingleton<IConfiguration>(config);
+        services.AddDbConfigInfoFactory();
+        services.AddFreeSqlFactory();
+        services.AddRepositories();
+        services.AddBusinessServices();
+
+        return services.BuildServiceProvider();
+    }
+
+    [TestInitialize]
+    public async Task TestInitialize()
+    {
+        GlobalServiceProvider = await NewGlobalSp();
+        _serviceScope = GlobalServiceProvider.CreateScope();
+        _serviceProvider = _serviceScope.ServiceProvider;
+
+        ClearData();
+
+        var systeminitializationService = _serviceProvider.GetService<ISystemInitializationService>();
+        systeminitializationService.TryInitDefaultEnvironment(); //初始化环境 DEV TEST STAGE PROD
+        systeminitializationService.TryInitJwtSecret(); //初始化 jwt secret
+
+        _appservice = _serviceProvider.GetService<IAppService>();
+
+        Console.WriteLine("Run TestInitialize");
+    }
+
+
+    [TestCleanup]
+    public void TestCleanup()
+    {
+        _appservice.Dispose();
+        _serviceScope.Dispose();
+    }
+
+    [TestMethod]
+    public async Task AddAsyncTest()
+    {
+        var id = Guid.NewGuid().ToString();
+        var source = new App
         {
-            Console.WriteLine("Try get configration data");
-            var dict = await GetConfigurationData();
+            Id = id,
+            Name = "xx",
+            Secret = "sec",
+            CreateTime = DateTime.Now,
+            UpdateTime = DateTime.Now,
+            Enabled = true
+        };
+        var result = await _appservice.AddAsync(source);
+        var app = await _appservice.GetAsync(source.Id);
 
-            foreach (var item in dict)
-            {
-                Console.WriteLine($"key: {item.Key} value: {item.Value}");
-            }
+        Assert.IsTrue(result);
+        Assert.IsNotNull(app);
 
-            var config = new ConfigurationBuilder()
-                             .AddInMemoryCollection(dict)
-                             .Build();
-            Console.WriteLine("Config list");
-            foreach (var item in config.AsEnumerable())
-            {
-                Console.WriteLine($"key: {item.Key} value: {item.Value}");
-            }
+        Assert.AreEqual(source.Id, app.Id);
+        Assert.AreEqual(source.Name, app.Name);
+        Assert.AreEqual(source.Secret, app.Secret);
+        Assert.AreEqual(source.CreateTime.ToString("yyyyMMddhhmmss"), app.CreateTime.ToString("yyyyMMddhhmmss"));
+        Assert.AreEqual(source.UpdateTime.Value.ToString("yyyyMMddhhmmss"),
+            app.UpdateTime.Value.ToString("yyyyMMddhhmmss"));
+        Assert.AreEqual(source.Enabled, app.Enabled);
+    }
 
-            var cache = new Mock<IMemoryCache>();
-            IServiceCollection services = new ServiceCollection();
-            services.AddLogging();
-            services.AddScoped(_ => cache.Object);
-            services.AddSingleton<IConfiguration>(config);
-            services.AddDbConfigInfoFactory();
-            services.AddFreeSqlFactory();
-            services.AddRepositories();
-            services.AddBusinessServices();
-
-            return services.BuildServiceProvider();
-        }
-
-        [TestInitialize]
-        public async Task TestInitialize()
+    [TestMethod]
+    public async Task DeleteAsyncTest()
+    {
+        var id = Guid.NewGuid().ToString();
+        var source = new App
         {
-            this.GlobalServiceProvider = await NewGlobalSp();
-            _serviceScope = this.GlobalServiceProvider.CreateScope();
-            _serviceProvider = _serviceScope.ServiceProvider;
+            Id = id,
+            Name = "xx",
+            Secret = "sec",
+            CreateTime = DateTime.Now,
+            UpdateTime = DateTime.Now,
+            Enabled = true
+        };
+        var result = await _appservice.AddAsync(source);
+        Assert.IsTrue(result);
 
-            ClearData();
+        var delResult = await _appservice.DeleteAsync(source);
+        Assert.IsTrue(delResult);
+    }
 
-            var systeminitializationService = _serviceProvider.GetService<ISystemInitializationService>();
-            systeminitializationService.TryInitDefaultEnvironment();//初始化环境 DEV TEST STAGE PROD
-            systeminitializationService.TryInitJwtSecret();//初始化 jwt secret
-
-            _appservice = _serviceProvider.GetService<IAppService>();
-
-            Console.WriteLine("Run TestInitialize");
-        }
-
-
-        [TestCleanup]
-        public void TestCleanup()
+    [TestMethod]
+    public async Task DeleteAsyncTest1()
+    {
+        var id = Guid.NewGuid().ToString();
+        var source = new App
         {
-            _appservice.Dispose();
-            _serviceScope.Dispose();
-        }
+            Id = id,
+            Name = "xx",
+            Secret = "sec",
+            CreateTime = DateTime.Now,
+            UpdateTime = DateTime.Now,
+            Enabled = true
+        };
+        var result = await _appservice.AddAsync(source);
+        Assert.IsTrue(result);
 
-        [TestMethod()]
-        public async Task AddAsyncTest()
+        var delResult = await _appservice.DeleteAsync(id);
+        Assert.IsTrue(delResult);
+
+        var app = await _appservice.GetAsync(source.Id);
+
+        Assert.IsNull(app);
+    }
+
+    [TestMethod]
+    public async Task GetAsyncTest()
+    {
+        var id = Guid.NewGuid().ToString();
+        var source = new App
         {
-            var id = Guid.NewGuid().ToString();
-            var source = new App
-            {
-                Id = id,
-                Name = "xx",
-                Secret = "sec",
-                CreateTime = DateTime.Now,
-                UpdateTime = DateTime.Now,
-                Enabled = true
-            };
-            var result = await _appservice.AddAsync(source);
-            var app = await _appservice.GetAsync(source.Id);
+            Id = id,
+            Name = "xx",
+            Secret = "sec",
+            CreateTime = DateTime.Now,
+            UpdateTime = DateTime.Now,
+            Enabled = true
+        };
+        var result = await _appservice.AddAsync(source);
+        Assert.IsTrue(result);
 
-            Assert.IsTrue(result);
-            Assert.IsNotNull(app);
+        var app = await _appservice.GetAsync(id);
+        Assert.IsNotNull(app);
 
-            Assert.AreEqual(source.Id, app.Id);
-            Assert.AreEqual(source.Name, app.Name);
-            Assert.AreEqual(source.Secret, app.Secret);
-            Assert.AreEqual(source.CreateTime.ToString("yyyyMMddhhmmss"), app.CreateTime.ToString("yyyyMMddhhmmss"));
-            Assert.AreEqual(source.UpdateTime.Value.ToString("yyyyMMddhhmmss"), app.UpdateTime.Value.ToString("yyyyMMddhhmmss"));
-            Assert.AreEqual(source.Enabled, app.Enabled);
-        }
+        Assert.AreEqual(source.Id, app.Id);
+        Assert.AreEqual(source.Name, app.Name);
+        Assert.AreEqual(source.Secret, app.Secret);
+        Assert.AreEqual(source.CreateTime.ToString("yyyyMMddhhmm"), app.CreateTime.ToString("yyyyMMddhhmm"));
+        Assert.AreEqual(source.UpdateTime.Value.ToString("yyyyMMddhhmm"),
+            app.UpdateTime.Value.ToString("yyyyMMddhhmm"));
+        Assert.AreEqual(source.Enabled, app.Enabled);
+    }
 
-        [TestMethod()]
-        public async Task DeleteAsyncTest()
+    [TestMethod]
+    public async Task GetAllAppsAsyncTest()
+    {
+        ClearData();
+
+        var id = Guid.NewGuid().ToString();
+        var source = new App
         {
-            var id = Guid.NewGuid().ToString();
-            var source = new App
-            {
-                Id = id,
-                Name = "xx",
-                Secret = "sec",
-                CreateTime = DateTime.Now,
-                UpdateTime = DateTime.Now,
-                Enabled = true
-            };
-            var result = await _appservice.AddAsync(source);
-            Assert.IsTrue(result);
-
-            var delResult = await _appservice.DeleteAsync(source);
-            Assert.IsTrue(delResult);
-        }
-
-        [TestMethod()]
-        public async Task DeleteAsyncTest1()
+            Id = id,
+            Name = "xx",
+            Secret = "sec",
+            CreateTime = DateTime.Now,
+            UpdateTime = DateTime.Now,
+            Enabled = true
+        };
+        var result = await _appservice.AddAsync(source);
+        Assert.IsTrue(result);
+        var id1 = Guid.NewGuid().ToString();
+        var source1 = new App
         {
-            var id = Guid.NewGuid().ToString();
-            var source = new App
-            {
-                Id = id,
-                Name = "xx",
-                Secret = "sec",
-                CreateTime = DateTime.Now,
-                UpdateTime = DateTime.Now,
-                Enabled = true
-            };
-            var result = await _appservice.AddAsync(source);
-            Assert.IsTrue(result);
+            Id = id1,
+            Name = "xx",
+            Secret = "sec",
+            CreateTime = DateTime.Now,
+            UpdateTime = DateTime.Now,
+            Enabled = true
+        };
+        var result1 = await _appservice.AddAsync(source1);
+        Assert.IsTrue(result1);
 
-            var delResult = await _appservice.DeleteAsync(id);
-            Assert.IsTrue(delResult);
+        var apps = await _appservice.GetAllAppsAsync();
+        Assert.IsNotNull(apps);
+        Assert.AreEqual(2, apps.Count);
+    }
 
-            var app = await _appservice.GetAsync(source.Id);
-
-            Assert.IsNull(app);
-
-        }
-
-        [TestMethod()]
-        public async Task GetAsyncTest()
+    [TestMethod]
+    public async Task UpdateAsyncTest()
+    {
+        var id = Guid.NewGuid().ToString();
+        var source = new App
         {
-            var id = Guid.NewGuid().ToString();
-            var source = new App
-            {
-                Id = id,
-                Name = "xx",
-                Secret = "sec",
-                CreateTime = DateTime.Now,
-                UpdateTime = DateTime.Now,
-                Enabled = true
-            };
-            var result = await _appservice.AddAsync(source);
-            Assert.IsTrue(result);
+            Id = id,
+            Name = "xx",
+            Secret = "sec",
+            CreateTime = DateTime.Now,
+            UpdateTime = DateTime.Now,
+            Enabled = true
+        };
+        var result = await _appservice.AddAsync(source);
+        Assert.IsTrue(result);
 
-            var app = await _appservice.GetAsync(id);
-            Assert.IsNotNull(app);
+        source.Name = "new name";
+        source.Secret = "new sec";
+        source.CreateTime = DateTime.Now.AddDays(1);
+        source.UpdateTime = DateTime.Now.AddDays(1);
+        source.Enabled = false;
 
-            Assert.AreEqual(source.Id, app.Id);
-            Assert.AreEqual(source.Name, app.Name);
-            Assert.AreEqual(source.Secret, app.Secret);
-            Assert.AreEqual(source.CreateTime.ToString("yyyyMMddhhmm"), app.CreateTime.ToString("yyyyMMddhhmm"));
-            Assert.AreEqual(source.UpdateTime.Value.ToString("yyyyMMddhhmm"), app.UpdateTime.Value.ToString("yyyyMMddhhmm"));
-            Assert.AreEqual(source.Enabled, app.Enabled);
-        }
+        var result1 = await _appservice.UpdateAsync(source);
+        Assert.IsTrue(result1);
 
-        [TestMethod()]
-        public async Task GetAllAppsAsyncTest()
+        var app = await _appservice.GetAsync(source.Id);
+
+        Assert.AreEqual(source.Id, app.Id);
+        Assert.AreEqual(source.Name, app.Name);
+        Assert.AreEqual(source.Secret, app.Secret);
+        Assert.AreEqual(source.CreateTime.ToString("yyyyMMddhhmmss"), app.CreateTime.ToString("yyyyMMddhhmmss"));
+        Assert.AreEqual(source.UpdateTime.Value.ToString("yyyyMMddhhmmss"),
+            app.UpdateTime.Value.ToString("yyyyMMddhhmmss"));
+        Assert.AreEqual(source.Enabled, app.Enabled);
+    }
+
+    [TestMethod]
+    public async Task CountEnabledAppsAsyncTest()
+    {
+        ClearData();
+
+        var id = Guid.NewGuid().ToString();
+        var source = new App
         {
-            ClearData();
-
-            var id = Guid.NewGuid().ToString();
-            var source = new App
-            {
-                Id = id,
-                Name = "xx",
-                Secret = "sec",
-                CreateTime = DateTime.Now,
-                UpdateTime = DateTime.Now,
-                Enabled = true
-            };
-            var result = await _appservice.AddAsync(source);
-            Assert.IsTrue(result);
-            var id1 = Guid.NewGuid().ToString();
-            var source1 = new App
-            {
-                Id = id1,
-                Name = "xx",
-                Secret = "sec",
-                CreateTime = DateTime.Now,
-                UpdateTime = DateTime.Now,
-                Enabled = true
-            };
-            var result1 = await _appservice.AddAsync(source1);
-            Assert.IsTrue(result1);
-
-            var apps = await _appservice.GetAllAppsAsync();
-            Assert.IsNotNull(apps);
-            Assert.AreEqual(2, apps.Count);
-
-
-        }
-
-        [TestMethod()]
-        public async Task UpdateAsyncTest()
+            Id = id,
+            Name = "xx",
+            Secret = "sec",
+            CreateTime = DateTime.Now,
+            UpdateTime = DateTime.Now,
+            Enabled = true
+        };
+        var result = await _appservice.AddAsync(source);
+        Assert.IsTrue(result);
+        var id1 = Guid.NewGuid().ToString();
+        var source1 = new App
         {
-            var id = Guid.NewGuid().ToString();
-            var source = new App
-            {
-                Id = id,
-                Name = "xx",
-                Secret = "sec",
-                CreateTime = DateTime.Now,
-                UpdateTime = DateTime.Now,
-                Enabled = true
-            };
-            var result = await _appservice.AddAsync(source);
-            Assert.IsTrue(result);
+            Id = id1,
+            Name = "xx",
+            Secret = "sec",
+            CreateTime = DateTime.Now,
+            UpdateTime = DateTime.Now,
+            Enabled = false
+        };
+        var result1 = await _appservice.AddAsync(source1);
+        Assert.IsTrue(result1);
 
-            source.Name = "new name";
-            source.Secret = "new sec";
-            source.CreateTime = DateTime.Now.AddDays(1);
-            source.UpdateTime = DateTime.Now.AddDays(1);
-            source.Enabled = false;
+        var count = await _appservice.CountEnabledAppsAsync();
+        Assert.AreEqual(1, count);
+    }
 
-            var result1 = await _appservice.UpdateAsync(source);
-            Assert.IsTrue(result1);
+    [TestMethod]
+    public async Task GetAllInheritancedAppsAsyncTest()
+    {
+        ClearData();
 
-            var app = await _appservice.GetAsync(source.Id);
-
-            Assert.AreEqual(source.Id, app.Id);
-            Assert.AreEqual(source.Name, app.Name);
-            Assert.AreEqual(source.Secret, app.Secret);
-            Assert.AreEqual(source.CreateTime.ToString("yyyyMMddhhmmss"), app.CreateTime.ToString("yyyyMMddhhmmss"));
-            Assert.AreEqual(source.UpdateTime.Value.ToString("yyyyMMddhhmmss"), app.UpdateTime.Value.ToString("yyyyMMddhhmmss"));
-            Assert.AreEqual(source.Enabled, app.Enabled);
-        }
-
-        [TestMethod()]
-        public async Task CountEnabledAppsAsyncTest()
+        var id = Guid.NewGuid().ToString();
+        var source = new App
         {
-            this.ClearData();
-
-            var id = Guid.NewGuid().ToString();
-            var source = new App
-            {
-                Id = id,
-                Name = "xx",
-                Secret = "sec",
-                CreateTime = DateTime.Now,
-                UpdateTime = DateTime.Now,
-                Enabled = true
-            };
-            var result = await _appservice.AddAsync(source);
-            Assert.IsTrue(result);
-            var id1 = Guid.NewGuid().ToString();
-            var source1 = new App
-            {
-                Id = id1,
-                Name = "xx",
-                Secret = "sec",
-                CreateTime = DateTime.Now,
-                UpdateTime = DateTime.Now,
-                Enabled = false
-            };
-            var result1 = await _appservice.AddAsync(source1);
-            Assert.IsTrue(result1);
-
-            var count = await _appservice.CountEnabledAppsAsync();
-            Assert.AreEqual(1, count);
-        }
-
-        [TestMethod()]
-        public async Task GetAllInheritancedAppsAsyncTest()
+            Id = id,
+            Name = "xx",
+            Secret = "sec",
+            CreateTime = DateTime.Now,
+            UpdateTime = DateTime.Now,
+            Enabled = true,
+            Type = AppType.PRIVATE
+        };
+        var source1 = new App
         {
-            this.ClearData();
-
-            var id = Guid.NewGuid().ToString();
-            var source = new App
-            {
-                Id = id,
-                Name = "xx",
-                Secret = "sec",
-                CreateTime = DateTime.Now,
-                UpdateTime = DateTime.Now,
-                Enabled = true,
-                Type = AppType.PRIVATE
-            };
-            var source1 = new App
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "xxx",
-                Secret = "sec",
-                CreateTime = DateTime.Now,
-                UpdateTime = DateTime.Now,
-                Enabled = true,
-                Type = AppType.PRIVATE
-            };
-            var source2 = new App
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "xxxx",
-                Secret = "sec",
-                CreateTime = DateTime.Now,
-                UpdateTime = DateTime.Now,
-                Enabled = true,
-                Type = AppType.Inheritance
-            };
-            var source3 = new App
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "xxxx",
-                Secret = "sec",
-                CreateTime = DateTime.Now,
-                UpdateTime = DateTime.Now,
-                Enabled = false,
-                Type = AppType.Inheritance
-            };
-            var result = await _appservice.AddAsync(source);
-            await _appservice.AddAsync(source1);
-            await _appservice.AddAsync(source2);
-            await _appservice.AddAsync(source3);
-
-            Assert.IsTrue(result);
-
-            var apps = await _appservice.GetAllInheritancedAppsAsync();
-
-            Assert.AreEqual(2, apps.Count);
-        }
-        [TestMethod()]
-        public async Task GetInheritancedAppsAsyncTest()
+            Id = Guid.NewGuid().ToString(),
+            Name = "xxx",
+            Secret = "sec",
+            CreateTime = DateTime.Now,
+            UpdateTime = DateTime.Now,
+            Enabled = true,
+            Type = AppType.PRIVATE
+        };
+        var source2 = new App
         {
-            this.ClearData();
+            Id = Guid.NewGuid().ToString(),
+            Name = "xxxx",
+            Secret = "sec",
+            CreateTime = DateTime.Now,
+            UpdateTime = DateTime.Now,
+            Enabled = true,
+            Type = AppType.Inheritance
+        };
+        var source3 = new App
+        {
+            Id = Guid.NewGuid().ToString(),
+            Name = "xxxx",
+            Secret = "sec",
+            CreateTime = DateTime.Now,
+            UpdateTime = DateTime.Now,
+            Enabled = false,
+            Type = AppType.Inheritance
+        };
+        var result = await _appservice.AddAsync(source);
+        await _appservice.AddAsync(source1);
+        await _appservice.AddAsync(source2);
+        await _appservice.AddAsync(source3);
 
-            var id = Guid.NewGuid().ToString();
-            var source = new App
-            {
-                Id = id,
-                Name = "xx",
-                Secret = "sec",
-                CreateTime = DateTime.Now,
-                UpdateTime = DateTime.Now,
-                Enabled = true,
-                Type = AppType.PRIVATE
-            };
-            var source1 = new App
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "xx1",
-                Secret = "sec",
-                CreateTime = DateTime.Now,
-                UpdateTime = DateTime.Now,
-                Enabled = true,
-                Type = AppType.Inheritance
-            };
-            var source2 = new App
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "xx2",
-                Secret = "sec",
-                CreateTime = DateTime.Now,
-                UpdateTime = DateTime.Now,
-                Enabled = true,
-                Type = AppType.Inheritance
-            };
-            //
-            var appInher = new AppInheritanced();
-            appInher.Id = Guid.NewGuid().ToString();
-            appInher.AppId = source.Id;
-            appInher.InheritancedAppId = source1.Id;
-            appInher.Sort = 1;
-            var appInher1 = new AppInheritanced();
-            appInher1.Id = Guid.NewGuid().ToString();
-            appInher1.AppId = source.Id;
-            appInher1.InheritancedAppId = source2.Id;
-            appInher1.Sort = 2;
+        Assert.IsTrue(result);
 
-            var result = await _appservice.AddAsync(source);
-            await _appservice.AddAsync(source1);
-            await _appservice.AddAsync(source2);
+        var apps = await _appservice.GetAllInheritancedAppsAsync();
 
-            await _serviceProvider.GetService<IAppInheritancedRepository>().InsertAsync(appInher);
-            await _serviceProvider.GetService<IAppInheritancedRepository>().InsertAsync(appInher1);
+        Assert.AreEqual(2, apps.Count);
+    }
 
-            Assert.IsTrue(result);
+    [TestMethod]
+    public async Task GetInheritancedAppsAsyncTest()
+    {
+        ClearData();
 
-            var apps = await _appservice.GetInheritancedAppsAsync(source.Id);
+        var id = Guid.NewGuid().ToString();
+        var source = new App
+        {
+            Id = id,
+            Name = "xx",
+            Secret = "sec",
+            CreateTime = DateTime.Now,
+            UpdateTime = DateTime.Now,
+            Enabled = true,
+            Type = AppType.PRIVATE
+        };
+        var source1 = new App
+        {
+            Id = Guid.NewGuid().ToString(),
+            Name = "xx1",
+            Secret = "sec",
+            CreateTime = DateTime.Now,
+            UpdateTime = DateTime.Now,
+            Enabled = true,
+            Type = AppType.Inheritance
+        };
+        var source2 = new App
+        {
+            Id = Guid.NewGuid().ToString(),
+            Name = "xx2",
+            Secret = "sec",
+            CreateTime = DateTime.Now,
+            UpdateTime = DateTime.Now,
+            Enabled = true,
+            Type = AppType.Inheritance
+        };
+        //
+        var appInher = new AppInheritanced();
+        appInher.Id = Guid.NewGuid().ToString();
+        appInher.AppId = source.Id;
+        appInher.InheritancedAppId = source1.Id;
+        appInher.Sort = 1;
+        var appInher1 = new AppInheritanced();
+        appInher1.Id = Guid.NewGuid().ToString();
+        appInher1.AppId = source.Id;
+        appInher1.InheritancedAppId = source2.Id;
+        appInher1.Sort = 2;
 
-            Assert.AreEqual(2, apps.Count);
-        }
+        var result = await _appservice.AddAsync(source);
+        await _appservice.AddAsync(source1);
+        await _appservice.AddAsync(source2);
 
+        await _serviceProvider.GetService<IAppInheritancedRepository>().InsertAsync(appInher);
+        await _serviceProvider.GetService<IAppInheritancedRepository>().InsertAsync(appInher1);
+
+        Assert.IsTrue(result);
+
+        var apps = await _appservice.GetInheritancedAppsAsync(source.Id);
+
+        Assert.AreEqual(2, apps.Count);
     }
 }

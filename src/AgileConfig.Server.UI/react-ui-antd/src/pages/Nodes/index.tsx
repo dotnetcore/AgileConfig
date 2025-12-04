@@ -3,12 +3,13 @@ import { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
 import { Button, FormInstance, message,Modal } from 'antd';
+// hasFunction no longer needed after migrating to <RequireFunction>
+import { RequireFunction } from '@/utils/permission';
 import React, { useState, useRef } from 'react';
 import { NodeItem } from './data';
 import { queryNodes, addNode, delNode,allClientReload } from './service';
 import { useIntl } from 'umi';
-import AuthorizedEle from '@/components/Authorized/AuthorizedElement';
-import functionKeys from '@/models/functionKeys';
+// Removed AuthorizedEle/functionKeys: using hasFunction for gating now
 
 const { confirm } = Modal;
 
@@ -153,35 +154,26 @@ const nodeList:React.FC = () => {
       dataIndex: 'option',
       valueType: 'option',
       render: (_, record) => [
-        <AuthorizedEle key="del" judgeKey={functionKeys.Node_Delete}>
+        <RequireFunction fn="NODE_DELETE" key="delete" fallback={null}>
           <a
             onClick={() => {
               confirm({
-                title: intl.formatMessage({
-                  id: 'pages.nodes.confirmDelete',
-                }),
+                title: intl.formatMessage({ id: 'pages.nodes.confirmDelete' }),
                 icon: <ExclamationCircleOutlined />,
-                content: intl.formatMessage({
-                  id: 'pages.nodes.confirmDeleteContent',
-                }),
+                content: intl.formatMessage({ id: 'pages.nodes.confirmDeleteContent' }),
                 onOk() {
                   handleDel(record).then((success) => {
                     if (success) {
-                      if (actionRef.current) {
-                        actionRef.current.reload();
-                      }
+                      actionRef.current?.reload();
                     }
                   });
                 },
-                onCancel() {},
               });
             }}
           >
-            {intl.formatMessage({
-              id: 'pages.nodes.delete',
-            })}
+            {intl.formatMessage({ id: 'pages.nodes.delete' })}
           </a>
-        </AuthorizedEle>,
+        </RequireFunction>,
       ],
     },
   ];
@@ -198,42 +190,30 @@ const nodeList:React.FC = () => {
           labelWidth: 120,
         }}
         toolBarRender={() => [
-          <AuthorizedEle key="reload" judgeKey={functionKeys.Node_Add}>
-            <Button type="primary" onClick={() => {
-              confirm({
-                title: intl.formatMessage({
-                  id: 'pages.nodes.reloadAll',
-                }),
-                icon: <ExclamationCircleOutlined />,
-                content: intl.formatMessage({
-                  id: 'pages.nodes.reloadAllContent',
-                }),
-                onOk() {
-                  handleAllReload({} as NodeItem).then((success) => {
-                    
-                  });
-                },
-                onCancel() {},
-              });
-            }}>
-              {intl.formatMessage({
-                id: 'pages.nodes.reloadAll',
-              })}
-            </Button>
-          </AuthorizedEle>,
-          <AuthorizedEle key="new" judgeKey={functionKeys.Node_Add}>
+          <RequireFunction fn="CLIENT_REFRESH" key="reload" fallback={null}>
+            <RequireFunction fn="NODE_READ" fallback={null}>
+              <Button type="primary" onClick={() => {
+                confirm({
+                  title: intl.formatMessage({ id: 'pages.nodes.reloadAll' }),
+                  icon: <ExclamationCircleOutlined />,
+                  content: intl.formatMessage({ id: 'pages.nodes.reloadAllContent' }),
+                  onOk() { handleAllReload({} as any); },
+                });
+              }}>
+                {intl.formatMessage({ id: 'pages.nodes.reloadAll' })}
+              </Button>
+            </RequireFunction>
+          </RequireFunction>,
+          <RequireFunction fn="NODE_ADD" key="add" fallback={null}>
             <Button
               type="primary"
-              key="primary"
               onClick={() => {
                 handleModalVisible(true);
               }}
             >
-              <PlusOutlined /> {intl.formatMessage({
-                id: 'pages.nodes.new',
-              })}
+              <PlusOutlined /> {intl.formatMessage({ id: 'pages.nodes.new' })}
             </Button>
-          </AuthorizedEle>,
+          </RequireFunction>,
         ]}
         request={queryNodes}
         columns={columns}

@@ -30,6 +30,5 @@ public class SystemEventHandlersRegister(ITinyEventBus tinyEventBus) : IEventHan
         tinyEventBus.Register<AddUserEventHandler>();
         tinyEventBus.Register<EditUserEventHandler>();
         tinyEventBus.Register<DeleteUserEventHandler>();
-
     }
 }

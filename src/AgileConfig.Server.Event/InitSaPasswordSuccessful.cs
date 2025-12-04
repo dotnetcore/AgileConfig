@@ -1,8 +1,7 @@
 ﻿using AgileConfig.Server.Common.EventBus;
 
-namespace AgileConfig.Server.Event
+namespace AgileConfig.Server.Event;
+
+public class InitSaPasswordSuccessful : IEvent
 {
-    public class InitSaPasswordSuccessful : IEvent
-    {
-    }
 }

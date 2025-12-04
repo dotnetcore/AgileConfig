@@ -1,26 +1,24 @@
 import { PageContainer } from '@ant-design/pro-layout';
+import { RequireFunction } from '@/utils/permission';
 import ProTable, { ProColumns } from '@ant-design/pro-table';
-import React, { useState, useRef, useEffect } from 'react';
-import { FormattedMessage, useIntl } from 'umi';
-import { TableListItem } from '../TableList/data';
+import React, { useState, useEffect } from 'react';
+import { useIntl } from 'umi';
 import { queryLogs } from './service';
-import {queryApps} from '../Apps/service'
+import { queryApps } from '../Apps/service';
 
 const logs:React.FC = () =>  {
   const intl = useIntl();
   const [appEnums, setAppEnums] = useState<any>();
-  const getAppEnums = async () =>
-  {
-    const result = await queryApps({})
-    const obj = {};
-    result.data.forEach((x)=>{
-      obj[x.id] = {
-        text: x.name
+  const getAppEnums = async () => {
+    const result = await queryApps({ sortField: 'createTime', ascOrDesc: 'descend', tableGrouped: false });
+    const obj: Record<string, { text: string }> = {};
+    result.data.forEach((x: any) => {
+      if (x.id && x.name) {
+        obj[x.id] = { text: x.name };
       }
     });
-
     return obj;
-  }
+  };
   useEffect(()=>{
     getAppEnums().then(x=> {
       console.log('app enums ', x);
@@ -76,17 +74,15 @@ const logs:React.FC = () =>  {
   ];
   return (
     <PageContainer>
-      <ProTable<TableListItem>       
-      options={
-        false
-      }    
-      search={{
-        labelWidth: 'auto',
-      }}                                                                         
-        rowKey="id"
-        columns = {columns}
-        request = { (params, sorter, filter) => queryLogs({ ...params}) }
-      />
+      <RequireFunction fn="LOG_READ" fallback={<div>{intl.formatMessage({ id: 'pages.role.permissions.LOG_READ', defaultMessage: 'No log permission' })}</div>}>
+        <ProTable
+          options={false}
+          search={{ labelWidth: 'auto' }}
+          rowKey="id"
+          columns={columns}
+          request={(params) => queryLogs({ ...params })}
+        />
+      </RequireFunction>
     </PageContainer>
   );
 }

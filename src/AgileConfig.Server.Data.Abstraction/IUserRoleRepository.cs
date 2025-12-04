@@ -1,8 +1,7 @@
 ﻿using AgileConfig.Server.Data.Entity;
 
-namespace AgileConfig.Server.Data.Abstraction
+namespace AgileConfig.Server.Data.Abstraction;
+
+public interface IUserRoleRepository : IRepository<UserRole, string>
 {
-    public interface IUserRoleRepository : IRepository<UserRole, string>
-    {
-    }
 }

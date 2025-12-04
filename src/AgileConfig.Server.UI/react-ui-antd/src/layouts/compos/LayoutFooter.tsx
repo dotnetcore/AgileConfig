@@ -14,7 +14,7 @@ const LayoutFooter : React.FC =()=>{
           { getAppVer()}
           &nbsp;&nbsp;  
           <a title={'agileconfig ' + getAppVer()} href="https://github.com/kklldog/AgileConfig" style={{color:'#bfbfbf'}}><GithubOutlined/> </a>
-          &nbsp; Powered by .NET8 ant-design-pro4
+          &nbsp; Powered by .NET10 ant-design-pro4
         </div>
       )
 }

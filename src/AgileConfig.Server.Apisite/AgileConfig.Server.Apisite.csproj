@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework>
 		<AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
-		<AssemblyVersion>1.10.0</AssemblyVersion>
-		<Version>1.10.0</Version>
-		<PackageVersion>1.10.0</PackageVersion>
+		<AssemblyVersion>1.11.0</AssemblyVersion>
+		<Version>1.11.0</Version>
+		<PackageVersion>1.11.0</PackageVersion>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-		<FileVersion>1.10.0</FileVersion>
+		<FileVersion>1.11.0</FileVersion>
 		<Authors>kklldog</Authors>
 		<Company>kklldog</Company>
 	</PropertyGroup>
@@ -26,34 +26,37 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
-		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
-		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Diagnostics.ResourceMonitoring" Version="8.5.0" />
-		<PackageReference Include="Npgsql.OpenTelemetry" Version="8.0.3" />
-		<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.8.1" />
-		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.8.1" />
-		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.8.1" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.8.1" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.8.1" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.8.0" />
-		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.5.0" />
-		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.5.0" />
-		<PackageReference Include="Figgle.Generator" Version="0.6.4" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="10.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0-preview.4" />
+		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="10.0.0-rc.1.25458.5" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.ResourceMonitoring" Version="10.0.0" />
+		<PackageReference Include="Npgsql.OpenTelemetry" Version="10.0.0" />
+		<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.14.0" />
+		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.14.0" />
+		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.14.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.14.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.14.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.14.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.0.1" />
+		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.0.1" />
+		<PackageReference Include="Figgle.Generator" Version="0.6.5" PrivateAssets="all" />
 		<PackageReference Include="Figgle.Fonts" Version="0.6.5" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\AgileConfig.Server.Common\AgileConfig.Server.Common.csproj" />
 		<ProjectReference Include="..\AgileConfig.Server.Data.Abstraction\AgileConfig.Server.Data.Abstraction.csproj" />
-		<ProjectReference Include="..\AgileConfig.Server.Data.Repository.Freesql\AgileConfig.Server.Data.Repository.Freesql.csproj" />
-		<ProjectReference Include="..\AgileConfig.Server.Data.Repository.Mongodb\AgileConfig.Server.Data.Repository.Mongodb.csproj" />
+		<ProjectReference
+			Include="..\AgileConfig.Server.Data.Repository.Freesql\AgileConfig.Server.Data.Repository.Freesql.csproj" />
+		<ProjectReference
+			Include="..\AgileConfig.Server.Data.Repository.Mongodb\AgileConfig.Server.Data.Repository.Mongodb.csproj" />
 		<ProjectReference Include="..\Agile.Config.Protocol\Agile.Config.Protocol.csproj" />
 		<ProjectReference Include="..\AgileConfig.Server.Data.Entity\AgileConfig.Server.Data.Entity.csproj" />
 		<ProjectReference Include="..\AgileConfig.Server.Data.Freesql\AgileConfig.Server.Data.Freesql.csproj" />
-		<ProjectReference Include="..\AgileConfig.Server.Data.Repository.Selector\AgileConfig.Server.Data.Repository.Selector.csproj" />
+		<ProjectReference
+			Include="..\AgileConfig.Server.Data.Repository.Selector\AgileConfig.Server.Data.Repository.Selector.csproj" />
 		<ProjectReference Include="..\AgileConfig.Server.Event\AgileConfig.Server.Event.csproj" />
 		<ProjectReference Include="..\AgileConfig.Server.OIDC\AgileConfig.Server.OIDC.csproj" />
 		<ProjectReference Include="..\AgileConfig.Server.Service\AgileConfig.Server.Service.csproj" />

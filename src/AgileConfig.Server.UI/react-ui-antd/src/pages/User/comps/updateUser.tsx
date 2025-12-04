@@ -1,32 +1,34 @@
 import { useIntl } from "@/.umi/plugin-locale/localeExports";
-import { getAuthority } from "@/utils/authority";
 import {  ModalForm,  ProFormSelect,  ProFormText } from "@ant-design/pro-form";
 import React from 'react';
 import { UserItem } from "../data";
+
+type RoleOption = {
+  value: string;
+  label: string;
+  code?: string;
+  isSystem?: boolean;
+};
+
 export type UpdateUserProps = {
     onSubmit: (values: UserItem) => Promise<void>;
     onCancel: () => void;
     updateModalVisible: boolean;
     value: UserItem | undefined ;
-    setValue: React.Dispatch<React.SetStateAction<UserItem | undefined>>
+    setValue: React.Dispatch<React.SetStateAction<UserItem | undefined>>;
+    roleOptions: RoleOption[];
+    defaultRoleIds: string[];
   };
 const UpdateForm : React.FC<UpdateUserProps> = (props)=>{
     const intl = useIntl();
-    const hasUserRole = (role:string) => {
-      const authority = getAuthority();
-      if (Array.isArray(authority)) {
-        if (authority.find(x=> x === role)) {
-          return true;
-        }
-      }
-    
-      return false;
-    }
     return (
-    <ModalForm 
+    <ModalForm
     width="400px"
     title={intl.formatMessage({id: props.value?.id ? 'pages.user.form.title.edit' : 'pages.user.form.title.add'})}
-    initialValues={props.value}
+    initialValues={{
+      ...props.value,
+      userRoleIds: props.value?.userRoleIds && props.value.userRoleIds.length > 0 ? props.value.userRoleIds : props.defaultRoleIds
+    }}
     visible={props.updateModalVisible}
     modalProps={
       {
@@ -61,32 +63,14 @@ const UpdateForm : React.FC<UpdateUserProps> = (props)=>{
             required: true,
           },
         ]}
-        label={intl.formatMessage({id: 'pages.user.form.usertype'})}
-        name="userRoles"
-        mode="multiple" 
-        options = {
-          hasUserRole('SuperAdmin')?[
-            {
-              value: 1,
-              label: intl.formatMessage({
-                id: 'pages.user.usertype.admin',
-              }),
-            },
-            {
-              value: 2,
-              label: intl.formatMessage({
-                id: 'pages.user.usertype.normaluser',
-              }),
-            }
-          ]:[{
-            value: 2,
-            label: intl.formatMessage({
-              id: 'pages.user.usertype.normaluser',
-            }),
-          }]
-        }
-      >
-        </ProFormSelect> 
+        label={intl.formatMessage({id: 'pages.user.form.userrole'})}
+        name="userRoleIds"
+        mode="multiple"
+        options={props.roleOptions.map(r => ({
+          value: r.value,
+          label: r.label,
+        }))}
+      />
     </ModalForm>
     );
 }
