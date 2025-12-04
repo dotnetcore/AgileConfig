@@ -31,10 +31,17 @@ const getPermissionTagColor = (permission: string) => {
 
 const renderPermissionTag = (props: CustomTagProps) => {
   const { label, value, closable, onClose } = props;
+  const onPreventMouseDown = (event: React.MouseEvent<HTMLSpanElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
   return (
     <Tag
       key={String(value)} {...props}
       color={getPermissionTagColor(String(value))}
+      onMouseDown={onPreventMouseDown}
+      closable={closable}
+      onClose={onClose}
     >
       {label}
     </Tag>
