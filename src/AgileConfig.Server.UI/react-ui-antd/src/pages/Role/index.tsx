@@ -33,9 +33,10 @@ const renderPermissionTag = (props: CustomTagProps) => {
   const { label, value, closable, onClose } = props;
   return (
     <Tag
-      key={String(value)}
+      key={String(value)} {...props}
+      color={getPermissionTagColor(String(value))}
     >
-      123
+      {label}
     </Tag>
   );
 };
@@ -290,7 +291,9 @@ const RolePage: React.FC = () => {
           label={intl.formatMessage({ id: 'pages.role.form.functions', defaultMessage: 'Permissions' })}
           mode="multiple"
           options={groupedPermissionOptions}
-          tagRender={renderPermissionTag}
+          fieldProps={{
+            tagRender: renderPermissionTag,
+          }}
         />
       </ModalForm>
 
@@ -332,8 +335,9 @@ const RolePage: React.FC = () => {
             label={intl.formatMessage({ id: 'pages.role.form.functions', defaultMessage: 'Permissions' })}
             mode="multiple"
             options={groupedPermissionOptions}
-            tagRender={renderPermissionTag}
-          />
+            fieldProps={{
+              tagRender: renderPermissionTag,
+            }}          />
         </ModalForm>
       )}
     </PageContainer>
