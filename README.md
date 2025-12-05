@@ -33,6 +33,7 @@ This is a lightweight configuration center based on .net core . It is easy to de
 9. support OIDC/SSO
 10. support OpenTelemetry
 11. also can be use as a simple service register center
+12. role base user permission control
     
 🔆🔆🔆Demo Project ：[AgileConfig Server Demo](http://agileconfig_server.xbaby.xyz)   name.pwd= admin/123456🔆🔆🔆   
 client project ：[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
@@ -179,9 +180,9 @@ var userid = ConfigClient.Instance["userid"]
 
 ## donate
 If this project is helpful to you, please scan the QR code below for a cup of coffee.    
- <img src="https://static.xbaby.xyz/alipay_qr.jpg|w30" width="300">
+ ![](https://static.xbaby.xyz/alipay_qr.jpg|w30)
      
- <img src="https://static.xbaby.xyz/wechatpay_qr.jpg|w30" width="300">
+![](https://static.xbaby.xyz/wechatpay_qr.jpg|w30)
    
 ## thanks 💖💖💖    
 大鹏￥66.66 , 瘦草￥6.66 + 88 , ziana￥10.0 , Nullable￥9.99 , *三 ￥6.66 , HHM ￥6.66 , *。 ￥6.66 , 微笑刺客 ￥6.66 ,飞鸟与鱼 ￥38.88,  *航 ￥9.9, *啦 ￥6.66, *海 ￥6.66, Dyx 邓杨喜 ￥30 And more ...
