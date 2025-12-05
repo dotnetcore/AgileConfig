@@ -1,214 +1,177 @@
-﻿using Agile.Config.Protocol;
-using AgileConfig.Server.IService;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Agile.Config.Protocol;
+using AgileConfig.Server.IService;
+using Newtonsoft.Json;
 
-namespace AgileConfig.Server.Apisite.Websocket
+namespace AgileConfig.Server.Apisite.Websocket;
+
+public class WebsocketCollection : IWebsocketCollection
 {
-    public class WebsocketCollection : IWebsocketCollection
+    private readonly ConcurrentDictionary<string, WebsocketClient> _clients = new();
+
+    static WebsocketCollection()
     {
-        private WebsocketCollection()
-        {
-        }
-
-        static WebsocketCollection()
-        {
-            Instance = new WebsocketCollection();
-        }
-
-        private readonly ConcurrentDictionary<string, WebsocketClient> _clients = new();
-
-        public void SendMessageToAll(string message)
-        {
-            if (_clients.Count == 0)
-            {
-                return;
-            }
-            var data = Encoding.UTF8.GetBytes(message);
-            foreach (var webSocket in _clients)
-            {
-                if (webSocket.Value.Client.State == WebSocketState.Open)
-                {
-                    webSocket.Value.Client.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
-                 CancellationToken.None);
-                }
-            }
-        }
-
-        public void SendToAppClients(string appId, string message)
-        {
-            if (_clients.IsEmpty)
-            {
-                return;
-            }
-            var appClients = _clients.Values.Where(c => c.AppId == appId);
-            if (!appClients.Any())
-            {
-                return;
-            }
-            var data = Encoding.UTF8.GetBytes(message);
-            foreach (var webSocket in appClients)
-            {
-                if (webSocket.AppId == appId && webSocket.Client.State == WebSocketState.Open)
-                {
-                    webSocket.Client.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
-                 CancellationToken.None);
-                }
-            }
-        }
-
-        public void SendActionToAppClients(string appId,string env, WebsocketAction action)
-        {
-            if (_clients.IsEmpty)
-            {
-                return;
-            }
-            var appClients = _clients.Values.Where(c => c.AppId == appId && c.Env == env);
-            if (!appClients.Any())
-            {
-                return;
-            }
-            var json = JsonConvert.SerializeObject(action);
-            var data = Encoding.UTF8.GetBytes(json);
-            foreach (var webSocket in appClients)
-            {
-                if (webSocket.AppId == appId && webSocket.Client.State == WebSocketState.Open)
-                {
-                    webSocket.Client.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
-                 CancellationToken.None);
-                }
-            }
-        }
-
-
-        public async Task SendMessageToOne(WebsocketClient client, string message)
-        {
-            if (client.Client.State == WebSocketState.Open)
-            {
-                var data = Encoding.UTF8.GetBytes(message);
-                await client.Client.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
-               CancellationToken.None);
-            }
-        }
-
-        public async Task SendActionToOne(WebsocketClient client, WebsocketAction action)
-        {
-            if (client.Client.State == WebSocketState.Open)
-            {
-                var json = JsonConvert.SerializeObject(action);
-                var data = Encoding.UTF8.GetBytes(json);
-                await client.Client.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
-               CancellationToken.None);
-            }
-        }
-
-
-        public void AddClient(WebsocketClient client)
-        {
-            _clients.TryAdd(client.Id, client);
-        }
-
-        public async Task RemoveClient(WebsocketClient client, WebSocketCloseStatus? closeStatus, string closeDesc = null)
-        {
-            if (_clients.TryRemove(client.Id, out WebsocketClient tryRemoveClient) && client.Client.State == WebSocketState.Open)
-            {
-                await client.Client.CloseAsync(closeStatus ?? WebSocketCloseStatus.Empty, closeDesc, CancellationToken.None);
-                client.Client.Dispose();
-            }
-        }
-
-        public void RemoveAppClients(string appId, WebSocketCloseStatus? closeStatus, string closeDesc)
-        {
-            var removeClients = _clients.Values.Where(c => c.AppId == appId).ToList();
-            if (removeClients.Count == 0)
-            {
-                return;
-            }
-            foreach (var webSocket in removeClients)
-            {
-                _clients.TryRemove(webSocket.Id, out WebsocketClient tryRemoveClient);
-            }
-            Task.Run(async () =>
-            {
-                foreach (var webSocket in removeClients)
-                {
-                    try
-                    {
-                        if (webSocket.Client.State != WebSocketState.Open) continue;
-                        await webSocket.Client.CloseAsync(closeStatus ?? WebSocketCloseStatus.Empty, closeDesc, CancellationToken.None);
-                        webSocket.Client.Dispose();
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Try to close websocket client {0} err {1}.", webSocket.Id, ex.Message);
-                    }
-                }
-            });
-        }
-
-        public WebsocketClient Get(string clientId)
-        {
-            _clients.TryGetValue(clientId, out WebsocketClient client);
-            return client;
-        }
-
-        public ClientInfos Report()
-        {
-            var clientInfos = _clients
-                                  .Values
-                                  .Select(c => new ClientInfo { 
-                                      Id = c.Id,
-                                      AppId = c.AppId, 
-                                      LastHeartbeatTime = c.LastHeartbeatTime, 
-                                      Tag = c.Tag, 
-                                      Name = c.Name,
-                                      Ip = c.Ip ,
-                                      Env = c.Env,
-                                      LastRefreshTime = c.LastRefreshTime
-                                  })
-                                  .OrderBy(c => c.AppId)
-                                  .ThenByDescending(c => c.LastHeartbeatTime)
-                                  .ToList();
-            return new ClientInfos
-            {
-                ClientCount = clientInfos.Count,
-                Infos = clientInfos
-            };
-        }
-
-        public void SendActionToAll(WebsocketAction action)
-        {
-            if (_clients.IsEmpty)
-            {
-                return;
-            }
-
-            var json = JsonConvert.SerializeObject(action);
-            var data = Encoding.UTF8.GetBytes(json);
-            foreach (var webSocket in _clients)
-            {
-                if (webSocket.Value.Client.State == WebSocketState.Open)
-                {
-                    webSocket.Value.Client.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
-                 CancellationToken.None);
-                }
-            }
-        }
-
-        public void Clear()
-        {
-            _clients?.Clear();
-        }
-
-        public static IWebsocketCollection Instance { get; private set; }
-
-        public int Count => _clients.Count;
+        Instance = new WebsocketCollection();
     }
 
+    private WebsocketCollection()
+    {
+    }
+
+    public static IWebsocketCollection Instance { get; private set; }
+
+    public void SendMessageToAll(string message)
+    {
+        if (_clients.Count == 0) return;
+        var data = Encoding.UTF8.GetBytes(message);
+        foreach (var webSocket in _clients)
+            if (webSocket.Value.Client.State == WebSocketState.Open)
+                webSocket.Value.Client.SendAsync(new ArraySegment<byte>(data, 0, data.Length),
+                    WebSocketMessageType.Text, true,
+                    CancellationToken.None);
+    }
+
+    public void SendToAppClients(string appId, string message)
+    {
+        if (_clients.IsEmpty) return;
+        var appClients = _clients.Values.Where(c => c.AppId == appId);
+        if (!appClients.Any()) return;
+        var data = Encoding.UTF8.GetBytes(message);
+        foreach (var webSocket in appClients)
+            if (webSocket.AppId == appId && webSocket.Client.State == WebSocketState.Open)
+                webSocket.Client.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text,
+                    true,
+                    CancellationToken.None);
+    }
+
+    public void SendActionToAppClients(string appId, string env, WebsocketAction action)
+    {
+        if (_clients.IsEmpty) return;
+        var appClients = _clients.Values.Where(c => c.AppId == appId && c.Env == env);
+        if (!appClients.Any()) return;
+        var json = JsonConvert.SerializeObject(action);
+        var data = Encoding.UTF8.GetBytes(json);
+        foreach (var webSocket in appClients)
+            if (webSocket.AppId == appId && webSocket.Client.State == WebSocketState.Open)
+                webSocket.Client.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text,
+                    true,
+                    CancellationToken.None);
+    }
+
+
+    public async Task SendMessageToOne(WebsocketClient client, string message)
+    {
+        if (client.Client.State == WebSocketState.Open)
+        {
+            var data = Encoding.UTF8.GetBytes(message);
+            await client.Client.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
+                CancellationToken.None);
+        }
+    }
+
+    public async Task SendActionToOne(WebsocketClient client, WebsocketAction action)
+    {
+        if (client.Client.State == WebSocketState.Open)
+        {
+            var json = JsonConvert.SerializeObject(action);
+            var data = Encoding.UTF8.GetBytes(json);
+            await client.Client.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
+                CancellationToken.None);
+        }
+    }
+
+
+    public void AddClient(WebsocketClient client)
+    {
+        _clients.TryAdd(client.Id, client);
+    }
+
+    public async Task RemoveClient(WebsocketClient client, WebSocketCloseStatus? closeStatus, string closeDesc = null)
+    {
+        if (_clients.TryRemove(client.Id, out var tryRemoveClient) && client.Client.State == WebSocketState.Open)
+        {
+            await client.Client.CloseAsync(closeStatus ?? WebSocketCloseStatus.Empty, closeDesc,
+                CancellationToken.None);
+            client.Client.Dispose();
+        }
+    }
+
+    public void RemoveAppClients(string appId, WebSocketCloseStatus? closeStatus, string closeDesc)
+    {
+        var removeClients = _clients.Values.Where(c => c.AppId == appId).ToList();
+        if (removeClients.Count == 0) return;
+        foreach (var webSocket in removeClients) _clients.TryRemove(webSocket.Id, out var tryRemoveClient);
+        Task.Run(async () =>
+        {
+            foreach (var webSocket in removeClients)
+                try
+                {
+                    if (webSocket.Client.State != WebSocketState.Open) continue;
+                    await webSocket.Client.CloseAsync(closeStatus ?? WebSocketCloseStatus.Empty, closeDesc,
+                        CancellationToken.None);
+                    webSocket.Client.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Try to close websocket client {0} err {1}.", webSocket.Id, ex.Message);
+                }
+        });
+    }
+
+    public WebsocketClient Get(string clientId)
+    {
+        _clients.TryGetValue(clientId, out var client);
+        return client;
+    }
+
+    public ClientInfos Report()
+    {
+        var clientInfos = _clients
+            .Values
+            .Select(c => new ClientInfo
+            {
+                Id = c.Id,
+                AppId = c.AppId,
+                LastHeartbeatTime = c.LastHeartbeatTime,
+                Tag = c.Tag,
+                Name = c.Name,
+                Ip = c.Ip,
+                Env = c.Env,
+                LastRefreshTime = c.LastRefreshTime
+            })
+            .OrderBy(c => c.AppId)
+            .ThenByDescending(c => c.LastHeartbeatTime)
+            .ToList();
+        return new ClientInfos
+        {
+            ClientCount = clientInfos.Count,
+            Infos = clientInfos
+        };
+    }
+
+    public void SendActionToAll(WebsocketAction action)
+    {
+        if (_clients.IsEmpty) return;
+
+        var json = JsonConvert.SerializeObject(action);
+        var data = Encoding.UTF8.GetBytes(json);
+        foreach (var webSocket in _clients)
+            if (webSocket.Value.Client.State == WebSocketState.Open)
+                webSocket.Value.Client.SendAsync(new ArraySegment<byte>(data, 0, data.Length),
+                    WebSocketMessageType.Text, true,
+                    CancellationToken.None);
+    }
+
+    public void Clear()
+    {
+        _clients?.Clear();
+    }
+
+    public int Count => _clients.Count;
 }

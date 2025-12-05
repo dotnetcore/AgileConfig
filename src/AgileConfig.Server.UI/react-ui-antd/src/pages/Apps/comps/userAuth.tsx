@@ -20,16 +20,20 @@ const UserAuth: React.FC<UserAuthProps> = (props) => {
   const intl = useIntl();
   const [users, setUsers] = useState<{ label: string; value: string }[]>();
   const [userAppAuthState, setUserAppAuthState] = useState<UserAppAuth>();
+  const canEditAuth = checkUserPermission(getFunctions(), functionKeys.App_Auth, props.value?.id);
 
   // Optimize useEffect indentation
   useEffect(() => {
+    const creatorId = props.value?.creator;
     allUsers().then((resp) => {
-      const usermp = resp.data.map((x: { userName: string; id: string; team: string }) => {
-        return { label: x.userName + ' - ' + (x.team ? x.team : ''), value: x.id };
-      });
+      const usermp = resp.data
+        .filter((x: { id: string }) => x.id !== creatorId)
+        .map((x: { userName: string; id: string; team: string }) => {
+          return { label: x.userName + ' - ' + (x.team ? x.team : ''), value: x.id };
+        });
       setUsers(usermp);
     });
-  }, []);
+  }, [props.value?.creator]);
 
   useEffect(() => {
     if (props.value?.id) {
@@ -37,8 +41,7 @@ const UserAuth: React.FC<UserAuthProps> = (props) => {
       getUserAppAuth(appId).then((resp) => {
         var auth: UserAppAuth = {
           appId: appId,
-          editConfigPermissionUsers: resp.data.editConfigPermissionUsers,
-          publishConfigPermissionUsers: resp.data.publishConfigPermissionUsers,
+          authorizedUsers: resp.data?.authorizedUsers ?? [],
         };
         setUserAppAuthState(auth);
       });
@@ -52,7 +55,7 @@ const UserAuth: React.FC<UserAuthProps> = (props) => {
       initialValues={userAppAuthState}
       visible={props.userAuthModalVisible}
       submitter={
-        checkUserPermission(getFunctions(), functionKeys.App_Auth, props.value?.id) ? {
+        canEditAuth ? {
           submitButtonProps: {},
         } : {
           submitButtonProps: { style: { display: 'none' } },
@@ -69,27 +72,10 @@ const UserAuth: React.FC<UserAuthProps> = (props) => {
 
       <ProFormSelect
         mode="multiple"
-        label={intl.formatMessage({ id: 'pages.app.auth.edit_permission' })}
-        name="editConfigPermissionUsers"
+        label={intl.formatMessage({ id: 'pages.app.auth.bind_users' })}
+        name="authorizedUsers"
         options={users}
-        readonly={!checkUserPermission(getFunctions(), functionKeys.App_Auth, props.value?.id)}
-        fieldProps={{
-          filterOption: (item, option) => {
-            const label = option?.label?.toString();
-            if (item && label) {
-              return label.indexOf(item) >= 0;
-            }
-            return false;
-          },
-        }}
-      />
-
-      <ProFormSelect
-        mode="multiple"
-        label={intl.formatMessage({ id: 'pages.app.auth.publish_permission' })}
-        name="publishConfigPermissionUsers"
-        options={users}
-        readonly={!checkUserPermission(getFunctions(), functionKeys.App_Auth, props.value?.id)}
+        readonly={!canEditAuth}
         fieldProps={{
           filterOption: (item, option) => {
             const label = option?.label?.toString();

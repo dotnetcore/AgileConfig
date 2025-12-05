@@ -1,69 +1,65 @@
-﻿using MongoDB.Driver;
+﻿using AgileConfig.Server.Data.Abstraction;
+using MongoDB.Driver;
+using MongoDB.Driver.Core.Clusters;
 
-namespace AgileConfig.Server.Data.Mongodb
+namespace AgileConfig.Server.Data.Mongodb;
+
+/// <summary>
+///     This is a empty implementation of IUow for mongodb.
+/// </summary>
+public class MongodbUow : IUow
 {
-    /// <summary>
-    /// This is a empty implementation of IUow for mongodb.
-    /// </summary>
-    public class MongodbUow : Abstraction.IUow
+    private bool _disposed;
+    public IClientSessionHandle? Session { get; private set; }
+
+    public async Task<bool> SaveChangesAsync()
     {
-        public IClientSessionHandle? Session { get; private set; }
-
-        public async Task<bool> SaveChangesAsync()
+        if (Session == null)
         {
-            if (Session == null)
-            {
-            }
-            else
-            {
-                await Session.CommitTransactionAsync();
-            }
-            return true;
+        }
+        else
+        {
+            await Session.CommitTransactionAsync();
         }
 
-        public void Rollback()
+        return true;
+    }
+
+    public void Rollback()
+    {
+        Session?.AbortTransaction();
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    public void Begin()
+    {
+        if (Session?.IsInTransaction != true) Session?.StartTransaction();
+    }
+
+    private void Dispose(bool disposing)
+    {
+        if (!_disposed)
         {
-            Session?.AbortTransaction();
+            if (disposing) Session?.Dispose();
+
+            _disposed = true;
         }
+    }
 
-        private bool _disposed;
-        private void Dispose(bool disposing)
+    internal void SetSession(IClientSessionHandle session)
+    {
+        if (session.Client.Cluster.Description.Type == ClusterType.Standalone)
         {
-            if (!_disposed)
-            {
-                if (disposing)
-                {
-                    Session?.Dispose();
-                }
-
-                _disposed = true;
-            }
+            // standalone mode is not support transaction.
         }
-
-        public void Dispose()
+        else
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        public void Begin()
-        {
-            if (Session?.IsInTransaction != true)
-            {
-                Session?.StartTransaction();
-            }
-        }
-
-        internal void SetSession(IClientSessionHandle session)
-        {
-            if (session.Client.Cluster.Description.Type == MongoDB.Driver.Core.Clusters.ClusterType.Standalone)
-            {
-                // standalone mode is not support transaction.
-            }
-            else
-            {
-                Session = session;
-            }
+            Session = session;
         }
     }
 }

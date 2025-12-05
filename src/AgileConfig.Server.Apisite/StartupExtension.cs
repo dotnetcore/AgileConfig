@@ -1,98 +1,81 @@
-﻿using AgileConfig.Server.Common;
-using Microsoft.Extensions.DependencyInjection;
-using OpenTelemetry.Metrics;
+﻿using System;
 using System.Net.Http;
-using OpenTelemetry.Trace;
-using OpenTelemetry.Exporter;
-using OpenTelemetry;
-using Npgsql;
 using AgileConfig.Server.Apisite.Metrics;
+using AgileConfig.Server.Common;
+using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
+using OpenTelemetry;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
 
-namespace AgileConfig.Server.Apisite
+namespace AgileConfig.Server.Apisite;
+
+public static class StartupExtension
 {
-    public static class StartupExtension
+    public static void AddDefaultHttpClient(this IServiceCollection services, bool isTrustSsl)
     {
-        public static void AddDefaultHttpClient(this IServiceCollection services, bool isTrustSsl)
-        {
-            services.AddHttpClient(Global.DefaultHttpClientName)
-                .ConfigurePrimaryHttpMessageHandler(() =>
-                {
-                    return NewMessageHandler(isTrustSsl);
-                })
-                ;
-        }
+        services.AddHttpClient(Global.DefaultHttpClientName)
+            .ConfigurePrimaryHttpMessageHandler(() => { return NewMessageHandler(isTrustSsl); })
+            ;
+    }
 
-        public static IOpenTelemetryBuilder AddOtlpTraces(this IOpenTelemetryBuilder builder)
-        {
-            if (string.IsNullOrEmpty(Appsettings.OtlpTracesEndpoint))
+    public static IOpenTelemetryBuilder AddOtlpTraces(this IOpenTelemetryBuilder builder)
+    {
+        if (string.IsNullOrEmpty(Appsettings.OtlpTracesEndpoint)) return builder;
+
+        builder.WithTracing(tracing => tracing
+            .AddAspNetCoreInstrumentation()
+            .AddNpgsql()
+            .AddOtlpExporter(op =>
             {
-                return builder;
-            }
+                op.Protocol = Appsettings.OtlpTracesProtocol == "http"
+                    ? OtlpExportProtocol.HttpProtobuf
+                    : OtlpExportProtocol.Grpc;
+                op.Endpoint = new Uri(Appsettings.OtlpTracesEndpoint);
+                if (!string.IsNullOrEmpty(Appsettings.OtlpTracesHeaders)) op.Headers = Appsettings.OtlpTracesHeaders;
+            })
+        );
 
-            builder.WithTracing(tracing => tracing
-                          .AddAspNetCoreInstrumentation()
-                          .AddNpgsql()
-                          .AddOtlpExporter(op =>
-                              {
-                                  op.Protocol = Appsettings.OtlpTracesProtocol == "http" ? OtlpExportProtocol.HttpProtobuf : OtlpExportProtocol.Grpc;
-                                  op.Endpoint = new System.Uri(Appsettings.OtlpTracesEndpoint);
-                                  if (!string.IsNullOrEmpty(Appsettings.OtlpTracesHeaders))
-                                  {
-                                      op.Headers = Appsettings.OtlpTracesHeaders;    
-                                  }
-                              })
-                       );
+        return builder;
+    }
 
-            return builder;
-        }
+    public static IOpenTelemetryBuilder AddOtlpMetrics(this IOpenTelemetryBuilder builder)
+    {
+        if (string.IsNullOrEmpty(Appsettings.OtlpMetricsEndpoint)) return builder;
 
-        public static IOpenTelemetryBuilder AddOtlpMetrics(this IOpenTelemetryBuilder builder)
-        {
-            if (string.IsNullOrEmpty(Appsettings.OtlpMetricsEndpoint))
+        builder.WithMetrics(metrics => metrics
+            .AddAspNetCoreInstrumentation()
+            .AddRuntimeInstrumentation()
+            .AddMeter(MeterService.MeterName)
+            .AddOtlpExporter((op, reader) =>
             {
-                return builder;
-            }
+                op.Protocol = Appsettings.OtlpMetricsProtocol == "http"
+                    ? OtlpExportProtocol.HttpProtobuf
+                    : OtlpExportProtocol.Grpc;
+                op.Endpoint = new Uri(Appsettings.OtlpMetricsEndpoint);
+                reader.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = 1000;
+                if (!string.IsNullOrEmpty(Appsettings.OtlpMetricsHeaders)) op.Headers = Appsettings.OtlpMetricsHeaders;
+            })
+        );
 
-            builder.WithMetrics(metrics => metrics
-                          .AddAspNetCoreInstrumentation()
-                          .AddRuntimeInstrumentation()
-                          .AddMeter(MeterService.MeterName)
-                          .AddOtlpExporter((op, reader) =>
-                              {
-                                  op.Protocol = Appsettings.OtlpMetricsProtocol == "http" ? OtlpExportProtocol.HttpProtobuf : OtlpExportProtocol.Grpc;
-                                  op.Endpoint = new System.Uri(Appsettings.OtlpMetricsEndpoint);
-                                  reader.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = 1000;
-                                  if (!string.IsNullOrEmpty(Appsettings.OtlpMetricsHeaders))
-                                  {
-                                      op.Headers = Appsettings.OtlpMetricsHeaders;    
-                                  }
-                              })
-                      );
+        return builder;
+    }
 
-            return builder;
-        }
+    public static IServiceCollection AddMeterService(this IServiceCollection services)
+    {
+        if (!string.IsNullOrEmpty(Appsettings.OtlpMetricsEndpoint)) services.AddResourceMonitoring();
 
-        public static IServiceCollection AddMeterService(this IServiceCollection services)
-        {
-            if (!string.IsNullOrEmpty(Appsettings.OtlpMetricsEndpoint))
-            {
-                services.AddResourceMonitoring();
-            }
+        services.AddSingleton<IMeterService, MeterService>();
 
-            services.AddSingleton<IMeterService, MeterService>();
+        return services;
+    }
 
-            return services;
-        }
+    private static HttpMessageHandler NewMessageHandler(bool alwaysTrustSsl)
+    {
+        var handler = new HttpClientHandler();
+        if (alwaysTrustSsl) handler.ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
 
-        static HttpMessageHandler NewMessageHandler(bool alwaysTrustSsl)
-        {
-            var handler = new HttpClientHandler();
-            if (alwaysTrustSsl)
-            {
-                handler.ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
-            }
-
-            return handler;
-        }
+        return handler;
     }
 }

@@ -14,41 +14,35 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
     private readonly IRestClient _restClient;
     private readonly IServiceInfoService _serviceInfoService;
 
+    private int _checkInterval;
+    private int _removeServiceInterval;
+    private int _unhealthInterval;
+
     public ServiceHealthCheckService(
         IServiceInfoService serviceInfoService,
         ILogger<ServiceHealthCheckService> logger,
         IRestClient restClient
-        )
+    )
     {
         _serviceInfoService = serviceInfoService;
         _logger = logger;
         _restClient = restClient;
     }
 
-    private int _checkInterval;
-    private int _unhealthInterval;
-    private int _removeServiceInterval;
-
     /// <summary>
-    /// 健康检测的间隔
+    ///     Time threshold (seconds) after which a service is considered unhealthy.
     /// </summary>
     /// <exception cref="ArgumentException"></exception>
     private int CheckInterval
     {
         get
         {
-            if (_checkInterval > 0)
-            {
-                return _checkInterval;
-            }
+            if (_checkInterval > 0) return _checkInterval;
 
             var interval = Global.Config["serviceHealthCheckInterval"];
-            if (int.TryParse(interval, out int i))
+            if (int.TryParse(interval, out var i))
             {
-                if (i <= 0)
-                {
-                    throw new ArgumentException("serviceHealthCheckInterval must be greater than 0");
-                }
+                if (i <= 0) throw new ArgumentException("serviceHealthCheckInterval must be greater than 0");
 
                 _checkInterval = i;
             }
@@ -58,25 +52,19 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
     }
 
     /// <summary>
-    /// 判断一个服务是否健康的标准时间，操作这个时间没有收到响应，则认为不健康
+    ///     Interval for running health checks, in seconds.
     /// </summary>
     /// <exception cref="ArgumentException"></exception>
     private int UnhealthInterval
     {
         get
         {
-            if (_unhealthInterval > 0)
-            {
-                return _unhealthInterval;
-            }
+            if (_unhealthInterval > 0) return _unhealthInterval;
 
             var interval = Global.Config["serviceUnhealthInterval"];
-            if (int.TryParse(interval, out int i))
+            if (int.TryParse(interval, out var i))
             {
-                if (i <= 0)
-                {
-                    throw new ArgumentException("serviceUnhealthInterval must be greater than 0");
-                }
+                if (i <= 0) throw new ArgumentException("serviceUnhealthInterval must be greater than 0");
 
                 _unhealthInterval = i;
             }
@@ -89,22 +77,15 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
     {
         get
         {
-            if (_removeServiceInterval > 0)
-            {
-                return _removeServiceInterval;
-            }
+            if (_removeServiceInterval > 0) return _removeServiceInterval;
 
             var interval = Global.Config["removeServiceInterval"];
-            if (int.TryParse(interval, out int i))
+            if (int.TryParse(interval, out var i))
             {
                 if (i <= 0)
-                {
                     _removeServiceInterval = 0;
-                }
                 else
-                {
                     _removeServiceInterval = i;
-                }
             }
 
             return _removeServiceInterval;
@@ -119,54 +100,44 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
         {
             while (true)
             {
-                //没有填写心跳模式，则不做检查
+                // Skip services without a configured heartbeat mode.
                 var services = await _serviceInfoService
                     .QueryAsync(x => x.HeartBeatMode != null && x.HeartBeatMode != "");
                 foreach (var service in services)
                 {
-                    if (service.HeartBeatMode == HeartBeatModes.none.ToString())
-                    {
-                        continue;
-                    }
+                    if (service.HeartBeatMode == HeartBeatModes.none.ToString()) continue;
 
                     var lstHeartBeat = service.LastHeartBeat;
-                    if (!lstHeartBeat.HasValue)
-                    {
-                        lstHeartBeat = service.RegisterTime ?? DateTime.MinValue;
-                    }
+                    if (!lstHeartBeat.HasValue) lstHeartBeat = service.RegisterTime ?? DateTime.MinValue;
 
-                    //service.HeartBeatMode 不为空
+                    // A heartbeat mode is specified.
                     if (!string.IsNullOrWhiteSpace(service.HeartBeatMode))
                     {
                         if (RemoveServiceInterval > 0 &&
                             (DateTime.Now - lstHeartBeat.Value).TotalSeconds > RemoveServiceInterval)
                         {
-                            //超过设定时间，则直接删除服务
+                            // Remove the service if it has exceeded the configured lifetime.
                             await _serviceInfoService.RemoveAsync(service.Id);
                             continue;
                         }
 
-                        //是客户端主动心跳，不做http健康检查
+                        // Client-initiated heartbeats do not require an HTTP health check.
                         if (service.HeartBeatMode == HeartBeatModes.client.ToString())
                         {
                             if ((DateTime.Now - lstHeartBeat.Value).TotalSeconds > UnhealthInterval)
-                            {
-                                //客户端主动心跳模式：超过 UnhealthInterval 没有心跳，则认为服务不可用
+                                // For client heartbeats, treat services as unavailable after UnhealthInterval without heartbeats.
                                 if (service.Status == ServiceStatus.Healthy)
-                                {
                                     await _serviceInfoService.UpdateServiceStatus(service, ServiceStatus.Unhealthy);
-                                }
-                            }
 
                             continue;
                         }
 
-                        //等于server 主动http健康检查
+                        // Server-initiated HTTP health check.
                         if (service.HeartBeatMode == HeartBeatModes.server.ToString())
                         {
                             if (string.IsNullOrWhiteSpace(service.CheckUrl))
                             {
-                                //CheckUrl不填，直接认为下线
+                                // Without a CheckUrl, consider the service offline.
                                 await _serviceInfoService.UpdateServiceStatus(service, ServiceStatus.Unhealthy);
                                 continue;
                             }
@@ -195,14 +166,13 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
             using var resp = await _restClient.GetAsync(service.CheckUrl);
 
             var result = false;
-            int istatus = ((int)resp.StatusCode - 200);
-            result = istatus >= 0 && istatus < 100; // 200 段都认为是正常的
+            var istatus = (int)resp.StatusCode - 200;
+            result = istatus >= 0 && istatus < 100; // Treat 2xx status codes as healthy responses.
 
             if (!result)
-            {
-                _logger.LogInformation("check service health {0} {1} {2} result：{3}", service.CheckUrl, service.ServiceId,
-                                                                                        service.ServiceName, "down");
-            }
+                _logger.LogInformation("check service health {0} {1} {2} result：{3}", service.CheckUrl,
+                    service.ServiceId,
+                    service.ServiceName, "down");
 
             return result;
         }

@@ -4,139 +4,122 @@ using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.Event;
 using AgileConfig.Server.IService;
 
-namespace AgileConfig.Server.EventHandler
+namespace AgileConfig.Server.EventHandler;
+
+public class ConfigPublishedHandler : IEventHandler<PublishConfigSuccessful>
 {
-    public class ConfigPublishedHandler : IEventHandler<PublishConfigSuccessful>
+    private readonly IAppService _appService;
+    private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
+    private readonly IServerNodeService _serverNodeService;
+
+    public ConfigPublishedHandler(
+        IRemoteServerNodeProxy remoteServerNodeProxy,
+        IServerNodeService serverNodeService,
+        IAppService appService)
     {
-        private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
-        private readonly IServerNodeService _serverNodeService;
-        private readonly IAppService _appService;
-
-        public ConfigPublishedHandler(
-            IRemoteServerNodeProxy remoteServerNodeProxy,
-            IServerNodeService serverNodeService,
-            IAppService appService)
-        {
-            _remoteServerNodeProxy = remoteServerNodeProxy;
-            _serverNodeService = serverNodeService;
-            _appService = appService;
-        }
-
-        public async Task Handle(IEvent evt)
-        {
-            var evtInstance = evt as PublishConfigSuccessful;
-            var timelineNode = evtInstance?.PublishTimeline;
-            if (timelineNode != null)
-            {
-                var nodes = await _serverNodeService.GetAllNodesAsync();
-                var noticeApps = await ConfigUpadteNoticeUtil.GetNeedNoticeInheritancedFromAppsAction(_appService, timelineNode.AppId);
-                noticeApps.Add(timelineNode.AppId,
-                    new WebsocketAction { Action = ActionConst.Reload, Module = ActionModule.ConfigCenter });
-
-                foreach (var node in nodes)
-                {
-                    if (node.Status == NodeStatus.Offline)
-                    {
-                        continue;
-                    }
-
-                    //all server cache
-                    await _remoteServerNodeProxy.ClearConfigServiceCache(node.Id);
-                }
-
-                foreach (var node in nodes)
-                {
-                    if (node.Status == NodeStatus.Offline)
-                    {
-                        continue;
-                    }
-
-                    foreach (var item in noticeApps)
-                    {
-                        await _remoteServerNodeProxy.AppClientsDoActionAsync(
-                            node.Id,
-                            item.Key,
-                            timelineNode.Env,
-                            item.Value);
-                    }
-                }
-            }
-        }
-
+        _remoteServerNodeProxy = remoteServerNodeProxy;
+        _serverNodeService = serverNodeService;
+        _appService = appService;
     }
 
-    public class ConfigStatusRollbackSuccessfulThenNoticeClientReloadHandler : IEventHandler<RollbackConfigSuccessful>
+    public async Task Handle(IEvent evt)
     {
-        private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
-        private readonly IServerNodeService _serverNodeService;
-        private readonly IAppService _appService;
-
-        public ConfigStatusRollbackSuccessfulThenNoticeClientReloadHandler(
-            IRemoteServerNodeProxy remoteServerNodeProxy,
-            IServerNodeService serverNodeService,
-            IAppService appService)
+        var evtInstance = evt as PublishConfigSuccessful;
+        var timelineNode = evtInstance?.PublishTimeline;
+        if (timelineNode != null)
         {
-            _remoteServerNodeProxy = remoteServerNodeProxy;
-            _serverNodeService = serverNodeService;
-            _appService = appService;
-        }
-
-        public async Task Handle(IEvent evt)
-        {
-            var evtInstance = evt as RollbackConfigSuccessful;
-            var appId = evtInstance.TimelineNode.AppId;
-            var env = evtInstance.TimelineNode.Env;
             var nodes = await _serverNodeService.GetAllNodesAsync();
-            var noticeApps = await ConfigUpadteNoticeUtil.GetNeedNoticeInheritancedFromAppsAction(_appService, appId);
-            noticeApps.Add(appId,
-                new WebsocketAction
-                { Action = ActionConst.Reload, Module = ActionModule.ConfigCenter });
+            var noticeApps =
+                await ConfigUpadteNoticeUtil.GetNeedNoticeInheritancedFromAppsAction(_appService, timelineNode.AppId);
+            noticeApps.Add(timelineNode.AppId,
+                new WebsocketAction { Action = ActionConst.Reload, Module = ActionModule.ConfigCenter });
 
             foreach (var node in nodes)
             {
-                if (node.Status == NodeStatus.Offline)
-                {
-                    continue;
-                }
+                if (node.Status == NodeStatus.Offline) continue;
+
+                //all server cache
+                await _remoteServerNodeProxy.ClearConfigServiceCache(node.Id);
+            }
+
+            foreach (var node in nodes)
+            {
+                if (node.Status == NodeStatus.Offline) continue;
 
                 foreach (var item in noticeApps)
-                {
-                    await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Id, item.Key,
-                        env,
+                    await _remoteServerNodeProxy.AppClientsDoActionAsync(
+                        node.Id,
+                        item.Key,
+                        timelineNode.Env,
                         item.Value);
-                }
             }
         }
+    }
+}
 
+public class ConfigStatusRollbackSuccessfulThenNoticeClientReloadHandler : IEventHandler<RollbackConfigSuccessful>
+{
+    private readonly IAppService _appService;
+    private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
+    private readonly IServerNodeService _serverNodeService;
 
+    public ConfigStatusRollbackSuccessfulThenNoticeClientReloadHandler(
+        IRemoteServerNodeProxy remoteServerNodeProxy,
+        IServerNodeService serverNodeService,
+        IAppService appService)
+    {
+        _remoteServerNodeProxy = remoteServerNodeProxy;
+        _serverNodeService = serverNodeService;
+        _appService = appService;
     }
 
-    class ConfigUpadteNoticeUtil
+    public async Task Handle(IEvent evt)
     {
-        /// <summary>
-        /// 根据当前配置计算需要通知的应用
-        /// </summary>
-        /// <returns></returns>
-        public static async Task<Dictionary<string, WebsocketAction>> GetNeedNoticeInheritancedFromAppsAction(IAppService appService, string appId)
-        {
-            Dictionary<string, WebsocketAction> needNoticeAppsActions = new Dictionary<string, WebsocketAction>
-            {
-            };
-            var currentApp = await appService.GetAsync(appId);
-            if (currentApp.Type == AppType.Inheritance)
-            {
-                var inheritancedFromApps = await appService.GetInheritancedFromAppsAsync(appId);
-                inheritancedFromApps.ForEach(x =>
-                {
-                    needNoticeAppsActions.Add(x.Id, new WebsocketAction
-                    {
-                        Action = ActionConst.Reload,
-                        Module = ActionModule.ConfigCenter
-                    });
-                });
-            }
+        var evtInstance = evt as RollbackConfigSuccessful;
+        var appId = evtInstance.TimelineNode.AppId;
+        var env = evtInstance.TimelineNode.Env;
+        var nodes = await _serverNodeService.GetAllNodesAsync();
+        var noticeApps = await ConfigUpadteNoticeUtil.GetNeedNoticeInheritancedFromAppsAction(_appService, appId);
+        noticeApps.Add(appId,
+            new WebsocketAction
+                { Action = ActionConst.Reload, Module = ActionModule.ConfigCenter });
 
-            return needNoticeAppsActions;
+        foreach (var node in nodes)
+        {
+            if (node.Status == NodeStatus.Offline) continue;
+
+            foreach (var item in noticeApps)
+                await _remoteServerNodeProxy.AppClientsDoActionAsync(node.Id, item.Key,
+                    env,
+                    item.Value);
         }
+    }
+}
+
+internal class ConfigUpadteNoticeUtil
+{
+    /// <summary>
+    ///     Determine which applications need to be notified based on the current configuration.
+    /// </summary>
+    /// <returns></returns>
+    public static async Task<Dictionary<string, WebsocketAction>> GetNeedNoticeInheritancedFromAppsAction(
+        IAppService appService, string appId)
+    {
+        var needNoticeAppsActions = new Dictionary<string, WebsocketAction>();
+        var currentApp = await appService.GetAsync(appId);
+        if (currentApp.Type == AppType.Inheritance)
+        {
+            var inheritancedFromApps = await appService.GetInheritancedFromAppsAsync(appId);
+            inheritancedFromApps.ForEach(x =>
+            {
+                needNoticeAppsActions.Add(x.Id, new WebsocketAction
+                {
+                    Action = ActionConst.Reload,
+                    Module = ActionModule.ConfigCenter
+                });
+            });
+        }
+
+        return needNoticeAppsActions;
     }
 }

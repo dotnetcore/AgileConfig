@@ -8,8 +8,7 @@ export type AppListItem = {
     secret?: string,
     createTime?: Date,
     updateTime?: Date
-    appAdmin: string,
-    appAdminName: string
+    creator?: string
   };
     
 export type AppListParams = {
@@ -32,6 +31,5 @@ export type AppListResult = {
 
 export type UserAppAuth = {
   appId: string,
-  editConfigPermissionUsers?: string[],
-  publishConfigPermissionUsers?: string[]
+  authorizedUsers?: string[]
 }

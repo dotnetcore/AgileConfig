@@ -1,234 +1,232 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using AgileConfig.Server.Service;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using AgileConfig.Server.Data.Entity;
 using System.Threading.Tasks;
-using AgileConfig.Server.IService;
-using Microsoft.Extensions.DependencyInjection;
-using MongoDB.Driver.Linq;
 using AgileConfig.Server.Data.Abstraction;
+using AgileConfig.Server.Data.Entity;
+using AgileConfig.Server.Data.Freesql;
+using AgileConfig.Server.Data.Repository.Selector;
+using AgileConfig.Server.IService;
+using AgileConfig.Server.Service;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using AgileConfig.Server.Common;
-using AgileConfig.Server.Data.Repository.Selector;
-using AgileConfig.Server.Data.Freesql;
 
-namespace AgileConfig.Server.ServiceTests.sqlite
+namespace AgileConfig.Server.ServiceTests.sqlite;
+
+[TestClass]
+public class SysLogServiceTests : BasicTestService
 {
-    [TestClass()]
-    public class SysLogServiceTests: BasicTestService
-    {
-        IServiceProvider _serviceProvider = null;
-        IServiceScope _serviceScope = null;
-        ISysLogService _syslogservice = null;
+    private IServiceProvider _serviceProvider;
+    private IServiceScope _serviceScope;
+    private ISysLogService _syslogservice;
 
-        public override Task<Dictionary<string, string>> GetConfigurationData()
-        {
-            return
-                Task.FromResult(
+    public override Task<Dictionary<string, string>> GetConfigurationData()
+    {
+        return
+            Task.FromResult(
                 new Dictionary<string, string>
                 {
-                {"db:provider","sqlite" },
-                {"db:conn","Data Source=agile_config.db" }
-            });
-        }
+                    { "db:provider", "sqlite" },
+                    { "db:conn", "Data Source=agile_config.db" }
+                });
+    }
 
-        [TestInitialize]
-        public async Task TestInitialize()
+    [TestInitialize]
+    public async Task TestInitialize()
+    {
+        await NewGlobalSp();
+        _serviceScope = GlobalServiceProvider.CreateScope();
+        _serviceProvider = _serviceScope.ServiceProvider;
+
+        ClearData();
+
+        var systeminitializationService = _serviceProvider.GetService<ISystemInitializationService>();
+        systeminitializationService.TryInitDefaultEnvironment(); //初始化环境 DEV TEST STAGE PROD
+        systeminitializationService.TryInitJwtSecret(); //初始化 jwt secret
+
+        _syslogservice = _serviceProvider.GetService<ISysLogService>();
+
+        Console.WriteLine("Run TestInitialize");
+    }
+
+    private async Task NewGlobalSp()
+    {
+        Console.WriteLine("Try get configration data");
+        var dict = await GetConfigurationData();
+
+        foreach (var item in dict) Console.WriteLine($"key: {item.Key} value: {item.Value}");
+
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(dict)
+            .Build();
+        Console.WriteLine("Config list");
+        foreach (var item in config.AsEnumerable()) Console.WriteLine($"key: {item.Key} value: {item.Value}");
+
+        var cache = new Mock<IMemoryCache>();
+        IServiceCollection services = new ServiceCollection();
+        services.AddLogging();
+        services.AddScoped(_ => cache.Object);
+        services.AddSingleton<IConfiguration>(config);
+        services.AddDbConfigInfoFactory();
+        services.AddFreeSqlFactory();
+        services.AddLogging();
+        services.AddRepositories();
+        services.AddBusinessServices();
+
+        GlobalServiceProvider = services.BuildServiceProvider();
+    }
+
+    [TestCleanup]
+    public void TestCleanup()
+    {
+        _syslogservice.Dispose();
+        _serviceScope.Dispose();
+    }
+
+    [TestMethod]
+    public async Task AddSysLogAsyncTest()
+    {
+        var source = new SysLog
         {
-            await NewGlobalSp();
-            _serviceScope = GlobalServiceProvider.CreateScope();
-            _serviceProvider = _serviceScope.ServiceProvider;
+            AppId = "001",
+            LogType = SysLogType.Normal,
+            LogTime = DateTime.Now,
+            LogText = "123"
+        };
 
-            ClearData();
+        var result = await _syslogservice.AddSysLogAsync(source);
+        Assert.IsTrue(result);
 
-            var systeminitializationService = _serviceProvider.GetService<ISystemInitializationService>();
-            systeminitializationService.TryInitDefaultEnvironment();//初始化环境 DEV TEST STAGE PROD
-            systeminitializationService.TryInitJwtSecret();//初始化 jwt secret
+        var log = await _serviceProvider.GetService<ISysLogRepository>().GetAsync(source.Id);
 
-            _syslogservice = _serviceProvider.GetService<ISysLogService>();
+        Assert.IsNotNull(log);
 
-            Console.WriteLine("Run TestInitialize");
-        }
+        Assert.AreEqual(source.Id, log.Id);
+        Assert.AreEqual(source.AppId, log.AppId);
+        Assert.AreEqual(source.LogType, log.LogType);
+        Assert.AreEqual(source.LogTime.Value.ToString("yyyyMMddHHmmss"), log.LogTime.Value.ToString("yyyyMMddHHmmss"));
+        Assert.AreEqual(source.LogText, log.LogText);
+    }
 
-        private async Task NewGlobalSp()
+
+    [TestMethod]
+    public async Task AddRangeAsyncTest()
+    {
+        var source = new SysLog
         {
-            Console.WriteLine("Try get configration data");
-            var dict = await GetConfigurationData();
-
-            foreach (var item in dict)
-            {
-                Console.WriteLine($"key: {item.Key} value: {item.Value}");
-            }
-
-            var config = new ConfigurationBuilder()
-                             .AddInMemoryCollection(dict)
-                             .Build();
-            Console.WriteLine("Config list");
-            foreach (var item in config.AsEnumerable())
-            {
-                Console.WriteLine($"key: {item.Key} value: {item.Value}");
-            }
-
-            var cache = new Mock<IMemoryCache>();
-            IServiceCollection services = new ServiceCollection();
-            services.AddLogging();
-            services.AddScoped(_ => cache.Object);
-            services.AddSingleton<IConfiguration>(config);
-            services.AddDbConfigInfoFactory();
-            services.AddFreeSqlFactory();
-            services.AddLogging();
-            services.AddRepositories();
-            services.AddBusinessServices();
-
-            this.GlobalServiceProvider = services.BuildServiceProvider();
-        }
-
-        [TestCleanup]
-        public void TestCleanup()
+            AppId = "001",
+            LogType = SysLogType.Normal,
+            LogTime = DateTime.Now,
+            LogText = "123"
+        };
+        var source1 = new SysLog
         {
-            _syslogservice.Dispose();
-            _serviceScope.Dispose();
-        }
-
-        [TestMethod()]
-        public async Task AddSysLogAsyncTest()
+            AppId = "002",
+            LogType = SysLogType.Warn,
+            LogTime = DateTime.Now,
+            LogText = "124"
+        };
+        var result = await _syslogservice.AddRangeAsync(new List<SysLog>
         {
-            var source = new SysLog
-            {
-                AppId = "001",
-                LogType = SysLogType.Normal,
-                LogTime = DateTime.Now,
-                LogText = "123"
-            };
+            source, source1
+        });
+        Assert.IsTrue(result);
 
-            var result = await _syslogservice.AddSysLogAsync(source);
-            Assert.IsTrue(result);
+        var log = await _serviceProvider.GetService<ISysLogRepository>().GetAsync(source.Id);
 
-            var log = await _serviceProvider.GetService<ISysLogRepository>().GetAsync(source.Id);
+        Assert.IsNotNull(log);
+        Assert.AreEqual(source.Id, log.Id);
+        Assert.AreEqual(source.AppId, log.AppId);
+        Assert.AreEqual(source.LogType, log.LogType);
+        Assert.AreEqual(source.LogTime.Value.ToString("yyyyMMddHHmmss"), log.LogTime.Value.ToString("yyyyMMddHHmmss"));
+        Assert.AreEqual(source.LogText, log.LogText);
 
-            Assert.IsNotNull(log);
+        var log1 = await _serviceProvider.GetService<ISysLogRepository>().GetAsync(source1.Id);
 
-            Assert.AreEqual(source.Id, log.Id);
-            Assert.AreEqual(source.AppId, log.AppId);
-            Assert.AreEqual(source.LogType, log.LogType);
-            Assert.AreEqual(source.LogTime.Value.ToString("yyyyMMddHHmmss"), log.LogTime.Value.ToString("yyyyMMddHHmmss"));
-            Assert.AreEqual(source.LogText, log.LogText);
-        }
+        Assert.IsNotNull(log1);
+        Assert.AreEqual(source1.Id, log1.Id);
+        Assert.AreEqual(source1.AppId, log1.AppId);
+        Assert.AreEqual(source1.LogType, log1.LogType);
+        Assert.AreEqual(source1.LogTime.Value.ToString("yyyyMMddHHmmss"),
+            log1.LogTime.Value.ToString("yyyyMMddHHmmss"));
+        Assert.AreEqual(source1.LogText, log1.LogText);
+    }
 
 
-        [TestMethod()]
-        public async Task AddRangeAsyncTest()
+    [TestMethod]
+    public async Task CountTest()
+    {
+        ClearData();
+
+        var source = new SysLog
         {
-            var source = new SysLog
-            {
-                AppId = "001",
-                LogType = SysLogType.Normal,
-                LogTime = DateTime.Now,
-                LogText = "123"
-            };
-            var source1 = new SysLog
-            {
-                AppId = "002",
-                LogType = SysLogType.Warn,
-                LogTime = DateTime.Now,
-                LogText = "124"
-            };
-            var result = await _syslogservice.AddRangeAsync(new List<SysLog> {
-                source, source1
-            });
-            Assert.IsTrue(result);
-
-            var log = await _serviceProvider.GetService<ISysLogRepository>().GetAsync(source.Id);
-
-            Assert.IsNotNull(log);
-            Assert.AreEqual(source.Id, log.Id);
-            Assert.AreEqual(source.AppId, log.AppId);
-            Assert.AreEqual(source.LogType, log.LogType);
-            Assert.AreEqual(source.LogTime.Value.ToString("yyyyMMddHHmmss"), log.LogTime.Value.ToString("yyyyMMddHHmmss"));
-            Assert.AreEqual(source.LogText, log.LogText);
-
-            var log1 = await _serviceProvider.GetService<ISysLogRepository>().GetAsync(source1.Id);
-
-            Assert.IsNotNull(log1);
-            Assert.AreEqual(source1.Id, log1.Id);
-            Assert.AreEqual(source1.AppId, log1.AppId);
-            Assert.AreEqual(source1.LogType, log1.LogType);
-            Assert.AreEqual(source1.LogTime.Value.ToString("yyyyMMddHHmmss"), log1.LogTime.Value.ToString("yyyyMMddHHmmss"));
-            Assert.AreEqual(source1.LogText, log1.LogText);
-        }
-
-
-        [TestMethod()]
-        public async Task CountTest()
+            Id = "1",
+            AppId = "001",
+            LogType = SysLogType.Normal,
+            LogTime = DateTime.Now,
+            LogText = "123"
+        };
+        var source1 = new SysLog
         {
-            this.ClearData();
- 
-            var source = new SysLog
-            {
-                Id= "1",
-                AppId = "001",
-                LogType = SysLogType.Normal,
-                LogTime = DateTime.Now,
-                LogText = "123"
-            };
-            var source1 = new SysLog
-            {
-                Id = "2",
-                AppId = "002",
-                LogType = SysLogType.Warn,
-                LogTime = DateTime.Now,
-                LogText = "124"
-            };
-            var result = await _syslogservice.AddRangeAsync(new List<SysLog> {
-                source, source1
-            });
-            Assert.IsTrue(result);
-
-            var count = await _syslogservice.Count("001", SysLogType.Normal, DateTime.Now.AddDays(-1), DateTime.Now.AddDays(1));
-            Assert.AreEqual(1, count);
-
-            var count1 = await _syslogservice.Count("002", SysLogType.Warn, DateTime.Now.AddDays(-1), DateTime.Now.AddDays(-1));
-            Assert.AreEqual(0, count1);
-        }
-
-        [TestMethod()]
-        public async Task SearchPageTest()
+            Id = "2",
+            AppId = "002",
+            LogType = SysLogType.Warn,
+            LogTime = DateTime.Now,
+            LogText = "124"
+        };
+        var result = await _syslogservice.AddRangeAsync(new List<SysLog>
         {
-            this.ClearData();
+            source, source1
+        });
+        Assert.IsTrue(result);
 
-            var source = new SysLog
-            {
-                AppId = "001",
-                LogType = SysLogType.Normal,
-                LogTime = DateTime.Now,
-                LogText = "123"
-            };
-            var source1 = new SysLog
-            {
-                AppId = "002",
-                LogType = SysLogType.Warn,
-                LogTime = DateTime.Now,
-                LogText = "124"
-            };
-            var result = await _syslogservice.AddSysLogAsync(source);
-            Assert.IsTrue(result);
-            result = await _syslogservice.AddSysLogAsync(source1);
-            Assert.IsTrue(result);
+        var count = await _syslogservice.Count("001", SysLogType.Normal, DateTime.Now.AddDays(-1),
+            DateTime.Now.AddDays(1));
+        Assert.AreEqual(1, count);
 
-            var log = await _serviceProvider.GetService<ISysLogRepository>().GetAsync(source.Id);
-            Assert.IsNotNull(log);
+        var count1 =
+            await _syslogservice.Count("002", SysLogType.Warn, DateTime.Now.AddDays(-1), DateTime.Now.AddDays(-1));
+        Assert.AreEqual(0, count1);
+    }
 
-            var log1 = await _serviceProvider.GetService<ISysLogRepository>().GetAsync(source1.Id);
-            Assert.IsNotNull(log1);
+    [TestMethod]
+    public async Task SearchPageTest()
+    {
+        ClearData();
 
-            var page = await _syslogservice.SearchPage("001", SysLogType.Normal, DateTime.Now.AddDays(-1), DateTime.Now.AddDays(1), 1, 1);
-            Assert.AreEqual(1, page.Count);
+        var source = new SysLog
+        {
+            AppId = "001",
+            LogType = SysLogType.Normal,
+            LogTime = DateTime.Now,
+            LogText = "123"
+        };
+        var source1 = new SysLog
+        {
+            AppId = "002",
+            LogType = SysLogType.Warn,
+            LogTime = DateTime.Now,
+            LogText = "124"
+        };
+        var result = await _syslogservice.AddSysLogAsync(source);
+        Assert.IsTrue(result);
+        result = await _syslogservice.AddSysLogAsync(source1);
+        Assert.IsTrue(result);
 
-            var page1 = await _syslogservice.SearchPage("002", SysLogType.Warn, DateTime.Now.AddDays(-1), DateTime.Now.AddDays(-1), 1, 1);
-            Assert.AreEqual(0, page1.Count);
-        }
+        var log = await _serviceProvider.GetService<ISysLogRepository>().GetAsync(source.Id);
+        Assert.IsNotNull(log);
+
+        var log1 = await _serviceProvider.GetService<ISysLogRepository>().GetAsync(source1.Id);
+        Assert.IsNotNull(log1);
+
+        var page = await _syslogservice.SearchPage("001", SysLogType.Normal, DateTime.Now.AddDays(-1),
+            DateTime.Now.AddDays(1), 1, 1);
+        Assert.AreEqual(1, page.Count);
+
+        var page1 = await _syslogservice.SearchPage("002", SysLogType.Warn, DateTime.Now.AddDays(-1),
+            DateTime.Now.AddDays(-1), 1, 1);
+        Assert.AreEqual(0, page1.Count);
     }
 }

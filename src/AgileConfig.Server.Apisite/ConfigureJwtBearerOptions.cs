@@ -15,7 +15,7 @@ public class ConfigureJwtBearerOptions(
         {
             ValidIssuer = jwtService.Issuer,
             ValidAudience = jwtService.Audience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtService.GetSecurityKey())),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtService.GetSecurityKey()))
         };
     }
 

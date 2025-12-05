@@ -1,4 +1,4 @@
-/** Request 网络请求工具 更详细的 api 文档: https://github.com/umijs/umi-request */
+﻿/** Request utility for network calls. Detailed API docs: https://github.com/umijs/umi-request */
 import { extend, RequestOptionsInit } from 'umi-request';
 import { notification } from 'antd';
 import { getToken } from './authority';
@@ -22,7 +22,7 @@ const codeMessage = {
   504: '网关超时。',
 };
 
-/** 异常处理程序 */
+/** Error handler */
 const errorHandler = (error: { response: Response }): Response => {
   const { response } = error;
   if (response && response.status) {
@@ -79,7 +79,7 @@ if (NODE_ENV === 'development') {
   requestPrefix = 'http://localhost:5000/';
   //requestPrefix = 'http://agileconfig_server.xbaby.xyz/';
 }
-/** 配置request请求时的默认参数 */
+/** Configure default request parameters */
 const request = extend({
   prefix: requestPrefix,
   errorHandler, // default error handler

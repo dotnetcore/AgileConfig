@@ -2,15 +2,24 @@ import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
 import { Button, FormInstance, message,Modal, Space, Tag } from 'antd';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { UserItem } from './data';
 import { queryUsers, addUser, delUser, editUser, resetPassword } from './service';
+import { queryRoles } from '@/services/role';
 import { useIntl, getIntl, getLocale } from 'umi';
 import { ModalForm, ProFormSelect, ProFormText } from '@ant-design/pro-form';
 import UpdateUser from './comps/updateUser';
 import { getAuthority } from '@/utils/authority';
+import { RequireFunction } from '@/utils/permission';
 
 const { confirm } = Modal;
+
+type RoleOption = {
+  value: string;
+  label: string;
+  code: string;
+  isSystem: boolean;
+};
 const handleAdd = async (fields: UserItem) => {
   const intl = getIntl(getLocale());
   const hide = message.loading(intl.formatMessage({
@@ -124,19 +133,6 @@ const hasUserRole = (role:string) => {
   return false;
 }
 
-const checkUserListModifyPermission = (user:UserItem) => {
-  const authMap = { 'SuperAdmin': 0,'Admin':1,'NormalUser':2};
-  let currentAuthNum = 2;
-  const roles = getAuthority();
-  if (Array.isArray(roles)) {
-    let max = roles.map(x=> authMap[x]).sort((a, b) => a - b)[0];
-    currentAuthNum = max;
-  }
-  let userAuthNum = user.userRoles.sort((a, b) => a - b)[0];
-
-  return currentAuthNum < userAuthNum;
-}
-
 const userList:React.FC = () => {
   const actionRef = useRef<ActionType>();
   const addFormRef = useRef<FormInstance>();
@@ -145,6 +141,39 @@ const userList:React.FC = () => {
   const [createModalVisible, handleModalVisible] = useState<boolean>(false);
   const [updateModalVisible, setUpdateModalVisible] = useState<boolean>(false);
   const [currentRow, setCurrentRow] = useState<UserItem>();
+  const [roleOptions, setRoleOptions] = useState<RoleOption[]>([]);
+
+  useEffect(() => {
+    loadRoles();
+  }, []);
+
+  const loadRoles = async () => {
+    try {
+      const response = await queryRoles();
+      if (response?.success && Array.isArray(response.data)) {
+        const options = response.data.map((role: any) => ({
+          value: role.id,
+          label: role.name,
+          code: role.code,
+          isSystem: role.isSystem,
+        }));
+        setRoleOptions(options);
+      } else {
+        message.error(intl.formatMessage({ id: 'pages.role.load_failed', defaultMessage: 'Failed to load roles' }));
+      }
+    } catch (error) {
+      message.error(intl.formatMessage({ id: 'pages.role.load_failed', defaultMessage: 'Failed to load roles' }));
+    }
+  };
+
+  const getDefaultRoleIds = () => {
+    const normalRole = roleOptions.find(option => option.code === 'NormalUser');
+    return normalRole ? [normalRole.value] : [];
+  };
+
+  const availableRoleOptions = hasUserRole('SuperAdmin')
+    ? roleOptions
+    : roleOptions.filter(option => option.code !== 'SuperAdmin');
   const columns: ProColumns<UserItem>[] = [
     {
       title: intl.formatMessage({
@@ -160,22 +189,29 @@ const userList:React.FC = () => {
     },
     {
       title: intl.formatMessage({
-        id: 'pages.user.table.cols.usertype',
+        id: 'pages.user.table.cols.userrole',
       }),
-      dataIndex: 'userRoles',
+      dataIndex: 'userRoleNames',
       search: false,
       renderFormItem: (_, { defaultRender }) => {
         return defaultRender(_);
       },
       render: (_, record) => (
         <Space>
-          {record.userRoleNames?.map((name:string) => (
-            <Tag color={
-              name === intl.formatMessage({id: 'pages.user.usertype.admin'}) ? 'gold':'blue'
-            } key={name}>
-              {name}
-            </Tag>
-          ))}
+          {record.userRoleNames?.map((name:string, index:number) => {
+            const code = record.userRoleCodes?.[index];
+            let color = 'blue';
+            if (code === 'SuperAdmin') {
+              color = 'red';
+            } else if (code === 'Admin') {
+              color = 'gold';
+            }
+            return (
+              <Tag color={color} key={`${record.id}-${code || name}`}>
+                {name}
+              </Tag>
+            );
+          })}
         </Space>
       ),
     },
@@ -184,72 +220,71 @@ const userList:React.FC = () => {
         id: 'pages.user.table.cols.action'
       }),
       valueType: 'option',
-      render: (text, record, _, action) => checkUserListModifyPermission(record)?[
-        <a key="0"
-        onClick={() => {
-          setUpdateModalVisible(true);
-          setCurrentRow(record);
-          console.log('select user ', record);
-          console.log('current user ', currentRow);
-        }}
-        >
-          {intl.formatMessage({
-            id: 'pages.user.table.cols.action.edit',
-          })}
-        </a>,
-         <a key="1"
-         onClick={ ()=> {
-          const msg = intl.formatMessage({
-            id: 'pages.user.confirm_reset',
-          }) + `【${record.userName}】` + intl.formatMessage({
-            id: 'pages.user.reset_password_default',
-          });
-          confirm({
-            icon: <ExclamationCircleOutlined />,
-            content: msg,
-            async onOk() {
-              console.log('reset password user ' + record.userName);
-              const success = await handleResetPassword(record);
-              if (success) {
-                actionRef.current?.reload();
-              }
-            },
-            onCancel() {
-              console.log('Cancel');
-            },
-          });
-        }}
-         >
-         {intl.formatMessage({
-           id: 'pages.user.table.cols.action.reset',
-         })}
-         </a>,
-        <Button key="2" type="link" danger
-          onClick={ ()=> {
-            const msg = intl.formatMessage({
-              id: 'pages.user.confirm_delete',
-            }) + `【${record.userName}】?`;
-            confirm({
-              icon: <ExclamationCircleOutlined />,
-              content: msg,
-              async onOk() {
-                console.log('delete user ' + record.userName);
-                const success = await handleDel(record);
-                if (success) {
-                  actionRef.current?.reload();
-                }
-              },
-              onCancel() {
-                console.log('Cancel');
-              },
-            });
-          }}
-        >
-          {intl.formatMessage({
-            id: 'pages.user.table.cols.action.delete',
-          })}
-        </Button >
-      ]:[]
+      render: (text, record, _, action) => {
+        const actions: React.ReactNode[] = [];
+        actions.push(
+          <RequireFunction fn="USER_EDIT" key="edit" fallback={null}>
+            <a
+              onClick={() => {
+                setUpdateModalVisible(true);
+                setCurrentRow(record);
+              }}
+            >
+              {intl.formatMessage({ id: 'pages.user.table.cols.action.edit' })}
+            </a>
+          </RequireFunction>
+        );
+        actions.push(
+          <RequireFunction fn="USER_EDIT" key="reset" fallback={null}>
+            <a
+              onClick={() => {
+                const msg =
+                  intl.formatMessage({ id: 'pages.user.confirm_reset' }) +
+                  `【${record.userName}】` +
+                  intl.formatMessage({ id: 'pages.user.reset_password_default' });
+                confirm({
+                  icon: <ExclamationCircleOutlined />,
+                  content: msg,
+                  async onOk() {
+                    const success = await handleResetPassword(record);
+                    if (success) {
+                      actionRef.current?.reload();
+                    }
+                  },
+                });
+              }}
+            >
+              {intl.formatMessage({ id: 'pages.user.table.cols.action.reset' })}
+            </a>
+          </RequireFunction>
+        );
+        actions.push(
+          <RequireFunction fn="USER_DELETE" key="delete" fallback={null}>
+            <Button
+              type="link"
+              danger
+              onClick={() => {
+                const msg =
+                  intl.formatMessage({ id: 'pages.user.confirm_delete' }) +
+                  `【${record.userName}】?`;
+                confirm({
+                  icon: <ExclamationCircleOutlined />,
+                  content: msg,
+                  async onOk() {
+                    const success = await handleDel(record);
+                    if (success) {
+                      actionRef.current?.reload();
+                    }
+                  },
+                });
+              }}
+            >
+              {intl.formatMessage({ id: 'pages.user.table.cols.action.delete' })}
+            </Button>
+          </RequireFunction>
+        );
+        return actions;
+      }
     }
   ];
   return (
@@ -263,16 +298,17 @@ const userList:React.FC = () => {
         columns = {columns}
         request = { (params, sorter, filter) => queryUsers(params) }
         toolBarRender={() => [
-          (hasUserRole('SuperAdmin')||hasUserRole('Admin'))? 
-          <Button key="0" icon={<PlusOutlined />} type="primary"
-          onClick={ ()=>{ handleModalVisible(true) } }
-          >
-            {intl.formatMessage({
-              id: 'pages.user.table.cols.action.add'
-            })}
-          </Button>
-          :
-          <span key="1"></span>
+          <RequireFunction fn="USER_ADD" key="add" fallback={null}>
+            <Button
+              icon={<PlusOutlined />}
+              type="primary"
+              onClick={() => {
+                handleModalVisible(true);
+              }}
+            >
+              {intl.formatMessage({ id: 'pages.user.table.cols.action.add' })}
+            </Button>
+          </RequireFunction>,
         ]}
       />
 
@@ -290,7 +326,17 @@ const userList:React.FC = () => {
         } 
         width="400px"
         visible={createModalVisible}
-        onVisibleChange={handleModalVisible}
+        initialValues={{
+          userRoleIds: getDefaultRoleIds(),
+        }}
+        onVisibleChange={(visible) => {
+          handleModalVisible(visible);
+          if (visible) {
+            addFormRef.current?.setFieldsValue({ userRoleIds: getDefaultRoleIds() });
+          } else {
+            addFormRef.current?.resetFields();
+          }
+        }}
         onFinish={
           async (value) => {
             const success = await handleAdd(value as UserItem);
@@ -339,32 +385,13 @@ const userList:React.FC = () => {
                   },
                 ]}
                   label={intl.formatMessage({
-                    id: 'pages.user.form.usertype'
+                    id: 'pages.user.form.userrole'
                   })}
-                  name="userRoles"
-                  mode="multiple" 
-                  options = {hasUserRole('SuperAdmin')?[
-                    {
-                      value: 1,
-                      label: intl.formatMessage({
-                        id: 'pages.user.usertype.admin'
-                      }),
-                    },
-                    {
-                      value: 2,
-                      label: intl.formatMessage({
-                        id: 'pages.user.usertype.normaluser'
-                      }),
-                    }
-                  ]:[
-                  {
-                    value: 2,
-                    label: intl.formatMessage({
-                      id: 'pages.user.usertype.normaluser'
-                    }),
-                  }]}
+                  name="userRoleIds"
+                  mode="multiple"
+                  options = {availableRoleOptions}
                 >
-        </ProFormSelect> 
+        </ProFormSelect>
       </ModalForm>
 
       {
@@ -373,6 +400,8 @@ const userList:React.FC = () => {
           value={currentRow}
           setValue={setCurrentRow}
           updateModalVisible={updateModalVisible}
+          roleOptions={availableRoleOptions}
+          defaultRoleIds={getDefaultRoleIds()}
           onCancel={
             () => {
               setCurrentRow(undefined);
@@ -389,10 +418,10 @@ const userList:React.FC = () => {
                   actionRef.current.reload();
                 }
               }
-              addFormRef.current?.resetFields();
             }
-          }/>
-      }
+          }
+        />
+     }
 
     </PageContainer>
   );

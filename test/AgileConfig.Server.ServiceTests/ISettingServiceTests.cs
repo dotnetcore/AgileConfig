@@ -1,51 +1,50 @@
 ﻿using AgileConfig.Server.IService;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace AgileConfig.Server.ServiceTests
+namespace AgileConfig.Server.ServiceTests;
+
+[TestClass]
+public class ISettingServiceTests
 {
-    [TestClass]
-    public class ISettingServiceTests
+    [TestMethod]
+    public void IfEnvEmptySetDefaultTest()
     {
-        [TestMethod]
-        public void IfEnvEmptySetDefaultTest()
-        {
-            // Arrange
-            string env = "test";
-            ISettingService.EnvironmentList = new string[] { "test", "prod" };
+        // Arrange
+        var env = "test";
+        ISettingService.EnvironmentList = new[] { "test", "prod" };
 
-            // Act
-            ISettingService.IfEnvEmptySetDefault(ref env);
+        // Act
+        ISettingService.IfEnvEmptySetDefault(ref env);
 
-            // Assert
-            Assert.AreEqual("test", env);
-        }
+        // Assert
+        Assert.AreEqual("test", env);
+    }
 
-        [TestMethod]
-        public void IfEnvEmptySetDefault_envEmpty_shouldReturn_defaul()
-        {
-            // Arrange
-            string env = "";
-            ISettingService.EnvironmentList = new string[] { "test", "prod" };
+    [TestMethod]
+    public void IfEnvEmptySetDefault_envEmpty_shouldReturn_defaul()
+    {
+        // Arrange
+        var env = "";
+        ISettingService.EnvironmentList = new[] { "test", "prod" };
 
-            // Act
-            ISettingService.IfEnvEmptySetDefault(ref env);
+        // Act
+        ISettingService.IfEnvEmptySetDefault(ref env);
 
-            // Assert
-            Assert.AreEqual("test", env);
-        }
+        // Assert
+        Assert.AreEqual("test", env);
+    }
 
-        [TestMethod]
-        public void IfEnvEmptySetDefault_envNull_shouldReturn_defaul()
-        {
-            // Arrange
-            string env = null;
-            ISettingService.EnvironmentList = new string[] { "test", "prod" };
+    [TestMethod]
+    public void IfEnvEmptySetDefault_envNull_shouldReturn_defaul()
+    {
+        // Arrange
+        string env = null;
+        ISettingService.EnvironmentList = new[] { "test", "prod" };
 
-            // Act
-            ISettingService.IfEnvEmptySetDefault(ref env);
+        // Act
+        ISettingService.IfEnvEmptySetDefault(ref env);
 
-            // Assert
-            Assert.AreEqual("test", env);
-        }
+        // Assert
+        Assert.AreEqual("test", env);
     }
 }

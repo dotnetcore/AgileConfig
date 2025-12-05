@@ -1,5 +1,5 @@
-import AuthorizedEle from '@/components/Authorized/AuthorizedElement';
-import functionKeys from '@/models/functionKeys';
+// migrated to RequireFunction for permission gating
+import { RequireFunction } from '@/utils/permission';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
@@ -127,48 +127,39 @@ const clients: React.FC = () => {
       }),
     },
     {
-      title: intl.formatMessage({
-        id: 'pages.client.table.cols.action',
-      }),
+      title: intl.formatMessage({ id: 'pages.client.table.cols.action' }),
       valueType: 'option',
       render: (text, record) => [
-        <a
-          onClick={() => {
-            handleClientReload(record);
-          }}
-        >
-          {intl.formatMessage({
-            id: 'pages.client.table.cols.action.refresh',
-          })}
-        </a>,
-        <AuthorizedEle judgeKey={functionKeys.Client_Disconnect}>
+        <RequireFunction fn="CLIENT_REFRESH" key="refresh" fallback={null}>
+          <a
+            onClick={() => {
+              handleClientReload(record);
+            }}
+          >
+            {intl.formatMessage({ id: 'pages.client.table.cols.action.refresh' })}
+          </a>
+        </RequireFunction>,
+        <RequireFunction fn="CLIENT_DISCONNECT" key="disconnect" fallback={null}>
           <Button
             type="link"
             danger
             onClick={() => {
-              const msg =
-                intl.formatMessage({
-                  id: 'pages.client.disconnect_message',
-                }) + `【${record.id}】`;
+              const msg = intl.formatMessage({ id: 'pages.client.disconnect_message' }) + `【${record.id}】`;
               confirm({
                 icon: <ExclamationCircleOutlined />,
                 content: msg,
                 async onOk() {
-                  console.log('disconnect client ' + record.id);
                   const success = await handleClientOffline(record);
                   if (success) {
                     actionRef.current?.reload();
                   }
                 },
-                onCancel() {},
               });
             }}
           >
-            {intl.formatMessage({
-              id: 'pages.client.table.cols.action.disconnect',
-            })}
+            {intl.formatMessage({ id: 'pages.client.table.cols.action.disconnect' })}
           </Button>
-        </AuthorizedEle>,
+        </RequireFunction>,
       ],
     },
   ];

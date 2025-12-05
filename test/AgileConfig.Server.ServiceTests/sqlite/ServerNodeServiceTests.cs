@@ -1,242 +1,237 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using AgileConfig.Server.Data.Entity;
 using System.Threading.Tasks;
+using AgileConfig.Server.Data.Abstraction;
+using AgileConfig.Server.Data.Entity;
+using AgileConfig.Server.Data.Freesql;
+using AgileConfig.Server.Data.Repository.Selector;
 using AgileConfig.Server.IService;
-using Microsoft.Extensions.DependencyInjection;
-using MongoDB.Driver.Linq;
+using AgileConfig.Server.Service;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using AgileConfig.Server.Common;
-using AgileConfig.Server.Data.Repository.Selector;
-using AgileConfig.Server.Data.Freesql;
-using AgileConfig.Server.Service;
-using AgileConfig.Server.Data.Abstraction;
 
-namespace AgileConfig.Server.ServiceTests.sqlite
+namespace AgileConfig.Server.ServiceTests.sqlite;
+
+[TestClass]
+public class ServerNodeServiceTests : BasicTestService
 {
-    [TestClass()]
-    public class ServerNodeServiceTests : BasicTestService
-    {
-        IServiceProvider _serviceProvider = null;
-        IServiceScope _serviceScope = null;
-        IServerNodeService _serverNodeService = null;
+    private IServerNodeService _serverNodeService;
+    private IServiceProvider _serviceProvider;
+    private IServiceScope _serviceScope;
 
-        public override Task<Dictionary<string, string>> GetConfigurationData()
-        {
-            return
-                Task.FromResult(
+    public override Task<Dictionary<string, string>> GetConfigurationData()
+    {
+        return
+            Task.FromResult(
                 new Dictionary<string, string>
                 {
-                {"db:provider","sqlite" },
-                {"db:conn","Data Source=agile_config.db" }
-            });
-        }
-        [TestInitialize]
-        public async Task TestInitialize()
-        {
-            await NewGlobalSp();
+                    { "db:provider", "sqlite" },
+                    { "db:conn", "Data Source=agile_config.db" }
+                });
+    }
 
-            _serviceScope = GlobalServiceProvider.CreateScope();
-            _serviceProvider = _serviceScope.ServiceProvider;
+    [TestInitialize]
+    public async Task TestInitialize()
+    {
+        await NewGlobalSp();
 
-            var systeminitializationService = _serviceProvider.GetService<ISystemInitializationService>();
-            systeminitializationService.TryInitDefaultEnvironment();//初始化环境 DEV TEST STAGE PROD
-            systeminitializationService.TryInitJwtSecret();//初始化 jwt secret
+        _serviceScope = GlobalServiceProvider.CreateScope();
+        _serviceProvider = _serviceScope.ServiceProvider;
 
-            _serverNodeService = _serviceProvider.GetService<IServerNodeService>();
+        var systeminitializationService = _serviceProvider.GetService<ISystemInitializationService>();
+        systeminitializationService.TryInitDefaultEnvironment(); //初始化环境 DEV TEST STAGE PROD
+        systeminitializationService.TryInitJwtSecret(); //初始化 jwt secret
 
-            Console.WriteLine($"IServerNodeService type is {_serverNodeService.GetType().FullName}");
+        _serverNodeService = _serviceProvider.GetService<IServerNodeService>();
 
-            Console.WriteLine("Run TestInitialize");
-        }
+        Console.WriteLine($"IServerNodeService type is {_serverNodeService.GetType().FullName}");
 
-        private async Task NewGlobalSp()
-        {
-            Console.WriteLine("Try get configration data");
-            var dict = await GetConfigurationData();
+        Console.WriteLine("Run TestInitialize");
+    }
 
-            foreach (var item in dict)
-            {
-                Console.WriteLine($"key: {item.Key} value: {item.Value}");
-            }
+    private async Task NewGlobalSp()
+    {
+        Console.WriteLine("Try get configration data");
+        var dict = await GetConfigurationData();
 
-            var config = new ConfigurationBuilder()
-                             .AddInMemoryCollection(dict)
-                             .Build();
-            Console.WriteLine("Config list");
-            foreach (var item in config.AsEnumerable())
-            {
-                Console.WriteLine($"key: {item.Key} value: {item.Value}");
-            }
+        foreach (var item in dict) Console.WriteLine($"key: {item.Key} value: {item.Value}");
 
-            var cache = new Mock<IMemoryCache>();
-            IServiceCollection services = new ServiceCollection();
-            services.AddScoped(_ => cache.Object);
-            services.AddLogging();
-            services.AddSingleton<IConfiguration>(config);
-            services.AddDbConfigInfoFactory();
-            services.AddFreeSqlFactory();
-            services.AddRepositories();
-            services.AddBusinessServices();
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(dict)
+            .Build();
+        Console.WriteLine("Config list");
+        foreach (var item in config.AsEnumerable()) Console.WriteLine($"key: {item.Key} value: {item.Value}");
 
-            this.GlobalServiceProvider = services.BuildServiceProvider();
-        }
+        var cache = new Mock<IMemoryCache>();
+        IServiceCollection services = new ServiceCollection();
+        services.AddScoped(_ => cache.Object);
+        services.AddLogging();
+        services.AddSingleton<IConfiguration>(config);
+        services.AddDbConfigInfoFactory();
+        services.AddFreeSqlFactory();
+        services.AddRepositories();
+        services.AddBusinessServices();
 
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            _serverNodeService.Dispose();
-            _serviceScope.Dispose();
-        }
+        GlobalServiceProvider = services.BuildServiceProvider();
+    }
 
-        [TestMethod()]
-        public async Task AddAsyncTest()
-        {
-            this.ClearData();
+    [TestCleanup]
+    public void TestCleanup()
+    {
+        _serverNodeService.Dispose();
+        _serviceScope.Dispose();
+    }
 
-            var source = new ServerNode();
-            source.Id = "1";
-            source.CreateTime = DateTime.Now;
-            source.LastEchoTime = DateTime.Now;
-            source.Remark = "2";
-            source.Status = NodeStatus.Offline;
+    [TestMethod]
+    public async Task AddAsyncTest()
+    {
+        ClearData();
 
-            var result = await _serverNodeService.AddAsync(source);
-            Assert.IsTrue(result);
+        var source = new ServerNode();
+        source.Id = "1";
+        source.CreateTime = DateTime.Now;
+        source.LastEchoTime = DateTime.Now;
+        source.Remark = "2";
+        source.Status = NodeStatus.Offline;
 
-            var node = await _serverNodeService.GetAsync("1");
-            Assert.IsNotNull(node);
+        var result = await _serverNodeService.AddAsync(source);
+        Assert.IsTrue(result);
 
-            Assert.AreEqual(source.Id, node.Id);
-            Assert.AreEqual(source.CreateTime.ToString("yyyyMMddHHmmss"), node.CreateTime.ToString("yyyyMMddHHmmss"));
-            Assert.AreEqual(source.LastEchoTime.Value.ToString("yyyyMMddHHmmss"), node.LastEchoTime.Value.ToString("yyyyMMddHHmmss"));
-            Assert.AreEqual(source.Remark, node.Remark);
-            Assert.AreEqual(source.Status, node.Status);
-        }
+        var node = await _serverNodeService.GetAsync("1");
+        Assert.IsNotNull(node);
 
-        [TestMethod()]
-        public async Task DeleteAsyncTest()
-        {
-            this.ClearData();
+        Assert.AreEqual(source.Id, node.Id);
+        Assert.AreEqual(source.CreateTime.ToString("yyyyMMddHHmmss"), node.CreateTime.ToString("yyyyMMddHHmmss"));
+        Assert.AreEqual(source.LastEchoTime.Value.ToString("yyyyMMddHHmmss"),
+            node.LastEchoTime.Value.ToString("yyyyMMddHHmmss"));
+        Assert.AreEqual(source.Remark, node.Remark);
+        Assert.AreEqual(source.Status, node.Status);
+    }
 
-            var source = new ServerNode();
-            source.Id = "1";
-            source.CreateTime = DateTime.Now;
-            source.LastEchoTime = DateTime.Now;
-            source.Remark = "2";
-            source.Status = NodeStatus.Offline;
+    [TestMethod]
+    public async Task DeleteAsyncTest()
+    {
+        ClearData();
 
-            var result = await _serverNodeService.AddAsync(source);
-            Assert.IsTrue(result);
+        var source = new ServerNode();
+        source.Id = "1";
+        source.CreateTime = DateTime.Now;
+        source.LastEchoTime = DateTime.Now;
+        source.Remark = "2";
+        source.Status = NodeStatus.Offline;
 
-            var result1 = await _serverNodeService.DeleteAsync(source);
-            Assert.IsTrue(result1);
+        var result = await _serverNodeService.AddAsync(source);
+        Assert.IsTrue(result);
 
-            var node = await _serverNodeService.GetAsync("1");
+        var result1 = await _serverNodeService.DeleteAsync(source);
+        Assert.IsTrue(result1);
 
-            Assert.IsNull(node);
-        }
+        var node = await _serverNodeService.GetAsync("1");
 
-        [TestMethod()]
-        public async Task DeleteAsyncTest1()
-        {
-            this.ClearData();
+        Assert.IsNull(node);
+    }
 
-            var source = new ServerNode();
-            source.Id = "1";
-            source.CreateTime = DateTime.Now;
-            source.LastEchoTime = DateTime.Now;
-            source.Remark = "2";
-            source.Status = NodeStatus.Offline;
+    [TestMethod]
+    public async Task DeleteAsyncTest1()
+    {
+        ClearData();
 
-            var result = await _serverNodeService.AddAsync(source);
-            Assert.IsTrue(result);
+        var source = new ServerNode();
+        source.Id = "1";
+        source.CreateTime = DateTime.Now;
+        source.LastEchoTime = DateTime.Now;
+        source.Remark = "2";
+        source.Status = NodeStatus.Offline;
 
-            var result1 = await _serverNodeService.DeleteAsync(source.Id);
-            Assert.IsTrue(result1);
+        var result = await _serverNodeService.AddAsync(source);
+        Assert.IsTrue(result);
 
-            var node = await _serverNodeService.GetAsync("1");
+        var result1 = await _serverNodeService.DeleteAsync(source.Id);
+        Assert.IsTrue(result1);
 
-            Assert.IsNull(node);
-        }
+        var node = await _serverNodeService.GetAsync("1");
 
-        [TestMethod()]
-        public async Task GetAllNodesAsyncTest()
-        {
-            this.ClearData();
+        Assert.IsNull(node);
+    }
 
-            var source = new ServerNode();
-            source.Id = "1";
-            source.CreateTime = DateTime.Now;
-            source.LastEchoTime = DateTime.Now;
-            source.Remark = "2";
-            source.Status = NodeStatus.Offline;
+    [TestMethod]
+    public async Task GetAllNodesAsyncTest()
+    {
+        ClearData();
 
-            var result = await _serverNodeService.AddAsync(source);
-            Assert.IsTrue(result);
+        var source = new ServerNode();
+        source.Id = "1";
+        source.CreateTime = DateTime.Now;
+        source.LastEchoTime = DateTime.Now;
+        source.Remark = "2";
+        source.Status = NodeStatus.Offline;
 
-            var nodes = await _serverNodeService.GetAllNodesAsync();
-            Assert.IsNotNull(nodes);
+        var result = await _serverNodeService.AddAsync(source);
+        Assert.IsTrue(result);
 
-            Assert.AreEqual(1, nodes.Count);
-        }
+        var nodes = await _serverNodeService.GetAllNodesAsync();
+        Assert.IsNotNull(nodes);
 
-        [TestMethod()]
-        public async Task GetAsyncTest()
-        {
-            this.ClearData();
+        Assert.AreEqual(1, nodes.Count);
+    }
 
-            var source = new ServerNode();
-            source.Id = "1";
-            source.CreateTime = DateTime.Now;
-            source.LastEchoTime = DateTime.Now;
-            source.Remark = "2";
-            source.Status = NodeStatus.Offline;
-            var result = await _serverNodeService.AddAsync(source);
-            Assert.IsTrue(result);
+    [TestMethod]
+    public async Task GetAsyncTest()
+    {
+        ClearData();
 
-            var node = await _serverNodeService.GetAsync(source.Id);
-            Assert.IsNotNull(node);
+        var source = new ServerNode();
+        source.Id = "1";
+        source.CreateTime = DateTime.Now;
+        source.LastEchoTime = DateTime.Now;
+        source.Remark = "2";
+        source.Status = NodeStatus.Offline;
+        var result = await _serverNodeService.AddAsync(source);
+        Assert.IsTrue(result);
 
-            Assert.AreEqual(source.Id, node.Id);
-            Assert.AreEqual(source.CreateTime.ToString("yyyyMMddHHmmss"), node.CreateTime.ToString("yyyyMMddHHmmss"));
-            Assert.AreEqual(source.LastEchoTime.Value.ToString("yyyyMMddHHmmss"), node.LastEchoTime.Value.ToString("yyyyMMddHHmmss"));
-            Assert.AreEqual(source.Remark, node.Remark);
-            Assert.AreEqual(source.Status, node.Status);
-        }
+        var node = await _serverNodeService.GetAsync(source.Id);
+        Assert.IsNotNull(node);
 
-        [TestMethod()]
-        public async Task UpdateAsyncTest()
-        {
-            this.ClearData();
+        Assert.AreEqual(source.Id, node.Id);
+        Assert.AreEqual(source.CreateTime.ToString("yyyyMMddHHmmss"), node.CreateTime.ToString("yyyyMMddHHmmss"));
+        Assert.AreEqual(source.LastEchoTime.Value.ToString("yyyyMMddHHmmss"),
+            node.LastEchoTime.Value.ToString("yyyyMMddHHmmss"));
+        Assert.AreEqual(source.Remark, node.Remark);
+        Assert.AreEqual(source.Status, node.Status);
+    }
 
-            var source = new ServerNode();
-            source.Id = "1";
-            source.CreateTime = DateTime.Now;
-            source.LastEchoTime = DateTime.Now;
-            source.Remark = "2";
-            source.Status = NodeStatus.Offline;
-            var result = await _serverNodeService.AddAsync(source);
-            Assert.IsTrue(result);
+    [TestMethod]
+    public async Task UpdateAsyncTest()
+    {
+        ClearData();
 
-            source.CreateTime = DateTime.Now;
-            source.LastEchoTime = DateTime.Now;
-            source.Remark = "3";
-            source.Status = NodeStatus.Online;
-            var result1 = await _serverNodeService.UpdateAsync(source);
-            Assert.IsTrue(result);
+        var source = new ServerNode();
+        source.Id = "1";
+        source.CreateTime = DateTime.Now;
+        source.LastEchoTime = DateTime.Now;
+        source.Remark = "2";
+        source.Status = NodeStatus.Offline;
+        var result = await _serverNodeService.AddAsync(source);
+        Assert.IsTrue(result);
 
-            var node = await _serverNodeService.GetAsync(source.Id);
-            Assert.IsNotNull(node);
+        source.CreateTime = DateTime.Now;
+        source.LastEchoTime = DateTime.Now;
+        source.Remark = "3";
+        source.Status = NodeStatus.Online;
+        var result1 = await _serverNodeService.UpdateAsync(source);
+        Assert.IsTrue(result);
 
-            Assert.AreEqual(source.Id, node.Id);
-            Assert.AreEqual(source.CreateTime.ToString("yyyyMMddHHmmss"), node.CreateTime.ToString("yyyyMMddHHmmss"));
-            Assert.AreEqual(source.LastEchoTime.Value.ToString("yyyyMMddHHmmss"), node.LastEchoTime.Value.ToString("yyyyMMddHHmmss"));
-            Assert.AreEqual(source.Remark, node.Remark);
-            Assert.AreEqual(source.Status, node.Status);
-        }
+        var node = await _serverNodeService.GetAsync(source.Id);
+        Assert.IsNotNull(node);
+
+        Assert.AreEqual(source.Id, node.Id);
+        Assert.AreEqual(source.CreateTime.ToString("yyyyMMddHHmmss"), node.CreateTime.ToString("yyyyMMddHHmmss"));
+        Assert.AreEqual(source.LastEchoTime.Value.ToString("yyyyMMddHHmmss"),
+            node.LastEchoTime.Value.ToString("yyyyMMddHHmmss"));
+        Assert.AreEqual(source.Remark, node.Remark);
+        Assert.AreEqual(source.Status, node.Status);
     }
 }

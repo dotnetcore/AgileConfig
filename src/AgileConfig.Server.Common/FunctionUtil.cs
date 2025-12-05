@@ -1,136 +1,106 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace AgileConfig.Server.Common
+namespace AgileConfig.Server.Common;
+
+public static class FunctionUtil
 {
-    public static class FunctionUtil
+    /// <summary>
+    ///     Try executing a function multiple times.
+    /// </summary>
+    /// <typeparam name="T">Return type of the function.</typeparam>
+    /// <param name="func">Delegate to invoke.</param>
+    /// <param name="tryCount">Number of attempts before giving up.</param>
+    /// <returns>Result produced by the function.</returns>
+    public static T TRY<T>(Func<T> func, int tryCount)
     {
-        /// <summary>
-        /// 尝试运行一个Func几次
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="func"></param>
-        /// <param name="tryCount"></param>
-        /// <returns></returns>
-        public static T TRY<T>(Func<T> func, int tryCount)
-        {
-            if (func == null)
+        if (func == null) throw new ArgumentNullException(nameof(func));
+
+        var result = default(T);
+        for (var i = 0; i < tryCount; i++)
+            try
             {
-                throw new ArgumentNullException(nameof(func));
+                result = func();
+                break;
+            }
+            catch
+            {
+                if (i == tryCount - 1) throw;
             }
 
-            T result = default(T);
-            for (int i = 0; i < tryCount; i++)
+        return result;
+    }
+
+    /// <summary>
+    ///     Try executing an asynchronous function multiple times.
+    /// </summary>
+    /// <typeparam name="T">Return type of the function.</typeparam>
+    /// <param name="func">Asynchronous delegate to invoke.</param>
+    /// <param name="tryCount">Number of attempts before rethrowing the exception.</param>
+    /// <returns>Result produced by the asynchronous function.</returns>
+    public static async Task<T> TRYAsync<T>(Func<Task<T>> func, int tryCount)
+    {
+        if (func == null) throw new ArgumentNullException("func");
+
+        var result = default(T);
+        for (var i = 0; i < tryCount; i++)
+            try
             {
-                try
-                {
-                    result = func();
-                    break;
-                }
-                catch
-                {
-                    if (i == (tryCount - 1))
-                    {
-                        throw;
-                    }
-                }
+                result = await func();
+                break;
+            }
+            catch
+            {
+                if (i == tryCount - 1) throw;
             }
 
-            return result;
-        }
+        return result;
+    }
 
-        /// <summary>
-        /// 尝试执行一个异步方法多次
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="func"></param>
-        /// <param name="tryCount"></param>
-        /// <returns></returns>
-        public static async Task<T> TRYAsync<T>(Func<Task<T>> func, int tryCount)
-        {
-            if (func == null)
+    /// <summary>
+    ///     Try executing an asynchronous function multiple times and swallow exceptions.
+    /// </summary>
+    /// <typeparam name="T">Return type of the function.</typeparam>
+    /// <param name="func">Asynchronous delegate to invoke.</param>
+    /// <param name="tryCount">Number of attempts to run the delegate.</param>
+    /// <returns>Result produced by the asynchronous function, or default when all attempts fail.</returns>
+    public static async Task<T> EATAsync<T>(Func<Task<T>> func, int tryCount)
+    {
+        if (func == null) throw new ArgumentNullException(nameof(func));
+
+        var result = default(T);
+        for (var i = 0; i < tryCount; i++)
+            try
             {
-                throw new ArgumentNullException("func");
+                result = await func();
+                break;
+            }
+            catch
+            {
             }
 
-            T result = default(T);
-            for (int i = 0; i < tryCount; i++)
+        return result;
+    }
+
+    /// <summary>
+    ///     Try executing an action multiple times.
+    /// </summary>
+    /// <param name="act">Action to invoke.</param>
+    /// <param name="tryCount">Number of attempts before rethrowing the exception.</param>
+    /// <returns>Nothing.</returns>
+    public static void TRY(Action act, int tryCount)
+    {
+        if (act == null) throw new ArgumentNullException(nameof(act));
+
+        for (var i = 0; i < tryCount; i++)
+            try
             {
-                try
-                {
-                    result = await func();
-                    break;
-                }
-                catch 
-                {
-                    if (i == (tryCount - 1))
-                    {
-                        throw;
-                    }
-                }
+                act();
+                break;
             }
-
-            return result;
-        }
-
-        /// <summary>
-        ///  尝试执行一个异步方法多次 , 直接吞掉异常
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="func"></param>
-        /// <param name="tryCount"></param>
-        /// <returns></returns>
-        public static async Task<T> EATAsync<T>(Func<Task<T>> func, int tryCount)
-        {
-            if (func == null)
+            catch
             {
-                throw new ArgumentNullException(nameof(func));
+                if (i == tryCount - 1) throw;
             }
-
-            T result = default(T);
-            for (int i = 0; i < tryCount; i++)
-            {
-                try
-                {
-                    result = await func();
-                    break;
-                }
-                catch 
-                {
-                }
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// 尝试运行一个Action几次
-        /// </summary>
-        /// <param name="act"></param>
-        /// <param name="tryCount"></param>
-        /// <returns></returns>
-        public static void TRY(Action act, int tryCount)
-        {
-            if (act == null)
-            {
-                throw new ArgumentNullException(nameof(act));
-            }
-
-            for (int i = 0; i < tryCount; i++)
-            {
-                try
-                {
-                    act();
-                    break;
-                }
-                catch 
-                {
-                    if (i == (tryCount - 1))
-                    {
-                        throw;
-                    }
-                }
-            }
-        }
     }
 }

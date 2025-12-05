@@ -1,112 +1,112 @@
-﻿using Agile.Config.Protocol;
+﻿using System.Threading.Tasks;
+using Agile.Config.Protocol;
 using AgileConfig.Server.Apisite.Utilites;
-using AgileConfig.Server.Common;
 using AgileConfig.Server.Common.EventBus;
+using AgileConfig.Server.Common.Resources;
+using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.Event;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System.Dynamic;
-using System.Threading.Tasks;
-using AgileConfig.Server.Common.Resources;
 
-namespace AgileConfig.Server.Apisite.Controllers
+namespace AgileConfig.Server.Apisite.Controllers;
+
+/// <summary>
+///     Handles console web requests that proxy operations to remote server nodes (distinct from RemoteOpController).
+/// </summary>
+[Authorize]
+public class RemoteServerProxyController : Controller
 {
-    /// <summary>
-    /// 这个Controller是控制台网页跟后台的接口，不要跟RemoteOp那个Controller混淆
-    /// </summary>
-    [Authorize]
-    public class RemoteServerProxyController : Controller
+    private readonly ILogger _logger;
+    private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
+    private readonly IServerNodeService _serverNodeService;
+    private readonly ITinyEventBus _tinyEventBus;
+
+    public RemoteServerProxyController(
+        IRemoteServerNodeProxy remoteServerNodeProxy,
+        ILoggerFactory loggerFactory,
+        IServerNodeService serverNodeService,
+        ITinyEventBus tinyEventBus
+    )
     {
-        private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
-        private readonly ITinyEventBus _tinyEventBus;
-        private readonly ILogger _logger;
+        _serverNodeService = serverNodeService;
+        _remoteServerNodeProxy = remoteServerNodeProxy;
+        _tinyEventBus = tinyEventBus;
+        _logger = loggerFactory.CreateLogger<RemoteServerProxyController>();
+    }
 
-        public RemoteServerProxyController(
-            IRemoteServerNodeProxy remoteServerNodeProxy,
-            ILoggerFactory loggerFactory,
-            ITinyEventBus tinyEventBus
-        )
-        {
-            _remoteServerNodeProxy = remoteServerNodeProxy;
-            _tinyEventBus = tinyEventBus;
-            _logger = loggerFactory.CreateLogger<RemoteServerProxyController>();
-        }
-
-        /// <summary>
-        /// 通知一个节点的某个客户端离线
-        /// </summary>
-        /// <param name="address"></param>
-        /// <param name="clientId"></param>
-        /// <returns></returns>
-        [HttpPost]
-        public async Task<IActionResult> Client_Offline(string address, string clientId)
-        {
-            if (Appsettings.IsPreviewMode)
+    /// <summary>
+    ///     Notify a node to disconnect a specific client.
+    /// </summary>
+    /// <param name="address">Remote node address.</param>
+    /// <param name="clientId">Client identifier to disconnect.</param>
+    /// <returns>Operation result.</returns>
+    [HttpPost]
+    public async Task<IActionResult> Client_Offline(string address, string clientId)
+    {
+        if (Appsettings.IsPreviewMode)
+            return Json(new
             {
-                return Json(new
-                {
-                    success = false,
-                    message = Messages.DemoModeNoClientDisconnect
-                });
+                success = false,
+                message = Messages.DemoModeNoClientDisconnect
+            });
+
+        var action = new WebsocketAction { Action = ActionConst.Offline, Module = ActionModule.ConfigCenter };
+        var result = await _remoteServerNodeProxy.OneClientDoActionAsync(address, clientId, action);
+        if (result) _tinyEventBus.Fire(new DiscoinnectSuccessful(clientId, this.GetCurrentUserName()));
+
+        _logger.LogInformation("Request remote node {0} 's action OneClientDoAction {1} .", address,
+            result ? "success" : "fail");
+
+        return Json(new
+        {
+            success = true
+        });
+    }
+
+    /// <summary>
+    ///     Notify a node to instruct all clients to reload configuration.
+    /// </summary>
+    /// <param name="address">Remote node address.</param>
+    /// <returns>Operation result.</returns>
+    [HttpPost]
+    public async Task<IActionResult> AllClients_Reload()
+    {
+        var nodes = await _serverNodeService.GetAllNodesAsync();
+        var action = new WebsocketAction { Action = ActionConst.Reload, Module = ActionModule.ConfigCenter };
+        foreach (var node in nodes)
+            if (node.Status == NodeStatus.Online)
+            {
+                var result = await _remoteServerNodeProxy.AllClientsDoActionAsync(node.Id, action);
+                _logger.LogInformation("Request remote node {0} 's action AllClientsDoAction {1} .", node.Id,
+                    result ? "success" : "fail");
             }
 
-            var action = new WebsocketAction { Action = ActionConst.Offline, Module = ActionModule.ConfigCenter };
-            var result = await _remoteServerNodeProxy.OneClientDoActionAsync(address, clientId, action);
-            if (result)
-            {
-                _tinyEventBus.Fire(new DiscoinnectSuccessful(clientId, this.GetCurrentUserName()));
-            }
-
-            _logger.LogInformation("Request remote node {0} 's action OneClientDoAction {1} .", address,
-                result ? "success" : "fail");
-
-            return Json(new
-            {
-                success = true,
-            });
-        }
-
-        /// <summary>
-        /// 通知某个节点让所有的客户端刷新配置项
-        /// </summary>
-        /// <param name="address"></param>
-        /// <returns></returns>
-        [HttpPost]
-        public async Task<IActionResult> AllClients_Reload(string address)
+        return Json(new
         {
-            var action = new WebsocketAction { Action = ActionConst.Reload, Module = ActionModule.ConfigCenter };
-            var result = await _remoteServerNodeProxy.AllClientsDoActionAsync(address, action);
+            success = true
+        });
+    }
 
-            _logger.LogInformation("Request remote node {0} 's action AllClientsDoAction {1} .", address,
-                result ? "success" : "fail");
+    /// <summary>
+    ///     Notify a node to instruct a single client to reload configuration.
+    /// </summary>
+    /// <param name="address">Remote node address.</param>
+    /// <param name="clientId">Client identifier to reload.</param>
+    /// <returns>Operation result.</returns>
+    [HttpPost]
+    public async Task<IActionResult> Client_Reload(string address, string clientId)
+    {
+        var action = new WebsocketAction { Action = ActionConst.Reload, Module = ActionModule.ConfigCenter };
+        var result = await _remoteServerNodeProxy.OneClientDoActionAsync(address, clientId, action);
 
-            return Json(new
-            {
-                success = true,
-            });
-        }
+        _logger.LogInformation("Request remote node {0} 's action OneClientDoAction {1} .", address,
+            result ? "success" : "fail");
 
-        /// <summary>
-        /// 通知某个节点个某个客户端刷新配置项
-        /// </summary>
-        /// <param name="address"></param>
-        /// <param name="clientId"></param>
-        /// <returns></returns>
-        [HttpPost]
-        public async Task<IActionResult> Client_Reload(string address, string clientId)
+        return Json(new
         {
-            var action = new WebsocketAction { Action = ActionConst.Reload, Module = ActionModule.ConfigCenter };
-            var result = await _remoteServerNodeProxy.OneClientDoActionAsync(address, clientId, action);
-
-            _logger.LogInformation("Request remote node {0} 's action OneClientDoAction {1} .", address,
-                result ? "success" : "fail");
-
-            return Json(new
-            {
-                success = true,
-            });
-        }
+            success = true
+        });
     }
 }

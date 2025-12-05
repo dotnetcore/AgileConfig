@@ -1,9 +1,8 @@
 ﻿using Figgle;
 
-namespace AgileConfig.Server.Apisite
+namespace AgileConfig.Server.Apisite;
+
+[EmbedFiggleFont("Font", "ogre")]
+internal static partial class ASCII_FONT
 {
-    [EmbedFiggleFont(memberName: "Font", fontName: "ogre")]
-    internal static partial class ASCII_FONT
-    {
-    }
 }

@@ -1,7 +1,6 @@
-﻿namespace AgileConfig.Server.Data.Freesql
+﻿namespace AgileConfig.Server.Data.Freesql;
+
+public interface IMyFreeSQL
 {
-    public interface IMyFreeSQL
-    {
-        IFreeSql GetInstanceByEnv(string env);
-    }
+    IFreeSql GetInstanceByEnv(string env);
 }

@@ -1,44 +1,41 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace AgileConfig.Server.Apisite.Controllers.api.Models
+namespace AgileConfig.Server.Apisite.Controllers.api.Models;
+
+public class ApiPublishTimelineVM
 {
-    public class ApiPublishTimelineVM
-    {
-        /// <summary>
-        /// 编号
-        /// </summary>
-        public string Id { get; set; }
-        /// <summary>
-        /// 应用id
-        /// </summary>
-        public string AppId { get; set; }
+    /// <summary>
+    ///     Publish record identifier.
+    /// </summary>
+    public string Id { get; set; }
 
-        /// <summary>
-        /// 发布时间
-        /// </summary>
-        public DateTime? PublishTime { get; set; }
+    /// <summary>
+    ///     Application ID.
+    /// </summary>
+    public string AppId { get; set; }
 
-        /// <summary>
-        /// 发布者
-        /// </summary>
-        public string PublishUserId { get; set; }
+    /// <summary>
+    ///     Publish time.
+    /// </summary>
+    public DateTime? PublishTime { get; set; }
 
-        /// <summary>
-        /// 发布版本序号
-        /// </summary>
-        public int Version { get; set; }
+    /// <summary>
+    ///     Publisher.
+    /// </summary>
+    public string PublishUserId { get; set; }
 
-        /// <summary>
-        /// 发布日志
-        /// </summary>
-        public string Log { get; set; }
+    /// <summary>
+    ///     Publish version number.
+    /// </summary>
+    public int Version { get; set; }
 
-        /// <summary>
-        /// 环境
-        /// </summary>
-        public string Env { get; set; }
-    }
+    /// <summary>
+    ///     Publish log text.
+    /// </summary>
+    public string Log { get; set; }
+
+    /// <summary>
+    ///     Environment identifier.
+    /// </summary>
+    public string Env { get; set; }
 }

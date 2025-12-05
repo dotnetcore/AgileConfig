@@ -1,17 +1,16 @@
 ﻿using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.Data.Entity;
 
-namespace AgileConfig.Server.Event
-{
-    public class EditAppSuccessful : IEvent
-    {
-        public EditAppSuccessful(App app, string userName)
-        {
-            App = app;
-            UserName = userName;
-        }
+namespace AgileConfig.Server.Event;
 
-        public App App { get; }
-        public string UserName { get; }
+public class EditAppSuccessful : IEvent
+{
+    public EditAppSuccessful(App app, string userName)
+    {
+        App = app;
+        UserName = userName;
     }
+
+    public App App { get; }
+    public string UserName { get; }
 }

@@ -1,60 +1,58 @@
-﻿using AgileConfig.Server.Common;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using AgileConfig.Server.Data.Abstraction.DbProvider;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.Data.Freesql;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
-namespace AgileConfig.Server.ServiceTests.sqlite
+namespace AgileConfig.Server.ServiceTests.sqlite;
+
+public class BasicTestService
 {
-    public class BasicTestService
+    public BasicTestService()
     {
-        protected ServiceProvider GlobalServiceProvider { get; set; }
-        
-        public virtual Task<Dictionary<string, string>> GetConfigurationData()
-        {
-            return
-              null;
-        }
+        Console.WriteLine("BasicTestService ctor.");
+    }
 
-        public IFreeSql GetFreeSql()
-        {
-            var dict = this.GetConfigurationData().Result;
+    protected ServiceProvider GlobalServiceProvider { get; set; }
 
-            var config = new ConfigurationBuilder()
-                       .AddInMemoryCollection(dict)
-                       .Build();
+    public virtual Task<Dictionary<string, string>> GetConfigurationData()
+    {
+        return
+            null;
+    }
 
-            var myfreesql = new MyFreeSQL(new DbConfigInfoFactory(config));
-            var factory = new EnvFreeSqlFactory(myfreesql);
-            var fsq = factory.Create("");
+    public IFreeSql GetFreeSql()
+    {
+        var dict = GetConfigurationData().Result;
 
-            return fsq;
-        }
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(dict)
+            .Build();
 
-        public virtual void ClearData()
-        {
-            var fsq = GetFreeSql();
+        var myfreesql = new MyFreeSQL(new DbConfigInfoFactory(config));
+        var factory = new EnvFreeSqlFactory(myfreesql);
+        var fsq = factory.Create("");
 
-            fsq.Delete<ServerNode>().Where("1=1").ExecuteAffrows();
-            fsq.Delete<App>().Where("1=1").ExecuteAffrows();
-            fsq.Delete<AppInheritanced>().Where("1=1").ExecuteAffrows();
-            fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
-            fsq.Delete<PublishDetail>().Where("1=1").ExecuteAffrows();
-            fsq.Delete<PublishTimeline>().Where("1=1").ExecuteAffrows();
-            fsq.Delete<ConfigPublished>().Where("1=1").ExecuteAffrows();
-            //fsq.Delete<Setting>().Where("1=1").ExecuteAffrows();
-            fsq.Delete<SysLog>().Where("1=1").ExecuteAffrows();
+        return fsq;
+    }
 
-            fsq.Dispose();
-        }
+    public virtual void ClearData()
+    {
+        var fsq = GetFreeSql();
 
-        public BasicTestService()
-        {
-            Console.WriteLine("BasicTestService ctor.");
-        }
+        fsq.Delete<ServerNode>().Where("1=1").ExecuteAffrows();
+        fsq.Delete<App>().Where("1=1").ExecuteAffrows();
+        fsq.Delete<AppInheritanced>().Where("1=1").ExecuteAffrows();
+        fsq.Delete<Config>().Where("1=1").ExecuteAffrows();
+        fsq.Delete<PublishDetail>().Where("1=1").ExecuteAffrows();
+        fsq.Delete<PublishTimeline>().Where("1=1").ExecuteAffrows();
+        fsq.Delete<ConfigPublished>().Where("1=1").ExecuteAffrows();
+        //fsq.Delete<Setting>().Where("1=1").ExecuteAffrows();
+        fsq.Delete<SysLog>().Where("1=1").ExecuteAffrows();
+
+        fsq.Dispose();
     }
 }

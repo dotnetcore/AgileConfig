@@ -2,19 +2,19 @@
 
   <PropertyGroup>
 	  <Nullable>enable</Nullable>
-	  <TargetFramework>net8.0</TargetFramework>
+	  <TargetFramework>net10.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FreeSql" Version="3.2.810" />
-    <PackageReference Include="FreeSql.DbContext" Version="3.2.810" />
-    <PackageReference Include="FreeSql.Provider.MySqlConnector" Version="3.2.810" />
-    <PackageReference Include="FreeSql.Provider.Oracle" Version="3.2.810" />
-    <PackageReference Include="FreeSql.Provider.PostgreSQL" Version="3.2.810" />
-    <PackageReference Include="FreeSql.Provider.Sqlite" Version="3.2.810" />
-    <PackageReference Include="FreeSql.Provider.SqlServer" Version="3.2.810" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.4" />
-    <PackageReference Include="Microsoft.Data.SqlClient.SNI.runtime" Version="5.1.1" />
+    <PackageReference Include="FreeSql" Version="3.5.303" />
+    <PackageReference Include="FreeSql.DbContext" Version="3.5.303" />
+    <PackageReference Include="FreeSql.Provider.MySqlConnector" Version="3.5.303" />
+    <PackageReference Include="FreeSql.Provider.Oracle" Version="3.5.303" />
+    <PackageReference Include="FreeSql.Provider.PostgreSQL" Version="3.5.303" />
+    <PackageReference Include="FreeSql.Provider.Sqlite" Version="3.5.303" />
+    <PackageReference Include="FreeSql.Provider.SqlServer" Version="3.5.303" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.0-preview2.25289.6" />
+    <PackageReference Include="Microsoft.Data.SqlClient.SNI.runtime" Version="6.0.2" />
   </ItemGroup>
 
   <ItemGroup>

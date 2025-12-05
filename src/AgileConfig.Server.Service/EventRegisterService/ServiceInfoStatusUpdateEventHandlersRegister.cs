@@ -1,9 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Agile.Config.Protocol;
+﻿using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.EventHandler;
 using AgileConfig.Server.IService;
 
@@ -11,10 +6,9 @@ namespace AgileConfig.Server.Service.EventRegisterService;
 
 public class ServiceInfoStatusUpdateEventHandlersRegister : IEventHandlerRegister
 {
+    private readonly ITinyEventBus _tinyEventBus;
 
-    private readonly Common.EventBus.ITinyEventBus _tinyEventBus;
-
-    public ServiceInfoStatusUpdateEventHandlersRegister(Common.EventBus.ITinyEventBus tinyEventBus)
+    public ServiceInfoStatusUpdateEventHandlersRegister(ITinyEventBus tinyEventBus)
     {
         _tinyEventBus = tinyEventBus;
     }
@@ -25,5 +19,4 @@ public class ServiceInfoStatusUpdateEventHandlersRegister : IEventHandlerRegiste
         _tinyEventBus.Register<ServiceUnRegisterHandler>();
         _tinyEventBus.Register<ServiceStatusUpdateHandler>();
     }
-
 }

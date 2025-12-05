@@ -1,12 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace AgileConfig.Server.IService
+namespace AgileConfig.Server.IService;
+
+/// <summary>
+///     Provides basic authentication based on administrator credentials.
+/// </summary>
+public interface IAdmBasicAuthService : IBasicAuthService
 {
-    /// <summary>
-    /// 基于管理员的认证
-    /// </summary>
-    public interface IAdmBasicAuthService : IBasicAuthService
-    {
-        (string,string) GetUserNamePassword(HttpRequest httpRequest);
-    }
+    (string, string) GetUserNamePassword(HttpRequest httpRequest);
 }

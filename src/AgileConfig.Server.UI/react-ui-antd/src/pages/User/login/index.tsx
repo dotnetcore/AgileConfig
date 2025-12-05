@@ -93,7 +93,9 @@ const Login: React.FC<LoginProps> = (props) => {
                 size: 'large',
                 prefix: <UserOutlined className={styles.prefixIcon} />,
               }}
-              placeholder='用户名'
+              placeholder={intl.formatMessage({
+                id: 'pages.login.username.placeholder',
+              })}
               rules={[
                 {
                   required: true,

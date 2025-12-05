@@ -12,15 +12,13 @@ using Newtonsoft.Json;
 namespace AgileConfig.Server.Apisite.Websocket.MessageHandlers;
 
 /// <summary>
-/// 消息处理器
+///     Message handler.
 /// </summary>
 internal class MessageHandler : IMessageHandler
 {
     private readonly IConfigService _configService;
     private readonly IRegisterCenterService _registerCenterService;
     private readonly IServiceInfoService _serviceInfoService;
-
-    private int ClientVersion { get; set; }
 
     public MessageHandler(
         IConfigService configService,
@@ -32,13 +30,12 @@ internal class MessageHandler : IMessageHandler
         _serviceInfoService = serviceInfoService;
     }
 
+    private int ClientVersion { get; set; }
+
     public bool Hit(HttpRequest request)
     {
         var ver = request.Headers["client-v"];
-        if (string.IsNullOrEmpty(ver))
-        {
-            return false;
-        }
+        if (string.IsNullOrEmpty(ver)) return false;
 
         if (int.TryParse(ver.ToString().Replace(".", ""), out var verInt))
         {
@@ -49,12 +46,7 @@ internal class MessageHandler : IMessageHandler
 
         return false;
     }
-    private async Task SendMessage(WebSocket webSocket, string message)
-    {
-        var data = Encoding.UTF8.GetBytes(message);
-        await webSocket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
-            CancellationToken.None);
-    }
+
     public async Task Handle(string message, HttpRequest request, WebsocketClient client)
     {
         message ??= "";
@@ -62,7 +54,7 @@ internal class MessageHandler : IMessageHandler
         // "ping" is old version
         if (message is "ping" or "c:ping")
         {
-            //如果是ping，回复本地数据的md5版本 
+            // Reply with the MD5 of the local data for legacy heartbeat messages.
             var appId = request.Headers["appid"];
             appId = HttpUtility.UrlDecode(appId);
             var env = request.Headers["env"].ToString();
@@ -70,7 +62,7 @@ internal class MessageHandler : IMessageHandler
 
             var data = await GetCPingData(appId, env);
 
-            await SendMessage(client.Client, JsonConvert.SerializeObject(new WebsocketAction()
+            await SendMessage(client.Client, JsonConvert.SerializeObject(new WebsocketAction
             {
                 Action = ActionConst.Ping,
                 Module = ActionModule.ConfigCenter,
@@ -79,13 +71,13 @@ internal class MessageHandler : IMessageHandler
         }
         else if (message.StartsWith("s:ping:"))
         {
-            //如果是注册中心client的心跳，则更新client的心跳时间
+            // Update the heartbeat timestamp for register-center clients.
             var id = message.Substring(7, message.Length - 7);
             var heartBeatResult = await _registerCenterService.ReceiveHeartbeatAsync(id);
             if (heartBeatResult)
             {
                 var version = await _serviceInfoService.ServicesMD5Cache();
-                await SendMessage(client.Client, JsonConvert.SerializeObject(new WebsocketAction()
+                await SendMessage(client.Client, JsonConvert.SerializeObject(new WebsocketAction
                 {
                     Action = ActionConst.Ping,
                     Module = ActionModule.RegisterCenter,
@@ -95,31 +87,36 @@ internal class MessageHandler : IMessageHandler
         }
         else if (message == "loaded")
         {
-            //如果是client加载数据成功
+            // The client reports that configuration data was loaded successfully.
             client.LastRefreshTime = DateTime.Now;
         }
         else
         {
-            //如果无法处理，回复0
+            // Reply with 0 when the message cannot be handled.
             await SendMessage(client.Client, "0");
         }
+    }
+
+    private async Task SendMessage(WebSocket webSocket, string message)
+    {
+        var data = Encoding.UTF8.GetBytes(message);
+        await webSocket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true,
+            CancellationToken.None);
     }
 
     private async Task<string> GetCPingData(string appId, string env)
     {
         if (ClientVersion <= 176)
         {
-            // 1.7.6及以前的版本，返回V:md5
+            // For versions 1.7.6 and earlier, respond with V:md5.
             var md5 = await _configService.AppPublishedConfigsMd5CacheWithInheritance(appId, env);
 
             return md5;
         }
-        else
-        {
-            // 1.7.7及以后的版本，返回 publish time line id
-            var publishTimeLineId = await _configService.GetLastPublishTimelineVirtualIdAsyncWithCache(appId, env);
 
-            return publishTimeLineId;
-        }
+        // For versions 1.7.7 and later, respond with the publish timeline id.
+        var publishTimeLineId = await _configService.GetLastPublishTimelineVirtualIdAsyncWithCache(appId, env);
+
+        return publishTimeLineId;
     }
 }

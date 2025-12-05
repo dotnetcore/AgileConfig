@@ -1,7 +1,6 @@
-﻿namespace AgileConfig.Server.OIDC.SettingProvider
+﻿namespace AgileConfig.Server.OIDC.SettingProvider;
+
+public interface IOidcSettingProvider
 {
-    public interface IOidcSettingProvider
-    {
-        OidcSetting GetSetting();
-    }
+    OidcSetting GetSetting();
 }

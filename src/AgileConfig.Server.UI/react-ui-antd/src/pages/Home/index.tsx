@@ -6,6 +6,7 @@ import { queryNodes, addNode } from './../Nodes/service'
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { NodeItem } from './../Nodes/data';
 import { message, Modal } from 'antd';
+import { hasFunction } from '@/utils/authority';
 import { getIntl, getLocale } from 'umi';
 import LatestVisitApps from './comps/latestVisitApps';
 const { confirm } = Modal;
@@ -71,31 +72,31 @@ const home: React.FC = () => {
   }
 
   useEffect(() => {
-    anyServerNode().then(data => {
-      if (!data) {
-        console.log('No nodes plz add one !');
-        const intl = getIntl(getLocale());
-        let confirmMsg = intl.formatMessage({id:'pages.home.empty_node_confirm'}) + `【${window.location.origin}】` + intl.formatMessage({id:'pages.home.to_node_list'});
-        confirm({
-          icon: <ExclamationCircleOutlined />,
-          content: confirmMsg,
-          onOk() {
-            const origin = window.location.origin;
-            console.log(` try add ${origin} to node list .`);
-            const node: NodeItem = {
-              address: origin,
-              remark: intl.formatMessage({
-                id: 'pages.home.consoleNode',
-              }),
-              status: 0
-            };
+    // Only prompt to add current domain as a node if user has NODE_ADD permission
+    if (!hasFunction('NODE_ADD')) {
+      return; // skip check & prompt entirely
+    }
+    anyServerNode().then(exists => {
+      if (exists) return;
+      const intl = getIntl(getLocale());
+      const confirmMsg =
+        intl.formatMessage({ id: 'pages.home.empty_node_confirm' }) +
+        `【${window.location.origin}】` +
+        intl.formatMessage({ id: 'pages.home.to_node_list' });
+      confirm({
+        icon: <ExclamationCircleOutlined />,
+        content: confirmMsg,
+        onOk() {
+          const origin = window.location.origin;
+          const node: NodeItem = {
+            address: origin,
+            remark: intl.formatMessage({ id: 'pages.home.consoleNode' }),
+            status: 0,
+          };
             handleAdd(node);
-          },
-          onCancel() {
-          },
-          okText: intl.formatMessage({id: 'pages.home.add_now'})
-        })
-      }
+        },
+        okText: intl.formatMessage({ id: 'pages.home.add_now' }),
+      });
     });
   }, []);
   useEffect(() => {
