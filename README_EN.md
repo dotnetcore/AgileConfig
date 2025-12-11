@@ -1,5 +1,5 @@
 <p align="center">
-    <img height="130" src="https://ftp.bmp.ovh/imgs/2021/04/5162f8595d9c6a99.png" style="height: 130px">
+    <img height="130" src="https://static.xbaby.xyz/blog/ac.png" style="height: 130px">
 </p>
     
 <h1 align="center">AgileConfig</h1>
