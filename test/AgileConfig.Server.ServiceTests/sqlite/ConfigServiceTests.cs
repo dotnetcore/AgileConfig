@@ -318,10 +318,9 @@ public class ConfigServiceTests : BasicTestService
         ClearData();
 
         var env = "DEV";
-        var id = Guid.NewGuid().ToString();
         var appid1 = Guid.NewGuid().ToString();
         var appid2 = Guid.NewGuid().ToString();
-
+        var id = Guid.NewGuid().ToString();
         var source = new Config
         {
             AppId = appid1,
@@ -366,18 +365,43 @@ public class ConfigServiceTests : BasicTestService
             OnlineStatus = OnlineStatus.Online,
             Env = env
         };
+        var id3 = Guid.NewGuid().ToString();
+        var source3 = new Config
+        {
+            AppId = appid1,
+            Id = id3,
+            Group = "",
+            Key = "k",
+            Value = "v",
+            Description = "d1",
+            CreateTime = DateTime.Now,
+            UpdateTime = DateTime.Now,
+            Status = ConfigStatus.Enabled,
+            OnlineStatus = OnlineStatus.Online,
+            Env = env
+        };
         var result = await _service.AddAsync(source, env);
         Assert.IsTrue(result);
         var result1 = await _service.AddAsync(source1, env);
         Assert.IsTrue(result1);
         var result2 = await _service.AddAsync(source2, env);
         Assert.IsTrue(result2);
+        var result3 = await _service.AddAsync(source3, env);
+        Assert.IsTrue(result3);
 
         var config = await _service.GetByAppIdKeyEnv(appid1, "g", "k", env);
         Assert.IsNotNull(config);
+        Assert.AreEqual("g", config.Group);
+        Assert.AreEqual("k", config.Key);
+        Assert.AreEqual("v", config.Value);
+        var config1 = await _service.GetByAppIdKeyEnv(appid1, "", "k", env);
+        Assert.IsNotNull(config1);
+        Assert.AreEqual("", config1.Group);
+        Assert.AreEqual("k", config1.Key);
+        Assert.AreEqual("v", config1.Value);
 
-        var config1 = await _service.GetByAppIdKeyEnv(appid2, "g", "k", env);
-        Assert.IsNull(config1);
+        var config2 = await _service.GetByAppIdKeyEnv(appid2, "g", "k", env);
+        Assert.IsNull(config2);
     }
 
     [TestMethod]
