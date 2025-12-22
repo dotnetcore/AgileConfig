@@ -151,12 +151,12 @@ public class ConfigService : IConfigService
         if (string.IsNullOrEmpty(group))
         {
             Expression<Func<Config, bool>> exp1 = c => c.Group == "" || c.Group == null;
-            exp.And(exp1);
+            exp = exp.And(exp1);
         }
         else
         {
             Expression<Func<Config, bool>> exp1 = c => c.Group == group;
-            exp.And(exp1);
+            exp = exp.And(exp1);
         }
 
         using var repository = _configRepositoryAccessor(env);
