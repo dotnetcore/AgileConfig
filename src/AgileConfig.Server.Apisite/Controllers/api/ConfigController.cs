@@ -1,17 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AgileConfig.Server.Apisite.Controllers.api.Models;
+﻿using AgileConfig.Server.Apisite.Controllers.api.Models;
 using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Apisite.Metrics;
 using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Apisite.Models.Mapping;
+using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -53,6 +54,14 @@ public class ConfigController : Controller
     public async Task<ActionResult<List<ApiConfigVM>>> GetAppConfig(string appId, [FromQuery] EnvString env)
     {
         ArgumentException.ThrowIfNullOrEmpty(appId);
+
+        var idInHeader = Encrypt.UnboxBasicAuth(HttpContext.Request).Item1;
+
+        if (appId != idInHeader)
+        {
+            await Response.WriteAsync("The AppId does not match the ID in Basic Authentication.");
+            return BadRequest();
+        }
 
         var app = await _appService.GetAsync(appId);
         if (!app.Enabled) return NotFound();
