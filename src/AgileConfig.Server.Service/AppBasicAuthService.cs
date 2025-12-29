@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AgileConfig.Server.Common;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Http;
 
@@ -23,41 +24,7 @@ public class AppBasicAuthService : IAppBasicAuthService
     /// <returns>Tuple of Application ID and secret extracted from the header.</returns>
     public (string, string) GetAppIdSecret(HttpRequest httpRequest)
     {
-        var authorization = httpRequest.Headers["Authorization"];
-        if (string.IsNullOrEmpty(authorization)) return ("", "");
-        var authStr = authorization.First();
-        // Remove the "Basic " prefix.
-        if (!authStr.StartsWith("Basic "))
-        {
-            return ("", "");
-            ;
-        }
-
-        authStr = authStr.Substring(6, authStr.Length - 6);
-        byte[] base64Decode = null;
-        try
-        {
-            base64Decode = Convert.FromBase64String(authStr);
-        }
-        catch
-        {
-            return ("", "");
-        }
-
-        var base64Str = Encoding.UTF8.GetString(base64Decode);
-
-        if (string.IsNullOrEmpty(base64Str)) return ("", "");
-
-        var appId = "";
-        var sec = "";
-
-
-        var baseAuthArr = base64Str.Split(':');
-
-        if (baseAuthArr.Length > 0) appId = baseAuthArr[0];
-        if (baseAuthArr.Length > 1) sec = baseAuthArr[1];
-
-        return (appId, sec);
+        return Encrypt.UnboxBasicAuth(httpRequest);
     }
 
     public async Task<bool> ValidAsync(HttpRequest httpRequest)
