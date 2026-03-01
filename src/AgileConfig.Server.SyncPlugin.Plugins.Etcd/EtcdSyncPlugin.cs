@@ -123,9 +123,9 @@ public class EtcdSyncPlugin : ISyncPlugin
 
         var rangeResponse = await _httpClient.PostAsJsonAsync("/v3/kv/range", rangeRequest);
         rangeResponse.EnsureSuccessStatusCode();
-        
+
         var rangeResult = await rangeResponse.Content.ReadFromJsonAsync<EtcdRangeResponse>();
-        
+
         if (rangeResult?.kvs != null && rangeResult.kvs.Count > 0)
         {
             // Delete each key
@@ -135,8 +135,8 @@ public class EtcdSyncPlugin : ISyncPlugin
                 {
                     key = kvp.key
                 };
-                
-                var deleteResponse = await _httpClient.PostAsJsonAsync("/v3/kv/delete-range", deleteRequest);
+
+                var deleteResponse = await _httpClient.PostAsJsonAsync("/v3/kv/deleterange", deleteRequest);
                 deleteResponse.EnsureSuccessStatusCode();
             }
         }

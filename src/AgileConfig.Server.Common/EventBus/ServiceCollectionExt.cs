@@ -6,9 +6,7 @@ public static class ServiceCollectionExt
 {
     public static IServiceCollection AddTinyEventBus(this IServiceCollection sc)
     {
-        sc.AddSingleton<ITinyEventBus, TinyEventBus>(sp =>
-            new TinyEventBus(sc));
-
+        sc.AddSingleton<ITinyEventBus, TinyEventBus>();
         return sc;
     }
 }

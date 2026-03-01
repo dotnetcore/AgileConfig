@@ -167,7 +167,16 @@ public class SyncEngine : IDisposable
         if (!_pluginConfigs.TryGetValue(pluginName, out var config))
             return false;
 
-        return config.Enabled?.ToLower() == "true";
+        var raw = config.Enabled?.Trim();
+        if (string.IsNullOrEmpty(raw))
+            return false;
+
+        if (bool.TryParse(raw, out var parsed))
+            return parsed;
+
+        return raw.Equals("1", StringComparison.OrdinalIgnoreCase)
+               || raw.Equals("yes", StringComparison.OrdinalIgnoreCase)
+               || raw.Equals("on", StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task<SyncPluginResult> SafeExecuteAsync(Func<Task<SyncPluginResult>> action)
