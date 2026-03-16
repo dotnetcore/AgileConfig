@@ -54,6 +54,9 @@ public class ConfigSyncEventHandler : IEventHandler<PublishConfigSuccessful>
                 return;
             }
 
+            // Clear existing failed records for this app+env before new sync
+            _retryService.ClearFailedRecord(timeline.AppId, timeline.Env);
+            
             // Convert to sync contexts
             var contexts = configs.Select(c => new SyncContext
             {

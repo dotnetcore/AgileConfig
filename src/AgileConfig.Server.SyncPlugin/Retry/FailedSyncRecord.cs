@@ -41,4 +41,14 @@ public class FailedSyncRecord
     /// Last error message
     /// </summary>
     public string? LastError { get; set; }
+
+    /// <summary>
+    /// Next retry time
+    /// </summary>
+    public DateTimeOffset? NextRetryTime { get; set; }
+
+    /// <summary>
+    /// Whether the record is in circuit breaker state
+    /// </summary>
+    public bool IsCircuitBroken { get; set; }
 }

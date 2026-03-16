@@ -20,7 +20,9 @@ public class SyncRetryService
 
     // Configuration
     private const int MaxRetryCount = 10;
-    private const int RetryIntervalSeconds = 30;
+    private const int CircuitBreakDurationMinutes = 60;
+    private const int MinRetryDelaySeconds = 1;
+    private const int MaxRetryDelaySeconds = 60;
 
     public SyncRetryService(
         SyncEngine syncEngine,
@@ -47,20 +49,38 @@ public class SyncRetryService
                 existing.RetryCount++;
                 existing.LastRetryTime = DateTimeOffset.UtcNow;
                 existing.LastError = errorMessage;
-                _logger.LogWarning("Sync failed for app {AppId} env {Env}, retry count: {Count}", 
-                    appId, env, existing.RetryCount);
+
+                if (existing.RetryCount >= MaxRetryCount)
+                {
+                    // Circuit break: stop retrying for CircuitBreakDurationMinutes
+                    existing.IsCircuitBroken = true;
+                    existing.NextRetryTime = DateTimeOffset.UtcNow.AddMinutes(CircuitBreakDurationMinutes);
+                    _logger.LogError("Sync failed for app {AppId} env {Env} for {Count} times, circuit breaker activated, next retry after {NextRetry}", 
+                        appId, env, existing.RetryCount, existing.NextRetryTime);
+                }
+                else
+                {
+                    // Exponential backoff: 2^retryCount seconds, capped at MaxRetryDelaySeconds
+                    var delaySeconds = Math.Min(MaxRetryDelaySeconds, Math.Pow(2, existing.RetryCount));
+                    existing.NextRetryTime = DateTimeOffset.UtcNow.AddSeconds(delaySeconds);
+                    _logger.LogWarning("Sync failed for app {AppId} env {Env}, retry count: {Count}, next retry after {NextRetry} ({Delay}s)", 
+                        appId, env, existing.RetryCount, existing.NextRetryTime, delaySeconds);
+                }
             }
             else
             {
-                _failedRecords.Add(new FailedSyncRecord
+                var newRecord = new FailedSyncRecord
                 {
                     AppId = appId,
                     Env = env,
                     FailedTime = DateTimeOffset.UtcNow,
                     RetryCount = 1,
-                    LastError = errorMessage
-                });
-                _logger.LogWarning("Recorded failed sync for app {AppId} env {Env}", appId, env);
+                    LastError = errorMessage,
+                    NextRetryTime = DateTimeOffset.UtcNow.AddSeconds(MinRetryDelaySeconds)
+                };
+                _failedRecords.Add(newRecord);
+                _logger.LogWarning("Recorded failed sync for app {AppId} env {Env}, first retry after {NextRetry} ({Delay}s)", 
+                    appId, env, newRecord.NextRetryTime, MinRetryDelaySeconds);
             }
         }
     }
@@ -75,10 +95,19 @@ public class SyncRetryService
         
         lock (_lock)
         {
+            var now = DateTimeOffset.UtcNow;
             // Get records that are ready to retry
             recordsToProcess = _failedRecords
-                .Where(x => x.RetryCount < MaxRetryCount)
+                .Where(x => x.NextRetryTime <= now)
                 .ToList();
+            
+            // Reset circuit breaker for records where next retry time has passed
+            foreach (var record in recordsToProcess.Where(x => x.IsCircuitBroken))
+            {
+                record.IsCircuitBroken = false;
+                record.RetryCount = 0; // Reset retry count after circuit break
+                _logger.LogInformation("Circuit breaker reset for app {AppId} env {Env}, resuming retries", record.AppId, record.Env);
+            }
         }
 
         if (!recordsToProcess.Any())
@@ -190,6 +219,21 @@ public class SyncRetryService
         lock (_lock)
         {
             _failedRecords.Clear();
+        }
+    }
+
+    /// <summary>
+    /// Clear failed records for specific appId and env
+    /// </summary>
+    public void ClearFailedRecord(string appId, string env)
+    {
+        lock (_lock)
+        {
+            var removed = _failedRecords.RemoveAll(x => x.AppId == appId && x.Env == env);
+            if (removed > 0)
+            {
+                _logger.LogDebug("Cleared {Count} failed records for app {AppId} env {Env}", removed, appId, env);
+            }
         }
     }
 }

@@ -15,6 +15,9 @@ public class EtcdSyncPlugin : ISyncPlugin
     private SyncPluginConfig? _config;
     private HttpClient? _httpClient;
     private string _keyPrefix = "/agileconfig";
+    private bool _allowOverwriteOtherData = false;
+    private int _maxTxnOperations = 500;
+    private string _syncStrategy = "FullReplace";
 
     public string Name => "etcd";
     public string DisplayName => "Etcd";
@@ -32,9 +35,21 @@ public class EtcdSyncPlugin : ISyncPlugin
             _config = config;
 
             var endpoints = config.Settings.GetValueOrDefault("endpoints", "http://localhost:2379");
-            _keyPrefix = config.Settings.GetValueOrDefault("keyPrefix", "/agileconfig");
+            _keyPrefix = config.Settings.GetValueOrDefault("keyPrefix", "/agileconfig").TrimEnd('/');
+            _allowOverwriteOtherData = bool.TryParse(config.Settings.GetValueOrDefault("allowOverwriteOtherData", "false"), out var a) && a;
+            _maxTxnOperations = int.TryParse(config.Settings.GetValueOrDefault("maxTxnOperations", "500"), out var m) && m > 0 ? m : 500;
+            _syncStrategy = config.Settings.GetValueOrDefault("syncStrategy", "FullReplace");
 
-            _logger.LogInformation("Initializing Etcd plugin with endpoints: {Endpoints}", endpoints);
+            // Validate key prefix
+            if (_keyPrefix == "/" || _keyPrefix.Length < 5 || !_keyPrefix.StartsWith('/'))
+            {
+                var error = $"Invalid key prefix '{_keyPrefix}'. Prefix must start with '/' and be at least 5 characters long, cannot be root path '/'.";
+                _logger.LogError(error);
+                return Task.FromResult(new SyncPluginResult { Success = false, Message = error });
+            }
+
+            _logger.LogInformation("Initializing Etcd plugin with endpoints: {Endpoints}, keyPrefix: {KeyPrefix}, allowOverwriteOtherData: {AllowOverwrite}, maxTxnOperations: {MaxTxn}, syncStrategy: {SyncStrategy}", 
+                endpoints, _keyPrefix, _allowOverwriteOtherData, _maxTxnOperations, _syncStrategy);
 
             _httpClient = new HttpClient
             {
@@ -51,7 +66,7 @@ public class EtcdSyncPlugin : ISyncPlugin
     }
 
     /// <summary>
-    /// Full sync: delete all + insert all
+    /// Full sync: use etcd transaction to atomically replace all configs
     /// </summary>
     public async Task<SyncPluginResult> SyncAllAsync(SyncContext[] contexts)
     {
@@ -67,54 +82,198 @@ public class EtcdSyncPlugin : ISyncPlugin
             var env = contexts[0].Env;
             var prefix = $"{_keyPrefix}/{appId}/{env}/";
 
-            // Step 1: Delete all existing keys with prefix
-            await DeleteRangeAsync(prefix);
-            _logger.LogInformation("Deleted all keys with prefix {Prefix}", prefix);
-
-            // Step 2: Insert all new configs
-            foreach (var context in contexts)
+            List<string>? existingKeys = null;
+            // Safety check: verify existing keys are valid AgileConfig keys if overwrite is not allowed
+            if (!_allowOverwriteOtherData)
             {
-                var key = BuildKey(context);
-                await PutAsync(key, context.Value);
+                existingKeys = await GetRangeKeysAsync(prefix);
+                foreach (var base64Key in existingKeys)
+                {
+                    var key = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(base64Key));
+                    // Valid key format: {prefix}/{appId}/{env}/{group}/{key}
+                    var relativePath = key.Substring(prefix.Length);
+                    if (string.IsNullOrEmpty(relativePath) || !relativePath.Contains('/') || relativePath.StartsWith('/') || relativePath.EndsWith('/'))
+                    {
+                        var error = $"Found invalid key '{key}' under prefix '{prefix}' that does not match AgileConfig format. To overwrite anyway, set 'allowOverwriteOtherData' to true.";
+                        _logger.LogError(error);
+                        return new SyncPluginResult { Success = false, Message = error };
+                    }
+                }
             }
 
-            _logger.LogInformation("Synced {Count} configs to etcd for app {AppId} env {Env}", 
-                contexts.Length, appId, env);
+            List<object> operations;
+            int deletedCount = 0;
+            int addedCount = 0;
+            int updatedCount = 0;
+
+            if (_syncStrategy.Equals("Incremental", StringComparison.OrdinalIgnoreCase))
+            {
+                // Incremental sync: compare existing configs with new ones
+                var existingKvs = await GetRangeKvsAsync(prefix);
+                var existingDict = existingKvs.ToDictionary(
+                    kv => System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(kv.key)),
+                    kv => System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(kv.value))
+                );
+
+                var newDict = contexts.ToDictionary(
+                    c => BuildKey(c),
+                    c => c.Value
+                );
+
+                operations = new List<object>();
+
+                // Find keys to delete (exist in etcd but not in new configs)
+                foreach (var kv in existingDict)
+                {
+                    if (!newDict.ContainsKey(kv.Key))
+                    {
+                        operations.Add(new
+                        {
+                            request_delete_range = new
+                            {
+                                key = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(kv.Key))
+                            }
+                        });
+                        deletedCount++;
+                    }
+                }
+
+                // Find keys to add/update
+                foreach (var kv in newDict)
+                {
+                    if (!existingDict.TryGetValue(kv.Key, out var existingValue) || existingValue != kv.Value)
+                    {
+                        operations.Add(new
+                        {
+                            request_put = new
+                            {
+                                key = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(kv.Key)),
+                                value = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(kv.Value))
+                            }
+                        });
+                        if (!existingDict.ContainsKey(kv.Key))
+                            addedCount++;
+                        else
+                            updatedCount++;
+                    }
+                }
+
+                _logger.LogInformation("Incremental sync: {Deleted} to delete, {Added} to add, {Updated} to update", 
+                    deletedCount, addedCount, updatedCount);
+            }
+            else
+            {
+                // Full replace sync: delete all then insert all
+                operations = new List<object>
+                {
+                    // Add single delete_range operation to delete all existing keys with prefix
+                    new
+                    {
+                        request_delete_range = new
+                        {
+                            key = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(prefix)),
+                            range_end = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(GetRangeEnd(prefix)))
+                        }
+                    }
+                };
+                existingKeys ??= await GetRangeKeysAsync(prefix);
+                deletedCount = existingKeys.Count;
+
+                // Add put operations for all new configs
+                foreach (var context in contexts)
+                {
+                    var key = BuildKey(context);
+                    operations.Add(new
+                    {
+                        request_put = new
+                        {
+                            key = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(key)),
+                            value = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(context.Value))
+                        }
+                    });
+                    addedCount++;
+                }
+
+                _logger.LogInformation("Full replace sync: {Deleted} old keys to delete, {Added} new keys to add", 
+                    deletedCount, addedCount);
+            }
+
+            // Split operations into batches and execute
+            var batchSize = _maxTxnOperations;
+            var totalBatches = (int)Math.Ceiling((double)operations.Count / batchSize);
+            var processed = 0;
+
+            for (var i = 0; i < totalBatches; i++)
+            {
+                var batch = operations.Skip(i * batchSize).Take(batchSize).ToList();
+                try
+                {
+                    var batchTxn = new
+                    {
+                        success = batch
+                    };
+
+                    var batchResponse = await _httpClient.PostAsJsonAsync("/v3/kv/txn", batchTxn);
+                    batchResponse.EnsureSuccessStatusCode();
+                    processed += batch.Count;
+                    _logger.LogDebug("Processed batch {Current}/{Total}, {Processed} operations completed", i + 1, totalBatches, processed);
+                }
+                catch (HttpRequestException ex) when (ex.Message.Contains("request too large") && batchSize > 10)
+                {
+                    // Auto reduce batch size on request too large error
+                    batchSize = Math.Max(10, batchSize / 2);
+                    _logger.LogWarning("Request too large, reducing batch size to {BatchSize} and retrying batch", batchSize);
+                    i--; // Retry current batch
+                }
+            }
+
+            _logger.LogInformation("Successfully synced configs to etcd for app {AppId} env {Env}: {Deleted} deleted, {Added} added, {Updated} updated in {Batches} batches", 
+                appId, env, deletedCount, addedCount, updatedCount, totalBatches);
 
             return new SyncPluginResult 
             { 
                 Success = true, 
-                Message = $"Synced {contexts.Length} configs" 
+                Message = $"Synced: {deletedCount} deleted, {addedCount} added, {updatedCount} updated in {totalBatches} batches" 
             };
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to sync configs to etcd");
+            _logger.LogError(ex, "Failed to sync configs to etcd (transaction rolled back, no changes applied)");
             return new SyncPluginResult { Success = false, Message = ex.Message, Exception = ex };
         }
     }
 
     /// <summary>
-    /// Put a key-value pair
+    /// Get all keys with given prefix
     /// </summary>
-    private async Task PutAsync(string key, string value)
+    private async Task<List<string>> GetRangeKeysAsync(string prefix)
     {
-        var request = new
+        var keys = new List<string>();
+        var rangeRequest = new
         {
-            key = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(key)),
-            value = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(value))
+            key = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(prefix)),
+            range_end = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(GetRangeEnd(prefix))),
+            keys_only = true
         };
 
-        var response = await _httpClient.PostAsJsonAsync("/v3/kv/put", request);
-        response.EnsureSuccessStatusCode();
+        var rangeResponse = await _httpClient.PostAsJsonAsync("/v3/kv/range", rangeRequest);
+        rangeResponse.EnsureSuccessStatusCode();
+        
+        var rangeResult = await rangeResponse.Content.ReadFromJsonAsync<EtcdRangeResponse>();
+        
+        if (rangeResult?.kvs != null)
+        {
+            keys.AddRange(rangeResult.kvs.Select(kv => kv.key));
+        }
+
+        return keys;
     }
 
     /// <summary>
-    /// Delete all keys with given prefix
+    /// Get all key-value pairs with given prefix
     /// </summary>
-    private async Task DeleteRangeAsync(string prefix)
+    private async Task<List<EtcdKv>> GetRangeKvsAsync(string prefix)
     {
-        // Range request to get all keys with prefix
         var rangeRequest = new
         {
             key = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(prefix)),
@@ -125,21 +284,8 @@ public class EtcdSyncPlugin : ISyncPlugin
         rangeResponse.EnsureSuccessStatusCode();
 
         var rangeResult = await rangeResponse.Content.ReadFromJsonAsync<EtcdRangeResponse>();
-
-        if (rangeResult?.kvs != null && rangeResult.kvs.Count > 0)
-        {
-            // Delete each key
-            foreach (var kvp in rangeResult.kvs)
-            {
-                var deleteRequest = new
-                {
-                    key = kvp.key
-                };
-
-                var deleteResponse = await _httpClient.PostAsJsonAsync("/v3/kv/deleterange", deleteRequest);
-                deleteResponse.EnsureSuccessStatusCode();
-            }
-        }
+        
+        return rangeResult?.kvs ?? new List<EtcdKv>();
     }
 
     /// <summary>
