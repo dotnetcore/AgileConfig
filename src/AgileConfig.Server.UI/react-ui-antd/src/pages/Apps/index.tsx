@@ -1,4 +1,4 @@
-import { DownloadOutlined, ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { DownloadOutlined, ExclamationCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import {
   ModalForm,
   ProFormDependency,
@@ -23,6 +23,7 @@ import {
 import React, { Key, useState, useRef, useEffect } from 'react';
 import { getIntl, getLocale, Link, useIntl } from 'umi';
 import UpdateForm from './comps/updateForm';
+import AppImport from './comps/AppImport';
 import { AppListItem, AppListParams, AppListResult, UserAppAuth } from './data';
 import {
   addApp,
@@ -224,6 +225,7 @@ const appList: React.FC = (props) => {
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [updateModalVisible, setUpdateModalVisible] = useState<boolean>(false);
   const [userAuthModalVisible, setUserAuthModalVisible] = useState<boolean>(false);
+  const [importModalVisible, setImportModalVisible] = useState<boolean>(false);
   const [currentRow, setCurrentRow] = useState<AppListItem>();
   const [dataSource, setDataSource] = useState<AppListResult>();
   const [selectedRowKeysState, setSelectedRowKeys] = useState<Key[]>([]);
@@ -544,6 +546,17 @@ const appList: React.FC = (props) => {
                 导出
               </Button>
             </AuthorizedEle>,
+            <AuthorizedEle key="2" judgeKey={functionKeys.App_Add}>
+              <Button
+                key="import"
+                icon={<UploadOutlined />}
+                onClick={() => {
+                  setImportModalVisible(true);
+                }}
+              >
+                {intl.formatMessage({ id: 'pages.app.import.button' })}
+              </Button>
+            </AuthorizedEle>,
           ];
         }}
         //dataSource={dataSource}
@@ -726,6 +739,18 @@ const appList: React.FC = (props) => {
             }
           }}
         ></UserAuth>
+      )}
+      {importModalVisible && (
+        <AppImport
+          visible={importModalVisible}
+          onCancel={() => {
+            setImportModalVisible(false);
+          }}
+          onSuccess={() => {
+            setImportModalVisible(false);
+            actionRef.current?.reload();
+          }}
+        />
       )}
     </PageContainer>
   );
