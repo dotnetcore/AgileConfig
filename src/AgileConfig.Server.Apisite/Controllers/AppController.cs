@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Apisite.Models;
@@ -14,6 +15,7 @@ using AgileConfig.Server.Event;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace AgileConfig.Server.Apisite.Controllers;
 
@@ -22,14 +24,20 @@ namespace AgileConfig.Server.Apisite.Controllers;
 public class AppController : Controller
 {
     private readonly IAppService _appService;
+    private readonly IConfigService _configService;
+    private readonly ISettingService _settingService;
     private readonly ITinyEventBus _tinyEventBus;
     private readonly IUserService _userService;
 
     public AppController(IAppService appService,
         IUserService userService,
+        IConfigService configService,
+        ISettingService settingService,
         ITinyEventBus tinyEventBus)
     {
         _userService = userService;
+        _configService = configService;
+        _settingService = settingService;
         _tinyEventBus = tinyEventBus;
         _appService = appService;
     }
@@ -105,6 +113,26 @@ public class AppController : Controller
                 : inheritancedApps.Select(ia => ia.Name).ToList();
             if (appListVm.children != null) await AppendInheritancedInfo(appListVm.children);
         }
+    }
+
+    private async Task<bool> IsCurrentUserAdmin(string currentUserId)
+    {
+        if (string.IsNullOrWhiteSpace(currentUserId)) return false;
+
+        var roles = await _userService.GetUserRolesAsync(currentUserId);
+        return roles.Any(r => r.Id == SystemRoleConstants.AdminId || r.Id == SystemRoleConstants.SuperAdminId);
+    }
+
+    private async Task<App> GetAuthorizedAppAsync(string appId, string currentUserId, bool isAdmin)
+    {
+        var app = await _appService.GetAsync(appId);
+        if (app == null) return null;
+
+        if (isAdmin) return app;
+
+        var searchResult = await _appService.SearchAsync(appId, null, null, nameof(App.Id), "ascend", 1, 1,
+            currentUserId, false);
+        return searchResult.Apps.FirstOrDefault(x => x.Id == appId);
     }
 
     [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Add })]
@@ -271,6 +299,87 @@ public class AppController : Controller
             success = result,
             message = !result ? Messages.UpdateAppFailed : ""
         });
+    }
+
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Read })]
+    [HttpPost]
+    public async Task<IActionResult> Export([FromBody] AppExportRequest model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+
+        var appIds = model.AppIds?
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList() ?? new List<string>();
+        if (!appIds.Any()) throw new ArgumentException("appIds");
+
+        var currentUserId = await this.GetCurrentUserId(_userService);
+        var isAdmin = await IsCurrentUserAdmin(currentUserId);
+
+        var apps = new List<App>();
+        foreach (var appId in appIds)
+        {
+            var app = await GetAuthorizedAppAsync(appId, currentUserId, isAdmin);
+            if (app == null)
+            {
+                Response.StatusCode = 403;
+                return new ContentResult();
+            }
+
+            apps.Add(app);
+        }
+
+        var envs = (await _settingService.GetEnvironmentList())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(x => x, StringComparer.Ordinal)
+            .ToList();
+
+        var exportFile = new AppExportFileVM
+        {
+            ExportedAt = DateTime.UtcNow
+        };
+
+        foreach (var app in apps)
+        {
+            var inheritancedApps = await _appService.GetInheritancedAppsAsync(app.Id);
+            var exportItem = new AppExportItemVM
+            {
+                App = new AppExportAppVM
+                {
+                    Id = app.Id,
+                    Name = app.Name,
+                    Group = app.Group,
+                    Secret = app.Secret,
+                    Enabled = app.Enabled,
+                    Type = (int)app.Type,
+                    Inheritanced = app.Type == AppType.Inheritance,
+                    InheritancedApps = inheritancedApps.Select(x => x.Id).ToList()
+                }
+            };
+
+            foreach (var env in envs)
+            {
+                var configs = await _configService.GetByAppIdAsync(app.Id, env);
+                exportItem.Envs[env] = configs
+                    .OrderBy(x => x.Group ?? string.Empty, StringComparer.Ordinal)
+                    .ThenBy(x => x.Key ?? string.Empty, StringComparer.Ordinal)
+                    .Select(x => new AppExportConfigVM
+                    {
+                        Group = x.Group,
+                        Key = x.Key,
+                        Value = x.Value,
+                        Description = x.Description
+                    })
+                    .ToList();
+            }
+
+            exportFile.Apps.Add(exportItem);
+        }
+
+        var json = JsonConvert.SerializeObject(exportFile, Formatting.Indented);
+        var fileName = $"agileconfig-export-{DateTime.UtcNow:yyyyMMddHHmmss}.json";
+        return File(Encoding.UTF8.GetBytes(json), "application/json", fileName);
     }
 
     /// <summary>

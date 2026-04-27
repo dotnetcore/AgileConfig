@@ -1,4 +1,4 @@
-import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { DownloadOutlined, ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import {
   ModalForm,
   ProFormDependency,
@@ -20,7 +20,7 @@ import {
   Switch,
   Tag,
 } from 'antd';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { Key, useState, useRef, useEffect } from 'react';
 import { getIntl, getLocale, Link, useIntl } from 'umi';
 import UpdateForm from './comps/updateForm';
 import { AppListItem, AppListParams, AppListResult, UserAppAuth } from './data';
@@ -33,6 +33,7 @@ import {
   enableOrdisableApp,
   saveAppAuth,
   getAppGroups,
+  exportApps,
 } from './service';
 import UserAuth from './comps/userAuth';
 import AuthorizedEle from '@/components/Authorized/AuthorizedElement';
@@ -182,6 +183,38 @@ const handleUserAppAuth = async (model: UserAppAuth) => {
   }
 };
 
+const buildExportFileName = () => {
+  const date = new Date();
+  const pad = (value: number) => value.toString().padStart(2, '0');
+  return `agileconfig-export-${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(
+    date.getDate(),
+  )}${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}.json`;
+};
+
+const handleExportApps = async (apps: AppListItem[]) => {
+  const intl = getIntl(getLocale());
+  const hide = message.loading('导出中...');
+  try {
+    const file = await exportApps(apps.map((item) => item.id));
+    hide();
+    const fileURL = URL.createObjectURL(file);
+    const a = document.createElement('a');
+    a.href = fileURL;
+    a.target = '_blank';
+    a.download = buildExportFileName();
+    document.body.appendChild(a);
+    a.click();
+    URL.revokeObjectURL(a.href);
+    document.body.removeChild(a);
+    message.success('导出成功');
+    return true;
+  } catch (error) {
+    hide();
+    message.error(intl.formatMessage({ id: 'save_fail' }));
+    return false;
+  }
+};
+
 const appList: React.FC = (props) => {
   const actionRef = useRef<ActionType>();
   const addFormRef = useRef<FormInstance>();
@@ -193,6 +226,8 @@ const appList: React.FC = (props) => {
   const [userAuthModalVisible, setUserAuthModalVisible] = useState<boolean>(false);
   const [currentRow, setCurrentRow] = useState<AppListItem>();
   const [dataSource, setDataSource] = useState<AppListResult>();
+  const [selectedRowKeysState, setSelectedRowKeys] = useState<Key[]>([]);
+  const [selectedRowsState, setSelectedRows] = useState<AppListItem[]>([]);
   const [appGroups, setAppGroups] = useState<{ label: string; value: string }[]>([]);
   const [newAppGroupName, setNewAppGroupName] = useState<string>('');
   const [appGroupsEnums, setAppGroupsEnums] = useState<{}>({});
@@ -440,6 +475,13 @@ const appList: React.FC = (props) => {
       <ProTable
         actionRef={actionRef}
         options={false}
+        rowSelection={{
+          selectedRowKeys: selectedRowKeysState,
+          onChange: (selectedRowKeys, selectedRows) => {
+            setSelectedRowKeys(selectedRowKeys);
+            setSelectedRows(selectedRows as AppListItem[]);
+          },
+        }}
         search={{
           labelWidth: 'auto',
         }}
@@ -484,6 +526,22 @@ const appList: React.FC = (props) => {
                 {intl.formatMessage({
                   id: 'pages.app.table.cols.action.add',
                 })}
+              </Button>
+            </AuthorizedEle>,
+            <AuthorizedEle key="1" judgeKey={functionKeys.App_Read}>
+              <Button
+                key="export"
+                icon={<DownloadOutlined />}
+                disabled={selectedRowsState.length === 0}
+                onClick={async () => {
+                  const success = await handleExportApps(selectedRowsState);
+                  if (success) {
+                    setSelectedRowKeys([]);
+                    setSelectedRows([]);
+                  }
+                }}
+              >
+                导出
               </Button>
             </AuthorizedEle>,
           ];

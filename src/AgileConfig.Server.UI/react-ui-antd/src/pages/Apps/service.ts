@@ -70,3 +70,13 @@ export async function getAppGroups() {
     method: 'GET',
   });
 }
+
+export async function exportApps(appIds: string[]) {
+  return request('app/Export', {
+    method: 'POST',
+    data: {
+      appIds,
+    },
+    responseType: 'blob',
+  });
+}

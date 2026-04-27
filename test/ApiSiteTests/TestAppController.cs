@@ -26,9 +26,12 @@ public class TestAppController
         var logService = new Mock<ISysLogService>();
         var userService = new Mock<IUserService>();
         var permissionService = new Mock<IPermissionService>();
+        var configService = new Mock<IConfigService>();
+        var settingService = new Mock<ISettingService>();
         var eventBus = new Mock<ITinyEventBus>();
 
-        var ctl = new AppController(appService.Object, userService.Object, eventBus.Object);
+        var ctl = new AppController(appService.Object, userService.Object, configService.Object, settingService.Object,
+            eventBus.Object);
 
         ctl.ControllerContext.HttpContext = new DefaultHttpContext();
 
