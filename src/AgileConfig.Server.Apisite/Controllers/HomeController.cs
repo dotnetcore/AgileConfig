@@ -36,7 +36,7 @@ public class HomeController : Controller
         if (!Appsettings.IsAdminConsoleMode)
             return Content($"AgileConfig Node is running now , {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} .");
 
-        if (!_systemInitializationService.HasSa()) return Redirect(Request.PathBase + "/ui#/user/initpassword");
+        if (!_systemInitializationService.HasSa()) return Redirect(Request.PathBase + "/ui#/user/initPassword");
 
         return Redirect(Request.PathBase + "/ui");
     }

@@ -1,4 +1,4 @@
-import { useIntl } from "@/.umi/plugin-locale/localeExports";
+import { useIntl } from "umi";
 import {  ModalForm,  ProFormSelect,  ProFormText } from "@ant-design/pro-form";
 import React from 'react';
 import { UserItem } from "../data";
