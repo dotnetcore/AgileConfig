@@ -33,3 +33,38 @@ export type UserAppAuth = {
   appId: string,
   authorizedUsers?: string[]
 }
+
+export type AppImportPreviewItem = {
+  appId: string;
+  name: string;
+  group?: string;
+  enabled: boolean;
+  inheritanced: boolean;
+  inheritancedApps: string[];
+  envCount: number;
+  configCount: number;
+  order: number;
+}
+
+export type AppImportPreviewResult = {
+  apps: AppImportPreviewItem[];
+  errors: string[];
+}
+
+export type AppImportFile = {
+  schemaVersion: number;
+  exportedAt: string;
+  apps: {
+    app: {
+      id: string;
+      name: string;
+      group?: string;
+      secret?: string;
+      enabled: boolean;
+      type: number;
+      inheritanced: boolean;
+      inheritancedApps: string[];
+    };
+    envs: Record<string, { group?: string; key: string; value?: string; description?: string }[]>;
+  }[];
+}

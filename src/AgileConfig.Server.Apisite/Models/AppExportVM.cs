@@ -10,6 +10,12 @@ public class AppExportRequest
     public List<string> AppIds { get; set; }
 }
 
+public class AppImportRequest
+{
+    [JsonProperty("file")]
+    public AppExportFileVM File { get; set; }
+}
+
 public class AppExportFileVM
 {
     [JsonProperty("schemaVersion")]
@@ -71,4 +77,43 @@ public class AppExportConfigVM
 
     [JsonProperty("description")]
     public string Description { get; set; }
+}
+
+public class AppImportPreviewVM
+{
+    [JsonProperty("apps")]
+    public List<AppImportPreviewItemVM> Apps { get; set; } = new();
+
+    [JsonProperty("errors")]
+    public List<string> Errors { get; set; } = new();
+}
+
+public class AppImportPreviewItemVM
+{
+    [JsonProperty("appId")]
+    public string AppId { get; set; }
+
+    [JsonProperty("name")]
+    public string Name { get; set; }
+
+    [JsonProperty("group")]
+    public string Group { get; set; }
+
+    [JsonProperty("enabled")]
+    public bool Enabled { get; set; }
+
+    [JsonProperty("inheritanced")]
+    public bool Inheritanced { get; set; }
+
+    [JsonProperty("inheritancedApps")]
+    public List<string> InheritancedApps { get; set; } = new();
+
+    [JsonProperty("envCount")]
+    public int EnvCount { get; set; }
+
+    [JsonProperty("configCount")]
+    public int ConfigCount { get; set; }
+
+    [JsonProperty("order")]
+    public int Order { get; set; }
 }
