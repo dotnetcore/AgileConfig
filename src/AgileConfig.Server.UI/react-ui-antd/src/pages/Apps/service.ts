@@ -1,5 +1,5 @@
 import request from '@/utils/request';
-import { AppListItem, AppListParams, AppListResult, UserAppAuth } from './data';
+import { AppImportFile, AppImportPreviewResult, AppListItem, AppListParams, AppListResult, UserAppAuth } from './data';
 
 export async function queryApps(params:AppListParams) {
   return request<AppListResult>('app/search', {
@@ -78,5 +78,24 @@ export async function exportApps(appIds: string[]) {
       appIds,
     },
     responseType: 'blob',
+  });
+}
+
+export async function previewImportApps(file: File) {
+  const formData = new FormData();
+  formData.append('file', file);
+  return request<{ success: boolean; data: AppImportPreviewResult; message?: string }>('app/PreviewImport', {
+    method: 'POST',
+    data: formData,
+    requestType: 'form',
+  });
+}
+
+export async function importApps(file: AppImportFile) {
+  return request('app/Import', {
+    method: 'POST',
+    data: {
+      file,
+    },
   });
 }
