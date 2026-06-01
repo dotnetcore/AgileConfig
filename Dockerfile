@@ -9,8 +9,8 @@ EXPOSE 5000
 FROM node:16 AS ui-build
 WORKDIR /src/AgileConfig.Server.UI/react-ui-antd
 COPY ["src/AgileConfig.Server.UI/react-ui-antd/package.json", "src/AgileConfig.Server.UI/react-ui-antd/package-lock.json", "./"]
-RUN npm install
-COPY ["src/AgileConfig.Server.UI/react-ui-antd", "./"]
+RUN npm ci
+COPY ["src/AgileConfig.Server.UI/react-ui-antd/.", "./"]
 RUN npm run build
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
