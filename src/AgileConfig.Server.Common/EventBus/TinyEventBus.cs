@@ -11,14 +11,13 @@ namespace AgileConfig.Server.Common.EventBus;
 public class TinyEventBus : ITinyEventBus
 {
     private static readonly ConcurrentDictionary<Type, List<Type>> EventHandlerMap = new();
-    private readonly ILogger _logger;
-    private readonly IServiceCollection _serviceCollection;
-    private IServiceProvider _localServiceProvider;
+    private readonly ILogger<TinyEventBus> _logger;
+    private readonly IServiceProvider _serviceProvider;
 
-    public TinyEventBus(IServiceCollection serviceCollection)
+    public TinyEventBus(IServiceProvider serviceProvider, ILogger<TinyEventBus> logger)
     {
-        _serviceCollection = serviceCollection;
-        _logger = _serviceCollection.BuildServiceProvider().GetService<ILoggerFactory>().CreateLogger<TinyEventBus>();
+        _serviceProvider = serviceProvider;
+        _logger = logger;
     }
 
     public void Register<T>() where T : class, IEventHandler
@@ -30,7 +29,6 @@ public class TinyEventBus : ITinyEventBus
             handlerTypes.Add(handlerType);
         else
             EventHandlerMap.TryAdd(eventType, [handlerType]);
-        _serviceCollection.AddScoped<T>();
     }
 
     /// <summary>
@@ -40,24 +38,22 @@ public class TinyEventBus : ITinyEventBus
     /// <param name="evt">Event payload instance to dispatch to handlers.</param>
     public void Fire<TEvent>(TEvent evt) where TEvent : IEvent
     {
-        _localServiceProvider ??= _serviceCollection.BuildServiceProvider();
-
-        _logger.LogInformation($"Event fired: {typeof(TEvent).Name}");
+        _logger.LogInformation("Event fired: {EventType}", typeof(TEvent).Name);
 
         var eventType = typeof(TEvent);
         if (EventHandlerMap.TryGetValue(eventType, out var handlers))
         {
             if (handlers.Count == 0)
             {
-                _logger.LogInformation($"Event fired: {typeof(TEvent).Name}, but no handlers.");
+                _logger.LogInformation("Event fired: {EventType}, but no handlers.", typeof(TEvent).Name);
                 return;
             }
 
             foreach (var handlerType in handlers)
                 _ = Task.Run(async () =>
                 {
-                    using var sc = _localServiceProvider.CreateScope();
-                    var handler = sc.ServiceProvider.GetService(handlerType);
+                    using var scope = _serviceProvider.CreateScope();
+                    var handler = ActivatorUtilities.CreateInstance(scope.ServiceProvider, handlerType);
 
                     try
                     {
@@ -65,8 +61,7 @@ public class TinyEventBus : ITinyEventBus
                     }
                     catch (Exception ex)
                     {
-                        _logger
-                            .LogError(ex, "try run {handler} occur error.", handlerType);
+                        _logger.LogError(ex, "try run {handler} occur error.", handlerType);
                     }
                 });
         }

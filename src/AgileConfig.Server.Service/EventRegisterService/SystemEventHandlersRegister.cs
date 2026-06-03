@@ -1,4 +1,4 @@
-﻿using AgileConfig.Server.EventHandler;
+using AgileConfig.Server.EventHandler;
 using AgileConfig.Server.IService;
 using ITinyEventBus = AgileConfig.Server.Common.EventBus.ITinyEventBus;
 
@@ -30,5 +30,9 @@ public class SystemEventHandlersRegister(ITinyEventBus tinyEventBus) : IEventHan
         tinyEventBus.Register<AddUserEventHandler>();
         tinyEventBus.Register<EditUserEventHandler>();
         tinyEventBus.Register<DeleteUserEventHandler>();
+        
+        // SyncPlugin event handlers
+        tinyEventBus.Register<ConfigSyncEventHandler>();
+        // Note: ConfigDeleteSyncEventHandler removed - using "replace all" strategy, no need to handle deletes
     }
 }

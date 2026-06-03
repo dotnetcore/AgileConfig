@@ -20,6 +20,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\AgileConfig.Server.Apisite\AgileConfig.Server.Apisite.csproj" />
     <ProjectReference Include="..\..\src\AgileConfig.Server.Common\AgileConfig.Server.Common.csproj" />
+    <ProjectReference Include="..\..\src\AgileConfig.Server.EventHandler\AgileConfig.Server.EventHandler.csproj" />
+    <ProjectReference Include="..\..\src\AgileConfig.Server.SyncPlugin\AgileConfig.Server.SyncPlugin.csproj" />
+    <ProjectReference Include="..\..\src\AgileConfig.Server.SyncPlugin.Contracts\AgileConfig.Server.SyncPlugin.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

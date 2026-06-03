@@ -64,7 +64,18 @@ public static class StartupExtension
 
     public static IServiceCollection AddMeterService(this IServiceCollection services)
     {
-        if (!string.IsNullOrEmpty(Appsettings.OtlpMetricsEndpoint)) services.AddResourceMonitoring();
+        // Note: AddResourceMonitoring() requires cgroup support, skip on systems without it
+        // if (!string.IsNullOrEmpty(Appsettings.OtlpMetricsEndpoint))
+        // {
+        //     try
+        //     {
+        //         services.AddResourceMonitoring();
+        //     }
+        //     catch
+        //     {
+        //         // Ignore - may fail in environments without cgroup support
+        //     }
+        // }
 
         services.AddSingleton<IMeterService, MeterService>();
 
