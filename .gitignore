@@ -219,6 +219,9 @@ UpgradeLog*.htm
 *.bim.layout
 *.bim_*.settings
 
+# Local git worktrees
+.worktrees/
+
 # Microsoft Fakes
 FakesAssemblies/
 

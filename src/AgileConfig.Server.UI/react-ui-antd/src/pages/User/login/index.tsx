@@ -31,7 +31,7 @@ const Login: React.FC<LoginProps> = (props) => {
     sys().then(resp=> {
       console.log(resp);
       if (!resp.passwordInited) {
-        history.replace('/user/initpassword');
+        history.replace('/user/initPassword');
       }
       setSsoEnabled(resp.ssoEnabled);
       if(resp.ssoButtonText) {

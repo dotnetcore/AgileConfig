@@ -1,4 +1,4 @@
-import { useIntl } from "@/.umi/plugin-locale/localeExports";
+import { useIntl } from "umi";
 import { checkUserPermission } from "@/components/Authorized/AuthorizedElement";
 import functionKeys from "@/models/functionKeys";
 import { allUsers } from "@/pages/User/service";
