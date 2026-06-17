@@ -11,6 +11,7 @@ using AgileConfig.Server.Data.Freesql;
 using AgileConfig.Server.Data.Repository.Selector;
 using AgileConfig.Server.OIDC;
 using AgileConfig.Server.Service;
+using AgileConfig.Server.SyncPlugin;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -82,6 +83,8 @@ public class Startup
         services.AddOIDC();
 
         services.AddMeterService();
+
+        services.AddSyncPlugin();
 
         services.AddOpenTelemetry()
             .ConfigureResource(resource => resource.AddService(Program.AppName,

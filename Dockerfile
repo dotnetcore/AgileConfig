@@ -16,6 +16,10 @@ COPY ["src/AgileConfig.Server.IService/AgileConfig.Server.IService.csproj", "Agi
 COPY ["src/AgileConfig.Server.Data.Freesql/AgileConfig.Server.Data.Freesql.csproj", "AgileConfig.Server.Data.Freesql/"]
 COPY ["src/AgileConfig.Server.Common/AgileConfig.Server.Common.csproj", "AgileConfig.Server.Common/"]
 COPY ["src/AgileConfig.Server.OIDC/AgileConfig.Server.OIDC.csproj", "AgileConfig.Server.OIDC/"]
+# SyncPlugin projects (required for etcd sync)
+COPY ["src/AgileConfig.Server.SyncPlugin.Contracts/AgileConfig.Server.SyncPlugin.Contracts.csproj", "AgileConfig.Server.SyncPlugin.Contracts/"]
+COPY ["src/AgileConfig.Server.SyncPlugin/AgileConfig.Server.SyncPlugin.csproj", "AgileConfig.Server.SyncPlugin/"]
+COPY ["src/AgileConfig.Server.SyncPlugin.Plugins.Etcd/AgileConfig.Server.SyncPlugin.Plugins.Etcd.csproj", "AgileConfig.Server.SyncPlugin.Plugins.Etcd/"]
 
 RUN dotnet restore "AgileConfig.Server.Apisite/AgileConfig.Server.Apisite.csproj"
 COPY src/. .

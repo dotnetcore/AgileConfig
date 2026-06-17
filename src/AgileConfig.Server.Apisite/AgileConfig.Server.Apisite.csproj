@@ -60,6 +60,8 @@
 		<ProjectReference Include="..\AgileConfig.Server.Event\AgileConfig.Server.Event.csproj" />
 		<ProjectReference Include="..\AgileConfig.Server.OIDC\AgileConfig.Server.OIDC.csproj" />
 		<ProjectReference Include="..\AgileConfig.Server.Service\AgileConfig.Server.Service.csproj" />
+		<ProjectReference Include="..\AgileConfig.Server.SyncPlugin\AgileConfig.Server.SyncPlugin.csproj" />
+		<ProjectReference Include="..\AgileConfig.Server.SyncPlugin.Plugins.Etcd\AgileConfig.Server.SyncPlugin.Plugins.Etcd.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

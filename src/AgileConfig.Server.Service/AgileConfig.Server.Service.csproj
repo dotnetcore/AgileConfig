@@ -16,6 +16,7 @@
     <ProjectReference Include="..\AgileConfig.Server.EventHandler\AgileConfig.Server.EventHandler.csproj" />
     <ProjectReference Include="..\AgileConfig.Server.Event\AgileConfig.Server.Event.csproj" />
     <ProjectReference Include="..\AgileConfig.Server.IService\AgileConfig.Server.IService.csproj" />
+    <ProjectReference Include="..\AgileConfig.Server.SyncPlugin\AgileConfig.Server.SyncPlugin.csproj" />
   </ItemGroup>
 
 </Project>
