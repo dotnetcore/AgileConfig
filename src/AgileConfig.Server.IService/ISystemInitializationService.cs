@@ -14,5 +14,5 @@ public interface ISystemInitializationService
 
     bool TryInitDefaultEnvironment();
 
-    Task<bool> TryInitSuperAdminRole();
+    Task<bool> TryInitSystemRolesAndPermissions();
 }

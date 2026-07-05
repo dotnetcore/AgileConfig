@@ -14,9 +14,7 @@ public class SystemInitializationService(
     ISysInitRepository sysInitRepository,
     IConfiguration configuration,
     ILogger<SystemInitializationService> logger,
-    IRoleDefinitionRepository roleDefinitionRepository,
-    IFunctionRepository functionRepository,
-    IRoleFunctionRepository roleFunctionRepository) : ISystemInitializationService
+    IFunctionRepository functionRepository) : ISystemInitializationService
 {
     /// <summary>
     ///     Initialize the JWT secret if it is not configured via file or environment variables.
@@ -130,59 +128,25 @@ public class SystemInitializationService(
         return true;
     }
 
-    public async Task<bool> TryInitSuperAdminRole()
+    public async Task<bool> TryInitSystemRolesAndPermissions()
     {
         try
         {
-            // Check if SuperAdministrator role already exists
-            var superAdminRole = await roleDefinitionRepository.GetAsync(SystemRoleConstants.SuperAdminId);
-            if (superAdminRole != null)
-            {
-                logger.LogInformation("SuperAdministrator role already exists.");
-                return true;
-            }
-
-            // Create SuperAdministrator role
-            superAdminRole = new Role
-            {
-                Id = SystemRoleConstants.SuperAdminId,
-                Name = "SuperAdministrator",
-                Description = "System super administrator with all permissions",
-                IsSystem = true,
-                CreateTime = DateTime.Now
-            };
-
-            await roleDefinitionRepository.InsertAsync(superAdminRole);
-            logger.LogInformation("SuperAdministrator role created successfully.");
-
-            // Get all existing functions
+            // Ensure the built-in permission (function) catalog exists first, because the
+            // system role-function bindings are matched against these function codes.
             var allFunctions = await functionRepository.AllAsync();
+            if (allFunctions.Count == 0) await InitializeFunctions();
 
-            // If no functions exist yet, create them from the Functions class constants
-            if (allFunctions.Count == 0) allFunctions = await InitializeFunctions();
-
-// Bind all functions to SuperAdministrator role
-            var roleFunctions = new List<RoleFunction>();
-            foreach (var function in allFunctions)
-                roleFunctions.Add(new RoleFunction
-                {
-                    Id = Guid.NewGuid().ToString("N"),
-                    RoleId = SystemRoleConstants.SuperAdminId,
-                    FunctionId = function.Id,
-                    CreateTime = DateTime.Now
-                });
-
-            if (roleFunctions.Count > 0)
-            {
-                await roleFunctionRepository.InsertAsync(roleFunctions);
-                logger.LogInformation("Bound {count} functions to SuperAdministrator role.", roleFunctions.Count);
-            }
+            // Delegate system role creation and role-function binding to the single
+            // idempotent implementation in the repository layer. It only adds missing
+            // bindings and removes stale ones, so it is safe to run on every startup.
+            sysInitRepository.EnsureSystemRolePermissions();
 
             return true;
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Failed to initialize SuperAdministrator role.");
+            logger.LogError(e, "Failed to initialize system roles and permissions.");
             return false;
         }
     }

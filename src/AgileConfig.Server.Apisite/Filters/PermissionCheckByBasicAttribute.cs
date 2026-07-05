@@ -19,7 +19,6 @@ public class PermissionCheckByBasicAttribute : PermissionCheckAttribute
         IConfigService configService,
         IAdmBasicAuthService basicAuthService,
         IUserService userService,
-        string actionName,
         string functionKey) : base(permissionService, configService, functionKey)
     {
         _userService = userService;
