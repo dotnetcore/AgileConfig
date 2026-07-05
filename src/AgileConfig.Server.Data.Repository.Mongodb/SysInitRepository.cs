@@ -48,8 +48,6 @@ public class SysInitRepository : ISysInitRepository
         var newSalt = Guid.NewGuid().ToString("N");
         password = Encrypt.Md5(password + newSalt);
 
-        EnsureSystemRoles();
-
         var user = new User();
         user.Id = SystemSettings.SuperAdminId;
         user.Password = password;
@@ -110,6 +108,11 @@ public class SysInitRepository : ISysInitRepository
             });
 
         return true;
+    }
+
+    public void EnsureSystemRolePermissions()
+    {
+        EnsureSystemRoles();
     }
 
     private void EnsureSystemRoles()

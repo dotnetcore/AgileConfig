@@ -45,8 +45,6 @@ public class SysInitRepository : ISysInitRepository
 
         var sql = freeSqlFactory.Create();
 
-        EnsureSystemRoles(sql);
-
         var user = new User();
         user.Id = SystemSettings.SuperAdminId;
         user.Password = password;
@@ -101,6 +99,12 @@ public class SysInitRepository : ISysInitRepository
             }).ExecuteAffrows();
 
         return true;
+    }
+
+    public void EnsureSystemRolePermissions()
+    {
+        var sql = freeSqlFactory.Create();
+        EnsureSystemRoles(sql);
     }
 
     private static void EnsureSystemRoles(IFreeSql sql)

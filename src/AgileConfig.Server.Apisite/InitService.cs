@@ -43,10 +43,10 @@ public class InitService : IHostedService
         if (Appsettings.IsAdminConsoleMode)
         {
             _systemInitializationService.TryInitJwtSecret(); // Initialize the JWT secret.
+            await _systemInitializationService
+                .TryInitSystemRolesAndPermissions(); // Initialize system roles, functions and permission bindings.
             _systemInitializationService.TryInitSaPassword(); // init super admin password
             _systemInitializationService.TryInitDefaultApp();
-            await _systemInitializationService
-                .TryInitSuperAdminRole(); // Initialize SuperAdministrator role and functions
             _ = _remoteServerNodeProxy.TestEchoAsync(); // Start node connectivity checks.
             _ = _serviceHealthCheckService.StartCheckAsync(); // Start service health monitoring.
             _eventRegister.Register(); // Register event bus callbacks.

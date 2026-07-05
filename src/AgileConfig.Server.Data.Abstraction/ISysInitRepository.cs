@@ -32,4 +32,10 @@ public interface ISysInitRepository
     bool HasSa();
 
     bool InitDefaultApp(string appName);
+
+    /// <summary>
+    ///     Ensure the built-in system roles and their function permission bindings exist and stay in sync.
+    ///     Idempotent: safe to call on every startup without creating duplicate bindings.
+    /// </summary>
+    void EnsureSystemRolePermissions();
 }
