@@ -145,7 +145,9 @@ public static class ConfigExtension
             Value = config.Value,
             Status = config.Status,
             OnlineStatus = config.OnlineStatus,
-            EditStatus = config.EditStatus
+            EditStatus = config.EditStatus,
+            Description = config.Description,
+            Sensitive = config.Sensitive
         };
 
         return vm;

@@ -29,6 +29,9 @@ public class PublishDetail : IEntity<string>
     [Column(Name = "description", StringLength = 200)]
     public string Description { get; set; }
 
+    [Column(Name = "sensitive")]
+    public bool Sensitive { get; set; }
+
     [Column(Name = "edit_status")] public EditStatus EditStatus { get; set; }
 
     [Column(Name = "env", StringLength = 50)]

@@ -27,6 +27,8 @@ public class ConfigVM : IAppIdModel
     [MaxLength(200, ErrorMessage = "描述长度不能超过200位")]
     public string Description { get; set; }
 
+    public bool Sensitive { get; set; }
+
     public OnlineStatus OnlineStatus { get; set; }
     public ConfigStatus Status { get; set; }
 

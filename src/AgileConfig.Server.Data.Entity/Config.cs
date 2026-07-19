@@ -57,6 +57,9 @@ public class Config : IEntity<string>
     [Column(Name = "description", StringLength = 200)]
     public string Description { get; set; }
 
+    [Column(Name = "sensitive")]
+    public bool Sensitive { get; set; }
+
     [Column(Name = "create_time")]
     [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
     public DateTime CreateTime { get; set; }

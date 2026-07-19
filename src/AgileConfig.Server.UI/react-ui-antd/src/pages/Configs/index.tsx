@@ -1,5 +1,5 @@
 import {  DeleteOutlined, DownOutlined, PlusOutlined, RollbackOutlined, VerticalAlignTopOutlined } from '@ant-design/icons';
-import { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
+import { ModalForm, ProFormText, ProFormTextArea, ProFormSwitch } from '@ant-design/pro-form';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns, TableDropdown } from '@ant-design/pro-table';
 import { Badge, Button, Drawer, Dropdown, FormInstance, Input, List, Menu, message, Modal, Radio, Space, Tag } from 'antd';
@@ -330,6 +330,15 @@ const configs: React.FC = (props: any) => {
       dataIndex: 'description',
       hideInSearch: true,
       ellipsis: true,
+    },
+    {
+      title: intl.formatMessage({id:'pages.configs.table.cols.sensitive'}),
+      dataIndex: 'sensitive',
+      hideInSearch: true,
+      width: 70,
+      render: (_, record) => (
+        record.sensitive ? <span title={intl.formatMessage({id:'pages.configs.sensitive.locked'})}>🔒</span> : null
+      ),
     },
     {
       title: intl.formatMessage({id:'pages.configs.table.cols.create_time'}),
@@ -780,6 +789,12 @@ const configs: React.FC = (props: any) => {
           ]}
           label={intl.formatMessage({id:'pages.configs.table.cols.desc'})}
           name="description"
+        />
+        <ProFormSwitch
+          label={intl.formatMessage({id:'pages.configs.table.cols.sensitive'})}
+          name="sensitive"
+          checkedChildren={intl.formatMessage({id:'pages.configs.sensitive.on'})}
+          unCheckedChildren={intl.formatMessage({id:'pages.configs.sensitive.off'})}
         />
       </ModalForm>
       {

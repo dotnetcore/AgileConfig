@@ -25,18 +25,21 @@ public class ConfigController : Controller
     private readonly IConfigService _configService;
     private readonly ITinyEventBus _tinyEventBus;
     private readonly IUserService _userService;
+    private readonly IPermissionService _permissionService;
 
     public ConfigController(
         IConfigService configService,
         IAppService appService,
         IUserService userService,
-        ITinyEventBus tinyEventBus
+        ITinyEventBus tinyEventBus,
+        IPermissionService permissionService
     )
     {
         _configService = configService;
         _appService = appService;
         _userService = userService;
         _tinyEventBus = tinyEventBus;
+        _permissionService = permissionService;
     }
 
     [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.Config_Add })]
@@ -74,6 +77,7 @@ public class ConfigController : Controller
         config.OnlineStatus = OnlineStatus.WaitPublish;
         config.EditStatus = EditStatus.Add;
         config.Env = env.Value;
+        config.Sensitive = model.Sensitive;
 
         var result = await _configService.AddAsync(config, env.Value);
 
@@ -126,6 +130,7 @@ public class ConfigController : Controller
             config.OnlineStatus = OnlineStatus.WaitPublish;
             config.EditStatus = EditStatus.Add;
             config.Env = env.Value;
+            config.Sensitive = item.Sensitive;
 
             addConfigs.Add(config);
         }
@@ -172,7 +177,8 @@ public class ConfigController : Controller
         {
             Key = config.Key,
             Group = config.Group,
-            Value = config.Value
+            Value = config.Value,
+            Sensitive = config.Sensitive
         };
         if (config.Group != model.Group || config.Key != model.Key)
         {
@@ -192,6 +198,7 @@ public class ConfigController : Controller
         config.Group = model.Group;
         config.UpdateTime = DateTime.Now;
         config.Env = env.Value;
+        config.Sensitive = model.Sensitive;
 
         if (!IsOnlyUpdateDescription(config, oldConfig))
         {
@@ -229,12 +236,32 @@ public class ConfigController : Controller
                newConfig.Value == oldConfig.Value;
     }
 
+    /// <summary>
+    ///     Mask sensitive configuration values with "******" when the current user lacks
+    ///     the Config_ViewSensitive permission.
+    /// </summary>
+    private async Task MaskSensitiveConfigs(List<Config> configs)
+    {
+        var userId = await this.GetCurrentUserId(_userService);
+        if (string.IsNullOrEmpty(userId)) return;
+
+        var userPermissions = await _permissionService.GetUserPermission(userId);
+        if (userPermissions.Contains(Functions.Config_ViewSensitive)) return;
+
+        foreach (var config in configs)
+        {
+            if (config.Sensitive) config.Value = "******";
+        }
+    }
+
     [HttpGet]
     public async Task<IActionResult> All(string env)
     {
         ISettingService.IfEnvEmptySetDefault(ref env);
 
         var configs = await _configService.GetAllConfigsAsync(env);
+
+        await MaskSensitiveConfigs(configs);
 
         return Json(new
         {
@@ -286,6 +313,8 @@ public class ConfigController : Controller
         var page = configs.Skip((current - 1) * pageSize).Take(pageSize).ToList();
         var total = configs.Count();
 
+        await MaskSensitiveConfigs(page);
+
         return Json(new
         {
             current,
@@ -304,6 +333,9 @@ public class ConfigController : Controller
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException("id");
 
         var config = await _configService.GetAsync(id, env.Value);
+
+        if (config != null)
+            await MaskSensitiveConfigs(new List<Config> { config });
 
         return Json(new
         {
@@ -486,7 +518,10 @@ public class ConfigController : Controller
         var jsonFile = files.First();
         using (var stream = jsonFile.OpenReadStream())
         {
-            var dict = JsonConfigurationFileParser.Parse(stream);
+            // Try parsing as JSONC first; fall back to standard JSON if no comments found
+            var parseResult = JsonCConfigurationFileParser.Parse(stream);
+            var dict = parseResult.values;
+            var descriptions = parseResult.descriptions;
 
             var addConfigs = new List<Config>();
             foreach (var key in dict.Keys)
@@ -503,7 +538,7 @@ public class ConfigController : Controller
 
                 var config = new Config();
                 config.Key = newKey;
-                config.Description = "";
+                config.Description = descriptions.TryGetValue(key, out var desc) ? desc : "";
                 config.Value = dict[key];
                 config.Group = group;
                 config.Id = Guid.NewGuid().ToString();
@@ -530,6 +565,8 @@ public class ConfigController : Controller
         if (string.IsNullOrEmpty(appId)) throw new ArgumentNullException("appId");
 
         var configs = await _configService.GetByAppIdAsync(appId, env.Value);
+
+        await MaskSensitiveConfigs(configs);
 
         var dict = new Dictionary<string, string>();
         configs.ForEach(x =>
@@ -685,6 +722,9 @@ public class ConfigController : Controller
         var configs = await _configService.GetByAppIdAsync(appId, env.Value);
         // When displaying text format, exclude deleted configurations.
         configs = configs.Where(x => x.EditStatus != EditStatus.Deleted).ToList();
+
+        await MaskSensitiveConfigs(configs);
+
         var kvList = new List<KeyValuePair<string, string>>();
         foreach (var config in configs)
             kvList.Add(new KeyValuePair<string, string>(_configService.GenerateKey(config), config.Value));
@@ -711,14 +751,20 @@ public class ConfigController : Controller
         var configs = await _configService.GetByAppIdAsync(appId, env.Value);
         // When producing JSON, exclude deleted configurations.
         configs = configs.Where(x => x.EditStatus != EditStatus.Deleted).ToList();
-        var dict = new Dictionary<string, string>();
+
+        await MaskSensitiveConfigs(configs);
+
+        var values = new Dictionary<string, string>();
+        var descriptions = new Dictionary<string, string>();
         configs.ForEach(x =>
         {
             var key = _configService.GenerateKey(x);
-            dict.Add(key, x.Value);
+            values.Add(key, x.Value);
+            if (!string.IsNullOrWhiteSpace(x.Description))
+                descriptions.Add(key, x.Description);
         });
 
-        var json = DictionaryConvertToJson.ToJson(dict);
+        var json = DictionaryConvertToJsonC.ToJsonC(values, descriptions);
 
         return Json(new
         {
@@ -738,7 +784,7 @@ public class ConfigController : Controller
 
         if (string.IsNullOrEmpty(data.json)) throw new ArgumentNullException("data.json");
 
-        var result = await _configService.SaveJsonAsync(data.json, appId, env.Value, data.isPatch);
+        var result = await _configService.SaveJsonCAsync(data.json, appId, env.Value, data.isPatch);
 
         return Json(new
         {
