@@ -63,6 +63,7 @@ public class TestApiConfigController
         var userSErvice = new Mock<IUserService>();
         var eventBus = new Mock<ITinyEventBus>();
         var meterService = new Mock<IMeterService>();
+        var permissionService = new Mock<IPermissionService>();
 
         var httpContext = new DefaultHttpContext();
         httpContext.Request.Headers["Authorization"] = "Basic MDAxOjE=";
@@ -72,7 +73,7 @@ public class TestApiConfigController
             appService.Object,
             memoryCache,
             meterService.Object,
-            new ConfigController(configService.Object, appService.Object, userSErvice.Object, eventBus.Object)
+            new ConfigController(configService.Object, appService.Object, userSErvice.Object, eventBus.Object, permissionService.Object)
         );
         ctrl.ControllerContext = new ControllerContext
         {
@@ -105,6 +106,7 @@ public class TestApiConfigController
         var userSErvice = new Mock<IUserService>();
         var eventBus = new Mock<ITinyEventBus>();
         var meterService = new Mock<IMeterService>();
+        var permissionService = new Mock<IPermissionService>();
         var httpContext = new DefaultHttpContext();
         httpContext.Request.Headers["Authorization"] = "Basic MDAxOjE=";
 
@@ -113,7 +115,7 @@ public class TestApiConfigController
             appService.Object,
             memoryCache,
             meterService.Object,
-            new ConfigController(configService.Object, appService.Object, userSErvice.Object, eventBus.Object)
+            new ConfigController(configService.Object, appService.Object, userSErvice.Object, eventBus.Object, permissionService.Object)
         );
         ctrl.ControllerContext = new ControllerContext
         {

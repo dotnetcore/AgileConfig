@@ -185,6 +185,8 @@ export default {
   'pages.configs.sensitive.on': '是',
   'pages.configs.sensitive.off': '否',
   'pages.configs.sensitive.locked': '此配置为敏感配置，无权限用户无法查看值',
+  'pages.configs.sensitive.view': '查看敏感值',
+  'pages.configs.sensitive.hide': '隐藏敏感值',
   'pages.configs.table.cols.create_time': '创建时间',
   'pages.configs.table.cols.status': '状态',
   'pages.configs.table.cols.status.0': '待发布',

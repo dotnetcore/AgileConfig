@@ -188,6 +188,8 @@ export default {
   'pages.configs.sensitive.on': 'Yes',
   'pages.configs.sensitive.off': 'No',
   'pages.configs.sensitive.locked': 'Sensitive config, value is hidden from unauthorized users',
+  'pages.configs.sensitive.view': 'View sensitive value',
+  'pages.configs.sensitive.hide': 'Hide sensitive value',
   'pages.configs.table.cols.create_time': 'CreateTime',
   'pages.configs.table.cols.status': 'Status',
   'pages.configs.table.cols.status.0': 'WaitPublish',

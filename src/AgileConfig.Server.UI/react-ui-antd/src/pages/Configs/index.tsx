@@ -1,4 +1,4 @@
-import {  DeleteOutlined, DownOutlined, PlusOutlined, RollbackOutlined, VerticalAlignTopOutlined } from '@ant-design/icons';
+import {  DeleteOutlined, DownOutlined, EyeInvisibleOutlined, EyeOutlined, PlusOutlined, RollbackOutlined, VerticalAlignTopOutlined } from '@ant-design/icons';
 import { ModalForm, ProFormText, ProFormTextArea, ProFormSwitch } from '@ant-design/pro-form';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ActionType, ProColumns, TableDropdown } from '@ant-design/pro-table';
@@ -230,10 +230,14 @@ const configs: React.FC = (props: any) => {
   const envList = getEnvList();
   const [currentEnv, setCurrentEnv] = useState<string>(envList[0]);
   const [tableData, setTableData] = useState<ConfigListItem[]>([]);
+  const [revealedSensitiveKeys, setRevealedSensitiveKeys] = useState<Record<string, boolean>>({});
   const actionRef = useRef<ActionType>();
   const addFormRef = useRef<FormInstance>();
   let _publishLog:string = '';
   const intl = useIntl();
+  const toggleReveal = (id: string) => {
+    setRevealedSensitiveKeys(prev => ({ ...prev, [id]: !prev[id] }));
+  };
   useEffect(() => {
     getWaitPublishStatus(appId, currentEnv).then(x => {
       console.log('WaitPublishStatus ', x);
@@ -322,8 +326,34 @@ const configs: React.FC = (props: any) => {
       dataIndex: 'value',
       hideInSearch: true,
       ellipsis: true,
-      copyable: true,
-      tip: intl.formatMessage({id:'pages.configs.table.cols.v.tip'})
+      tip: intl.formatMessage({id:'pages.configs.table.cols.v.tip'}),
+      render: (_, record) => {
+        if (!record.sensitive) {
+          return <Text copyable>{record.value}</Text>;
+        }
+        const hasPermission = checkUserPermission(getFunctions(), functionKeys.Config_ViewSensitive, appId);
+        const isRevealed = revealedSensitiveKeys[record.id] === true;
+        if (hasPermission && isRevealed) {
+          return (
+            <Space size="small">
+              <Text copyable>{record.value}</Text>
+              <a onClick={() => toggleReveal(record.id)} title={intl.formatMessage({id:'pages.configs.sensitive.hide'})}>
+                <EyeInvisibleOutlined />
+              </a>
+            </Space>
+          );
+        }
+        return (
+          <Space size="small">
+            <Text type="secondary">******</Text>
+            {hasPermission && (
+              <a onClick={() => toggleReveal(record.id)} title={intl.formatMessage({id:'pages.configs.sensitive.view'})}>
+                <EyeOutlined />
+              </a>
+            )}
+          </Space>
+        );
+      },
     },
     {
       title: intl.formatMessage({id:'pages.configs.table.cols.desc'}),
@@ -464,6 +494,7 @@ const configs: React.FC = (props: any) => {
               (e)=>{
                 console.log(e.target.value);
                 setCurrentEnv(e.target.value);
+                setRevealedSensitiveKeys({});
                 actionRef.current?.reload(true);
               }}>
                 {
