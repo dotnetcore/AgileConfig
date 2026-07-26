@@ -9,30 +9,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-reactapp:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: src/AgileConfig.Server.UI/react-ui-antd
-    strategy:
-      matrix:
-        node-version: [16.x]
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-        
-    - run: npm install
-    - run: npm run build
-    - uses: actions/upload-artifact@v4
-      with:
-        name: agileconfig-ui
-        path: src/AgileConfig.Server.UI/react-ui-antd/dist/
+  # The React admin UI is built inside the Dockerfile (ui-build stage), so there
+  # is no separate build-reactapp job here.
   build-dotnet-push-to-hub:
-    needs: build-reactapp
     runs-on: ubuntu-latest
 
     steps:
@@ -48,10 +27,6 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --configuration Release --no-restore
-    - uses: actions/download-artifact@v4
-      with:
-        name: agileconfig-ui
-        path: src/AgileConfig.Server.Apisite/wwwroot/ui
     - name: Push to Docker Hub
       uses: docker/build-push-action@v1
       with:
