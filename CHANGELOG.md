@@ -1,5 +1,10 @@
 # Change log
 ------------------------------
+[1.12.2]
+* Build the React admin UI inside the Dockerfile so `docker build .` produces a working image (#240)
+* Fix the `/user/initPassword` redirect casing, which routed to a 404 (#240)
+* Remove the redundant UI build from the publish and test-cd workflows (#243)
+
 [1.11.2]
 * Fixbug #228
 

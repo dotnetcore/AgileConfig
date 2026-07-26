@@ -1,4 +1,5 @@
 using AgileConfig.Server.Common;
+using AgileConfig.Server.IService;
 using MongoDB.Driver;
 
 namespace AgileConfig.Server.Data.Repository.Mongodb;
@@ -20,6 +21,8 @@ public class SysInitRepository : ISysInitRepository
     private MongodbAccess<UserRole> _userRoleAccess => new(_connectionString);
     private MongodbAccess<Role> _roleAccess => new(_connectionString);
     private MongodbAccess<App> _appAccess => new(_connectionString);
+    private MongodbAccess<Function> _functionAccess => new(_connectionString);
+    private MongodbAccess<RoleFunction> _roleFunctionAccess => new(_connectionString);
 
     public string? GetDefaultEnvironmentFromDb()
     {
@@ -117,9 +120,48 @@ public class SysInitRepository : ISysInitRepository
 
     private void EnsureSystemRoles()
     {
+        // Super Admin gets all permissions
+        var superAdminPermissions = Functions.GetAllPermissions();
         EnsureRole(SystemRoleConstants.SuperAdminId, "Super Administrator");
+        EnsureRolePermissions(SystemRoleConstants.SuperAdminId, superAdminPermissions);
+
+        // Administrator gets all permissions (same as SuperAdmin)
+        var adminPermissions = GetAdminPermissions();
         EnsureRole(SystemRoleConstants.AdminId, "Administrator");
+        EnsureRolePermissions(SystemRoleConstants.AdminId, adminPermissions);
+
+        // Operator gets all App and Config related permissions
+        var operatorPermissions = GetOperatorPermissions();
         EnsureRole(SystemRoleConstants.OperatorId, "Operator");
+        EnsureRolePermissions(SystemRoleConstants.OperatorId, operatorPermissions);
+    }
+
+    private static List<string> GetAdminPermissions()
+    {
+        // Administrator has all permissions same as SuperAdmin
+        return Functions.GetAllPermissions();
+    }
+
+    private static List<string> GetOperatorPermissions()
+    {
+        // Operator has all App and Config related permissions
+        return new List<string>
+        {
+            // All Application permissions
+            Functions.App_Read,
+            Functions.App_Add,
+            Functions.App_Edit,
+            Functions.App_Delete,
+            Functions.App_Auth,
+
+            // All Configuration permissions
+            Functions.Config_Read,
+            Functions.Config_Add,
+            Functions.Config_Edit,
+            Functions.Config_Delete,
+            Functions.Config_Publish,
+            Functions.Config_Offline
+        };
     }
 
     private void EnsureRole(string id, string name)
@@ -144,5 +186,48 @@ public class SysInitRepository : ISysInitRepository
             role.UpdateTime = DateTime.Now;
             _roleAccess.Collection.ReplaceOne(x => x.Id == id, role, new ReplaceOptions { IsUpsert = true });
         }
+    }
+
+    private void EnsureRolePermissions(string roleId, List<string> functionCodes)
+    {
+        // Get all functions from database
+        var allFunctions = _functionAccess.MongoQueryable.ToList();
+
+        // Get existing role-function mappings
+        var existingRoleFunctions = _roleFunctionAccess.MongoQueryable.Where(x => x.RoleId == roleId).ToList();
+
+        // Find functions that need to be assigned to this role
+        var functionsToAssign = new List<RoleFunction>();
+        foreach (var functionCode in functionCodes)
+        {
+            var function = allFunctions.FirstOrDefault(f => f.Code == functionCode);
+            if (function != null)
+                // Check if this role-function mapping already exists
+                if (!existingRoleFunctions.Any(rf => rf.FunctionId == function.Id))
+                    functionsToAssign.Add(new RoleFunction
+                    {
+                        Id = Guid.NewGuid().ToString("N"),
+                        RoleId = roleId,
+                        FunctionId = function.Id,
+                        CreateTime = DateTime.Now
+                    });
+        }
+
+        // Insert new role-function mappings
+        if (functionsToAssign.Count > 0) _roleFunctionAccess.Collection.InsertMany(functionsToAssign);
+
+        // Remove role-function mappings that are no longer needed
+        var functionIdsToKeep = allFunctions
+            .Where(f => functionCodes.Contains(f.Code))
+            .Select(f => f.Id)
+            .ToList();
+
+        var roleFunctionsToRemove = existingRoleFunctions
+            .Where(rf => !functionIdsToKeep.Contains(rf.FunctionId))
+            .Select(rf => rf.Id)
+            .ToList();
+
+        if (roleFunctionsToRemove.Count > 0)
+            _roleFunctionAccess.Collection.DeleteMany(rf => roleFunctionsToRemove.Contains(rf.Id));
     }
 }

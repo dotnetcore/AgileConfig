@@ -111,17 +111,17 @@ public class SysInitRepository : ISysInitRepository
     {
         // Super Admin gets all permissions
         var superAdminPermissions = Functions.GetAllPermissions();
-        EnsureRole(sql, SystemRoleConstants.SuperAdminId, "Super Administrator", superAdminPermissions);
+        EnsureRole(sql, SystemRoleConstants.SuperAdminId, "Super Administrator");
         EnsureRolePermissions(sql, SystemRoleConstants.SuperAdminId, superAdminPermissions);
 
         // Administrator gets all permissions (same as SuperAdmin)
         var adminPermissions = GetAdminPermissions();
-        EnsureRole(sql, SystemRoleConstants.AdminId, "Administrator", adminPermissions);
+        EnsureRole(sql, SystemRoleConstants.AdminId, "Administrator");
         EnsureRolePermissions(sql, SystemRoleConstants.AdminId, adminPermissions);
 
         // Operator gets all App and Config related permissions
         var operatorPermissions = GetOperatorPermissions();
-        EnsureRole(sql, SystemRoleConstants.OperatorId, "Operator", operatorPermissions);
+        EnsureRole(sql, SystemRoleConstants.OperatorId, "Operator");
         EnsureRolePermissions(sql, SystemRoleConstants.OperatorId, operatorPermissions);
     }
 
@@ -154,7 +154,7 @@ public class SysInitRepository : ISysInitRepository
         };
     }
 
-    private static void EnsureRole(IFreeSql sql, string id, string name, List<string> functions)
+    private static void EnsureRole(IFreeSql sql, string id, string name)
     {
         var role = sql.Select<Role>().Where(x => x.Id == id).First();
 
