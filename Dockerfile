@@ -6,6 +6,13 @@ RUN sed -i 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1/g' /usr/lib/ssl/openssl.
 WORKDIR /app
 EXPOSE 5000
 
+FROM node:16 AS ui-build
+WORKDIR /src/AgileConfig.Server.UI/react-ui-antd
+COPY ["src/AgileConfig.Server.UI/react-ui-antd/package.json", "src/AgileConfig.Server.UI/react-ui-antd/package-lock.json", "./"]
+RUN npm ci
+COPY ["src/AgileConfig.Server.UI/react-ui-antd/.", "./"]
+RUN npm run build
+
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 COPY ["src/AgileConfig.Server.Apisite/AgileConfig.Server.Apisite.csproj", "AgileConfig.Server.Apisite/"]
@@ -19,6 +26,7 @@ COPY ["src/AgileConfig.Server.OIDC/AgileConfig.Server.OIDC.csproj", "AgileConfig
 
 RUN dotnet restore "AgileConfig.Server.Apisite/AgileConfig.Server.Apisite.csproj"
 COPY src/. .
+COPY --from=ui-build /src/AgileConfig.Server.UI/react-ui-antd/dist ./AgileConfig.Server.Apisite/wwwroot/ui
 WORKDIR "/src/AgileConfig.Server.Apisite"
 RUN dotnet build "AgileConfig.Server.Apisite.csproj" -c Release -o /app/build
 
