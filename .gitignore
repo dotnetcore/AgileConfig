@@ -271,3 +271,4 @@ __pycache__/
 /src/AgileConfig.Server.Apisite/wwwroot/ui/
 /src/AgileConfig.Server.Apisite/agile_config.db
 /coverage
+/AGENTS.md
