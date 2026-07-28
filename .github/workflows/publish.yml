@@ -12,8 +12,6 @@ env:
   PLATFORMS: linux/amd64,linux/arm64
 
 jobs:
-  # The React admin UI is built inside the Dockerfile (ui-build stage), so there
-  # is no separate build-reactapp job here.
   build-dotnet-push-to-hub:
     runs-on: ubuntu-latest
 
@@ -22,17 +20,19 @@ jobs:
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
+
     - name: Set up Docker Buildx
+      id: buildx
       uses: docker/setup-buildx-action@v3
       with:
         driver: docker-container
-        
+
     - name: Login to Docker Hub
       uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKER_HUB_NAME }}
         password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-        
+
     - name: Login to ACR
       uses: aliyun/acr-login@v1
       with:
@@ -40,11 +40,12 @@ jobs:
         username: "${{ secrets.ALI_REGISTRY_USERNAME }}"
         password: "${{ secrets.ALI_REGISTRY_PASSWORD }}"
 
-    # 一次构建，同时推送多架构 manifest 到两个 registry
     - name: Build and push multi-arch image
       uses: docker/build-push-action@v6
       with:
+        builder: ${{ steps.buildx.outputs.name }}
         context: .
         platforms: ${{ env.PLATFORMS }}
         push: true
-        tags: kklldog/agile_config:latest
+        tags: |
+          kklldog/agile_config:latest
