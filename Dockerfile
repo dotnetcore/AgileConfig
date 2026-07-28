@@ -47,7 +47,7 @@ WORKDIR "/src/AgileConfig.Server.Apisite"
 
 FROM build AS publish
 RUN dotnet publish "AgileConfig.Server.Apisite.csproj" -c Release -o /app/publish \
-        -r "$(cat /tmp/rid)" --self-contained false --no-restore
+        -r "$(cat /tmp/rid)" --self-contained false
 
 FROM base AS final
 WORKDIR /app
