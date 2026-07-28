@@ -47,8 +47,6 @@ jobs:
         context: .
         platforms: ${{ env.PLATFORMS }}
         push: true
-        tags: |
-          kklldog/agile_config:latest
-          registry.cn-shanghai.aliyuncs.com/kklldog/agile_config:latest
+        tags: kklldog/agile_config:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
