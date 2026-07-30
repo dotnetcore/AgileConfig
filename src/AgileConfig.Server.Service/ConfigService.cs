@@ -420,7 +420,8 @@ public class ConfigService : IConfigService
                     Value = x.Value,
                     PublishTimelineId = publishTimelineNode.Id,
                     Version = publishTimelineNode.Version,
-                    Env = env
+                    Env = env,
+                    Sensitive = x.Sensitive
                 });
 
                 if (x.EditStatus == EditStatus.Deleted)
@@ -719,7 +720,9 @@ public class ConfigService : IConfigService
                 else
                 {
                     // Update the target environment when values differ.
-                    if (envConfig.Value != currentEnvConfig.Value)
+                    if (envConfig.Value != currentEnvConfig.Value
+                        || envConfig.Description != currentEnvConfig.Description
+                        || envConfig.Sensitive != currentEnvConfig.Sensitive)
                     {
                         envConfig.UpdateTime = DateTime.Now;
                         envConfig.Value = currentEnvConfig.Value;
@@ -727,6 +730,7 @@ public class ConfigService : IConfigService
 
                         envConfig.OnlineStatus = OnlineStatus.WaitPublish;
                         envConfig.Description = currentEnvConfig.Description;
+                        envConfig.Sensitive = currentEnvConfig.Sensitive;
                         updateRanges.Add(envConfig);
                     }
                 }
@@ -773,6 +777,26 @@ public class ConfigService : IConfigService
         var dict = JsonConfigurationFileParser.Parse(stream);
 
         return await SaveFromDictAsync(dict, appId, env, isPatch);
+    }
+
+    /// <summary>
+    ///     Convert JSONC (JSON with Comments) configuration into standard config entries and persist them.
+    ///     Inline comments are extracted and stored as Description on each config item.
+    /// </summary>
+    /// <param name="jsonC">JSONC string with optional inline comments.</param>
+    /// <param name="appId">Application ID.</param>
+    /// <param name="env">Environment name.</param>
+    /// <param name="isPatch">Indicates whether to apply patch mode updates.</param>
+    /// <returns>True when the JSONC content is processed successfully.</returns>
+    public async Task<bool> SaveJsonCAsync(string jsonC, string appId, string env, bool isPatch)
+    {
+        if (string.IsNullOrEmpty(jsonC)) throw new ArgumentNullException(nameof(jsonC));
+
+        var parseResult = JsonCConfigurationFileParser.Parse(jsonC);
+        var values = parseResult.values;
+        var descriptions = parseResult.descriptions;
+
+        return await SaveFromDictAsync(values, appId, env, isPatch, descriptions);
     }
 
     public (bool, string) ValidateKvString(string kvStr)
@@ -925,7 +949,8 @@ public class ConfigService : IConfigService
         _memoryCache?.Remove(cacheKey);
     }
 
-    private async Task<bool> SaveFromDictAsync(IDictionary<string, string> dict, string appId, string env, bool isPatch)
+    private async Task<bool> SaveFromDictAsync(IDictionary<string, string> dict, string appId, string env, bool isPatch,
+        IDictionary<string, string> descriptions = null)
     {
         using var uow = _uowAccessor(env);
         using var configRepository = _configRepositoryAccessor(env);
@@ -961,7 +986,8 @@ public class ConfigService : IConfigService
                     CreateTime = now,
                     Status = ConfigStatus.Enabled,
                     EditStatus = EditStatus.Add,
-                    OnlineStatus = OnlineStatus.WaitPublish
+                    OnlineStatus = OnlineStatus.WaitPublish,
+                    Description = descriptions != null && descriptions.TryGetValue(key, out var desc) ? desc : ""
                 });
             }
             else if (config.Value != kv.Value)
@@ -990,7 +1016,21 @@ public class ConfigService : IConfigService
                         config.EditStatus = EditStatus.Edit;
                 }
 
+                // Update description if provided; otherwise keep existing
+                if (descriptions != null && descriptions.TryGetValue(key, out var desc))
+                    config.Description = desc;
+
                 updateConfigs.Add(config);
+            }
+            else
+            {
+                // Value unchanged, but description may have changed
+                if (descriptions != null && descriptions.TryGetValue(key, out var desc)
+                    && config.Description != desc)
+                {
+                    config.Description = desc;
+                    updateConfigs.Add(config);
+                }
             }
         }
 

@@ -216,6 +216,17 @@ public interface IConfigService : IDisposable
     Task<bool> SaveJsonAsync(string json, string appId, string env, bool isPatch);
 
     /// <summary>
+    ///     Convert JSONC (JSON with Comments) configuration into standard config entries and persist them.
+    ///     Inline comments are extracted and stored as Description on each config item.
+    /// </summary>
+    /// <param name="jsonC">JSONC string with optional inline comments.</param>
+    /// <param name="appId">Application ID.</param>
+    /// <param name="env">Environment name.</param>
+    /// <param name="isPatch">Indicates whether to apply patch mode updates.</param>
+    /// <returns></returns>
+    Task<bool> SaveJsonCAsync(string jsonC, string appId, string env, bool isPatch);
+
+    /// <summary>
     ///     Persist the key/value configuration list to the database.
     /// </summary>
     /// <param name="kvString">Serialized key/value pairs.</param>

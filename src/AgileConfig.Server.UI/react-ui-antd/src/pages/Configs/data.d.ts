@@ -10,6 +10,7 @@ export type ConfigListItem = {
     status: number
     updateTime: Date
     value: string
+    sensitive: boolean
 }
 
 export type ConfigModifyLog =  {

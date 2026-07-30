@@ -116,7 +116,7 @@ const JsonEditor: React.FC<JsonEditorProps> = (props) => {
     >
       <Editor
         height="500px"
-        defaultLanguage="json"
+        defaultLanguage="jsonc"
         defaultValue=""
         value={json}
         options={{ minimap: { enabled: false } }}

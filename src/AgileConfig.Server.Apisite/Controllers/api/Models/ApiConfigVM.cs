@@ -47,6 +47,11 @@ public class ApiConfigVM : IAppIdModel
     public string Description { get; set; }
 
     /// <summary>
+    ///     Whether this configuration item contains sensitive data.
+    /// </summary>
+    public bool Sensitive { get; set; }
+
+    /// <summary>
     ///     Application ID.
     /// </summary>
     public string AppId { get; set; }
@@ -74,7 +79,8 @@ public static class ApiConfigVMExtension
             Group = model.Group,
             Key = model.Key,
             Value = model.Value,
-            Description = model.Description
+            Description = model.Description,
+            Sensitive = model.Sensitive
         };
     }
 }

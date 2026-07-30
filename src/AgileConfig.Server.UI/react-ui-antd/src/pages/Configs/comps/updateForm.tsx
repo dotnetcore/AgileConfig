@@ -1,4 +1,4 @@
-import {  ModalForm, ProFormText, ProFormTextArea } from "@ant-design/pro-form";
+import {  ModalForm, ProFormText, ProFormTextArea, ProFormSwitch } from "@ant-design/pro-form";
 import React from 'react';
 import { useIntl } from "react-intl";
 import { ConfigListItem } from "../data";
@@ -100,7 +100,13 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
           label={intl.formatMessage({id:'pages.configs.table.cols.desc'})}
           name="description"
         />
-    
+        <ProFormSwitch
+          label={intl.formatMessage({id:'pages.configs.table.cols.sensitive'})}
+          name="sensitive"
+          checkedChildren={intl.formatMessage({id:'pages.configs.sensitive.on'})}
+          unCheckedChildren={intl.formatMessage({id:'pages.configs.sensitive.off'})}
+        />
+
     </ModalForm>
     );
 }

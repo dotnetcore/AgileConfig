@@ -16,6 +16,8 @@ public static class Functions
     public const string Config_Edit = "CONFIG_EDIT";
     public const string Config_Delete = "CONFIG_DELETE";
 
+    public const string Config_ViewSensitive = "CONFIG_VIEW_SENSITIVE";
+
     public const string Config_Publish = "CONFIG_PUBLISH";
     public const string Config_Offline = "CONFIG_OFFLINE";
 
@@ -62,6 +64,7 @@ public static class Functions
             Config_Delete,
             Config_Publish,
             Config_Offline,
+            Config_ViewSensitive,
 
             // Node permissions
             Node_Read,

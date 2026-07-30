@@ -13,6 +13,7 @@ export default {
     Config_Delete: 'CONFIG_DELETE',
     Config_Publish: 'CONFIG_PUBLISH',
     Config_Offline: 'CONFIG_OFFLINE',
+    Config_ViewSensitive: 'CONFIG_VIEW_SENSITIVE',
 
     // Node
     Node_Read: 'NODE_READ',
