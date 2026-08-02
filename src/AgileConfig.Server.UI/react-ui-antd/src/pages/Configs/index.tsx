@@ -187,7 +187,7 @@ const handleExportJson = async (appId: string, env:string) => {
     var a = document.createElement('a');
     a.href = fileURL;
     a.target = '_blank';
-    a.download = appId+'.json';
+    a.download = appId+'.jsonc';
     document.body.appendChild(a);
     a.click();
     URL.revokeObjectURL(a.href);

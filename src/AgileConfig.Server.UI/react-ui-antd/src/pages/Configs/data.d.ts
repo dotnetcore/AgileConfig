@@ -34,6 +34,7 @@ export type JsonImportItem =  {
   group: string,
   key: string,
   value: string,
+  description: string,
   id: string,
   appId: string
 }
