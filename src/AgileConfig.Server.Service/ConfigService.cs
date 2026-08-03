@@ -16,6 +16,11 @@ namespace AgileConfig.Server.Service;
 
 public class ConfigService : IConfigService
 {
+    /// <summary>
+    ///     Length of the description column of agc_config.
+    /// </summary>
+    public const int ConfigDescriptionMaxLength = 200;
+
     private static readonly SemaphoreSlim _lock = new(1, 1);
     private readonly IAppService _appService;
     private readonly Func<string, IConfigPublishedRepository> _configPublishedRepositoryAccessor;
@@ -770,9 +775,9 @@ public class ConfigService : IConfigService
 
         var byteArray = Encoding.UTF8.GetBytes(json);
         using var stream = new MemoryStream(byteArray);
-        var dict = JsonConfigurationFileParser.Parse(stream);
+        var result = JsonConfigurationFileParser.ParseWithComments(stream);
 
-        return await SaveFromDictAsync(dict, appId, env, isPatch);
+        return await SaveFromDictAsync(result.Data, appId, env, isPatch, result.Comments);
     }
 
     public (bool, string) ValidateKvString(string kvStr)
@@ -925,7 +930,8 @@ public class ConfigService : IConfigService
         _memoryCache?.Remove(cacheKey);
     }
 
-    private async Task<bool> SaveFromDictAsync(IDictionary<string, string> dict, string appId, string env, bool isPatch)
+    private async Task<bool> SaveFromDictAsync(IDictionary<string, string> dict, string appId, string env, bool isPatch,
+        IDictionary<string, string> comments = null)
     {
         using var uow = _uowAccessor(env);
         using var configRepository = _configRepositoryAccessor(env);
@@ -958,15 +964,21 @@ public class ConfigService : IConfigService
                     Key = gk.Item2,
                     Group = gk.Item1,
                     Value = value,
+                    Description = ReadComment(comments, key),
                     CreateTime = now,
                     Status = ConfigStatus.Enabled,
                     EditStatus = EditStatus.Add,
                     OnlineStatus = OnlineStatus.WaitPublish
                 });
             }
-            else if (config.Value != kv.Value)
+            else
             {
+                // When comments are absent the caller does not manage descriptions, so keep the current one.
+                var description = comments == null ? config.Description : ReadComment(comments, key);
+                if (config.Value == value && config.Description == description) continue;
+
                 config.Value = value;
+                config.Description = description;
                 config.UpdateTime = now;
                 if (config.OnlineStatus == OnlineStatus.Online)
                 {
@@ -975,16 +987,6 @@ public class ConfigService : IConfigService
                 }
                 else
                 {
-                    if (config.EditStatus == EditStatus.Add)
-                    {
-                        //do nothing
-                    }
-
-                    if (config.EditStatus == EditStatus.Edit)
-                    {
-                        //do nothing
-                    }
-
                     if (config.EditStatus == EditStatus.Deleted)
                         // Previously marked as deleted; revert to edited state.
                         config.EditStatus = EditStatus.Edit;
@@ -1020,8 +1022,20 @@ public class ConfigService : IConfigService
         return true;
     }
 
-    private (string, string) SplitJsonKey(string key)
+    /// <summary>
+    ///     Read the jsonc comment of a configuration item, trimmed to the length of the description column.
+    /// </summary>
+    private static string ReadComment(IDictionary<string, string> comments, string key)
     {
+        if (comments == null || !comments.TryGetValue(key, out var comment) || string.IsNullOrWhiteSpace(comment))
+            return "";
+
+        return comment.Length > ConfigDescriptionMaxLength
+            ? comment.Substring(0, ConfigDescriptionMaxLength)
+            : comment;
+    }
+
+    private (string, string) SplitJsonKey(string key)    {
         if (string.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key));
 
         var index = key.LastIndexOf(':');

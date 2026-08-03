@@ -74,6 +74,10 @@ const JsonImport : React.FC<JsonImportFormProps> = (props)=>{
           dataIndex: 'value',
         },
         {
+          title: intl.formatMessage({id:'pages.configs.table.cols.desc'}),
+          dataIndex: 'description',
+        },
+        {
           title: intl.formatMessage({id:'pages.configs.table.cols.action'}),
           key: 'action',
           render: (text:string, record:any) => (
@@ -133,7 +137,7 @@ const JsonImport : React.FC<JsonImportFormProps> = (props)=>{
           }
           >
             <div className={styles.action_bar}>
-              <Upload accept=".json" {...fileUploadProps}>
+              <Upload accept=".json,.jsonc" {...fileUploadProps}>
                 <Button type="primary" icon={<UploadOutlined />}>
                   {
                     intl.formatMessage({id:'pages.configs.from.importjson.selectfile'})
