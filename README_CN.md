@@ -55,8 +55,8 @@ JAVA 客户端项目：[AgileConfig_JClient](https://github.com/kklldog/agilecon
 Restful API:   
 [✈️ restful api](https://github.com/kklldog/AgileConfig/wiki/Restful-API)
    
-## ChangeLog
-[📝 Changelog](https://github.com/kklldog/AgileConfig/blob/master/CHANGELOG.md)   
+## 版本变更
+[📝 GitHub Releases](https://github.com/dotnetcore/AgileConfig/releases)
    
 ## 联系作者
 [📧 联系](#联系我)

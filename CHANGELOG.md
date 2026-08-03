@@ -1,4 +1,9 @@
 # Change log
+
+> Starting with v-1.12.8, release notes are maintained in
+> [GitHub Releases](https://github.com/dotnetcore/AgileConfig/releases).
+> This file is retained as a historical archive for earlier versions.
+
 ------------------------------
 [1.12.2]
 * Build the React admin UI inside the Dockerfile so `docker build .` produces a working image (#240)

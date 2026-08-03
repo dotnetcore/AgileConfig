@@ -1,13 +1,22 @@
-name: package workflow
+name: release workflow
 
 on:
   push:
-    paths-ignore: 
-      - '**/*.md'
-      - '**/*.yml'
-    tags:        
+    tags:
       - 'v-*'
-  workflow_dispatch:  
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing v-* tag to release
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+
 jobs:
   build-reactapp:
     runs-on: ubuntu-latest
@@ -19,13 +28,15 @@ jobs:
         node-version: [16.x]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ env.RELEASE_TAG }}
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
-        
-    - run: npm install
+
+    - run: npm ci
     - run: npm run build
     - uses: actions/upload-artifact@v4
       with:
@@ -34,39 +45,82 @@ jobs:
   build-dotnet:
     needs: build-reactapp
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        ref: ${{ env.RELEASE_TAG }}
     - name: setup .net
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: | 
+        dotnet-version: |
           8.0.x
           9.0.x
           10.0.x
+    - name: Validate release version
+      id: release-info
+      shell: bash
+      env:
+        PROJECT_FILE: src/AgileConfig.Server.Apisite/AgileConfig.Server.Apisite.csproj
+      run: |
+        if [[ "$RELEASE_TAG" != v-* ]]; then
+          echo "Release tag must start with v-. Got: $RELEASE_TAG" >&2
+          exit 1
+        fi
+
+        tag_version="${RELEASE_TAG#v-}"
+        project_version="$(dotnet msbuild "$PROJECT_FILE" -getProperty:Version -nologo | xargs)"
+
+        if [[ "$tag_version" != "$project_version" ]]; then
+          echo "Tag version $tag_version does not match project version $project_version." >&2
+          exit 1
+        fi
+
+        prerelease=false
+        if [[ "$tag_version" == *-* ]]; then
+          prerelease=true
+        fi
+
+        previous_tag="$(git describe --tags --abbrev=0 "$RELEASE_TAG^" --match 'v-*')"
+
+        echo "version=$tag_version" >> "$GITHUB_OUTPUT"
+        echo "prerelease=$prerelease" >> "$GITHUB_OUTPUT"
+        echo "previous_tag=$previous_tag" >> "$GITHUB_OUTPUT"
     - name: Install dependencies
       run: dotnet restore
     - name: Build
       run: dotnet build --configuration Release --no-restore
+    - name: Test
+      run: dotnet test --configuration Release --no-build --verbosity normal
     - uses: actions/download-artifact@v4
       with:
         name: agileconfig-ui
         path: src/AgileConfig.Server.Apisite/wwwroot/ui
-    - name: build server release xxx
-      run: dotnet publish src/AgileConfig.Server.Apisite/AgileConfig.Server.Apisite.csproj -c Release
-    - uses: vimtor/action-zip@v1
-      with:
-        files: src/AgileConfig.Server.Apisite/bin/Release/net10.0/publish/
-        dest: agileconfig_server_deploy.zip
-    - name: create release
-      uses: ncipollo/release-action@v1
-      with:
-        artifacts: agileconfig_server_deploy.zip
-        token: ${{ secrets.GITHUB_TOKEN }}
-    - name: Push to Docker hub release -xxx
+    - name: Publish server
+      run: dotnet publish src/AgileConfig.Server.Apisite/AgileConfig.Server.Apisite.csproj --configuration Release --no-restore
+    - name: Package server
+      working-directory: src/AgileConfig.Server.Apisite/bin/Release/net10.0/publish
+      env:
+        VERSION: ${{ steps.release-info.outputs.version }}
+      run: zip -r "$GITHUB_WORKSPACE/agileconfig-server-$VERSION.zip" .
+    - name: Push version image to Docker Hub
       uses: docker/build-push-action@v1
       with:
         username: ${{ secrets.DOCKER_HUB_NAME }}
         password: ${{ secrets.DOCKER_HUB_PASSWORD }}
         repository: kklldog/agile_config
-        tag_with_ref: true
+        tags: ${{ env.RELEASE_TAG }}
+    - name: Create GitHub release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: agileconfig-server-${{ steps.release-info.outputs.version }}.zip
+        generateReleaseNotes: true
+        generateReleaseNotesPreviousTag: ${{ steps.release-info.outputs.previous_tag }}
+        makeLatest: ${{ steps.release-info.outputs.prerelease == 'false' }}
+        name: ${{ env.RELEASE_TAG }}
+        prerelease: ${{ steps.release-info.outputs.prerelease }}
+        tag: ${{ env.RELEASE_TAG }}
+        token: ${{ secrets.GITHUB_TOKEN }}
