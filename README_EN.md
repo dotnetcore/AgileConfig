@@ -49,8 +49,8 @@ https://github.com/kklldog/AgileConfig/wiki
  
 API:   
 [restful api](https://github.com/kklldog/AgileConfig/wiki/Restful-API)
-## ChangeLog
-[Changelog](https://github.com/kklldog/AgileConfig/blob/master/CHANGELOG.md)
+## Release notes
+[GitHub Releases](https://github.com/dotnetcore/AgileConfig/releases)
 ## architecture
 ![](https://s1.ax1x.com/2020/06/29/NRz1gO.png)
 ### client
