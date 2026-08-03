@@ -27,6 +27,13 @@ jobs:
         username: ${{ secrets.DOCKER_HUB_NAME }}
         password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
+    - name: Login to Aliyun Container Registry
+      uses: docker/login-action@v4
+      with:
+        registry: registry.cn-shanghai.aliyuncs.com
+        username: ${{ secrets.ALI_REGISTRY_USERNAME }}
+        password: ${{ secrets.ALI_REGISTRY_PASSWORD }}
+
     - name: Set up Docker Buildx
       id: buildx
       uses: docker/setup-buildx-action@v3
@@ -42,3 +49,4 @@ jobs:
         push: true
         tags: |
           kklldog/agile_config:latest
+          registry.cn-shanghai.aliyuncs.com/kklldog/agile_config:latest
