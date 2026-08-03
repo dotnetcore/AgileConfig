@@ -57,11 +57,7 @@ const JsonEditor: React.FC<JsonEditorProps> = (props) => {
   useEffect(() => {
     getConfigJson(props.appId, props.env).then((res) => {
       if (res.success) {
-        let jsonObj = JSON.parse(res.data);
-        console.log(jsonObj);
         setJson(res.data);
-        console.log(res.data);
-        console.log(json);
       }
     });
   }, []);

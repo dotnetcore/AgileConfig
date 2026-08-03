@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Newtonsoft.Json;
 
 namespace AgileConfig.Server.Common;
 
 public static class DictionaryConvertToJson
 {
+    private const string IndentUnit = "  ";
+
     public static string ToJson(IDictionary<string, string> dict)
     {
         if (dict.Count == 0) return "{}";
@@ -17,6 +20,103 @@ public static class DictionaryConvertToJson
         var newDict = RebuildDict(root);
 
         return JsonConvert.SerializeObject(newDict, Formatting.Indented);
+    }
+
+    /// <summary>
+    ///     Convert flattened key-value pairs to jsonc, writing each comment above the item it describes.
+    /// </summary>
+    /// <param name="dict">Flattened configuration items.</param>
+    /// <param name="comments">Comments keyed by the same flattened key. Multi line comments are separated by \n.</param>
+    /// <returns>A jsonc document.</returns>
+    public static string ToJsonc(IDictionary<string, string> dict, IDictionary<string, string> comments)
+    {
+        if (dict.Count == 0) return "{}";
+
+        if (comments == null || comments.Count == 0) return ToJson(dict);
+
+        var root = new SortedDictionary<string, object>();
+        foreach (var kv in dict) Generate(kv.Key, kv.Value, root);
+
+        var newDict = RebuildDict(root);
+
+        var sb = new StringBuilder();
+        WriteJsonc(sb, newDict, "", comments, 0);
+
+        return sb.ToString();
+    }
+
+    private static void WriteJsonc(StringBuilder sb, object value, string path, IDictionary<string, string> comments,
+        int level)
+    {
+        if (value is IDictionary<string, object> dict)
+        {
+            if (dict.Count == 0)
+            {
+                sb.Append("{}");
+                return;
+            }
+
+            sb.Append('{').Append(Environment.NewLine);
+            var index = 0;
+            foreach (var kv in dict)
+            {
+                var childPath = string.IsNullOrEmpty(path) ? kv.Key : path + ":" + kv.Key;
+                WriteComment(sb, childPath, comments, level + 1);
+                Indent(sb, level + 1);
+                sb.Append(JsonConvert.ToString(kv.Key)).Append(": ");
+                WriteJsonc(sb, kv.Value, childPath, comments, level + 1);
+                if (++index < dict.Count) sb.Append(',');
+
+                sb.Append(Environment.NewLine);
+            }
+
+            Indent(sb, level);
+            sb.Append('}');
+            return;
+        }
+
+        if (value is object[] array)
+        {
+            if (array.Length == 0)
+            {
+                sb.Append("[]");
+                return;
+            }
+
+            sb.Append('[').Append(Environment.NewLine);
+            for (var i = 0; i < array.Length; i++)
+            {
+                var childPath = string.IsNullOrEmpty(path) ? i.ToString() : path + ":" + i;
+                WriteComment(sb, childPath, comments, level + 1);
+                Indent(sb, level + 1);
+                WriteJsonc(sb, array[i], childPath, comments, level + 1);
+                if (i < array.Length - 1) sb.Append(',');
+
+                sb.Append(Environment.NewLine);
+            }
+
+            Indent(sb, level);
+            sb.Append(']');
+            return;
+        }
+
+        sb.Append(JsonConvert.ToString(value as string));
+    }
+
+    private static void WriteComment(StringBuilder sb, string path, IDictionary<string, string> comments, int level)
+    {
+        if (!comments.TryGetValue(path, out var comment) || string.IsNullOrWhiteSpace(comment)) return;
+
+        foreach (var line in comment.Replace("\r\n", "\n").Split('\n'))
+        {
+            Indent(sb, level);
+            sb.Append("// ").Append(line.Trim()).Append(Environment.NewLine);
+        }
+    }
+
+    private static void Indent(StringBuilder sb, int level)
+    {
+        for (var i = 0; i < level; i++) sb.Append(IndentUnit);
     }
 
     /// <summary>

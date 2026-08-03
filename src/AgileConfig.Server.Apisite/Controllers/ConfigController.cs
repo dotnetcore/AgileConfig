@@ -12,6 +12,7 @@ using AgileConfig.Server.Common.Resources;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.Event;
 using AgileConfig.Server.IService;
+using AgileConfig.Server.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -470,7 +471,7 @@ public class ConfigController : Controller
     }
 
     /// <summary>
-    ///     Preview an uploaded JSON configuration file.
+    ///     Preview an uploaded json/jsonc configuration file.
     /// </summary>
     /// <returns></returns>
     public IActionResult PreViewJsonFile()
@@ -486,7 +487,8 @@ public class ConfigController : Controller
         var jsonFile = files.First();
         using (var stream = jsonFile.OpenReadStream())
         {
-            var dict = JsonConfigurationFileParser.Parse(stream);
+            var parseResult = JsonConfigurationFileParser.ParseWithComments(stream);
+            var dict = parseResult.Data;
 
             var addConfigs = new List<Config>();
             foreach (var key in dict.Keys)
@@ -503,7 +505,7 @@ public class ConfigController : Controller
 
                 var config = new Config();
                 config.Key = newKey;
-                config.Description = "";
+                config.Description = ReadJsoncComment(parseResult.Comments, key);
                 config.Value = dict[key];
                 config.Group = group;
                 config.Id = Guid.NewGuid().ToString();
@@ -518,8 +520,17 @@ public class ConfigController : Controller
         }
     }
 
+    private static string ReadJsoncComment(IDictionary<string, string> comments, string key)
+    {
+        if (!comments.TryGetValue(key, out var comment) || string.IsNullOrWhiteSpace(comment)) return "";
+
+        return comment.Length > ConfigService.ConfigDescriptionMaxLength
+            ? comment.Substring(0, ConfigService.ConfigDescriptionMaxLength)
+            : comment;
+    }
+
     /// <summary>
-    ///     Export an application's configurations as a JSON file.
+    ///     Export an application's configurations as a jsonc file.
     /// </summary>
     /// <param name="appId">Application ID.</param>
     /// <returns></returns>
@@ -532,15 +543,17 @@ public class ConfigController : Controller
         var configs = await _configService.GetByAppIdAsync(appId, env.Value);
 
         var dict = new Dictionary<string, string>();
+        var comments = new Dictionary<string, string>();
         configs.ForEach(x =>
         {
             var key = _configService.GenerateKey(x);
             dict.Add(key, x.Value);
+            if (!string.IsNullOrWhiteSpace(x.Description)) comments.Add(key, x.Description);
         });
 
-        var json = DictionaryConvertToJson.ToJson(dict);
+        var json = DictionaryConvertToJson.ToJsonc(dict, comments);
 
-        return File(Encoding.UTF8.GetBytes(json), "application/json", $"{appId}.json");
+        return File(Encoding.UTF8.GetBytes(json), "application/json", $"{appId}.jsonc");
     }
 
     /// <summary>
@@ -698,7 +711,7 @@ public class ConfigController : Controller
     }
 
     /// <summary>
-    ///     Get configuration content in JSON format.
+    ///     Get configuration content in jsonc format.
     /// </summary>
     /// <param name="appId">Application ID.</param>
     /// <returns></returns>
@@ -712,13 +725,15 @@ public class ConfigController : Controller
         // When producing JSON, exclude deleted configurations.
         configs = configs.Where(x => x.EditStatus != EditStatus.Deleted).ToList();
         var dict = new Dictionary<string, string>();
+        var comments = new Dictionary<string, string>();
         configs.ForEach(x =>
         {
             var key = _configService.GenerateKey(x);
             dict.Add(key, x.Value);
+            if (!string.IsNullOrWhiteSpace(x.Description)) comments.Add(key, x.Description);
         });
 
-        var json = DictionaryConvertToJson.ToJson(dict);
+        var json = DictionaryConvertToJson.ToJsonc(dict, comments);
 
         return Json(new
         {
