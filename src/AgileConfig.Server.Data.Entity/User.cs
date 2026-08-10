@@ -7,6 +7,7 @@ namespace AgileConfig.Server.Data.Entity;
 
 [Table(Name = "agc_user")]
 [OraclePrimaryKeyName("agc_user_pk")]
+[BsonIgnoreExtraElements]
 public class User : IEntity<string>
 {
     [Column(Name = "user_name", StringLength = 256)]

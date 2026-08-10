@@ -13,6 +13,7 @@ public enum SysLogType
 
 [Table(Name = "agc_sys_log")]
 [OraclePrimaryKeyName("agc_sys_log_pk")]
+[BsonIgnoreExtraElements]
 public class SysLog : IEntity<string>
 {
     public SysLog()

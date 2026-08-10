@@ -26,6 +26,7 @@ public enum HeartBeatModes
 
 [Table(Name = "agc_service_info")]
 [OraclePrimaryKeyName("agc_serviceinfo_pk")]
+[BsonIgnoreExtraElements]
 public class ServiceInfo : IEntity<string>
 {
     [Column(Name = "service_id", StringLength = 100)]

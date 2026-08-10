@@ -1,5 +1,6 @@
 ﻿using AgileConfig.Server.Common;
 using FreeSql.DataAnnotations;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace AgileConfig.Server.Data.Entity;
 
@@ -8,6 +9,7 @@ namespace AgileConfig.Server.Data.Entity;
 /// </summary>
 [Table(Name = "agc_appInheritanced")]
 [OraclePrimaryKeyName("agc_appInheritanced_pk")]
+[BsonIgnoreExtraElements]
 public class AppInheritanced : IEntity<string>
 {
     [Column(Name = "appid", StringLength = 36)]

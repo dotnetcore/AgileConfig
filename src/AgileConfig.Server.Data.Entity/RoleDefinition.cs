@@ -7,6 +7,7 @@ namespace AgileConfig.Server.Data.Entity;
 
 [Table(Name = "agc_role")]
 [OraclePrimaryKeyName("agc_role_pk")]
+[BsonIgnoreExtraElements]
 public class Role : IEntity<string>
 {
     [Column(Name = "name", StringLength = 128)]

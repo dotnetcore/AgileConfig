@@ -7,6 +7,7 @@ namespace AgileConfig.Server.Data.Entity;
 
 [Table(Name = "agc_config_published")]
 [OraclePrimaryKeyName("agc_config_published_pk")]
+[BsonIgnoreExtraElements]
 public class ConfigPublished : IEntity<string>
 {
     [Column(Name = "app_id", StringLength = 36)]
