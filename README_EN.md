@@ -45,9 +45,9 @@ JAVA Client：[AgileConfig_JClient](https://github.com/kklldog/agileconfig-jclie
 GO Client：[AgileConfig_GoClient](https://github.com/kklldog/agileconfig_client_go)  
 Python Client：[AgileConfig_GoClient](https://github.com/kklldog/agileconfig_client_python)  
 GO Client：[go-agile-config](https://github.com/animacaeli/go-agile-config)  
-Python Client：[py-agile-config](https://github.com/animacaeli/py-agile-config)
+Python Client：[py-agile-config](https://github.com/animacaeli/py-agile-config)   
 Nodejs Client: [node-agile-client](https://github.com/LetTTGACO/node-agile-client)    
-Blazor UI：[AgileConfigBlazorUI](https://github.com/EzrealJ/AgileConfigBlazorUI) 
+Blazor UI：[AgileConfigBlazorUI](https://github.com/EzrealJ/AgileConfigBlazorUI)    
 
 samples ：    
 [AgileConfigMVCSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigMVCSample)   
