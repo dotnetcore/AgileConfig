@@ -8,6 +8,7 @@ import { useIntl } from 'umi';
 export type TextEditorProps = {
   appId: string;
   appName: string;
+  darkMode: boolean;
   ModalVisible: boolean;
   env: string;
   onCancel: () => void;
@@ -133,6 +134,7 @@ const TextEditor: React.FC<TextEditorProps> = (props) => {
         defaultLanguage="text"
         defaultValue=""
         value={kvText}
+        theme={props.darkMode ? 'vs-dark' : 'vs'}
         options={{ minimap: { enabled: false } }}
         onChange={(v, e) => {
           setkvText(v);
