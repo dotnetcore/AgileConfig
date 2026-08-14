@@ -43,8 +43,8 @@ CN Atomgit Mirror site: [AgileConfig](https://atomgit.com/dotnetcore/AgileConfig
 Community Resource：   
 .NET Client：[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
 JAVA Client：[AgileConfig_JClient](https://github.com/kklldog/agileconfig-jclient)   
-GO Client：[AgileConfig_GoClient](https://github.com/kklldog/agileconfig_client_go)  
-Python Client：[AgileConfig_GoClient](https://github.com/kklldog/agileconfig_client_python)  
+GO Client：[agileconfig_client_go](https://github.com/kklldog/agileconfig_client_go)  
+Python Client：[agileconfig_client_python](https://github.com/kklldog/agileconfig_client_python)  
 GO Client：[go-agile-config](https://github.com/animacaeli/go-agile-config)  
 Python Client：[py-agile-config](https://github.com/animacaeli/py-agile-config)   
 Nodejs Client: [node-agile-client](https://github.com/LetTTGACO/node-agile-client)    
