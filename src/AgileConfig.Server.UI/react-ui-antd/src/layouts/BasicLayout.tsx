@@ -6,7 +6,6 @@
 import {
   MenuDataItem,
   BasicLayoutProps as ProLayoutProps,
-  Settings,
 } from '@ant-design/pro-layout';
 import ProLayout from '@ant-design/pro-layout';
 import React, { useEffect, useMemo, useRef, useCallback } from 'react';
@@ -20,6 +19,7 @@ import type { ConnectState } from '@/models/connect';
 import { getMatchMenu } from '@umijs/route-utils';
 import logo from '../assets/logo.svg';
 import LayoutFooter from './compos/LayoutFooter';
+import type { DefaultSettings } from '../../config/defaultSettings';
 
 const noMatch = (
   <Result
@@ -39,7 +39,7 @@ export type BasicLayoutProps = {
     authority: string[];
   };
   categories?: string[];
-  settings: Settings;
+  settings: DefaultSettings;
   dispatch: Dispatch;
 } & ProLayoutProps;
 export type BasicLayoutContext = { [K in 'location']: BasicLayoutProps[K] } & {
@@ -119,6 +119,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
   );
 
   const { formatMessage } = useIntl();
+  const { darkMode } = settings;
 
   return (
     <ProLayout
@@ -127,6 +128,8 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
       formatMessage={formatMessage}
       {...props}
       {...settings}
+      navTheme={darkMode ? 'realDark' : settings.navTheme}
+      headerTheme={darkMode ? 'dark' : settings.headerTheme}
       onCollapse={handleMenuCollapse}
       onMenuHeaderClick={() => history.push('/')}
       menuItemRender={(menuItemProps, defaultDom) => {

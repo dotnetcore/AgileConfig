@@ -11,6 +11,7 @@ loader.config({ paths: { vs: 'monaco-editor/min/vs' } });
 export type JsonEditorProps = {
   appId: string;
   appName: string;
+  darkMode: boolean;
   ModalVisible: boolean;
   env: string;
   onCancel: () => void;
@@ -115,6 +116,7 @@ const JsonEditor: React.FC<JsonEditorProps> = (props) => {
         defaultLanguage="json"
         defaultValue=""
         value={json}
+        theme={props.darkMode ? 'vs-dark' : 'vs'}
         options={{ minimap: { enabled: false } }}
         beforeMount={(monaco) => {
           monaco.languages.json.jsonDefaults.setDiagnosticsOptions({

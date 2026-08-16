@@ -11,7 +11,7 @@ import Text from 'antd/lib/typography/Text';
 import moment from 'moment';
 import styles from './index.less';
 import JsonImport from './comps/JsonImport';
-import { getIntl, getLocale, useIntl } from 'umi';
+import { connect, getIntl, getLocale, useIntl } from 'umi';
 import { checkUserPermission } from '@/components/Authorized/AuthorizedElement';
 import { RequireFunction } from '@/utils/permission';
 import functionKeys from '@/models/functionKeys';
@@ -22,6 +22,7 @@ import JsonEditor from './comps/JsonEditor';
 import TextEditor from './comps/TextEditor';
 import { getEnvList } from '@/utils/system';
 import { saveVisitApp } from '@/utils/latestVisitApps';
+import type { ConnectState } from '@/models/connect';
 
 const { TextArea } = Input;
 const { confirm } = Modal;
@@ -200,7 +201,18 @@ const handleExportJson = async (appId: string, env:string) => {
   }
 }
 
-const configs: React.FC = (props: any) => {
+type ConfigsProps = {
+  darkMode: boolean;
+  match: {
+    params: {
+      app_id: string;
+      app_name: string;
+    };
+  };
+};
+
+const configs: React.FC<ConfigsProps> = (props) => {
+  const { darkMode } = props;
   const appId = props.match.params.app_id;
   const appName = props.match.params.app_name;
   useEffect(()=>{
@@ -815,6 +827,7 @@ const configs: React.FC = (props: any) => {
         <JsonEditor 
         appId={appId}
         appName={appName}
+        darkMode={darkMode}
         env={currentEnv}
         ModalVisible={jsonEditorVisible}
         onCancel={
@@ -838,6 +851,7 @@ const configs: React.FC = (props: any) => {
         <TextEditor 
         appId={appId}
         appName={appName}
+        darkMode={darkMode}
         env={currentEnv}
         ModalVisible={textEditorVisible}
         onCancel={
@@ -898,4 +912,6 @@ const configs: React.FC = (props: any) => {
     </PageContainer>
   );
 }
-export default configs;
+export default connect(({ settings }: ConnectState) => ({
+  darkMode: !!settings.darkMode,
+}))(configs);
