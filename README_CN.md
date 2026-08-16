@@ -33,8 +33,15 @@ AgileConfig秉承轻量化的特点，部署简单、配置简单、使用简单
 ❤️❤️ 演示地址：[AgileConfig Server Demo](https://agileconfig-server.xbaby.xyz)   用户名：admin 密码：123456   
 🎥[演示视频](https://www.bilibili.com/video/BV1FwqeYcEy9/?vd_source=767c7a8e20240041358ff961ab0cb9e5)
 
+社区资源：   
 .NET 客户端项目：[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
 JAVA 客户端项目：[AgileConfig_JClient](https://github.com/kklldog/agileconfig-jclient)   
+GO 客户端项目：[AgileConfig_GoClient](https://github.com/kklldog/agileconfig_client_go)  
+Python 客户端项目：[AgileConfig_GoClient](https://github.com/kklldog/agileconfig_client_python)  
+GO 客户端项目：[go-agile-config](https://github.com/animacaeli/go-agile-config)  
+Python 客户端项目：[py-agile-config](https://github.com/animacaeli/py-agile-config)
+Nodejs 实现的客户端: [node-agile-client](https://github.com/LetTTGACO/node-agile-client)    
+Blazor 实现的管理界面：[AgileConfigBlazorUI](https://github.com/EzrealJ/AgileConfigBlazorUI)  
 
 示例项目：    
 [AgileConfig MVCSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigMVCSample)   
@@ -46,11 +53,7 @@ JAVA 客户端项目：[AgileConfig_JClient](https://github.com/kklldog/agilecon
 [教程 - 如何开启 SSO](https://www.cnblogs.com/kklldog/p/agileconfig-170.html)   
 💥[常见问题，必看！！！](https://github.com/kklldog/AgileConfig/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%EF%BC%8C%E5%BF%85%E7%9C%8B%EF%BC%81%EF%BC%81%EF%BC%81)  
 [关于多环境的部署说明](https://github.com/dotnetcore/AgileConfig/wiki/%E5%85%B3%E4%BA%8E-1.5-%E7%89%88%E6%9C%AC%E6%94%AF%E6%8C%81%E5%A4%9A%E7%8E%AF%E5%A2%83%E7%9A%84%E8%AF%B4%E6%98%8E)   
-[如何对接 OpenTelemetry 查看 log，trace，metric](https://mp.weixin.qq.com/s/QoagvZrCby1jI6g3XzZUAg)
-    
-社区资源：   
-🌷 基于 Nodejs 实现的客户端: [node-agile-client](https://github.com/LetTTGACO/node-agile-client)    
-🌷 基于 Blazor 实现的管理界面：[AgileConfigBlazorUI](https://github.com/EzrealJ/AgileConfigBlazorUI)   
+[如何对接 OpenTelemetry 查看 log，trace，metric](https://mp.weixin.qq.com/s/QoagvZrCby1jI6g3XzZUAg) 
    
 Restful API:   
 [✈️ restful api](https://github.com/kklldog/AgileConfig/wiki/Restful-API)

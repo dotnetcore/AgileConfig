@@ -2,6 +2,7 @@ import { Settings as ProSettings } from '@ant-design/pro-layout';
 
 type DefaultSettings = Partial<ProSettings> & {
   pwa: boolean;
+  darkMode: boolean;
 };
 
 const proSettings: DefaultSettings ={
@@ -13,6 +14,7 @@ const proSettings: DefaultSettings ={
   "fixSiderbar": true,
   "title": "AgileConfig",
   "pwa": false,
+  "darkMode": false,
   "iconfontUrl": "",
   "menu": {
     "locale": true

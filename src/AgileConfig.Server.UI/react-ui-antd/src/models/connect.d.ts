@@ -1,7 +1,8 @@
-import type { MenuDataItem, Settings as ProSettings } from '@ant-design/pro-layout';
+import type { MenuDataItem } from '@ant-design/pro-layout';
 import { GlobalModelState } from './global';
 import { UserModelState } from './user';
 import type { StateType } from './login';
+import type { DefaultSettings } from '../../config/defaultSettings';
 
 export { GlobalModelState, UserModelState };
 
@@ -20,7 +21,7 @@ export type Loading = {
 export type ConnectState = {
   global: GlobalModelState;
   loading: Loading;
-  settings: ProSettings;
+  settings: DefaultSettings;
   user: UserModelState;
   login: StateType;
 };

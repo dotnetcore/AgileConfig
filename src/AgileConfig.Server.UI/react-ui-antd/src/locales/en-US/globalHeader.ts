@@ -4,6 +4,8 @@ export default {
   'component.globalHeader.search.example2': 'Search example 2',
   'component.globalHeader.search.example3': 'Search example 3',
   'component.globalHeader.help': 'Help',
+  'component.globalHeader.theme.dark': 'Switch to dark mode',
+  'component.globalHeader.theme.light': 'Switch to light mode',
   'component.globalHeader.notification': 'Notification',
   'component.globalHeader.notification.empty': 'You have viewed all notifications.',
   'component.globalHeader.message': 'Message',

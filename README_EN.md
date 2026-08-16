@@ -38,7 +38,17 @@ CN Atomgit Mirror site: [AgileConfig](https://atomgit.com/dotnetcore/AgileConfig
 11. also can be use as a simple service register center
     
 🔆🔆🔆Demo Project ：[AgileConfig Server Demo](http://agileconfig_server.xbaby.xyz)   name.pwd= admin/123456🔆🔆🔆   
-client project ：[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
+
+Community Resource：   
+.NET Client：[AgileConfig_Client](https://github.com/kklldog/AgileConfig_Client)   
+JAVA Client：[AgileConfig_JClient](https://github.com/kklldog/agileconfig-jclient)   
+GO Client：[AgileConfig_GoClient](https://github.com/kklldog/agileconfig_client_go)  
+Python Client：[AgileConfig_GoClient](https://github.com/kklldog/agileconfig_client_python)  
+GO Client：[go-agile-config](https://github.com/animacaeli/go-agile-config)  
+Python Client：[py-agile-config](https://github.com/animacaeli/py-agile-config)   
+Nodejs Client: [node-agile-client](https://github.com/LetTTGACO/node-agile-client)    
+Blazor UI：[AgileConfigBlazorUI](https://github.com/EzrealJ/AgileConfigBlazorUI)    
+
 samples ：    
 [AgileConfigMVCSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigMVCSample)   
 [AgileConfig WPFSample](https://github.com/kklldog/AgileConfig_Client/tree/master/AgileConfigWPFSample)    
