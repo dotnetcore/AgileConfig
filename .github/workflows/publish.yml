@@ -47,6 +47,8 @@ jobs:
         context: .
         platforms: ${{ env.PLATFORMS }}
         push: true
+        provenance: false
+        sbom: false
         tags: |
           kklldog/agile_config:latest
           registry.cn-shanghai.aliyuncs.com/kklldog/agile_config:latest
