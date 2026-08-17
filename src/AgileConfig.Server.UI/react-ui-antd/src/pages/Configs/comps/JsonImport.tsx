@@ -2,7 +2,7 @@ import { getToken } from "@/utils/authority";
 import { DeleteOutlined, UploadOutlined } from "@ant-design/icons";
 import { Button, message, Modal, Space, Table, Upload } from "antd";
 import React, { useState } from 'react';
-import { useIntl } from "umi";
+import { useIntl } from "@umijs/max";
 import { JsonImportItem } from "../data";
 import { addRangeConfig } from "../service";
 import styles from './jsonImport.less';
@@ -121,7 +121,7 @@ const JsonImport : React.FC<JsonImportFormProps> = (props)=>{
           maskClosable={false}
           title={intl.formatMessage({id:'pages.configs.table.cols.action.pop.importfromjosnfile'})} 
           width={1000} 
-          visible={props.jsonImportModalVisible}
+          open={props.jsonImportModalVisible}
           onCancel={
             ()=>{
               props.onCancel();

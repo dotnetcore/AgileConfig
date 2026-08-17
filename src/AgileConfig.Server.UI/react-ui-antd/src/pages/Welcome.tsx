@@ -1,10 +1,10 @@
-import React from 'react';
-import { PageContainer } from '@ant-design/pro-layout';
+import React, { PropsWithChildren } from 'react';
+import { PageContainer } from '@ant-design/pro-components';
 import { Card, Alert, Typography } from 'antd';
-import { useIntl, FormattedMessage } from 'umi';
+import { useIntl, FormattedMessage } from '@umijs/max';
 import styles from './Welcome.less';
 
-const CodePreview: React.FC = ({ children }) => (
+const CodePreview: React.FC<PropsWithChildren> = ({ children }) => (
   <pre className={styles.pre}>
     <code>
       <Typography.Text copyable>{children}</Typography.Text>

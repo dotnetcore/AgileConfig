@@ -1,13 +1,14 @@
 import React from 'react';
-import { PageLoading } from '@ant-design/pro-layout';
-import type { ConnectProps } from 'umi';
-import { Redirect, connect } from 'umi';
+import { PageLoading } from '@ant-design/pro-components';
+import type { ConnectProps } from '@umijs/max';
+import { Navigate, Outlet, connect } from '@umijs/max';
 import type { ConnectState } from '@/models/connect';
 import type { CurrentUser } from '@/models/user';
 
 type SecurityLayoutProps = {
   loading?: boolean;
   currentUser?: CurrentUser;
+  children?: React.ReactNode;
 } & ConnectProps;
 
 type SecurityLayoutState = {
@@ -42,9 +43,9 @@ class SecurityLayout extends React.Component<SecurityLayoutProps, SecurityLayout
       return <PageLoading />;
     }
     if (!isLogin && window.location.pathname !== '/user/login') {
-      return <Redirect to={`/user/login`} />;
+      return <Navigate to="/user/login" replace />;
     }
-    return children;
+    return children ?? <Outlet />;
   }
 }
 

@@ -2,7 +2,7 @@ import { Button, Col, message, Modal, Row, Table, Tag } from "antd";
 import styles from './versionHistory.less';
 import moment from "moment";
 import React, { useState,useEffect } from 'react';
-import { useIntl } from "umi";
+import { useIntl } from "@umijs/max";
 import { PublishDetialNode } from "../data";
 import { getPublishHistory, rollback } from "../service";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
@@ -112,7 +112,7 @@ const VersionHistory : React.FC<VersionHistoryFormProps> = (props)=>{
           cancelText={intl.formatMessage({id: 'pages.configs.close'})}
           title={intl.formatMessage({id: 'pages.config.history.title'})}
           width={1000} 
-          visible={props.versionHistoryModalVisible}
+          open={props.versionHistoryModalVisible}
           onCancel={
             ()=>{
               props.onCancel(false);

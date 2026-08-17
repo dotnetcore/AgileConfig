@@ -5,6 +5,7 @@ type AuthorizedProps = {
   authority?: string[],
   judgeKey: string,
   noMatch?: React.ReactNode;
+  children?: React.ReactNode;
 };
 
 export const checkUserPermission = (functions:string[] | undefined,judgeKey:string, appid:string|undefined)=>{

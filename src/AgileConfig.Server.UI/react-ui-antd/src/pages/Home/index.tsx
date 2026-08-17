@@ -1,4 +1,4 @@
-import { PageContainer } from '@ant-design/pro-layout';
+import { PageContainer } from '@ant-design/pro-components';
 import React, { useEffect, useState } from 'react';
 import { queryServerNodeStatus } from './service';
 import Summary, { summaryProps } from './comps/summary';
@@ -7,7 +7,7 @@ import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { NodeItem } from './../Nodes/data';
 import { message, Modal } from 'antd';
 import { hasFunction } from '@/utils/authority';
-import { getIntl, getLocale } from 'umi';
+import { getIntl, getLocale } from '@umijs/max';
 import LatestVisitApps from './comps/latestVisitApps';
 const { confirm } = Modal;
 

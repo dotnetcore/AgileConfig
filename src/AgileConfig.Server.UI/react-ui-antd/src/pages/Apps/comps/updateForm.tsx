@@ -1,5 +1,5 @@
-import { useIntl } from 'umi';
-import { ModalForm, ProFormDependency, ProFormSelect, ProFormSwitch, ProFormText } from '@ant-design/pro-form';
+import { useIntl } from '@umijs/max';
+import { ModalForm, ProFormDependency, ProFormSelect, ProFormSwitch, ProFormText } from '@ant-design/pro-components';
 import React, { useEffect, useState } from 'react';
 import { AppListItem } from '../data';
 import { getAppGroups, inheritancedApps } from '../service';
@@ -35,7 +35,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
     <ModalForm
       title={intl.formatMessage({ id: 'pages.app.form.title.edit' })}
       initialValues={props.value}
-      visible={props.updateModalVisible}
+      open={props.updateModalVisible}
       modalProps={{ onCancel: () => props.onCancel(), maskClosable: false }}
       onFinish={props.onSubmit}
     >
@@ -60,7 +60,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
         name='group'
         options={appGroups}
         fieldProps={{
-          dropdownRender: (menu) => (
+          popupRender: (menu) => (
             <div>
               {menu}
               <Divider style={{ margin: '4px 0' }} />

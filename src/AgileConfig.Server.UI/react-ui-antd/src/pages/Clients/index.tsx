@@ -1,11 +1,10 @@
 // migrated to RequireFunction for permission gating
 import { RequireFunction } from '@/utils/permission';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
-import { PageContainer } from '@ant-design/pro-layout';
-import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
+import { ActionType, PageContainer, ProColumns, ProTable } from '@ant-design/pro-components';
 import { Button, message, Modal } from 'antd';
 import React, { useRef } from 'react';
-import { useIntl } from 'umi';
+import { useIntl } from '@umijs/max';
 import { queryNodes } from '../Nodes/service';
 import { queryClients, reloadClientConfigs, clientOffline } from './service';
 const { confirm } = Modal;
@@ -71,7 +70,7 @@ const clients: React.FC = () => {
         id: 'pages.client.table.cols.id',
       }),
       dataIndex: 'id',
-      hideInSearch: true,
+      search: false,
       ellipsis: true,
     },
     {
@@ -99,28 +98,28 @@ const clients: React.FC = () => {
         id: 'pages.client.table.cols.ip',
       }),
       dataIndex: 'ip',
-      hideInSearch: true,
+      search: false,
     },
     {
       title: intl.formatMessage({
         id: 'pages.client.table.cols.name',
       }),
       dataIndex: 'name',
-      hideInSearch: true,
+      search: false,
     },
     {
       title: intl.formatMessage({
         id: 'pages.client.table.cols.tag',
       }),
       dataIndex: 'tag',
-      hideInSearch: true,
+      search: false,
     },
     {
       title: intl.formatMessage({
         id: 'pages.client.table.cols.lastRefreshTime',
       }),
       dataIndex: 'lastRefreshTime',
-      hideInSearch: true,
+      search: false,
       valueType: 'dateTime',
       tooltip: intl.formatMessage({
         id: 'pages.client.table.cols.lastRefreshTime.tooltip',

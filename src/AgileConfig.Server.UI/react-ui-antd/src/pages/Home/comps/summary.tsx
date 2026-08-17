@@ -40,19 +40,19 @@ const Summary: React.FC<summaryProps> = (props) => {
   return (
     <div className={styles.panel}>
       <Row gutter={16} className={styles.summary}>
-        <Col flex={1}>
+        <Col flex="1 1 160px">
           <ItemInfo count={props.nodeOnCount + '/' + props.nodeCount} type="node" link="/node" icon={<DatabaseOutlined ></DatabaseOutlined>}></ItemInfo>
         </Col>
-        <Col flex={1}>
+        <Col flex="1 1 160px">
           <ItemInfo count={appCount + ''} type="app" link="/app" icon={<AppstoreOutlined ></AppstoreOutlined>}></ItemInfo>
         </Col>
-        <Col flex={1}>
+        <Col flex="1 1 160px">
           <ItemInfo count={configCount + ''} type="config" link="/app" icon={<TableOutlined ></TableOutlined>}></ItemInfo>
         </Col>
-        <Col flex={1}>
+        <Col flex="1 1 160px">
           <ItemInfo count={props.clientCount + ''} type="client" link="/client" icon={<ShrinkOutlined ></ShrinkOutlined>}></ItemInfo>
         </Col>
-        <Col flex={1}>
+        <Col flex="1 1 160px">
           <ItemInfo count={serviceOnCount + '/' + serviceCount} type="service" link="/service" icon={<CloudOutlined ></CloudOutlined>}></ItemInfo>
         </Col>
       </Row>

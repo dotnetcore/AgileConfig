@@ -1,4 +1,4 @@
-import { Settings as ProSettings } from '@ant-design/pro-layout';
+import type { Settings as ProSettings } from '@ant-design/pro-components';
 
 type DefaultSettings = Partial<ProSettings> & {
   pwa: boolean;
@@ -7,7 +7,7 @@ type DefaultSettings = Partial<ProSettings> & {
 
 const proSettings: DefaultSettings ={
   "navTheme": "light",
-  "primaryColor": "#1890ff",
+  "colorPrimary": "#1677ff",
   "layout": "mix",
   "contentWidth": "Fluid",
   "fixedHeader": false,
@@ -18,8 +18,7 @@ const proSettings: DefaultSettings ={
   "iconfontUrl": "",
   "menu": {
     "locale": true
-  },
-  "headerHeight": 48
+  }
 }
 
 export type { DefaultSettings };

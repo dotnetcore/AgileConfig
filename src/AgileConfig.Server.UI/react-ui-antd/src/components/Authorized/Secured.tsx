@@ -4,8 +4,10 @@ import CheckPermissions from './CheckPermissions';
 /** Default behavior denies access to every page; default authority is "NULL". */
 const Exception403 = () => 403;
 
-export const isComponentClass = (component: React.ComponentClass | React.ReactNode): boolean => {
-  if (!component) return false;
+export const isComponentClass = (
+  component: unknown,
+): component is React.ComponentType<any> => {
+  if (typeof component !== 'function') return false;
   const proto = Object.getPrototypeOf(component);
   if (proto === React.Component || proto === Function.prototype) return true;
   return isComponentClass(proto);
@@ -15,9 +17,9 @@ export const isComponentClass = (component: React.ComponentClass | React.ReactNo
 // AuthorizedRoute is already instantiated
 // Authorized  render is already instantiated, children is no instantiated
 // Secured is not instantiated
-const checkIsInstantiation = (target: React.ComponentClass | React.ReactNode) => {
+const checkIsInstantiation = (target: unknown) => {
   if (isComponentClass(target)) {
-    const Target = target as React.ComponentClass;
+    const Target = target as React.ComponentType<any>;
     return (props: any) => <Target {...props} />;
   }
   if (React.isValidElement(target)) {
@@ -47,7 +49,7 @@ const authorize = (authority: string, error?: React.ReactNode) => {
   if (!authority) {
     throw new Error('authority is required');
   }
-  return function decideAuthority(target: React.ComponentClass | React.ReactNode) {
+  return function decideAuthority(target: unknown) {
     const component = CheckPermissions(authority, target, classError || Exception403);
     return checkIsInstantiation(component);
   };

@@ -1,11 +1,10 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { FormInstance, ModalForm, ProFormDependency, ProFormSelect, ProFormText } from '@ant-design/pro-form';
-import { PageContainer } from '@ant-design/pro-layout';
-import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
+import { ActionType, ModalForm, PageContainer, ProColumns, ProFormDependency, ProFormSelect, ProFormText, ProTable } from '@ant-design/pro-components';
 import { Button, message, Modal } from 'antd';
+import type { FormInstance } from 'antd';
 import { RequireFunction } from '@/utils/permission';
 import React, {  useRef, useState } from 'react';
-import { useIntl } from 'umi';
+import { useIntl } from '@umijs/max';
 import { ServiceItem } from './data';
 import { addService, queryService, removeService } from './service';
 import styles from './index.less';
@@ -80,35 +79,35 @@ const services: React.FC = () => {
         id: 'pages.services.ip',
       }),
       dataIndex: 'ip',
-      hideInSearch: true,
+      search: false,
     },
     {
       title: intl.formatMessage({
         id: 'pages.services.port',
       }),
       dataIndex: 'port',
-      hideInSearch: true,
+      search: false,
     },
     {
       title: intl.formatMessage({
         id: 'pages.services.metaData',
       }),
       dataIndex: 'metaData',
-      hideInSearch: true,
+      search: false,
     },
     {
       title: intl.formatMessage({
         id: 'pages.services.heartBeatMode',
       }),
       dataIndex: 'heartBeatMode',
-      hideInSearch: true,
+      search: false,
     },
     {
       title: intl.formatMessage({
         id: 'pages.services.checkUrl',
       }),
       dataIndex: 'checkUrl',
-      hideInSearch: true,
+      search: false,
       ellipsis: true,
     },
     {
@@ -116,7 +115,7 @@ const services: React.FC = () => {
         id: 'pages.services.alarmUrl',
       }),
       dataIndex: 'alarmUrl',
-      hideInSearch: true,
+      search: false,
       ellipsis: true,
     },
     {
@@ -124,7 +123,7 @@ const services: React.FC = () => {
         id: 'pages.services.registerTime',
       }),
       dataIndex: 'registerTime',
-      hideInSearch: true,
+      search: false,
       valueType: 'dateTime',
       sorter: true,
     },
@@ -133,7 +132,7 @@ const services: React.FC = () => {
         id: 'pages.services.lastHeartBeat',
       }),
       dataIndex: 'lastHeartBeat',
-      hideInSearch: true,
+      search: false,
       valueType: 'dateTime',
     },
     {
@@ -224,8 +223,8 @@ const services: React.FC = () => {
         title={intl.formatMessage({
           id: 'pages.services.newService',
         })}
-        visible={createModalVisible}
-        onVisibleChange={setCreateModalVisible}
+        open={createModalVisible}
+        onOpenChange={setCreateModalVisible}
         onFinish={
           async (value) => {
             const success = await handleAdd(value as ServiceItem);
@@ -280,13 +279,11 @@ const services: React.FC = () => {
                   },
                 ]}
                  tooltip={
-                   ()=>{
-                     return <div>
+                     <div>
                        none: 该模式不会进行任何健康检测服务会永远在线<br/>
                        client: 客户端主动上报<br/>
                        server: 服务端主动检测
                      </div>
-                   }
                  }
                   label={intl.formatMessage({
                     id: 'pages.services.heartBeatMode',

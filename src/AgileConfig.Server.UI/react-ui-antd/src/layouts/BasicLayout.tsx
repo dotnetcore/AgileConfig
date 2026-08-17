@@ -1,16 +1,22 @@
-/**
- * Ant Design Pro v4 use `@ant-design/pro-layout` to handle Layout.
- *
- * @see You can view component api by: https://github.com/ant-design/ant-design-pro-layout
- */
 import {
   MenuDataItem,
-  BasicLayoutProps as ProLayoutProps,
-} from '@ant-design/pro-layout';
-import ProLayout from '@ant-design/pro-layout';
+  ProLayout,
+  ProLayoutProps,
+} from '@ant-design/pro-components';
+import {
+  AppstoreOutlined,
+  BarsOutlined,
+  CloudOutlined,
+  DashboardOutlined,
+  DatabaseOutlined,
+  SafetyCertificateOutlined,
+  ShrinkOutlined,
+  TableOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
 import React, { useEffect, useMemo, useRef, useCallback } from 'react';
-import { Dispatch, getIntl, getLocale } from 'umi';
-import { Link, useIntl, connect, history } from 'umi';
+import { Dispatch, getIntl, getLocale } from '@umijs/max';
+import { Link, Outlet, useIntl, useLocation, connect, history } from '@umijs/max';
 import { Result, Button } from 'antd';
 import { getCategories } from '@/utils/authority';
 import Authorized from '@/utils/Authorized';
@@ -20,6 +26,33 @@ import { getMatchMenu } from '@umijs/route-utils';
 import logo from '../assets/logo.svg';
 import LayoutFooter from './compos/LayoutFooter';
 import type { DefaultSettings } from '../../config/defaultSettings';
+import routes from '../../config/routes';
+
+const securityRoute = routes[0].routes?.find(
+  (route) => route.component === '../layouts/SecurityLayout',
+);
+const basicRoute = securityRoute && 'routes' in securityRoute
+  ? securityRoute.routes.find((route) => route.component === '../layouts/BasicLayout')
+  : undefined;
+const menuIcons: Record<string, React.ReactNode> = {
+  Appstore: <AppstoreOutlined />,
+  Bars: <BarsOutlined />,
+  Cloud: <CloudOutlined />,
+  Dashboard: <DashboardOutlined />,
+  Database: <DatabaseOutlined />,
+  SafetyCertificate: <SafetyCertificateOutlined />,
+  Shrink: <ShrinkOutlined />,
+  Table: <TableOutlined />,
+  User: <UserOutlined />,
+};
+const layoutRoute = {
+  routes: basicRoute && 'routes' in basicRoute
+    ? (basicRoute.routes || []).map((route) => ({
+        ...route,
+        icon: route.icon ? menuIcons[route.icon] : undefined,
+      }))
+    : [],
+} as ProLayoutProps['route'];
 
 const noMatch = (
   <Result
@@ -35,7 +68,7 @@ const noMatch = (
 );
 export type BasicLayoutProps = {
   breadcrumbNameMap: Record<string, MenuDataItem>;
-  route: ProLayoutProps['route'] & {
+  route?: ProLayoutProps['route'] & {
     authority: string[];
   };
   categories?: string[];
@@ -48,14 +81,13 @@ export type BasicLayoutContext = { [K in 'location']: BasicLayoutProps[K] } & {
 /** Use Authorized check all menu item */
 
 const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
+  const currentLocation = useLocation();
   const {
     dispatch,
     children,
     settings,
-    location = {
-      pathname: '/',
-    },
   } = props;
+  const location = props.location || currentLocation;
 
   // keep categories in props to force re-render when user changes; fall back to persisted storage to avoid empty menu during bootstrap
   const categories = useMemo<string[]>(() => {
@@ -128,8 +160,9 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
       formatMessage={formatMessage}
       {...props}
       {...settings}
+      route={props.route || layoutRoute}
+      location={location}
       navTheme={darkMode ? 'realDark' : settings.navTheme}
-      headerTheme={darkMode ? 'dark' : settings.headerTheme}
       onCollapse={handleMenuCollapse}
       onMenuHeaderClick={() => history.push('/')}
       menuItemRender={(menuItemProps, defaultDom) => {
@@ -143,7 +176,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
         return <Link to={menuItemProps.path}>{defaultDom}</Link>;
       }}
       breadcrumbRender={(routers = []) => {
-        const configRouter = routers.find(x=>x.path.indexOf('/app/config') >= 0);
+        const configRouter = routers.find((item) => item.path?.includes('/app/config'));
         if (configRouter) {
           const intl = getIntl(getLocale());
           const breadcrumbName = intl.formatMessage({
@@ -169,14 +202,14 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
         )
       }}
       menuDataRender={menuDataRender}
-      rightContentRender={() => <RightContent />}
+      actionsRender={() => <RightContent />}
       postMenuData={(menuData) => {
         menuDataRef.current = menuData || [];
         return menuData || [];
       }}
     >
       <Authorized authority={authorized!.authority} noMatch={noMatch}>
-        {children}
+        {children ?? <Outlet />}
       </Authorized>
     </ProLayout>
   );

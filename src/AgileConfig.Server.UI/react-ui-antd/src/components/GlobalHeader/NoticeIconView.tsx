@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import type { ConnectProps } from 'umi';
-import { connect } from 'umi';
+import type { ConnectProps } from '@umijs/max';
+import { connect } from '@umijs/max';
 import { Tag, message } from 'antd';
 import groupBy from 'lodash/groupBy';
 import moment from 'moment';

@@ -5,9 +5,11 @@ import {
   ProFormSelect,
   ProFormSwitch,
   ProFormText,
-} from '@ant-design/pro-form';
-import { PageContainer } from '@ant-design/pro-layout';
-import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
+  ActionType,
+  PageContainer,
+  ProColumns,
+  ProTable,
+} from '@ant-design/pro-components';
 import {
   Button,
   Checkbox,
@@ -21,7 +23,7 @@ import {
   Tag,
 } from 'antd';
 import React, { Key, useState, useRef, useEffect } from 'react';
-import { getIntl, getLocale, Link, useIntl } from 'umi';
+import { getIntl, getLocale, Link, useIntl } from '@umijs/max';
 import UpdateForm from './comps/updateForm';
 import AppImport from './comps/AppImport';
 import { AppListItem, AppListParams, AppListResult, UserAppAuth } from './data';
@@ -319,7 +321,7 @@ const appList: React.FC = (props) => {
       }),
       dataIndex: 'secret',
       valueType: 'password',
-      hideInSearch: true,
+      search: false,
       copyable: true,
     },
     {
@@ -337,7 +339,7 @@ const appList: React.FC = (props) => {
       }),
       dataIndex: 'createTime',
       valueType: 'dateTime',
-      hideInSearch: true,
+      search: false,
       sorter: true,
     },
     {
@@ -345,7 +347,7 @@ const appList: React.FC = (props) => {
         id: 'pages.app.table.cols.public',
       }),
       dataIndex: 'inheritanced',
-      hideInSearch: true,
+      search: false,
       valueEnum: {
         false: {
           text: intl.formatMessage({
@@ -367,7 +369,7 @@ const appList: React.FC = (props) => {
       }),
       dataIndex: 'inheritancedApps',
       search: false,
-      renderFormItem: (_, { defaultRender }) => {
+      formItemRender: (_, { defaultRender }) => {
         return defaultRender(_);
       },
       render: (_, record) => (
@@ -400,7 +402,7 @@ const appList: React.FC = (props) => {
           </RequireFunction>
         );
       },
-      hideInSearch: true,
+      search: false,
     },
     {
       title: intl.formatMessage({
@@ -569,8 +571,8 @@ const appList: React.FC = (props) => {
         title={intl.formatMessage({
           id: 'pages.app.form.title.add',
         })}
-        visible={createModalVisible}
-        onVisibleChange={setCreateModalVisible}
+        open={createModalVisible}
+        onOpenChange={setCreateModalVisible}
         onFinish={async (value) => {
           const success = await handleAdd(value as AppListItem);
           if (success) {
@@ -621,7 +623,7 @@ const appList: React.FC = (props) => {
           name="group"
           options={appGroups}
           fieldProps={{
-            dropdownRender: (menu) => (
+            popupRender: (menu) => (
               <div>
                 {menu}
                 <Divider style={{ margin: '4px 0' }} />
@@ -742,7 +744,7 @@ const appList: React.FC = (props) => {
       )}
       {importModalVisible && (
         <AppImport
-          visible={importModalVisible}
+          open={importModalVisible}
           onCancel={() => {
             setImportModalVisible(false);
           }}

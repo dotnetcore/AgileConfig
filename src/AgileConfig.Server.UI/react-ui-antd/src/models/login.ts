@@ -1,5 +1,5 @@
-import type { Reducer, Effect } from 'umi';
-import { getIntl, history, getLocale  } from 'umi';
+import type { Reducer, Effect } from '@umijs/max';
+import { getIntl, history, getLocale  } from '@umijs/max';
 import { accountLogin } from '@/services/login';
 import { setAuthority, setFunctions, setToken, setUserInfo, setCategories } from '@/utils/authority';
 import { getPageQuery } from '@/utils/utils';

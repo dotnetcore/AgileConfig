@@ -2,9 +2,9 @@ import { Button, message, Modal, Checkbox, Tooltip } from 'antd';
 import Editor from '@monaco-editor/react';
 import React, { useState, useEffect } from 'react';
 import { getConfigsKvList, saveKvList } from '../service';
-import { CheckboxChangeEvent } from 'antd/es/checkbox';
+import type { CheckboxChangeEvent } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
-import { useIntl } from 'umi';
+import { useIntl } from '@umijs/max';
 export type TextEditorProps = {
   appId: string;
   appName: string;
@@ -73,7 +73,7 @@ const TextEditor: React.FC<TextEditorProps> = (props) => {
         id: 'save'
       })}
       width={800}
-      visible={props.ModalVisible}
+      open={props.ModalVisible}
       onCancel={() => {
         props.onCancel();
       }}

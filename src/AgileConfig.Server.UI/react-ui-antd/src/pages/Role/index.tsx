@@ -1,11 +1,10 @@
 import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { PageContainer } from '@ant-design/pro-layout';
-import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
+import { ActionType, PageContainer, ProColumns, ProTable } from '@ant-design/pro-components';
 import { Button, message, Modal, Space, Tag } from 'antd';
-import { ModalForm, ProFormSelect, ProFormText } from '@ant-design/pro-form';
+import { ModalForm, ProFormSelect, ProFormText } from '@ant-design/pro-components';
 import type { CustomTagProps } from 'rc-select/lib/BaseSelect';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useIntl } from 'umi';
+import { useIntl } from '@umijs/max';
 import type { RoleFormValues, RoleItem } from './data';
 import { createRole, deleteRole, fetchSupportedRolePermissions, queryRoles, updateRole } from '@/services/role';
 import { RequireFunction } from '@/utils/permission';
@@ -272,8 +271,8 @@ const RolePage: React.FC = () => {
 
       <ModalForm<RoleFormValues>
         title={intl.formatMessage({ id: 'pages.role.form.title.add', defaultMessage: 'Add Role' })}
-        visible={createModalVisible}
-        onVisibleChange={setCreateModalVisible}
+        open={createModalVisible}
+        onOpenChange={setCreateModalVisible}
         initialValues={{ functions: [] }}
         onFinish={async (values) => {
           const success = await handleCreate(values);
@@ -307,8 +306,8 @@ const RolePage: React.FC = () => {
       {updateModalVisible && (
         <ModalForm<RoleFormValues>
           title={intl.formatMessage({ id: 'pages.role.form.title.edit', defaultMessage: 'Edit Role' })}
-          visible={updateModalVisible}
-          onVisibleChange={(visible) => {
+          open={updateModalVisible}
+          onOpenChange={(visible) => {
             setUpdateModalVisible(visible);
             if (!visible) {
               setCurrentRole(undefined);

@@ -72,7 +72,11 @@ const checkPermissions = <T, K>(
 
 export { checkPermissions };
 
-function check<T, K>(authority: IAuthorityType, target: T, Exception: K): T | K | React.ReactNode {
+function check<T, K>(
+  authority: IAuthorityType,
+  target: T,
+  Exception: K,
+): T | K | React.ReactNode {
   return checkPermissions<T, K>(authority, CURRENT, target, Exception);
 }
 

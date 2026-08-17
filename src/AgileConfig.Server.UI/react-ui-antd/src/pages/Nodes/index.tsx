@@ -1,14 +1,12 @@
 import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
-import { PageContainer } from '@ant-design/pro-layout';
-import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
+import { ActionType, ModalForm, PageContainer, ProColumns, ProFormText, ProFormTextArea, ProTable } from '@ant-design/pro-components';
 import { Button, FormInstance, message,Modal } from 'antd';
 // hasFunction no longer needed after migrating to <RequireFunction>
 import { RequireFunction } from '@/utils/permission';
 import React, { useState, useRef } from 'react';
 import { NodeItem } from './data';
 import { queryNodes, addNode, delNode,allClientReload } from './service';
-import { useIntl } from 'umi';
+import { useIntl } from '@umijs/max';
 // Removed AuthorizedEle/functionKeys: using hasFunction for gating now
 
 const { confirm } = Modal;
@@ -108,7 +106,7 @@ const nodeList:React.FC = () => {
         id: 'pages.nodes.remark',
       }),
       dataIndex: 'remark',
-      hideInSearch: true,
+      search: false,
     },
     {
       title: intl.formatMessage({
@@ -136,7 +134,7 @@ const nodeList:React.FC = () => {
         id: 'pages.nodes.lastEchoTime',
       }),
       dataIndex: 'lastEchoTime',
-      hideInSearch: true,
+      search: false,
       valueType: 'dateTime',
     },
     {
@@ -144,7 +142,7 @@ const nodeList:React.FC = () => {
         id: 'pages.nodes.createTime',
       }),
       dataIndex: 'createTime',
-      hideInSearch: true,
+      search: false,
       valueType: 'dateTime',
     },
     {
@@ -223,8 +221,8 @@ const nodeList:React.FC = () => {
         title={intl.formatMessage({
           id: 'pages.nodes.new',
         })}
-        visible={createModalVisible}
-        onVisibleChange={handleModalVisible}
+        open={createModalVisible}
+        onOpenChange={handleModalVisible}
         onFinish={async (value) => {
           const success = await handleAdd(value as NodeItem);
           if (success) {

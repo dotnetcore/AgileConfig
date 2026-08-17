@@ -1,5 +1,5 @@
 import { Card } from 'antd';
-import { history, useIntl } from 'umi';
+import { history, useIntl } from '@umijs/max';
 import { useState } from 'react';
 import { getVisitApps } from '@/utils/latestVisitApps';
 

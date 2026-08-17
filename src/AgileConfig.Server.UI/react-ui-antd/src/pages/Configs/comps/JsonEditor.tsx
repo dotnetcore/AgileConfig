@@ -3,9 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { getConfigJson, saveJson } from '../service';
 import Editor from '@monaco-editor/react';
 import { loader } from '@monaco-editor/react';
-import { CheckboxChangeEvent } from 'antd/lib/checkbox/Checkbox';
+import type { CheckboxChangeEvent } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
-import { useIntl } from 'umi';
+import { useIntl } from '@umijs/max';
 loader.config({ paths: { vs: 'monaco-editor/min/vs' } });
 
 export type JsonEditorProps = {
@@ -68,7 +68,7 @@ const JsonEditor: React.FC<JsonEditorProps> = (props) => {
       title={intl.formatMessage({id: 'pages.configs.json_editor_title'})}
       okText={intl.formatMessage({id: 'pages.configs.save'})}
       width={800}
-      visible={props.ModalVisible}
+      open={props.ModalVisible}
       onCancel={props.onCancel}
       footer={
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
