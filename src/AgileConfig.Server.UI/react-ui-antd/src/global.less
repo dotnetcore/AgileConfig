@@ -19,6 +19,7 @@ canvas {
 }
 
 body {
+  margin: 0;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -85,4 +86,19 @@ ol {
 body {
   color: var(--ant-color-text, rgba(0, 0, 0, 0.88));
   background: var(--ant-color-bg-layout, #f5f5f5);
+}
+
+.ant-design-pro.ant-pro-layout .ant-pro-layout-container {
+  min-height: 100vh;
+}
+
+.ant-design-pro.ant-pro-layout .ant-pro-layout-container > main {
+  flex: 1 0 auto;
+}
+
+.layout-footer {
+  flex-shrink: 0;
+  margin-top: auto;
+  margin-bottom: 10px;
+  padding: 0 16px;
 }
