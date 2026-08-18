@@ -1,4 +1,4 @@
-@import '~antd/es/style/themes/default.less';
+@import '~@/styles/variables.less';
 
 .container {
   display: flex;
@@ -71,17 +71,9 @@
 }
 
 :global(html.dark-mode) {
-  .container {
-    background: #141414;
-  }
-
   @media (min-width: @screen-md-min) {
     .container {
       background-image: none;
     }
-  }
-
-  .title {
-    color: rgba(255, 255, 255, 0.85);
   }
 }

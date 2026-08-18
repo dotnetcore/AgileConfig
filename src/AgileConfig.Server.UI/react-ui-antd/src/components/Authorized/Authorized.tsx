@@ -8,6 +8,7 @@ import type Secured from './Secured';
 type AuthorizedProps = {
   authority: IAuthorityType;
   noMatch?: React.ReactNode;
+  children?: React.ReactNode;
 };
 
 type IAuthorizedType = React.FunctionComponent<AuthorizedProps> & {

@@ -7,6 +7,7 @@ namespace AgileConfig.Server.Data.Entity;
 
 [Table(Name = "agc_publish_timeline")]
 [OraclePrimaryKeyName("agc_publish_timeline_pk")]
+[BsonIgnoreExtraElements]
 public class PublishTimeline : IEntity<string>
 {
     [Column(Name = "app_id", StringLength = 36)]

@@ -1,20 +1,19 @@
 import {  DeleteOutlined, DownOutlined, PlusOutlined, RollbackOutlined, VerticalAlignTopOutlined } from '@ant-design/icons';
-import { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
-import { PageContainer } from '@ant-design/pro-layout';
-import ProTable, { ActionType, ProColumns, TableDropdown } from '@ant-design/pro-table';
-import { Badge, Button, Drawer, Dropdown, FormInstance, Input, List, Menu, message, Modal, Radio, Space, Tag } from 'antd';
+import { ActionType, ModalForm, PageContainer, ProColumns, ProFormText, ProFormTextArea, ProTable, TableDropdown } from '@ant-design/pro-components';
+import { Badge, Button, Drawer, Dropdown, FormInstance, Input, List, message, Modal, Radio, Space, Tag, Typography } from 'antd';
 import React, { useState, useRef, useEffect } from 'react';
 import UpdateForm from './comps/updateForm';
 import { ConfigListItem, PublishDetialConfig } from './data';
 import { queryConfigs, delConfig,delConfigs, addConfig, editConfig, queryConfigPublishedHistory, getWaitPublishStatus, publish, cancelEdit, exportJson, cancelSomeEdit } from './service';
-import Text from 'antd/lib/typography/Text';
 import moment from 'moment';
 import styles from './index.less';
 import JsonImport from './comps/JsonImport';
-import { connect, getIntl, getLocale, useIntl } from 'umi';
+import { connect, getIntl, getLocale, useIntl, useParams } from '@umijs/max';
 import { checkUserPermission } from '@/components/Authorized/AuthorizedElement';
 import { RequireFunction } from '@/utils/permission';
 import functionKeys from '@/models/functionKeys';
+
+const { Text } = Typography;
 import VersionHistory from './comps/versionHistory';
 import { getFunctions } from '@/utils/authority';
 import EnvSync from './comps/EnvSync';
@@ -203,18 +202,14 @@ const handleExportJson = async (appId: string, env:string) => {
 
 type ConfigsProps = {
   darkMode: boolean;
-  match: {
-    params: {
-      app_id: string;
-      app_name: string;
-    };
-  };
 };
 
 const configs: React.FC<ConfigsProps> = (props) => {
   const { darkMode } = props;
-  const appId = props.match.params.app_id;
-  const appName = props.match.params.app_name;
+  const { app_id: appId = '', app_name: appName = '' } = useParams<{
+    app_id: string;
+    app_name: string;
+  }>();
   useEffect(()=>{
     saveVisitApp(appId,appName);
   },[]);
@@ -331,21 +326,21 @@ const configs: React.FC<ConfigsProps> = (props) => {
     {
       title: intl.formatMessage({id:'pages.configs.table.cols.v'}),
       dataIndex: 'value',
-      hideInSearch: true,
+      search: false,
       ellipsis: true,
       copyable: true,
-      tip: intl.formatMessage({id:'pages.configs.table.cols.v.tip'})
+      tooltip: intl.formatMessage({id:'pages.configs.table.cols.v.tip'})
     },
     {
       title: intl.formatMessage({id:'pages.configs.table.cols.desc'}),
       dataIndex: 'description',
-      hideInSearch: true,
+      search: false,
       ellipsis: true,
     },
     {
       title: intl.formatMessage({id:'pages.configs.table.cols.create_time'}),
       dataIndex: 'createTime',
-      hideInSearch: true,
+      search: false,
       valueType: 'dateTime',
       width: 150,
       sorter: true,
@@ -606,22 +601,28 @@ const configs: React.FC<ConfigsProps> = (props) => {
           </Button>
         </RequireFunction>
           ,
-          <Dropdown overlay={
-            <Menu >
-              <Menu.Item hidden={!checkUserPermission(getFunctions(),functionKeys.Config_Publish,appId)} key="history" onClick={()=>{ setVersionHistoryFormModalVisible(true) }}>
-               {intl.formatMessage({id:'pages.config.history.title'})}
-              </Menu.Item>
-              <Menu.Item hidden={!checkUserPermission(getFunctions(),functionKeys.Config_Add,appId)} key="syncEnv" onClick={()=>{ setEnvSyncModalVisible(true) }}>
-                {intl.formatMessage({id: 'pages.configs.env_sync'})}
-              </Menu.Item>
-              <Menu.Item hidden={!checkUserPermission(getFunctions(),functionKeys.Config_Add,appId)} key="import" onClick={()=>{ setjsonImportFormModalVisible(true) }}>
-                {intl.formatMessage({id:'pages.configs.table.cols.action.importfromjosnfile'})}
-              </Menu.Item>
-              <Menu.Item key="export" onClick={()=>{handleExportJson(appId, currentEnv)}}>
-                {intl.formatMessage({id:'pages.configs.table.cols.action.exportJson'})}
-              </Menu.Item>
-            </Menu>
-          }>
+          <Dropdown
+            menu={{
+              items: [
+                checkUserPermission(getFunctions(), functionKeys.Config_Publish, appId)
+                  ? { key: 'history', label: intl.formatMessage({ id: 'pages.config.history.title' }) }
+                  : null,
+                checkUserPermission(getFunctions(), functionKeys.Config_Add, appId)
+                  ? { key: 'syncEnv', label: intl.formatMessage({ id: 'pages.configs.env_sync' }) }
+                  : null,
+                checkUserPermission(getFunctions(), functionKeys.Config_Add, appId)
+                  ? { key: 'import', label: intl.formatMessage({ id: 'pages.configs.table.cols.action.importfromjosnfile' }) }
+                  : null,
+                { key: 'export', label: intl.formatMessage({ id: 'pages.configs.table.cols.action.exportJson' }) },
+              ],
+              onClick: ({ key }) => {
+                if (key === 'history') setVersionHistoryFormModalVisible(true);
+                if (key === 'syncEnv') setEnvSyncModalVisible(true);
+                if (key === 'import') setjsonImportFormModalVisible(true);
+                if (key === 'export') handleExportJson(appId, currentEnv);
+              },
+            }}
+          >
           <Button>
             {intl.formatMessage({id: 'pages.configs.more'})} <DownOutlined />
           </Button>
@@ -715,8 +716,8 @@ const configs: React.FC<ConfigsProps> = (props) => {
         }
         formRef={addFormRef}
         title={intl.formatMessage({id:'pages.configs.from.title.add'})}
-        visible={createModalVisible}
-        onVisibleChange={setCreateModalVisible}
+        open={createModalVisible}
+        onOpenChange={setCreateModalVisible}
         onFinish={
           async (value) => {
             const success = await handleAdd(value as ConfigListItem, currentEnv);
@@ -871,7 +872,7 @@ const configs: React.FC<ConfigsProps> = (props) => {
         </TextEditor>
       }
 
-      <Drawer title={intl.formatMessage({id:'pages.config.history.title'})} visible={modifyLogsModalVisible} width="400" onClose={() => { setmodifyLogsModalVisible(false); setModifyLogs([]); }} >
+      <Drawer title={intl.formatMessage({id:'pages.config.history.title'})} open={modifyLogsModalVisible} width="400" onClose={() => { setmodifyLogsModalVisible(false); setModifyLogs([]); }} >
         <List
           className={styles.history}
           header={false}

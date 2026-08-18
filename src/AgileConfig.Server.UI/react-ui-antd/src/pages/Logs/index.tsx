@@ -1,8 +1,7 @@
-import { PageContainer } from '@ant-design/pro-layout';
+import { PageContainer, ProColumns, ProTable } from '@ant-design/pro-components';
 import { RequireFunction } from '@/utils/permission';
-import ProTable, { ProColumns } from '@ant-design/pro-table';
 import React, { useState, useEffect } from 'react';
-import { useIntl } from 'umi';
+import { useIntl } from '@umijs/max';
 import { queryLogs } from './service';
 import { queryApps } from '../Apps/service';
 
@@ -50,7 +49,7 @@ const logs:React.FC = () =>  {
       title: intl.formatMessage({id: 'pages.logs.table.time'}),
       dataIndex: 'logTime',
       valueType: 'dateTime',
-      hideInSearch: true,
+      search: false,
     },
     {
       title: intl.formatMessage({id: 'pages.logs.table.time'}),
@@ -69,7 +68,7 @@ const logs:React.FC = () =>  {
     {
       title: intl.formatMessage({id: 'pages.logs.table.content'}),
       dataIndex: 'logText',
-      hideInSearch: true
+      search: false
     },
   ];
   return (

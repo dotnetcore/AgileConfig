@@ -1,7 +1,6 @@
-import type { Reducer, Effect } from 'umi';
+import type { Reducer, Effect } from '@umijs/max';
 
 import type { NoticeIconData } from '@/components/NoticeIcon';
-import { queryNotices } from '@/services/user';
 import type { ConnectState } from './connect.d';
 
 export type NoticeItem = {
@@ -19,7 +18,6 @@ export type GlobalModelType = {
   namespace: 'global';
   state: GlobalModelState;
   effects: {
-    fetchNotices: Effect;
     clearNotices: Effect;
     changeNoticeReadState: Effect;
   };
@@ -39,23 +37,6 @@ const GlobalModel: GlobalModelType = {
   },
 
   effects: {
-    *fetchNotices(_, { call, put, select }) {
-      const data = yield call(queryNotices);
-      yield put({
-        type: 'saveNotices',
-        payload: data,
-      });
-      const unreadCount: number = yield select(
-        (state: ConnectState) => state.global.notices.filter((item) => !item.read).length,
-      );
-      yield put({
-        type: 'user/changeNotifyCount',
-        payload: {
-          totalCount: data.length,
-          unreadCount,
-        },
-      });
-    },
     *clearNotices({ payload }, { put, select }) {
       yield put({
         type: 'saveClearedNotices',
@@ -108,8 +89,8 @@ const GlobalModel: GlobalModelType = {
     },
     saveNotices(state, { payload }): GlobalModelState {
       return {
-        collapsed: false,
         ...state,
+        collapsed: state?.collapsed ?? false,
         notices: payload,
       };
     },

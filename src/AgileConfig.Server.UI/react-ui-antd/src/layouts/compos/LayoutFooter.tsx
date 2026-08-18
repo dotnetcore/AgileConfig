@@ -4,10 +4,9 @@ import React from "react"
 
 const LayoutFooter : React.FC =()=>{
     return (
-        <div style={{
+        <div className="layout-footer" style={{
           display:'flex',
           justifyContent: 'center',
-          marginBottom: '10px',
           color: '#bfbfbf'
         }}>
           v

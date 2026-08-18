@@ -1,4 +1,4 @@
-import { getIntl, getLocale, useIntl } from 'umi';
+import { getIntl, getLocale, useIntl } from '@umijs/max';
 import { UploadOutlined } from '@ant-design/icons';
 import { Alert, Button, message, Modal, Space, Table, Upload } from 'antd';
 import React, { useMemo, useState } from 'react';
@@ -6,12 +6,12 @@ import { AppImportFile, AppImportPreviewItem, AppImportPreviewResult } from '../
 import { importApps, previewImportApps } from '../service';
 
 export type AppImportProps = {
-  visible: boolean;
+  open: boolean;
   onCancel: () => void;
   onSuccess: () => void;
 };
 
-const AppImport: React.FC<AppImportProps> = ({ visible, onCancel, onSuccess }) => {
+const AppImport: React.FC<AppImportProps> = ({ open, onCancel, onSuccess }) => {
   const intl = useIntl();
   const [preview, setPreview] = useState<AppImportPreviewResult>();
   const [importFile, setImportFile] = useState<AppImportFile>();
@@ -124,14 +124,14 @@ const AppImport: React.FC<AppImportProps> = ({ visible, onCancel, onSuccess }) =
       width={1000}
       maskClosable={false}
       title={intl.formatMessage({ id: 'pages.app.import.title' })}
-      visible={visible}
+      open={open}
       onCancel={() => {
         reset();
         onCancel();
       }}
       onOk={handleImport}
       okButtonProps={{ disabled: !preview?.apps?.length || !!preview?.errors?.length, loading: submitting }}
-      destroyOnClose
+      destroyOnHidden
     >
       <Space direction="vertical" style={{ width: '100%' }} size="middle">
         <Alert type="info" showIcon message={intl.formatMessage({ id: 'pages.app.import.tip' })} />

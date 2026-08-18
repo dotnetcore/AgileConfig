@@ -1,17 +1,20 @@
 // https://umijs.org/config/
-import { defineConfig } from 'umi';
-import defaultSettings from './defaultSettings';
+import { defineConfig } from '@umijs/max';
 import proxy from './proxy';
 import routes from './routes';
 
 const { REACT_APP_ENV } = process.env;
+const proxyEnv = (REACT_APP_ENV || 'dev') as keyof typeof proxy;
 
 export default defineConfig({
   hash: true,
-  antd: {},
-  dva: {
-    hmr: true,
+  esbuildMinifyIIFE: true,
+  define: {
+    REACT_APP_ENV: REACT_APP_ENV || false,
+    ANT_DESIGN_PRO_ONLY_DO_NOT_USE_IN_YOUR_PRODUCTION: false,
   },
+  antd: {},
+  dva: {},
   history: {
     type: 'hash',
   },
@@ -22,25 +25,14 @@ export default defineConfig({
     // default true, when it is true, will use `navigator.language` overwrite default
     baseNavigator: true,
   },
-  dynamicImport: {
-    loading: '@/components/PageLoading/index'
-  },
-  targets: {
-    ie: 11,
-  },
   // umi routes: https://umijs.org/docs/routing
   routes,
-  // Theme for antd: https://ant.design/docs/react/customize-theme-cn
-  theme: {
-    'primary-color': defaultSettings.primaryColor,
-  },
   title: false,
   ignoreMomentLocale: true,
-  proxy: proxy[REACT_APP_ENV || 'dev'],
+  proxy: proxy[proxyEnv],
   manifest: {
     basePath: '/a/',
   },
-  esbuild: {},
   publicPath: '/',
-  runtimePublicPath: true
+  runtimePublicPath: {},
 });

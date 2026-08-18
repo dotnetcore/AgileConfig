@@ -1,6 +1,6 @@
-import type { Effect, Reducer } from 'umi';
+import type { Effect, Reducer } from '@umijs/max';
 
-import { current, query as queryUsers } from '@/services/user';
+import { current } from '@/services/user';
 import { setAuthority, setCategories, setFunctions, setUserInfo } from '@/utils/authority';
 import { sys } from '@/services/system';
 import { setSysInfo } from '@/utils/system';
@@ -28,7 +28,6 @@ export type UserModelType = {
   namespace: 'user';
   state: UserModelState;
   effects: {
-    fetch: Effect;
     fetchCurrent: Effect;
   };
   reducers: {
@@ -45,14 +44,7 @@ const UserModel: UserModelType = {
   },
 
   effects: {
-    *fetch(_, { call, put }) {
-      const response = yield call(queryUsers);
-      yield put({
-        type: 'save',
-        payload: response,
-      });
-    },
-    *fetchCurrent(_, { call, put }) {
+    *fetchCurrent(_, { call, put }): Generator<any, void, any> {
       const currentInfo = yield call(current);
       console.log('current ', current);
       const sysInfo = yield call(sys);

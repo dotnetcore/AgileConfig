@@ -1,4 +1,4 @@
-import type { Reducer } from 'umi';
+import type { Reducer } from '@umijs/max';
 import type { DefaultSettings } from '../../config/defaultSettings';
 import defaultSettings from '../../config/defaultSettings';
 import { applyDarkMode, getStoredDarkMode } from '@/utils/theme';

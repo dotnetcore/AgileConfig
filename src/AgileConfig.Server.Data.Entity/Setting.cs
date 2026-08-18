@@ -7,6 +7,7 @@ namespace AgileConfig.Server.Data.Entity;
 
 [Table(Name = "agc_setting")]
 [OraclePrimaryKeyName("agc_setting_pk")]
+[BsonIgnoreExtraElements]
 public class Setting : IEntity<string>
 {
     [Column(Name = "value", StringLength = 200)]

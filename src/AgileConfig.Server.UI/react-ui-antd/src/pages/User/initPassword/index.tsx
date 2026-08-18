@@ -1,10 +1,10 @@
 import {
   LockTwoTone,
 } from '@ant-design/icons';
-import { Alert, message, Tabs } from 'antd';
-import React, { useEffect, useState } from 'react';
-import ProForm, { ProFormText } from '@ant-design/pro-form';
-import { useIntl, connect, FormattedMessage, history, getIntl, getLocale } from 'umi';
+import { message } from 'antd';
+import React, { useEffect } from 'react';
+import { ProForm, ProFormText } from '@ant-design/pro-components';
+import { useIntl, FormattedMessage, history, getIntl, getLocale } from '@umijs/max';
 
 import styles from './index.less';
 import { InitPasswordModel } from './data';
@@ -37,7 +37,7 @@ const handleSave = async function name(params: InitPasswordModel) {
   }
 }
 
-const InitPassword: React.FC = (props) => {
+const InitPassword: React.FC = () => {
   const intl = useIntl();
   useEffect(() => {
     const msg = intl.formatMessage({
@@ -66,7 +66,7 @@ const InitPassword: React.FC = (props) => {
           }
         }}
         onFinish={async (values) => {
-          const result = handleSave(values as InitPasswordModel)
+          await handleSave(values as InitPasswordModel);
         }}
       >
         <div style={

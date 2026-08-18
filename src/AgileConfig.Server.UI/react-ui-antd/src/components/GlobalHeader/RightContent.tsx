@@ -1,15 +1,15 @@
 import { BulbFilled, BulbOutlined } from '@ant-design/icons';
 import { Tag, Tooltip } from 'antd';
-import type { Settings as ProSettings } from '@ant-design/pro-layout';
+import type { Settings as ProSettings } from '@ant-design/pro-components';
 import React from 'react';
-import type { ConnectProps } from 'umi';
-import { connect, SelectLang, useIntl } from 'umi';
+import type { ConnectProps } from '@umijs/max';
+import { connect, SelectLang, useIntl } from '@umijs/max';
 import type { ConnectState } from '@/models/connect';
 import Avatar from './AvatarDropdown';
 import styles from './index.less';
 
 export type GlobalHeaderRightProps = {
-  theme?: ProSettings['navTheme'] | 'realDark';
+  theme?: ProSettings['navTheme'] | 'dark';
   darkMode?: boolean;
 } & Partial<ConnectProps> &
   Partial<ProSettings>;
@@ -20,7 +20,7 @@ const ENVTagColor = {
   pre: '#87d068',
 };
 
-const GlobalHeaderRight: React.SFC<GlobalHeaderRightProps> = (props) => {
+const GlobalHeaderRight: React.FC<GlobalHeaderRightProps> = (props) => {
   const { theme, layout } = props;
   const { formatMessage } = useIntl();
   const darkMode = !!props.darkMode;
@@ -67,7 +67,7 @@ const GlobalHeaderRight: React.SFC<GlobalHeaderRightProps> = (props) => {
 };
 
 export default connect(({ settings }: ConnectState) => ({
-  theme: settings.darkMode ? 'dark' : settings.navTheme,
+  theme: settings.darkMode ? ('dark' as const) : settings.navTheme,
   layout: settings.layout,
   darkMode: settings.darkMode,
 }))(GlobalHeaderRight);

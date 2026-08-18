@@ -1,15 +1,13 @@
 import { BellOutlined } from '@ant-design/icons';
-import { Badge, Spin, Tabs } from 'antd';
+import { Badge, Popover, Spin, Tabs } from 'antd';
+import type { TabsProps } from 'antd';
 import useMergedState from 'rc-util/es/hooks/useMergedState';
 import React from 'react';
 import classNames from 'classnames';
 import type { NoticeIconTabProps } from './NoticeList';
 import NoticeList from './NoticeList';
 
-import HeaderDropdown from '../HeaderDropdown';
 import styles from './index.less';
-
-const { TabPane } = Tabs;
 
 export type NoticeIconData = {
   avatar?: string | React.ReactNode;
@@ -58,7 +56,7 @@ const NoticeIcon: React.FC<NoticeIconProps> & {
     if (!children) {
       return null;
     }
-    const panes: React.ReactNode[] = [];
+    const items: TabsProps['items'] = [];
     React.Children.forEach(children, (child: React.ReactElement<NoticeIconTabProps>): void => {
       if (!child) {
         return;
@@ -67,8 +65,10 @@ const NoticeIcon: React.FC<NoticeIconProps> & {
       const len = list && list.length ? list.length : 0;
       const msgCount = count || count === 0 ? count : len;
       const tabTitle: string = msgCount > 0 ? `${title} (${msgCount})` : title;
-      panes.push(
-        <TabPane tab={tabTitle} key={tabKey}>
+      items.push({
+        label: tabTitle,
+        key: tabKey,
+        children: (
           <NoticeList
             {...child.props}
             clearText={clearText}
@@ -87,14 +87,12 @@ const NoticeIcon: React.FC<NoticeIconProps> & {
             showViewMore={showViewMore}
             title={title}
           />
-        </TabPane>,
-      );
+        ),
+      });
     });
     return (
       <Spin spinning={loading} delay={300}>
-        <Tabs className={styles.tabs} onChange={onTabChange}>
-          {panes}
-        </Tabs>
+        <Tabs className={styles.tabs} onChange={onTabChange} items={items} />
       </Spin>
     );
   };
@@ -120,16 +118,16 @@ const NoticeIcon: React.FC<NoticeIconProps> & {
   }
 
   return (
-    <HeaderDropdown
+    <Popover
       placement="bottomRight"
-      overlay={notificationBox}
-      overlayClassName={styles.popover}
-      trigger={['click']}
-      visible={visible}
-      onVisibleChange={setVisible}
+      content={notificationBox}
+      classNames={{ root: styles.popover }}
+      trigger="click"
+      open={visible}
+      onOpenChange={setVisible}
     >
       {trigger}
-    </HeaderDropdown>
+    </Popover>
   );
 };
 

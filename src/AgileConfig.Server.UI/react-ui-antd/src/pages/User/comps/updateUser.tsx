@@ -1,5 +1,5 @@
-import { useIntl } from "umi";
-import {  ModalForm,  ProFormSelect,  ProFormText } from "@ant-design/pro-form";
+import { useIntl } from "@umijs/max";
+import { ModalForm, ProFormSelect, ProFormText } from "@ant-design/pro-components";
 import React from 'react';
 import { UserItem } from "../data";
 
@@ -29,7 +29,7 @@ const UpdateForm : React.FC<UpdateUserProps> = (props)=>{
       ...props.value,
       userRoleIds: props.value?.userRoleIds && props.value.userRoleIds.length > 0 ? props.value.userRoleIds : props.defaultRoleIds
     }}
-    visible={props.updateModalVisible}
+    open={props.updateModalVisible}
     modalProps={
       {
         onCancel: ()=>{

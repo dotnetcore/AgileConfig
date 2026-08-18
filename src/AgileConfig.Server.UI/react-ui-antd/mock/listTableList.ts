@@ -1,7 +1,18 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Request, Response } from 'express';
 import { parse } from 'url';
-import { TableListItem, TableListParams } from '@/pages/TableList/data';
+
+type TableListItem = Record<string, any> & {
+  key: number;
+  name: string;
+};
+
+type TableListParams = Record<string, any> & {
+  sorter?: string;
+  filter?: string;
+  name?: string;
+  currentPage?: number;
+};
 
 // mock tableListDataSource
 const genList = (current: number, pageSize: number) => {

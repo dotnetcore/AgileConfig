@@ -1,4 +1,4 @@
-import type { MenuDataItem } from '@ant-design/pro-layout';
+import type { MenuDataItem } from '@ant-design/pro-components';
 import { GlobalModelState } from './global';
 import { UserModelState } from './user';
 import type { StateType } from './login';

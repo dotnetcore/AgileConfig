@@ -1,4 +1,5 @@
 const themeStorageKey = 'agileconfig.theme';
+export const themeChangeEvent = 'agileconfig.theme.change';
 
 export const getStoredDarkMode = (): boolean => {
   if (typeof window === 'undefined') {
@@ -23,5 +24,7 @@ export const applyDarkMode = (darkMode: boolean): void => {
     } catch {
       // Storage can be unavailable in private or restricted browsing contexts.
     }
+
+    window.dispatchEvent(new CustomEvent(themeChangeEvent, { detail: { darkMode } }));
   }
 };

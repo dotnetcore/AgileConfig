@@ -1,8 +1,9 @@
 import { LogoutOutlined, SettingOutlined, } from '@ant-design/icons';
-import { Menu, Space, Spin } from 'antd';
+import type { MenuProps } from 'antd';
+import { Spin } from 'antd';
 import React from 'react';
-import type { ConnectProps } from 'umi';
-import {  connect,getIntl, getLocale } from 'umi';
+import type { ConnectProps } from '@umijs/max';
+import {  connect,getIntl, getLocale } from '@umijs/max';
 import type { ConnectState } from '@/models/connect';
 import type { CurrentUser } from '@/models/user';
 import HeaderDropdown from '../HeaderDropdown';
@@ -20,12 +21,7 @@ class AvatarDropdown extends React.Component<GlobalHeaderRightProps,{changePassw
     super(props);
     this.state = {changePasswordModalVisible: false};
   }
-  onMenuClick = (event: {
-    key: React.Key;
-    keyPath: React.Key[];
-    item: React.ReactInstance;
-    domEvent: React.MouseEvent<HTMLElement>;
-  }) => {
+  onMenuClick: MenuProps['onClick'] = (event) => {
     const { key } = event;
 
     if (key === 'logout') {
@@ -53,28 +49,19 @@ class AvatarDropdown extends React.Component<GlobalHeaderRightProps,{changePassw
         avatar: '',
         name: '',
       },
-      menu,
     } = this.props;
-    const menuHeaderDropdown = (
-      <Menu className={styles.menu} selectedKeys={[]} onClick={this.onMenuClick}>
-        <Menu.Item key="resetPassword">
-          <SettingOutlined />
-            {
-             intl.formatMessage({
-              id: 'menu.account.resetPassword'
-             })
-            }
-        </Menu.Item>
-        <Menu.Item key="logout">
-          <LogoutOutlined />
-           {
-             intl.formatMessage({
-              id: 'menu.account.logout'
-             })
-           }
-        </Menu.Item>
-      </Menu>
-    );
+    const menuItems: MenuProps['items'] = [
+      {
+        key: 'resetPassword',
+        icon: <SettingOutlined />,
+        label: intl.formatMessage({ id: 'menu.account.resetPassword' }),
+      },
+      {
+        key: 'logout',
+        icon: <LogoutOutlined />,
+        label: intl.formatMessage({ id: 'menu.account.logout' }),
+      },
+    ];
     return (
 
       currentUser && currentUser.name ? (
@@ -105,7 +92,10 @@ class AvatarDropdown extends React.Component<GlobalHeaderRightProps,{changePassw
             </Changepassword>
           }
           
-        <HeaderDropdown overlay={menuHeaderDropdown}>
+        <HeaderDropdown
+          menu={{ items: menuItems, onClick: this.onMenuClick, selectedKeys: [] }}
+          overlayClassName={styles.menu}
+        >
           <span className={`${styles.action} ${styles.account}`}>
             <span className={`${styles.name} anticon`}>
             <img 
