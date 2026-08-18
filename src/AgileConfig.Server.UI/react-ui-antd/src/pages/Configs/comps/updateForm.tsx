@@ -1,4 +1,4 @@
-import {  ModalForm, ProFormText, ProFormTextArea } from "@ant-design/pro-form";
+import { ModalForm, ProFormText, ProFormTextArea } from "@ant-design/pro-components";
 import React from 'react';
 import { useIntl } from "react-intl";
 import { ConfigListItem } from "../data";
@@ -19,7 +19,7 @@ const UpdateForm : React.FC<UpdateFormProps> = (props)=>{
     <ModalForm 
     title={intl.formatMessage({id:'pages.configs.from.title.edit'})}
     initialValues={props.value}
-    visible={props.updateModalVisible}
+    open={props.updateModalVisible}
     modalProps={
       {
         onCancel: ()=>{

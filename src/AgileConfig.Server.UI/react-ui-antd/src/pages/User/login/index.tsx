@@ -3,10 +3,10 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import React, { useEffect, useState } from 'react';
-import ProForm, { ProFormText } from '@ant-design/pro-form';
-import { useIntl, connect, FormattedMessage } from 'umi';
-import type { Dispatch } from 'umi';
-import { history } from 'umi';
+import { ProForm, ProFormText } from '@ant-design/pro-components';
+import { useIntl, connect, FormattedMessage } from '@umijs/max';
+import type { Dispatch } from '@umijs/max';
+import { history } from '@umijs/max';
 import type { StateType } from '@/models/login';
 import type { LoginParamsType } from '@/services/login';
 import type { ConnectState } from '@/models/connect';

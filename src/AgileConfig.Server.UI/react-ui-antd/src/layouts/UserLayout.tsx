@@ -1,15 +1,21 @@
-import type { MenuDataItem } from '@ant-design/pro-layout';
-import { getMenuData, getPageTitle } from '@ant-design/pro-layout';
+import type { MenuDataItem, ProLayoutProps } from '@ant-design/pro-components';
+import { getMenuData, getPageTitle } from '@ant-design/pro-components';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import type { ConnectProps } from 'umi';
-import { Link, SelectLang, useIntl, connect, FormattedMessage } from 'umi';
+import type { ConnectProps } from '@umijs/max';
+import { Link, Outlet, SelectLang, useIntl, connect, FormattedMessage } from '@umijs/max';
 import React from 'react';
 import type { ConnectState } from '@/models/connect';
 import styles from './UserLayout.less';
 import LayoutFooter from './compos/LayoutFooter';
 
+type UserLayoutRoute = Parameters<typeof getMenuData>[0][number];
+type UserLayoutLocation = NonNullable<ProLayoutProps['location']>;
+
 export type UserLayoutProps = {
   breadcrumbNameMap: Record<string, MenuDataItem>;
+  children?: React.ReactNode;
+  route?: UserLayoutRoute;
+  location?: UserLayoutLocation;
 } & Partial<ConnectProps>;
 
 const UserLayout: React.FC<UserLayoutProps> = (props) => {
@@ -57,7 +63,7 @@ const UserLayout: React.FC<UserLayoutProps> = (props) => {
               />
             </div>
           </div>
-          {children}
+          {children ?? <Outlet />}
         </div>
         <LayoutFooter />
       </div>

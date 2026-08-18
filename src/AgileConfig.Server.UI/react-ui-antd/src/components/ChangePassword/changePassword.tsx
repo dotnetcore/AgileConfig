@@ -1,8 +1,8 @@
 import request from "@/utils/request";
-import { ModalForm, ProFormText } from "@ant-design/pro-form";
+import { ModalForm, ProFormText } from "@ant-design/pro-components";
 import {  message } from "antd";
 import React from 'react';
-import { useIntl } from "umi";
+import { useIntl } from "@umijs/max";
 
 export type ChangepasswordProps = {
     changePasswordModalVisible: boolean;
@@ -28,7 +28,7 @@ const Changepassword : React.FC<ChangepasswordProps> = (props)=>{
         <ModalForm 
         title={ intl.formatMessage({id: 'resetpassword.title'}) }
         width={400}
-        visible={props.changePasswordModalVisible}
+        open={props.changePasswordModalVisible}
         modalProps={
           {
             onCancel: ()=>{

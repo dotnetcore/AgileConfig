@@ -1,4 +1,4 @@
-@import '~antd/es/style/themes/default.less';
+@import '~@/styles/variables.less';
 
 html,
 body,
@@ -19,6 +19,7 @@ canvas {
 }
 
 body {
+  margin: 0;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -82,180 +83,22 @@ ol {
   background-color: #73d13d;
 }
 
-// Ant Design 4 generates its component palette at build time. These scoped
-// overrides keep the runtime theme switch consistent across application views.
-html.dark-mode {
-  color-scheme: dark;
+body {
+  color: var(--ant-color-text, rgba(0, 0, 0, 0.88));
+  background: var(--ant-color-bg-layout, #f5f5f5);
+}
 
-  body,
-  #root,
-  .ant-layout,
-  .ant-pro-basicLayout,
-  .ant-pro-basicLayout-content,
-  .ant-pro-page-container,
-  .ant-pro-grid-content,
-  .ant-pro-page-container-children-content {
-    color: rgba(255, 255, 255, 0.85);
-    background: #141414;
-  }
+.ant-design-pro.ant-pro-layout .ant-pro-layout-container {
+  min-height: 100vh;
+}
 
-  .ant-pro-global-header,
-  .ant-pro-global-header .ant-pro-global-header-layout-mix,
-  .ant-pro-sider,
-  .ant-layout-sider {
-    background: #1f1f1f;
-  }
+.ant-design-pro.ant-pro-layout .ant-pro-layout-container > main {
+  flex: 1 0 auto;
+}
 
-  .ant-card,
-  .ant-modal-content,
-  .ant-drawer-content,
-  .ant-dropdown-menu,
-  .ant-popover-inner,
-  .ant-select-dropdown,
-  .ant-picker-dropdown,
-  .ant-cascader-menu,
-  .ant-menu-submenu-popup,
-  .ant-message-notice-content,
-  .ant-notification-notice,
-  .ant-tooltip-inner {
-    color: rgba(255, 255, 255, 0.85);
-    background: #1f1f1f;
-  }
-
-  .ant-card,
-  .ant-modal-header,
-  .ant-modal-footer,
-  .ant-drawer-header,
-  .ant-popover-inner,
-  .ant-dropdown-menu,
-  .ant-select-dropdown,
-  .ant-picker-panel-container,
-  .ant-table,
-  .ant-table-container,
-  .ant-descriptions-bordered .ant-descriptions-item-label,
-  .ant-descriptions-bordered .ant-descriptions-item-content {
-    border-color: #434343;
-  }
-
-  .ant-modal-header,
-  .ant-drawer-header,
-  .ant-table,
-  .ant-table-container,
-  .ant-table-thead > tr > th,
-  .ant-table-tbody > tr > td,
-  .ant-descriptions-bordered .ant-descriptions-item-label,
-  .ant-descriptions-bordered .ant-descriptions-item-content,
-  .ant-list-item,
-  .ant-collapse,
-  .ant-collapse > .ant-collapse-item,
-  .ant-tabs-top > .ant-tabs-nav::before,
-  .ant-tabs-bottom > .ant-tabs-nav::before,
-  .ant-tabs-top > div > .ant-tabs-nav::before,
-  .ant-tabs-bottom > div > .ant-tabs-nav::before {
-    border-color: #434343;
-  }
-
-  .ant-modal-header,
-  .ant-drawer-header,
-  .ant-table-thead > tr > th,
-  .ant-descriptions-bordered .ant-descriptions-item-label,
-  .ant-collapse,
-  .ant-collapse > .ant-collapse-item,
-  .ant-pagination-item,
-  .ant-pagination-prev .ant-pagination-item-link,
-  .ant-pagination-next .ant-pagination-item-link {
-    background: #262626;
-  }
-
-  .ant-table-tbody > tr > td,
-  .ant-table-tbody > tr.ant-table-row:hover > td,
-  .ant-descriptions-bordered .ant-descriptions-item-content,
-  .ant-collapse-content,
-  .ant-collapse-content > .ant-collapse-content-box {
-    color: rgba(255, 255, 255, 0.85);
-    background: #1f1f1f;
-  }
-
-  .ant-input,
-  .ant-input-affix-wrapper,
-  .ant-input-number,
-  .ant-input-number-input,
-  .ant-select:not(.ant-select-customize-input) .ant-select-selector,
-  .ant-picker,
-  .ant-mentions,
-  .ant-transfer-list,
-  .ant-btn:not(.ant-btn-primary):not(.danger):not(.warn):not(.success) {
-    color: rgba(255, 255, 255, 0.85);
-    background: #141414;
-    border-color: #434343;
-  }
-
-  .ant-input::placeholder,
-  .ant-input-number-input::placeholder,
-  .ant-select-selection-placeholder,
-  .ant-empty-description,
-  .ant-form-item-label > label,
-  .ant-descriptions-title,
-  .ant-modal-title,
-  .ant-drawer-title,
-  .ant-list-item-meta-title,
-  .ant-statistic-title,
-  .ant-page-header-heading-title {
-    color: rgba(255, 255, 255, 0.65);
-  }
-
-  .ant-select-item,
-  .ant-dropdown-menu-item,
-  .ant-dropdown-menu-submenu-title,
-  .ant-menu-item,
-  .ant-menu-submenu-title,
-  .ant-picker-cell,
-  .ant-picker-header,
-  .ant-picker-content th,
-  .ant-pagination-item a,
-  .ant-pagination-prev .ant-pagination-item-link,
-  .ant-pagination-next .ant-pagination-item-link,
-  .ant-tabs-tab,
-  .ant-list-item,
-  .ant-descriptions-item-label,
-  .ant-descriptions-item-content {
-    color: rgba(255, 255, 255, 0.85);
-  }
-
-  .ant-select-item-option-active:not(.ant-select-item-option-disabled),
-  .ant-dropdown-menu-item:hover,
-  .ant-dropdown-menu-submenu-title:hover,
-  .ant-picker-cell-in-view.ant-picker-cell-selected .ant-picker-cell-inner,
-  .ant-picker-cell-in-view.ant-picker-cell-in-range::before {
-    background: #303030;
-  }
-
-  .ant-pagination-item-active {
-    border-color: @primary-color;
-  }
-
-  .ant-pagination-item-active a,
-  .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn,
-  .ant-picker-cell-in-view.ant-picker-cell-today .ant-picker-cell-inner::before {
-    color: @primary-color;
-  }
-
-  .ant-result-title,
-  .ant-result-subtitle,
-  .ant-typography,
-  .ant-typography h1,
-  .ant-typography h2,
-  .ant-typography h3,
-  .ant-typography h4,
-  .ant-typography h5,
-  .ant-typography h6 {
-    color: rgba(255, 255, 255, 0.85);
-  }
-
-  .ant-pro-table .ant-card,
-  .ant-pro-page-container-children-container,
-  .ant-pro-page-container-content {
-    background: transparent;
-  }
-
+.layout-footer {
+  flex-shrink: 0;
+  margin-top: auto;
+  margin-bottom: 10px;
+  padding: 0 16px;
 }

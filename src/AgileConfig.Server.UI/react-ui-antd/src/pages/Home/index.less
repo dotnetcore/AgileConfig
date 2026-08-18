@@ -1,9 +1,11 @@
-@import '~antd/es/style/themes/default.less';
+@import '~@/styles/variables.less';
 .summary {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-around;
     align-items: center;
     .item {
+        box-sizing: border-box;
         cursor: pointer;
         display: flex;
         justify-content: space-between;
@@ -34,11 +36,7 @@
 }
 
 .panel {
-    background-color: white;
+    background-color: var(--ant-color-bg-container, #fff);
     padding: 20px 20px;
     margin-bottom: 20px;
-}
-
-:global(html.dark-mode) .panel {
-    background-color: #1f1f1f;
 }

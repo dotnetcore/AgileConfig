@@ -1,13 +1,11 @@
 import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { PageContainer } from '@ant-design/pro-layout';
-import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
+import { ActionType, ModalForm, PageContainer, ProColumns, ProFormSelect, ProFormText, ProTable } from '@ant-design/pro-components';
 import { Button, FormInstance, message,Modal, Space, Tag } from 'antd';
 import React, { useState, useRef, useEffect } from 'react';
 import { UserItem } from './data';
 import { queryUsers, addUser, delUser, editUser, resetPassword } from './service';
 import { queryRoles } from '@/services/role';
-import { useIntl, getIntl, getLocale } from 'umi';
-import { ModalForm, ProFormSelect, ProFormText } from '@ant-design/pro-form';
+import { useIntl, getIntl, getLocale } from '@umijs/max';
 import UpdateUser from './comps/updateUser';
 import { getAuthority } from '@/utils/authority';
 import { RequireFunction } from '@/utils/permission';
@@ -193,7 +191,7 @@ const userList:React.FC = () => {
       }),
       dataIndex: 'userRoleNames',
       search: false,
-      renderFormItem: (_, { defaultRender }) => {
+      formItemRender: (_, { defaultRender }) => {
         return defaultRender(_);
       },
       render: (_, record) => (
@@ -325,11 +323,11 @@ const userList:React.FC = () => {
           })
         } 
         width="400px"
-        visible={createModalVisible}
+        open={createModalVisible}
         initialValues={{
           userRoleIds: getDefaultRoleIds(),
         }}
-        onVisibleChange={(visible) => {
+        onOpenChange={(visible) => {
           handleModalVisible(visible);
           if (visible) {
             addFormRef.current?.setFieldsValue({ userRoleIds: getDefaultRoleIds() });

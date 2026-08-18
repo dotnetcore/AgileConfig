@@ -1,8 +1,7 @@
 import { getEnvList } from "@/utils/system";
 import { message, Modal, Checkbox } from "antd";
-import { CheckboxValueType } from "antd/lib/checkbox/Group";
 import React from 'react';
-import { useIntl } from "umi";
+import { useIntl } from "@umijs/max";
 import { envSync } from "../service";
 const CheckboxGroup = Checkbox.Group;
 export type EnvSyncFormProps = {
@@ -15,16 +14,16 @@ export type EnvSyncFormProps = {
   
 const EnvSync : React.FC<EnvSyncFormProps> = (props)=>{
     const intl = useIntl();
-    const [checkedList, setCheckedList] = React.useState<CheckboxValueType[]>([]);
+    const [checkedList, setCheckedList] = React.useState<string[]>([]);
     const envList = getEnvList();
-    const onChange = (list:CheckboxValueType[]) => {
-      setCheckedList(list);
+    const onChange = (list: Array<string | number>) => {
+      setCheckedList(list.map(String));
     };
 
     return (
         <Modal 
           title={intl.formatMessage({id: 'pages.configs.sync_env_title'})}
-          visible={props.ModalVisible}
+          open={props.ModalVisible}
           onCancel={
             ()=>{
               props.onCancel();

@@ -1,10 +1,8 @@
-import React from 'react';
-import { Inspector } from 'react-dev-inspector';
+import React, { PropsWithChildren } from 'react';
+import { Outlet } from '@umijs/max';
 
-const InspectorWrapper = process.env.NODE_ENV === 'development' ? Inspector : React.Fragment;
-
-const Layout: React.FC = ({ children }) => {
-  return <InspectorWrapper>{children}</InspectorWrapper>;
+const Layout: React.FC<PropsWithChildren> = ({ children }) => {
+  return <>{children ?? <Outlet />}</>;
 };
 
 export default Layout;

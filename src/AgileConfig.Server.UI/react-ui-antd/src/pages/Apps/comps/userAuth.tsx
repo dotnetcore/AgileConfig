@@ -1,9 +1,9 @@
-import { useIntl } from "umi";
+import { useIntl } from "@umijs/max";
 import { checkUserPermission } from "@/components/Authorized/AuthorizedElement";
 import functionKeys from "@/models/functionKeys";
 import { allUsers } from "@/pages/User/service";
 import { getFunctions } from "@/utils/authority";
-import { ModalForm, ProFormSelect, ProFormText } from "@ant-design/pro-form";
+import { ModalForm, ProFormSelect, ProFormText } from "@ant-design/pro-components";
 import React, { useEffect, useState } from 'react';
 import { AppListItem, UserAppAuth } from "../data";
 import { getUserAppAuth } from "../service";
@@ -53,7 +53,7 @@ const UserAuth: React.FC<UserAuthProps> = (props) => {
     <ModalForm
       title={props.value?.name + ' - ' + intl.formatMessage({ id: 'pages.app.auth.title' })}
       initialValues={userAppAuthState}
-      visible={props.userAuthModalVisible}
+      open={props.userAuthModalVisible}
       submitter={
         canEditAuth ? {
           submitButtonProps: {},

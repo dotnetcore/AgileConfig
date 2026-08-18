@@ -50,7 +50,9 @@ public class ReactUiMiddleware
             if (refererValues.Any())
             {
                 var refererValue = refererValues.First();
-                if (refererValue.EndsWith("/ui", StringComparison.OrdinalIgnoreCase)
+                var isUiReferer = Uri.TryCreate(refererValue, UriKind.Absolute, out var refererUri)
+                                  && refererUri.AbsolutePath.TrimEnd('/').EndsWith("/ui", StringComparison.OrdinalIgnoreCase);
+                if (isUiReferer
                     || refererValue.Contains("/monaco-editor/", StringComparison.OrdinalIgnoreCase))
                     return true;
             }
@@ -156,6 +158,8 @@ public class ReactUiMiddleware
             {
                 context.Response.ContentType = uiFile.ContentType;
                 context.Response.Headers.TryAdd("last-modified", uiFile.LastModified.ToString("R"));
+                if (filePath.EndsWith("index.html", StringComparison.OrdinalIgnoreCase))
+                    context.Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";
                 return Task.CompletedTask;
             });
 

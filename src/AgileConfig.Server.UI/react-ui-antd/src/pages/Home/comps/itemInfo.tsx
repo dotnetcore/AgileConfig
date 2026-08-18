@@ -1,5 +1,5 @@
 import styles from '../index.less';
-import { useIntl,history } from 'umi';
+import { useIntl,history } from '@umijs/max';
 
 export type itemInfoProps = {
     type: string,
