@@ -26,6 +26,7 @@ public enum AppType
 
 [Table(Name = "agc_app")]
 [OraclePrimaryKeyName("agc_app_pk")]
+[BsonIgnoreExtraElements]
 public class App : IAppModel, IEntity<string>
 {
     [Column(Name = "secret", StringLength = 36)]

@@ -1,10 +1,12 @@
 ﻿using AgileConfig.Server.Common;
 using FreeSql.DataAnnotations;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace AgileConfig.Server.Data.Entity;
 
 [Table(Name = "agc_publish_detail")]
 [OraclePrimaryKeyName("agc_publish_detail_pk")]
+[BsonIgnoreExtraElements]
 public class PublishDetail : IEntity<string>
 {
     [Column(Name = "app_id", StringLength = 36)]

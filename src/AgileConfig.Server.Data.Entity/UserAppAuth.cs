@@ -1,10 +1,12 @@
 ﻿using AgileConfig.Server.Common;
 using FreeSql.DataAnnotations;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace AgileConfig.Server.Data.Entity;
 
 [Table(Name = "agc_user_app_auth")]
 [OraclePrimaryKeyName("agc_user_app_auth_pk")]
+[BsonIgnoreExtraElements]
 public class UserAppAuth : IEntity<string>
 {
     [Column(Name = "app_id", StringLength = 36)]

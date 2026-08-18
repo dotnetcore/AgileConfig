@@ -41,6 +41,7 @@ public enum OnlineStatus
 
 [Table(Name = "agc_config")]
 [OraclePrimaryKeyName("agc_config_pk")]
+[BsonIgnoreExtraElements]
 public class Config : IEntity<string>
 {
     [Column(Name = "app_id", StringLength = 36)]

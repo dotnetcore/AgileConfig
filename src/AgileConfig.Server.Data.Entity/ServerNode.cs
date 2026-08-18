@@ -17,6 +17,7 @@ public enum NodeStatus
 
 [Table(Name = "agc_server_node")]
 [OraclePrimaryKeyName("agc_server_node_pk")]
+[BsonIgnoreExtraElements]
 public class ServerNode : IEntity<string>
 {
     [Column(Name = "remark", StringLength = 50)]

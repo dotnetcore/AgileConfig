@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="FreeSql" Version="3.5.303" />
-    <PackageReference Include="MongoDB.Bson" Version="3.5.1" />
+    <PackageReference Include="MongoDB.Bson" Version="3.10.0" />
   </ItemGroup>
 
   <ItemGroup>
