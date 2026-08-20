@@ -47,7 +47,8 @@ GO Client：[agileconfig_client_go](https://github.com/kklldog/agileconfig_clien
 Python Client：[agileconfig_client_python](https://github.com/kklldog/agileconfig_client_python)  
 GO Client：[go-agile-config](https://github.com/animacaeli/go-agile-config)  
 Python Client：[py-agile-config](https://github.com/animacaeli/py-agile-config)   
-Nodejs Client: [node-agile-client](https://github.com/LetTTGACO/node-agile-client)    
+Nodejs Client: [node-agile-client](https://github.com/LetTTGACO/node-agile-client)  
+Rust Client: [agile-config-client](https://crates.io/crates/agile-config-client)  
 Blazor UI：[AgileConfigBlazorUI](https://github.com/EzrealJ/AgileConfigBlazorUI)    
 
 samples ：    
