@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using AgileConfig.Server.Application;
 using AgileConfig.Server.Apisite.Controllers.api.v2.Models;
 using AgileConfig.Server.Apisite.Filters;
-using AgileConfig.Server.Common.Resources;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
@@ -64,7 +63,7 @@ public sealed class ApplicationsController : ControllerBase
                 result,
                 "Application creation failed.",
                 "An application with the same identifier already exists.",
-                Messages.CreateAppFailed);
+                "The application could not be created.");
 
         var application = await _applicationManagementService.GetAsync(result.Value.Id);
         if (application == null) return Problem(title: "The created application could not be loaded.");
@@ -86,7 +85,10 @@ public sealed class ApplicationsController : ControllerBase
             request.IsInheritanceSource,
             request.InheritsFrom));
         if (!result.Succeeded)
-            return ToFailure(result, "Application update failed.", operationDetail: Messages.UpdateAppFailed);
+            return ToFailure(
+                result,
+                "Application update failed.",
+                operationDetail: "The application could not be updated.");
 
         var application = await _applicationManagementService.GetAsync(result.Value.Id);
         return application == null
@@ -101,7 +103,10 @@ public sealed class ApplicationsController : ControllerBase
         var result = await _applicationManagementService.DeleteAsync(new DeleteApplicationCommand(applicationId));
         return result.Succeeded
             ? NoContent()
-            : ToFailure(result, "Application deletion failed.", operationDetail: Messages.UpdateAppFailed);
+            : ToFailure(
+                result,
+                "Application deletion failed.",
+                operationDetail: "The application could not be deleted.");
     }
 
     private ActionResult ToFailure(
@@ -114,7 +119,7 @@ public sealed class ApplicationsController : ControllerBase
         {
             ApplicationError.Conflict => conflictDetail ??
                 "The application could not be updated because it conflicts with another resource.",
-            ApplicationError.ValidationFailed => Messages.DemoModeNoTestAppEdit,
+            ApplicationError.ValidationFailed => "The application cannot be modified in preview mode.",
             ApplicationError.OperationFailed => operationDetail,
             _ => null
         };

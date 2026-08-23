@@ -102,7 +102,7 @@ public sealed class ConfigurationManagementServiceTests
         Assert.IsTrue(result.Succeeded);
         Assert.AreEqual(EditStatus.Edit, existing.EditStatus);
         Assert.AreEqual(OnlineStatus.WaitPublish, existing.OnlineStatus);
-        Assert.AreEqual(FixedNow.DateTime, existing.UpdateTime);
+        Assert.AreEqual(FixedNow.ToLocalTime().DateTime, existing.UpdateTime);
         eventBus.Verify(x => x.Fire(It.Is<EditConfigSuccessful>(e => e.Config == existing)), Times.Once);
     }
 
