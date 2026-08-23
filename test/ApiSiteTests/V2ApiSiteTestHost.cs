@@ -24,7 +24,7 @@ internal sealed class V2ApiSiteTestHost : IDisposable
     private readonly string _tempDirectory;
     private readonly TestServer _server;
 
-    public V2ApiSiteTestHost()
+    public V2ApiSiteTestHost(bool previewMode = false)
     {
         _tempDirectory = Path.Combine(Path.GetTempPath(), "AgileConfig.V2ApiSiteTests", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_tempDirectory);
@@ -41,7 +41,7 @@ internal sealed class V2ApiSiteTestHost : IDisposable
             ["saPassword"] = "1",
             ["defaultApp"] = "",
             ["cluster"] = "false",
-            ["preview_mode"] = "false",
+            ["preview_mode"] = previewMode.ToString(),
             ["alwaysTrustSsl"] = "false",
             ["serviceHealthCheckInterval"] = "60",
             ["serviceUnhealthInterval"] = "60",
