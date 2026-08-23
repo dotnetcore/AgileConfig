@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Agile.Config.Protocol;
+using AgileConfig.Server.Application;
 using AgileConfig.Server.Apisite.Controllers.api.Models;
 using AgileConfig.Server.Apisite.Models.Mapping;
-using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.Data.Entity;
-using AgileConfig.Server.Event;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,18 +19,16 @@ namespace AgileConfig.Server.Apisite.Controllers.api;
 [ApiController]
 public class RegisterCenterController : Controller
 {
-    private readonly IRegisterCenterService _registerCenterService;
+    private readonly IServiceInstanceManagementService _serviceInstanceManagementService;
     private readonly IServiceInfoService _serviceInfoService;
-    private readonly ITinyEventBus _tinyEventBus;
 
-    public RegisterCenterController(IRegisterCenterService registerCenterService
-        , IServiceInfoService serviceInfoService,
-        ITinyEventBus tinyEventBus
+    public RegisterCenterController(
+        IServiceInstanceManagementService serviceInstanceManagementService,
+        IServiceInfoService serviceInfoService
     )
     {
-        _registerCenterService = registerCenterService;
+        _serviceInstanceManagementService = serviceInstanceManagementService;
         _serviceInfoService = serviceInfoService;
-        _tinyEventBus = tinyEventBus;
     }
 
     [HttpPost]
@@ -38,16 +36,22 @@ public class RegisterCenterController : Controller
     {
         ArgumentNullException.ThrowIfNull(model);
 
-        var entity = model.ToServiceInfo();
-        entity.RegisterWay = RegisterWay.Auto;
-
-        var id = await _registerCenterService.RegisterAsync(entity);
-
-        _tinyEventBus.Fire(new ServiceRegisteredEvent(id));
+        var result = await _serviceInstanceManagementService.RegisterAsync(new RegisterServiceInstanceCommand(
+            model.ServiceId,
+            model.ServiceName,
+            model.Ip,
+            model.Port,
+            JsonSerializer.Serialize(model.MetaData ?? []),
+            model.CheckUrl,
+            model.AlarmUrl,
+            model.HeartBeatMode,
+            RegisterWay.Auto,
+            RejectExisting: false,
+            AcceptMissingIdentifier: true));
 
         return new RegisterResultVM
         {
-            UniqueId = id
+            UniqueId = result.Succeeded ? result.Value.UniqueId : null
         };
     }
 
@@ -55,15 +59,8 @@ public class RegisterCenterController : Controller
     [HttpDelete("{id}")]
     public async Task<ActionResult<RegisterResultVM>> UnRegister(string id, [FromBody] RegisterServiceInfoVM vm)
     {
-        var entity = await _serviceInfoService.GetByUniqueIdAsync(id);
-        if (entity == null) return NotFound();
-
-        var result = await _registerCenterService.UnRegisterAsync(id);
-        if (!result)
-            if (!string.IsNullOrEmpty(vm?.ServiceId))
-                result = await _registerCenterService.UnRegisterByServiceIdAsync(vm.ServiceId);
-
-        if (result) _tinyEventBus.Fire(new ServiceUnRegisterEvent(id));
+        var result = await _serviceInstanceManagementService.UnregisterAsync(id, vm?.ServiceId);
+        if (!result.Succeeded && result.Error == ApplicationError.NotFound) return NotFound();
 
         return new RegisterResultVM
         {
@@ -76,17 +73,14 @@ public class RegisterCenterController : Controller
     {
         ArgumentNullException.ThrowIfNull(param);
 
-        var serviceHeartbeatResult = false;
-        if (!string.IsNullOrEmpty(param.UniqueId))
-            serviceHeartbeatResult = await _registerCenterService.ReceiveHeartbeatAsync(param.UniqueId);
+        var result = await _serviceInstanceManagementService.ReceiveHeartbeatAsync(param.UniqueId);
 
-        if (serviceHeartbeatResult)
+        if (result.Succeeded)
         {
-            var md5 = await _serviceInfoService.ServicesMD5Cache();
             return new HeartbeatResultVM
             {
                 Action = ActionConst.Ping,
-                Data = md5,
+                Data = result.Value.ServicesVersion,
                 Module = ActionModule.RegisterCenter
             };
         }

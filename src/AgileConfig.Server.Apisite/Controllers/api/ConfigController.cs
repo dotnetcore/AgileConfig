@@ -3,7 +3,10 @@ using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Apisite.Metrics;
 using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Apisite.Models.Mapping;
+using AgileConfig.Server.Application;
+using AgileConfig.Server.Application.Configurations;
 using AgileConfig.Server.Common;
+using AgileConfig.Server.Common.Resources;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Http;
@@ -23,7 +26,7 @@ public class ConfigController : Controller
 {
     private readonly IAppService _appService;
     private readonly IMemoryCache _cacheMemory;
-    private readonly Controllers.ConfigController _configController;
+    private readonly IConfigurationManagementService _configurationManagementService;
     private readonly IConfigService _configService;
     private readonly IMeterService _meterService;
 
@@ -32,14 +35,14 @@ public class ConfigController : Controller
         IAppService appService,
         IMemoryCache cacheMemory,
         IMeterService meterService,
-        Controllers.ConfigController configController
+        IConfigurationManagementService configurationManagementService
     )
     {
         _configService = configService;
         _appService = appService;
         _cacheMemory = cacheMemory;
         _meterService = meterService;
-        _configController = configController;
+        _configurationManagementService = configurationManagementService;
     }
 
     /// <summary>
@@ -159,18 +162,22 @@ public class ConfigController : Controller
             });
         }
 
-        _configController.ControllerContext.HttpContext = HttpContext;
+        var config = model.ToConfigVM();
+        var result = await _configurationManagementService.CreateAsync(new CreateConfigurationCommand(
+            config.Id,
+            config.AppId,
+            config.Group,
+            config.Key,
+            config.Value,
+            config.Description,
+            env.Value));
 
-        var result = await _configController.Add(model.ToConfigVM(), env) as JsonResult;
-
-        dynamic obj = result?.Value;
-
-        if (obj?.success == true) return Created("/api/config/" + obj.data.Id, "");
+        if (result.Succeeded) return Created("/api/config/" + result.Value.Id, "");
 
         Response.StatusCode = 400;
         return Json(new
         {
-            obj?.message
+            message = GetCreateErrorMessage(result.Error, config.AppId)
         });
     }
 
@@ -198,17 +205,22 @@ public class ConfigController : Controller
             });
         }
 
-        _configController.ControllerContext.HttpContext = HttpContext;
         model.Id = id;
-        var result = await _configController.Edit(model.ToConfigVM(), env) as JsonResult;
-
-        dynamic obj = result?.Value;
-        if (obj?.success == true) return Ok();
+        var config = model.ToConfigVM();
+        var result = await _configurationManagementService.UpdateAsync(new UpdateConfigurationCommand(
+            config.Id,
+            config.AppId,
+            config.Group,
+            config.Key,
+            config.Value,
+            config.Description,
+            env.Value));
+        if (result.Succeeded) return Ok();
 
         Response.StatusCode = 400;
         return Json(new
         {
-            obj?.message
+            message = await GetUpdateErrorMessage(result.Error, config.AppId, id, env.Value)
         });
     }
 
@@ -225,18 +237,44 @@ public class ConfigController : Controller
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id, EnvString env)
     {
-        _configController.ControllerContext.HttpContext = HttpContext;
-
-        var result = await _configController.Delete(id, env) as JsonResult;
-
-        dynamic obj = result?.Value;
-        if (obj?.success == true) return NoContent();
+        var result = await _configurationManagementService.DeleteAsync(
+            new DeleteConfigurationCommand(id, env.Value));
+        if (result.Succeeded) return NoContent();
 
         Response.StatusCode = 400;
         return Json(new
         {
-            obj?.message
+            message = result.Error == ApplicationError.NotFound
+                ? "未找到对应的配置项。"
+                : "删除配置失败，请查看错误日志"
         });
+    }
+
+    private static string GetCreateErrorMessage(ApplicationError error, string appId)
+    {
+        return error switch
+        {
+            ApplicationError.NotFound => Messages.AppNotExists(appId),
+            ApplicationError.Conflict => Messages.ConfigExists,
+            _ => Messages.CreateConfigFailed
+        };
+    }
+
+    private async Task<string> GetUpdateErrorMessage(
+        ApplicationError error,
+        string appId,
+        string configurationId,
+        string environment)
+    {
+        if (error == ApplicationError.Conflict) return Messages.ConfigKeyExists;
+
+        if (error == ApplicationError.NotFound)
+        {
+            var config = await _configService.GetAsync(configurationId, environment);
+            return config == null ? Messages.ConfigNotFound : Messages.AppNotExists(appId);
+        }
+
+        return "修改配置失败，请查看错误日志。";
     }
 
     private (bool, string) CheckRequired(ApiConfigVM model)

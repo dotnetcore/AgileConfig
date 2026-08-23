@@ -3,6 +3,8 @@ using System.IO;
 using System.Net;
 using AgileConfig.Server.Apisite.UIExtension;
 using AgileConfig.Server.Apisite.Websocket;
+using AgileConfig.Server.Apisite.Application;
+using AgileConfig.Server.Application;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.Common.RestClient;
@@ -57,6 +59,7 @@ public class Startup
         services.AddRestClient();
 
         services.AddMemoryCache();
+        services.AddHttpContextAccessor();
 
         services.AddCors();
         services.AddMvc().AddRazorRuntimeCompilation().AddControllersAsServices();
@@ -71,6 +74,9 @@ public class Startup
         services.AddRepositories();
 
         services.AddBusinessServices();
+        services.AddApplicationServices();
+        services.AddScoped<ICurrentUserAccessor, HttpCurrentUserAccessor>();
+        services.AddSingleton<IPreviewModeAccessor, AppsettingsPreviewModeAccessor>();
 
         services.ConfigureOptions<ConfigureJwtBearerOptions>();
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

@@ -2,6 +2,7 @@ using AgileConfig.Server.Apisite.Controllers;
 using AgileConfig.Server.Apisite.Controllers.api.Models;
 using AgileConfig.Server.Apisite.Metrics;
 using AgileConfig.Server.Apisite.Models;
+using AgileConfig.Server.Application.Configurations;
 using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
@@ -60,8 +61,7 @@ public class TestApiConfigController
             .ReturnsAsync(newConfigs);
 
         IMemoryCache memoryCache = null;
-        var userSErvice = new Mock<IUserService>();
-        var eventBus = new Mock<ITinyEventBus>();
+        var configurationManagementService = new Mock<IConfigurationManagementService>();
         var meterService = new Mock<IMeterService>();
 
         var httpContext = new DefaultHttpContext();
@@ -72,7 +72,7 @@ public class TestApiConfigController
             appService.Object,
             memoryCache,
             meterService.Object,
-            new ConfigController(configService.Object, appService.Object, userSErvice.Object, eventBus.Object)
+            configurationManagementService.Object
         );
         ctrl.ControllerContext = new ControllerContext
         {
@@ -102,8 +102,7 @@ public class TestApiConfigController
         appService.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync(newApp1);
         var configService = new Mock<IConfigService>();
         IMemoryCache memoryCache = null;
-        var userSErvice = new Mock<IUserService>();
-        var eventBus = new Mock<ITinyEventBus>();
+        var configurationManagementService = new Mock<IConfigurationManagementService>();
         var meterService = new Mock<IMeterService>();
         var httpContext = new DefaultHttpContext();
         httpContext.Request.Headers["Authorization"] = "Basic MDAxOjE=";
@@ -113,7 +112,7 @@ public class TestApiConfigController
             appService.Object,
             memoryCache,
             meterService.Object,
-            new ConfigController(configService.Object, appService.Object, userSErvice.Object, eventBus.Object)
+            configurationManagementService.Object
         );
         ctrl.ControllerContext = new ControllerContext
         {
