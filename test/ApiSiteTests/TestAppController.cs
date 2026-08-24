@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AgileConfig.Server.Apisite.Controllers;
 using AgileConfig.Server.Apisite.Models;
-using AgileConfig.Server.Common.EventBus;
+using AgileConfig.Server.Application;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Http;
@@ -24,9 +24,9 @@ public class TestAppController
     private static AppController BuildController(Mock<IAppService> appService, Mock<IConfigService> configService,
         Mock<ISettingService> settingService, Mock<IUserService> userService)
     {
-        var eventBus = new Mock<ITinyEventBus>();
+        var applicationManagementService = new Mock<IApplicationManagementService>();
         var ctl = new AppController(appService.Object, userService.Object, configService.Object, settingService.Object,
-            eventBus.Object);
+            applicationManagementService.Object);
         ctl.ControllerContext.HttpContext = new DefaultHttpContext();
         return ctl;
     }
@@ -44,21 +44,21 @@ public class TestAppController
         CultureInfo.CurrentUICulture = new CultureInfo("en-US", false);
 
         var appService = new Mock<IAppService>();
-        var logService = new Mock<ISysLogService>();
         var userService = new Mock<IUserService>();
-        var permissionService = new Mock<IPermissionService>();
         var configService = new Mock<IConfigService>();
         var settingService = new Mock<ISettingService>();
-        var eventBus = new Mock<ITinyEventBus>();
+        var applicationManagementService = new Mock<IApplicationManagementService>();
 
         var ctl = new AppController(appService.Object, userService.Object, configService.Object, settingService.Object,
-            eventBus.Object);
+            applicationManagementService.Object);
 
         ctl.ControllerContext.HttpContext = new DefaultHttpContext();
 
         Assert.ThrowsExactly<ArgumentNullException>(() => { ctl.Add(null).GetAwaiter().GetResult(); });
 
-        appService.Setup(s => s.GetAsync("01")).ReturnsAsync(new App());
+        applicationManagementService
+            .Setup(x => x.CreateAsync(It.Is<CreateApplicationCommand>(command => command.Id == "01")))
+            .ReturnsAsync(ApplicationResult<App>.Failure(ApplicationError.Conflict));
         var result = await ctl.Add(new AppVM
         {
             Id = "01"
@@ -69,10 +69,9 @@ public class TestAppController
         Assert.IsNotNull(jr.Value);
         Console.WriteLine(jr.Value.ToString());
         //Assert.IsTrue(jr.Value.ToString().Contains("Ӧ��Id�Ѵ��ڣ�����������"));
-        App nullApp = null;
-
-        appService.Setup(s => s.GetAsync("02")).ReturnsAsync(nullApp);
-        appService.Setup(s => s.AddAsync(It.IsAny<App>())).ReturnsAsync(false);
+        applicationManagementService
+            .Setup(x => x.CreateAsync(It.Is<CreateApplicationCommand>(command => command.Id == "02")))
+            .ReturnsAsync(ApplicationResult<App>.Failure(ApplicationError.OperationFailed));
         result = await ctl.Add(new AppVM
         {
             Id = "02"
@@ -84,8 +83,9 @@ public class TestAppController
         Console.WriteLine(jr.Value.ToString());
         Assert.IsTrue(jr.Value.ToString().Contains("success = False"));
 
-        appService.Setup(s => s.AddAsync(It.IsAny<App>())).ReturnsAsync(true);
-        appService.Setup(s => s.AddAsync(It.IsAny<App>(), It.IsAny<List<AppInheritanced>>())).ReturnsAsync(true);
+        applicationManagementService
+            .Setup(x => x.CreateAsync(It.Is<CreateApplicationCommand>(command => command.Id == "02")))
+            .ReturnsAsync(ApplicationResult<App>.Success(new App { Id = "02" }));
         Console.WriteLine(CultureInfo.CurrentUICulture);
         result = await ctl.Add(new AppVM
         {
