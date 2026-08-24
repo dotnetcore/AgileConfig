@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 
 namespace AgileConfig.Server.Apisite.Controllers.api.v2.Models;
 
@@ -20,8 +21,10 @@ public sealed class ServiceInstanceResource
     public DateTime? LastHeartbeatAt { get; init; }
 }
 
-public sealed class RegisterServiceInstanceRequest
+public sealed class RegisterServiceInstanceRequest : IValidatableObject
 {
+    public const int MetadataMaxLength = 2000;
+
     [Required, MaxLength(100)]
     public string ServiceId { get; init; }
 
@@ -44,6 +47,17 @@ public sealed class RegisterServiceInstanceRequest
 
     [MaxLength(2000)]
     public string AlarmUrl { get; init; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        var metadataJson = JsonSerializer.Serialize(Metadata ?? []);
+        if (metadataJson.Length > MetadataMaxLength)
+        {
+            yield return new ValidationResult(
+                $"Serialized metadata cannot exceed {MetadataMaxLength} characters.",
+                [nameof(Metadata)]);
+        }
+    }
 }
 
 public sealed class HeartbeatResource

@@ -56,6 +56,10 @@ public sealed class ApplicationManagementService : IApplicationManagementService
         if (await _appService.GetAsync(command.Id) != null)
             return ApplicationResult<App>.Failure(ApplicationError.Conflict);
 
+        if (command.ValidateInheritanceReferences &&
+            !await HasValidInheritanceReferencesAsync(command.Id, command.IsInheritanceSource, command.InheritsFrom))
+            return ApplicationResult<App>.Failure(ApplicationError.ValidationFailed);
+
         var app = new App
         {
             Id = command.Id,
@@ -83,6 +87,10 @@ public sealed class ApplicationManagementService : IApplicationManagementService
         if (app == null) return ApplicationResult<App>.Failure(ApplicationError.NotFound);
 
         if (_previewModeAccessor.IsPreviewMode && app.Name == "test_app")
+            return ApplicationResult<App>.Failure(ApplicationError.ValidationFailed);
+
+        if (command.ValidateInheritanceReferences &&
+            !await HasValidInheritanceReferencesAsync(command.Id, command.IsInheritanceSource, command.InheritsFrom))
             return ApplicationResult<App>.Failure(ApplicationError.ValidationFailed);
 
         app.Name = command.Name;
@@ -130,6 +138,29 @@ public sealed class ApplicationManagementService : IApplicationManagementService
     {
         var userId = await _currentUserAccessor.GetUserIdAsync();
         return string.IsNullOrWhiteSpace(userId) ? null : userId;
+    }
+
+    private async Task<bool> HasValidInheritanceReferencesAsync(
+        string applicationId,
+        bool isInheritanceSource,
+        IReadOnlyList<string> inheritedAppIds)
+    {
+        if (isInheritanceSource || inheritedAppIds == null || inheritedAppIds.Count == 0) return true;
+
+        var distinctIds = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var inheritedAppId in inheritedAppIds)
+        {
+            if (string.IsNullOrWhiteSpace(inheritedAppId) ||
+                inheritedAppId.Length > 36 ||
+                !distinctIds.Add(inheritedAppId) ||
+                string.Equals(applicationId, inheritedAppId, StringComparison.Ordinal))
+                return false;
+
+            var inheritedApp = await _appService.GetAsync(inheritedAppId);
+            if (inheritedApp?.Type != AppType.Inheritance) return false;
+        }
+
+        return true;
     }
 
     private static List<AppInheritanced> BuildInheritanceApps(

@@ -26,7 +26,8 @@ public sealed record CreateApplicationCommand(
     string Secret,
     bool Enabled,
     bool IsInheritanceSource,
-    IReadOnlyList<string> InheritsFrom);
+    IReadOnlyList<string> InheritsFrom,
+    bool ValidateInheritanceReferences = false);
 
 public sealed record UpdateApplicationCommand(
     string Id,
@@ -35,6 +36,7 @@ public sealed record UpdateApplicationCommand(
     string Secret,
     bool Enabled,
     bool IsInheritanceSource,
-    IReadOnlyList<string> InheritsFrom);
+    IReadOnlyList<string> InheritsFrom,
+    bool ValidateInheritanceReferences = false);
 
 public sealed record DeleteApplicationCommand(string Id);

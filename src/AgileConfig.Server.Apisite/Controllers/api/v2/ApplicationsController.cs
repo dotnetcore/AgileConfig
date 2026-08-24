@@ -57,7 +57,8 @@ public sealed class ApplicationsController : ControllerBase
             request.Secret,
             request.Enabled,
             request.IsInheritanceSource,
-            request.InheritsFrom));
+            request.InheritsFrom,
+            ValidateInheritanceReferences: true));
         if (!result.Succeeded)
             return ToFailure(
                 result,
@@ -83,7 +84,8 @@ public sealed class ApplicationsController : ControllerBase
             request.Secret,
             request.Enabled,
             request.IsInheritanceSource,
-            request.InheritsFrom));
+            request.InheritsFrom,
+            ValidateInheritanceReferences: true));
         if (!result.Succeeded)
             return ToFailure(
                 result,
@@ -119,7 +121,7 @@ public sealed class ApplicationsController : ControllerBase
         {
             ApplicationError.Conflict => conflictDetail ??
                 "The application could not be updated because it conflicts with another resource.",
-            ApplicationError.ValidationFailed => "The application cannot be modified in preview mode.",
+            ApplicationError.ValidationFailed => "The application request is invalid.",
             ApplicationError.OperationFailed => operationDetail,
             _ => null
         };

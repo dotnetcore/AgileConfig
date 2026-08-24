@@ -59,6 +59,8 @@ public sealed class ApplicationManagementServiceTests
         List<AppInheritanced> addedInheritance = null;
 
         appService.Setup(x => x.GetAsync("app-1")).ReturnsAsync((App)null);
+        appService.Setup(x => x.GetAsync("parent-a")).ReturnsAsync(new App { Id = "parent-a", Type = AppType.Inheritance });
+        appService.Setup(x => x.GetAsync("parent-b")).ReturnsAsync(new App { Id = "parent-b", Type = AppType.Inheritance });
         appService.Setup(x => x.AddAsync(It.IsAny<App>(), It.IsAny<List<AppInheritanced>>()))
             .Callback<App, List<AppInheritanced>>((app, inheritance) =>
             {
@@ -81,7 +83,8 @@ public sealed class ApplicationManagementServiceTests
             "secret",
             false,
             false,
-            new[] { "parent-a", "parent-b" }));
+            new[] { "parent-a", "parent-b" },
+            ValidateInheritanceReferences: true));
 
         Assert.IsTrue(result.Succeeded);
         Assert.AreSame(addedApp, result.Value);
@@ -193,6 +196,38 @@ public sealed class ApplicationManagementServiceTests
 
         var result = await service.UpdateAsync(new UpdateApplicationCommand(
             "app-1", "Changed", null, null, true, false, Array.Empty<string>()));
+
+        Assert.IsFalse(result.Succeeded);
+        Assert.AreEqual(ApplicationError.ValidationFailed, result.Error);
+        appService.Verify(x => x.UpdateAsync(It.IsAny<App>(), It.IsAny<List<AppInheritanced>>()), Times.Never);
+    }
+
+    [TestMethod]
+    public async Task CreateAsync_WithInvalidInheritanceReference_RejectsWithoutWriting()
+    {
+        var appService = new Mock<IAppService>();
+        var eventBus = new Mock<ITinyEventBus>();
+        appService.Setup(x => x.GetAsync("app-1")).ReturnsAsync((App)null);
+
+        var result = await CreateService(appService, eventBus).CreateAsync(new CreateApplicationCommand(
+            "app-1", "Application 1", null, null, true, false, new[] { "missing-parent" },
+            ValidateInheritanceReferences: true));
+
+        Assert.IsFalse(result.Succeeded);
+        Assert.AreEqual(ApplicationError.ValidationFailed, result.Error);
+        appService.Verify(x => x.AddAsync(It.IsAny<App>(), It.IsAny<List<AppInheritanced>>()), Times.Never);
+    }
+
+    [TestMethod]
+    public async Task UpdateAsync_WithInheritanceIdentifierExceedingColumnLength_RejectsWithoutWriting()
+    {
+        var appService = new Mock<IAppService>();
+        var eventBus = new Mock<ITinyEventBus>();
+        appService.Setup(x => x.GetAsync("app-1")).ReturnsAsync(new App { Id = "app-1" });
+
+        var result = await CreateService(appService, eventBus).UpdateAsync(new UpdateApplicationCommand(
+            "app-1", "Application 1", null, null, true, false, new[] { new string('a', 37) },
+            ValidateInheritanceReferences: true));
 
         Assert.IsFalse(result.Succeeded);
         Assert.AreEqual(ApplicationError.ValidationFailed, result.Error);

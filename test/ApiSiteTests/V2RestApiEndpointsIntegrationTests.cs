@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using AgileConfig.Server.Apisite.Controllers.api.v2.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ApiSiteTests;
@@ -175,6 +176,18 @@ public class V2RestApiEndpointsIntegrationTests
             etag: response.Headers.ETag.Tag);
         Assert.AreEqual(HttpStatusCode.NotModified, notModified.StatusCode);
 
+        var matchingList = await host.SendAsync(HttpMethod.Get,
+            $"/api/v2/applications/{applicationId}/environments/TEST/published-configurations",
+            authorization: applicationAuth,
+            etag: $"\"stale\", W/{response.Headers.ETag.Tag}");
+        Assert.AreEqual(HttpStatusCode.NotModified, matchingList.StatusCode);
+
+        var wildcard = await host.SendAsync(HttpMethod.Get,
+            $"/api/v2/applications/{applicationId}/environments/TEST/published-configurations",
+            authorization: applicationAuth,
+            etag: "*");
+        Assert.AreEqual(HttpStatusCode.NotModified, wildcard.StatusCode);
+
         var mismatch = await host.SendAsync(HttpMethod.Get,
             $"/api/v2/applications/another-app/environments/TEST/published-configurations",
             authorization: applicationAuth);
@@ -228,6 +241,19 @@ public class V2RestApiEndpointsIntegrationTests
             alarmUrl = ""
         };
 
+        var oversizedMetadata = await host.SendAsync(HttpMethod.Post, "/api/v2/service-instances", new
+        {
+            serviceId = $"oversized-{Guid.NewGuid():N}",
+            name = "V2 service",
+            ipAddress = "127.0.0.1",
+            port = 8080,
+            metadata = new[] { new string('x', RegisterServiceInstanceRequest.MetadataMaxLength - 3) },
+            heartbeatMode = "client",
+            healthCheckUrl = "",
+            alarmUrl = ""
+        });
+        await AssertProblem(oversizedMetadata, HttpStatusCode.BadRequest);
+
         var register = await host.SendAsync(HttpMethod.Post, "/api/v2/service-instances", request);
         Assert.AreEqual(HttpStatusCode.Created, register.StatusCode);
         var instance = await V2ApiSiteTestHost.ReadJsonAsync(register);
@@ -276,6 +302,14 @@ public class V2RestApiEndpointsIntegrationTests
             name = "Missing identifier"
         });
         await AssertProblem(invalidModel, HttpStatusCode.BadRequest);
+
+        var invalidInheritance = await host.SendAsync(HttpMethod.Post, "/api/v2/applications", new
+        {
+            id = $"child-{Guid.NewGuid():N}",
+            name = "Invalid inheritance application",
+            inheritsFrom = new[] { "missing-inheritance-source" }
+        });
+        await AssertProblem(invalidInheritance, HttpStatusCode.BadRequest);
 
         var missing = await host.SendAsync(HttpMethod.Get, "/api/v2/applications/does-not-exist");
         Assert.AreEqual(HttpStatusCode.NotFound, missing.StatusCode);

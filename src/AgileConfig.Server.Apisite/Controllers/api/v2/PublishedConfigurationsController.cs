@@ -8,7 +8,7 @@ using AgileConfig.Server.Apisite.Metrics;
 using AgileConfig.Server.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Primitives;
+using Microsoft.Net.Http.Headers;
 
 namespace AgileConfig.Server.Apisite.Controllers.api.v2;
 
@@ -53,7 +53,7 @@ public sealed class PublishedConfigurationsController : ControllerBase
             Response.Headers.ETag = etag;
             Response.Headers.Append("X-Publish-Timeline-Id", timelineId);
 
-            if (Request.Headers.IfNoneMatch == new StringValues(etag)) return StatusCode(StatusCodes.Status304NotModified);
+            if (MatchesIfNoneMatch(etag)) return StatusCode(StatusCodes.Status304NotModified);
         }
 
         _meterService.PullAppConfigCounter?.Add(1,
@@ -69,5 +69,14 @@ public sealed class PublishedConfigurationsController : ControllerBase
             Key = x.Key,
             Value = x.Value
         }).ToList());
+    }
+
+    private bool MatchesIfNoneMatch(string etag)
+    {
+        if (!EntityTagHeaderValue.TryParseList(Request.Headers.IfNoneMatch.ToArray(), out var validators)) return false;
+
+        var current = new EntityTagHeaderValue(etag);
+        return validators.Any(validator =>
+            validator == EntityTagHeaderValue.Any || validator.Compare(current, useStrongComparison: false));
     }
 }
