@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using AgileConfig.Server.Apisite.Controllers;
 using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Application;
+using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Entity;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Http;
@@ -212,5 +213,83 @@ public class TestAppController
         Assert.IsTrue(addedConfigs.All(x => x.EditStatus == EditStatus.Add));
         Assert.IsTrue(addedConfigs.All(x => x.OnlineStatus == OnlineStatus.WaitPublish));
         Assert.IsTrue(addedConfigs.All(x => x.Status == ConfigStatus.Enabled));
+    }
+
+    [TestMethod]
+    public async Task SearchAndReadEndpoints_ReturnAppsForAdministrators()
+    {
+        var appService = new Mock<IAppService>();
+        var userService = new Mock<IUserService>();
+        var configService = new Mock<IConfigService>();
+        var settingService = new Mock<ISettingService>();
+        var controller = BuildController(appService, configService, settingService, userService);
+        controller.ControllerContext.HttpContext.User = new System.Security.Claims.ClaimsPrincipal(
+            new System.Security.Claims.ClaimsIdentity(
+                [new System.Security.Claims.Claim("id", "admin-user")], "test"));
+
+        var parent = new App { Id = "parent", Name = "Parent", Enabled = true };
+        var child = new App { Id = "child", Name = "Child", Enabled = true };
+        appService.Setup(x => x.SearchAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), "admin-user", true))
+            .ReturnsAsync((new List<App> { parent }, 1L));
+        appService.Setup(x => x.SearchGroupedAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), "admin-user", true))
+            .ReturnsAsync((new List<GroupedApp> { new() { App = parent, Children = [new GroupedApp { App = child }] } }, 1L));
+        appService.Setup(x => x.GetInheritancedAppsAsync(It.IsAny<string>())).ReturnsAsync(new List<App>());
+        appService.Setup(x => x.GetAsync("parent")).ReturnsAsync(parent);
+        userService.Setup(x => x.GetUserRolesAsync("admin-user"))
+            .ReturnsAsync(new List<Role> { new() { Id = SystemRoleConstants.AdminId } });
+
+        Assert.IsInstanceOfType(await controller.Search(null, null, null, "name", "ascend", false), typeof(JsonResult));
+        Assert.IsInstanceOfType(await controller.Search(null, null, null, "name", "ascend", true), typeof(JsonResult));
+        Assert.IsInstanceOfType(await controller.Get("parent"), typeof(JsonResult));
+        Assert.IsInstanceOfType(await controller.Get("missing"), typeof(NotFoundObjectResult));
+    }
+
+    [TestMethod]
+    public async Task AppManagementAndExportEndpoints_ExecuteExpectedServiceOperations()
+    {
+        var appService = new Mock<IAppService>();
+        var userService = new Mock<IUserService>();
+        var configService = new Mock<IConfigService>();
+        var settingService = new Mock<ISettingService>();
+        var applicationManagement = new Mock<IApplicationManagementService>();
+        var controller = new AppController(appService.Object, userService.Object, configService.Object, settingService.Object,
+            applicationManagement.Object);
+        controller.ControllerContext.HttpContext = new DefaultHttpContext();
+        controller.ControllerContext.HttpContext.User = new System.Security.Claims.ClaimsPrincipal(
+            new System.Security.Claims.ClaimsIdentity(
+                [new System.Security.Claims.Claim("id", "admin-user")], "test"));
+
+        var app = new App { Id = "app-1", Name = "App", Enabled = true, Type = AppType.PRIVATE };
+        appService.Setup(x => x.GetAsync("app-1")).ReturnsAsync(app);
+        appService.Setup(x => x.GetInheritancedAppsAsync("app-1")).ReturnsAsync(new List<App>());
+        appService.Setup(x => x.UpdateAsync(app)).ReturnsAsync(true);
+        appService.Setup(x => x.SearchAsync("app-1", null, null, nameof(App.Id), "ascend", 1, 1, "admin-user", false))
+            .ReturnsAsync((new List<App> { app }, 1L));
+        appService.Setup(x => x.SaveUserAppAuth("app-1", It.IsAny<List<string>>())).ReturnsAsync(true);
+        appService.Setup(x => x.GetUserAppAuth("app-1")).ReturnsAsync(new List<User> { new() { Id = "user-1" } });
+        appService.Setup(x => x.GetAllInheritancedAppsAsync()).ReturnsAsync(new List<App> { app, new() { Id = "hidden", Enabled = false } });
+        appService.Setup(x => x.GetAppGroups()).ReturnsAsync(new List<string> { "z", "a" });
+        userService.Setup(x => x.GetUserRolesAsync("admin-user"))
+            .ReturnsAsync(new List<Role> { new() { Id = SystemRoleConstants.AdminId } });
+        settingService.Setup(x => x.GetEnvironmentList()).ReturnsAsync(["DEV", "DEV", ""]);
+        configService.Setup(x => x.GetByAppIdAsync("app-1", "DEV")).ReturnsAsync(new List<Config>
+        {
+            new() { Key = "key", Value = "value", Group = "group" }
+        });
+        applicationManagement.Setup(x => x.UpdateAsync(It.IsAny<UpdateApplicationCommand>()))
+            .ReturnsAsync(ApplicationResult<App>.Failure(ApplicationError.ValidationFailed));
+        applicationManagement.Setup(x => x.DeleteAsync(It.IsAny<DeleteApplicationCommand>()))
+            .ReturnsAsync(ApplicationResult<App>.Success(app));
+
+        Assert.IsInstanceOfType(await controller.DisableOrEnable("app-1"), typeof(JsonResult));
+        Assert.IsInstanceOfType(await controller.Edit(new AppVM { Id = "app-1" }), typeof(JsonResult));
+        Assert.IsInstanceOfType(await controller.Delete("app-1"), typeof(JsonResult));
+        Assert.IsInstanceOfType(await controller.Export(new AppExportRequest { AppIds = ["app-1", "APP-1"] }), typeof(FileContentResult));
+        Assert.IsInstanceOfType(await controller.InheritancedApps("app-1"), typeof(JsonResult));
+        Assert.IsInstanceOfType(await controller.SaveAppAuth(new AppAuthVM { AppId = "app-1", AuthorizedUsers = ["user-1"] }), typeof(JsonResult));
+        Assert.IsInstanceOfType(await controller.GetUserAppAuth("app-1"), typeof(JsonResult));
+        Assert.IsInstanceOfType(await controller.GetAppGroups(), typeof(JsonResult));
     }
 }
