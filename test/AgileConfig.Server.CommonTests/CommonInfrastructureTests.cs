@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -9,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using AgileConfig.Server.Common.EventBus;
+using AgileConfig.Server.Common.Resources;
 using AgileConfig.Server.Common.RestClient;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -123,6 +125,12 @@ public class CommonInfrastructureTests
     {
         Assert.AreEqual("described", DescribedValue.Described.ToDesc());
         Assert.AreEqual(nameof(DescribedValue.Plain), DescribedValue.Plain.ToDesc());
+    }
+
+    [TestMethod]
+    public void Messages_UseEnglishResourcesAsTheNeutralFallback()
+    {
+        Assert.AreEqual("Password cannot be empty", Messages.GetString(nameof(Messages.PasswordCannotBeEmpty), CultureInfo.InvariantCulture));
     }
 
     [TestMethod]
