@@ -13,6 +13,7 @@
 ![Docker image](https://img.shields.io/docker/v/kklldog/agile_config?label=docker%20image)
 ![GitHub license](https://img.shields.io/github/license/dotnetcore/AgileConfig)
 ![build workflow](https://github.com/dotnetcore/AgileConfig/actions/workflows/master-ci.yml/badge.svg)
+[![Unit test coverage](https://img.shields.io/badge/unit%20test%20coverage-60%25-brightgreen)](https://github.com/dotnetcore/AgileConfig/pull/254)
 [![package workflow](https://github.com/dotnetcore/AgileConfig/actions/workflows/release-xxx.yml/badge.svg)](https://github.com/dotnetcore/AgileConfig/actions/workflows/release-xxx.yml)
 ![Commit Date](https://img.shields.io/github/last-commit/dotnetcore/AgileConfig/master.svg?logo=github&logoColor=green&label=commit)
     

@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\AgileConfig.Server.Common\AgileConfig.Server.Common.csproj" />
+    <ProjectReference Include="..\..\src\AgileConfig.Server.OIDC\AgileConfig.Server.OIDC.csproj" />
   </ItemGroup>
 
 </Project>

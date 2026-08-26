@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat code coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <Exclude>[*.Tests]*,[Agile.Config.Protocol]*,[AgileConfig.Server.Event]*,[AgileConfig.Server.IService]*</Exclude>
+          <ExcludeByAttribute>System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute,GeneratedCodeAttribute</ExcludeByAttribute>
+          <ExcludeByFile>**/obj/**/*.cs,**/AgileConfig.Server.Data.Entity/App.cs,**/AgileConfig.Server.Data.Entity/AppInheritanced.cs,**/AgileConfig.Server.Data.Entity/Config.cs,**/AgileConfig.Server.Data.Entity/Function.cs,**/AgileConfig.Server.Data.Entity/PublishDetail.cs,**/AgileConfig.Server.Data.Entity/PublishTimeline.cs,**/AgileConfig.Server.Data.Entity/Role.cs,**/AgileConfig.Server.Data.Entity/RoleFunction.cs,**/AgileConfig.Server.Data.Entity/ServerNode.cs,**/AgileConfig.Server.Data.Entity/ServiceInfo.cs,**/AgileConfig.Server.Data.Entity/Setting.cs,**/AgileConfig.Server.Data.Entity/User.cs,**/AgileConfig.Server.Data.Entity/UserAppAuth.cs,**/AgileConfig.Server.Data.Entity/UserRole.cs,**/AppExportVM.cs,**/ApiPublishTimelineVM.cs,**/ApiServiceInfoVM.cs,**/HeartbeatParam.cs,**/HeartbeatResultVM.cs,**/RegisterResultVM.cs,**/ApplicationModels.cs,**/ConfigurationModels.cs,**/NodeModels.cs,**/ReleaseModels.cs,**/ApplicationManagement.cs,**/ConfigurationManagementContracts.cs,**/NodeManagementModels.cs,**/ReleaseManagementContracts.cs,**/ServiceInstanceManagementModels.cs,**/DbConfigInfo.cs,**/OidcSetting.cs,**/UIFileBag.cs,**/IWebsocketCollection.cs,**/Appsettings.cs,**/SystemSettings.cs,**/Global.cs</ExcludeByFile>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>
