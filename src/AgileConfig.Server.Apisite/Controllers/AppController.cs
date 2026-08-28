@@ -3,15 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AgileConfig.Server.Application;
 using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Apisite.Models.Mapping;
 using AgileConfig.Server.Apisite.Utilites;
 using AgileConfig.Server.Common;
-using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.Common.Resources;
 using AgileConfig.Server.Data.Entity;
-using AgileConfig.Server.Event;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -26,21 +25,21 @@ public class AppController : Controller
 {
     private readonly IAppService _appService;
     private readonly IConfigService _configService;
+    private readonly IApplicationManagementService _applicationManagementService;
     private readonly ISettingService _settingService;
-    private readonly ITinyEventBus _tinyEventBus;
     private readonly IUserService _userService;
 
     public AppController(IAppService appService,
         IUserService userService,
         IConfigService configService,
         ISettingService settingService,
-        ITinyEventBus tinyEventBus)
+        IApplicationManagementService applicationManagementService)
     {
         _userService = userService;
         _configService = configService;
         _settingService = settingService;
-        _tinyEventBus = tinyEventBus;
         _appService = appService;
+        _applicationManagementService = applicationManagementService;
     }
 
     [TypeFilter(typeof(PermissionCheckAttribute),
@@ -142,41 +141,27 @@ public class AppController : Controller
     {
         ArgumentNullException.ThrowIfNull(model);
 
-        var oldApp = await _appService.GetAsync(model.Id);
-        if (oldApp != null)
+        var result = await _applicationManagementService.CreateAsync(new CreateApplicationCommand(
+            model.Id,
+            model.Name,
+            model.Group,
+            model.Secret,
+            model.Enabled,
+            model.Inheritanced,
+            model.inheritancedApps));
+
+        if (result.Error == ApplicationError.Conflict)
             return Json(new
             {
                 success = false,
                 message = Messages.AppIdExists
             });
 
-        var app = model.ToApp();
-        app.CreateTime = DateTime.Now;
-        var creatorId = await this.GetCurrentUserId(_userService);
-        if (!string.IsNullOrWhiteSpace(creatorId)) app.Creator = creatorId;
-
-        var inheritanceApps = new List<AppInheritanced>();
-        if (!model.Inheritanced && model.inheritancedApps != null)
-        {
-            var sort = 0;
-            model.inheritancedApps.ForEach(appId =>
-            {
-                inheritanceApps.Add(new AppInheritanced
-                {
-                    Id = Guid.NewGuid().ToString("N"),
-                    AppId = app.Id,
-                    InheritancedAppId = appId,
-                    Sort = sort++
-                });
-            });
-        }
-
-        var result = await _appService.AddAsync(app, inheritanceApps);
         return Json(new
         {
-            data = app,
-            success = result,
-            message = !result ? Messages.CreateAppFailed : ""
+            data = result.Value,
+            success = result.Succeeded,
+            message = !result.Succeeded ? Messages.CreateAppFailed : ""
         });
     }
 
@@ -186,44 +171,33 @@ public class AppController : Controller
     {
         ArgumentNullException.ThrowIfNull(model);
 
-        var app = await _appService.GetAsync(model.Id);
-        if (app == null)
+        var result = await _applicationManagementService.UpdateAsync(new UpdateApplicationCommand(
+            model.Id,
+            model.Name,
+            model.Group,
+            model.Secret,
+            model.Enabled,
+            model.Inheritanced,
+            model.inheritancedApps));
+
+        if (result.Error == ApplicationError.NotFound)
             return Json(new
             {
                 success = false,
                 message = Messages.AppNotFound
             });
 
-        if (Appsettings.IsPreviewMode && app.Name == "test_app")
+        if (result.Error == ApplicationError.ValidationFailed)
             return Json(new
             {
                 success = false,
                 message = Messages.DemoModeNoTestAppEdit
             });
 
-        app = model.ToApp(app);
-        app.UpdateTime = DateTime.Now;
-        var inheritanceApps = new List<AppInheritanced>();
-        if (!model.Inheritanced && model.inheritancedApps != null)
-        {
-            var sort = 0;
-            model.inheritancedApps.ForEach(appId =>
-            {
-                inheritanceApps.Add(new AppInheritanced
-                {
-                    Id = Guid.NewGuid().ToString("N"),
-                    AppId = app.Id,
-                    InheritancedAppId = appId,
-                    Sort = sort++
-                });
-            });
-        }
-
-        var result = await _appService.UpdateAsync(app, inheritanceApps);
         return Json(new
         {
-            success = result,
-            message = !result ? Messages.UpdateAppFailed : ""
+            success = result.Succeeded,
+            message = !result.Succeeded ? Messages.UpdateAppFailed : ""
         });
     }
 
@@ -283,22 +257,18 @@ public class AppController : Controller
     {
         ArgumentException.ThrowIfNullOrEmpty(id);
 
-        var app = await _appService.GetAsync(id);
-        if (app == null)
+        var result = await _applicationManagementService.DeleteAsync(new DeleteApplicationCommand(id));
+        if (result.Error == ApplicationError.NotFound)
             return NotFound(new
             {
                 success = false,
                 message = Messages.AppNotFound
             });
 
-        var result = await _appService.DeleteAsync(app);
-
-        if (result) _tinyEventBus.Fire(new DeleteAppSuccessful(app, this.GetCurrentUserName()));
-
         return Json(new
         {
-            success = result,
-            message = !result ? Messages.UpdateAppFailed : ""
+            success = result.Succeeded,
+            message = !result.Succeeded ? Messages.UpdateAppFailed : ""
         });
     }
 

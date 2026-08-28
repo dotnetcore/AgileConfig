@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AgileConfig.Server.Application;
+using AgileConfig.Server.Application.Releases;
 using AgileConfig.Server.Apisite.Controllers.api.Models;
 using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Apisite.Models.Mapping;
+using AgileConfig.Server.Common.Resources;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace AgileConfig.Server.Apisite.Controllers.api;
 
@@ -19,21 +21,18 @@ namespace AgileConfig.Server.Apisite.Controllers.api;
 [Route("api/[controller]")]
 public class AppController : Controller
 {
-    private readonly Controllers.AppController _appController;
     private readonly IAppService _appService;
-    private readonly Controllers.ConfigController _configController;
-    private readonly IConfigService _configService;
+    private readonly IApplicationManagementService _applicationManagementService;
+    private readonly IReleaseManagementService _releaseManagementService;
 
-    public AppController(IAppService appService,
-        IConfigService configService,
-        Controllers.AppController appController,
-        Controllers.ConfigController configController)
+    public AppController(
+        IAppService appService,
+        IApplicationManagementService applicationManagementService,
+        IReleaseManagementService releaseManagementService)
     {
         _appService = appService;
-        _configService = configService;
-
-        _appController = appController;
-        _configController = configController;
+        _applicationManagementService = applicationManagementService;
+        _releaseManagementService = releaseManagementService;
     }
 
     /// <summary>
@@ -61,23 +60,18 @@ public class AppController : Controller
         Arguments = new object[] { Functions.App_Read })]
     public async Task<ActionResult<ApiAppVM>> GetById(string id)
     {
-        var actionResult = await _appController.Get(id);
-        var status = actionResult as IStatusCodeActionResult;
-
-        var result = actionResult as JsonResult;
-        dynamic obj = result?.Value;
-
-        if (obj?.success ?? false)
+        var app = await _appService.GetAsync(id);
+        if (app == null)
         {
-            AppVM appVM = obj.data;
-            return Json(appVM.ToApiAppVM());
+            Response.StatusCode = 404;
+            return Json(new { message = Messages.AppNotFound });
         }
 
-        Response.StatusCode = status.StatusCode.Value;
-        return Json(new
-        {
-            obj?.message
-        });
+        var resource = app.ToApiAppVM();
+        resource.InheritancedApps = (await _appService.GetInheritancedAppsAsync(id))
+            .Select(x => x.Id)
+            .ToList();
+        return Json(resource);
     }
 
     /// <summary>
@@ -101,19 +95,20 @@ public class AppController : Controller
             });
         }
 
-        _appController.ControllerContext.HttpContext = HttpContext;
-
-        var result = await _appController.Add(model.ToAppVM()) as JsonResult;
-
-        dynamic obj = result?.Value;
-
-        if (obj?.success == true) return Created("/api/app/" + obj.data.Id, "");
+        var result = await _applicationManagementService.CreateAsync(new CreateApplicationCommand(
+            model.Id,
+            model.Name,
+            model.Group,
+            model.Secret,
+            model.Enabled.GetValueOrDefault(),
+            model.Inheritanced,
+            null));
+        if (result.Succeeded) return Created("/api/app/" + result.Value.Id, "");
 
         Response.StatusCode = 400;
-        return Json(new
-        {
-            obj?.message
-        });
+        return Json(new { message = result.Error == ApplicationError.Conflict
+            ? Messages.AppIdExists
+            : Messages.CreateAppFailed });
     }
 
     /// <summary>
@@ -138,21 +133,24 @@ public class AppController : Controller
             });
         }
 
-        _appController.ControllerContext.HttpContext = HttpContext;
-
         model.Id = id;
-        var actionResult = await _appController.Edit(model.ToAppVM());
-        var status = actionResult as IStatusCodeActionResult;
-        var result = actionResult as JsonResult;
+        var result = await _applicationManagementService.UpdateAsync(new UpdateApplicationCommand(
+            id,
+            model.Name,
+            model.Group,
+            model.Secret,
+            model.Enabled.GetValueOrDefault(),
+            model.Inheritanced,
+            null));
+        if (result.Succeeded) return Ok();
 
-        dynamic obj = result?.Value;
-        if (obj?.success ?? false) return Ok();
-
-        Response.StatusCode = status.StatusCode.Value;
-        return Json(new
+        Response.StatusCode = result.Error == ApplicationError.NotFound ? 404 : 400;
+        return Json(new { message = result.Error switch
         {
-            obj?.message
-        });
+            ApplicationError.NotFound => Messages.AppNotFound,
+            ApplicationError.ValidationFailed => Messages.DemoModeNoTestAppEdit,
+            _ => Messages.UpdateAppFailed
+        } });
     }
 
     /// <summary>
@@ -166,20 +164,13 @@ public class AppController : Controller
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {
-        _appController.ControllerContext.HttpContext = HttpContext;
+        var result = await _applicationManagementService.DeleteAsync(new DeleteApplicationCommand(id));
+        if (result.Succeeded) return NoContent();
 
-        var actionResult = await _appController.Delete(id);
-        var status = actionResult as IStatusCodeActionResult;
-        var result = actionResult as JsonResult;
-
-        dynamic obj = result?.Value;
-        if (obj?.success ?? false) return NoContent();
-
-        Response.StatusCode = status.StatusCode.Value;
-        return Json(new
-        {
-            obj?.message
-        });
+        Response.StatusCode = result.Error == ApplicationError.NotFound ? 404 : 400;
+        return Json(new { message = result.Error == ApplicationError.NotFound
+            ? (string)null
+            : Messages.UpdateAppFailed });
     }
 
     /// <summary>
@@ -194,23 +185,12 @@ public class AppController : Controller
     [HttpPost("publish")]
     public async Task<IActionResult> Publish(string appId, EnvString env)
     {
-        _configController.ControllerContext.HttpContext = HttpContext;
+        var result = await _releaseManagementService.PublishAsync(
+            new PublishConfigurationsCommand(appId, null, null, env.Value));
+        if (result.Succeeded) return Ok();
 
-        var actionResult = await _configController.Publish(new PublishLogVM
-        {
-            AppId = appId
-        }, env);
-        var status = actionResult as IStatusCodeActionResult;
-        var result = actionResult as JsonResult;
-
-        dynamic obj = result?.Value;
-        if (obj?.success ?? false) return Ok();
-
-        Response.StatusCode = status.StatusCode.Value;
-        return Json(new
-        {
-            obj?.message
-        });
+        Response.StatusCode = result.Error == ApplicationError.NotFound ? 404 : 400;
+        return Json(new { message = "上线配置失败，请查看错误日志" });
     }
 
     /// <summary>
@@ -227,10 +207,7 @@ public class AppController : Controller
     {
         ArgumentException.ThrowIfNullOrEmpty(appId);
 
-        var history = await _configService.GetPublishTimelineHistoryAsync(appId, env.Value);
-
-        history = history.OrderByDescending(x => x.Version).ToList();
-
+        var history = await _releaseManagementService.GetAllAsync(appId, env.Value);
         var vms = history.Select(x => x.ToApiPublishTimelimeVM());
 
         return Json(vms);
@@ -248,20 +225,12 @@ public class AppController : Controller
     [HttpPost("rollback")]
     public async Task<IActionResult> Rollback(string historyId, EnvString env)
     {
-        _configController.ControllerContext.HttpContext = HttpContext;
+        var result = await _releaseManagementService.RollbackAsync(
+            new RollbackConfigurationCommand(historyId, env.Value));
+        if (result.Succeeded) return Ok();
 
-        var actionResult = await _configController.Rollback(historyId, env);
-        var status = actionResult as IStatusCodeActionResult;
-        var result = actionResult as JsonResult;
-
-        dynamic obj = result?.Value;
-        if (obj?.success ?? false) return Ok();
-
-        Response.StatusCode = status.StatusCode.Value;
-        return Json(new
-        {
-            obj?.message
-        });
+        Response.StatusCode = result.Error == ApplicationError.NotFound ? 404 : 400;
+        return Json(new { message = "回滚失败，请查看错误日志。" });
     }
 
     private (bool, string) CheckRequired(ApiAppVM model)

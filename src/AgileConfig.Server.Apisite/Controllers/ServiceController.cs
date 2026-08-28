@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AgileConfig.Server.Application;
 using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Apisite.Models;
-using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.Common.Resources;
 using AgileConfig.Server.Data.Entity;
-using AgileConfig.Server.Event;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,17 +17,15 @@ namespace AgileConfig.Server.Apisite.Controllers;
 [ModelVaildate]
 public class ServiceController : Controller
 {
-    private readonly IRegisterCenterService _registerCenterService;
+    private readonly IServiceInstanceManagementService _serviceInstanceManagementService;
     private readonly IServiceInfoService _serviceInfoService;
-    private readonly ITinyEventBus _tinyEventBus;
 
-    public ServiceController(IServiceInfoService serviceInfoService,
-        IRegisterCenterService registerCenterService,
-        ITinyEventBus tinyEventBus)
+    public ServiceController(
+        IServiceInfoService serviceInfoService,
+        IServiceInstanceManagementService serviceInstanceManagementService)
     {
         _serviceInfoService = serviceInfoService;
-        _registerCenterService = registerCenterService;
-        _tinyEventBus = tinyEventBus;
+        _serviceInstanceManagementService = serviceInstanceManagementService;
     }
 
     [HttpPost]
@@ -37,26 +34,25 @@ public class ServiceController : Controller
     {
         if (model == null) throw new ArgumentNullException(nameof(model));
 
-        if (await _serviceInfoService.GetByServiceIdAsync(model.ServiceId) != null)
+        var result = await _serviceInstanceManagementService.RegisterAsync(new RegisterServiceInstanceCommand(
+            model.ServiceId,
+            model.ServiceName,
+            model.Ip,
+            model.Port,
+            model.MetaData,
+            model.CheckUrl,
+            model.AlarmUrl,
+            model.HeartBeatMode,
+            RegisterWay.Manual,
+            RejectExisting: true,
+            AcceptMissingIdentifier: true));
+
+        if (!result.Succeeded)
             return Json(new
             {
                 success = false,
-                message = Messages.ServiceAlreadyExists
+                message = result.Error == ApplicationError.Conflict ? Messages.ServiceAlreadyExists : ""
             });
-
-        var service = new ServiceInfo();
-        service.Ip = model.Ip;
-        service.Port = model.Port;
-        service.AlarmUrl = model.AlarmUrl;
-        service.CheckUrl = model.CheckUrl;
-        service.MetaData = model.MetaData;
-        service.ServiceId = model.ServiceId;
-        service.ServiceName = model.ServiceName;
-        service.RegisterWay = RegisterWay.Manual;
-        service.HeartBeatMode = model.HeartBeatMode;
-        var uniqueId = await _registerCenterService.RegisterAsync(service);
-
-        _tinyEventBus.Fire(new ServiceRegisteredEvent(uniqueId));
 
         return Json(new
         {
@@ -70,21 +66,19 @@ public class ServiceController : Controller
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException("id");
 
-        var service = await _serviceInfoService.GetByUniqueIdAsync(id);
-        if (service == null)
+        var result = await _serviceInstanceManagementService.UnregisterAsync(
+            id,
+            succeedWhenRemovalFails: true);
+        if (!result.Succeeded && result.Error == ApplicationError.NotFound)
             return Json(new
             {
                 success = false,
                 message = Messages.ServiceNotFound
             });
 
-        await _registerCenterService.UnRegisterAsync(id);
-
-        _tinyEventBus.Fire(new ServiceUnRegisterEvent(service.Id));
-
         return Json(new
         {
-            success = true
+            success = result.Succeeded || result.Error == ApplicationError.OperationFailed
         });
     }
 

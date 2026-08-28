@@ -3,11 +3,11 @@
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
 		<AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
-		<AssemblyVersion>1.13.1</AssemblyVersion>
-		<Version>1.13.1</Version>
-		<PackageVersion>1.13.1</PackageVersion>
+		<AssemblyVersion>1.13.2</AssemblyVersion>
+		<Version>1.13.2</Version>
+		<PackageVersion>1.13.2</PackageVersion>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-		<FileVersion>1.13.1</FileVersion>
+		<FileVersion>1.13.2</FileVersion>
 		<Authors>kklldog</Authors>
 		<Company>kklldog</Company>
 	</PropertyGroup>
@@ -48,6 +48,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\AgileConfig.Server.Application\AgileConfig.Server.Application.csproj" />
 		<ProjectReference Include="..\AgileConfig.Server.Common\AgileConfig.Server.Common.csproj" />
 		<ProjectReference Include="..\AgileConfig.Server.Data.Abstraction\AgileConfig.Server.Data.Abstraction.csproj" />
 		<ProjectReference Include="..\AgileConfig.Server.Data.Repository.Freesql\AgileConfig.Server.Data.Repository.Freesql.csproj" />

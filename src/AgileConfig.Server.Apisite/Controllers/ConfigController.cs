@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AgileConfig.Server.Application;
+using AgileConfig.Server.Application.Configurations;
+using AgileConfig.Server.Application.Releases;
 using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Apisite.Utilites;
@@ -24,20 +27,23 @@ public class ConfigController : Controller
 {
     private readonly IAppService _appService;
     private readonly IConfigService _configService;
+    private readonly IConfigurationManagementService _configurationManagementService;
+    private readonly IReleaseManagementService _releaseManagementService;
     private readonly ITinyEventBus _tinyEventBus;
-    private readonly IUserService _userService;
 
     public ConfigController(
         IConfigService configService,
         IAppService appService,
-        IUserService userService,
-        ITinyEventBus tinyEventBus
+        ITinyEventBus tinyEventBus,
+        IConfigurationManagementService configurationManagementService,
+        IReleaseManagementService releaseManagementService
     )
     {
         _configService = configService;
         _appService = appService;
-        _userService = userService;
         _tinyEventBus = tinyEventBus;
+        _configurationManagementService = configurationManagementService;
+        _releaseManagementService = releaseManagementService;
     }
 
     [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.Config_Add })]
@@ -46,45 +52,34 @@ public class ConfigController : Controller
     {
         ArgumentNullException.ThrowIfNull(model);
 
-        var app = await _appService.GetAsync(model.AppId);
-        if (app == null)
-            return Json(new
+        var result = await _configurationManagementService.CreateAsync(new CreateConfigurationCommand(
+            model.Id,
+            model.AppId,
+            model.Group,
+            model.Key,
+            model.Value,
+            model.Description,
+            env.Value));
+
+        if (!result.Succeeded)
+        {
+            var message = result.Error switch
             {
-                success = false,
-                message = Messages.AppNotExists(model.AppId)
-            });
+                ApplicationError.NotFound => Messages.AppNotExists(model.AppId),
+                ApplicationError.Conflict => Messages.ConfigExists,
+                _ => Messages.CreateConfigFailed
+            };
 
-        var oldConfig = await _configService.GetByAppIdKeyEnv(model.AppId, model.Group, model.Key, env.Value);
-        if (oldConfig != null)
-            return Json(new
-            {
-                success = false,
-                message = Messages.ConfigExists
-            });
-
-        var config = new Config();
-        config.Id = string.IsNullOrEmpty(model.Id) ? Guid.NewGuid().ToString("N") : model.Id;
-        config.Key = model.Key;
-        config.AppId = model.AppId;
-        config.Description = model.Description;
-        config.Value = model.Value;
-        config.Group = model.Group;
-        config.Status = ConfigStatus.Enabled;
-        config.CreateTime = DateTime.Now;
-        config.UpdateTime = null;
-        config.OnlineStatus = OnlineStatus.WaitPublish;
-        config.EditStatus = EditStatus.Add;
-        config.Env = env.Value;
-
-        var result = await _configService.AddAsync(config, env.Value);
-
-        if (result) _tinyEventBus.Fire(new AddConfigSuccessful(config, this.GetCurrentUserName()));
+            return result.Value == null
+                ? Json(new { success = false, message })
+                : Json(new { success = false, message, data = result.Value });
+        }
 
         return Json(new
         {
-            success = result,
-            message = !result ? Messages.CreateConfigFailed : "",
-            data = config
+            success = true,
+            message = "",
+            data = result.Value
         });
     }
 
@@ -153,81 +148,35 @@ public class ConfigController : Controller
     {
         if (model == null) throw new ArgumentNullException("model");
 
-        var config = await _configService.GetAsync(model.Id, env.Value);
-        if (config == null)
+        var result = await _configurationManagementService.UpdateAsync(new UpdateConfigurationCommand(
+            model.Id,
+            model.AppId,
+            model.Group,
+            model.Key,
+            model.Value,
+            model.Description,
+            env.Value));
+
+        if (!result.Succeeded)
             return Json(new
             {
                 success = false,
-                message = Messages.ConfigNotFound
-            });
-
-        var app = await _configService.GetByAppIdAsync(model.AppId, env.Value);
-        if (!app.Any())
-            return Json(new
-            {
-                success = false,
-                message = Messages.AppNotExists(model.AppId)
-            });
-
-        var oldConfig = new Config
-        {
-            Key = config.Key,
-            Group = config.Group,
-            Value = config.Value
-        };
-        if (config.Group != model.Group || config.Key != model.Key)
-        {
-            var anotherConfig = await _configService.GetByAppIdKeyEnv(model.AppId, model.Group, model.Key, env.Value);
-            if (anotherConfig != null)
-                return Json(new
+                message = result.Error switch
                 {
-                    success = false,
-                    message = Messages.ConfigKeyExists
-                });
-        }
-
-        config.AppId = model.AppId;
-        config.Description = model.Description;
-        config.Key = model.Key;
-        config.Value = model.Value;
-        config.Group = model.Group;
-        config.UpdateTime = DateTime.Now;
-        config.Env = env.Value;
-
-        if (!IsOnlyUpdateDescription(config, oldConfig))
-        {
-            var isPublished = await _configService.IsPublishedAsync(config.Id, env.Value);
-            if (isPublished)
-                // When an already published configuration is modified, mark it as edited.
-                config.EditStatus = EditStatus.Edit;
-            else
-                // If it has never been published, keep the status as added.
-                config.EditStatus = EditStatus.Add;
-
-            config.OnlineStatus = OnlineStatus.WaitPublish;
-        }
-
-        var result = await _configService.UpdateAsync(config, env.Value);
-
-        if (result) _tinyEventBus.Fire(new EditConfigSuccessful(config, this.GetCurrentUserName()));
+                    ApplicationError.NotFound =>
+                        (await _configService.GetAsync(model.Id, env.Value)) == null
+                            ? Messages.ConfigNotFound
+                            : Messages.AppNotExists(model.AppId),
+                    ApplicationError.Conflict => Messages.ConfigKeyExists,
+                    _ => "修改配置失败，请查看错误日志。"
+                }
+            });
 
         return Json(new
         {
-            success = result,
-            message = !result ? "修改配置失败，请查看错误日志。" : ""
+            success = true,
+            message = ""
         });
-    }
-
-    /// <summary>
-    ///     Determine whether only the description field changed.
-    /// </summary>
-    /// <param name="newConfig">Configuration submitted by the client.</param>
-    /// <param name="oldConfig">Existing configuration stored in the database.</param>
-    /// <returns>True when only the description differs.</returns>
-    private bool IsOnlyUpdateDescription(Config newConfig, Config oldConfig)
-    {
-        return newConfig.Key == oldConfig.Key && newConfig.Group == oldConfig.Group &&
-               newConfig.Value == oldConfig.Value;
     }
 
     [HttpGet]
@@ -321,29 +270,22 @@ public class ConfigController : Controller
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException("id");
 
-        var config = await _configService.GetAsync(id, env.Value);
-        if (config == null)
+        var result = await _configurationManagementService.DeleteAsync(
+            new DeleteConfigurationCommand(id, env.Value));
+
+        if (!result.Succeeded)
             return Json(new
             {
                 success = false,
-                message = "未找到对应的配置项。"
+                message = result.Error == ApplicationError.NotFound
+                    ? "未找到对应的配置项。"
+                    : "删除配置失败，请查看错误日志"
             });
-
-        config.EditStatus = EditStatus.Deleted;
-        config.OnlineStatus = OnlineStatus.WaitPublish;
-
-        var isPublished = await _configService.IsPublishedAsync(config.Id, env.Value);
-        if (!isPublished)
-            // If it has never been published, remove it directly.
-            config.Status = ConfigStatus.Deleted;
-
-        var result = await _configService.UpdateAsync(config, env.Value);
-        if (result) _tinyEventBus.Fire(new DeleteConfigSuccessful(config, this.GetCurrentUserName()));
 
         return Json(new
         {
-            success = result,
-            message = !result ? "删除配置失败，请查看错误日志" : ""
+            success = true,
+            message = ""
         });
     }
 
@@ -396,18 +338,13 @@ public class ConfigController : Controller
     {
         if (string.IsNullOrEmpty(publishTimelineId)) throw new ArgumentNullException("publishTimelineId");
 
-        var result = await _configService.RollbackAsync(publishTimelineId, env.Value);
-
-        if (result)
-        {
-            var node = await _configService.GetPublishTimeLineNodeAsync(publishTimelineId, env.Value);
-            _tinyEventBus.Fire(new RollbackConfigSuccessful(node, this.GetCurrentUserName()));
-        }
+        var result = await _releaseManagementService.RollbackAsync(
+            new RollbackConfigurationCommand(publishTimelineId, env.Value));
 
         return Json(new
         {
-            success = result,
-            message = !result ? "回滚失败，请查看错误日志。" : ""
+            success = result.Succeeded,
+            message = !result.Succeeded ? "回滚失败，请查看错误日志。" : ""
         });
     }
 
@@ -453,20 +390,16 @@ public class ConfigController : Controller
 
         if (string.IsNullOrEmpty(model.AppId)) throw new ArgumentNullException("appId");
 
-        var appId = model.AppId;
-        var userId = await this.GetCurrentUserId(_userService);
-        var ret = await _configService.Publish(appId, model.Ids, model.Log, userId, env.Value);
-
-        if (ret.result)
-        {
-            var timelineNode = await _configService.GetPublishTimeLineNodeAsync(ret.publishTimelineId, env.Value);
-            _tinyEventBus.Fire(new PublishConfigSuccessful(timelineNode, this.GetCurrentUserName()));
-        }
+        var result = await _releaseManagementService.PublishAsync(new PublishConfigurationsCommand(
+            model.AppId,
+            model.Ids,
+            model.Log,
+            env.Value));
 
         return Json(new
         {
-            success = ret.result,
-            message = !ret.result ? "上线配置失败，请查看错误日志" : ""
+            success = result.Succeeded,
+            message = !result.Succeeded ? "上线配置失败，请查看错误日志" : ""
         });
     }
 

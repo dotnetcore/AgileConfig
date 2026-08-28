@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AgileConfig.Server.Application;
 using AgileConfig.Server.Apisite.Controllers.api.Models;
 using AgileConfig.Server.Apisite.Filters;
-using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Apisite.Models.Mapping;
-using AgileConfig.Server.Common.EventBus;
+using AgileConfig.Server.Common.Resources;
 using AgileConfig.Server.IService;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,21 +18,11 @@ namespace AgileConfig.Server.Apisite.Controllers.api;
 [Route("api/[controller]")]
 public class NodeController : Controller
 {
-    private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
-    private readonly IServerNodeService _serverNodeService;
-    private readonly ISysLogService _sysLogService;
-    private readonly ITinyEventBus _tinyEventBus;
+    private readonly INodeManagementService _nodeManagementService;
 
-    public NodeController(IServerNodeService serverNodeService,
-        ISysLogService sysLogService,
-        IRemoteServerNodeProxy remoteServerNodeProxy,
-        ITinyEventBus tinyEventBus
-    )
+    public NodeController(INodeManagementService nodeManagementService)
     {
-        _serverNodeService = serverNodeService;
-        _sysLogService = sysLogService;
-        _remoteServerNodeProxy = remoteServerNodeProxy;
-        _tinyEventBus = tinyEventBus;
+        _nodeManagementService = nodeManagementService;
     }
 
     /// <summary>
@@ -42,7 +32,7 @@ public class NodeController : Controller
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ApiNodeVM>>> GetAll()
     {
-        var nodes = await _serverNodeService.GetAllNodesAsync();
+        var nodes = await _nodeManagementService.GetAllAsync();
 
         var vms = nodes.Select(x => x.ToApiNodeVM());
 
@@ -70,17 +60,13 @@ public class NodeController : Controller
             });
         }
 
-        var ctrl = new ServerNodeController(_serverNodeService, _sysLogService, _remoteServerNodeProxy, _tinyEventBus);
-        ctrl.ControllerContext.HttpContext = HttpContext;
-        var result = await ctrl.Add(model.ToServerNodeVM()) as JsonResult;
-
-        dynamic obj = result?.Value;
-        if (obj?.success == true) return Created("", "");
+        var result = await _nodeManagementService.CreateAsync(new CreateNodeCommand(model.Address, model.Remark));
+        if (result.Succeeded) return Created("", "");
 
         Response.StatusCode = 400;
         return Json(new
         {
-            obj?.message
+            message = GetCreateErrorMessage(result.Error)
         });
     }
 
@@ -95,24 +81,35 @@ public class NodeController : Controller
     [HttpDelete]
     public async Task<IActionResult> Delete([FromQuery] string address)
     {
-        var ctrl = new ServerNodeController(_serverNodeService, _sysLogService, _remoteServerNodeProxy, _tinyEventBus);
-        ctrl.ControllerContext.HttpContext = HttpContext;
-        var result = await ctrl.Delete(new ServerNodeVM { Address = address }) as JsonResult;
-
-        dynamic obj = result?.Value;
-        if (obj?.success == true) return NoContent();
+        var result = await _nodeManagementService.DeleteAsync(address);
+        if (result.Succeeded) return NoContent();
 
         Response.StatusCode = 400;
         return Json(new
         {
-            obj?.message
+            message = GetDeleteErrorMessage(result.Error)
         });
     }
 
-    private (bool, string) CheckRequired(ApiNodeVM model)
+    private static (bool, string) CheckRequired(ApiNodeVM model)
     {
         if (string.IsNullOrEmpty(model.Address)) return (false, "Address is required");
 
         return (true, "");
+    }
+
+    private static string GetCreateErrorMessage(ApplicationError error)
+    {
+        return error == ApplicationError.Conflict ? Messages.NodeAlreadyExists : Messages.AddNodeFailed;
+    }
+
+    private static string GetDeleteErrorMessage(ApplicationError error)
+    {
+        return error switch
+        {
+            ApplicationError.Forbidden => Messages.DemoModeNoNodeDelete,
+            ApplicationError.NotFound => Messages.NodeNotFound,
+            _ => Messages.DeleteNodeFailed
+        };
     }
 }

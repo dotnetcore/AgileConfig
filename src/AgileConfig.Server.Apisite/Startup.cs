@@ -3,6 +3,8 @@ using System.IO;
 using System.Net;
 using AgileConfig.Server.Apisite.UIExtension;
 using AgileConfig.Server.Apisite.Websocket;
+using AgileConfig.Server.Apisite.Application;
+using AgileConfig.Server.Application;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Common.EventBus;
 using AgileConfig.Server.Common.RestClient;
@@ -57,6 +59,7 @@ public class Startup
         services.AddRestClient();
 
         services.AddMemoryCache();
+        services.AddHttpContextAccessor();
 
         services.AddCors();
         services.AddMvc().AddRazorRuntimeCompilation().AddControllersAsServices();
@@ -71,6 +74,9 @@ public class Startup
         services.AddRepositories();
 
         services.AddBusinessServices();
+        services.AddApplicationServices();
+        services.AddScoped<ICurrentUserAccessor, HttpCurrentUserAccessor>();
+        services.AddSingleton<IPreviewModeAccessor, AppsettingsPreviewModeAccessor>();
 
         services.ConfigureOptions<ConfigureJwtBearerOptions>();
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -142,7 +148,14 @@ public class Startup
     {
         services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "AgileConfig API", Version = "v1" });
+            c.SwaggerDoc("v2", new OpenApiInfo { Title = "AgileConfig API", Version = "v2" });
+            c.DocInclusionPredicate((documentName, apiDescription) =>
+            {
+                var path = apiDescription.RelativePath ?? string.Empty;
+                var isV2 = path.StartsWith("api/v2/", StringComparison.OrdinalIgnoreCase);
+                return documentName == (isV2 ? "v2" : "v1");
+            });
             var basePath = Path.GetDirectoryName(typeof(Program).Assembly.Location);
             var xmlPath = Path.Combine(basePath, "AgileConfig.Server.Apisite.xml");
             c.IncludeXmlComments(xmlPath);
@@ -152,6 +165,10 @@ public class Startup
     private void AddSwaggerMiddleWare(IApplicationBuilder app)
     {
         app.UseSwagger();
-        app.UseSwaggerUI(c => { c.SwaggerEndpoint("v1/swagger.json", "My API V1"); });
+        app.UseSwaggerUI(c =>
+        {
+            c.SwaggerEndpoint("v2/swagger.json", "AgileConfig API V2");
+            c.SwaggerEndpoint("v1/swagger.json", "AgileConfig API V1");
+        });
     }
 }

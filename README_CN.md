@@ -39,8 +39,9 @@ JAVA 客户端项目：[AgileConfig_JClient](https://github.com/kklldog/agilecon
 GO 客户端项目：[AgileConfig_GoClient](https://github.com/kklldog/agileconfig_client_go)  
 Python 客户端项目：[AgileConfig_GoClient](https://github.com/kklldog/agileconfig_client_python)  
 GO 客户端项目：[go-agile-config](https://github.com/animacaeli/go-agile-config)  
-Python 客户端项目：[py-agile-config](https://github.com/animacaeli/py-agile-config)
+Python 客户端项目：[py-agile-config](https://github.com/animacaeli/py-agile-config)  
 Nodejs 实现的客户端: [node-agile-client](https://github.com/LetTTGACO/node-agile-client)    
+Rust 实现的客户端: [agile-config-client](https://crates.io/crates/agile-config-client)  
 Blazor 实现的管理界面：[AgileConfigBlazorUI](https://github.com/EzrealJ/AgileConfigBlazorUI)  
 
 示例项目：    
