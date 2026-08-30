@@ -83,6 +83,12 @@ public class RoleService : IRoleService
         return _roleDefinitionRepository.GetAsync(id);
     }
 
+    public async Task<List<string>> GetFunctionsAsync(string roleId)
+    {
+        var roleFunctions = await _roleFunctionRepository.QueryAsync(x => x.RoleId == roleId);
+        return roleFunctions.Select(x => x.FunctionId).ToList();
+    }
+
     public async Task<bool> UpdateAsync(Role role, IEnumerable<string> functions)
     {
         if (role == null) throw new ArgumentNullException(nameof(role));

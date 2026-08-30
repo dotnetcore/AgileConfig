@@ -1,5 +1,6 @@
 using System.Linq;
 using AgileConfig.Server.Apisite;
+using AgileConfig.Server.Apisite.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -45,5 +46,22 @@ public sealed class ControllerDependencyArchitectureTests
 
         Assert.IsEmpty(invalidDependencies,
             $"V2 controllers must access use cases through the Application layer: {string.Join(", ", invalidDependencies)}");
+    }
+
+    [TestMethod]
+    public void MigratedIdentityControllers_UseOnlyApplicationServices()
+    {
+        var migratedControllers = new[] { typeof(UserController), typeof(RoleController) };
+        var invalidDependencies = migratedControllers
+            .SelectMany(type => type.GetConstructors()
+                .SelectMany(constructor => constructor.GetParameters()
+                    .Where(parameter => parameter.ParameterType.Namespace == null ||
+                                        !parameter.ParameterType.Namespace.StartsWith(
+                                            "AgileConfig.Server.Application"))
+                    .Select(parameter => $"{type.FullName} -> {parameter.ParameterType.FullName}")))
+            .ToList();
+
+        Assert.IsEmpty(invalidDependencies,
+            $"Migrated identity controllers must use Application services: {string.Join(", ", invalidDependencies)}");
     }
 }
