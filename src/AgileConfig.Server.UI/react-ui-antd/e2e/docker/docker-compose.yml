@@ -1,0 +1,56 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: agileconfig
+      MYSQL_ROOT_PASSWORD: e2e-mysql-password
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -pe2e-mysql-password"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  admin:
+    build:
+      context: ../../../../..
+    image: agileconfig-e2e:local
+    ports:
+      - "15100:5000"
+    environment: &server-environment
+      adminConsole: "true"
+      saPassword: e2e-admin-password
+      cluster: "true"
+      db__provider: mysql
+      db__conn: "database=agileconfig;data source=mysql;User Id=root;password=e2e-mysql-password;port=3306"
+      otlp__logs__endpoint: ""
+      otlp__traces__endpoint: ""
+      otlp__metrics__endpoint: ""
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  node1:
+    image: agileconfig-e2e:local
+    ports:
+      - "15101:5000"
+    environment:
+      <<: *server-environment
+      adminConsole: "false"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      admin:
+        condition: service_started
+
+  node2:
+    image: agileconfig-e2e:local
+    ports:
+      - "15102:5000"
+    environment:
+      <<: *server-environment
+      adminConsole: "false"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      admin:
+        condition: service_started

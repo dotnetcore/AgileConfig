@@ -32,6 +32,11 @@
     "test": "max test",
     "test:all": "node ./tests/run-tests.js",
     "test:component": "max test ./src/components",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test e2e/specs/configuration-lifecycle.spec.ts",
+    "test:e2e:protocol": "playwright test e2e/specs/websocket-publish.spec.ts",
+    "test:e2e:permissions": "playwright test e2e/specs/permissions.spec.ts",
+    "test:e2e:docker": "node e2e/docker/run-cluster.js",
     "tsc": "tsc --noEmit"
   },
   "lint-staged": {
@@ -66,6 +71,7 @@
     "umi-request": "^1.0.8"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@types/classnames": "^2.2.7",
     "@types/express": "^4.17.0",
     "@types/history": "^4.7.2",
@@ -75,6 +81,7 @@
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
     "@types/react-helmet": "^6.1.0",
+    "@types/ws": "^8.18.1",
     "@umijs/fabric": "^2.5.1",
     "@umijs/utils": "4.7.5",
     "carlo": "^0.9.46",
@@ -92,7 +99,8 @@
     "prettier": "^2.0.1",
     "puppeteer-core": "^5.0.0",
     "stylelint": "^13.0.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "ws": "^8.21.3"
   },
   "engines": {
     "node": ">=18.0.0"

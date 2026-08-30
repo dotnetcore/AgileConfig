@@ -511,13 +511,14 @@ const configs: React.FC<ConfigsProps> = (props) => {
         }
         toolBarRender={() => [
           <RequireFunction fn={functionKeys.Config_Add} key="add" fallback={null} appId={appId}>
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => { setCreateModalVisible(true); }}>
+            <Button data-testid="config-create" type="primary" icon={<PlusOutlined />} onClick={() => { setCreateModalVisible(true); }}>
               {intl.formatMessage({ id: 'pages.configs.table.cols.action.add' })}
             </Button>
           </RequireFunction>
           ,
           <RequireFunction fn={functionKeys.Config_Publish} key="publish" fallback={null} appId={appId}>
             <Button
+              data-testid="config-publish-all"
               icon={<VerticalAlignTopOutlined />}
               type="primary"
               className="success"
@@ -714,6 +715,9 @@ const configs: React.FC<ConfigsProps> = (props) => {
             maskClosable:false
           }
         }
+        submitter={{
+          submitButtonProps: { 'data-testid': 'config-create-submit' },
+        }}
         formRef={addFormRef}
         title={intl.formatMessage({id:'pages.configs.from.title.add'})}
         open={createModalVisible}
@@ -761,6 +765,7 @@ const configs: React.FC<ConfigsProps> = (props) => {
           name="group"
         />
         <ProFormText
+          fieldProps={{ id: 'config-create-key' }}
           rules={[
             {
               required: true,
@@ -779,6 +784,7 @@ const configs: React.FC<ConfigsProps> = (props) => {
           name="value"
           fieldProps={
             {
+              id: 'config-create-value',
               autoSize: {
                 minRows: 3, maxRows: 12
               }
