@@ -7,31 +7,41 @@ test('an administrator can publish a configuration from the hosted management UI
   const key = `e2e.key.${suffix}`;
   const value = `value-${suffix}`;
 
+  const login = await request.post('/admin/jwt/login', {
+    data: { userName: 'admin', password: 'e2e-admin-password' },
+  });
+  await expect(login).toBeOK();
+  const { token } = await login.json();
+  const addNode = await request.post('/ServerNode/Add', {
+    headers: { Authorization: `Bearer ${token}` },
+    data: { address: 'http://127.0.0.1:5187', remark: 'E2E local node' },
+  });
+  await expect(addNode).toBeOK();
+
   await page.goto('/ui#/user/login');
   await page.getByRole('textbox', { name: 'Username', exact: true }).fill('admin');
   await page.getByRole('textbox', { name: 'Password', exact: true }).fill('e2e-admin-password');
   await page.getByRole('button', { name: 'Login', exact: true }).click();
   await expect(page).toHaveURL(/#\/home$/);
-  await page.getByRole('button', { name: 'Add Now', exact: true }).click();
 
   await page.goto('/ui#/app');
-  await page.getByRole('button', { name: /Create$/ }).click();
+  await page.getByTestId('app-create').click();
   const applicationDialog = page.getByRole('dialog');
-  await applicationDialog.getByLabel('Name').fill(appName);
-  await applicationDialog.getByLabel('AppID').fill(appId);
-  await applicationDialog.getByLabel('Secret').fill('e2e-app-secret');
+  await applicationDialog.locator('#app-create-name').fill(appName);
+  await applicationDialog.locator('#app-create-id').fill(appId);
+  await applicationDialog.locator('#app-create-secret').fill('e2e-app-secret');
   await applicationDialog.getByRole('button', { name: 'Submit', exact: true }).click();
   await expect(page.getByText(appId, { exact: true })).toBeVisible();
 
   await page.goto(`/ui#/app/config/${appId}/${encodeURIComponent(appName)}`);
-  await page.getByRole('button', { name: /Add$/ }).click();
+  await page.getByTestId('config-create').click();
   const configurationDialog = page.getByRole('dialog');
-  await configurationDialog.getByLabel('Key').fill(key);
-  await configurationDialog.getByLabel('Value').fill(value);
+  await configurationDialog.locator('#config-create-key').fill(key);
+  await configurationDialog.locator('#config-create-value').fill(value);
   await configurationDialog.getByRole('button', { name: 'Submit', exact: true }).click();
   await expect(page.getByText(key, { exact: true })).toBeVisible();
 
-  await page.getByRole('button', { name: /Publish All$/ }).click();
+  await page.getByTestId('config-publish-all').click();
   const publishDialog = page.getByRole('dialog');
   await publishDialog.getByRole('button', { name: 'OK', exact: true }).click();
   await expect(page.getByText('Publish Success!', { exact: true })).toBeVisible();

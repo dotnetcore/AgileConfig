@@ -29,7 +29,7 @@ jobs:
     - run: npm install
     - run: npm run build
     - run: npx playwright install --with-deps chromium
-    - run: npm run test:e2e
+    - run: E2E_SKIP_UI_BUILD=true npm run test:e2e
   build-dotnet:
     runs-on: ubuntu-latest
     

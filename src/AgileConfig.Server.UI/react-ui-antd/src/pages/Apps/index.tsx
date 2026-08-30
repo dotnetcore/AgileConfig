@@ -521,6 +521,7 @@ const appList: React.FC = (props) => {
             <AuthorizedEle key="0" judgeKey={functionKeys.App_Add}>
               <Button
                 key="button"
+                data-testid="app-create"
                 icon={<PlusOutlined />}
                 type="primary"
                 onClick={() => {
@@ -585,6 +586,7 @@ const appList: React.FC = (props) => {
         }}
       >
         <ProFormText
+          fieldProps={{ id: 'app-create-name' }}
           rules={[
             {
               required: true,
@@ -596,6 +598,7 @@ const appList: React.FC = (props) => {
           name="name"
         />
         <ProFormText
+          fieldProps={{ id: 'app-create-id' }}
           rules={[
             {
               required: true,
@@ -607,6 +610,7 @@ const appList: React.FC = (props) => {
           name="id"
         />
         <ProFormText.Password
+          fieldProps={{ id: 'app-create-secret' }}
           rules={[{}]}
           label={intl.formatMessage({
             id: 'pages.app.form.secret',

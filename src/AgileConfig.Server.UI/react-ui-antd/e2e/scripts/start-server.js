@@ -16,7 +16,7 @@ function run(command, args, cwd) {
   execFileSync(command, args, { cwd, stdio: 'inherit', shell: process.platform === 'win32' });
 }
 
-if (!existsSync(uiSource)) {
+if (!process.env.E2E_SKIP_UI_BUILD || !existsSync(uiSource)) {
   run('npm', ['run', 'build'], frontendRoot);
 }
 run('dotnet', ['build', apiProject, '-c', 'Release', '--nologo'], repositoryRoot);
