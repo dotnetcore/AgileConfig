@@ -568,6 +568,9 @@ const appList: React.FC = (props) => {
         modalProps={{
           maskClosable: false,
         }}
+        submitter={{
+          submitButtonProps: { 'data-testid': 'app-create-submit' },
+        }}
         formRef={addFormRef}
         title={intl.formatMessage({
           id: 'pages.app.form.title.add',

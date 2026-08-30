@@ -715,6 +715,9 @@ const configs: React.FC<ConfigsProps> = (props) => {
             maskClosable:false
           }
         }
+        submitter={{
+          submitButtonProps: { 'data-testid': 'config-create-submit' },
+        }}
         formRef={addFormRef}
         title={intl.formatMessage({id:'pages.configs.from.title.add'})}
         open={createModalVisible}

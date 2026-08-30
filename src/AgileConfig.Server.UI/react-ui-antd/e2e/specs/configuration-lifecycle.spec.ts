@@ -30,7 +30,7 @@ test('an administrator can publish a configuration from the hosted management UI
   await applicationDialog.locator('#app-create-name').fill(appName);
   await applicationDialog.locator('#app-create-id').fill(appId);
   await applicationDialog.locator('#app-create-secret').fill('e2e-app-secret');
-  await applicationDialog.getByRole('button', { name: 'Submit', exact: true }).click();
+  await applicationDialog.getByTestId('app-create-submit').click();
   await expect(page.getByText(appId, { exact: true })).toBeVisible();
 
   await page.goto(`/ui#/app/config/${appId}/${encodeURIComponent(appName)}`);
@@ -38,7 +38,7 @@ test('an administrator can publish a configuration from the hosted management UI
   const configurationDialog = page.getByRole('dialog');
   await configurationDialog.locator('#config-create-key').fill(key);
   await configurationDialog.locator('#config-create-value').fill(value);
-  await configurationDialog.getByRole('button', { name: 'Submit', exact: true }).click();
+  await configurationDialog.getByTestId('config-create-submit').click();
   await expect(page.getByText(key, { exact: true })).toBeVisible();
 
   await page.getByTestId('config-publish-all').click();
