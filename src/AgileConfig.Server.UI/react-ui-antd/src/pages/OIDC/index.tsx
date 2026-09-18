@@ -1,17 +1,16 @@
-import { PageContainer } from '@ant-design/pro-components';
-import React, { useEffect } from 'react';
-import { Spin } from 'antd';
-import styles from './index.less';
 import { oidcLogin } from '@/services/login';
+import { PageContainer } from '@ant-design/pro-components';
 import type { Dispatch } from '@umijs/max';
 import { connect, history, useIntl, useLocation } from '@umijs/max';
-import { message } from 'antd';
+import { message, Spin } from 'antd';
+import React, { useEffect } from 'react';
+import styles from './index.less';
 
 type OidcCallbackProps = {
   dispatch: Dispatch;
 };
 
-const OidcCallback: React.FC<OidcCallbackProps> = ({ dispatch }) =>  {
+export const OidcCallback: React.FC<OidcCallbackProps> = ({ dispatch }) => {
   const intl = useIntl();
   const location = useLocation();
   const code = new URLSearchParams(location.search).get('code');
@@ -41,10 +40,9 @@ const OidcCallback: React.FC<OidcCallbackProps> = ({ dispatch }) =>  {
   return (
     <PageContainer>
       <div className={styles.loading}>
-        <Spin tip="OIDC loading..." size='large'>
-        </Spin>
+        <Spin tip="OIDC loading..." size="large" />
       </div>
     </PageContainer>
   );
-}
+};
 export default connect(() => ({}))(OidcCallback);
