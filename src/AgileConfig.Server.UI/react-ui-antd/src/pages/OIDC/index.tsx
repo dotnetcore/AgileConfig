@@ -3,10 +3,15 @@ import React, { useEffect } from 'react';
 import { Spin } from 'antd';
 import styles from './index.less';
 import { oidcLogin } from '@/services/login';
-import { history, useIntl, useLocation } from '@umijs/max';
+import type { Dispatch } from '@umijs/max';
+import { connect, history, useIntl, useLocation } from '@umijs/max';
 import { message } from 'antd';
 
-const OidcCallback: React.FC = () =>  {
+type OidcCallbackProps = {
+  dispatch: Dispatch;
+};
+
+const OidcCallback: React.FC<OidcCallbackProps> = ({ dispatch }) =>  {
   const intl = useIntl();
   const location = useLocation();
   const code = new URLSearchParams(location.search).get('code');
@@ -19,6 +24,10 @@ const OidcCallback: React.FC = () =>  {
 
     oidcLogin(code).then((response) => {
       if (response.status === 'ok') {
+        dispatch({
+          type: 'login/changeLoginStatus',
+          payload: response,
+        });
         message.success(intl.formatMessage({ id: 'pages.login.loginsuccess' }));
         history.replace('/');
         return;
@@ -27,7 +36,7 @@ const OidcCallback: React.FC = () =>  {
       message.error(intl.formatMessage({ id: 'pages.login.loginfail' }));
       history.replace('/user/login');
     });
-  }, [code, intl]);
+  }, [code, intl, dispatch]);
 
   return (
     <PageContainer>
@@ -38,4 +47,4 @@ const OidcCallback: React.FC = () =>  {
     </PageContainer>
   );
 }
-export default OidcCallback;
+export default connect(() => ({}))(OidcCallback);
