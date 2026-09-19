@@ -273,4 +273,6 @@ __pycache__/
 /src/AgileConfig.Server.Apisite/wwwroot/ui/
 /src/AgileConfig.Server.Apisite/agile_config.db
 /coverage
+/src/AgileConfig.Server.UI/react-ui-antd/playwright-report/
+/src/AgileConfig.Server.UI/react-ui-antd/test-results/
 /AGENTS.md

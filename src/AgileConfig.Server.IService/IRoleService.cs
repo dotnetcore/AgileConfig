@@ -8,6 +8,7 @@ public interface IRoleService
 {
     Task<List<Role>> GetAllAsync();
     Task<Role> GetAsync(string id);
+    Task<List<string>> GetFunctionsAsync(string roleId);
     Task<Role> CreateAsync(Role role, IEnumerable<string> functions);
     Task<bool> UpdateAsync(Role role, IEnumerable<string> functions);
     Task<bool> DeleteAsync(string id);

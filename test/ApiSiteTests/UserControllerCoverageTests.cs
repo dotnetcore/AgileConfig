@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using AgileConfig.Server.Application;
+using AgileConfig.Server.Application.Users;
 using AgileConfig.Server.Apisite.Controllers;
 using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Common;
@@ -327,7 +329,14 @@ public sealed class UserControllerCoverageTests
             User = new ClaimsPrincipal(new ClaimsIdentity(
                 new[] { new Claim("username", currentUser) }, "test"))
         };
-        var controller = new UserController(userService.Object, eventBus.Object);
+        var currentUserAccessor = new Mock<ICurrentUserAccessor>();
+        currentUserAccessor.SetupGet(x => x.UserName).Returns(currentUser);
+        var managementService = new UserManagementService(
+            userService.Object,
+            eventBus.Object,
+            currentUserAccessor.Object,
+            TimeProvider.System);
+        var controller = new UserController(managementService);
         controller.ControllerContext = new ControllerContext { HttpContext = context };
         return controller;
     }

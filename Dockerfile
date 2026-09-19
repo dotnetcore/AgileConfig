@@ -14,7 +14,7 @@ WORKDIR /app
 EXPOSE 5000
 
 # 前端与架构无关，固定跑在构建机原生平台上，避免 QEMU 模拟拖慢 npm
-FROM --platform=$BUILDPLATFORM node:16 AS ui-build
+FROM --platform=$BUILDPLATFORM node:20 AS ui-build
 WORKDIR /src/AgileConfig.Server.UI/react-ui-antd
 COPY ["src/AgileConfig.Server.UI/react-ui-antd/package.json", "src/AgileConfig.Server.UI/react-ui-antd/package-lock.json", "./"]
 RUN npm ci

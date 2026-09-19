@@ -1,6 +1,8 @@
 using System;
 using AgileConfig.Server.Application.Configurations;
 using AgileConfig.Server.Application.Releases;
+using AgileConfig.Server.Application.Roles;
+using AgileConfig.Server.Application.Users;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AgileConfig.Server.Application;
@@ -16,6 +18,8 @@ public static class ServiceCollectionExt
         services.AddScoped<IReleaseManagementService, ReleaseManagementService>();
         services.AddScoped<INodeManagementService, NodeManagementService>();
         services.AddScoped<IServiceInstanceManagementService, ServiceInstanceManagementService>();
+        services.AddScoped<IUserManagementService, UserManagementService>();
+        services.AddScoped<IRoleManagementService, RoleManagementService>();
         return services;
     }
 }
