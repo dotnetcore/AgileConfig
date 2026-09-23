@@ -96,63 +96,83 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
     {
         _logger.LogInformation("start to service health check");
 
+        // Cache the check interval upfront to avoid an exception during the loop
+        // (the getter throws if the config value is <= 0, which would crash the loop silently).
+        var interval = CheckInterval;
+        _logger.LogInformation("service health check interval: {0}s", interval);
+
         Task.Factory.StartNew(async () =>
         {
             while (true)
             {
-                // Skip services without a configured heartbeat mode.
-                var services = await _serviceInfoService
-                    .QueryAsync(x => x.HeartBeatMode != null && x.HeartBeatMode != "");
-                foreach (var service in services)
+                try
                 {
-                    if (service.HeartBeatMode == HeartBeatModes.none.ToString()) continue;
-
-                    var lstHeartBeat = service.LastHeartBeat;
-                    if (!lstHeartBeat.HasValue) lstHeartBeat = service.RegisterTime ?? DateTime.MinValue;
-
-                    // A heartbeat mode is specified.
-                    if (!string.IsNullOrWhiteSpace(service.HeartBeatMode))
+                    // Skip services without a configured heartbeat mode.
+                    var services = await _serviceInfoService
+                        .QueryAsync(x => x.HeartBeatMode != null && x.HeartBeatMode != "");
+                    foreach (var service in services)
                     {
-                        if (RemoveServiceInterval > 0 &&
-                            (DateTime.Now - lstHeartBeat.Value).TotalSeconds > RemoveServiceInterval)
-                        {
-                            // Remove the service if it has exceeded the configured lifetime.
-                            await _serviceInfoService.RemoveAsync(service.Id);
-                            continue;
-                        }
+                        if (service.HeartBeatMode == HeartBeatModes.none.ToString()) continue;
 
-                        // Client-initiated heartbeats do not require an HTTP health check.
-                        if (service.HeartBeatMode == HeartBeatModes.client.ToString())
-                        {
-                            if ((DateTime.Now - lstHeartBeat.Value).TotalSeconds > UnhealthInterval)
-                                // For client heartbeats, treat services as unavailable after UnhealthInterval without heartbeats.
-                                if (service.Status == ServiceStatus.Healthy)
-                                    await _serviceInfoService.UpdateServiceStatus(service, ServiceStatus.Unhealthy);
+                        var lstHeartBeat = service.LastHeartBeat;
+                        if (!lstHeartBeat.HasValue) lstHeartBeat = service.RegisterTime ?? DateTime.MinValue;
 
-                            continue;
-                        }
-
-                        // Server-initiated HTTP health check.
-                        if (service.HeartBeatMode == HeartBeatModes.server.ToString())
+                        // A heartbeat mode is specified.
+                        if (!string.IsNullOrWhiteSpace(service.HeartBeatMode))
                         {
-                            if (string.IsNullOrWhiteSpace(service.CheckUrl))
+                            if (RemoveServiceInterval > 0 &&
+                                (DateTime.Now - lstHeartBeat.Value).TotalSeconds > RemoveServiceInterval)
                             {
-                                // Without a CheckUrl, consider the service offline.
-                                await _serviceInfoService.UpdateServiceStatus(service, ServiceStatus.Unhealthy);
+                                // Remove the service if it has exceeded the configured lifetime.
+                                await _serviceInfoService.RemoveAsync(service.Id);
                                 continue;
                             }
 
-                            _ = Task.Run(async () =>
+                            // Client-initiated heartbeats do not require an HTTP health check.
+                            if (service.HeartBeatMode == HeartBeatModes.client.ToString())
                             {
-                                var result = await CheckAService(service);
-                                await _serviceInfoService.UpdateServiceStatus(service,
-                                    result ? ServiceStatus.Healthy : ServiceStatus.Unhealthy);
-                            });
+                                if ((DateTime.Now - lstHeartBeat.Value).TotalSeconds > UnhealthInterval)
+                                    // For client heartbeats, treat services as unavailable after UnhealthInterval without heartbeats.
+                                    if (service.Status == ServiceStatus.Healthy)
+                                        await _serviceInfoService.UpdateServiceStatus(service, ServiceStatus.Unhealthy);
+
+                                continue;
+                            }
+
+                            // Server-initiated HTTP health check.
+                            if (service.HeartBeatMode == HeartBeatModes.server.ToString())
+                            {
+                                if (string.IsNullOrWhiteSpace(service.CheckUrl))
+                                {
+                                    // Without a CheckUrl, consider the service offline.
+                                    await _serviceInfoService.UpdateServiceStatus(service, ServiceStatus.Unhealthy);
+                                    continue;
+                                }
+
+                                _ = Task.Run(async () =>
+                                {
+                                    try
+                                    {
+                                        var result = await CheckAService(service);
+                                        await _serviceInfoService.UpdateServiceStatus(service,
+                                            result ? ServiceStatus.Healthy : ServiceStatus.Unhealthy);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        _logger.LogError(ex, "check service health task error for {0} {1}",
+                                            service.ServiceId, service.ServiceName);
+                                    }
+                                });
+                            }
                         }
                     }
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "service health check loop error");
+                }
 
-                await Task.Delay(CheckInterval * 1000);
+                await Task.Delay(interval * 1000);
             }
         }, TaskCreationOptions.LongRunning);
 
@@ -170,9 +190,13 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
             result = istatus >= 0 && istatus < 100; // Treat 2xx status codes as healthy responses.
 
             if (!result)
+                _logger.LogInformation("check service health {0} {1} {2} result：{3} status：{4}", service.CheckUrl,
+                    service.ServiceId,
+                    service.ServiceName, "down", (int)resp.StatusCode);
+            else
                 _logger.LogInformation("check service health {0} {1} {2} result：{3}", service.CheckUrl,
                     service.ServiceId,
-                    service.ServiceName, "down");
+                    service.ServiceName, "up");
 
             return result;
         }

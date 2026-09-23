@@ -98,7 +98,7 @@ public class ServiceInfoService : IServiceInfoService
         if (service2 == null) return;
 
         service2.Status = status;
-        if (status != ServiceStatus.Unhealthy) service2.LastHeartBeat = DateTime.Now;
+        service2.LastHeartBeat = DateTime.Now;
         await _serviceInfoRepository.UpdateAsync(service2);
 
         if (oldStatus != status)
