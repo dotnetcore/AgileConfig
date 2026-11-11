@@ -2,7 +2,8 @@
 
 public class PublishTimelineRepository : MongodbRepository<PublishTimeline, string>, IPublishTimelineRepository
 {
-    public PublishTimelineRepository(string? connectionString) : base(connectionString)
+    public PublishTimelineRepository(string? connectionString, MongodbTlsOptions tlsOptions = null)
+        : base(connectionString, tlsOptions)
     {
     }
 

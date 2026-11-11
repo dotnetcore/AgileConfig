@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33801.468
@@ -59,6 +59,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.Application", "src\AgileConfig.Server.Application\AgileConfig.Server.Application.csproj", "{CA724F53-FA58-44CC-B0E7-5FD05CF5E63E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgileConfig.Server.ApplicationTests", "test\AgileConfig.Server.ApplicationTests\AgileConfig.Server.ApplicationTests.csproj", "{0AF33559-2F97-4F77-B8E4-859B6A341BA8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgileConfig.Server.Data.MongodbTests", "test\AgileConfig.Server.Data.MongodbTests\AgileConfig.Server.Data.MongodbTests.csproj", "{CE8930D4-1D11-4DD1-8A43-45AEA1072113}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -154,6 +156,10 @@ Global
 		{0AF33559-2F97-4F77-B8E4-859B6A341BA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0AF33559-2F97-4F77-B8E4-859B6A341BA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0AF33559-2F97-4F77-B8E4-859B6A341BA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE8930D4-1D11-4DD1-8A43-45AEA1072113}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE8930D4-1D11-4DD1-8A43-45AEA1072113}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE8930D4-1D11-4DD1-8A43-45AEA1072113}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE8930D4-1D11-4DD1-8A43-45AEA1072113}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -181,6 +187,7 @@ Global
 		{899F5AAE-2C6F-4F0A-9358-6F5C7D0412DC} = {1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}
 		{CA724F53-FA58-44CC-B0E7-5FD05CF5E63E} = {1D2FD643-CB85-40F9-BC8A-CE4A39E9F43E}
 		{0AF33559-2F97-4F77-B8E4-859B6A341BA8} = {F277EC27-8C0E-4490-9645-F5F3244F9246}
+		{CE8930D4-1D11-4DD1-8A43-45AEA1072113} = {F277EC27-8C0E-4490-9645-F5F3244F9246}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7F10DB58-5B6F-4EAC-994F-14E8046B306F}

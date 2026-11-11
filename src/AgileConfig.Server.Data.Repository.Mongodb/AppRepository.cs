@@ -2,7 +2,7 @@
 
 public class AppRepository : MongodbRepository<App, string>, IAppRepository
 {
-    public AppRepository(string? connectionString) : base(connectionString)
+    public AppRepository(string? connectionString, MongodbTlsOptions tlsOptions = null) : base(connectionString, tlsOptions)
     {
     }
 

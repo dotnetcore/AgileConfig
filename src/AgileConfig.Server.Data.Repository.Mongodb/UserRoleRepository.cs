@@ -2,7 +2,7 @@
 
 public class UserRoleRepository : MongodbRepository<UserRole, string>, IUserRoleRepository
 {
-    public UserRoleRepository(string? connectionString) : base(connectionString)
+    public UserRoleRepository(string? connectionString, MongodbTlsOptions tlsOptions = null) : base(connectionString, tlsOptions)
     {
     }
 

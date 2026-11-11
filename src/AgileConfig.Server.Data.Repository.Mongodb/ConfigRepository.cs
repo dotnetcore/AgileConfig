@@ -2,7 +2,8 @@
 
 public class ConfigRepository : MongodbRepository<Config, string>, IConfigRepository
 {
-    public ConfigRepository(string? connectionString) : base(connectionString)
+    public ConfigRepository(string? connectionString, MongodbTlsOptions tlsOptions = null)
+        : base(connectionString, tlsOptions)
     {
     }
 
