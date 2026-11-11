@@ -26,29 +26,21 @@ public class MongodbRepositoryServiceRegister : IRepositoryServiceRegister
         var dbConfigInfoFactory = sp.GetRequiredService<IDbConfigInfoFactory>();
 
         if (typeof(T) == typeof(IUow)) return new MongodbUow() as T;
+
+        var envDbConfig = dbConfigInfoFactory.GetConfigInfo(env);
+        var tlsOptions = MongodbTlsOptions.FromConfiguration(sp.GetService<IConfiguration>(), env);
+
         if (typeof(T) == typeof(IConfigPublishedRepository))
-        {
-            var envDbConfig = dbConfigInfoFactory.GetConfigInfo(env);
-            return new ConfigPublishedRepository(envDbConfig.ConnectionString) as T;
-        }
+            return new ConfigPublishedRepository(envDbConfig.ConnectionString, tlsOptions) as T;
 
         if (typeof(T) == typeof(IConfigRepository))
-        {
-            var envDbConfig = dbConfigInfoFactory.GetConfigInfo(env);
-            return new ConfigRepository(envDbConfig.ConnectionString) as T;
-        }
+            return new ConfigRepository(envDbConfig.ConnectionString, tlsOptions) as T;
 
         if (typeof(T) == typeof(IPublishDetailRepository))
-        {
-            var envDbConfig = dbConfigInfoFactory.GetConfigInfo(env);
-            return new PublishDetailRepository(envDbConfig.ConnectionString) as T;
-        }
+            return new PublishDetailRepository(envDbConfig.ConnectionString, tlsOptions) as T;
 
         if (typeof(T) == typeof(IPublishTimelineRepository))
-        {
-            var envDbConfig = dbConfigInfoFactory.GetConfigInfo(env);
-            return new PublishTimelineRepository(envDbConfig.ConnectionString) as T;
-        }
+            return new PublishTimelineRepository(envDbConfig.ConnectionString, tlsOptions) as T;
 
         return default;
     }

@@ -2,7 +2,7 @@ namespace AgileConfig.Server.Data.Repository.Mongodb;
 
 public class RoleFunctionRepository : MongodbRepository<RoleFunction, string>, IRoleFunctionRepository
 {
-    public RoleFunctionRepository(string? connectionString) : base(connectionString)
+    public RoleFunctionRepository(string? connectionString, MongodbTlsOptions tlsOptions = null) : base(connectionString, tlsOptions)
     {
     }
 

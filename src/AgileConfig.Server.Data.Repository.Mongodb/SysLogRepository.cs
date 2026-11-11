@@ -2,7 +2,7 @@
 
 public class SysLogRepository : MongodbRepository<SysLog, string>, ISysLogRepository
 {
-    public SysLogRepository(string? connectionString) : base(connectionString)
+    public SysLogRepository(string? connectionString, MongodbTlsOptions tlsOptions = null) : base(connectionString, tlsOptions)
     {
     }
 

@@ -99,6 +99,38 @@ sudo docker run \
 
 After the docker instance has successfully started you can visit http://localhost:5000 . 
 
+#### Connect to MongoDB with a private CA (self-signed certificate)
+
+When the MongoDB server certificate is signed by a private CA (for example a self-hosted replica set),
+pass that CA to AgileConfig. Otherwise the driver fails with
+`The remote certificate is invalid because of errors in the certificate chain: UntrustedRoot`.
+
+Two equivalent ways:
+
+```shell
+# 1) connection string option, the same form mongosh and the other official drivers accept
+-e db__conn="mongodb://user:pwd@mdb1.example.com:27017/db?replicaSet=rs0&authSource=admin&tls=true&tlsCAFile=/certs/ca.crt" \
+-v /host/path/ca.crt:/certs/ca.crt:ro \
+
+# 2) dedicated setting, keeps the connection string portable across environments
+-e db__tls__caFile=/certs/ca.crt \
+-v /host/path/ca.crt:/certs/ca.crt:ro \
+```
+
+| Setting | Environment variable | Description |
+|---|---|---|
+| `db:tls:caFile` | `db__tls__caFile` | Path of the CA file (PEM or DER). A relative path resolves against the application directory. Mount the file into the container first. |
+| `db:tls:ca` | `db__tls__ca` | Inline CA content: PEM (write line breaks as `\n`) or Base64 encoded DER. Useful when the certificate is injected as a secret instead of a file. |
+| `db:tls:allowInvalidHostnames` | `db__tls__allowInvalidHostnames` | Skip the host name check only; chain validation still applies. |
+| `db:tls:allowInvalidCertificates` | `db__tls__allowInvalidCertificates` | Skip certificate validation completely. Debug only. |
+| `db:tls:checkCertificateRevocation` | `db__tls__checkCertificateRevocation` | Check CRL / OCSP while building the chain from `caFile` / `ca`. |
+
+> - When none of them is set, the behavior is identical to previous versions (the OS trust store is used).
+> - Per environment override: `db:env:{TEST|STAGING|PROD}:tls:*`; a missing key falls back to `db:tls:*`.
+> - `tlsCAFile`, `tlsAllowInvalidCertificates` and `tlsAllowInvalidHostnames` (including the legacy `ssl` prefix) are recognized by AgileConfig and stripped from the connection string before it reaches the .NET driver, which does not support them natively. All other options are passed through.
+> - Client certificates (mTLS, `tlsCertificateKeyFile`) are not supported yet; a clear error is returned.
+> - The private CA is additional trust: certificates already trusted by the OS still work.
+
 ## use client
 install client lib from nuget：
 ```

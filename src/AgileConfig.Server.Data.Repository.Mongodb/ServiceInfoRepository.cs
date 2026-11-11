@@ -2,7 +2,7 @@
 
 public class ServiceInfoRepository : MongodbRepository<ServiceInfo, string>, IServiceInfoRepository
 {
-    public ServiceInfoRepository(string? connectionString) : base(connectionString)
+    public ServiceInfoRepository(string? connectionString, MongodbTlsOptions tlsOptions = null) : base(connectionString, tlsOptions)
     {
     }
 

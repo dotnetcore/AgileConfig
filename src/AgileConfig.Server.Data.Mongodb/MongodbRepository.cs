@@ -15,16 +15,16 @@ public class MongodbRepository<TEntity, TId> : IRepository<TEntity, TId>
 
     private MongodbUow? _mongodbUow;
 
-    public MongodbRepository(string? connectionString)
+    public MongodbRepository(string? connectionString, MongodbTlsOptions tlsOptions = null)
     {
-        _access = new MongodbAccess<TEntity>(connectionString);
+        _access = new MongodbAccess<TEntity>(connectionString, tlsOptions);
     }
 
     [ActivatorUtilitiesConstructor]
     public MongodbRepository(IConfiguration configuration)
     {
         var connectionString = configuration["db:conn"];
-        _access = new MongodbAccess<TEntity>(connectionString);
+        _access = new MongodbAccess<TEntity>(connectionString, MongodbTlsOptions.FromConfiguration(configuration));
     }
 
     public IUow Uow

@@ -104,7 +104,7 @@ AgileConfig的节点都是无状态的，所以可以横向部署多个节点来
 有同学说你这样没什么卵用，数据库还是单点的，一旦数据库崩了，同样GG。但是数据库有数据库的高可用技术，比如mysql的binlog等等。至于数据库的高可用还是让数据库自己搞定吧。从架构上看携程的apollo数据库也是单点的。
 ## 部署服务端
 ## 初始化数据库
-用户只需要手工建一个空库，所有的表在第一次启动的时候都会自动生成。目前支持sqlserver，mysql，sqlite, PostgreSql，Oracle 五种数据库。
+用户只需要手工建一个空库，所有的表在第一次启动的时候都会自动生成。目前支持sqlserver，mysql，sqlite, PostgreSql，Oracle，MongoDB 六种数据库。
 provider对照：   
 sqlserver = SqlServer   
 mysql = MySql   
@@ -128,7 +128,7 @@ sudo docker run \
 ```
 通过docker建立一个agile_config实例，其中有3个环境变量需要配置:    
 1. adminConsole 配置程序是否为管理控制台。如果为true则启用控制台功能，访问该实例会出现管理界面。
-2. db__provider 配置程序的数据库类型。目前程序支持：sqlserver，mysql，sqlite, PostgreSql，Oracle 五种数据库。
+2. db__provider 配置程序的数据库类型。目前程序支持：sqlserver，mysql，sqlite, PostgreSql，Oracle，MongoDB 六种数据库。
 3. db__conn 配置数据库连接串    
    
 > 💥注意：如果通过IIS或者别的方式部署，请自行从主页上的[releases](https://github.com/dotnetcore/AgileConfig/releases)页面下载最新的部署包。如果自己使用源码编译，请先编译react-ui-antd项目把dist内的产物复制到apisite项目的wwwroot/ui目录下。调试的时候需要复制到bin目录下。
@@ -184,6 +184,60 @@ services:
 networks:
   net0:
 ```
+### 连接启用 TLS 的 MongoDB（私有 CA / 自签证书）
+MongoDB 使用私有 CA 签发服务端证书时（例如自建的三节点副本集），必须把这份 CA 交给 AgileConfig，否则会报
+`The remote certificate is invalid because of errors in the certificate chain: UntrustedRoot`。
+
+支持两种写法，任选其一。
+
+**方式一：连接串参数**（与 `mongosh` 等官方客户端写法一致）
+
+```shell
+-e db__conn="mongodb://user:pwd@mdb1.example.com:27017/db?replicaSet=rs0&authSource=admin&tls=true&tlsCAFile=/certs/ca.crt" \
+-v /host/path/ca.crt:/certs/ca.crt:ro \
+```
+
+**方式二：独立配置项**（推荐，连接串可以在不同环境间复用）
+
+```shell
+-e db__tls__caFile=/certs/ca.crt \
+-v /host/path/ca.crt:/certs/ca.crt:ro \
+```
+
+完整示例：
+
+```shell
+sudo docker run \
+  --restart=always \
+  --name agile_config \
+  -e TZ=Asia/Shanghai \
+  -e adminConsole=true \
+  -e db__provider=mongodb \
+  -e db__conn="mongodb://root:password@mdb1.example.com:27017,mdb2.example.com:27017,mdb3.example.com:27017/AgileConfig?replicaSet=rs0&authSource=admin&tls=true" \
+  -e db__tls__caFile=/certs/ca.crt \
+  -v /host/path/ca.crt:/certs/ca.crt:ro \
+  -p 2371:5000 \
+  -d kklldog/agile_config:latest
+```
+
+配置项说明：
+
+| 配置项 | 环境变量 | 说明 |
+|---|---|---|
+| `db:tls:caFile` | `db__tls__caFile` | CA 证书文件路径，支持 PEM / DER。相对路径基于程序目录解析。容器内必须先挂载该文件 |
+| `db:tls:ca` | `db__tls__ca` | 直接内联 CA 内容。可为 PEM（换行写成 `\n`），也可为 Base64 编码的 DER，适合证书以 Secret 注入、无法挂载文件的场景 |
+| `db:tls:allowInvalidHostnames` | `db__tls__allowInvalidHostnames` | 只跳过主机名校验，证书链校验仍然生效 |
+| `db:tls:allowInvalidCertificates` | `db__tls__allowInvalidCertificates` | 完全跳过证书校验，仅用于排查问题，生产环境不要开启 |
+| `db:tls:checkCertificateRevocation` | `db__tls__checkCertificateRevocation` | 使用 `caFile` / `ca` 建立证书链时是否检查 CRL / OCSP |
+
+> 💥注意：
+> - 未配置以上任何一项时，程序行为与旧版本完全一致（使用操作系统的默认信任库），不需要修改已有部署。
+> - 每个环境可以单独覆盖：`db:env:{TEST|STAGING|PROD}:tls:*`，未配置的项自动回退到全局 `db:tls:*`。
+> - 连接串里的 `tlsCAFile`、`tlsAllowInvalidCertificates`、`tlsAllowInvalidHostnames`（含 `ssl` 前缀的旧写法）会被 AgileConfig 识别并从连接串中剥离后再交给 .NET 驱动——.NET 驱动本身不支持这些参数，其余参数原样透传。
+> - 客户端证书（mTLS，`tlsCertificateKeyFile`）暂不支持，配置该参数会得到明确的错误提示。
+> - `ca.crt` 只包含公钥，可以安全分发。容器内**只挂载 `ca.crt`**，不要挂载 CA 私钥或服务端私钥。
+> - 私有 CA 是**追加信任**：操作系统已信任的公共证书依然可以连接，同一份配置可以在公网托管 MongoDB 与自建集群之间切换。
+
 ### 初始化管理员密码
 第一次运行程序需要初始化超级管理员密码，超管用户名固定为 admin    
 ![](https://static.xbaby.xyz/%E5%BE%AE%E4%BF%A1%E6%88%AA%E5%9B%BE_20220821020958.png)
