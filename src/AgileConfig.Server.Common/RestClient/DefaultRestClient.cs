@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
@@ -64,5 +65,10 @@ public class DefaultRestClient : IRestClient
     private HttpClient GetDefaultClient()
     {
         return _httpClientFactory.CreateClient(Global.DefaultHttpClientName);
+    }
+
+    public Task<HttpResponseMessage> GetAsync(string url, CancellationToken cancellationToken)
+    {
+        return GetDefaultClient().GetAsync(url, cancellationToken);
     }
 }

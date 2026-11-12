@@ -24,7 +24,8 @@ internal sealed class V2ApiSiteTestHost : IDisposable
     private readonly string _tempDirectory;
     private readonly TestServer _server;
 
-    public V2ApiSiteTestHost(bool previewMode = false)
+    public V2ApiSiteTestHost(bool previewMode = false,
+        Action<IServiceCollection> configureServices = null, bool waitForInitialization = true)
     {
         _tempDirectory = Path.Combine(Path.GetTempPath(), "AgileConfig.V2ApiSiteTests", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_tempDirectory);
@@ -78,14 +79,21 @@ internal sealed class V2ApiSiteTestHost : IDisposable
             .ConfigureLogging(logging => logging.ClearProviders())
             .UseStartup<Startup>();
 
+        if (configureServices != null) builder.ConfigureTestServices(configureServices);
         _server = new TestServer(builder);
-        InitializeSystemData();
+        if (waitForInitialization)
+        {
+            _server.Services.GetRequiredService<InitializationState>().Ready
+                .WaitAsync(TimeSpan.FromSeconds(30)).GetAwaiter().GetResult();
+            InitializeSystemData();
+        }
 
         Client = _server.CreateClient();
         Client.DefaultRequestHeaders.Authorization = BasicAuthentication("admin", "1");
     }
 
     public HttpClient Client { get; }
+    public IServiceProvider Services => _server.Services;
 
     public async Task<HttpResponseMessage> SendAsync(
         HttpMethod method,

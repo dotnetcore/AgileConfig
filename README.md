@@ -73,6 +73,8 @@ A .net client to read configurations from server node .
 Node is just a .net core app . Client connect to the node in real time over websocket . Any node can be an admin console to manage configurations.
 ### database
 AgileConfig support most popular databases.    
+
+Database outage handling and recovery settings are documented in the [English guide](README_EN.md#database-outage-recovery) and [Chinese guide](README_CN.md#数据库故障与恢复).
 dbprovider :   
 sqlserver = SqlServer   
 mysql = MySql   

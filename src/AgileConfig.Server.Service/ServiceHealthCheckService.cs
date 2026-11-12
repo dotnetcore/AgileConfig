@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using AgileConfig.Server.Common;
 using AgileConfig.Server.Common.RestClient;
@@ -13,46 +14,29 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
     private readonly ILogger _logger;
     private readonly IRestClient _restClient;
     private readonly IServiceInfoService _serviceInfoService;
+    private readonly ServiceHealthCheckRecovery _recovery;
+    private readonly TimeProvider _timeProvider;
 
-    private int _checkInterval;
     private int _removeServiceInterval;
     private int _unhealthInterval;
 
     public ServiceHealthCheckService(
         IServiceInfoService serviceInfoService,
         ILogger<ServiceHealthCheckService> logger,
-        IRestClient restClient
+        IRestClient restClient,
+        ServiceHealthCheckRecovery recovery,
+        TimeProvider timeProvider
     )
     {
         _serviceInfoService = serviceInfoService;
         _logger = logger;
         _restClient = restClient;
+        _recovery = recovery;
+        _timeProvider = timeProvider;
     }
 
     /// <summary>
-    ///     Time threshold (seconds) after which a service is considered unhealthy.
-    /// </summary>
-    /// <exception cref="ArgumentException"></exception>
-    private int CheckInterval
-    {
-        get
-        {
-            if (_checkInterval > 0) return _checkInterval;
-
-            var interval = Global.Config["serviceHealthCheckInterval"];
-            if (int.TryParse(interval, out var i))
-            {
-                if (i <= 0) throw new ArgumentException("serviceHealthCheckInterval must be greater than 0");
-
-                _checkInterval = i;
-            }
-
-            return _checkInterval;
-        }
-    }
-
-    /// <summary>
-    ///     Interval for running health checks, in seconds.
+    ///     Time without a client heartbeat before a service is considered unhealthy.
     /// </summary>
     /// <exception cref="ArgumentException"></exception>
     private int UnhealthInterval
@@ -92,78 +76,71 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
         }
     }
 
-    public Task StartCheckAsync()
-    {
-        _logger.LogInformation("start to service health check");
-
-        Task.Factory.StartNew(async () =>
-        {
-            while (true)
-            {
-                // Skip services without a configured heartbeat mode.
-                var services = await _serviceInfoService
-                    .QueryAsync(x => x.HeartBeatMode != null && x.HeartBeatMode != "");
-                foreach (var service in services)
-                {
-                    if (service.HeartBeatMode == HeartBeatModes.none.ToString()) continue;
-
-                    var lstHeartBeat = service.LastHeartBeat;
-                    if (!lstHeartBeat.HasValue) lstHeartBeat = service.RegisterTime ?? DateTime.MinValue;
-
-                    // A heartbeat mode is specified.
-                    if (!string.IsNullOrWhiteSpace(service.HeartBeatMode))
-                    {
-                        if (RemoveServiceInterval > 0 &&
-                            (DateTime.Now - lstHeartBeat.Value).TotalSeconds > RemoveServiceInterval)
-                        {
-                            // Remove the service if it has exceeded the configured lifetime.
-                            await _serviceInfoService.RemoveAsync(service.Id);
-                            continue;
-                        }
-
-                        // Client-initiated heartbeats do not require an HTTP health check.
-                        if (service.HeartBeatMode == HeartBeatModes.client.ToString())
-                        {
-                            if ((DateTime.Now - lstHeartBeat.Value).TotalSeconds > UnhealthInterval)
-                                // For client heartbeats, treat services as unavailable after UnhealthInterval without heartbeats.
-                                if (service.Status == ServiceStatus.Healthy)
-                                    await _serviceInfoService.UpdateServiceStatus(service, ServiceStatus.Unhealthy);
-
-                            continue;
-                        }
-
-                        // Server-initiated HTTP health check.
-                        if (service.HeartBeatMode == HeartBeatModes.server.ToString())
-                        {
-                            if (string.IsNullOrWhiteSpace(service.CheckUrl))
-                            {
-                                // Without a CheckUrl, consider the service offline.
-                                await _serviceInfoService.UpdateServiceStatus(service, ServiceStatus.Unhealthy);
-                                continue;
-                            }
-
-                            _ = Task.Run(async () =>
-                            {
-                                var result = await CheckAService(service);
-                                await _serviceInfoService.UpdateServiceStatus(service,
-                                    result ? ServiceStatus.Healthy : ServiceStatus.Unhealthy);
-                            });
-                        }
-                    }
-                }
-
-                await Task.Delay(CheckInterval * 1000);
-            }
-        }, TaskCreationOptions.LongRunning);
-
-        return Task.CompletedTask;
-    }
-
-    private async Task<bool> CheckAService(ServiceInfo service)
+    public async Task CheckAsync(CancellationToken cancellationToken)
     {
         try
         {
-            using var resp = await _restClient.GetAsync(service.CheckUrl);
+            cancellationToken.ThrowIfCancellationRequested();
+            var services = await _serviceInfoService
+                .QueryAsync(x => x.HeartBeatMode != null && x.HeartBeatMode != "");
+            var inGracePeriod = _recovery.IsInGracePeriod();
+            await Parallel.ForEachAsync(services, new ParallelOptions
+            {
+                MaxDegreeOfParallelism = 8,
+                CancellationToken = cancellationToken
+            }, async (service, token) =>
+            {
+                if (service.HeartBeatMode == HeartBeatModes.none.ToString() ||
+                    string.IsNullOrWhiteSpace(service.HeartBeatMode)) return;
+
+                var lastHeartbeat = service.LastHeartBeat ?? service.RegisterTime ?? DateTime.MinValue;
+                var now = _timeProvider.GetLocalNow().DateTime;
+                if (!inGracePeriod && RemoveServiceInterval > 0 &&
+                    (now - lastHeartbeat).TotalSeconds > RemoveServiceInterval)
+                {
+                    await _serviceInfoService.RemoveAsync(service.Id);
+                    return;
+                }
+
+                if (service.HeartBeatMode == HeartBeatModes.client.ToString())
+                {
+                    if (!inGracePeriod && (now - lastHeartbeat).TotalSeconds > UnhealthInterval &&
+                        service.Status == ServiceStatus.Healthy)
+                        await _serviceInfoService.UpdateServiceStatus(service, ServiceStatus.Unhealthy);
+                    return;
+                }
+
+                if (service.HeartBeatMode == HeartBeatModes.server.ToString())
+                {
+                    if (string.IsNullOrWhiteSpace(service.CheckUrl))
+                    {
+                        await _serviceInfoService.UpdateServiceStatus(service, ServiceStatus.Unhealthy);
+                        return;
+                    }
+
+                    var result = await CheckAService(service, token);
+                    token.ThrowIfCancellationRequested();
+                    await _serviceInfoService.UpdateServiceStatus(service,
+                        result ? ServiceStatus.Healthy : ServiceStatus.Unhealthy);
+                }
+            });
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch
+        {
+            _recovery.RequireRecovery();
+            throw;
+        }
+    }
+
+    private async Task<bool> CheckAService(ServiceInfo service, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var resp = await _restClient.GetAsync(service.CheckUrl, cancellationToken);
 
             var result = false;
             var istatus = (int)resp.StatusCode - 200;
@@ -175,6 +152,10 @@ public class ServiceHealthCheckService : IServiceHealthCheckService
                     service.ServiceName, "down");
 
             return result;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception e)
         {

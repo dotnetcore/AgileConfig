@@ -75,6 +75,8 @@ public interface IRemoteServerNodeProxy
     /// <returns></returns>
     Task TestEchoAsync();
 
+    Task TestEchoAsync(System.Threading.CancellationToken cancellationToken);
+
     /// <summary>
     ///     Check whether a specific node is online.
     /// </summary>

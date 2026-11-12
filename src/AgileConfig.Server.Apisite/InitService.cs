@@ -11,75 +11,117 @@ using Microsoft.Extensions.Logging;
 
 namespace AgileConfig.Server.Apisite;
 
-public class InitService : IHostedService
+public class InitService : BackgroundService
 {
-    private readonly IEventHandlerRegister _eventRegister;
-    private readonly IServiceScope _localServiceScope;
+    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly InitializationState _initialization;
+    private readonly TimeProvider _timeProvider;
+    private IServiceScope _eventScope;
     private readonly ILogger _logger;
     private readonly IMeterService _meterService;
-    private readonly IRemoteServerNodeProxy _remoteServerNodeProxy;
-    private readonly IServerNodeService _serverNodeService;
-    private readonly IServiceHealthCheckService _serviceHealthCheckService;
-    private readonly ISystemInitializationService _systemInitializationService;
 
     public InitService(IServiceScopeFactory serviceScopeFactory,
         IMeterService meterService,
-        ILogger<InitService> logger)
+        ILogger<InitService> logger,
+        InitializationState initialization,
+        TimeProvider timeProvider)
     {
         _logger = logger;
         _meterService = meterService;
-        _localServiceScope = serviceScopeFactory.CreateScope();
-        _systemInitializationService = _localServiceScope.ServiceProvider.GetService<ISystemInitializationService>();
-        _remoteServerNodeProxy = _localServiceScope.ServiceProvider.GetService<IRemoteServerNodeProxy>();
-        _eventRegister = _localServiceScope.ServiceProvider.GetService<IEventHandlerRegister>();
-        _serverNodeService = _localServiceScope.ServiceProvider.GetService<IServerNodeService>();
-        _serviceHealthCheckService = _localServiceScope.ServiceProvider.GetService<IServiceHealthCheckService>();
+        _scopeFactory = serviceScopeFactory;
+        _initialization = initialization;
+        _timeProvider = timeProvider;
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _systemInitializationService.TryInitDefaultEnvironment(); //init DEV TEST STAGE PROD
-
-        if (Appsettings.IsAdminConsoleMode)
-        {
-            _systemInitializationService.TryInitJwtSecret(); // Initialize the JWT secret.
-            await _systemInitializationService
-                .TryInitSystemRolesAndPermissions(); // Initialize system roles, functions and permission bindings.
-            _systemInitializationService.TryInitSaPassword(); // init super admin password
-            _systemInitializationService.TryInitDefaultApp();
-            _ = _remoteServerNodeProxy.TestEchoAsync(); // Start node connectivity checks.
-            _ = _serviceHealthCheckService.StartCheckAsync(); // Start service health monitoring.
-            _eventRegister.Register(); // Register event bus callbacks.
-        }
-
-        if (Appsettings.Cluster)
-        {
-            // When cluster mode is enabled, automatically register the local IP (for docker-compose setups).
-            var ip = GetIp();
-            if (!string.IsNullOrEmpty(ip))
-            {
-                var desc = Appsettings.IsAdminConsoleMode ? "Console node" : "";
-                await _serverNodeService.JoinAsync(ip, 5000, desc);
-                _logger.LogInformation($"AgileConfig node http://{ip}:5000 joined .");
-            }
-        }
-
         if (!string.IsNullOrEmpty(Appsettings.OtlpMetricsEndpoint)) _meterService.Start();
+        var failures = 0;
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            IServiceScope scope = null;
+            try
+            {
+                scope = _scopeFactory.CreateScope();
+                var services = scope.ServiceProvider;
+                var initializer = services.GetRequiredService<ISystemInitializationService>();
+                if (!initializer.TryInitDefaultEnvironment())
+                    throw new InvalidOperationException("Default environment initialization failed.");
+
+                if (Appsettings.IsAdminConsoleMode)
+                {
+                    if (!initializer.TryInitJwtSecret() ||
+                        !await initializer.TryInitSystemRolesAndPermissions() ||
+                        !initializer.TryInitSaPassword() ||
+                        !initializer.TryInitDefaultApp())
+                        throw new InvalidOperationException("Admin console initialization failed.");
+                }
+
+                // Keep later JWT option creation from depending on a live database.
+                services.GetRequiredService<IJwtService>().GetSecurityKey();
+                stoppingToken.ThrowIfCancellationRequested();
+                if (Appsettings.Cluster)
+                {
+                    var ip = GetIp();
+                    if (!string.IsNullOrEmpty(ip))
+                    {
+                        var desc = Appsettings.IsAdminConsoleMode ? "Console node" : "";
+                        await services.GetRequiredService<IServerNodeService>().JoinAsync(ip, 5000, desc);
+                        _logger.LogInformation("AgileConfig node http://{Ip}:5000 joined.", ip);
+                    }
+                }
+
+                if (Appsettings.IsAdminConsoleMode)
+                    services.GetRequiredService<IEventHandlerRegister>().Register();
+                _eventScope = scope;
+                scope = null;
+                _initialization.MarkReady();
+                _logger.LogInformation("Database initialization completed; the node is ready.");
+                return;
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                return;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "Database initialization failed; the node remains unavailable and will retry.");
+            }
+            finally
+            {
+                scope?.Dispose();
+            }
+
+            await Task.Delay(DatabaseMaintenanceService.RetryDelay(++failures), _timeProvider, stoppingToken);
+        }
     }
 
-    public async Task StopAsync(CancellationToken cancellationToken)
+    public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        if (Appsettings.Cluster)
+        await base.StopAsync(cancellationToken);
+        if (_initialization.IsReady && Appsettings.Cluster && !cancellationToken.IsCancellationRequested)
         {
             var ip = GetIp();
             if (!string.IsNullOrEmpty(ip))
             {
-                await _serverNodeService.DeleteAsync($"http://{ip}:{5000}");
-                _logger.LogInformation($"AgileConfig node http://{ip}:5000 removed .");
+                try
+                {
+                    using var scope = _scopeFactory.CreateScope();
+                    await scope.ServiceProvider.GetRequiredService<IServerNodeService>().DeleteAsync($"http://{ip}:5000");
+                    _logger.LogInformation("AgileConfig node http://{Ip}:5000 removed.", ip);
+                }
+                catch (Exception exception)
+                {
+                    _logger.LogWarning(exception, "Could not unregister the node during shutdown.");
+                }
             }
         }
+    }
 
-        _localServiceScope?.Dispose();
+    public override void Dispose()
+    {
+        base.Dispose();
+        _eventScope?.Dispose();
     }
 
     private string GetIp()
