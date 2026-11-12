@@ -82,7 +82,13 @@ public class Startup
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer();
 
+        services.AddSingleton<InitializationState>();
         services.AddHostedService<InitService>();
+        if (Appsettings.IsAdminConsoleMode)
+        {
+            services.AddHostedService<NodeMonitorService>();
+            services.AddHostedService<RegistryMonitorService>();
+        }
         services.AddAntiforgery(o => o.SuppressXFrameOptionsHeader = true);
 
         services.AddOIDC();
@@ -132,12 +138,13 @@ public class Startup
             op.AllowAnyMethod();
             op.AllowAnyHeader();
         });
+        app.UseStaticFiles();
+        app.UseMiddleware<DatabaseAvailabilityMiddleware>();
         app.UseWebSockets(new WebSocketOptions
         {
             KeepAliveInterval = TimeSpan.FromSeconds(60)
         });
         app.UseMiddleware<WebsocketHandlerMiddleware>();
-        app.UseStaticFiles();
         app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();

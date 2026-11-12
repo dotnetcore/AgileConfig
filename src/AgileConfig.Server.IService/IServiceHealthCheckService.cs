@@ -1,8 +1,9 @@
 ﻿using System.Threading.Tasks;
+using System.Threading;
 
 namespace AgileConfig.Server.IService;
 
 public interface IServiceHealthCheckService
 {
-    Task StartCheckAsync();
+    Task CheckAsync(CancellationToken cancellationToken);
 }

@@ -371,9 +371,10 @@ public class ConfigService : IConfigService
         string operatorr, string env)
     {
         await _lock.WaitAsync();
-        using var uow = _uowAccessor(env);
+        IUow uow = null;
         try
         {
+            uow = _uowAccessor(env);
             using var configRepository = _configRepositoryAccessor(env);
             configRepository.Uow = uow;
             using var publishTimelineRepository = _publishTimelineRepositoryAccsssor(env);
@@ -532,14 +533,21 @@ public class ConfigService : IConfigService
 
             return (true, publishTimelineNode.Id);
         }
-        catch (Exception exc)
+        catch
         {
             uow?.Rollback();
             throw;
         }
         finally
         {
-            _lock.Release();
+            try
+            {
+                uow?.Dispose();
+            }
+            finally
+            {
+                _lock.Release();
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Agile.Config.Protocol;
 using AgileConfig.Server.Common;
@@ -141,16 +142,23 @@ public class RemoteServerNodeProxy : IRemoteServerNodeProxy
         };
     }
 
-    public async Task TestEchoAsync(string address)
+    public Task TestEchoAsync(string address)
     {
+        return TestEchoAsync(address, CancellationToken.None);
+    }
+
+    private async Task TestEchoAsync(string address, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
         var node = await _serverNodeService.GetAsync(address);
+        if (node == null) return; // Another node may have removed it since the last scan.
         try
         {
             var url = node.Id + "/home/echo";
 
-            using var resp = await _restClient.GetAsync(url);
+            using var resp = await _restClient.GetAsync(url, cancellationToken);
 
-            if (resp.StatusCode == HttpStatusCode.OK && await resp.Content.ReadAsStringAsync() == "ok")
+            if (resp.StatusCode == HttpStatusCode.OK && await resp.Content.ReadAsStringAsync(cancellationToken) == "ok")
             {
                 node.LastEchoTime = DateTime.Now;
                 node.Status = NodeStatus.Online;
@@ -160,12 +168,17 @@ public class RemoteServerNodeProxy : IRemoteServerNodeProxy
                 node.Status = NodeStatus.Offline;
             }
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (Exception e)
         {
             node.Status = NodeStatus.Offline;
             _logger.LogInformation(e, "Try test node {0} echo , but fail .", node.Id);
         }
 
+        cancellationToken.ThrowIfCancellationRequested();
         if (node.Status == NodeStatus.Offline)
         {
             var time = node.LastEchoTime;
@@ -183,17 +196,14 @@ public class RemoteServerNodeProxy : IRemoteServerNodeProxy
 
     public Task TestEchoAsync()
     {
-        return Task.Run(async () =>
-        {
-            while (true)
-            {
-                var nodes = await _serverNodeService.GetAllNodesAsync();
+        return TestEchoAsync(CancellationToken.None);
+    }
 
-                foreach (var node in nodes) await TestEchoAsync(node.Id);
-
-                await Task.Delay(5000 * 1);
-            }
-        });
+    public async Task TestEchoAsync(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var nodes = await _serverNodeService.GetAllNodesAsync();
+        foreach (var node in nodes) await TestEchoAsync(node.Id, cancellationToken);
     }
 
     public async Task ClearConfigServiceCache(string address)

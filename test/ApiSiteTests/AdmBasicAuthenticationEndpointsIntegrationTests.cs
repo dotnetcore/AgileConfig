@@ -267,6 +267,8 @@ public class AdmBasicAuthenticationEndpointsIntegrationTests
                 .UseStartup<Startup>();
 
             _server = new TestServer(builder);
+            _server.Services.GetRequiredService<InitializationState>().Ready
+                .WaitAsync(TimeSpan.FromSeconds(30)).GetAwaiter().GetResult();
             InitializeSystemData();
             Client = _server.CreateClient();
             Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",

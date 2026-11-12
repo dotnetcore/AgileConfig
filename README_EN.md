@@ -71,6 +71,16 @@ A .net client to read configurations from server node .
 Node is just a .net core app . Client connect to the node in real time over websocket . Any node can be an admin console to manage configurations.
 ### database
 AgileConfig support most popular databases.    
+
+#### Database outage recovery
+
+Database initialization retries with exponential backoff (2 to 30 seconds). Until initialization succeeds, business endpoints return HTTP `503` with `Retry-After`; the node does not invent environment settings or bypass authentication. `GET /health/live` is database-independent and suitable for container liveness checks; HTTP `200` does not imply configuration availability. Node and registry monitoring are hosted background services: failed rounds are retried, and shutdown cancels HTTP checks and waits for outstanding work.
+
+Repository calls share a circuit per database connection, including environments using that same connection. After 3 consecutive connectivity failures, the circuit rejects calls for 10 seconds, then admits one recovery probe. Syntax/constraint errors and request cancellation do not trip it. Database writes are never automatically retried.
+
+Configure `databaseResilience:failureThreshold` (default `3`), `databaseResilience:breakSeconds` (default `10`), and `serviceHealthCheckRecoveryGraceSeconds` (default `60`); all must be positive. For Docker, replace `:` with `__`. During the startup/recovery grace period, heartbeat expiry cannot mark services unhealthy or remove them; active HTTP health checks still run. Allow enough time for clients to reconnect and send heartbeats.
+
+These protections do not provide offline server snapshots or guarantee configuration reads during an outage. Use database HA and client caches as well. In-flight database calls remain subject to provider connection/command timeouts.
 dbprovider :   
 sqlserver = SqlServer   
 mysql = MySql   

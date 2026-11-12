@@ -16,6 +16,7 @@ public static class ServiceCollectionExt
         sc.AddScoped<IRemoteServerNodeProxy, RemoteServerNodeProxy>();
         sc.AddScoped<IEventHandlerRegister, EventHandlerRegister>();
         sc.AddScoped<IServiceHealthCheckService, ServiceHealthCheckService>();
+        sc.AddSingleton<ServiceHealthCheckRecovery>();
         sc.AddScoped<IServiceInfoService, ServiceInfoService>();
 
         sc.AddScoped<IAppService, AppService>();

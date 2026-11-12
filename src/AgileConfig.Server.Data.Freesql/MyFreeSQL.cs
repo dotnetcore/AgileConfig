@@ -41,7 +41,15 @@ public class MyFreeSQL : IMyFreeSQL
             var sql = new FreeSqlBuilder()
                 .UseConnectionString(dbType.Value, dbConfig.ConnectionString)
                 .Build();
-            ApplyDatabaseStructrue(sql);
+            try
+            {
+                ApplyDatabaseStructrue(sql);
+            }
+            catch
+            {
+                sql.Dispose();
+                throw;
+            }
 
             _envFreesqls.Add(key, sql);
 

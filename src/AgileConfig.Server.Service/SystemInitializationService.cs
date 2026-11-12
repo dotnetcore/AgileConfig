@@ -42,11 +42,9 @@ public class SystemInitializationService(
                 }
                 catch (Exception e)
                 {
-                    // Handle concurrent initialization across multiple instances.
-                    Console.WriteLine(e);
+                    logger.LogWarning(e, "JWT secret initialization failed; checking for concurrent initialization.");
+                    return !string.IsNullOrEmpty(sysInitRepository.GetJwtTokenSecret());
                 }
-
-                return false;
             }
         }
 
@@ -71,8 +69,13 @@ public class SystemInitializationService(
             }
             catch (Exception e)
             {
-                logger.LogError(
-                    "TryInitDefaultEnvironment error, maybe exec this saveing action in parallel on another node.");
+                logger.LogWarning(e, "Default environment initialization failed; checking for concurrent initialization.");
+                envArrayString = sysInitRepository.GetDefaultEnvironmentFromDb();
+                if (envArrayString == null)
+                {
+                    logger.LogError("The default environment was not persisted; initialization must be retried.");
+                    return false;
+                }
             }
         }
 
