@@ -16,6 +16,7 @@ namespace AgileConfig.Server.Data.Mongodb;
 /// </summary>
 internal sealed class MongodbServerCertificateValidator
 {
+    private const string ServerAuthenticationOid = "1.3.6.1.5.5.7.3.1";
     private static readonly string[] PemMarkers = ["-----BEGIN CERTIFICATE-----", "-----BEGIN TRUSTED CERTIFICATE-----"];
 
     private readonly MongodbTlsOptions _options;
@@ -82,6 +83,11 @@ internal sealed class MongodbServerCertificateValidator
                 : X509RevocationMode.NoCheck;
             policy.RevocationFlag = X509RevocationFlag.ExcludeRoot;
             policy.VerificationFlags = X509VerificationFlags.NoFlag;
+
+            // Rebuilding the chain must not relax the platform's purpose check: a certificate issued
+            // for clientAuth only has to stay rejected for a TLS server endpoint. X509Chain does not
+            // inherit this from the driver chain, so the serverAuth EKU is applied explicitly.
+            policy.ApplicationPolicy.Add(new Oid(ServerAuthenticationOid, "Server Authentication"));
 
             // The driver already collected the intermediates sent by the server; feed them to our chain.
             if (driverChain is not null)

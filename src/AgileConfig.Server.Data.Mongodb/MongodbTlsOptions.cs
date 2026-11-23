@@ -58,7 +58,9 @@ public sealed class MongodbTlsOptions
     public bool CheckCertificateRevocation => _raw.CheckCertificateRevocation ?? false;
 
     /// <summary>
-    ///     True when the instance carries no effective setting.
+    ///     True when the instance carries no effective setting, i.e. when it can not change the
+    ///     behavior of the MongoDB driver. An explicit <c>false</c> is the default value of every
+    ///     boolean option and does not require the custom TLS branch on its own.
     /// </summary>
     public bool IsEmpty => _raw.IsEmpty;
 
@@ -67,7 +69,11 @@ public sealed class MongodbTlsOptions
     /// </summary>
     /// <param name="configuration">The application configuration.</param>
     /// <param name="env">Optional environment name; <c>db:env:{env}:tls:*</c> overrides <c>db:tls:*</c> per key.</param>
-    /// <returns>The settings, or <c>null</c> when nothing is configured.</returns>
+    /// <returns>
+    ///     The settings, or <c>null</c> when no effective setting is configured. Configuration keys that
+    ///     merely repeat a default value (for example <c>allowInvalidHostnames=false</c> in
+    ///     appsettings.json) do not count as an effective setting.
+    /// </returns>
     public static MongodbTlsOptions FromConfiguration(IConfiguration configuration, string env = null)
     {
         if (configuration is null) return null;
@@ -93,6 +99,11 @@ public sealed class MongodbTlsOptions
 
     /// <summary>
     ///     Creates an instance from explicit values. Used by tests and by the connection string parser.
+    ///     <para>
+    ///         An explicit <c>false</c> is kept so that it can override a <c>true</c> value coming from a
+    ///         lower precedence source, but the resulting instance is still <see cref="IsEmpty" /> because
+    ///         it does not enable any custom TLS behavior.
+    ///     </para>
     /// </summary>
     public static MongodbTlsOptions Create(
         string caFile = null,
@@ -103,7 +114,7 @@ public sealed class MongodbTlsOptions
     {
         var raw = new Raw(Trim(caFile), Trim(ca), allowInvalidCertificates, allowInvalidHostnames,
             checkCertificateRevocation);
-        return raw.IsEmpty ? null : new MongodbTlsOptions(raw);
+        return raw.HasAnyValue ? new MongodbTlsOptions(raw) : null;
     }
 
     /// <summary>
@@ -162,9 +173,21 @@ public sealed class MongodbTlsOptions
         bool? AllowInvalidHostnames,
         bool? CheckCertificateRevocation)
     {
+        /// <summary>
+        ///     True when at least one key was provided, even if its value is the default (for example
+        ///     an explicit <c>false</c>). Such a value still has to take part in precedence handling.
+        /// </summary>
+        public bool HasAnyValue => CaFile is not null || Ca is not null ||
+                                   AllowInvalidCertificates is not null || AllowInvalidHostnames is not null ||
+                                   CheckCertificateRevocation is not null;
+
+        /// <summary>
+        ///     True when no setting can change the driver behavior: there is no CA to trust and no
+        ///     option is enabled. Explicit <c>false</c> values are deliberately ignored here.
+        /// </summary>
         public bool IsEmpty => string.IsNullOrWhiteSpace(CaFile) && string.IsNullOrWhiteSpace(Ca) &&
-                               AllowInvalidCertificates is null && AllowInvalidHostnames is null &&
-                               CheckCertificateRevocation is null;
+                               AllowInvalidCertificates is not true && AllowInvalidHostnames is not true &&
+                               CheckCertificateRevocation is not true;
 
         public Raw Override(Raw overrides)
         {

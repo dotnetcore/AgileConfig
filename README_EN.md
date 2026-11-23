@@ -123,6 +123,8 @@ Two equivalent ways:
 | `db:tls:checkCertificateRevocation` | `db__tls__checkCertificateRevocation` | Check CRL / OCSP while building the chain from `caFile` / `ca`. |
 
 > - When none of them is set, the behavior is identical to previous versions (the OS trust store is used).
+> - The boolean options default to `false` and never enable TLS on their own. When custom TLS settings are effective (for example a CA is configured), TLS is enabled automatically unless the connection string explicitly says `tls=false` (or `ssl=false`), which always wins.
+> - Rebuilt certificate chains keep the serverAuth (`1.3.6.1.5.5.7.3.1`) usage constraint, so a certificate that only allows clientAuth is still rejected.
 > - Per environment override: `db:env:{TEST|STAGING|PROD}:tls:*`; a missing key falls back to `db:tls:*`.
 > - `tlsCAFile`, `tlsAllowInvalidCertificates` and `tlsAllowInvalidHostnames` (including the legacy `ssl` prefix) are recognized by AgileConfig and stripped from the connection string before it reaches the .NET driver, which does not support them natively. All other options are passed through.
 > - Client certificates (mTLS, `tlsCertificateKeyFile`) are not supported yet; a clear error is returned.

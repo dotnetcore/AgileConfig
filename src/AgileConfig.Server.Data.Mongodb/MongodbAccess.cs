@@ -35,7 +35,8 @@ public abstract class MongodbAccess
             // Use "AgileConfig" as the default database name when it is not specified in the connection string.
             const string defaultDataBaseName = "AgileConfig";
             var databaseName = string.IsNullOrEmpty(url.DatabaseName) ? defaultDataBaseName : url.DatabaseName;
-            LazyMongoClients.Value.TryAdd(_cacheKey, new Db(databaseName, CreateClient(url, effectiveTlsOptions)));
+            LazyMongoClients.Value.TryAdd(_cacheKey,
+                new Db(databaseName, CreateClient(url, normalized.ConnectionString, effectiveTlsOptions)));
         }
     }
 
@@ -57,21 +58,63 @@ public abstract class MongodbAccess
             : $"{connectionString}|tls:{tlsOptions.CacheKey}";
     }
 
-    private static IMongoClient CreateClient(MongoUrl url, MongodbTlsOptions tlsOptions)
+    private static IMongoClient CreateClient(MongoUrl url, string connectionString, MongodbTlsOptions tlsOptions)
     {
         if (tlsOptions is null || tlsOptions.IsEmpty) return new MongoClient(url);
 
+        return new MongoClient(CreateClientSettings(url, connectionString, tlsOptions));
+    }
+
+    /// <summary>
+    ///     Builds the driver settings for the custom TLS branch. Exposed for unit tests.
+    /// </summary>
+    internal static MongoClientSettings CreateClientSettings(MongoUrl url, string connectionString,
+        MongodbTlsOptions tlsOptions)
+    {
         var settings = MongoClientSettings.FromUrl(url);
 
-        // A CA was configured on purpose, so an encrypted connection is expected even when the
-        // connection string forgot to append "tls=true".
-        if (!settings.UseTls) settings.UseTls = true;
+        if (tlsOptions is null || tlsOptions.IsEmpty) return settings;
+
+        if (!settings.UseTls)
+        {
+            // An explicit "tls=false" is an operator decision and must not be overridden. Without it,
+            // a configured CA means an encrypted connection is expected even when the connection
+            // string forgot to append "tls=true".
+            if (IsTlsExplicitlyDisabled(connectionString)) return settings;
+
+            settings.UseTls = true;
+        }
 
         var sslSettings = (settings.SslSettings ?? new SslSettings()).Clone();
         sslSettings.ServerCertificateValidationCallback = MongodbServerCertificateValidator.Create(tlsOptions);
         settings.SslSettings = sslSettings;
 
-        return new MongoClient(settings);
+        return settings;
+    }
+
+    private static bool IsTlsExplicitlyDisabled(string connectionString)
+    {
+        if (string.IsNullOrEmpty(connectionString)) return false;
+
+        var queryIndex = connectionString.IndexOf('?');
+        if (queryIndex < 0) return false;
+
+        bool? tlsEnabled = null;
+        foreach (var pair in connectionString[(queryIndex + 1)..].Split('&', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var separatorIndex = pair.IndexOf('=');
+            var key = (separatorIndex < 0 ? pair : pair[..separatorIndex]).Trim();
+            if (!key.Equals("tls", StringComparison.OrdinalIgnoreCase) &&
+                !key.Equals("ssl", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            var value = separatorIndex < 0
+                ? string.Empty
+                : Uri.UnescapeDataString(pair[(separatorIndex + 1)..].Replace("+", "%20")).Trim();
+            if (bool.TryParse(value, out var parsed)) tlsEnabled = parsed;
+        }
+
+        return tlsEnabled == false;
     }
 
     private readonly record struct Db(string DatabaseName, IMongoClient Client);

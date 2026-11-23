@@ -31,6 +31,45 @@ public class MongodbTlsOptionsTests
     }
 
     [TestMethod]
+    public void FromConfiguration_DefaultAppSettings_DoesNotRequireCustomTls()
+    {
+        var configuration = TestConfiguration.LoadDefaultAppSettings();
+
+        // The shipped appsettings.json documents the keys with their default values (false / empty).
+        // Those defaults must not be mistaken for "TLS was configured".
+        Assert.IsNull(MongodbTlsOptions.FromConfiguration(configuration));
+        Assert.IsNull(MongodbTlsOptions.FromConfiguration(configuration, "TEST"));
+        Assert.IsNull(MongodbTlsOptions.FromConfiguration(configuration, "PROD"));
+    }
+
+    [TestMethod]
+    public void FromConfiguration_ExplicitFalseValues_AreTreatedAsDefault()
+    {
+        var configuration = BuildConfiguration(new Dictionary<string, string>
+        {
+            ["db:tls:caFile"] = "",
+            ["db:tls:ca"] = "",
+            ["db:tls:allowInvalidCertificates"] = "false",
+            ["db:tls:allowInvalidHostnames"] = "false",
+            ["db:tls:checkCertificateRevocation"] = "false"
+        });
+
+        Assert.IsNull(MongodbTlsOptions.FromConfiguration(configuration));
+    }
+
+    [TestMethod]
+    public void FromConfiguration_EnvironmentFalse_DisablesGlobalTrue()
+    {
+        var configuration = BuildConfiguration(new Dictionary<string, string>
+        {
+            ["db:tls:allowInvalidHostnames"] = "true",
+            ["db:env:TEST:tls:allowInvalidHostnames"] = "false"
+        });
+
+        Assert.IsNull(MongodbTlsOptions.FromConfiguration(configuration, "TEST"));
+    }
+
+    [TestMethod]
     public void FromConfiguration_ReadsGlobalSettings()
     {
         var configuration = BuildConfiguration(new Dictionary<string, string>
@@ -143,6 +182,24 @@ public class MongodbTlsOptionsTests
         Assert.AreSame(baseline, MongodbTlsOptions.Merge(baseline, null));
         Assert.AreSame(baseline, MongodbTlsOptions.Merge(null, baseline));
         Assert.IsNull(MongodbTlsOptions.Merge(null, null));
+    }
+
+    [TestMethod]
+    public void Merge_ExplicitFalseOverridesBaselineTrue()
+    {
+        var baseline = MongodbTlsOptions.Create(allowInvalidHostnames: true);
+        var overrides = MongodbTlsOptions.Create(allowInvalidHostnames: false);
+
+        Assert.IsNull(MongodbTlsOptions.Merge(baseline, overrides));
+    }
+
+    [TestMethod]
+    public void Create_ExplicitFalse_IsKeptForPrecedenceButIsEmpty()
+    {
+        var options = MongodbTlsOptions.Create(allowInvalidHostnames: false);
+
+        Assert.IsNotNull(options);
+        Assert.IsTrue(options.IsEmpty);
     }
 
     [TestMethod]

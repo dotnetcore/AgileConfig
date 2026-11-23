@@ -232,6 +232,8 @@ sudo docker run \
 
 > 💥注意：
 > - 未配置以上任何一项时，程序行为与旧版本完全一致（使用操作系统的默认信任库），不需要修改已有部署。
+> - 三个布尔项默认就是 `false`，不会单独触发 TLS；只有自定义 TLS 配置真正生效时（例如配置了 CA），才会在连接串未显式写 `tls=false` 的情况下自动启用 TLS。连接串里显式的 `tls=false`（或 `ssl=false`）始终优先。
+> - 重建证书链时会保留服务端用途约束（serverAuth `1.3.6.1.5.5.7.3.1`），仅包含 clientAuth 用途的证书仍会被拒绝。
 > - 每个环境可以单独覆盖：`db:env:{TEST|STAGING|PROD}:tls:*`，未配置的项自动回退到全局 `db:tls:*`。
 > - 连接串里的 `tlsCAFile`、`tlsAllowInvalidCertificates`、`tlsAllowInvalidHostnames`（含 `ssl` 前缀的旧写法）会被 AgileConfig 识别并从连接串中剥离后再交给 .NET 驱动——.NET 驱动本身不支持这些参数，其余参数原样透传。
 > - 客户端证书（mTLS，`tlsCertificateKeyFile`）暂不支持，配置该参数会得到明确的错误提示。

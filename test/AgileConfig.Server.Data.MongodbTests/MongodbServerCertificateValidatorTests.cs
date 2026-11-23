@@ -9,9 +9,15 @@ namespace AgileConfig.Server.Data.MongodbTests;
 public class MongodbServerCertificateValidatorTests
 {
     private const string NodeHostName = "mdb1.dpangzi.com";
+    private const string ServerAuthenticationOid = "1.3.6.1.5.5.7.3.1";
+    private const string ClientAuthenticationOid = "1.3.6.1.5.5.7.3.2";
 
-    private static (X509Certificate2 Ca, X509Certificate2 Leaf) CreateCaAndLeaf(string dnsName)
+    private static (X509Certificate2 Ca, X509Certificate2 Leaf) CreateCaAndLeaf(string dnsName,
+        params string[] enhancedKeyUsages)
     {
+        // No explicit EKU means a normal TLS server certificate.
+        if (enhancedKeyUsages.Length == 0) enhancedKeyUsages = [ServerAuthenticationOid];
+
         using var caKey = RSA.Create(2048);
         var caRequest = new CertificateRequest("CN=AgileConfig Test Root CA", caKey,
             HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
@@ -27,8 +33,9 @@ public class MongodbServerCertificateValidatorTests
         leafRequest.CertificateExtensions.Add(new X509BasicConstraintsExtension(false, false, 0, false));
         leafRequest.CertificateExtensions.Add(
             new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature | X509KeyUsageFlags.KeyEncipherment, false));
-        leafRequest.CertificateExtensions.Add(
-            new X509EnhancedKeyUsageExtension(new OidCollection { new("1.3.6.1.5.5.7.3.1") }, false));
+        var usages = new OidCollection();
+        foreach (var oid in enhancedKeyUsages) usages.Add(new Oid(oid));
+        leafRequest.CertificateExtensions.Add(new X509EnhancedKeyUsageExtension(usages, false));
         var subjectAlternativeName = new SubjectAlternativeNameBuilder();
         subjectAlternativeName.AddDnsName(dnsName);
         leafRequest.CertificateExtensions.Add(subjectAlternativeName.Build());
@@ -45,6 +52,26 @@ public class MongodbServerCertificateValidatorTests
     public void Accepts_CertificateSignedByTheConfiguredCa()
     {
         var (ca, leaf) = CreateCaAndLeaf(NodeHostName);
+        var callback = MongodbServerCertificateValidator.Create(MongodbTlsOptions.Create(ca: ca.ExportCertificatePem()));
+
+        Assert.IsTrue(callback(null, leaf, null, SslPolicyErrors.RemoteCertificateChainErrors));
+    }
+
+    [TestMethod]
+    public void Rejects_ServerCertificateThatOnlyAllowsClientAuthentication()
+    {
+        // Same private CA, matching host name, but the EKU only permits clientAuth. The platform
+        // would report NotValidForUsage for a TLS server, so the rebuilt chain must do the same.
+        var (ca, leaf) = CreateCaAndLeaf(NodeHostName, ClientAuthenticationOid);
+        var callback = MongodbServerCertificateValidator.Create(MongodbTlsOptions.Create(ca: ca.ExportCertificatePem()));
+
+        Assert.IsFalse(callback(null, leaf, null, SslPolicyErrors.RemoteCertificateChainErrors));
+    }
+
+    [TestMethod]
+    public void Accepts_ServerCertificateThatAlsoAllowsClientAuthentication()
+    {
+        var (ca, leaf) = CreateCaAndLeaf(NodeHostName, ServerAuthenticationOid, ClientAuthenticationOid);
         var callback = MongodbServerCertificateValidator.Create(MongodbTlsOptions.Create(ca: ca.ExportCertificatePem()));
 
         Assert.IsTrue(callback(null, leaf, null, SslPolicyErrors.RemoteCertificateChainErrors));
