@@ -20,6 +20,14 @@ public class AppBasicAuthenticationAttribute : ActionFilterAttribute
 
     public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
+        // In dual-port mode, client APIs are only available on the client port.
+        if (context.HttpContext.Connection.LocalPort != Appsettings.ApiPort)
+        {
+            context.HttpContext.Response.StatusCode = 404;
+            context.Result = new ContentResult();
+            return;
+        }
+
         if (!await Valid(context.HttpContext.Request))
         {
             context.HttpContext.Response.StatusCode = 403;

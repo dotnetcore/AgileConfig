@@ -39,6 +39,13 @@ public class WebsocketHandlerMiddleware
     {
         if (context.Request.Path == "/ws")
         {
+            // WebSocket is only available on the client port.
+            if (context.Connection.LocalPort != Appsettings.ApiPort)
+            {
+                context.Response.StatusCode = 404;
+                return;
+            }
+
             if (context.WebSockets.IsWebSocketRequest)
             {
                 if (!await appBasicAuth.ValidAsync(context.Request))

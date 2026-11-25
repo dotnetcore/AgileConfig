@@ -31,6 +31,14 @@ public class Program
             Global.Config = builder.AddJsonFile("appsettings.json").AddEnvironmentVariables().Build();
 #endif
 
+        // Log dual-port mode information
+        var apiPort = Appsettings.ApiPort;
+        var consolePort = Appsettings.ConsolePort;
+        if (consolePort != apiPort)
+        {
+            Console.WriteLine("Dual-port mode: client API on port {0}, admin console on port {1}", apiPort, consolePort);
+        }
+
         var host = CreateWebHostBuilder(args)
             .Build();
 
@@ -49,10 +57,23 @@ public class Program
 
     private static IWebHostBuilder CreateWebHostBuilder(string[] args)
     {
-        return WebHost.CreateDefaultBuilder(args).ConfigureLogging((context, builder) => { AddOtlpLogging(builder); }
-            )
-            .UseConfiguration(Global.Config)
-            .UseStartup<Startup>();
+        var webHost = WebHost.CreateDefaultBuilder(args)
+            .ConfigureLogging((context, builder) => { AddOtlpLogging(builder); })
+            .UseConfiguration(Global.Config);
+
+        // Listen on configured ports.
+        var apiPort = Appsettings.ApiPort;
+        var consolePort = Appsettings.ConsolePort;
+        if (apiPort != consolePort)
+        {
+            webHost.UseUrls($"http://*:{apiPort}", $"http://*:{consolePort}");
+        }
+        else
+        {
+            webHost.UseUrls($"http://*:{apiPort}");
+        }
+
+        return webHost.UseStartup<Startup>();
     }
 
     private static void AddOtlpLogging(ILoggingBuilder builder)

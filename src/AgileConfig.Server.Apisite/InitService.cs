@@ -65,9 +65,10 @@ public class InitService : BackgroundService
                     var ip = GetIp();
                     if (!string.IsNullOrEmpty(ip))
                     {
+                        var port = Appsettings.ApiPort;
                         var desc = Appsettings.IsAdminConsoleMode ? "Console node" : "";
-                        await services.GetRequiredService<IServerNodeService>().JoinAsync(ip, 5000, desc);
-                        _logger.LogInformation("AgileConfig node http://{Ip}:5000 joined.", ip);
+                        await services.GetRequiredService<IServerNodeService>().JoinAsync(ip, port, desc);
+                        _logger.LogInformation("AgileConfig node http://{Ip}:{Port} joined.", ip, port);
                     }
                 }
 
@@ -106,9 +107,10 @@ public class InitService : BackgroundService
             {
                 try
                 {
+                    var port = Appsettings.ApiPort;
                     using var scope = _scopeFactory.CreateScope();
-                    await scope.ServiceProvider.GetRequiredService<IServerNodeService>().DeleteAsync($"http://{ip}:5000");
-                    _logger.LogInformation("AgileConfig node http://{Ip}:5000 removed.", ip);
+                    await scope.ServiceProvider.GetRequiredService<IServerNodeService>().DeleteAsync($"http://{ip}:{port}");
+                    _logger.LogInformation("AgileConfig node http://{Ip}:{Port} removed.", ip, port);
                 }
                 catch (Exception exception)
                 {
