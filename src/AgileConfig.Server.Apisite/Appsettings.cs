@@ -5,6 +5,8 @@ namespace AgileConfig.Server.Apisite;
 
 public class Appsettings
 {
+    public const int DefaultPort = 5000;
+
     /// <summary>
     ///     Indicates whether the server runs in demo mode.
     /// </summary>
@@ -21,6 +23,36 @@ public class Appsettings
     ///     Indicates whether the cluster auto-join feature is enabled.
     /// </summary>
     public static bool Cluster => "true".Equals(Global.Config["cluster"], StringComparison.CurrentCultureIgnoreCase);
+
+    /// <summary>
+    ///     The console port for admin UI. Defaults to 5000.
+    /// </summary>
+    public static int ConsolePort
+    {
+        get
+        {
+            if (int.TryParse(Global.Config?["consolePort"], out var port) && port > 0)
+            {
+                return port;
+            }
+            return DefaultPort;
+        }
+    }
+
+    /// <summary>
+    ///     The API port for client config pulling. Defaults to 5000.
+    /// </summary>
+    public static int ApiPort
+    {
+        get
+        {
+            if (int.TryParse(Global.Config?["apiPort"], out var port) && port > 0)
+            {
+                return port;
+            }
+            return DefaultPort;
+        }
+    }
 
     /// <summary>
     ///     path base
