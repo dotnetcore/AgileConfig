@@ -2,7 +2,7 @@
 
 public class SettingRepository : MongodbRepository<Setting, string>, ISettingRepository
 {
-    public SettingRepository(string? connectionString) : base(connectionString)
+    public SettingRepository(string? connectionString, MongodbTlsOptions tlsOptions = null) : base(connectionString, tlsOptions)
     {
     }
 

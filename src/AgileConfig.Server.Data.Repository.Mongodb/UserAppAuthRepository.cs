@@ -2,7 +2,7 @@
 
 public class UserAppAuthRepository : MongodbRepository<UserAppAuth, string>, IUserAppAuthRepository
 {
-    public UserAppAuthRepository(string? connectionString) : base(connectionString)
+    public UserAppAuthRepository(string? connectionString, MongodbTlsOptions tlsOptions = null) : base(connectionString, tlsOptions)
     {
     }
 

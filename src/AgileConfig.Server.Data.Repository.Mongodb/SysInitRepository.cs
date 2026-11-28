@@ -10,19 +10,22 @@ public class SysInitRepository : ISysInitRepository
 
     private readonly string _connectionString = "";
 
+    private readonly MongodbTlsOptions? _tlsOptions;
+
     public SysInitRepository(IConfiguration configuration)
     {
         _configuration = configuration;
         _connectionString = _configuration["db:conn"] ?? "";
+        _tlsOptions = MongodbTlsOptions.FromConfiguration(configuration);
     }
 
-    private MongodbAccess<Setting> _settingAccess => new(_connectionString);
-    private MongodbAccess<User> _userAccess => new(_connectionString);
-    private MongodbAccess<UserRole> _userRoleAccess => new(_connectionString);
-    private MongodbAccess<Role> _roleAccess => new(_connectionString);
-    private MongodbAccess<App> _appAccess => new(_connectionString);
-    private MongodbAccess<Function> _functionAccess => new(_connectionString);
-    private MongodbAccess<RoleFunction> _roleFunctionAccess => new(_connectionString);
+    private MongodbAccess<Setting> _settingAccess => new(_connectionString, _tlsOptions);
+    private MongodbAccess<User> _userAccess => new(_connectionString, _tlsOptions);
+    private MongodbAccess<UserRole> _userRoleAccess => new(_connectionString, _tlsOptions);
+    private MongodbAccess<Role> _roleAccess => new(_connectionString, _tlsOptions);
+    private MongodbAccess<App> _appAccess => new(_connectionString, _tlsOptions);
+    private MongodbAccess<Function> _functionAccess => new(_connectionString, _tlsOptions);
+    private MongodbAccess<RoleFunction> _roleFunctionAccess => new(_connectionString, _tlsOptions);
 
     public string? GetDefaultEnvironmentFromDb()
     {

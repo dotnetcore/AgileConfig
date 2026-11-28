@@ -2,7 +2,7 @@
 
 public class ServerNodeRepository : MongodbRepository<ServerNode, string>, IServerNodeRepository
 {
-    public ServerNodeRepository(string? connectionString) : base(connectionString)
+    public ServerNodeRepository(string? connectionString, MongodbTlsOptions tlsOptions = null) : base(connectionString, tlsOptions)
     {
     }
 

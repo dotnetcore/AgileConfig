@@ -2,7 +2,7 @@
 
 public class AppInheritancedRepository : MongodbRepository<AppInheritanced, string>, IAppInheritancedRepository
 {
-    public AppInheritancedRepository(string? connectionString) : base(connectionString)
+    public AppInheritancedRepository(string? connectionString, MongodbTlsOptions tlsOptions = null) : base(connectionString, tlsOptions)
     {
     }
 

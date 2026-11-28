@@ -2,7 +2,8 @@
 
 public class PublishDetailRepository : MongodbRepository<PublishDetail, string>, IPublishDetailRepository
 {
-    public PublishDetailRepository(string? connectionString) : base(connectionString)
+    public PublishDetailRepository(string? connectionString, MongodbTlsOptions tlsOptions = null)
+        : base(connectionString, tlsOptions)
     {
     }
 

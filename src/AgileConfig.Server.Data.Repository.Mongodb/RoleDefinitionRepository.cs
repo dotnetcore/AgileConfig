@@ -2,7 +2,7 @@
 
 public class RoleDefinitionRepository : MongodbRepository<Role, string>, IRoleDefinitionRepository
 {
-    public RoleDefinitionRepository(string? connectionString) : base(connectionString)
+    public RoleDefinitionRepository(string? connectionString, MongodbTlsOptions tlsOptions = null) : base(connectionString, tlsOptions)
     {
     }
 

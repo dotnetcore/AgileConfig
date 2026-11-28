@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
@@ -10,7 +10,11 @@
         <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
         <PackageReference Include="MongoDB.Analyzer" Version="2.0.0" />
-        <PackageReference Include="MongoDB.Driver" Version="3.10.0" />
+        <PackageReference Include="MongoDB.Driver" Version="3.13.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="AgileConfig.Server.Data.MongodbTests" />
     </ItemGroup>
 
     <ItemGroup>
