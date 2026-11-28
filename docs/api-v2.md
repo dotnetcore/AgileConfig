@@ -11,6 +11,8 @@ their original contracts.
   registry protocol. Service instance queries and deletion require administrator Basic authentication.
 
 Administrative actions continue to enforce the same AgileConfig function permissions as their v1 equivalents.
+Users who are not administrators are additionally limited to the applications they created or were authorized for:
+other applications are left out of `GET /api/v2/applications`, and requests that address them return `403`.
 
 ## Resources
 

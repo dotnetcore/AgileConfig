@@ -110,4 +110,11 @@ public interface IPermissionService
     /// <param name="userId">Identifier of the user requesting categories.</param>
     /// <returns>List of distinct categories granted to the user.</returns>
     Task<List<string>> GetUserCategories(string userId);
+
+    /// <summary>
+    ///     Resolve which applications a user may operate on.
+    /// </summary>
+    /// <param name="userId">Identifier of the user.</param>
+    /// <returns>Unrestricted access for administrators, otherwise the apps the user created or was authorized for.</returns>
+    Task<UserAppAccess> GetUserAppAccessAsync(string userId);
 }

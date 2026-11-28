@@ -31,7 +31,7 @@ public sealed class ReleasesController : ControllerBase
     }
 
     [HttpGet]
-    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.App_Read })]
+    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.App_Read, AppScope.App })]
     public async Task<ActionResult<IReadOnlyList<ReleaseResource>>> GetAll(string applicationId, string environment)
     {
         if (await _applicationManagementService.GetAsync(applicationId) == null) return NotFound();
@@ -41,7 +41,7 @@ public sealed class ReleasesController : ControllerBase
     }
 
     [HttpGet("{releaseId}", Name = RouteNames.Release)]
-    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.App_Read })]
+    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.App_Read, AppScope.App })]
     public async Task<ActionResult<ReleaseResource>> GetById(string applicationId, string environment, string releaseId)
     {
         var release = await FindRelease(applicationId, environment, releaseId);
@@ -49,7 +49,7 @@ public sealed class ReleasesController : ControllerBase
     }
 
     [HttpPost]
-    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.Config_Publish })]
+    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.Config_Publish, AppScope.App })]
     public async Task<ActionResult<ReleaseResource>> Create(
         string applicationId,
         string environment,
@@ -69,7 +69,7 @@ public sealed class ReleasesController : ControllerBase
     }
 
     [HttpPost("rollbacks")]
-    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.Config_Offline })]
+    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.Config_Offline, AppScope.App })]
     public async Task<IActionResult> Rollback(
         string applicationId,
         string environment,

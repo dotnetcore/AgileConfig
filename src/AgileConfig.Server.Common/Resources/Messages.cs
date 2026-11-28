@@ -104,6 +104,8 @@ public static class Messages
     public static string AppNotFound => GetString(nameof(AppNotFound));
     public static string DemoModeNoTestAppEdit => GetString(nameof(DemoModeNoTestAppEdit));
     public static string UpdateAppFailed => GetString(nameof(UpdateAppFailed));
+    public static string AppAuthOwnerOnly => GetString(nameof(AppAuthOwnerOnly));
+    public static string AppInheritNotAllowed => GetString(nameof(AppInheritNotAllowed));
     public static string ConfigKeyExists => GetString(nameof(ConfigKeyExists));
 
     // App Controller specific messages

@@ -41,11 +41,12 @@ public class AppController : Controller
     /// <returns></returns>
     [HttpGet]
     [TypeFilter(typeof(PermissionCheckByBasicAttribute),
-        Arguments = new object[] { Functions.App_Read })]
+        Arguments = new object[] { Functions.App_Read, AppScope.InAction })]
     public async Task<ActionResult<IEnumerable<ApiAppVM>>> GetAll()
     {
+        var access = HttpContext.GetUserAppAccess();
         var apps = await _appService.GetAllAppsAsync();
-        var vms = apps.Select(x => x.ToApiAppVM());
+        var vms = apps.Where(x => access.CanAccess(x.Id)).Select(x => x.ToApiAppVM());
 
         return Json(vms);
     }
@@ -57,7 +58,7 @@ public class AppController : Controller
     /// <returns></returns>
     [HttpGet("{id}")]
     [TypeFilter(typeof(PermissionCheckByBasicAttribute),
-        Arguments = new object[] { Functions.App_Read })]
+        Arguments = new object[] { Functions.App_Read, AppScope.App })]
     public async Task<ActionResult<ApiAppVM>> GetById(string id)
     {
         var app = await _appService.GetAsync(id);
@@ -118,7 +119,7 @@ public class AppController : Controller
     /// <param name="model">Application payload.</param>
     /// <returns></returns>
     [ProducesResponseType(200)]
-    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.App_Edit })]
+    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.App_Edit, AppScope.App })]
     [HttpPut("{id}")]
     public async Task<IActionResult> Edit(string id, [FromBody] ApiAppVM model)
     {
@@ -160,7 +161,7 @@ public class AppController : Controller
     /// <returns></returns>
     [ProducesResponseType(204)]
     [TypeFilter(typeof(PermissionCheckByBasicAttribute),
-        Arguments = new object[] { Functions.App_Delete })]
+        Arguments = new object[] { Functions.App_Delete, AppScope.App })]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {
@@ -181,7 +182,7 @@ public class AppController : Controller
     /// <returns></returns>
     [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
     [TypeFilter(typeof(PermissionCheckByBasicAttribute),
-        Arguments = new object[] { Functions.Config_Publish })]
+        Arguments = new object[] { Functions.Config_Publish, AppScope.App })]
     [HttpPost("publish")]
     public async Task<IActionResult> Publish(string appId, EnvString env)
     {
@@ -201,7 +202,7 @@ public class AppController : Controller
     /// <returns></returns>
     [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
     [TypeFilter(typeof(PermissionCheckByBasicAttribute),
-        Arguments = new object[] { Functions.App_Read })]
+        Arguments = new object[] { Functions.App_Read, AppScope.App })]
     [HttpGet("Publish_History")]
     public async Task<ActionResult<IEnumerable<ApiPublishTimelineVM>>> PublishHistory(string appId, EnvString env)
     {
@@ -221,7 +222,7 @@ public class AppController : Controller
     /// <returns></returns>
     [TypeFilter(typeof(AdmBasicAuthenticationAttribute))]
     [TypeFilter(typeof(PermissionCheckByBasicAttribute),
-        Arguments = new object[] { Functions.Config_Offline })]
+        Arguments = new object[] { Functions.Config_Offline, AppScope.PublishTimeline })]
     [HttpPost("rollback")]
     public async Task<IActionResult> Rollback(string historyId, EnvString env)
     {

@@ -26,18 +26,20 @@ public sealed class ApplicationsController : ControllerBase
     }
 
     [HttpGet]
-    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.App_Read })]
+    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.App_Read, AppScope.InAction })]
     public async Task<ActionResult<IReadOnlyList<ApplicationResource>>> GetAll()
     {
+        var access = HttpContext.GetUserAppAccess();
         var applications = await _applicationManagementService.GetAllAsync();
         var resources = applications
+            .Where(x => access.CanAccess(x.Application.Id))
             .Select(x => x.Application.ToV2Resource(x.InheritedApplicationIds))
             .ToList();
         return Ok(resources);
     }
 
     [HttpGet("{applicationId}", Name = RouteNames.Application)]
-    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.App_Read })]
+    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.App_Read, AppScope.App })]
     public async Task<ActionResult<ApplicationResource>> GetById(string applicationId)
     {
         var application = await _applicationManagementService.GetAsync(applicationId);
@@ -74,7 +76,7 @@ public sealed class ApplicationsController : ControllerBase
     }
 
     [HttpPut("{applicationId}")]
-    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.App_Edit })]
+    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.App_Edit, AppScope.App })]
     public async Task<ActionResult<ApplicationResource>> Update(string applicationId, UpdateApplicationRequest request)
     {
         var result = await _applicationManagementService.UpdateAsync(new UpdateApplicationCommand(
@@ -99,7 +101,7 @@ public sealed class ApplicationsController : ControllerBase
     }
 
     [HttpDelete("{applicationId}")]
-    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.App_Delete })]
+    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.App_Delete, AppScope.App })]
     public async Task<IActionResult> Delete(string applicationId)
     {
         var result = await _applicationManagementService.DeleteAsync(new DeleteApplicationCommand(applicationId));

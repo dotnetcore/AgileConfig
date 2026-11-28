@@ -33,7 +33,7 @@ public sealed class ConfigurationsController : ControllerBase
     }
 
     [HttpGet]
-    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.Config_Read })]
+    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.Config_Read, AppScope.App })]
     public async Task<ActionResult<IReadOnlyList<ConfigurationResource>>> GetAll(
         string applicationId,
         string environment)
@@ -45,7 +45,7 @@ public sealed class ConfigurationsController : ControllerBase
     }
 
     [HttpGet("{configurationId}", Name = RouteNames.Configuration)]
-    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.Config_Read })]
+    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.Config_Read, AppScope.App })]
     public async Task<ActionResult<ConfigurationResource>> GetById(
         string applicationId,
         string environment,
@@ -56,7 +56,7 @@ public sealed class ConfigurationsController : ControllerBase
     }
 
     [HttpPost]
-    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.Config_Add })]
+    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.Config_Add, AppScope.App })]
     public async Task<ActionResult<ConfigurationResource>> Create(
         string applicationId,
         string environment,
@@ -83,7 +83,7 @@ public sealed class ConfigurationsController : ControllerBase
     }
 
     [HttpPut("{configurationId}")]
-    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.Config_Edit })]
+    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.Config_Edit, AppScope.App })]
     public async Task<ActionResult<ConfigurationResource>> Update(
         string applicationId,
         string environment,
@@ -107,7 +107,7 @@ public sealed class ConfigurationsController : ControllerBase
     }
 
     [HttpDelete("{configurationId}")]
-    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.Config_Delete })]
+    [TypeFilter(typeof(PermissionCheckByBasicAttribute), Arguments = new object[] { Functions.Config_Delete, AppScope.App })]
     public async Task<IActionResult> Delete(string applicationId, string environment, string configurationId)
     {
         if (await FindConfiguration(applicationId, environment, configurationId) == null) return NotFound();

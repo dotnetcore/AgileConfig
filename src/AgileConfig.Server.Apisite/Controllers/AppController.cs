@@ -135,11 +135,49 @@ public class AppController : Controller
         return searchResult.Apps.FirstOrDefault(x => x.Id == appId);
     }
 
-    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Add })]
+    /// <summary>
+    ///     Inheriting from an app exposes its published configurations, so non-administrators may only
+    ///     inherit from public (inheritance) apps or apps they can access.
+    /// </summary>
+    private bool CanInheritFrom(App parent)
+    {
+        var access = HttpContext.GetUserAppAccess();
+
+        return access.IsAdmin || parent?.Type == AppType.Inheritance || access.CanAccess(parent?.Id);
+    }
+
+    private async Task<bool> CanInheritFromAsync(IEnumerable<string> parentIds)
+    {
+        if (parentIds == null || HttpContext.GetUserAppAccess().IsAdmin) return true;
+
+        foreach (var parentId in parentIds.Where(x => !string.IsNullOrWhiteSpace(x)))
+            if (!CanInheritFrom(await _appService.GetAsync(parentId)))
+                return false;
+
+        return true;
+    }
+
+    private async Task<bool> IsAdminOrCreatorAsync(string appId)
+    {
+        var access = HttpContext.GetUserAppAccess();
+        if (access.IsAdmin) return true;
+        if (string.IsNullOrEmpty(access.UserId)) return false;
+
+        return (await _appService.GetAsync(appId))?.Creator == access.UserId;
+    }
+
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Add, AppScope.InAction })]
     [HttpPost]
     public async Task<IActionResult> Add([FromBody] AppVM model)
     {
         ArgumentNullException.ThrowIfNull(model);
+
+        if (!await CanInheritFromAsync(model.inheritancedApps))
+            return Json(new
+            {
+                success = false,
+                message = Messages.AppInheritNotAllowed
+            });
 
         var result = await _applicationManagementService.CreateAsync(new CreateApplicationCommand(
             model.Id,
@@ -165,11 +203,18 @@ public class AppController : Controller
         });
     }
 
-    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Edit })]
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Edit, AppScope.App })]
     [HttpPost]
     public async Task<IActionResult> Edit([FromBody] AppVM model)
     {
         ArgumentNullException.ThrowIfNull(model);
+
+        if (!await CanInheritFromAsync(model.inheritancedApps))
+            return Json(new
+            {
+                success = false,
+                message = Messages.AppInheritNotAllowed
+            });
 
         var result = await _applicationManagementService.UpdateAsync(new UpdateApplicationCommand(
             model.Id,
@@ -201,7 +246,7 @@ public class AppController : Controller
         });
     }
 
-    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Read })]
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Read, AppScope.App })]
     [HttpGet]
     public async Task<IActionResult> Get(string id)
     {
@@ -227,7 +272,7 @@ public class AppController : Controller
     }
 
     [TypeFilter(typeof(PermissionCheckAttribute),
-        Arguments = new object[] { Functions.App_Edit })]
+        Arguments = new object[] { Functions.App_Edit, AppScope.App })]
     [HttpPost]
     public async Task<IActionResult> DisableOrEnable(string id)
     {
@@ -251,7 +296,7 @@ public class AppController : Controller
         });
     }
 
-    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Delete })]
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Delete, AppScope.App })]
     [HttpPost]
     public async Task<IActionResult> Delete(string id)
     {
@@ -353,7 +398,7 @@ public class AppController : Controller
         return File(Encoding.UTF8.GetBytes(json), "application/json", fileName);
     }
 
-    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Add })]
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Add, AppScope.InAction })]
     [HttpPost]
     public async Task<IActionResult> PreviewImport(IFormFile file)
     {
@@ -367,7 +412,7 @@ public class AppController : Controller
         });
     }
 
-    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Add })]
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Add, AppScope.InAction })]
     [HttpPost]
     public async Task<IActionResult> Import([FromBody] AppImportRequest model)
     {
@@ -521,8 +566,11 @@ public class AppController : Controller
             foreach (var parentId in item.App.InheritancedApps?.Where(x => !string.IsNullOrWhiteSpace(x)).Distinct(StringComparer.OrdinalIgnoreCase) ?? new List<string>())
             {
                 if (importedAppIds.Contains(parentId)) continue;
-                if (existingApps.Any(x => string.Equals(x.Id, parentId, StringComparison.OrdinalIgnoreCase))) continue;
-                preview.Errors.Add($"App '{item.App.Id}' references missing parent '{parentId}'. Parent must already exist or be included in the import file.");
+                var parent = existingApps.FirstOrDefault(x => string.Equals(x.Id, parentId, StringComparison.OrdinalIgnoreCase));
+                if (parent == null)
+                    preview.Errors.Add($"App '{item.App.Id}' references missing parent '{parentId}'. Parent must already exist or be included in the import file.");
+                else if (!CanInheritFrom(parent))
+                    preview.Errors.Add($"App '{item.App.Id}' is not allowed to inherit from '{parentId}'. Only public apps or apps you are authorized for can be inherited.");
             }
         }
 
@@ -625,11 +673,19 @@ public class AppController : Controller
     /// </summary>
     /// <param name="model">View model containing authorization assignments.</param>
     /// <returns>Operation result.</returns>
-    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Auth })]
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Auth, AppScope.App })]
     [HttpPost]
     public async Task<IActionResult> SaveAppAuth([FromBody] AppAuthVM model)
     {
         ArgumentNullException.ThrowIfNull(model);
+
+        // Being authorized for an app does not include handing it out to other users.
+        if (!await IsAdminOrCreatorAsync(model.AppId))
+            return Json(new
+            {
+                success = false,
+                message = Messages.AppAuthOwnerOnly
+            });
 
         var result = await _appService.SaveUserAppAuth(model.AppId, model.AuthorizedUsers);
 
@@ -640,7 +696,7 @@ public class AppController : Controller
     }
 
     [HttpGet]
-    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Read })]
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.App_Read, AppScope.App })]
     public async Task<IActionResult> GetUserAppAuth(string appId)
     {
         ArgumentException.ThrowIfNullOrEmpty(appId);

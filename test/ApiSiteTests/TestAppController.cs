@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AgileConfig.Server.Apisite.Controllers;
+using AgileConfig.Server.Apisite.Filters;
 using AgileConfig.Server.Apisite.Models;
 using AgileConfig.Server.Application;
 using AgileConfig.Server.Common;
@@ -257,6 +258,7 @@ public class TestAppController
         var controller = new AppController(appService.Object, userService.Object, configService.Object, settingService.Object,
             applicationManagement.Object);
         controller.ControllerContext.HttpContext = new DefaultHttpContext();
+        controller.ControllerContext.HttpContext.SetUserAppAccess(UserAppAccess.Admin("admin-user"));
         controller.ControllerContext.HttpContext.User = new System.Security.Claims.ClaimsPrincipal(
             new System.Security.Claims.ClaimsIdentity(
                 [new System.Security.Claims.Claim("id", "admin-user")], "test"));
