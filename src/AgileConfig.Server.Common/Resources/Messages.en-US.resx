@@ -350,6 +350,12 @@
   <data name="UpdateAppFailed" xml:space="preserve">
     <value>Failed to update app, please check error logs</value>
   </data>
+  <data name="AppAuthOwnerOnly" xml:space="preserve">
+    <value>Only administrators or the app creator can change app authorization.</value>
+  </data>
+  <data name="AppInheritNotAllowed" xml:space="preserve">
+    <value>You are not allowed to inherit from the selected app. Only public apps or apps you are authorized for can be inherited.</value>
+  </data>
   <data name="ConfigKeyExists" xml:space="preserve">
     <value>Config key already exists, please enter a different one.</value>
   </data>

@@ -46,7 +46,7 @@ public class ConfigController : Controller
         _releaseManagementService = releaseManagementService;
     }
 
-    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.Config_Add })]
+    [TypeFilter(typeof(PermissionCheckAttribute), Arguments = new object[] { Functions.Config_Add, AppScope.App })]
     [HttpPost]
     public async Task<IActionResult> Add([FromBody] ConfigVM model, EnvString env)
     {
@@ -84,7 +84,7 @@ public class ConfigController : Controller
     }
 
     [TypeFilter(typeof(PermissionCheckAttribute),
-        Arguments = new object[] { Functions.Config_Add })]
+        Arguments = new object[] { Functions.Config_Add, AppScope.App })]
     [HttpPost]
     public async Task<IActionResult> AddRange([FromBody] List<ConfigVM> model, EnvString env)
     {
@@ -142,7 +142,7 @@ public class ConfigController : Controller
     }
 
     [TypeFilter(typeof(PermissionCheckAttribute),
-        Arguments = new object[] { Functions.Config_Edit })]
+        Arguments = new object[] { Functions.Config_Edit, AppScope.Config })]
     [HttpPost]
     public async Task<IActionResult> Edit([FromBody] ConfigVM model, [FromQuery] EnvString env)
     {
@@ -180,11 +180,16 @@ public class ConfigController : Controller
     }
 
     [HttpGet]
+    [TypeFilter(typeof(PermissionCheckAttribute),
+        Arguments = new object[] { Functions.Config_Read, AppScope.InAction })]
     public async Task<IActionResult> All(string env)
     {
         ISettingService.IfEnvEmptySetDefault(ref env);
 
-        var configs = await _configService.GetAllConfigsAsync(env);
+        var access = HttpContext.GetUserAppAccess();
+        var configs = (await _configService.GetAllConfigsAsync(env))
+            .Where(x => access.CanAccess(x.AppId))
+            .ToList();
 
         return Json(new
         {
@@ -205,7 +210,7 @@ public class ConfigController : Controller
     /// <returns></returns>
     [HttpGet]
     [TypeFilter(typeof(PermissionCheckAttribute),
-        Arguments = new object[] { Functions.Config_Read })]
+        Arguments = new object[] { Functions.Config_Read, AppScope.App })]
     public async Task<IActionResult> Search(string appId, string group, string key, OnlineStatus? onlineStatus,
         string sortField, string ascOrDesc, EnvString env, int pageSize = 20, int current = 1)
     {
@@ -248,7 +253,7 @@ public class ConfigController : Controller
 
     [HttpGet]
     [TypeFilter(typeof(PermissionCheckAttribute),
-        Arguments = new object[] { Functions.Config_Read })]
+        Arguments = new object[] { Functions.Config_Read, AppScope.Config })]
     public async Task<IActionResult> Get(string id, EnvString env)
     {
         if (string.IsNullOrEmpty(id)) throw new ArgumentNullException("id");
@@ -264,7 +269,7 @@ public class ConfigController : Controller
     }
 
     [TypeFilter(typeof(PermissionCheckAttribute),
-        Arguments = new object[] { Functions.Config_Delete })]
+        Arguments = new object[] { Functions.Config_Delete, AppScope.Config })]
     [HttpPost]
     public async Task<IActionResult> Delete(string id, EnvString env)
     {
@@ -290,7 +295,7 @@ public class ConfigController : Controller
     }
 
     [TypeFilter(typeof(PermissionCheckAttribute),
-        Arguments = new object[] { Functions.Config_Delete })]
+        Arguments = new object[] { Functions.Config_Delete, AppScope.Config })]
     [HttpPost]
     public async Task<IActionResult> DeleteSome([FromBody] List<string> ids, EnvString env)
     {
@@ -332,7 +337,7 @@ public class ConfigController : Controller
 
 
     [TypeFilter(typeof(PermissionCheckAttribute),
-        Arguments = new object[] { Functions.Config_Offline })]
+        Arguments = new object[] { Functions.Config_Offline, AppScope.PublishTimeline })]
     [HttpPost]
     public async Task<IActionResult> Rollback(string publishTimelineId, EnvString env)
     {
@@ -349,7 +354,7 @@ public class ConfigController : Controller
     }
 
     [TypeFilter(typeof(PermissionCheckAttribute),
-        Arguments = new object[] { Functions.Config_Read })]
+        Arguments = new object[] { Functions.Config_Read, AppScope.Config })]
     [HttpGet]
     public async Task<IActionResult> ConfigPublishedHistory(string configId, EnvString env)
     {
@@ -382,7 +387,7 @@ public class ConfigController : Controller
     /// </summary>
     /// <returns></returns>
     [TypeFilter(typeof(PermissionCheckAttribute),
-        Arguments = new object[] { Functions.Config_Publish })]
+        Arguments = new object[] { Functions.Config_Publish, AppScope.App })]
     [HttpPost]
     public async Task<IActionResult> Publish([FromBody] PublishLogVM model, EnvString env)
     {
@@ -468,7 +473,7 @@ public class ConfigController : Controller
     /// <param name="appId">Application ID.</param>
     /// <returns></returns>
     [TypeFilter(typeof(PermissionCheckAttribute),
-        Arguments = new object[] { Functions.Config_Read })]
+        Arguments = new object[] { Functions.Config_Read, AppScope.App })]
     public async Task<IActionResult> ExportJson(string appId, EnvString env)
     {
         if (string.IsNullOrEmpty(appId)) throw new ArgumentNullException("appId");
@@ -495,7 +500,7 @@ public class ConfigController : Controller
     /// <param name="appId">Application ID.</param>
     /// <returns></returns>
     [TypeFilter(typeof(PermissionCheckAttribute),
-        Arguments = new object[] { Functions.Config_Read })]
+        Arguments = new object[] { Functions.Config_Read, AppScope.App })]
     public async Task<IActionResult> WaitPublishStatus(string appId, EnvString env)
     {
         if (string.IsNullOrEmpty(appId)) throw new ArgumentNullException("appId");
@@ -526,7 +531,7 @@ public class ConfigController : Controller
     /// <param name="appId">Application ID.</param>
     /// <returns></returns>
     [TypeFilter(typeof(PermissionCheckAttribute),
-        Arguments = new object[] { Functions.Config_Read })]
+        Arguments = new object[] { Functions.Config_Read, AppScope.App })]
     public async Task<IActionResult> PublishHistory(string appId, EnvString env)
     {
         if (string.IsNullOrEmpty(appId)) throw new ArgumentNullException("appId");
@@ -555,7 +560,7 @@ public class ConfigController : Controller
     }
 
     [TypeFilter(typeof(PermissionCheckAttribute),
-        Arguments = new object[] { Functions.Config_Edit })]
+        Arguments = new object[] { Functions.Config_Edit, AppScope.Config })]
     public async Task<IActionResult> CancelEdit(string configId, EnvString env)
     {
         if (string.IsNullOrEmpty(configId)) throw new ArgumentNullException("configId");
@@ -575,7 +580,7 @@ public class ConfigController : Controller
     }
 
     [TypeFilter(typeof(PermissionCheckAttribute),
-        Arguments = new object[] { Functions.Config_Edit })]
+        Arguments = new object[] { Functions.Config_Edit, AppScope.Config })]
     public async Task<IActionResult> CancelSomeEdit([FromBody] List<string> ids, EnvString env)
     {
         if (ids == null) throw new ArgumentNullException("ids");
@@ -595,7 +600,7 @@ public class ConfigController : Controller
     }
 
     [TypeFilter(typeof(PermissionCheckAttribute),
-        Arguments = new object[] { Functions.Config_Add })]
+        Arguments = new object[] { Functions.Config_Add, AppScope.App })]
     [HttpPost]
     public async Task<IActionResult> SyncEnv([FromBody] List<string> toEnvs, [FromQuery] string appId,
         [FromQuery] string currentEnv)
@@ -623,7 +628,7 @@ public class ConfigController : Controller
     }
 
     [TypeFilter(typeof(PermissionCheckAttribute),
-        Arguments = new object[] { Functions.Config_Read })]
+        Arguments = new object[] { Functions.Config_Read, AppScope.App })]
     public async Task<IActionResult> GetKvList(string appId, EnvString env)
     {
         if (string.IsNullOrEmpty(appId)) throw new ArgumentNullException("appId");
@@ -649,7 +654,7 @@ public class ConfigController : Controller
     /// <param name="appId">Application ID.</param>
     /// <returns></returns>
     [TypeFilter(typeof(PermissionCheckAttribute),
-        Arguments = new object[] { Functions.Config_Read })]
+        Arguments = new object[] { Functions.Config_Read, AppScope.App })]
     public async Task<IActionResult> GetJson(string appId, EnvString env)
     {
         if (string.IsNullOrEmpty(appId)) throw new ArgumentNullException("appId");
@@ -677,7 +682,7 @@ public class ConfigController : Controller
 
     [HttpPost]
     [TypeFilter(typeof(PermissionCheckAttribute),
-        Arguments = new object[] { Functions.Config_Edit })]
+        Arguments = new object[] { Functions.Config_Edit, AppScope.App })]
     public async Task<IActionResult> SaveJson([FromBody] SaveJsonVM data, string appId, EnvString env)
     {
         if (string.IsNullOrEmpty(appId)) throw new ArgumentNullException(nameof(appId));
@@ -696,7 +701,7 @@ public class ConfigController : Controller
 
     [HttpPost]
     [TypeFilter(typeof(PermissionCheckAttribute),
-        Arguments = new object[] { Functions.Config_Edit })]
+        Arguments = new object[] { Functions.Config_Edit, AppScope.App })]
     public async Task<IActionResult> SaveKvList([FromBody] SaveKVListVM data, string appId, EnvString env)
     {
         if (string.IsNullOrEmpty(appId)) throw new ArgumentNullException(nameof(appId));

@@ -350,6 +350,12 @@
   <data name="UpdateAppFailed" xml:space="preserve">
     <value>修改应用失败，请查看错误日志</value>
   </data>
+  <data name="AppAuthOwnerOnly" xml:space="preserve">
+    <value>只有管理员或应用创建者可以修改应用授权。</value>
+  </data>
+  <data name="AppInheritNotAllowed" xml:space="preserve">
+    <value>没有权限关联所选的应用，只能关联公共应用或已授权的应用。</value>
+  </data>
   <data name="ConfigKeyExists" xml:space="preserve">
     <value>配置键已存在，请重新输入。</value>
   </data>

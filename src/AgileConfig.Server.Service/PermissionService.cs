@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AgileConfig.Server.Common;
 using AgileConfig.Server.Data.Abstraction;
 using AgileConfig.Server.IService;
 
@@ -8,6 +9,7 @@ namespace AgileConfig.Server.Service;
 
 public class PermissionService : IPermissionService
 {
+    private readonly IAppRepository _appRepository;
     private readonly IFunctionRepository _functionRepository;
     private readonly IRoleFunctionRepository _roleFunctionRepository;
     private readonly IUserAppAuthRepository _userAppAuthRepository;
@@ -17,12 +19,14 @@ public class PermissionService : IPermissionService
         IUserRoleRepository userRoleRepository,
         IRoleFunctionRepository roleFunctionRepository,
         IFunctionRepository functionRepository,
-        IUserAppAuthRepository userAppAuthRepository)
+        IUserAppAuthRepository userAppAuthRepository,
+        IAppRepository appRepository)
     {
         _userRoleRepository = userRoleRepository;
         _roleFunctionRepository = roleFunctionRepository;
         _functionRepository = functionRepository;
         _userAppAuthRepository = userAppAuthRepository;
+        _appRepository = appRepository;
     }
 
 
@@ -73,6 +77,23 @@ public class PermissionService : IPermissionService
             .ToList();
 
         return categories;
+    }
+
+    public async Task<UserAppAccess> GetUserAppAccessAsync(string userId)
+    {
+        if (string.IsNullOrWhiteSpace(userId)) return UserAppAccess.None;
+
+        var userRoles = await _userRoleRepository.QueryAsync(x => x.UserId == userId);
+        if (userRoles.Any(x => x.RoleId == SystemRoleConstants.AdminId ||
+                               x.RoleId == SystemRoleConstants.SuperAdminId))
+            return UserAppAccess.Admin(userId);
+
+        var auths = await _userAppAuthRepository.QueryAsync(x => x.UserId == userId);
+        var authorizedAppIds = auths.Select(x => x.AppId).Distinct().ToList();
+        // Same rule as the application list: apps the user created or was authorized for.
+        var apps = await _appRepository.QueryAsync(a => a.Creator == userId || authorizedAppIds.Contains(a.Id));
+
+        return UserAppAccess.Restricted(userId, apps.Select(x => x.Id));
     }
 
     public string EditConfigPermissionKey => "EDIT_CONFIG";
